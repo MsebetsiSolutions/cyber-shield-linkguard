@@ -1,15 +1,38 @@
 import sqlite3
 from flask import Blueprint, jsonify, request
 import bcrypt
+import jwt
+import os
+from datetime import datetime, timedelta
 
 settings_bp = Blueprint('settings', __name__, url_prefix='/api/user')
+
+# JWT Secret Key (should be in environment variables in production)
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "cyber-shield-secret-key")
 
 def get_db_connection():
     # Get database connection to the cyber-shield-linkguard database
     conn = sqlite3.connect('cyber-shield-linkguard.db')
-    
     conn.row_factory = sqlite3.Row
     return conn
+
+def verify_token_and_get_user_id(token):
+    """
+    Verify JWT token and return user ID
+    """
+    try:
+        # Decode the JWT token
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])
+        return payload.get("user_id")
+    except jwt.ExpiredSignatureError:
+        print("Token has expired")
+        return None
+    except jwt.InvalidTokenError:
+        print("Invalid token")
+        return None
+    except Exception as e:
+        print(f"Token verification error: {e}")
+        return None
 
 @settings_bp.route('/profile', methods=['GET'])
 def get_profile():
@@ -85,13 +108,13 @@ def update_profile():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Check if the email belongs to the current user or if it's already taken by another user
-        cursor.execute('SELECT id, email FROM users WHERE email = ?', (email,))
+        # Check if the email is already taken by another user
+        cursor.execute('SELECT id, email FROM users WHERE email = ? AND id != ?', (email, user_id))
         existing_user = cursor.fetchone()
         
-        if existing_user and existing_user['id'] != user_id:
+        if existing_user:
             conn.close()
-            return jsonify({'error': 'Email already exists'}), 409
+            return jsonify({'error': f'Email "{email}" is already registered with another account'}), 409
         
         # Update user profile
         cursor.execute('''
@@ -101,19 +124,14 @@ def update_profile():
         ''', (full_name, email, user_id))
         
         conn.commit()
-        
-        # Get updated user data
-        cursor.execute('SELECT id, email, full_name, created_at FROM users WHERE id = ?', (user_id,))
-        updated_user = cursor.fetchone()
         conn.close()
         
         return jsonify({
             'message': 'Profile updated successfully',
             'user': {
-                'id': updated_user['id'],
-                'email': updated_user['email'],
-                'full_name': updated_user['full_name'],
-                'created_at': updated_user['created_at']
+                'id': user_id,
+                'email': email,
+                'full_name': full_name
             }
         }), 200
         
@@ -156,8 +174,8 @@ def update_password():
             return jsonify({'error': 'Current password and new password are required'}), 400
         
         # Validate new password length
-        if len(new_password) < 6 or len(new_password) > 12:
-            return jsonify({'error': 'New password must be between 6 and 12 characters'}), 400
+        if len(new_password) < 6:
+            return jsonify({'error': 'New password must be at least 6 characters'}), 400
         
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -249,18 +267,4 @@ def delete_account():
     except Exception as e:
         print(f"Error in delete_account: {e}")
         return jsonify({'error': 'Failed to delete account'}), 500
-
-# function to verify token and get user ID
-def verify_token_and_get_user_id(token):
-    """
-    Verify JWT token and return user ID
-    This is a placeholder - you need to implement proper token verification
-    """
-    try:
-        # extract the user ID from it
-        return 1
-        
-    except Exception as e:
-        print(f"Token verification error: {e}")
-        return None
     

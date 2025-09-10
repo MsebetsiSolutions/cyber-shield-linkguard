@@ -55,8 +55,12 @@ async function loadUserData() {
       const userData = await r.json();
       $('userName').value = userData.full_name || '';
       $('userEmail').value = userData.email || '';
+    } else if (r.status === 401) {
+      token.clear();
+      window.location.href = '../index.html';
     } else {
-      toast('Failed to load user data');
+      const error = await r.json();
+      toast(error.error || 'Failed to load user data');
     }
   } catch (error) {
     console.error('Error loading user data:', error);
@@ -84,7 +88,11 @@ $('profileForm').addEventListener('submit', async (e) => {
     });
     
     if (r.ok) {
+      const result = await r.json();
       toast('Profile updated successfully');
+      // Update the form with the returned data
+      $('userName').value = result.user.full_name || '';
+      $('userEmail').value = result.user.email || '';
     } else {
       const error = await r.json();
       toast(error.error || 'Failed to update profile');

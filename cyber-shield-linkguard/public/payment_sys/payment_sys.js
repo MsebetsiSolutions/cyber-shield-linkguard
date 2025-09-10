@@ -26,7 +26,6 @@ function setUserUI(email){
     whoRow.textContent = 'Signed in: ' + email; 
     show(logoutBtn);
   } else { 
-    // Don't show "Guest mode" text, just keep it empty
     whoRow.textContent = ''; 
     show(logoutBtn);
   }
