@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="theme-color" content="#fddde6" />
+  <title>Cyber Shield LinkGuard - Dashboard</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../theme.css">
+  <link rel="stylesheet" href="ScannerDash.css">
+</head>
+<body>
+  <div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div id="whoRow" class="cs-sub"></div>
+            <h1 class="cs-candy-title mb-0">CYBER SHIELD LINKGUARD</h1>
+            <div id="scanCounter" class="cs-sub small mt-1">Scans remaining: <span id="remainingScans">5</span>/5</div>
+          </div>
+          <div class="d-flex gap-2">
+            <button id="subscribeBtn" class="btn btn-subscribe hidden">
+              <i class="bi bi-star-fill me-1"></i> Subscribe
+            </button>
+            <a href="../settings/settings.html" class="btn btn-settings">
+              <i class="bi bi-gear-fill"></i> <span class="d-none d-md-inline">Settings</span>
+            </a>
+            <a href="../report/report.html" class="btn btn-report">
+              <i class="bi bi-flag-fill"></i> <span class="d-none d-md-inline">Report</span>
+            </a>
+            <button id="logout" class="btn btn-logout hidden">
+              <i class="bi bi-box-arrow-right"></i> <span class="d-none d-md-inline">Log out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Toggle -->
+    <div class="row d-lg-none mb-3">
+      <div class="col-12">
+        <button class="cs-btn btn-dropdown w-100" type="button" data-bs-toggle="collapse" data-bs-target="#mobileControls" aria-expanded="false">
+          <i class="bi bi-menu-button-wide me-2"></i>Scan Options
+          <i class="bi bi-chevron-down ms-auto dropdown-arrow"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Left Column - Controls (Desktop) / Collapsible (Mobile) -->
+      <div class="col-12 col-lg-6 mb-4">
+        <div class="cs-card p-4 h-100 collapse d-lg-block" id="mobileControls">
+          <h3 class="text-center mb-4 d-none d-lg-block"><i class="bi bi-input-cursor-text me-2"></i>Scan Controls</h3>
+          
+          <!-- URL Scan -->
+          <div class="mb-4">
+            <h4 class="mb-3"><i class="bi bi-link-45deg me-2"></i>Scan URL</h4>
+            <input id="urlInput" class="cs-input mb-3" placeholder="e.g. https://example.com" />
+            <button id="scanBtn" class="cs-btn btn-login w-100">
+              <i class="bi bi-search me-2"></i>SCAN URL
+            </button>
+          </div>
+          
+          <!-- File Scan -->
+          <div class="mb-4">
+            <h4 class="mb-3"><i class="bi bi-file-earmark me-2"></i>Scan File</h4>
+            <div class="file-upload-container mb-3">
+              <label for="fileInput" class="file-upload-label">
+                <i class="bi bi-cloud-arrow-up me-2"></i>
+                <span id="fileLabelText">Choose file or drag here</span>
+              </label>
+              <input id="fileInput" type="file" class="file-input" />
+            </div>
+            <button id="fileBtn" class="cs-btn btn-signup w-100">
+              <i class="bi bi-shield-check me-2"></i>SCAN FILE
+            </button>
+          </div>
+          
+          <!-- QR Scan -->
+          <div>
+            <h4 class="mb-3"><i class="bi bi-qr-code me-2"></i>Scan QR Code</h4>
+            <div class="file-upload-container mb-3">
+              <label for="qrInput" class="file-upload-label">
+                <i class="bi bi-camera me-2"></i>
+                <span>Upload image or take photo</span>
+              </label>
+              <input id="qrInput" type="file" accept="image/*" capture="environment" class="file-input" />
+            </div>
+            <button id="qrBtn" class="cs-btn btn-guest w-100">
+              <i class="bi bi-qr-code-scan me-2"></i>SCAN QR CODE
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Column -->
+      <div class="col-12 col-lg-6">
+        <div class="cs-card p-4 h-100">
+          <h3 class="text-center mb-4"><i class="bi bi-graph-up me-2"></i>Scan Results</h3>
+          
+          <!-- Results Overview -->
+          <div class="results-overview mb-4 text-center hidden" id="resultsOverview">
+            <div class="row">
+              <div class="col-6 col-md-3">
+                <div class="stat-card stat-malicious">
+                  <div class="stat-value" id="statMalicious">0</div>
+                  <div class="stat-label">Malicious</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="stat-card stat-suspicious">
+                  <div class="stat-value" id="statSuspicious">0</div>
+                  <div class="stat-label">Suspicious</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="stat-card stat-harmless">
+                  <div class="stat-value" id="statHarmless">0</div>
+                  <div class="stat-label">Harmless</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="stat-card stat-undetected">
+                  <div class="stat-value" id="statUndetected">0</div>
+                  <div class="stat-label">Undetected</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Detailed Results -->
+          <div class="results-container">
+            <!-- URL Results -->
+            <div class="result-section hidden" id="resultUrl">
+              <h4 class="result-header">URL Scan Results</h4>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <span id="badgeUrl" class="badge"></span>
+                <span id="scoreUrl" class="fw-bold"></span>
+              </div>
+              <p id="finalUrl" class="cs-sub mb-3 url-text"></p>
+              <h5>Analysis Details:</h5>
+              <ul id="reasonsUrl" class="reasons-list"></ul>
+            </div>
+            
+            <!-- File Results -->
+            <div class="result-section hidden" id="resultFile">
+              <h4 class="result-header">File Scan Results</h4>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <span id="badgeFile" class="badge"></span>
+                <span id="scoreFile" class="fw-bold"></span>
+              </div>
+              <p class="cs-sub mb-2"><b id="fileName"></b> <span id="fileSha" class="file-hash"></span></p>
+              <h5>Analysis Details:</h5>
+              <ul id="reasonsFile" class="reasons-list"></ul>
+              <div class="vt-summary mt-3">
+                <h5>VirusTotal Summary:</h5>
+                <p id="vtSummaryFile" class="cs-sub"></p>
+              </div>
+            </div>
+            
+            <!-- QR Results -->
+            <div class="result-section hidden" id="resultQr">
+              <h4 class="result-header">QR Scan Results</h4>
+              <p class="mb-3"><b>Decoded Content:</b> <span id="qrText" class="qr-content"></span></p>
+              
+              <div id="qrUrlBlock" class="hidden">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <span id="badgeQr" class="badge"></span>
+                  <span id="scoreQr" class="fw-bold"></span>
+                </div>
+                <p id="finalUrlQr" class="cs-sub mb-3 url-text"></p>
+                <h5>URL Analysis:</h5>
+                <ul id="reasonsQr" class="reasons-list"></ul>
+              </div>
+            </div>
+            
+            <!-- Empty State -->
+            <div class="empty-state text-center" id="emptyState">
+              <i class="bi bi-inbox empty-icon"></i>
+              <h4>No Scan Results Yet</h4>
+              <p class="cs-sub">Scan a URL, file, or QR code to see results here</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="text-center cs-sub mt-4">© Msebetsi Solutions Pty Ltd</footer>
+  </div>
+
+  <!-- Subscription Modal -->
+  <div class="modal fade" id="subscriptionModal" tabindex="-1" aria-labelledby="subscriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content cs-card">
+        <div class="modal-header">
+          <h2 class="modal-title cs-candy-title" id="subscriptionModalLabel">Upgrade Your Plan</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row" id="plansContainer">
+            <!-- sub plns will be  displayd here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="ScannerDash.js"></script>
+</body>
+</html>
+
