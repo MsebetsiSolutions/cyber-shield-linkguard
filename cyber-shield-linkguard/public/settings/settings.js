@@ -50,10 +50,10 @@ async function fetchWithAuth(path, opts={}, autoRetry=true){
 // Load user data
 async function loadUserData() {
   try {
-    const r = await fetchWithAuth('/api/me');
+    const r = await fetchWithAuth('/api/user/profile');
     if(r.ok) {
       const userData = await r.json();
-      $('userName').value = userData.name || '';
+      $('userName').value = userData.full_name || '';
       $('userEmail').value = userData.email || '';
     } else {
       toast('Failed to load user data');
@@ -68,10 +68,10 @@ async function loadUserData() {
 $('profileForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  const name = $('userName').value.trim();
+  const full_name = $('userName').value.trim();
   const email = $('userEmail').value.trim().toLowerCase();
   
-  if (!name || !email) {
+  if (!full_name || !email) {
     return toast('Please fill in all fields');
   }
   
@@ -80,14 +80,14 @@ $('profileForm').addEventListener('submit', async (e) => {
   try {
     const r = await fetchWithAuth('/api/user/profile', {
       method: 'PUT',
-      body: JSON.stringify({ name, email })
+      body: JSON.stringify({ full_name, email })
     });
     
     if (r.ok) {
       toast('Profile updated successfully');
     } else {
       const error = await r.json();
-      toast(error.message || 'Failed to update profile');
+      toast(error.error || 'Failed to update profile');
     }
   } catch (error) {
     console.error('Error updating profile:', error);
@@ -134,7 +134,7 @@ $('passwordForm').addEventListener('submit', async (e) => {
       $('passwordForm').reset();
     } else {
       const error = await r.json();
-      toast(error.message || 'Failed to update password');
+      toast(error.error || 'Failed to update password');
     }
   } catch (error) {
     console.error('Error updating password:', error);
@@ -168,7 +168,7 @@ $('confirmDelete').addEventListener('click', async () => {
       }, 1500);
     } else {
       const error = await r.json();
-      toast(error.message || 'Failed to delete account');
+      toast(error.error || 'Failed to delete account');
     }
   } catch (error) {
     console.error('Error deleting account:', error);
