@@ -24,12 +24,13 @@ def signup():
         if not data:
             return jsonify({'error': 'No data provided'}), 400
 
+        full_name = data.get('full_name', '').strip()
         email = data.get('email', '').strip().lower()
         password = data.get('password', '')
 
         # Basic validation
-        if not email or not password:
-            return jsonify({'error': 'Email and password required'}), 400
+        if not full_name or not email or not password:
+            return jsonify({'error': 'Full name, email and password required'}), 400
 
         # Validate password length of the original password
         if len(password) < 6 or len(password) > 12:
@@ -40,6 +41,7 @@ def signup():
         hashed_pw_str = hashed_pw.decode('utf-8')
 
         # Print to console for debug purposes
+        print(f"Full Name: {full_name}")
         print(f"Email: {email}")
         print(f"Original Password Length: {len(password)}")
         print(f"Hashed Password: {hashed_pw}")
@@ -59,9 +61,9 @@ def signup():
 
             # Insert new user to the users table in the database
             cursor.execute('''
-                INSERT INTO users (email, password) 
-                VALUES (?, ?)
-            ''', (email, hashed_pw_str))
+                INSERT INTO users (full_name, email, password) 
+                VALUES (?, ?, ?)
+            ''', (full_name, email, hashed_pw_str))
 
             conn.commit()
 
@@ -79,6 +81,7 @@ def signup():
 
         return jsonify({
             'message': 'Account created successfully',
+            'full_name': full_name,
             'email': email,
             'user_id': user_id
         }), 201 
@@ -170,7 +173,7 @@ def login():
             conn = get_db_connection()
             cursor = conn.cursor()
 
-            sql_query = 'SELECT id, email, password FROM users WHERE email = ?'
+            sql_query = 'SELECT id, full_name, email, password FROM users WHERE email = ?'
 
             cursor.execute(sql_query, (email,))
             user = cursor.fetchone()
@@ -185,6 +188,7 @@ def login():
             if bcrypt.checkpw(password.encode('utf-8'), stored_pw.encode('utf-8')):
 
                 return jsonify({'message': 'Login successful',
+                            'full_name': user['full_name'],
                             'email': user['email'],
                             'user_id': user['id']}), 200
             else:
@@ -195,7 +199,3 @@ def login():
     
     except Exception as e:
         return jsonify({'error': 'Login failed'}), 500
-
-
-
- 
