@@ -1,7 +1,7 @@
 import bcrypt
 import sqlite3
 import datetime
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -139,9 +139,6 @@ def guest_signup():
         
 
 
-
-
-
 # login function for registered users 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -152,21 +149,17 @@ def login():
         data = request.get_json()
 
         # debug purposes 
-        print(data)
+        print(f"Login attempt data: {data}")
 
         email = data.get('email', '').strip().lower()
         password = data.get('password', '')
 
-        if not email and not password:
-            return jsonify({'error': 'Email and Password required'})
+        if not email or not password:
+            return jsonify({'error': 'Email and Password required'}), 400
 
         # Validate password length of the original password
         if len(password) < 6 or len(password) > 12:
             return jsonify({'error': 'Password must be between 6 and 12 characters'}), 400
-
-        # Hash the password using bcrypt functions
-        hashed_pw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        hashed_pw_str = hashed_pw.decode('utf-8')
 
         try:
 
@@ -178,24 +171,81 @@ def login():
             cursor.execute(sql_query, (email,))
             user = cursor.fetchone()
 
-            conn.close()
-
             if not user:
+                conn.close()
+                print(f"User not found with email: {email}")
                 return jsonify({'error': 'Invalid email or password'}), 401
 
             stored_pw = user['password']
+            print(f"Stored password hash: {stored_pw}")
+            print(f"Input password: {password}")
 
+            # Check if the password matches using bcrypt
             if bcrypt.checkpw(password.encode('utf-8'), stored_pw.encode('utf-8')):
+                # Store user details in session objects
+                session['user_id'] = user['id']
+                session['user_full_name'] = user['full_name']
+                session['user_email'] = user['email']
+                
+                # Mark session as permanent for longer lifespan
+                session.permanent = True
+                
+                print(f"User {user['email']} logged in successfully. Session created.")
+                conn.close()
 
-                return jsonify({'message': 'Login successful',
-                            'full_name': user['full_name'],
-                            'email': user['email'],
-                            'user_id': user['id']}), 200
+                return jsonify({
+                    'message': 'Login successful',
+                    'full_name': user['full_name'],
+                    'email': user['email'],
+                    'user_id': user['id']
+                }), 200
             else:
+                print("Password does not match")
+                conn.close()
                 return jsonify({'error': 'Invalid email or password'}), 401
 
         except sqlite3.Error as e:
-            return jsonify({'error': 'Database error occured'}), 500
+            print(f"Database error: {e}")
+            if conn:
+                conn.close()
+            return jsonify({'error': 'Database error occurred'}), 500
     
     except Exception as e:
+        print(f"Login error: {e}")
+        import traceback
+        traceback.print_exc()  # This will show the full traceback
         return jsonify({'error': 'Login failed'}), 500
+
+
+
+# Logout function to clear session
+@auth_bp.route('/logout', methods=['POST'])
+def logout():
+    try:
+        # Clear all session data
+        session.clear()
+        print("User logged out. Session cleared.")
+        return jsonify({'message': 'Logout successful'}), 200
+    except Exception as e:
+        print(f"Logout error: {e}")
+        return jsonify({'error': 'Logout failed'}), 500
+
+
+# Check if user is authenticated
+@auth_bp.route('/check_auth', methods=['GET'])
+def check_auth():
+    try:
+        # Check if user details exist in session
+        if 'user_id' in session and 'user_email' in session:
+            return jsonify({
+                'authenticated': True,
+                'user_id': session['user_id'],
+                'full_name': session['user_full_name'],
+                'email': session['user_email']
+            }), 200
+        else:
+            return jsonify({'authenticated': False}), 200
+    except Exception as e:
+        print(f"Auth check error: {e}")
+        return jsonify({'error': 'Authentication check failed'}), 500
+    
