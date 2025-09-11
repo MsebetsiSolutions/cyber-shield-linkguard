@@ -81,7 +81,7 @@ async function fetchWithSession(path, opts={}) {
     const response = await fetch(path, {
       ...opts,
       headers,
-      credentials: 'include' // Important: Include cookies/session data
+      credentials: 'include' 
     });
     
     return response;
@@ -97,7 +97,7 @@ const userNameDisplay = $('userNameDisplay');
 const logoutBtn = $('logout');
 
 function setUserUI(userData){ 
-  console.log('Setting user UI with data:', userData); // Debug log
+  console.log('Setting user UI with data:', userData); 
   
   if(userData && userData.authenticated){ 
     const welcomeText = `Welcome, ${userData.full_name || userData.email}!`;
