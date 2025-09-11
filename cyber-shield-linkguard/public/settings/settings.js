@@ -16,55 +16,42 @@ const toast = (msg, ms=2000) => {
   setTimeout(() => t.classList.remove('show'), ms); 
 };
 
-const token = {
-  get access(){ return localStorage.getItem('access') || ''; },
-  set access(v){ v ? localStorage.setItem('access', v) : localStorage.removeItem('access'); },
-  get refresh(){ return localStorage.getItem('refresh') || ''; },
-  set refresh(v){ v ? localStorage.setItem('refresh', v) : localStorage.removeItem('refresh'); },
-  clear(){ this.access=''; this.refresh=''; }
+// Simple email validation
+const isValidEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
 };
 
-async function fetchWithAuth(path, opts={}, autoRetry=true){
-  const headers = Object.assign({'Content-Type':'application/json'}, opts.headers || {});
-  if(token.access){ headers.Authorization = 'Bearer ' + token.access; }
-  const r = await fetch(path, Object.assign({}, opts, { headers }));
-  if(r.status !== 401 || !autoRetry || !token.refresh) return r;
-  
-  // Try one refresh
-  const rf = await fetch('/api/auth/refresh', {
-    method: 'POST', 
-    headers: {'Content-Type': 'application/json'}, 
-    body: JSON.stringify({ refresh_token: token.refresh })
-  });
-  
-  if(!rf.ok){ token.clear(); return r; }
-  const j = await rf.json();
-  if(!j.access_token){ token.clear(); return r; }
-  
-  token.access = j.access_token;
-  return fetch(path, Object.assign({}, opts, { 
-    headers: Object.assign(headers, { Authorization: 'Bearer ' + token.access }) 
-  }));
-}
+// Simple phone validation (international format)
+const isValidPhone = (phone) => {
+  if (!phone) return true; // Phone is optional
+  const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+  return phoneRegex.test(phone);
+};
 
 // Load user data
 async function loadUserData() {
   try {
-    const r = await fetchWithAuth('/api/user/profile');
-    if(r.ok) {
-      const userData = await r.json();
+    const response = await fetch('/api/user/profile', {
+      method: 'GET',
+      credentials: 'include' // Include session cookies
+    });
+    
+    if(response.ok) {
+      const userData = await response.json();
       $('userName').value = userData.full_name || '';
       $('userEmail').value = userData.email || '';
-    } else if (r.status === 401) {
-      token.clear();
-      window.location.href = '../index.html';
+      $('userPhone').value = userData.phone_number || '';
+    } else if (response.status === 401) {
+      // Not authenticated, redirect to login
+      window.location.href = '../login/login.html';
     } else {
-      const error = await r.json();
+      const error = await response.json();
       toast(error.error || 'Failed to load user data');
     }
   } catch (error) {
     console.error('Error loading user data:', error);
-    toast('Network error');
+    toast('Network error. Please check your connection.');
   }
 }
 
@@ -74,34 +61,54 @@ $('profileForm').addEventListener('submit', async (e) => {
   
   const full_name = $('userName').value.trim();
   const email = $('userEmail').value.trim().toLowerCase();
+  const phone_number = $('userPhone').value.trim();
   
-  if (!full_name || !email) {
-    return toast('Please fill in all fields');
+  // Validation
+  if (!full_name) {
+    return toast('Full name is required');
   }
   
-  setBusy($('profileForm').querySelector('button'), true, 'Saving...');
+  if (!email) {
+    return toast('Email is required');
+  }
+  
+  if (!isValidEmail(email)) {
+    return toast('Please enter a valid email address');
+  }
+  
+  if (phone_number && !isValidPhone(phone_number)) {
+    return toast('Please enter a valid phone number in international format (e.g., +1234567890)');
+  }
+  
+  const updateButton = $('profileForm').querySelector('button[type="submit"]');
+  setBusy(updateButton, true, 'Saving...');
   
   try {
-    const r = await fetchWithAuth('/api/user/profile', {
+    const response = await fetch('/api/user/profile', {
       method: 'PUT',
-      body: JSON.stringify({ full_name, email })
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ full_name, email, phone_number })
     });
     
-    if (r.ok) {
-      const result = await r.json();
+    if (response.ok) {
+      const result = await response.json();
       toast('Profile updated successfully');
       // Update the form with the returned data
       $('userName').value = result.user.full_name || '';
       $('userEmail').value = result.user.email || '';
+      $('userPhone').value = result.user.phone_number || '';
     } else {
-      const error = await r.json();
+      const error = await response.json();
       toast(error.error || 'Failed to update profile');
     }
   } catch (error) {
     console.error('Error updating profile:', error);
-    toast('Network error');
+    toast('Network error. Please check your connection.');
   } finally {
-    setBusy($('profileForm').querySelector('button'), false);
+    setBusy(updateButton, false);
   }
 });
 
@@ -121,6 +128,10 @@ $('passwordForm').addEventListener('submit', async (e) => {
     return toast('New password must be at least 6 characters');
   }
   
+  if (newPassword.length > 12) {
+    return toast('New password must not exceed 12 characters');
+  }
+  
   if (newPassword !== confirmPassword) {
     show($('passwordError'));
     $('passwordError').textContent = 'Passwords do not match';
@@ -129,26 +140,31 @@ $('passwordForm').addEventListener('submit', async (e) => {
     hide($('passwordError'));
   }
   
-  setBusy($('passwordForm').querySelector('button'), true, 'Updating...');
+  const updateButton = $('passwordForm').querySelector('button[type="submit"]');
+  setBusy(updateButton, true, 'Updating...');
   
   try {
-    const r = await fetchWithAuth('/api/user/password', {
+    const response = await fetch('/api/user/password', {
       method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
       body: JSON.stringify({ currentPassword, newPassword })
     });
     
-    if (r.ok) {
+    if (response.ok) {
       toast('Password updated successfully');
       $('passwordForm').reset();
     } else {
-      const error = await r.json();
+      const error = await response.json();
       toast(error.error || 'Failed to update password');
     }
   } catch (error) {
     console.error('Error updating password:', error);
-    toast('Network error');
+    toast('Network error. Please check your connection.');
   } finally {
-    setBusy($('passwordForm').querySelector('button'), false);
+    setBusy(updateButton, false);
   }
 });
 
@@ -163,24 +179,27 @@ $('confirmDelete').addEventListener('click', async () => {
   setBusy($('confirmDelete'), true, 'Deleting...');
   
   try {
-    const r = await fetchWithAuth('/api/user/account', {
+    const response = await fetch('/api/user/account', {
       method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
       body: JSON.stringify({ password })
     });
     
-    if (r.ok) {
+    if (response.ok) {
       toast('Account deleted successfully');
-      token.clear();
       setTimeout(() => {
         window.location.href = '../index.html';
       }, 1500);
     } else {
-      const error = await r.json();
+      const error = await response.json();
       toast(error.error || 'Failed to delete account');
     }
   } catch (error) {
     console.error('Error deleting account:', error);
-    toast('Network error');
+    toast('Network error. Please check your connection.');
   } finally {
     setBusy($('confirmDelete'), false);
   }
@@ -188,13 +207,37 @@ $('confirmDelete').addEventListener('click', async () => {
 
 // Initialize
 (async function init() {
-  const accessToken = localStorage.getItem('access');
-  
-  if (!accessToken) {
-    window.location.href = '../index.html';
-    return;
+  // Check if user is authenticated
+  try {
+    const response = await fetch('/api/auth/me', {
+      method: 'GET',
+      credentials: 'include'
+    });
+    
+    if (response.ok) {
+      const userInfo = await response.json();
+      if (!userInfo.authenticated) {
+        window.location.href = '../login/login.html';
+        return;
+      }
+      await loadUserData();
+    } else {
+      window.location.href = '../login/login.html';
+    }
+  } catch (error) {
+    console.error('Error checking authentication:', error);
+    window.location.href = '../login/login.html';
   }
-  
-  await loadUserData();
 })();
 
+// Add event listener to clear error message when user starts typing in password fields
+['currentPassword', 'newPassword', 'confirmPassword'].forEach(id => {
+  $(id).addEventListener('input', () => {
+    hide($('passwordError'));
+  });
+});
+
+// Add event listener for modal close to clear password field
+$('deleteAccountModal').addEventListener('hidden.bs.modal', () => {
+  $('deletePassword').value = '';
+});

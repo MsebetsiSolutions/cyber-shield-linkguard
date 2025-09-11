@@ -1,8 +1,9 @@
 import sqlite3
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 import bcrypt
 import jwt
 import os
+import re
 from datetime import datetime, timedelta
 
 settings_bp = Blueprint('settings', __name__, url_prefix='/api/user')
@@ -11,17 +12,14 @@ settings_bp = Blueprint('settings', __name__, url_prefix='/api/user')
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "cyber-shield-secret-key")
 
 def get_db_connection():
-    # Get database connection to the cyber-shield-linkguard database
+    """Get database connection to the cyber-shield-linkguard database"""
     conn = sqlite3.connect('cyber-shield-linkguard.db')
     conn.row_factory = sqlite3.Row
     return conn
 
 def verify_token_and_get_user_id(token):
-    """
-    Verify JWT token and return user ID
-    """
+    """Verify JWT token and return user ID"""
     try:
-        # Decode the JWT token
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])
         return payload.get("user_id")
     except jwt.ExpiredSignatureError:
@@ -34,26 +32,33 @@ def verify_token_and_get_user_id(token):
         print(f"Token verification error: {e}")
         return None
 
+def validate_email(email):
+    """Validate email format"""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+
+def validate_phone(phone):
+    """Validate phone number format (international format)"""
+    if not phone:
+        return True  # Phone is optional
+    pattern = r'^\+?[1-9]\d{1,14}$'
+    return re.match(pattern, phone) is not None
+
 @settings_bp.route('/profile', methods=['GET'])
 def get_profile():
     """Get user profile information"""
     try:
-        # Get authorization token from header
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({'error': 'Authorization token required'}), 401
+        # Check if user is authenticated via session
+        if 'user_id' not in session:
+            return jsonify({'error': 'Not authenticated'}), 401
         
-        token = auth_header.split(' ')[1]
-        
-        user_id = verify_token_and_get_user_id(token)
-        if not user_id:
-            return jsonify({'error': 'Invalid or expired token'}), 401
+        user_id = session['user_id']
         
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Get user profile information
-        cursor.execute('SELECT id, email, full_name, created_at FROM users WHERE id = ?', (user_id,))
+        # Get user profile information including phone number
+        cursor.execute('SELECT id, email, full_name, phone_number, created_at FROM users WHERE id = ?', (user_id,))
         user = cursor.fetchone()
         conn.close()
         
@@ -64,6 +69,7 @@ def get_profile():
             'id': user['id'],
             'email': user['email'],
             'full_name': user['full_name'],
+            'phone_number': user['phone_number'] or '',
             'created_at': user['created_at']
         }), 200
         
@@ -78,17 +84,11 @@ def get_profile():
 def update_profile():
     """Update user profile information"""
     try:
-        # Get authorization token from header
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({'error': 'Authorization token required'}), 401
+        # Check if user is authenticated via session
+        if 'user_id' not in session:
+            return jsonify({'error': 'Not authenticated'}), 401
         
-        token = auth_header.split(' ')[1]
-        
-        # Verify token and get user ID
-        user_id = verify_token_and_get_user_id(token)
-        if not user_id:
-            return jsonify({'error': 'Invalid or expired token'}), 401
+        user_id = session['user_id']
         
         # Get JSON data
         data = request.get_json()
@@ -97,6 +97,7 @@ def update_profile():
         
         full_name = data.get('full_name', '').strip()
         email = data.get('email', '').strip().lower()
+        phone_number = data.get('phone_number', '').strip()
         
         # Basic validation
         if not full_name:
@@ -104,6 +105,12 @@ def update_profile():
         
         if not email:
             return jsonify({'error': 'Email is required'}), 400
+        
+        if not validate_email(email):
+            return jsonify({'error': 'Invalid email format'}), 400
+        
+        if phone_number and not validate_phone(phone_number):
+            return jsonify({'error': 'Invalid phone number format. Use international format (e.g., +1234567890)'}), 400
         
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -119,11 +126,16 @@ def update_profile():
         # Update user profile
         cursor.execute('''
             UPDATE users 
-            SET full_name = ?, email = ?
+            SET full_name = ?, email = ?, phone_number = ?
             WHERE id = ?
-        ''', (full_name, email, user_id))
+        ''', (full_name, email, phone_number, user_id))
         
         conn.commit()
+        
+        # Update session data
+        session['user_full_name'] = full_name
+        session['user_email'] = email
+        
         conn.close()
         
         return jsonify({
@@ -131,7 +143,8 @@ def update_profile():
             'user': {
                 'id': user_id,
                 'email': email,
-                'full_name': full_name
+                'full_name': full_name,
+                'phone_number': phone_number
             }
         }), 200
         
@@ -149,17 +162,11 @@ def update_profile():
 def update_password():
     """Update user password"""
     try:
-        # Get authorization token from header
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({'error': 'Authorization token required'}), 401
+        # Check if user is authenticated via session
+        if 'user_id' not in session:
+            return jsonify({'error': 'Not authenticated'}), 401
         
-        token = auth_header.split(' ')[1]
-        
-        # Verify token and get user ID
-        user_id = verify_token_and_get_user_id(token)
-        if not user_id:
-            return jsonify({'error': 'Invalid or expired token'}), 401
+        user_id = session['user_id']
         
         # Get JSON data
         data = request.get_json()
@@ -176,6 +183,9 @@ def update_password():
         # Validate new password length
         if len(new_password) < 6:
             return jsonify({'error': 'New password must be at least 6 characters'}), 400
+        
+        if len(new_password) > 12:
+            return jsonify({'error': 'New password must not exceed 12 characters'}), 400
         
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -216,17 +226,11 @@ def update_password():
 def delete_account():
     """Delete user account"""
     try:
-        # Get authorization token from header
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({'error': 'Authorization token required'}), 401
+        # Check if user is authenticated via session
+        if 'user_id' not in session:
+            return jsonify({'error': 'Not authenticated'}), 401
         
-        token = auth_header.split(' ')[1]
-        
-        # Verify token and get user ID
-        user_id = verify_token_and_get_user_id(token)
-        if not user_id:
-            return jsonify({'error': 'Invalid or expired token'}), 401
+        user_id = session['user_id']
         
         # Get JSON data
         data = request.get_json()
@@ -258,6 +262,9 @@ def delete_account():
         cursor.execute('DELETE FROM users WHERE id = ?', (user_id,))
         conn.commit()
         conn.close()
+        
+        # Clear session
+        session.clear()
         
         return jsonify({'message': 'Account deleted successfully'}), 200
         
