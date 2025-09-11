@@ -23,7 +23,7 @@ app = Flask(__name__, static_url_path="", static_folder="public")
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # Add secret key for session management
-app.secret_key = os.getenv("FLASK_SECRET_KEY", os.urandom(24).hex())
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret-key-change-in-production")
 
 # registering 'auth_bp' blueprint
 app.register_blueprint(auth_bp, url_prefix='/api/auth')

@@ -5,22 +5,15 @@ from flask import Blueprint, jsonify, request, session
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
-
 def get_db_connection():
-    # Get database connection to the cyber-shield-linkguard database
     conn = sqlite3.connect('cyber-shield-linkguard.db')
-
-    # return dictionary data structure from the columns of the database
-    # e.g instead of column id data[2] use data['password']
     conn.row_factory = sqlite3.Row
     return conn
 
 @auth_bp.route('/signup', methods=['POST'])
 def signup():
     try:
-        # Get JSON data
         data = request.get_json()
-
         if not data:
             return jsonify({'error': 'No data provided'}), 400
 
@@ -28,19 +21,15 @@ def signup():
         email = data.get('email', '').strip().lower()
         password = data.get('password', '')
 
-        # Basic validation
         if not full_name or not email or not password:
             return jsonify({'error': 'Full name, email and password required'}), 400
 
-        # Validate password length of the original password
         if len(password) < 6 or len(password) > 12:
             return jsonify({'error': 'Password must be between 6 and 12 characters'}), 400
 
-        # Hash the password using bcrypt functions
         hashed_pw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         hashed_pw_str = hashed_pw.decode('utf-8')
 
-        # Print to console for debug purposes
         print(f"Full Name: {full_name}")
         print(f"Email: {email}")
         print(f"Original Password Length: {len(password)}")
@@ -48,25 +37,21 @@ def signup():
         print(f"Hashed Password (decoded): {hashed_pw_str}")
         print(f"Hashed Password Length: {len(hashed_pw_str)}")
 
-        # Trying to insert into database using the get_db_connection() defined above
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
 
-            # Check if user already exists
             cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
             if cursor.fetchone():
                 conn.close()
                 return jsonify({'error': 'Email already exists'}), 409
 
-            # Insert new user to the users table in the database
             cursor.execute('''
                 INSERT INTO users (full_name, email, password) 
                 VALUES (?, ?, ?)
             ''', (full_name, email, hashed_pw_str))
 
             conn.commit()
-
             user_id = cursor.lastrowid
             conn.close()
 
@@ -86,7 +71,6 @@ def signup():
             'user_id': user_id
         }), 201 
     
-    # Return success response
     except Exception as e:
         print(f"Signup error: {e}")
         return jsonify({'error': 'Signup failed'}), 500
@@ -94,61 +78,42 @@ def signup():
 @auth_bp.route('/guestSignup', methods=['POST'])
 def guest_signup():
     try:
-
         data = request.get_json()
-
         guest_email = data.get('email')
         guest_password = data.get('password')
 
-
-        hashpw = bcrypt.hashpw(guest_password.encode('ut-8'), bcrypt.gensalt())
+        hashpw = bcrypt.hashpw(guest_password.encode('utf-8'), bcrypt.gensalt())
         hashpw_str = hashpw.decode('utf-8')
-        # expiration date (30 days) one month trial
         expiry = datetime.datetime.now() + datetime.timedelta(days=30)
         expiry_str = expiry.isoformat()
 
-
         try:
             conn = get_db_connection()
-            cursor = conn.autocommit
-
-            sql_query = 'INSERT INTO USER (email, password, account_type, is_guest, guest_expires_at) VALUES (?, ?, guest, ?, ?)'
-
-            cursor.execute(sql_query, (guest_email, hashpw_str, expiry_str))
-
+            cursor = conn.cursor()
+            cursor.execute('INSERT INTO users (email, password, account_type, is_guest, guest_expires_at) VALUES (?, ?, "guest", 1, ?)',
+                          (guest_email, hashpw_str, expiry_str))
             conn.commit()
             user_id = cursor.lastrowid
             conn.close()
-
         except sqlite3.Error as e:
-            return jsonify({'error': 'Database error occured'}), 500
+            return jsonify({'error': 'Database error occurred'}), 500
         
-        return jsonify(
-            {
-                'message': 'Guest account created successfully',
-                'email': guest_email,
-                'user_id': user_id,
-                'account_type': 'guest',
-                'expire_at': expiry_str,
-                'expires_in_day': 30
-            }
-        ), 201
+        return jsonify({
+            'message': 'Guest account created successfully',
+            'email': guest_email,
+            'user_id': user_id,
+            'account_type': 'guest',
+            'expire_at': expiry_str,
+            'expires_in_day': 30
+        }), 201
     
     except Exception as e:
         return jsonify({'error': 'Guest account creation failed'}), 500
         
-
-
-# login function for registered users 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    
     try:
-
-        # gets data from the frontend
         data = request.get_json()
-
-        # debug purposes 
         print(f"Login attempt data: {data}")
 
         email = data.get('email', '').strip().lower()
@@ -157,18 +122,13 @@ def login():
         if not email or not password:
             return jsonify({'error': 'Email and Password required'}), 400
 
-        # Validate password length of the original password
         if len(password) < 6 or len(password) > 12:
             return jsonify({'error': 'Password must be between 6 and 12 characters'}), 400
 
         try:
-
             conn = get_db_connection()
             cursor = conn.cursor()
-
-            sql_query = 'SELECT id, full_name, email, password FROM users WHERE email = ?'
-
-            cursor.execute(sql_query, (email,))
+            cursor.execute('SELECT id, full_name, email, password FROM users WHERE email = ?', (email,))
             user = cursor.fetchone()
 
             if not user:
@@ -180,14 +140,10 @@ def login():
             print(f"Stored password hash: {stored_pw}")
             print(f"Input password: {password}")
 
-            # Check if the password matches using bcrypt
             if bcrypt.checkpw(password.encode('utf-8'), stored_pw.encode('utf-8')):
-                # Store user details in session objects
                 session['user_id'] = user['id']
                 session['user_full_name'] = user['full_name']
                 session['user_email'] = user['email']
-                
-                # Mark session as permanent for longer lifespan
                 session.permanent = True
                 
                 print(f"User {user['email']} logged in successfully. Session created.")
@@ -213,16 +169,12 @@ def login():
     except Exception as e:
         print(f"Login error: {e}")
         import traceback
-        traceback.print_exc()  # This will show the full traceback
+        traceback.print_exc()
         return jsonify({'error': 'Login failed'}), 500
 
-
-
-# Logout function to clear session
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
     try:
-        # Clear all session data
         session.clear()
         print("User logged out. Session cleared.")
         return jsonify({'message': 'Logout successful'}), 200
@@ -230,12 +182,10 @@ def logout():
         print(f"Logout error: {e}")
         return jsonify({'error': 'Logout failed'}), 500
 
-
-# Check if user is authenticated
-@auth_bp.route('/check_auth', methods=['GET'])
-def check_auth():
+# Get current user info from session - UPDATED ENDPOINT
+@auth_bp.route('/me', methods=['GET'])
+def get_current_user():
     try:
-        # Check if user details exist in session
         if 'user_id' in session and 'user_email' in session:
             return jsonify({
                 'authenticated': True,
@@ -246,6 +196,6 @@ def check_auth():
         else:
             return jsonify({'authenticated': False}), 200
     except Exception as e:
-        print(f"Auth check error: {e}")
-        return jsonify({'error': 'Authentication check failed'}), 500
+        print(f"Get user info error: {e}")
+        return jsonify({'error': 'Failed to get user information'}), 500
     
