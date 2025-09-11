@@ -16,6 +16,103 @@ const toast = (msg, ms=2000) => {
   setTimeout(() => t.classList.remove('show'), ms); 
 };
 
+// Session-based fetch function (no JWT tokens needed)
+async function fetchWithSession(path, opts={}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...opts.headers
+  };
+  
+  try {
+    const response = await fetch(path, {
+      ...opts,
+      headers,
+      credentials: 'include' 
+    });
+    
+    return response;
+  } catch (error) {
+    console.error('Fetch error:', error);
+    throw error;
+  }
+}
+
+// Set user UI
+const welcomeMessage = $('welcomeMessage');
+const userNameDisplay = $('userNameDisplay');
+const logoutBtn = $('logout');
+
+function setUserUI(userData){ 
+  console.log('Setting user UI with data:', userData); 
+  
+  if(userData && userData.authenticated){ 
+    const welcomeText = `Welcome, ${userData.full_name || userData.email}!`;
+    const displayName = userData.full_name || userData.email.split('@')[0];
+    
+    welcomeMessage.textContent = welcomeText;
+    userNameDisplay.textContent = displayName;
+    
+    console.log('User UI updated:', {
+      welcomeText,
+      displayName,
+      full_name: userData.full_name
+    });
+  } else { 
+    welcomeMessage.textContent = ''; 
+    userNameDisplay.textContent = 'User Name'; // Fallback text
+    console.log('User not authenticated, using fallback');
+  }
+}
+
+// Logout functionality
+function handleLogout() {
+  try {
+    fetchWithSession('/api/auth/logout', {
+      method: 'POST'
+    }).then(response => {
+      if (response.ok) {
+        console.log('Logout successful');
+      } else {
+        console.log('Logout API call failed, proceeding with client-side cleanup');
+      }
+    }).catch(e => {
+      console.log('Logout API call failed, proceeding with client-side cleanup');
+    });
+  } catch (e) {
+    console.log('Logout API call failed, proceeding with client-side cleanup');
+  }
+  
+  setUserUI(null); 
+  toast('Signed out');
+  setTimeout(() => {
+    window.location.href = '../index.html';
+  }, 1000);
+}
+
+logoutBtn.addEventListener('click', handleLogout);
+
+// User dropdown functionality
+const userDropdownBtn = $('userDropdownBtn');
+const userDropdown = $('userDropdown');
+
+// Toggle desktop dropdown
+userDropdownBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
+});
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+  if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+    userDropdown.style.display = 'none';
+  }
+});
+
+// Prevent dropdown from closing when clicking inside it
+userDropdown.addEventListener('click', (e) => {
+  e.stopPropagation();
+});
+
 // Simple email validation
 const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -32,10 +129,7 @@ const isValidPhone = (phone) => {
 // Load user data
 async function loadUserData() {
   try {
-    const response = await fetch('/api/user/profile', {
-      method: 'GET',
-      credentials: 'include' // Include session cookies
-    });
+    const response = await fetchWithSession('/api/user/profile');
     
     if(response.ok) {
       const userData = await response.json();
@@ -44,7 +138,7 @@ async function loadUserData() {
       $('userPhone').value = userData.phone_number || '';
     } else if (response.status === 401) {
       // Not authenticated, redirect to login
-      window.location.href = '../login/login.html';
+      window.location.href = '../index.html';
     } else {
       const error = await response.json();
       toast(error.error || 'Failed to load user data');
@@ -59,7 +153,7 @@ async function loadUserData() {
 $('profileForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  const full_name = $('userName').value.trim();
+  const full_name = $极('userName').value.trim();
   const email = $('userEmail').value.trim().toLowerCase();
   const phone_number = $('userPhone').value.trim();
   
@@ -84,12 +178,8 @@ $('profileForm').addEventListener('submit', async (e) => {
   setBusy(updateButton, true, 'Saving...');
   
   try {
-    const response = await fetch('/api/user/profile', {
+    const response = await fetchWithSession('/api/user/profile', {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
       body: JSON.stringify({ full_name, email, phone_number })
     });
     
@@ -100,6 +190,14 @@ $('profileForm').addEventListener('submit', async (e) => {
       $('userName').value = result.user.full_name || '';
       $('userEmail').value = result.user.email || '';
       $('userPhone').value = result.user.phone_number || '';
+      
+      // Update the user display name
+      if (userNameDisplay) {
+        userNameDisplay.textContent = result.user.full_name || result.user.email.split('@')[0];
+      }
+      if (welcomeMessage) {
+        welcomeMessage.textContent = `Welcome, ${result.user.full_name || result.user.email}!`;
+      }
     } else {
       const error = await response.json();
       toast(error.error || 'Failed to update profile');
@@ -144,12 +242,8 @@ $('passwordForm').addEventListener('submit', async (e) => {
   setBusy(updateButton, true, 'Updating...');
   
   try {
-    const response = await fetch('/api/user/password', {
+    const response = await fetchWithSession('/api/user/password', {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
       body: JSON.stringify({ currentPassword, newPassword })
     });
     
@@ -179,12 +273,8 @@ $('confirmDelete').addEventListener('click', async () => {
   setBusy($('confirmDelete'), true, 'Deleting...');
   
   try {
-    const response = await fetch('/api/user/account', {
+    const response = await fetchWithSession('/api/user/account', {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
       body: JSON.stringify({ password })
     });
     
@@ -209,24 +299,22 @@ $('confirmDelete').addEventListener('click', async () => {
 (async function init() {
   // Check if user is authenticated
   try {
-    const response = await fetch('/api/auth/me', {
-      method: 'GET',
-      credentials: 'include'
-    });
+    const response = await fetchWithSession('/api/auth/me');
     
     if (response.ok) {
       const userInfo = await response.json();
       if (!userInfo.authenticated) {
-        window.location.href = '../login/login.html';
+        window.location.href = '../index.html';
         return;
       }
+      setUserUI(userInfo);
       await loadUserData();
     } else {
-      window.location.href = '../login/login.html';
+      window.location.href = '../index.html';
     }
   } catch (error) {
     console.error('Error checking authentication:', error);
-    window.location.href = '../login/login.html';
+    window.location.href = '../index.html';
   }
 })();
 
@@ -238,6 +326,9 @@ $('confirmDelete').addEventListener('click', async () => {
 });
 
 // Add event listener for modal close to clear password field
-$('deleteAccountModal').addEventListener('hidden.bs.modal', () => {
-  $('deletePassword').value = '';
-});
+const deleteAccountModal = document.getElementById('deleteAccountModal');
+if (deleteAccountModal) {
+  deleteAccountModal.addEventListener('hidden.bs.modal', () => {
+    $('deletePassword').value = '';
+  });
+}
