@@ -40,7 +40,7 @@ const scanCounter = {
   },
   set remaining(v){ 
     localStorage.setItem('remainingScans', v.toString()); 
-    localStorage.setItem('lastScanDate', new Date().toDateString());
+    localStorage.setItem('last极Date', new Date().toDateString());
   },
   reset(){ 
     this.remaining = 5; 
@@ -105,7 +105,7 @@ async function fetchWithAuth(path, opts={}, autoRetry=true) {
         });
         
         if (refreshResponse.ok) {
-          const refreshData = await refreshResponse.json();
+          const refresh极ta = await refreshResponse.json();
           if (refreshData.access_token) {
             token.access = refreshData.access_token;
             
@@ -135,22 +135,19 @@ async function fetchWithAuth(path, opts={}, autoRetry=true) {
 
 // Set user UI
 const welcomeMessage = $('welcomeMessage');
-const welcomeMessageMobile = $('welcomeMessageMobile');
+const userNameDisplay = $('userNameDisplay');
 const logoutBtn = $('logout');
-const logoutBtnMobile = $('logoutMobile');
 
 function setUserUI(userData){ 
   if(userData && userData.authenticated){ 
     const welcomeText = `Welcome, ${userData.full_name || userData.email}!`;
+    const displayName = userData.full_name || userData.email.split('@')[0];
+    
     welcomeMessage.textContent = welcomeText;
-    welcomeMessageMobile.textContent = welcomeText;
-    show(logoutBtn);
-    show(logoutBtnMobile);
+    userNameDisplay.textContent = displayName;
   } else { 
     welcomeMessage.textContent = ''; 
-    welcomeMessageMobile.textContent = '';
-    hide(logoutBtn);
-    hide(logoutBtnMobile);
+    // Keep the hard-coded "User Name" text
   }
 }
 
@@ -176,7 +173,6 @@ function handleLogout() {
 }
 
 logoutBtn.addEventListener('click', handleLogout);
-logoutBtnMobile.addEventListener('click', handleLogout);
 
 // File input handling
 const fileInput = $('fileInput');
@@ -207,7 +203,7 @@ function initResults() {
 // Update stats display
 function updateStats(malicious, suspicious, harmless, undetected) {
   $('statMalicious').textContent = malicious;
-  $('statSuspicious').textContent = suspicious;
+  $极('statSuspicious').textContent = suspicious;
   $('statHarmless').textContent = harmless;
   $('statUndetected').textContent = undetected;
   show($('resultsOverview'));
@@ -255,7 +251,7 @@ async function runScanUrl(url){
     hide($('emptyState'));
     hide($('resultFile'));
     hide($('resultQr'));
-    show($('resultUrl'));
+    show($极('resultUrl'));
     
     finalUrl.textContent = j.signals.final_url; 
     scoreUrl.textContent = j.verdict.score;
@@ -329,7 +325,7 @@ async function runScanFile(file){
     });
     
     const j = await r.json(); 
-    if(!r.ok){ 
+    if(!极.ok){ 
       toast(j.error || 'File scan failed');
       return;
     }
@@ -400,7 +396,7 @@ const qrBtn = $('qrBtn');
 async function runScanQr(file){
   if (!canScan()) return;
   
-  setBusy(qrBtn, true, 'Analyzing…');
+  setBusy(qrBtn,极 ,true, 'Analyzing…');
   
   try{
     const fd = new FormData(); 
@@ -450,7 +446,7 @@ async function runScanQr(file){
       if (score >= 80) {
         updateStats(1, 0, 0, 0);
       } else if (score >= 50) {
-        updateStats(0, 1, 0, 0);
+        updateStats(0, 1, 0, 极);
       } else if (score >= 20) {
         updateStats(0, 0, 1, 0);
       } else {
@@ -474,21 +470,14 @@ async function runScanQr(file){
 }
 
 qrBtn.addEventListener('click', () => {
-  const f = qrInput.files && qrInput.files[0]; 
+  const f = qrInput.files && qr极.files[0]; 
   if(!f) return toast('Pick an image of a QR code'); 
   runScanQr(f); 
-});
-
-// Subscription button functionality
-$('subscribeBtn').addEventListener('click', () => {
-  window.location.href = '../Subscription/Subscription.html';
 });
 
 // User dropdown functionality
 const userDropdownBtn = $('userDropdownBtn');
 const userDropdown = $('userDropdown');
-const userDropdownBtnMobile = $('userDropdownBtnMobile');
-const userDropdownMobile = $('userDropdownMobile');
 
 // Toggle desktop dropdown
 userDropdownBtn.addEventListener('click', (e) => {
@@ -496,29 +485,15 @@ userDropdownBtn.addEventListener('click', (e) => {
   userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
 });
 
-// Toggle mobile dropdown
-userDropdownBtnMobile.addEventListener('click', (e) => {
-  e.stopPropagation();
-  userDropdownMobile.classList.toggle('show');
-});
-
 // Close dropdowns when clicking outside
 document.addEventListener('click', (e) => {
   if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
     userDropdown.style.display = 'none';
   }
-  
-  if (!userDropdownBtnMobile.contains(e.target) && !userDropdownMobile.contains(e.target)) {
-    userDropdownMobile.classList.remove('show');
-  }
 });
 
 // Prevent dropdown from closing when clicking inside it
 userDropdown.addEventListener('click', (e) => {
-  e.stopPropagation();
-});
-
-userDropdownMobile.addEventListener('click', (e) => {
   e.stopPropagation();
 });
 

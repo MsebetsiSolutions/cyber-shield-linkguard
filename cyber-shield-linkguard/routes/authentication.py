@@ -83,6 +83,8 @@ def signup():
 
 
 
+
+
 @auth_bp.route('/guestSignup', methods=['POST'])
 def guest_signup():
     try:
@@ -118,6 +120,8 @@ def guest_signup():
     except Exception as e:
         return jsonify({'error': 'Guest account creation failed'}), 500
         
+
+
 
 
 
@@ -192,6 +196,8 @@ def login():
 
 
 
+
+
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
     try:
@@ -201,6 +207,8 @@ def logout():
     except Exception as e:
         print(f"Logout error: {e}")
         return jsonify({'error': 'Logout failed'}), 500
+
+
 
 
 
