@@ -1,4 +1,8 @@
-Mobile-first, browser-based anti-phishing PWA by Msebetsi Solutions.
+# Cyber Shield LinkGuard
+
+browser-based anti-phishing PWA by Msebetsi Solutions.
+
+---
 
 ## Overview
 Cyber Shield LinkGuard is a cross-platform cybersecurity tool designed to protect users from malicious links, infected files, and unsafe QR codes. The project integrates with VirusTotal for threat intelligence and provides a lightweight web application that works on both desktop and mobile devices.
@@ -61,6 +65,12 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         |      |     ├── lin/
         |      |     └── pyvenv.cfg
         |      |
+        │      ├── routes/ 
+        |      |     ├── _pycache_/
+        |      |     ├── setings.py
+        |      |     ├── subscription.py
+        |      |     └── authentication.py
+        |      |
         │      └── public/ 
         |            ├── assets/
         |            ├── icons/
@@ -74,6 +84,11 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         |            |     ├── ScannerDash.css
         |            |     └── ScannerDash.js
         |            |
+        |            ├── Subscription/        
+        |            |     ├── Subscription.html
+        |            |     ├── Subscription.css
+        |            |     └── Subscription.js
+        |            |   
         |            ├── settings/          
         |            |     ├── settings.html
         |            |     ├── settings.css
@@ -83,6 +98,11 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         |            |     ├── report.html
         |            |     ├── report.css
         |            |     └── report.js
+        |            |
+        |            ├── payment_sys/              
+        |            |     ├── payment_sys.html
+        |            |     ├── payment_sys.css
+        |            |     └── payment_sys.js
         |            |
         |            ├── clarity/          
         |            |     ├── clarity.html
@@ -100,3 +120,4 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         |            └── theme.css
         |                
         └── README.md
+

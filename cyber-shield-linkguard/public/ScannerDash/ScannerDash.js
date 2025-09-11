@@ -26,21 +26,36 @@ const token = {
 
 // Scan counter management
 const scanCounter = {
-  get remaining(){ return parseInt(localStorage.getItem('remainingScans') || '5'); },
-  set remaining(v){ localStorage.setItem('remainingScans', v.toString()); },
-  reset(){ this.remaining = 5; },
+  get remaining(){ 
+    const today = new Date().toDateString();
+    const lastScanDate = localStorage.getItem('lastScanDate');
+    
+    if (lastScanDate !== today) {
+      localStorage.setItem('lastScanDate', today);
+      localStorage.setItem('remainingScans', '5');
+      return 5;
+    }
+    
+    return parseInt(localStorage.getItem('remainingScans') || '5'); 
+  },
+  set remaining(v){ 
+    localStorage.setItem('remainingScans', v.toString()); 
+    localStorage.setItem('lastScanDate', new Date().toDateString());
+  },
+  reset(){ 
+    this.remaining = 5; 
+    localStorage.setItem('lastScanDate', new Date().toDateString());
+  },
   decrement(){ 
     if(this.remaining > 0) {
       this.remaining = this.remaining - 1;
       this.updateUI();
-      this.checkSubscriptionButton();
       
-      // Show subscription modal if scans reach zero
       if (this.remaining === 0) {
-        toast('You have used all your 5 free scans. Please subscribe to get access to more scans.');
         setTimeout(() => {
-          $('subscribeBtn').click();
-        }, 5000);
+          const subscriptionModal = new bootstrap.Modal($('subscriptionModal'));
+          subscriptionModal.show();
+        }, 1000);
       }
       
       return true;
@@ -50,7 +65,6 @@ const scanCounter = {
   updateUI(){
     $('remainingScans').textContent = this.remaining;
     
-    // Change color based on remaining scans
     const scanCounterEl = $('scanCounter');
     scanCounterEl.classList.remove('text-danger', 'text-warning', 'text-success');
     
@@ -61,181 +75,94 @@ const scanCounter = {
     } else {
       scanCounterEl.classList.add('text-success');
     }
-  },
-  checkSubscriptionButton(){
-    if(this.remaining === 0) {
-      show($('subscribeBtn'));
-    } else {
-      hide($('subscribeBtn'));
-    }
   }
 };
 
-// Subscription plans data
-const subscriptionPlans = [
-  {
-    id: 'free',
-    name: 'Free Tier',
-    subtitle: 'Hobbyist',
-    price: 'R0 / month',
-    idealFor: 'Students, enthusiasts, and individuals doing occasional checks.',
-    features: [
-      '5 scans per month',
-      'Basic Threat Report',
-      'URL scanning only',
-      'Community support'
-    ],
-    color: 'plan-free'
-  },
-  {
-    id: 'pro',
-    name: 'Pro Tier',
-    subtitle: 'Professional',
-    price: 'R75 / month',
-    idealFor: 'Freelancers, IT administrators, and security analysts.',
-    features: [
-      'Unlimited scans',
-      'Detailed Threat Reports (Geolocation, historical data)',
-      'Browser Extension with quick-scan',
-      'File and QR code scanning',
-      'Priority email support'
-    ],
-    color: 'plan-pro'
-  },
-  {
-    id: 'team',
-    name: 'Team Tier',
-    subtitle: 'Small Business',
-    price: 'R200 / month',
-    idealFor: 'Small teams, start-ups, and IT departments.',
-    features: [
-      'Everything in Pro',
-      'Shared Team Workspace',
-      'Monitor 50 assets',
-      'Enhanced API Access (500 requests/month)',
-      'Customizable Alert Rules',
-      'SMS Alerts (25 credits)',
-      'Priority chat & email support'
-    ],
-    color: 'plan-team'
-  },
-  {
-    id: 'enterprise',
-    name: 'Enterprise Tier',
-    subtitle: 'Organization',
-    price: 'Contact Sales',
-    idealFor: 'Larger organizations, MSSPs, and enterprises.',
-    features: [
-      'Everything in Team',
-      'Unlimited users & workspaces',
-      'Unlimited Asset Monitoring & Alerts',
-      'Advanced API (2000 requests)',
-      'SIEM Integration',
-      'Threat Intelligence Feed',
-      'Custom Branded Reports',
-      'Dedicated Customer Success Manager',
-      '24/7 Phone Support'
-    ],
-    color: 'plan-enterprise'
+// Improved fetchWithAuth function
+async function fetchWithAuth(path, opts={}, autoRetry=true) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...opts.headers
+  };
+  
+  if (token.access) {
+    headers.Authorization = 'Bearer ' + token.access;
   }
-];
-
-// Render subscription plans
-function renderSubscriptionPlans() {
-  const plansContainer = $('#plansContainer');
-  plansContainer.innerHTML = '';
   
-  subscriptionPlans.forEach(plan => {
-    const planCol = document.createElement('div');
-    planCol.className = 'col-12 col-md-6 col-lg-3 mb-4';
-    planCol.innerHTML = `
-      <div class="plan-card ${plan.color}" data-plan-id="${plan.id}">
-        <div class="plan-header">
-          <h4>${plan.name}</h4>
-          <div class="plan-subtitle">${plan.subtitle}</div>
-          <div class="plan-price">${plan.price}</div>
-          <div class="plan-description">${plan.idealFor}</div>
-        </div>
-        <ul class="plan-features">
-          ${plan.features.slice(0, 3).map(feature => `<li>${feature}</li>`).join('')}
-        </ul>
-        <div class="plan-details">
-          <ul class="plan-features">
-            ${plan.features.slice(3).map(feature => `<li>${feature}</li>`).join('')}
-          </ul>
-          <button class="cs-btn btn-login w-100 mt-3">Select Plan</button>
-        </div>
-      </div>
-    `;
-    plansContainer.appendChild(planCol);
-  });
-  
-  // Add click event to plan cards
-  document.querySelectorAll('.plan-card').forEach(card => {
-    card.addEventListener('click', function() {
-      // Toggle details expansion
-      const details = this.querySelector('.plan-details');
-      const isExpanded = details.classList.contains('expanded');
-      
-      // Collapse all other plans
-      document.querySelectorAll('.plan-details').forEach(d => {
-        d.classList.remove('expanded');
-      });
-      document.querySelectorAll('.plan-card').forEach(c => {
-        c.classList.remove('plan-selected');
-      });
-      
-      // Expand this plan if it wasn't already expanded
-      if (!isExpanded) {
-        details.classList.add('expanded');
-        this.classList.add('plan-selected');
-      }
+  try {
+    let response = await fetch(path, {
+      ...opts,
+      headers
     });
-  });
-}
-
-async function fetchWithAuth(path, opts={}, autoRetry=true){
-  const headers = Object.assign({'Content-Type':'application/json'}, opts.headers || {});
-  if(token.access){ headers.Authorization = 'Bearer ' + token.access; }
-  const r = await fetch(path, Object.assign({}, opts, { headers }));
-  if(r.status !== 401 || !autoRetry || !token.refresh) return r;
-  
-  // Try one refresh
-  const rf = await fetch('/api/auth/refresh', {
-    method: 'POST', 
-    headers: {'Content-Type': 'application/json'}, 
-    body: JSON.stringify({ refresh_token: token.refresh })
-  });
-  
-  if(!rf.ok){ token.clear(); return r; }
-  const j = await rf.json();
-  if(!j.access_token){ token.clear(); return r; }
-  
-  token.access = j.access_token;
-  return fetch(path, Object.assign({}, opts, { 
-    headers: Object.assign(headers, { Authorization: 'Bearer ' + token.access }) 
-  }));
+    
+    // If unauthorized and we have a refresh token, try to refresh
+    if (response.status === 401 && autoRetry && token.refresh) {
+      try {
+        const refreshResponse = await fetch('/api/auth/refresh', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ refresh_token: token.refresh })
+        });
+        
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json();
+          if (refreshData.access_token) {
+            token.access = refreshData.access_token;
+            
+            // Retry the original request with new token
+            headers.Authorization = 'Bearer ' + token.access;
+            response = await fetch(path, {
+              ...opts,
+              headers
+            });
+          }
+        } else {
+          // Refresh failed, clear tokens
+          token.clear();
+        }
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError);
+        token.clear();
+      }
+    }
+    
+    return response;
+  } catch (error) {
+    console.error('Fetch error:', error);
+    throw error;
+  }
 }
 
 // Set user UI
 const whoRow = $('whoRow');
+const welcomeMessage = $('welcomeMessage');
 const logoutBtn = $('logout');
 
-function setUserUI(email){ 
-  if(email){ 
-    whoRow.textContent = 'Signed in: ' + email; 
+function setUserUI(userData){ 
+  if(userData && userData.authenticated){ 
+    welcomeMessage.textContent = `Welcome, ${userData.full_name || userData.email}!`;
+    whoRow.textContent = `Signed in: ${userData.email}`; 
     show(logoutBtn);
   } else { 
-    whoRow.textContent = 'Guest mode'; 
-    hide(logoutBtn);
+    welcomeMessage.textContent = ''; 
+    whoRow.textContent = ''; 
+    show(logoutBtn);
   }
 }
 
 // Logout functionality
-logoutBtn.addEventListener('click', () => {
+logoutBtn.addEventListener('click', async () => {
+  try {
+    await fetchWithAuth('/api/auth/logout', {
+      method: 'POST'
+    });
+  } catch (e) {
+    console.log('Logout API call failed, proceeding with client-side cleanup');
+  }
+  
   token.clear(); 
   scanCounter.reset();
-  setUserUI(''); 
+  setUserUI(null); 
   toast('Signed out');
   setTimeout(() => {
     window.location.href = '../index.html';
@@ -256,14 +183,12 @@ fileInput.addEventListener('change', function() {
 
 // Initialize results display
 function initResults() {
-  // Hide all result sections
   hide($('resultUrl'));
   hide($('resultFile'));
   hide($('resultQr'));
   hide($('resultsOverview'));
   show($('emptyState'));
   
-  // Reset stats
   $('statMalicious').textContent = '0';
   $('statSuspicious').textContent = '0';
   $('statHarmless').textContent = '0';
@@ -289,7 +214,7 @@ function canScan() {
   if (scanCounter.remaining > 0) {
     return true;
   } else {
-    toast('You have reached your scan limit. Please subscribe to continue scanning.');
+    toast('You have reached your daily scan limit. Please subscribe to continue scanning.');
     const subscriptionModal = new bootstrap.Modal($('subscriptionModal'));
     subscriptionModal.show();
     return false;
@@ -301,7 +226,6 @@ const urlInput = $('urlInput');
 const scanBtn = $('scanBtn');
 
 async function runScanUrl(url){
-  // Check scan limit
   if (!canScan()) return;
   
   setBusy(scanBtn, true, 'Scanning…');
@@ -318,16 +242,13 @@ async function runScanUrl(url){
       return;
     }
     
-    // Decrement scan counter
     scanCounter.decrement();
     
-    // Hide empty state and show results
     hide($('emptyState'));
     hide($('resultFile'));
     hide($('resultQr'));
     show($('resultUrl'));
     
-    // Update results
     finalUrl.textContent = j.signals.final_url; 
     scoreUrl.textContent = j.verdict.score;
     reasonsUrl.innerHTML = '';
@@ -340,7 +261,6 @@ async function runScanUrl(url){
     
     setBadge(badgeUrl, j.verdict.band);
     
-    // Update stats based on score
     const score = parseInt(j.verdict.score);
     if (score >= 80) {
       updateStats(1, 0, 0, 0);
@@ -352,7 +272,6 @@ async function runScanUrl(url){
       updateStats(0, 0, 0, 1);
     }
     
-    // Auto-close mobile dropdown after scan
     if (window.innerWidth < 992) {
       const mobileControls = document.getElementById('mobileControls');
       const bsCollapse = new bootstrap.Collapse(mobileControls, {toggle: false});
@@ -382,7 +301,6 @@ urlInput.addEventListener('keydown', e => {
 const fileBtn = $('fileBtn');
 
 async function runScanFile(file){
-  // Check scan limit
   if (!canScan()) return;
   
   setBusy(fileBtn, true, 'Uploading…');
@@ -391,7 +309,11 @@ async function runScanFile(file){
     const fd = new FormData(); 
     fd.append('file', file);
     
-    const headers = token.access ? { Authorization: 'Bearer ' + token.access } : {};
+    const headers = {};
+    if (token.access) {
+      headers.Authorization = 'Bearer ' + token.access;
+    }
+    
     const r = await fetch('/api/scan_file', { 
       method: 'POST', 
       headers, 
@@ -404,20 +326,16 @@ async function runScanFile(file){
       return;
     }
     
-    // Decrement scan counter
     scanCounter.decrement();
     
-    // Hide empty state and show results
     hide($('emptyState'));
     hide($('resultUrl'));
     hide($('resultQr'));
     show($('resultFile'));
     
-    // Update results
     fileName.textContent = j.file.filename || '(file)'; 
     fileSha.textContent = j.file.sha256 ? ' · ' + j.file.sha256 : '';
     
-    // Format VirusTotal summary
     let vtSummary = '';
     if (j.virustotal.enabled && !j.virustotal.error) {
       vtSummary = `Malicious: ${j.virustotal.malicious || 0}, Suspicious: ${j.virustotal.suspicious || 0}, ` +
@@ -438,7 +356,6 @@ async function runScanFile(file){
     setBadge(badgeFile, j.verdict.band); 
     scoreFile.textContent = j.verdict.score;
     
-    // Update stats based on score
     const score = parseInt(j.verdict.score);
     if (score >= 80) {
       updateStats(1, 0, 0, 0);
@@ -450,7 +367,6 @@ async function runScanFile(file){
       updateStats(0, 0, 0, 1);
     }
     
-    // Auto-close mobile dropdown after scan
     if (window.innerWidth < 992) {
       const mobileControls = document.getElementById('mobileControls');
       const bsCollapse = new bootstrap.Collapse(mobileControls, {toggle: false});
@@ -474,7 +390,6 @@ const qrInput = $('qrInput');
 const qrBtn = $('qrBtn');
 
 async function runScanQr(file){
-  // Check scan limit
   if (!canScan()) return;
   
   setBusy(qrBtn, true, 'Analyzing…');
@@ -483,7 +398,11 @@ async function runScanQr(file){
     const fd = new FormData(); 
     fd.append('file', file);
     
-    const headers = token.access ? { Authorization: 'Bearer ' + token.access } : {};
+    const headers = {};
+    if (token.access) {
+      headers.Authorization = 'Bearer ' + token.access;
+    }
+    
     const r = await fetch('/api/scan_qr', { 
       method: 'POST', 
       headers, 
@@ -496,19 +415,15 @@ async function runScanQr(file){
       return;
     }
     
-    // Decrement scan counter
     scanCounter.decrement();
     
-    // Hide empty state and show results
     hide($('emptyState'));
     hide($('resultUrl'));
     hide($('resultFile'));
     show($('resultQr'));
     
-    // Update results
     qrText.textContent = j.decoded || '(no data)';
     
-    // If the QR contains a URL and we have full analysis results
     if(j.type === 'url' && j.verdict) {
       show($('qrUrlBlock'));
       finalUrlQr.textContent = j.signals.final_url; 
@@ -523,7 +438,6 @@ async function runScanQr(file){
       
       setBadge(badgeQr, j.verdict.band);
       
-      // Update stats based on score
       const score = parseInt(j.verdict.score);
       if (score >= 80) {
         updateStats(1, 0, 0, 0);
@@ -539,7 +453,6 @@ async function runScanQr(file){
       updateStats(0, 0, 1, 0);
     }
     
-    // Auto-close mobile dropdown after scan
     if (window.innerWidth < 992) {
       const mobileControls = document.getElementById('mobileControls');
       const bsCollapse = new bootstrap.Collapse(mobileControls, {toggle: false});
@@ -560,39 +473,33 @@ qrBtn.addEventListener('click', () => {
 
 // Subscription button functionality
 $('subscribeBtn').addEventListener('click', () => {
-  const subscriptionModal = new bootstrap.Modal($('subscriptionModal'));
-  subscriptionModal.show();
+  window.location.href = '../Subscription/Subscription.html';
 });
 
 // Initialize dashboard
 (async function boot(){
   const accessToken = localStorage.getItem('access');
-  
+
   if(accessToken){
     try {
-      const r = await fetchWithAuth('/api/me');
+      const r = await fetchWithAuth('/api/auth/me');
       if(r.ok){ 
-        const me = await r.json(); 
-        setUserUI(me.email); 
-        
-        // Check if user has a paid plan
-        const userPlan = localStorage.getItem('userPlan') || 'free';
-        if (userPlan !== 'free') {
-          scanCounter.remaining = 999; // Unlimited scans for paid users
-        }
-        
+        const userData = await r.json(); 
+        setUserUI(userData); 
+        scanCounter.updateUI();
+        initResults();
         return; 
+      } else {
+        
+        token.clear();
       }
     } catch(e) {
       console.error('Failed to fetch user info', e);
+      token.clear();
     }
-    token.clear();
   }
-  
-  setUserUI('');
-  scanCounter.updateUI();
-  scanCounter.checkSubscriptionButton();
-  initResults();
-  renderSubscriptionPlans();
-})();
 
+  setUserUI(null);
+  scanCounter.updateUI();
+  initResults();
+})();

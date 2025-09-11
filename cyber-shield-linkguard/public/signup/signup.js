@@ -93,11 +93,16 @@ $('backToLogin').addEventListener('click', () => {
 });
 
 $('doSignup').addEventListener('click', async () => {
+  const fullName = $('fullName').value.trim();
   const email = $('suEmail').value.trim().toLowerCase(); 
   const password = $('suPass').value;
   const passwordConfirm = $('suPassConfirm').value;
   
   // Validation
+  if(!fullName) {
+    return toast('Please enter your full name');
+  }
+  
   if(!email) { 
     return toast('Please enter a valid email address'); 
   }
@@ -126,7 +131,7 @@ $('doSignup').addEventListener('click', async () => {
     const r = await fetch('/api/auth/signup', {
       method: 'POST', 
       headers: {'Content-Type': 'application/json'}, 
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ full_name: fullName, email, password })
     });
     
     const j = await r.json(); 
