@@ -134,27 +134,33 @@ async function fetchWithAuth(path, opts={}, autoRetry=true) {
 }
 
 // Set user UI
-const whoRow = $('whoRow');
 const welcomeMessage = $('welcomeMessage');
+const welcomeMessageMobile = $('welcomeMessageMobile');
 const logoutBtn = $('logout');
+const logoutBtnMobile = $('logoutMobile');
 
 function setUserUI(userData){ 
   if(userData && userData.authenticated){ 
-    welcomeMessage.textContent = `Welcome, ${userData.full_name || userData.email}!`;
-    whoRow.textContent = `Signed in: ${userData.email}`; 
+    const welcomeText = `Welcome, ${userData.full_name || userData.email}!`;
+    welcomeMessage.textContent = welcomeText;
+    welcomeMessageMobile.textContent = welcomeText;
     show(logoutBtn);
+    show(logoutBtnMobile);
   } else { 
     welcomeMessage.textContent = ''; 
-    whoRow.textContent = ''; 
-    show(logoutBtn);
+    welcomeMessageMobile.textContent = '';
+    hide(logoutBtn);
+    hide(logoutBtnMobile);
   }
 }
 
 // Logout functionality
-logoutBtn.addEventListener('click', async () => {
+function handleLogout() {
   try {
-    await fetchWithAuth('/api/auth/logout', {
+    fetchWithAuth('/api/auth/logout', {
       method: 'POST'
+    }).catch(e => {
+      console.log('Logout API call failed, proceeding with client-side cleanup');
     });
   } catch (e) {
     console.log('Logout API call failed, proceeding with client-side cleanup');
@@ -167,7 +173,10 @@ logoutBtn.addEventListener('click', async () => {
   setTimeout(() => {
     window.location.href = '../index.html';
   }, 1000);
-});
+}
+
+logoutBtn.addEventListener('click', handleLogout);
+logoutBtnMobile.addEventListener('click', handleLogout);
 
 // File input handling
 const fileInput = $('fileInput');
@@ -227,8 +236,7 @@ const scanBtn = $('scanBtn');
 
 async function runScanUrl(url){
   if (!canScan()) return;
-  
-  setBusy(scanBtn, true, 'Scanning…');
+    setBusy(scanBtn, true, 'Scanning…');
   
   try{
     const r = await fetchWithAuth('/api/scan', { 
@@ -476,6 +484,44 @@ $('subscribeBtn').addEventListener('click', () => {
   window.location.href = '../Subscription/Subscription.html';
 });
 
+// User dropdown functionality
+const userDropdownBtn = $('userDropdownBtn');
+const userDropdown = $('userDropdown');
+const userDropdownBtnMobile = $('userDropdownBtnMobile');
+const userDropdownMobile = $('userDropdownMobile');
+
+// Toggle desktop dropdown
+userDropdownBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
+});
+
+// Toggle mobile dropdown
+userDropdownBtnMobile.addEventListener('click', (e) => {
+  e.stopPropagation();
+  userDropdownMobile.classList.toggle('show');
+});
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+  if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+    userDropdown.style.display = 'none';
+  }
+  
+  if (!userDropdownBtnMobile.contains(e.target) && !userDropdownMobile.contains(e.target)) {
+    userDropdownMobile.classList.remove('show');
+  }
+});
+
+// Prevent dropdown from closing when clicking inside it
+userDropdown.addEventListener('click', (e) => {
+  e.stopPropagation();
+});
+
+userDropdownMobile.addEventListener('click', (e) => {
+  e.stopPropagation();
+});
+
 // Initialize dashboard
 (async function boot(){
   const accessToken = localStorage.getItem('access');
@@ -490,7 +536,6 @@ $('subscribeBtn').addEventListener('click', () => {
         initResults();
         return; 
       } else {
-        
         token.clear();
       }
     } catch(e) {

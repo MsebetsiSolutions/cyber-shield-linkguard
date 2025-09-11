@@ -10,6 +10,10 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+
+
+
+
 @auth_bp.route('/signup', methods=['POST'])
 def signup():
     try:
@@ -75,6 +79,10 @@ def signup():
         print(f"Signup error: {e}")
         return jsonify({'error': 'Signup failed'}), 500
 
+
+
+
+
 @auth_bp.route('/guestSignup', methods=['POST'])
 def guest_signup():
     try:
@@ -110,6 +118,14 @@ def guest_signup():
     except Exception as e:
         return jsonify({'error': 'Guest account creation failed'}), 500
         
+
+
+
+
+
+
+
+
 @auth_bp.route('/login', methods=['POST'])
 def login():
     try:
@@ -172,6 +188,10 @@ def login():
         traceback.print_exc()
         return jsonify({'error': 'Login failed'}), 500
 
+
+
+
+
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
     try:
@@ -181,6 +201,12 @@ def logout():
     except Exception as e:
         print(f"Logout error: {e}")
         return jsonify({'error': 'Logout failed'}), 500
+
+
+
+
+
+
 
 # Get current user info from session - UPDATED ENDPOINT
 @auth_bp.route('/me', methods=['GET'])

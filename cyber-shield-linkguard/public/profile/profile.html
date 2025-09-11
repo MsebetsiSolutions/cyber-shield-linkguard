@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile</title>
+  <style>
+    .profile-card {
+      max-width: 400px;
+      margin: 50px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+      font-family: Arial, sans-serif;
+    }
+    .profile-card h2 {
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="profile-card" id="profileCard">
+    Loading user info...
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Get the logged-in user's email from localStorage
+      const userEmail = localStorage.getItem('user_email');
+
+      if (!userEmail) {
+        document.getElementById('profileCard').innerHTML = "Not logged in.";
+        return;
+      }
+
+      fetch(`http://127.0.0.1:5000/api/user?email=${encodeURIComponent(userEmail)}`)
+        .then(res => res.json())
+        .then(user => {
+          const displayName = user.name || user.email.split('@')[0]; // Use DB name if available
+          document.getElementById('profileCard').innerHTML = `
+            <h2>${displayName.charAt(0).toUpperCase() + displayName.slice(1)}</h2>
+            <p><strong>Email:</strong> ${user.email}</p>
+            <p><strong>Role / Subscription:</strong> ${user.role}</p>
+          `;
+        })
+        .catch(err => {
+          document.getElementById('profileCard').innerHTML = "Error loading user info.";
+          console.error(err);
+        });
+    });
+  </script>
+
+</body>
+</html>
