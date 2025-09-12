@@ -9,7 +9,7 @@ const toast = (msg, ms=2000) => {
   setTimeout(() => t.classList.remove('show'), ms); 
 };
 
-// Session-based fetch function (no JWT tokens needed)
+// Session-based fetch function
 async function fetchWithSession(path, opts={}) {
   const headers = {
     'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ function setUserUI(userData){
     });
   } else { 
     if (welcomeMessage) welcomeMessage.textContent = ''; 
-    if (userNameDisplay) userNameDisplay.textContent = 'User Name'; // Fallback text
+    if (userNameDisplay) userNameDisplay.textContent = 'User Name';
     console.log('User not authenticated, using fallback');
   }
 }
@@ -147,12 +147,12 @@ const scanCounter = {
   }
 };
 
-// Subscription plan codes
+// Subscription plan codes and prices
 const planCodes = {
-  free: 'CSLG-FREE-001',
-  pro: 'CSLG-PRO-002',
-  team: 'CSLG-TEAM-003',
-  enterprise: 'CSLG-ENT-004'
+  free: {code: 'CSLG-FREE-001', price: 0},
+  pro: {code: 'CSLG-PRO-002', price: 75},
+  team: {code: 'CSLG-TEAM-003', price: 200},
+  enterprise: {code: 'CSLG-ENT-004', price: 0} // Contact sales for price
 };
 
 // Plan selection functionality
@@ -172,8 +172,8 @@ document.querySelectorAll('.plan-card').forEach(card => {
     
     // Store selected plan details
     const planName = this.querySelector('h4').textContent;
-    const planPrice = this.querySelector('.plan-price').textContent;
-    const planCode = planCodes[planId];
+    const planPrice = planCodes[planId].price;
+    const planCode = planCodes[planId].code;
     
     localStorage.setItem('selectedPlan', JSON.stringify({
       id: planId,
@@ -201,6 +201,18 @@ document.querySelectorAll('.plan-card').forEach(card => {
       }
       setUserUI(userInfo);
       scanCounter.updateUI();
+      
+      // Highlight current plan based on user's plan mode
+      const planMode = userInfo.plan_mode || 0;
+      const planMap = {0: 'free', 1: 'pro', 2: 'team', 3: 'enterprise'};
+      const currentPlanId = planMap[planMode];
+      
+      if (currentPlanId) {
+        const currentPlanCard = document.querySelector(`.plan-card[data-plan-id="${currentPlanId}"]`);
+        if (currentPlanCard) {
+          currentPlanCard.classList.add('plan-selected');
+        }
+      }
     } else {
       window.location.href = '../index.html';
     }

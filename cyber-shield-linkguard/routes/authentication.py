@@ -49,8 +49,8 @@ def signup():
                 return jsonify({'error': 'Email already exists'}), 409
 
             cursor.execute('''
-                INSERT INTO users (full_name, email, password) 
-                VALUES (?, ?, ?)
+                INSERT INTO users (full_name, email, password, Plan_Mode) 
+                VALUES (?, ?, ?, 0)
             ''', (full_name, email, hashed_pw_str))
 
             conn.commit()
@@ -70,49 +70,14 @@ def signup():
             'message': 'Account created successfully',
             'full_name': full_name,
             'email': email,
-            'user_id': user_id
+            'user_id': user_id,
+            'plan_mode': 0
         }), 201 
     
     except Exception as e:
         print(f"Signup error: {e}")
         return jsonify({'error': 'Signup failed'}), 500
 
-
-# Guest Account Registration Endpoint
-@auth_bp.route('/guestSignup', methods=['POST'])
-def guest_signup():
-    try:
-        data = request.get_json()
-        guest_email = data.get('email')
-        guest_password = data.get('password')
-
-        hashpw = bcrypt.hashpw(guest_password.encode('utf-8'), bcrypt.gensalt())
-        hashpw_str = hashpw.decode('utf-8')
-        expiry = datetime.datetime.now() + datetime.timedelta(days=30)
-        expiry_str = expiry.isoformat()
-
-        try:
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            cursor.execute('INSERT INTO users (email, password, account_type, is_guest, guest_expires_at) VALUES (?, ?, "guest", 1, ?)',
-                          (guest_email, hashpw_str, expiry_str))
-            conn.commit()
-            user_id = cursor.lastrowid
-            conn.close()
-        except sqlite3.Error as e:
-            return jsonify({'error': 'Database error occurred'}), 500
-        
-        return jsonify({
-            'message': 'Guest account created successfully',
-            'email': guest_email,
-            'user_id': user_id,
-            'account_type': 'guest',
-            'expire_at': expiry_str,
-            'expires_in_day': 30
-        }), 201
-    
-    except Exception as e:
-        return jsonify({'error': 'Guest account creation failed'}), 500
 
 
 # User Login Endpoint - Session Based Authentication
@@ -134,7 +99,7 @@ def login():
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
-            cursor.execute('SELECT id, full_name, email, password FROM users WHERE email = ?', (email,))
+            cursor.execute('SELECT id, full_name, email, password, Plan_Mode FROM users WHERE email = ?', (email,))
             user = cursor.fetchone()
 
             if not user:
@@ -151,10 +116,11 @@ def login():
                 session['user_id'] = user['id']
                 session['user_full_name'] = user['full_name']
                 session['user_email'] = user['email']
+                session['plan_mode'] = user['Plan_Mode']
                 session.permanent = True
                 
                 print(f"User {user['email']} logged in successfully. Session created.")
-                print(f"Session data: user_id={session.get('user_id')}, full_name={session.get('user_full_name')}")
+                print(f"Session data: user_id={session.get('user_id')}, full_name={session.get('user_full_name')}, plan_mode={session.get('plan_mode')}")
                 conn.close()
 
                 return jsonify({
@@ -162,6 +128,7 @@ def login():
                     'full_name': user['full_name'],
                     'email': user['email'],
                     'user_id': user['id'],
+                    'plan_mode': user['Plan_Mode'],
                     'authenticated': True
                 }), 200
             else:
@@ -205,7 +172,8 @@ def get_current_user():
                 'authenticated': True,
                 'user_id': session['user_id'],
                 'full_name': session.get('user_full_name', ''),
-                'email': session['user_email']
+                'email': session['user_email'],
+                'plan_mode': session.get('plan_mode', 0)
             }), 200
         else:
             return jsonify({'authenticated': False}), 200
