@@ -9,12 +9,142 @@ const toast = (msg, ms=2000) => {
   setTimeout(() => t.classList.remove('show'), ms); 
 };
 
-const token = {
-  get access(){ return localStorage.getItem('access') || ''; },
-  set access(v){ v ? localStorage.setItem('access', v) : localStorage.removeItem('access'); },
-  get refresh(){ return localStorage.getItem('refresh') || ''; },
-  set refresh(v){ v ? localStorage.setItem('refresh', v) : localStorage.removeItem('refresh'); },
-  clear(){ this.access=''; this.refresh=''; }
+// Session-based fetch function (no JWT tokens needed)
+async function fetchWithSession(path, opts={}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...opts.headers
+  };
+  
+  try {
+    const response = await fetch(path, {
+      ...opts,
+      headers,
+      credentials: 'include' 
+    });
+    
+    return response;
+  } catch (error) {
+    console.error('Fetch error:', error);
+    throw error;
+  }
+}
+
+// Set user UI
+const welcomeMessage = $('welcomeMessage');
+const userNameDisplay = $('userNameDisplay');
+const logoutBtn = $('logout');
+const scanCounterEl = $('scanCounter');
+const remainingScansEl = $('remainingScans');
+
+function setUserUI(userData){ 
+  console.log('Setting user UI with data:', userData); 
+  
+  if(userData && userData.authenticated){ 
+    const welcomeText = `Welcome, ${userData.full_name || userData.email}!`;
+    const displayName = userData.full_name || userData.email.split('@')[0];
+    
+    if (welcomeMessage) welcomeMessage.textContent = welcomeText;
+    if (userNameDisplay) userNameDisplay.textContent = displayName;
+    
+    console.log('User UI updated:', {
+      welcomeText,
+      displayName,
+      full_name: userData.full_name
+    });
+  } else { 
+    if (welcomeMessage) welcomeMessage.textContent = ''; 
+    if (userNameDisplay) userNameDisplay.textContent = 'User Name'; // Fallback text
+    console.log('User not authenticated, using fallback');
+  }
+}
+
+// Logout functionality
+function handleLogout() {
+  try {
+    fetchWithSession('/api/auth/logout', {
+      method: 'POST'
+    }).then(response => {
+      if (response.ok) {
+        console.log('Logout successful');
+      } else {
+        console.log('Logout API call failed, proceeding with client-side cleanup');
+      }
+    }).catch(e => {
+      console.log('Logout API call failed, proceeding with client-side cleanup');
+    });
+  } catch (e) {
+    console.log('Logout API call failed, proceeding with client-side cleanup');
+  }
+  
+  setUserUI(null); 
+  toast('Signed out');
+  setTimeout(() => {
+    window.location.href = '../index.html';
+  }, 1000);
+}
+
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', handleLogout);
+}
+
+// User dropdown functionality
+const userDropdownBtn = $('userDropdownBtn');
+const userDropdown = $('userDropdown');
+
+// Toggle desktop dropdown
+if (userDropdownBtn && userDropdown) {
+  userDropdownBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
+  });
+
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+      userDropdown.style.display = 'none';
+    }
+  });
+
+  // Prevent dropdown from closing when clicking inside it
+  userDropdown.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+}
+
+// Scan counter management
+const scanCounter = {
+  get remaining(){ 
+    const today = new Date().toDateString();
+    const lastScanDate = localStorage.getItem('lastScanDate');
+    
+    if (lastScanDate !== today) {
+      localStorage.setItem('lastScanDate', today);
+      localStorage.setItem('remainingScans', '5');
+      return 5;
+    }
+    
+    return parseInt(localStorage.getItem('remainingScans') || '5'); 
+  },
+  set remaining(v){ 
+    localStorage.setItem('remainingScans', v.toString()); 
+    localStorage.setItem('lastScanDate', new Date().toDateString());
+  },
+  updateUI(){
+    if (remainingScansEl) remainingScansEl.textContent = this.remaining;
+    
+    if (scanCounterEl) {
+      scanCounterEl.classList.remove('text-danger', 'text-warning', 'text-success');
+      
+      if(this.remaining === 0) {
+        scanCounterEl.classList.add('text-danger');
+      } else if(this.remaining <= 2) {
+        scanCounterEl.classList.add('text-warning');
+      } else {
+        scanCounterEl.classList.add('text-success');
+      }
+    }
+  }
 };
 
 // Subscription plan codes
@@ -24,30 +154,6 @@ const planCodes = {
   team: 'CSLG-TEAM-003',
   enterprise: 'CSLG-ENT-004'
 };
-
-// Set user UI
-const whoRow = $('whoRow');
-const logoutBtn = $('logout');
-
-function setUserUI(email){ 
-  if(email){ 
-    whoRow.textContent = 'Signed in: ' + email; 
-    show(logoutBtn);
-  } else { 
-    whoRow.textContent = ''; 
-    show(logoutBtn);
-  }
-}
-
-// Logout functionality
-logoutBtn.addEventListener('click', () => {
-  token.clear(); 
-  setUserUI(''); 
-  toast('Signed out');
-  setTimeout(() => {
-    window.location.href = '../index.html';
-  }, 1000);
-});
 
 // Plan selection functionality
 document.querySelectorAll('.plan-card').forEach(card => {
@@ -83,26 +189,23 @@ document.querySelectorAll('.plan-card').forEach(card => {
 
 // Initialize subscription page
 (async function boot(){
-  const accessToken = localStorage.getItem('access');
-  
-  if(accessToken){
-    try {
-      const r = await fetch('/api/me', {
-        headers: {
-          'Authorization': 'Bearer ' + accessToken,
-          'Content-Type': 'application/json'
-        }
-      });
-      if(r.ok){ 
-        const me = await r.json(); 
-        setUserUI(me.email); 
-        return; 
+  // Check if user is authenticated
+  try {
+    const response = await fetchWithSession('/api/auth/me');
+    
+    if (response.ok) {
+      const userInfo = await response.json();
+      if (!userInfo.authenticated) {
+        window.location.href = '../index.html';
+        return;
       }
-    } catch(e) {
-      console.error('Failed to fetch user info', e);
+      setUserUI(userInfo);
+      scanCounter.updateUI();
+    } else {
+      window.location.href = '../index.html';
     }
-    token.clear();
+  } catch (error) {
+    console.error('Error checking authentication:', error);
+    window.location.href = '../index.html';
   }
-  
-  setUserUI('');
 })();
