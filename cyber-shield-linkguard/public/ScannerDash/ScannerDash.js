@@ -22,6 +22,7 @@ const scanCounter = {
     const today = new Date().toDateString();
     const lastScanDate = localStorage.getItem('lastScanDate');
     
+    // Reset scan count daily
     if (lastScanDate !== today) {
       localStorage.setItem('lastScanDate', today);
       localStorage.setItem('remainingScans', '5');
@@ -32,7 +33,7 @@ const scanCounter = {
   },
   set remaining(v){ 
     localStorage.setItem('remainingScans', v.toString()); 
-    localStorage.setItem('lastScanDate', new Date().toDateString());
+    localStorage.setItem('lastScanDate', new Date().toDateString()); // Update date when count changes
   },
   reset(){ 
     this.remaining = 5; 
@@ -44,6 +45,7 @@ const scanCounter = {
       this.updateUI();
       
       if (this.remaining === 0) {
+        // Show subscription modal if free scans are depleted
         setTimeout(() => {
           const subscriptionModal = new bootstrap.Modal($('subscriptionModal'));
           subscriptionModal.show();
@@ -95,6 +97,8 @@ async function fetchWithSession(path, opts={}) {
 const welcomeMessage = $('welcomeMessage');
 const userNameDisplay = $('userNameDisplay');
 const logoutBtn = $('logout');
+const fileScanBtn = $('fileScanBtn'); // Get the File Scan button
+const qrScanBtn = $('qrScanBtn');     // Get the QR Scan button
 
 function setUserUI(userData){ 
   console.log('Setting user UI with data:', userData); 
@@ -111,12 +115,40 @@ function setUserUI(userData){
       displayName,
       full_name: userData.full_name
     });
+
+    // New logic: Control button states based on plan_mode
+    controlScanButtons(userData.plan_mode);
+
   } else { 
     welcomeMessage.textContent = ''; 
     userNameDisplay.textContent = 'User Name'; // Fallback text
     console.log('User not authenticated, using fallback');
+    // If not authenticated, disable all advanced scan buttons
+    controlScanButtons(0); // Treat as free plan (plan_mode 0)
   }
 }
+
+// New function to control button states
+function controlScanButtons(planMode) {
+  const isPaidPlan = planMode === 1 || planMode === 2 || planMode === 3;
+
+  // URL Scan button is always enabled (subject to daily limit)
+  $('scanBtn').disabled = false; 
+
+  if (isPaidPlan) {
+    fileScanBtn.disabled = false;
+    qrScanBtn.disabled = false;
+    fileScanBtn.title = ''; // Clear title if previously set
+    qrScanBtn.title = '';   // Clear title if previously set
+  } else {
+    fileScanBtn.disabled = true;
+    qrScanBtn.disabled = true;
+    fileScanBtn.title = 'Upgrade to a paid plan to scan files'; // Tooltip for disabled buttons
+    qrScanBtn.title = 'Upgrade to a paid plan to scan QR codes';
+  }
+  console.log(`Plan Mode: ${planMode}, File Scan Enabled: ${!fileScanBtn.disabled}, QR Scan Enabled: ${!qrScanBtn.disabled}`);
+}
+
 
 // Logout functionality
 function handleLogout() {
@@ -186,9 +218,20 @@ function setBadge(el, band){
   el.className = 'badge ' + band; 
 }
 
-// Check if user can scan
-function canScan() {
-  if (scanCounter.remaining > 0) {
+// Check if user can scan (now also considers plan mode for file/qr scans)
+function canScan(scanType = 'url') { // Add scanType parameter
+  let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0'); // Get plan_mode from session storage
+  
+  if (scanType === 'file' || scanType === 'qr') {
+    if (userPlanMode === 0) { // Free plan cannot access file or QR scans
+      toast('Upgrade your plan to unlock file and QR code scanning.');
+      const subscriptionModal = new bootstrap.Modal($('subscriptionModal'));
+      subscriptionModal.show();
+      return false;
+    }
+  }
+
+  if (scanCounter.remaining > 0 || userPlanMode > 0) { // Paid users have unlimited scans
     return true;
   } else {
     toast('You have reached your daily scan limit. Please subscribe to continue scanning.');
@@ -198,12 +241,13 @@ function canScan() {
   }
 }
 
+
 // URL Scan functionality
 const urlInput = $('urlInput');
 const scanBtn = $('scanBtn');
 
 async function runScanUrl(url){
-  if (!canScan()) return;
+  if (!canScan('url')) return; // Pass scanType
   setBusy(scanBtn, true, 'Scanning…');
   
   try{
@@ -218,7 +262,11 @@ async function runScanUrl(url){
       return;
     }
     
-    scanCounter.decrement();
+    // Decrement scan count only for free users
+    let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
+    if (userPlanMode === 0) {
+      scanCounter.decrement();
+    }
     
     hide($('emptyState'));
     hide($('resultFile'));
@@ -274,12 +322,17 @@ urlInput.addEventListener('keydown', e => {
 });
 
 // File Scan functionality
-const fileBtn = $('fileBtn');
+// fileBtn is now fileScanBtn
+fileScanBtn.addEventListener('click', () => {
+  const f = fileInput.files && fileInput.files[0]; 
+  if(!f) return toast('Choose a file first'); 
+  runScanFile(f); 
+});
 
 async function runScanFile(file){
-  if (!canScan()) return;
+  if (!canScan('file')) return; // Pass scanType
   
-  setBusy(fileBtn, true, 'Uploading…');
+  setBusy(fileScanBtn, true, 'Uploading…');
   
   try{
     const fd = new FormData(); 
@@ -297,7 +350,11 @@ async function runScanFile(file){
       return;
     }
     
-    scanCounter.decrement();
+    // Decrement scan count only for free users
+    let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
+    if (userPlanMode === 0) {
+      scanCounter.decrement();
+    }
     
     hide($('emptyState'));
     hide($('resultUrl'));
@@ -346,24 +403,23 @@ async function runScanFile(file){
   } catch(e) { 
     toast('Network error'); 
   } finally { 
-    setBusy(fileBtn, false); 
+    setBusy(fileScanBtn, false); 
   }
 }
 
-fileBtn.addEventListener('click', () => {
-  const f = fileInput.files && fileInput.files[0]; 
-  if(!f) return toast('Choose a file first'); 
-  runScanFile(f); 
-});
 
 // QR Scan functionality
-const qrInput = $('qrInput');
-const qrBtn = $('qrBtn');
+// qrBtn is now qrScanBtn
+qrScanBtn.addEventListener('click', () => {
+  const f = qrInput.files && qrInput.files[0]; 
+  if(!f) return toast('Pick an image of a QR code'); 
+  runScanQr(f); 
+});
 
 async function runScanQr(file){
-  if (!canScan()) return;
+  if (!canScan('qr')) return; // Pass scanType
   
-  setBusy(qrBtn, true, 'Analyzing…');
+  setBusy(qrScanBtn, true, 'Analyzing…');
   
   try{
     const fd = new FormData(); 
@@ -381,7 +437,11 @@ async function runScanQr(file){
       return;
     }
     
-    scanCounter.decrement();
+    // Decrement scan count only for free users
+    let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
+    if (userPlanMode === 0) {
+      scanCounter.decrement();
+    }
     
     hide($('emptyState'));
     hide($('resultUrl'));
@@ -427,15 +487,10 @@ async function runScanQr(file){
   } catch(e) { 
     toast('Network error'); 
   } finally { 
-    setBusy(qrBtn, false); 
+    setBusy(qrScanBtn, false); 
   }
 }
 
-qrBtn.addEventListener('click', () => {
-  const f = qrInput.files && qrInput.files[0]; 
-  if(!f) return toast('Pick an image of a QR code'); 
-  runScanQr(f); 
-});
 
 // User dropdown functionality
 const userDropdownBtn = $('userDropdownBtn');
@@ -472,32 +527,36 @@ userDropdown.addEventListener('click', (e) => {
       console.log('User data received:', userData);
       
       if (userData.authenticated) {
+        // Store plan_mode in sessionStorage for easy access by canScan
+        sessionStorage.setItem('plan_mode', userData.plan_mode); 
+        
         setUserUI(userData); 
         scanCounter.updateUI();
         initResults();
+        checkUserPlan(); // Call to update plan badge
         console.log('User authenticated successfully');
         return;
       } else {
         console.log('User not authenticated, redirecting to login');
-        // Redirect to login page if not authenticated
+        sessionStorage.removeItem('plan_mode'); // Clear plan_mode if not authenticated
         window.location.href = '../index.html';
         return;
       }
     } else {
       console.log('Auth check failed, redirecting to login');
-      // Redirect to login page if request failed
+      sessionStorage.removeItem('plan_mode'); // Clear plan_mode on auth check failure
       window.location.href = '../index.html';
       return;
     }
   } catch(e) {
     console.error('Failed to fetch user info', e);
-    // Redirect to login page on error
+    sessionStorage.removeItem('plan_mode'); // Clear plan_mode on error
     window.location.href = '../index.html';
     return;
   }
 })();
 
-// Add this function to your ScannerDash.js
+// update the plan badge based on user's plan mode
 function updatePlanBadge(planMode) {
   const planBadge = document.getElementById('planMode');
   if (!planBadge) return;
@@ -519,7 +578,7 @@ function updatePlanBadge(planMode) {
   planBadge.textContent = plan.text;
 }
 
-// Add this to your boot function or wherever you fetch user info
+// reboot function wherever you fetch user info
 async function checkUserPlan() {
   try {
     const response = await fetchWithSession('/api/subscription/current');
@@ -534,4 +593,3 @@ async function checkUserPlan() {
 
 // Call this function after user authentication
 checkUserPlan();
-
