@@ -3,9 +3,9 @@
   --card: #ffffff;
   --text: #2b2b2b;
   --muted: #6b7280;
-  --mint: #bfead9;
-  --sky: #bfe6f7;
-  --lemon: #fff1b8;
+  --mint: #00ff99;
+  --sky: #00b3ff;
+  --gold: #ffcc00;
   --candy-red: #ff5b5b;
   --candy-orange: #ffa64d;
   --candy-green: #4cc453;
@@ -13,6 +13,8 @@
   --btn-save: #a7efb6;
   --btn-danger: #ff9f80;
   --btn-secondary: #c4ebf9;
+  --btn-settings: #d6bbfc;
+  --btn-logout: #ff6f61;
 }
 
 body {
@@ -23,6 +25,140 @@ body {
   min-height: 100vh;
 }
 
+/* Logo styling */
+.header-logo {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Responsive adjustments for logo */
+@media (max-width: 768px) {
+  .header-logo {
+    height: 50px;
+  }
+  
+  .header-logo + .cs-sub {
+    margin-top: 0.5rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .header-logo {
+    height: 40px;
+  }
+  
+  .d-flex.align-items-center {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+}
+
+
+/* User Controls - copied from ScannerDash */
+.user-controls {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-name {
+  font-weight: 600;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.7);
+  padding: 5px 12px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-dropdown {
+  position: relative;
+}
+
+.user-dropbtn {
+  background-color: var(--btn-settings);
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: var(--text);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.user-dropbtn:hover {
+  transform: scale(1.05);
+  background-color: var(--btn-danger);
+  color: white;
+}
+
+.user-dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  min-width: 200px;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  z-index: 1;
+  margin-top: 10px;
+  padding: 0.5rem 0;
+}
+
+.user-dropdown-content a {
+  color: var(--text);
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+  transition: background-color 0.3s;
+  border-radius: 0.25rem;
+  margin: 0 0.5rem;
+}
+
+.user-dropdown-content a:hover {
+  background-color: var(--btn-settings);
+}
+
+.user-welcome {
+  padding: 12px 16px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--ring);
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.logout-btn {
+  background-color: var(--btn-logout);
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  transform: scale(1.05);
+  background-color: #ff4d3a;
+}
+
 /* Card styling */
 .cs-card {
   background: rgba(255, 255, 255, 0.9);
@@ -30,26 +166,6 @@ body {
   box-shadow: 0 4px 12px rgba(235, 159, 193, .15);
   border: 1px solid rgba(255,255,255,.6);
   backdrop-filter: blur(1px);
-}
-
-/* Back button */
-.btn-back {
-  background-color: var(--btn-secondary);
-  color: var(--text);
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.5rem 1rem;
-  text-decoration: none;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  transition: all 0.3s ease;
-}
-
-.btn-back:hover {
-  background-color: var(--sky);
-  color: var(--text);
-  transform: translateY(-2px);
 }
 
 /* Form elements */
@@ -120,7 +236,7 @@ body {
   font-weight: 900;
   letter-spacing: .5px;
   font-size: 1.8rem;
-  background: linear-gradient(90deg, var(--sky), var(--lemon), var(--mint));
+  background: linear-gradient(90deg, var(--sky), var(--gold), var(--mint));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -167,72 +283,6 @@ body {
   display: none !important;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .btn-back {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.875rem;
-  }
-  
-  .cs-candy-title {
-    font-size: 1.5rem;
-  }
-  
-  .cs-card {
-    padding: 1.5rem !important;
-  }
-}
-
-@media (max-width: 576px) {
-  .container-fluid.py-4 {
-    padding: 1rem !important;
-  }
-  
-  .cs-card {
-    border-radius: 0.5rem;
-  }
-}
-
-
-/* Add these styles to your existing settings.css */
-
-.hidden {
-  display: none !important;
-}
-
-/* Toast notification styles */
-#toast {
-  visibility: hidden;
-  min-width: 250px;
-  margin-left: -125px;
-  background-color: #333;
-  color: #fff;
-  text-align: center;
-  border-radius: 8px;
-  padding: 16px;
-  position: fixed;
-  z-index: 9999;
-  left: 50%;
-  bottom: 30px;
-  font-size: 14px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-#toast.show {
-  visibility: visible;
-  animation: fadein 0.5s, fadeout 0.5s 2.5s;
-}
-
-@keyframes fadein {
-  from {bottom: 0; opacity: 0;}
-  to {bottom: 30px; opacity: 1;}
-}
-
-@keyframes fadeout {
-  from {bottom: 30px; opacity: 1;}
-  to {bottom: 0; opacity: 0;}
-}
-
 /* Form validation styles */
 .is-invalid {
   border-color: #dc3545 !important;
@@ -273,4 +323,52 @@ body {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .cs-candy-title {
+    font-size: 1.5rem;
+  }
+  
+  .user-name {
+    font-size: 0.9rem;
+    padding: 4px 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cs-candy-title {
+    font-size: 1.5rem;
+  }
+  
+  .cs-card {
+    padding: 1.5rem !important;
+  }
+  
+  .user-name {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 576px) {
+  .container-fluid.py-4 {
+    padding: 1rem !important;
+  }
+  
+  .cs-card {
+    border-radius: 0.5rem;
+  }
+  
+  .user-controls {
+    top: 10px;
+    right: 10px;
+  }
+  
+  .user-name {
+    display: none;
+  }
 }

@@ -1,36 +1,15 @@
 import sqlite3
 from flask import Blueprint, jsonify, request, session
 import bcrypt
-import jwt
-import os
 import re
-from datetime import datetime, timedelta
 
 settings_bp = Blueprint('settings', __name__, url_prefix='/api/user')
-
-# JWT Secret Key (should be in environment variables in production)
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "cyber-shield-secret-key")
 
 def get_db_connection():
     """Get database connection to the cyber-shield-linkguard database"""
     conn = sqlite3.connect('cyber-shield-linkguard.db')
     conn.row_factory = sqlite3.Row
     return conn
-
-def verify_token_and_get_user_id(token):
-    """Verify JWT token and return user ID"""
-    try:
-        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])
-        return payload.get("user_id")
-    except jwt.ExpiredSignatureError:
-        print("Token has expired")
-        return None
-    except jwt.InvalidTokenError:
-        print("Invalid token")
-        return None
-    except Exception as e:
-        print(f"Token verification error: {e}")
-        return None
 
 def validate_email(email):
     """Validate email format"""
@@ -272,6 +251,6 @@ def delete_account():
         print(f"Database error in delete_account: {e}")
         return jsonify({'error': 'Database error occurred'}), 500
     except Exception as e:
-        print(f"Error in delete_account: {e}")
+        print(f"Error极 delete_account: {e}")
         return jsonify({'error': 'Failed to delete account'}), 500
     

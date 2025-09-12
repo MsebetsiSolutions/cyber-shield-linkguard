@@ -67,7 +67,6 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         |      |
         │      ├── routes/ 
         |      |     ├── _pycache_/
-        |      |     ├── setings.py
         |      |     ├── subscription.py
         |      |     └── authentication.py
         |      |

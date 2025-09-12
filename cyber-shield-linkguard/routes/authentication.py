@@ -11,9 +11,7 @@ def get_db_connection():
     return conn
 
 
-
-
-
+# User Registration Endpoint
 @auth_bp.route('/signup', methods=['POST'])
 def signup():
     try:
@@ -80,9 +78,7 @@ def signup():
         return jsonify({'error': 'Signup failed'}), 500
 
 
-
-
-
+# Guest Account Registration Endpoint
 @auth_bp.route('/guestSignup', methods=['POST'])
 def guest_signup():
     try:
@@ -117,15 +113,9 @@ def guest_signup():
     
     except Exception as e:
         return jsonify({'error': 'Guest account creation failed'}), 500
-        
 
 
-
-
-
-
-
-
+# User Login Endpoint - Session Based Authentication
 @auth_bp.route('/login', methods=['POST'])
 def login():
     try:
@@ -157,19 +147,22 @@ def login():
             print(f"Input password: {password}")
 
             if bcrypt.checkpw(password.encode('utf-8'), stored_pw.encode('utf-8')):
+                # Create session data
                 session['user_id'] = user['id']
                 session['user_full_name'] = user['full_name']
                 session['user_email'] = user['email']
                 session.permanent = True
                 
                 print(f"User {user['email']} logged in successfully. Session created.")
+                print(f"Session data: user_id={session.get('user_id')}, full_name={session.get('user_full_name')}")
                 conn.close()
 
                 return jsonify({
                     'message': 'Login successful',
                     'full_name': user['full_name'],
                     'email': user['email'],
-                    'user_id': user['id']
+                    'user_id': user['id'],
+                    'authenticated': True
                 }), 200
             else:
                 print("Password does not match")
@@ -189,9 +182,7 @@ def login():
         return jsonify({'error': 'Login failed'}), 500
 
 
-
-
-
+# User Logout Endpoint - Clear Session
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
     try:
@@ -203,20 +194,17 @@ def logout():
         return jsonify({'error': 'Logout failed'}), 500
 
 
-
-
-
-
-
-# Get current user info from session - UPDATED ENDPOINT
+# Get Current User Information from Session
 @auth_bp.route('/me', methods=['GET'])
 def get_current_user():
     try:
+        print(f"Session contents: {dict(session)}")  # Debug session contents
+        
         if 'user_id' in session and 'user_email' in session:
             return jsonify({
                 'authenticated': True,
                 'user_id': session['user_id'],
-                'full_name': session['user_full_name'],
+                'full_name': session.get('user_full_name', ''),
                 'email': session['user_email']
             }), 200
         else:

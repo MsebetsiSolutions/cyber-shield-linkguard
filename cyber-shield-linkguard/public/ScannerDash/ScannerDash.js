@@ -16,14 +16,6 @@ const toast = (msg, ms=2000) => {
   setTimeout(() => t.classList.remove('show'), ms); 
 };
 
-const token = {
-  get access(){ return localStorage.getItem('access') || ''; },
-  set access(v){ v ? localStorage.setItem('access', v) : localStorage.removeItem('access'); },
-  get refresh(){ return localStorage.getItem('refresh') || ''; },
-  set refresh(v){ v ? localStorage.setItem('refresh', v) : localStorage.removeItem('refresh'); },
-  clear(){ this.access=''; this.refresh=''; }
-};
-
 // Scan counter management
 const scanCounter = {
   get remaining(){ 
@@ -78,53 +70,19 @@ const scanCounter = {
   }
 };
 
-// Improved fetchWithAuth function
-async function fetchWithAuth(path, opts={}, autoRetry=true) {
+// Session-based fetch function (no JWT tokens needed)
+async function fetchWithSession(path, opts={}) {
   const headers = {
     'Content-Type': 'application/json',
     ...opts.headers
   };
   
-  if (token.access) {
-    headers.Authorization = 'Bearer ' + token.access;
-  }
-  
   try {
-    let response = await fetch(path, {
+    const response = await fetch(path, {
       ...opts,
-      headers
+      headers,
+      credentials: 'include' 
     });
-    
-    // If unauthorized and we have a refresh token, try to refresh
-    if (response.status === 401 && autoRetry && token.refresh) {
-      try {
-        const refreshResponse = await fetch('/api/auth/refresh', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ refresh_token: token.refresh })
-        });
-        
-        if (refreshResponse.ok) {
-          const refreshData = await refreshResponse.json();
-          if (refreshData.access_token) {
-            token.access = refreshData.access_token;
-            
-            // Retry the original request with new token
-            headers.Authorization = 'Bearer ' + token.access;
-            response = await fetch(path, {
-              ...opts,
-              headers
-            });
-          }
-        } else {
-          // Refresh failed, clear tokens
-          token.clear();
-        }
-      } catch (refreshError) {
-        console.error('Token refresh failed:', refreshError);
-        token.clear();
-      }
-    }
     
     return response;
   } catch (error) {
@@ -135,30 +93,42 @@ async function fetchWithAuth(path, opts={}, autoRetry=true) {
 
 // Set user UI
 const welcomeMessage = $('welcomeMessage');
-const welcomeMessageMobile = $('welcomeMessageMobile');
+const userNameDisplay = $('userNameDisplay');
 const logoutBtn = $('logout');
-const logoutBtnMobile = $('logoutMobile');
 
 function setUserUI(userData){ 
+  console.log('Setting user UI with data:', userData); 
+  
   if(userData && userData.authenticated){ 
     const welcomeText = `Welcome, ${userData.full_name || userData.email}!`;
+    const displayName = userData.full_name || userData.email.split('@')[0];
+    
     welcomeMessage.textContent = welcomeText;
-    welcomeMessageMobile.textContent = welcomeText;
-    show(logoutBtn);
-    show(logoutBtnMobile);
+    userNameDisplay.textContent = displayName;
+    
+    console.log('User UI updated:', {
+      welcomeText,
+      displayName,
+      full_name: userData.full_name
+    });
   } else { 
     welcomeMessage.textContent = ''; 
-    welcomeMessageMobile.textContent = '';
-    hide(logoutBtn);
-    hide(logoutBtnMobile);
+    userNameDisplay.textContent = 'User Name'; // Fallback text
+    console.log('User not authenticated, using fallback');
   }
 }
 
 // Logout functionality
 function handleLogout() {
   try {
-    fetchWithAuth('/api/auth/logout', {
+    fetchWithSession('/api/auth/logout', {
       method: 'POST'
+    }).then(response => {
+      if (response.ok) {
+        console.log('Logout successful');
+      } else {
+        console.log('Logout API call failed, proceeding with client-side cleanup');
+      }
     }).catch(e => {
       console.log('Logout API call failed, proceeding with client-side cleanup');
     });
@@ -166,7 +136,6 @@ function handleLogout() {
     console.log('Logout API call failed, proceeding with client-side cleanup');
   }
   
-  token.clear(); 
   scanCounter.reset();
   setUserUI(null); 
   toast('Signed out');
@@ -176,7 +145,6 @@ function handleLogout() {
 }
 
 logoutBtn.addEventListener('click', handleLogout);
-logoutBtnMobile.addEventListener('click', handleLogout);
 
 // File input handling
 const fileInput = $('fileInput');
@@ -236,10 +204,10 @@ const scanBtn = $('scanBtn');
 
 async function runScanUrl(url){
   if (!canScan()) return;
-    setBusy(scanBtn, true, 'Scanning…');
+  setBusy(scanBtn, true, 'Scanning…');
   
   try{
-    const r = await fetchWithAuth('/api/scan', { 
+    const r = await fetchWithSession('/api/scan', { 
       method: 'POST', 
       body: JSON.stringify({ url })
     });
@@ -257,17 +225,17 @@ async function runScanUrl(url){
     hide($('resultQr'));
     show($('resultUrl'));
     
-    finalUrl.textContent = j.signals.final_url; 
-    scoreUrl.textContent = j.verdict.score;
-    reasonsUrl.innerHTML = '';
+    $('finalUrl').textContent = j.signals.final_url; 
+    $('scoreUrl').textContent = j.verdict.score;
+    $('reasonsUrl').innerHTML = '';
     
     j.verdict.reasons.forEach(x => { 
       const li = document.createElement('li'); 
       li.textContent = x; 
-      reasonsUrl.appendChild(li);
+      $('reasonsUrl').appendChild(li);
     });
     
-    setBadge(badgeUrl, j.verdict.band);
+    setBadge($('badgeUrl'), j.verdict.band);
     
     const score = parseInt(j.verdict.score);
     if (score >= 80) {
@@ -317,14 +285,9 @@ async function runScanFile(file){
     const fd = new FormData(); 
     fd.append('file', file);
     
-    const headers = {};
-    if (token.access) {
-      headers.Authorization = 'Bearer ' + token.access;
-    }
-    
     const r = await fetch('/api/scan_file', { 
       method: 'POST', 
-      headers, 
+      credentials: 'include', // Include session cookies
       body: fd 
     });
     
@@ -341,8 +304,8 @@ async function runScanFile(file){
     hide($('resultQr'));
     show($('resultFile'));
     
-    fileName.textContent = j.file.filename || '(file)'; 
-    fileSha.textContent = j.file.sha256 ? ' · ' + j.file.sha256 : '';
+    $('fileName').textContent = j.file.filename || '(file)'; 
+    $('fileSha').textContent = j.file.sha256 ? ' · ' + j.file.sha256 : '';
     
     let vtSummary = '';
     if (j.virustotal.enabled && !j.virustotal.error) {
@@ -351,18 +314,18 @@ async function runScanFile(file){
     } else {
       vtSummary = 'VirusTotal scan not available or failed';
     }
-    vtSummaryFile.textContent = vtSummary;
+    $('vtSummaryFile').textContent = vtSummary;
     
-    reasonsFile.innerHTML = '';
+    $('reasonsFile').innerHTML = '';
     
     (j.verdict.reasons || []).forEach(x => { 
       const li = document.createElement('li'); 
       li.textContent = x; 
-      reasonsFile.appendChild(li);
+      $('reasonsFile').appendChild(li);
     });
     
-    setBadge(badgeFile, j.verdict.band); 
-    scoreFile.textContent = j.verdict.score;
+    setBadge($('badgeFile'), j.verdict.band); 
+    $('scoreFile').textContent = j.verdict.score;
     
     const score = parseInt(j.verdict.score);
     if (score >= 80) {
@@ -406,14 +369,9 @@ async function runScanQr(file){
     const fd = new FormData(); 
     fd.append('file', file);
     
-    const headers = {};
-    if (token.access) {
-      headers.Authorization = 'Bearer ' + token.access;
-    }
-    
     const r = await fetch('/api/scan_qr', { 
       method: 'POST', 
-      headers, 
+      credentials: 'include', // Include session cookies
       body: fd 
     });
     
@@ -430,21 +388,21 @@ async function runScanQr(file){
     hide($('resultFile'));
     show($('resultQr'));
     
-    qrText.textContent = j.decoded || '(no data)';
+    $('qrText').textContent = j.decoded || '(no data)';
     
     if(j.type === 'url' && j.verdict) {
       show($('qrUrlBlock'));
-      finalUrlQr.textContent = j.signals.final_url; 
-      scoreQr.textContent = j.verdict.score;
-      reasonsQr.innerHTML = '';
+      $('finalUrlQr').textContent = j.signals.final_url; 
+      $('scoreQr').textContent = j.verdict.score;
+      $('reasonsQr').innerHTML = '';
       
       j.verdict.reasons.forEach(x => { 
         const li = document.createElement('li'); 
         li.textContent = x; 
-        reasonsQr.appendChild(li);
+        $('reasonsQr').appendChild(li);
       });
       
-      setBadge(badgeQr, j.verdict.band);
+      setBadge($('badgeQr'), j.verdict.band);
       
       const score = parseInt(j.verdict.score);
       if (score >= 80) {
@@ -479,16 +437,9 @@ qrBtn.addEventListener('click', () => {
   runScanQr(f); 
 });
 
-// Subscription button functionality
-$('subscribeBtn').addEventListener('click', () => {
-  window.location.href = '../Subscription/Subscription.html';
-});
-
 // User dropdown functionality
 const userDropdownBtn = $('userDropdownBtn');
 const userDropdown = $('userDropdown');
-const userDropdownBtnMobile = $('userDropdownBtnMobile');
-const userDropdownMobile = $('userDropdownMobile');
 
 // Toggle desktop dropdown
 userDropdownBtn.addEventListener('click', (e) => {
@@ -496,20 +447,10 @@ userDropdownBtn.addEventListener('click', (e) => {
   userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
 });
 
-// Toggle mobile dropdown
-userDropdownBtnMobile.addEventListener('click', (e) => {
-  e.stopPropagation();
-  userDropdownMobile.classList.toggle('show');
-});
-
 // Close dropdowns when clicking outside
 document.addEventListener('click', (e) => {
   if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
     userDropdown.style.display = 'none';
-  }
-  
-  if (!userDropdownBtnMobile.contains(e.target) && !userDropdownMobile.contains(e.target)) {
-    userDropdownMobile.classList.remove('show');
   }
 });
 
@@ -518,33 +459,40 @@ userDropdown.addEventListener('click', (e) => {
   e.stopPropagation();
 });
 
-userDropdownMobile.addEventListener('click', (e) => {
-  e.stopPropagation();
-});
-
-// Initialize dashboard
+// Initialize dashboard and check authentication
 (async function boot(){
-  const accessToken = localStorage.getItem('access');
-
-  if(accessToken){
-    try {
-      const r = await fetchWithAuth('/api/auth/me');
-      if(r.ok){ 
-        const userData = await r.json(); 
+  console.log('Dashboard initializing...');
+  
+  try {
+    const r = await fetchWithSession('/api/auth/me');
+    console.log('Auth check response status:', r.status);
+    
+    if(r.ok){ 
+      const userData = await r.json(); 
+      console.log('User data received:', userData);
+      
+      if (userData.authenticated) {
         setUserUI(userData); 
         scanCounter.updateUI();
         initResults();
-        return; 
+        console.log('User authenticated successfully');
+        return;
       } else {
-        token.clear();
+        console.log('User not authenticated, redirecting to login');
+        // Redirect to login page if not authenticated
+        window.location.href = '../index.html';
+        return;
       }
-    } catch(e) {
-      console.error('Failed to fetch user info', e);
-      token.clear();
+    } else {
+      console.log('Auth check failed, redirecting to login');
+      // Redirect to login page if request failed
+      window.location.href = '../index.html';
+      return;
     }
+  } catch(e) {
+    console.error('Failed to fetch user info', e);
+    // Redirect to login page on error
+    window.location.href = '../index.html';
+    return;
   }
-
-  setUserUI(null);
-  scanCounter.updateUI();
-  initResults();
 })();
