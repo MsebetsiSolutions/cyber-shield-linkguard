@@ -79,42 +79,6 @@ def signup():
         return jsonify({'error': 'Signup failed'}), 500
 
 
-# Guest Account Registration Endpoint
-@auth_bp.route('/guestSignup', methods=['POST'])
-def guest_signup():
-    try:
-        data = request.get_json()
-        guest_email = data.get('email')
-        guest_password = data.get('password')
-
-        hashpw = bcrypt.hashpw(guest_password.encode('utf-8'), bcrypt.gensalt())
-        hashpw_str = hashpw.decode('utf-8')
-        expiry = datetime.datetime.now() + datetime.timedelta(days=30)
-        expiry_str = expiry.isoformat()
-
-        try:
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            cursor.execute('INSERT INTO users (email, password, account_type, is_guest, guest_expires_at) VALUES (?, ?, "guest", 1, ?)',
-                          (guest_email, hashpw_str, expiry_str))
-            conn.commit()
-            user_id = cursor.lastrowid
-            conn.close()
-        except sqlite3.Error as e:
-            return jsonify({'error': 'Database error occurred'}), 500
-        
-        return jsonify({
-            'message': 'Guest account created successfully',
-            'email': guest_email,
-            'user_id': user_id,
-            'account_type': 'guest',
-            'expire_at': expiry_str,
-            'expires_in_day': 30
-        }), 201
-    
-    except Exception as e:
-        return jsonify({'error': 'Guest account creation failed'}), 500
-
 
 # User Login Endpoint - Session Based Authentication
 @auth_bp.route('/login', methods=['POST'])
