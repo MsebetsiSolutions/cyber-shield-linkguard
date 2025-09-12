@@ -93,6 +93,11 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         |            |     ├── settings.css
         |            |     └── settings.js
         |            |
+        |            ├── forgotPassword/              
+        |            |     ├── forgotPassword.html
+        |            |     ├── forgotPassword.css
+        |            |     └── forgotPassword.js
+        |            |
         |            ├── report/              
         |            |     ├── report.html
         |            |     ├── report.css
