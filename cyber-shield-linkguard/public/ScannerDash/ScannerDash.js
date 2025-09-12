@@ -496,3 +496,42 @@ userDropdown.addEventListener('click', (e) => {
     return;
   }
 })();
+
+// Add this function to your ScannerDash.js
+function updatePlanBadge(planMode) {
+  const planBadge = document.getElementById('planMode');
+  if (!planBadge) return;
+  
+  const planMap = {
+    0: {text: 'FREE PLAN', class: 'free-plan'},
+    1: {text: 'PRO PLAN', class: 'pro-plan'},
+    2: {text: 'TEAM PLAN', class: 'team-plan'},
+    3: {text: 'ENTERPRISE', class: 'enterprise-plan'}
+  };
+  
+  const plan = planMap[planMode] || planMap[0];
+  
+  // Remove all plan classes
+  planBadge.classList.remove('free-plan', 'pro-plan', 'team-plan', 'enterprise-plan');
+  
+  // Add the current plan class
+  planBadge.classList.add(plan.class);
+  planBadge.textContent = plan.text;
+}
+
+// Add this to your boot function or wherever you fetch user info
+async function checkUserPlan() {
+  try {
+    const response = await fetchWithSession('/api/subscription/current');
+    if (response.ok) {
+      const data = await response.json();
+      updatePlanBadge(data.plan_mode);
+    }
+  } catch (error) {
+    console.error('Error checking user plan:', error);
+  }
+}
+
+// Call this function after user authentication
+checkUserPlan();
+
