@@ -15,6 +15,7 @@ import numpy as np
 from routes.authentication import auth_bp
 from routes.subscription import subscription_bp
 from routes.settings import settings_bp
+from routes.scan_results import scan_results_bp
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -30,6 +31,7 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret-key-change-in-product
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(subscription_bp)
 app.register_blueprint(settings_bp)
+app.register_blueprint(scan_results_bp)
 
 # Read VirusTotal API key from env (put it in .env as VT_API_KEY=...)
 VT_API_KEY = os.getenv("VT_API_KEY", "").strip()
