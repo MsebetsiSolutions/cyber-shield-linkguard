@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, request, jsonify, send_from_directory
 from urllib.parse import urlparse
 import os, time, re, socket, requests, tldextract
@@ -10,12 +9,14 @@ from PIL import Image
 import cv2
 from pyzbar.pyzbar import decode
 import numpy as np
+import sqlite3
 
-#importing auth_bp from authentication.py
+#importing blueprints
 from routes.authentication import auth_bp
 from routes.subscription import subscription_bp
 from routes.settings import settings_bp
 from routes.scan_results import scan_results_bp
+from routes.chats import chats_bp
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -27,11 +28,12 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 # Add secret key for session management
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret-key-change-in-production")
 
-# registering 'auth_bp' blueprint
+# registering blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(subscription_bp)
 app.register_blueprint(settings_bp)
 app.register_blueprint(scan_results_bp)
+app.register_blueprint(chats_bp, url_prefix='/api/chats')
 
 # Read VirusTotal API key from env (put it in .env as VT_API_KEY=...)
 VT_API_KEY = os.getenv("VT_API_KEY", "").strip()
@@ -60,6 +62,12 @@ RISK_BANDS = [
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx', 'exe', 'zip'}
 
 # -------------------- Helpers --------------------
+def get_db_connection():
+    conn = sqlite3.connect('cyber-shield-linkguard.db')
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -498,4 +506,3 @@ def health():
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "5000"))
     app.run(host="0.0.0.0", port=port, debug=True)
-    
