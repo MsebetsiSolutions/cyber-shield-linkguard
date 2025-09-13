@@ -105,7 +105,7 @@ def update_profile():
         # Update user profile
         cursor.execute('''
             UPDATE users 
-            SET full_name = ?, email = ?, phone_number = ?
+            SET full_name = ?, email = ?, cellphone_number = ?
             WHERE id = ?
         ''', (full_name, email, phone_number, user_id))
         
@@ -152,9 +152,9 @@ def update_password():
         if not data:
             return jsonify({'error': 'No data provided'}), 400
         
-        current_password = data.get('current_password', '')
-        new_password = data.get('new_password', '')
-        
+        current_password = data.get('currentPassword', '')
+        new_password = data.get('newPassword', '')
+
         # Basic validation
         if not current_password or not new_password:
             return jsonify({'error': 'Current password and new password are required'}), 400
@@ -251,6 +251,6 @@ def delete_account():
         print(f"Database error in delete_account: {e}")
         return jsonify({'error': 'Database error occurred'}), 500
     except Exception as e:
-        print(f"Error极 delete_account: {e}")
+        print(f"Error delete_account: {e}")
         return jsonify({'error': 'Failed to delete account'}), 500
     
