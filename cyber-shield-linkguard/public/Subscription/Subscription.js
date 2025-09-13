@@ -82,18 +82,17 @@ function updateCurrentPlanDisplay(planMode) {
     currentPlanText.textContent = `You're currently on the ${currentPlan.name} plan`;
   }
   
-  // Highlight current plan card
+  // Remove current plan styling from all cards
   document.querySelectorAll('.plan-card').forEach(card => {
     card.classList.remove('current-plan', 'pulse-animation');
     
-    // Add badge if it's the current plan
     const badge = card.querySelector('.plan-badge.current-badge');
     if (badge) {
       badge.style.display = 'none';
     }
   });
   
-  // Highlight the current plan card
+  // Apply current plan styling to the correct card
   const currentPlanCard = document.querySelector(`.plan-card[data-plan-id="${Object.keys(planMap).find(key => planMap[key].name === currentPlan.name).toLowerCase()}"]`);
   if (currentPlanCard) {
     currentPlanCard.classList.add('current-plan', 'pulse-animation');
@@ -106,7 +105,7 @@ function updateCurrentPlanDisplay(planMode) {
   }
 }
 
-// Update plan badge in header (similar to ScannerDash)
+// Update plan badge in header 
 function updatePlanBadge(planMode) {
   const planBadge = document.getElementById('planMode');
   if (!planBadge) return;
@@ -126,6 +125,64 @@ function updatePlanBadge(planMode) {
   // Add the current plan class
   planBadge.classList.add(plan.class);
   planBadge.textContent = plan.text;
+}
+
+// Update scan counter UI based on plan mode
+function updateScanCounterUI(planMode) {
+  const scanCounter = $('scanCounter');
+  
+  // Hide scan counter for paid users (plan_mode 1, 2, or 3)
+  if (planMode === 1 || planMode === 2 || planMode === 3) {
+    hide(scanCounter);
+  } else {
+    show(scanCounter);
+    
+    // Update scan count display
+    const today = new Date().toDateString();
+    const lastScanDate = localStorage.getItem('lastScanDate');
+    let remainingScans = 5;
+    
+    // Reset scan count daily
+    if (lastScanDate !== today) {
+      localStorage.setItem('lastScanDate', today);
+      localStorage.setItem('remainingScans', '5');
+    } else {
+      remainingScans = parseInt(localStorage.getItem('remainingScans') || '5');
+    }
+    
+    if (remainingScansEl) remainingScansEl.textContent = remainingScans;
+    
+    // Color coding based on remaining scans
+    if (scanCounter) {
+      scanCounter.classList.remove('text-danger', 'text-warning', 'text-success');
+      
+      if(remainingScans === 0) {
+        scanCounter.classList.add('text-danger');
+      } else if(remainingScans <= 2) {
+        scanCounter.classList.add('text-warning');
+      } else {
+        scanCounter.classList.add('text-success');
+      }
+    }
+  }
+}
+
+// Check user plan function
+async function checkUserPlan() {
+  try {
+    const response = await fetchWithSession('/api/subscription/current');
+    if (response.ok) {
+      const data = await response.json();
+      
+      // Update scan counter UI based on plan mode
+      updateScanCounterUI(data.plan_mode);
+      
+      return data.plan_mode;
+    }
+  } catch (error) {
+    console.error('Error checking user plan:', error);
+  }
+  return 0; // Default to free plan
 }
 
 // Logout functionality
@@ -167,7 +224,7 @@ if (userDropdownBtn && userDropdown) {
     e.stopPropagation();
     userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
   });
-
+  
   // Close dropdowns when clicking outside
   document.addEventListener('click', (e) => {
     if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
@@ -180,41 +237,6 @@ if (userDropdownBtn && userDropdown) {
     e.stopPropagation();
   });
 }
-
-// Scan counter management
-const scanCounter = {
-  get remaining(){ 
-    const today = new Date().toDateString();
-    const lastScanDate = localStorage.getItem('lastScanDate');
-    
-    if (lastScanDate !== today) {
-      localStorage.setItem('lastScanDate', today);
-      localStorage.setItem('remainingScans', '5');
-      return 5;
-    }
-    
-    return parseInt(localStorage.getItem('remainingScans') || '5'); 
-  },
-  set remaining(v){ 
-    localStorage.setItem('remainingScans', v.toString()); 
-    localStorage.setItem('lastScanDate', new Date().toDateString());
-  },
-  updateUI(){
-    if (remainingScansEl) remainingScansEl.textContent = this.remaining;
-    
-    if (scanCounterEl) {
-      scanCounterEl.classList.remove('text-danger', 'text-warning', 'text-success');
-      
-      if(this.remaining === 0) {
-        scanCounterEl.classList.add('text-danger');
-      } else if(this.remaining <= 2) {
-        scanCounterEl.classList.add('text-warning');
-      } else {
-        scanCounterEl.classList.add('text-success');
-      }
-    }
-  }
-};
 
 // Subscription plan codes and prices
 const planCodes = {
@@ -260,32 +282,41 @@ document.querySelectorAll('.plan-card').forEach(card => {
 });
 
 // Initialize subscription page
-(async function boot(){
-  // Check if user is authenticated
+(async function initSubscriptionPage(){
+  console.log('Subscription page initializing...');
+  
   try {
-    const response = await fetchWithSession('/api/auth/me');
+    const r = await fetchWithSession('/api/auth/me');
     
-    if (response.ok) {
-      const userInfo = await response.json();
-      if (!userInfo.authenticated) {
+    if(r.ok){ 
+      const userData = await r.json(); 
+      
+      if (userData.authenticated) {
+        // Store user info in sessionStorage for easy access
+        sessionStorage.setItem('user_id', userData.user_id || '');
+        sessionStorage.setItem('full_name', userData.full_name || '');
+        sessionStorage.setItem('email', userData.email || '');
+        sessionStorage.setItem('plan_mode', userData.plan_mode || '0');
+        
+        setUserUI(userData);
+        
+        // Check user plan and update UI accordingly
+        const planMode = await checkUserPlan();
+        console.log('Subscription page initialized successfully');
+        return;
+      } else {
+        console.log('User not authenticated, redirecting to login');
         window.location.href = '../index.html';
         return;
       }
-      
-      // Store user info in sessionStorage for easy access
-      sessionStorage.setItem('user_id', userInfo.user_id || '');
-      sessionStorage.setItem('full_name', userInfo.full_name || '');
-      sessionStorage.setItem('email', userInfo.email || '');
-      sessionStorage.setItem('plan_mode', userInfo.plan_mode || '0');
-      
-      setUserUI(userInfo);
-      scanCounter.updateUI();
-      
     } else {
+      console.log('Auth check failed, redirecting to login');
       window.location.href = '../index.html';
+      return;
     }
-  } catch (error) {
-    console.error('Error checking authentication:', error);
+  } catch(e) {
+    console.error('Failed to fetch user info', e);
     window.location.href = '../index.html';
+    return;
   }
 })();
