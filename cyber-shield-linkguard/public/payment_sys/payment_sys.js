@@ -30,40 +30,84 @@ async function fetchWithSession(path, opts={}) {
   }
 }
 
-// Set user UI
-const whoRow = $('whoRow');
-const logoutBtn = $('logout');
+// Set user UI (Updated to match ScannerDash's user dropdown)
+const welcomeMessage = $('welcomeMessage');
+const userNameDisplay = $('userNameDisplay');
+const logoutBtn = $('logout'); // Logout button is now part of the dropdown
+const userDropdownBtn = $('userDropdownBtn');
+const userDropdown = $('userDropdown');
+
 
 function setUserUI(userData){ 
+  console.log('Setting user UI with data:', userData); 
+  
   if(userData && userData.authenticated){ 
-    whoRow.textContent = 'Signed in: ' + (userData.full_name || userData.email); 
-    show(logoutBtn);
+    const welcomeText = `Welcome, ${userData.full_name || userData.email}!`;
+    const displayName = userData.full_name || userData.email.split('@')[0];
+    
+    welcomeMessage.textContent = welcomeText;
+    userNameDisplay.textContent = displayName;
+    
+    console.log('User UI updated:', {
+      welcomeText,
+      displayName,
+      full_name: userData.full_name
+    });
+
   } else { 
-    whoRow.textContent = ''; 
-    hide(logoutBtn);
+    welcomeMessage.textContent = ''; 
+    userNameDisplay.textContent = 'User Name'; // Fallback text
+    console.log('User not authenticated, using fallback');
   }
 }
 
 // Logout functionality
-if (logoutBtn) {
-  logoutBtn.addEventListener('click', () => {
+function handleLogout() {
+  try {
     fetchWithSession('/api/auth/logout', {
       method: 'POST'
     }).then(response => {
       if (response.ok) {
         console.log('Logout successful');
+      } else {
+        console.log('Logout API call failed, proceeding with client-side cleanup');
       }
     }).catch(e => {
-      console.log('Logout API call failed');
+      console.log('Logout API call failed, proceeding with client-side cleanup');
     });
-    
-    setUserUI(''); 
-    toast('Signed out');
-    setTimeout(() => {
-      window.location.href = '../index.html';
-    }, 1000);
-  });
+  } catch (e) {
+    console.log('Logout API call failed, proceeding with client-side cleanup');
+  }
+  
+  setUserUI(null); 
+  toast('Signed out');
+  setTimeout(() => {
+    window.location.href = '../index.html';
+  }, 1000);
 }
+
+// Attach logout event listener
+logoutBtn.addEventListener('click', handleLogout);
+
+// User dropdown functionality (Copied from ScannerDash.js)
+// Toggle desktop dropdown
+userDropdownBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
+});
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+  if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+    userDropdown.style.display = 'none';
+  }
+});
+
+// Prevent dropdown from closing when clicking inside it
+userDropdown.addEventListener('click', (e) => {
+  e.stopPropagation();
+});
+
 
 // Display selected plan info
 function displaySelectedPlan() {
@@ -150,23 +194,34 @@ $('paymentForm').addEventListener('submit', async (e) => {
 
 // Initialize payment page
 (async function boot(){
-  // Check if user is authenticated
+  console.log('Payment page initializing...');
+  
   try {
-    const response = await fetchWithSession('/api/auth/me');
+    const r = await fetchWithSession('/api/auth/me');
+    console.log('Auth check response status:', r.status);
     
-    if (response.ok) {
-      const userInfo = await response.json();
-      if (!userInfo.authenticated) {
+    if(r.ok){ 
+      const userData = await r.json(); 
+      console.log('User data received:', userData);
+      
+      if (userData.authenticated) {
+        setUserUI(userData); 
+        displaySelectedPlan();
+        console.log('User authenticated successfully');
+        return;
+      } else {
+        console.log('User not authenticated, redirecting to login');
         window.location.href = '../index.html';
         return;
       }
-      setUserUI(userInfo);
-      displaySelectedPlan();
     } else {
+      console.log('Auth check failed, redirecting to login');
       window.location.href = '../index.html';
+      return;
     }
-  } catch (error) {
-    console.error('Error checking authentication:', error);
+  } catch(e) {
+    console.error('Failed to fetch user info', e);
     window.location.href = '../index.html';
+    return;
   }
 })();

@@ -4,7 +4,7 @@
   --text: #2b2b2b;
   --muted: #6b7280;
   --mint: #00ff99;
-  --sky: #00极3ff;
+  --sky: #00b3ff;
   --gold: #ffcc00;
   --candy-red: #ff5b5b;
   --candy-orange: #ffa64d;
@@ -26,6 +26,8 @@
   --plan-pro: #a7efb6;
   --plan-team: #ffd166;
   --plan-enterprise: #ff9f80;
+  --plan-current: #e6f7ff;
+  --security-badge: #f8f9fa;
 }
 
 body {
@@ -43,28 +45,261 @@ body {
   object-fit: contain;
 }
 
-/* Responsive adjustments for logo */
-@media (max-width: 768px) {
-  .header-logo {
-    height: 50px;
-  }
-  
-  .header-logo + .cs-sub {
-    margin-top: 0.5rem !important;
-  }
+/* Plan badge styling (from ScannerDash) */
+.plan-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
-@media (max-width: 576px) {
-  .header-logo {
-    height: 40px;
-  }
-  
-  .d-flex.align-items-center {
-    flex-direction: column;
-    align-items: flex-start !important;
-  }
+.free-plan { 
+  background: var(--plan-free); 
+  color: var(--text); 
 }
 
+.pro-plan { 
+  background: var(--plan-pro); 
+  color: var(--text); 
+}
+
+.team-plan { 
+  background: var(--plan-team); 
+  color: var(--text); 
+}
+
+.enterprise-plan { 
+  background: var(--plan-enterprise); 
+  color: #fff; 
+}
+
+/* Current Plan Banner */
+.current-plan-banner {
+  background: linear-gradient(90deg, var(--plan-current), #ffffff);
+  border-radius: 0.5rem;
+  border-left: 4px solid var(--candy-green);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Plan Cards */
+.plan-card {
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.plan-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.plan-card:hover::before {
+  background: linear-gradient(90deg, var(--sky), var(--mint));
+}
+
+.plan-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.plan-free {
+  border-color: var(--sky);
+}
+
+.plan-pro {
+  border-color: var(--candy-green);
+}
+
+.plan-team {
+  border-color: var(--btn-subscribe);
+}
+
+.plan-enterprise {
+  border-color: var(--btn-login);
+}
+
+/* Current plan styling */
+.plan-card.current-plan {
+  background: linear-gradient(135deg, var(--plan-current) 0%, #ffffff 100%);
+  border: 2px solid var(--candy-green);
+  box-shadow: 0 0 20px rgba(76, 196, 83, 0.2);
+  transform: scale(1.03);
+}
+
+.plan-card.current-plan::before {
+  background: var(--candy-green);
+  height: 5px;
+}
+
+/* Plan badges */
+.plan-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  z-index: 1;
+}
+
+.current-badge {
+  background: var(--candy-green);
+  color: white;
+}
+
+.popular-badge {
+  background: var(--gold);
+  color: var(--text);
+}
+
+.plan-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  position: relative;
+  padding-top: 1rem;
+}
+
+.plan-price {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0.5rem 0;
+  color: var(--text);
+}
+
+.plan-subtitle {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.plan-description {
+  color: var(--muted);
+  font-size: 0.9rem;
+  min-height: 60px;
+}
+
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+  min-height: 300px;
+}
+
+.plan-features li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.plan-features li:last-child {
+  border-bottom: none;
+}
+
+.plan-features li::before {
+  content: "✓";
+  color: var(--candy-green);
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+.plan-action {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.plan-action .btn {
+  border-radius: 20px;
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+}
+
+/* Security badges */
+.security-badges {
+  background: var(--security-badge);
+  border-radius: 0.5rem;
+  border: 1px solid var(--ring);
+}
+
+.badge-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.badge-item i {
+  color: var(--candy-green);
+  font-size: 1.2rem;
+}
+
+/* Text styles */
+.cs-sub { 
+  color: var(--muted); 
+  margin: 0;
+}
+
+.cs-candy-title {
+  font-weight: 900;
+  letter-spacing: .5px;
+  font-size: 1.8rem;
+  background: linear-gradient(90deg, var(--sky), var(--gold), var(--mint));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Toast notification */
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  background: #111827;
+  color: #fff;
+  padding: .6rem .9rem;
+  border-radius: .5rem;
+  box-shadow: 0 极 18px rgba(0,0,0,.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+  font-size: .9rem;
+  z-index: 1000;
+}
+
+#toast.show {
+  opacity: 1;
+}
+
+/* Animation classes */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.pulse-animation {
+  animation: pulse 2s infinite;
+}
 
 /* User Controls */
 .user-controls {
@@ -119,7 +354,7 @@ body {
   background-color: rgba(255, 255, 255, 0.95);
   min-width: 200px;
   border-radius: 0.5rem;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 极.2);
   backdrop-filter: blur(10px);
   z-index: 1;
   margin-top: 10px;
@@ -142,7 +377,7 @@ body {
 }
 
 .user-welcome {
-  padding: 12px 16px;
+  padding: 12极 16px;
   font-weight: 600;
   border-bottom: 1px solid var(--ring);
   margin-bottom: 0.5rem;
@@ -170,135 +405,6 @@ body {
   background-color: #ff4d3a;
 }
 
-/* Card styling */
-.cs-card {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 12px rgba(235, 159, 193, .15);
-  border: 1px solid rgba(255,255,255,.6);
-  backdrop-filter: blur(1px);
-}
-
-/* Subscription Plans */
-.plan-card {
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.95);
-  border: 2px solid transparent;
-}
-
-.plan-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-
-.plan-free {
-  border-color: var(--sky);
-}
-
-.plan-pro {
-  border-color: var(--candy-green);
-}
-
-.plan-team {
-  border-color: var(--btn-subscribe);
-}
-
-.plan-enterprise {
-  border-color: var(--btn-login);
-}
-
-.plan-header {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.plan-price {
-  font-size: 1.8rem;
-  font-weight: 800;
-  margin: 0.5rem 0;
-}
-
-.plan-subtitle {
-  color: var(--muted);
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-}
-
-.plan-description {
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.plan-features {
-  list-style: none;
-  padding: 0;
-  margin: 1.5rem 0;
-}
-
-.plan-features li {
-  padding: 0.5rem 0;
-  border-bottom: 1px solid rgba(0,0,0,0.1);
-}
-
-.plan-features li:last-child {
-  border-bottom: none;
-}
-
-.plan-features li::before {
-  content: "✓";
-  color: var(--candy-green);
-  font-weight: bold;
-  margin-right: 0.5rem;
-}
-
-.plan-selected {
-  border: 3px solid var(--candy-green);
-  box-shadow: 0 0 15px rgba(167, 239, 182, 0.5);
-}
-
-/* Text styles */
-.cs-sub { 
-  color: var(--muted); 
-  margin: 0;
-}
-
-.cs-candy-title {
-  font-weight: 900;
-  letter-spacing: .5极;
-  font-size: 1.8rem;
-  background: linear-gradient(90deg, var(--sky), var(--gold), var(--mint));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* Toast notification */
-#toast {
-  position: fixed;
-  left: 50%;
-  bottom: 18px;
-  transform: translateX(-50%);
-  background: #111827;
-  color: #fff;
-  padding: .6rem .9rem;
-  border-radius: .5rem;
-  box-shadow: 0 6px 18px rgba(0,0,0,.25);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .25s;
-  font-size: .9rem;
-  z-index: 1000;
-}
-
-#toast.show {
-  opacity: 1;
-}
-
 /* Responsive adjustments */
 @media (max-width: 992px) {
   .cs-candy-title {
@@ -308,6 +414,10 @@ body {
   .user-name {
     font-size: 0.9rem;
     padding: 4px 10px;
+  }
+  
+  .plan-features {
+    min-height: 320px;
   }
 }
 
@@ -325,6 +435,15 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  
+  .plan-features {
+    min-height: auto;
+  }
+  
+  .badge-item {
+    flex: 0 0 100%;
+    margin-bottom: 0.5rem;
   }
 }
 
@@ -344,6 +463,12 @@ body {
   
   .user-name {
     display: none;
+  }
+  
+  .d-flex.align-items-center.gap-3 {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
   }
 }
 

@@ -16,6 +16,65 @@ const toast = (msg, ms=2000) => {
   setTimeout(() => t.classList.remove('show'), ms); 
 };
 
+// Chart.js instance
+let resultsChart = null;
+
+// Initialize Chart.js
+function initChart() {
+  const ctx = document.getElementById('resultsChart').getContext('2d');
+  resultsChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Malicious', 'Suspicious', 'Harmless', 'Undetected'],
+      datasets: [{
+        data: [0, 0, 0, 0],
+        backgroundColor: [
+          'rgba(255, 111, 97, 0.8)',
+          'rgba(255, 195, 107, 0.8)',
+          'rgba(167, 239, 182, 0.8)',
+          'rgba(196, 235, 249, 0.8)'
+        ],
+        borderColor: [
+          'rgb(255, 111, 97)',
+          'rgb(255, 195, 107)',
+          'rgb(167, 239, 182)',
+          'rgb(196, 235, 249)'
+        ],
+        borderWidth: 1,
+        hoverOffset: 10
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            font: {
+              size: 11
+            }
+          }
+        }
+      },
+      animation: {
+        animateScale: true,
+        animateRotate: true,
+        duration: 1000,
+        easing: 'easeOutQuart'
+      }
+    }
+  });
+}
+
+// Update chart with new data
+function updateChart(malicious, suspicious, harmless, undetected) {
+  if (resultsChart) {
+    resultsChart.data.datasets[0].data = [malicious, suspicious, harmless, undetected];
+    resultsChart.update();
+  }
+}
+
 // Scan counter management
 const scanCounter = {
   get remaining(){ 
@@ -57,17 +116,25 @@ const scanCounter = {
     return false;
   },
   updateUI(){
-    $('remainingScans').textContent = this.remaining;
+    const userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
     
-    const scanCounterEl = $('scanCounter');
-    scanCounterEl.classList.remove('text-danger', 'text-warning', 'text-success');
-    
-    if(this.remaining === 0) {
-      scanCounterEl.classList.add('text-danger');
-    } else if(this.remaining <= 2) {
-      scanCounterEl.classList.add('text-warning');
+    // Hide scan counter for paid users
+    if (userPlanMode > 0) {
+      $('scanCounter').classList.add('hidden');
     } else {
-      scanCounterEl.classList.add('text-success');
+      $('scanCounter').classList.remove('hidden');
+      $('remainingScans').textContent = this.remaining;
+      
+      const scanCounterEl = $('scanCounter');
+      scanCounterEl.classList.remove('text-danger', 'text-warning', 'text-success');
+      
+      if(this.remaining === 0) {
+        scanCounterEl.classList.add('text-danger');
+      } else if(this.remaining <= 2) {
+        scanCounterEl.classList.add('text-warning');
+      } else {
+        scanCounterEl.classList.add('text-success');
+      }
     }
   }
 };
@@ -90,6 +157,27 @@ async function fetchWithSession(path, opts={}) {
   } catch (error) {
     console.error('Fetch error:', error);
     throw error;
+  }
+}
+
+// Save scan result to database
+async function saveScanResult(scanData) {
+  try {
+    const response = await fetchWithSession('/api/scans/save', {
+      method: 'POST',
+      body: JSON.stringify(scanData)
+    });
+    
+    if (response.ok) {
+      console.log('Scan result saved successfully!');
+    } else {
+      const errorData = await response.json();
+      console.error('Failed to save scan result:', response.status, errorData.error);
+      toast('Failed to save scan result: ' + errorData.error);
+    }
+  } catch (error) {
+    console.error('Error saving scan result:', error);
+    toast('Network error when trying to save scan result.');
   }
 }
 
@@ -149,7 +237,6 @@ function controlScanButtons(planMode) {
   console.log(`Plan Mode: ${planMode}, File Scan Enabled: ${!fileScanBtn.disabled}, QR Scan Enabled: ${!qrScanBtn.disabled}`);
 }
 
-
 // Logout functionality
 function handleLogout() {
   try {
@@ -202,6 +289,11 @@ function initResults() {
   $('statSuspicious').textContent = '0';
   $('statHarmless').textContent = '0';
   $('statUndetected').textContent = '0';
+  
+  // Reset chart if it exists
+  if (resultsChart) {
+    updateChart(0, 0, 0, 0);
+  }
 }
 
 // Update stats display
@@ -211,6 +303,9 @@ function updateStats(malicious, suspicious, harmless, undetected) {
   $('statHarmless').textContent = harmless;
   $('statUndetected').textContent = undetected;
   show($('resultsOverview'));
+  
+  // Update chart
+  updateChart(malicious, suspicious, harmless, undetected);
 }
 
 function setBadge(el, band){ 
@@ -240,7 +335,6 @@ function canScan(scanType = 'url') { // Add scanType parameter
     return false;
   }
 }
-
 
 // URL Scan functionality
 const urlInput = $('urlInput');
@@ -296,6 +390,16 @@ async function runScanUrl(url){
       updateStats(0, 0, 0, 1);
     }
     
+    // Save scan result to database
+    const scanData = {
+      scan_type: 'url',
+      content: url,
+      result: JSON.stringify(j),
+      verdict_band: j.verdict.band // Pass the verdict band
+    };
+    
+    saveScanResult(scanData);
+    
     if (window.innerWidth < 992) {
       const mobileControls = document.getElementById('mobileControls');
       const bsCollapse = new bootstrap.Collapse(mobileControls, {toggle: false});
@@ -322,7 +426,6 @@ urlInput.addEventListener('keydown', e => {
 });
 
 // File Scan functionality
-// fileBtn is now fileScanBtn
 fileScanBtn.addEventListener('click', () => {
   const f = fileInput.files && fileInput.files[0]; 
   if(!f) return toast('Choose a file first'); 
@@ -395,6 +498,16 @@ async function runScanFile(file){
       updateStats(0, 0, 0, 1);
     }
     
+    // Save scan result to database
+    const scanData = {
+      scan_type: 'file',
+      content: file.name,
+      result: JSON.stringify(j),
+      verdict_band: j.verdict.band // Pass the verdict band
+    };
+    
+    saveScanResult(scanData);
+    
     if (window.innerWidth < 992) {
       const mobileControls = document.getElementById('mobileControls');
       const bsCollapse = new bootstrap.Collapse(mobileControls, {toggle: false});
@@ -407,9 +520,7 @@ async function runScanFile(file){
   }
 }
 
-
 // QR Scan functionality
-// qrBtn is now qrScanBtn
 qrScanBtn.addEventListener('click', () => {
   const f = qrInput.files && qrInput.files[0]; 
   if(!f) return toast('Pick an image of a QR code'); 
@@ -450,6 +561,7 @@ async function runScanQr(file){
     
     $('qrText').textContent = j.decoded || '(no data)';
     
+    let qrVerdictBand = 'SAFE'; // Default for non-URL QR codes
     if(j.type === 'url' && j.verdict) {
       show($('qrUrlBlock'));
       $('finalUrlQr').textContent = j.signals.final_url; 
@@ -463,6 +575,7 @@ async function runScanQr(file){
       });
       
       setBadge($('badgeQr'), j.verdict.band);
+      qrVerdictBand = j.verdict.band; // Set band from URL verdict
       
       const score = parseInt(j.verdict.score);
       if (score >= 80) {
@@ -476,8 +589,18 @@ async function runScanQr(file){
       }
     } else {
       hide($('qrUrlBlock'));
-      updateStats(0, 0, 1, 0);
+      updateStats(0, 0, 1, 0); // Consider non-URL QR as harmless for stats if no other verdict
     }
+    
+    // Save scan result to database
+    const scanData = {
+      scan_type: 'qr_code',
+      content: j.decoded || 'QR code image',
+      result: JSON.stringify(j),
+      verdict_band: qrVerdictBand // Pass the verdict band (default or from URL scan)
+    };
+    
+    saveScanResult(scanData);
     
     if (window.innerWidth < 992) {
       const mobileControls = document.getElementById('mobileControls');
@@ -490,7 +613,6 @@ async function runScanQr(file){
     setBusy(qrScanBtn, false); 
   }
 }
-
 
 // User dropdown functionality
 const userDropdownBtn = $('userDropdownBtn');
@@ -514,49 +636,7 @@ userDropdown.addEventListener('click', (e) => {
   e.stopPropagation();
 });
 
-// Initialize dashboard and check authentication
-(async function boot(){
-  console.log('Dashboard initializing...');
-  
-  try {
-    const r = await fetchWithSession('/api/auth/me');
-    console.log('Auth check response status:', r.status);
-    
-    if(r.ok){ 
-      const userData = await r.json(); 
-      console.log('User data received:', userData);
-      
-      if (userData.authenticated) {
-        // Store plan_mode in sessionStorage for easy access by canScan
-        sessionStorage.setItem('plan_mode', userData.plan_mode); 
-        
-        setUserUI(userData); 
-        scanCounter.updateUI();
-        initResults();
-        checkUserPlan(); // Call to update plan badge
-        console.log('User authenticated successfully');
-        return;
-      } else {
-        console.log('User not authenticated, redirecting to login');
-        sessionStorage.removeItem('plan_mode'); // Clear plan_mode if not authenticated
-        window.location.href = '../index.html';
-        return;
-      }
-    } else {
-      console.log('Auth check failed, redirecting to login');
-      sessionStorage.removeItem('plan_mode'); // Clear plan_mode on auth check failure
-      window.location.href = '../index.html';
-      return;
-    }
-  } catch(e) {
-    console.error('Failed to fetch user info', e);
-    sessionStorage.removeItem('plan_mode'); // Clear plan_mode on error
-    window.location.href = '../index.html';
-    return;
-  }
-})();
-
-// update the plan badge based on user's plan mode
+// Update the plan badge based on user's plan mode
 function updatePlanBadge(planMode) {
   const planBadge = document.getElementById('planMode');
   if (!planBadge) return;
@@ -578,18 +658,67 @@ function updatePlanBadge(planMode) {
   planBadge.textContent = plan.text;
 }
 
-// reboot function wherever you fetch user info
+// Check user plan function
 async function checkUserPlan() {
   try {
     const response = await fetchWithSession('/api/subscription/current');
     if (response.ok) {
       const data = await response.json();
       updatePlanBadge(data.plan_mode);
+      // Store plan_mode in sessionStorage for easy access
+      sessionStorage.setItem('plan_mode', data.plan_mode);
+      
+      // Update scan counter UI based on plan
+      scanCounter.updateUI();
+      
+      return data.plan_mode;
     }
   } catch (error) {
     console.error('Error checking user plan:', error);
   }
+  return 0; // Default to free plan
 }
 
-// Call this function after user authentication
-checkUserPlan();
+// Initialize dashboard and check authentication
+(async function boot(){
+  console.log('Dashboard initializing...');
+  
+  try {
+    const r = await fetchWithSession('/api/auth/me');
+    console.log('Auth check response status:', r.status);
+    
+    if(r.ok){ 
+      const userData = await r.json(); 
+      console.log('User data received:', userData);
+      
+      if (userData.authenticated) {
+        // Initialize chart
+        initChart();
+        
+        // Check user plan and update UI accordingly
+        const planMode = await checkUserPlan();
+        
+        setUserUI({...userData, plan_mode: planMode}); 
+        scanCounter.updateUI();
+        initResults();
+        console.log('User authenticated successfully');
+        return;
+      } else {
+        console.log('User not authenticated, redirecting to login');
+        sessionStorage.removeItem('plan_mode'); // Clear plan_mode if not authenticated
+        window.location.href = '../index.html';
+        return;
+      }
+    } else {
+      console.log('Auth check failed, redirecting to login');
+      sessionStorage.removeItem('plan_mode'); // Clear plan_mode on auth check failure
+      window.location.href = '../index.html';
+      return;
+    }
+  } catch(e) {
+    console.error('Failed to fetch user info', e);
+    sessionStorage.removeItem('plan_mode'); // Clear plan_mode on error
+    window.location.href = '../index.html';
+    return;
+  }
+})();
