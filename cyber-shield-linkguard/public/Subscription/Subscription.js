@@ -36,6 +36,8 @@ const userNameDisplay = $('userNameDisplay');
 const logoutBtn = $('logout');
 const scanCounterEl = $('scanCounter');
 const remainingScansEl = $('remainingScans');
+const currentPlanBanner = $('currentPlanBanner');
+const currentPlanText = $('currentPlanText');
 
 function setUserUI(userData){ 
   console.log('Setting user UI with data:', userData); 
@@ -50,13 +52,80 @@ function setUserUI(userData){
     console.log('User UI updated:', {
       welcomeText,
       displayName,
-      full_name: userData.full_name
+      full_name: userData.full_name,
+      plan_mode: userData.plan_mode
     });
+    
+    // Update current plan display based on plan_mode
+    updateCurrentPlanDisplay(userData.plan_mode);
+    updatePlanBadge(userData.plan_mode); // Update the plan badge in header
   } else { 
     if (welcomeMessage) welcomeMessage.textContent = ''; 
     if (userNameDisplay) userNameDisplay.textContent = 'User Name';
     console.log('User not authenticated, using fallback');
   }
+}
+
+// Update current plan display based on plan_mode
+function updateCurrentPlanDisplay(planMode) {
+  const planMap = {
+    0: { name: 'Free Tier', badgeId: 'freeBadge' },
+    1: { name: 'Pro Tier', badgeId: 'proBadge' },
+    2: { name: 'Team Tier', badgeId: 'teamBadge' },
+    3: { name: 'Enterprise Tier', badgeId: 'enterpriseBadge' }
+  };
+  
+  const currentPlan = planMap[planMode] || planMap[0];
+  
+  // Update banner text
+  if (currentPlanText) {
+    currentPlanText.textContent = `You're currently on the ${currentPlan.name} plan`;
+  }
+  
+  // Highlight current plan card
+  document.querySelectorAll('.plan-card').forEach(card => {
+    card.classList.remove('current-plan', 'pulse-animation');
+    
+    // Add badge if it's the current plan
+    const badge = card.querySelector('.plan-badge.current-badge');
+    if (badge) {
+      badge.style.display = 'none';
+    }
+  });
+  
+  // Highlight the current plan card
+  const currentPlanCard = document.querySelector(`.plan-card[data-plan-id="${Object.keys(planMap).find(key => planMap[key].name === currentPlan.name).toLowerCase()}"]`);
+  if (currentPlanCard) {
+    currentPlanCard.classList.add('current-plan', 'pulse-animation');
+    
+    // Show the current badge
+    const badge = currentPlanCard.querySelector('.plan-badge.current-badge');
+    if (badge) {
+      badge.style.display = 'block';
+    }
+  }
+}
+
+// Update plan badge in header (similar to ScannerDash)
+function updatePlanBadge(planMode) {
+  const planBadge = document.getElementById('planMode');
+  if (!planBadge) return;
+  
+  const planMap = {
+    0: {text: 'FREE PLAN', class: 'free-plan'},
+    1: {text: 'PRO PLAN', class: 'pro-plan'},
+    2: {text: 'TEAM PLAN', class: 'team-plan'},
+    3: {text: 'ENTERPRISE', class: 'enterprise-plan'}
+  };
+  
+  const plan = planMap[planMode] || planMap[0];
+  
+  // Remove all plan classes
+  planBadge.classList.remove('free-plan', 'pro-plan', 'team-plan', 'enterprise-plan');
+  
+  // Add the current plan class
+  planBadge.classList.add(plan.class);
+  planBadge.textContent = plan.text;
 }
 
 // Logout functionality
@@ -159,9 +228,12 @@ const planCodes = {
 document.querySelectorAll('.plan-card').forEach(card => {
   card.addEventListener('click', function() {
     const planId = this.dataset.planId;
+    const userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
+    const planModeMap = {free: 0, pro: 1, team: 2, enterprise: 3};
     
-    if (planId === 'free') {
-      toast('You are currently on the Free plan');
+    // If this is the current plan, show a message
+    if (planModeMap[planId] === userPlanMode) {
+      toast(`You're already on the ${planId.charAt(0).toUpperCase() + planId.slice(1)} plan`);
       return;
     }
     
@@ -199,20 +271,16 @@ document.querySelectorAll('.plan-card').forEach(card => {
         window.location.href = '../index.html';
         return;
       }
+      
+      // Store user info in sessionStorage for easy access
+      sessionStorage.setItem('user_id', userInfo.user_id || '');
+      sessionStorage.setItem('full_name', userInfo.full_name || '');
+      sessionStorage.setItem('email', userInfo.email || '');
+      sessionStorage.setItem('plan_mode', userInfo.plan_mode || '0');
+      
       setUserUI(userInfo);
       scanCounter.updateUI();
       
-      // Highlight current plan based on user's plan mode
-      const planMode = userInfo.plan_mode || 0;
-      const planMap = {0: 'free', 1: 'pro', 2: 'team', 3: 'enterprise'};
-      const currentPlanId = planMap[planMode];
-      
-      if (currentPlanId) {
-        const currentPlanCard = document.querySelector(`.plan-card[data-plan-id="${currentPlanId}"]`);
-        if (currentPlanCard) {
-          currentPlanCard.classList.add('plan-selected');
-        }
-      }
     } else {
       window.location.href = '../index.html';
     }
