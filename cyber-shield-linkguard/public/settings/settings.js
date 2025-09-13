@@ -165,7 +165,7 @@ async function loadUserData() {
   }
 }
 
-// Update profile (this will need to be implemented in your backend)
+// Update profile: this sent data to the backend to update user profile
 if ($('profileForm')) {
   $('profileForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -192,12 +192,12 @@ if ($('profileForm')) {
     }
     
     const updateButton = $('profileForm').querySelector('button[type="submit"]');
-    setBusy(update极utton, true, 'Saving...');
+  setBusy(updateButton, true, 'Saving...');
     
     try {
       // This endpoint needs to be implemented in your backend
-      const response = await fetchWithSession('/api/auth/update-profile', {
-        method: 'POST',
+      const response = await fetchWithSession('/api/user/profile', {
+        method: 'PUT',
         body: JSON.stringify({ full_name, email, phone_number })
       });
       
@@ -258,8 +258,8 @@ if ($('passwordForm')) {
     
     try {
       // This endpoint needs to be implemented in your backend
-      const response = await fetchWithSession('/api/auth/update-password', {
-        method: 'POST',
+      const response = await fetchWithSession('/api/user/password', {
+        method: 'PUT',
         body: JSON.stringify({ currentPassword, newPassword })
       });
       
@@ -292,8 +292,8 @@ if ($('confirmDelete')) {
     
     try {
       // This endpoint needs to be implemented in your backend
-      const response = await fetchWithSession('/api/auth/delete-account', {
-        method: 'POST',
+      const response = await fetchWithSession('/api/user/account', {
+        method: 'DELETE',
         body: JSON.stringify({ password })
       });
       
