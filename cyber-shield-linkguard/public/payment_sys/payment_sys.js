@@ -33,7 +33,7 @@ async function fetchWithSession(path, opts={}) {
 // Set user UI (Updated to match ScannerDash's user dropdown)
 const welcomeMessage = $('welcomeMessage');
 const userNameDisplay = $('userNameDisplay');
-const logoutBtn = $('logout'); // Logout button is now part of the dropdown
+const logoutBtn = $('logout'); 
 const userDropdownBtn = $('userDropdownBtn');
 const userDropdown = $('userDropdown');
 
@@ -56,7 +56,7 @@ function setUserUI(userData){
 
   } else { 
     welcomeMessage.textContent = ''; 
-    userNameDisplay.textContent = 'User Name'; // Fallback text
+    userNameDisplay.textContent = 'User Name'; 
     console.log('User not authenticated, using fallback');
   }
 }
@@ -89,8 +89,6 @@ function handleLogout() {
 // Attach logout event listener
 logoutBtn.addEventListener('click', handleLogout);
 
-// User dropdown functionality (Copied from ScannerDash.js)
-// Toggle desktop dropdown
 userDropdownBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
