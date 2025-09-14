@@ -15,6 +15,7 @@ Cyber Shield LinkGuard is a cross-platform cybersecurity tool designed to protec
 - **Dashboard Interface** – Simple and intuitive candy-themed UI
 - **Reporting System** – Report malicious content to authorities
 - **Responsive Design** – Works seamlessly on mobile and desktop
+- **Cyber Shield Community** – System assistance and troubleshooting, Reporting bugs and issues, Sharing ideas and suggestions, Community support and discussions
 
 ## Quick Start
 ### 1. Create virtual environment
@@ -68,6 +69,8 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         │      ├── routes/ 
         |      |     ├── _pycache_/
         |      |     ├── subscription.py
+        |      |     ├── settings.py
+        |      |     ├── chats.py
         |      |     └── authentication.py
         |      |
         │      └── public/ 
@@ -77,6 +80,11 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         |            |     ├── signup.html
         |            |     ├── signup.css
         |            |     └── signup.js
+        |            |
+        |            ├── supcom/        
+        |            |     ├── supcom.html
+        |            |     ├── supcom.css
+        |            |     └── supcom.js
         |            |
         |            ├── ScannerDash/        
         |            |     ├── ScannerDash.html

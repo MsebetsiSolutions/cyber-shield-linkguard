@@ -1,5 +1,4 @@
-# app.py
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, session
 from urllib.parse import urlparse
 import os, time, re, socket, requests, tldextract
 import base64
@@ -10,12 +9,14 @@ from PIL import Image
 import cv2
 from pyzbar.pyzbar import decode
 import numpy as np
+import sqlite3
 
-#importing auth_bp from authentication.py
+#importing blueprints
 from routes.authentication import auth_bp
 from routes.subscription import subscription_bp
 from routes.settings import settings_bp
 from routes.scan_results import scan_results_bp
+from routes.chats import chats_bp
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -27,11 +28,12 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 # Add secret key for session management
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret-key-change-in-production")
 
-# registering 'auth_bp' blueprint
+# registering blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(subscription_bp)
 app.register_blueprint(settings_bp)
 app.register_blueprint(scan_results_bp)
+app.register_blueprint(chats_bp, url_prefix='/api/chats')
 
 # Read VirusTotal API key from env (put it in .env as VT_API_KEY=...)
 VT_API_KEY = os.getenv("VT_API_KEY", "").strip()
@@ -60,6 +62,12 @@ RISK_BANDS = [
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx', 'exe', 'zip'}
 
 # -------------------- Helpers --------------------
+def get_db_connection():
+    conn = sqlite3.connect('cyber-shield-linkguard.db')
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -166,60 +174,66 @@ def base64_urlsafe(s: str) -> str:
 def vt_lookup(u: str):
     if not VT_API_KEY:
         return {"enabled": False}
+    
     try:
-        # Submit URL to VirusTotal
-        submit_response = requests.post(
-            "https://www.virustotal.com/api/v3/urls",
-            headers={"x-apikey": VT_API_KEY, "accept": "application/json"},
-            data={"url": u},
-            timeout=8,
-        )
-        
-        # If submission was successful, get the analysis ID
-        if submit_response.status_code == 200:
-            analysis_id = submit_response.json().get('data', {}).get('id')
-            if analysis_id:
-                # Wait a moment for analysis to complete
-                time.sleep(2)
-                
-                # Get the analysis results
-                analysis_response = requests.get(
-                    f"https://www.virustotal.com/api/v3/analyses/{analysis_id}",
-                    headers={"x-apikey": VT_API_KEY, "accept": "application/json"},
-                    timeout=10,
-                )
-                
-                if analysis_response.status_code == 200:
-                    stats = analysis_response.json().get('data', {}).get('attributes', {}).get('stats', {})
-                    return {
-                        "enabled": True,
-                        "malicious": stats.get("malicious", 0),
-                        "suspicious": stats.get("suspicious", 0),
-                        "harmless": stats.get("harmless", 0),
-                        "undetected": stats.get("undetected", 0),
-                    }
-        
-        # Fallback: Try to get existing report
-        url_id = base64_urlsafe(u)
+        # First try to get existing report
+        url_id = base64.urlsafe_b64encode(u.encode()).decode().strip('=')
         rep = requests.get(
             f"https://www.virustotal.com/api/v3/urls/{url_id}",
             headers={"x-apikey": VT_API_KEY, "accept": "application/json"},
-            timeout=8,
+            timeout=10,
         )
+        
         if rep.status_code == 200:
             data = rep.json().get("data", {}).get("attributes", {})
-            stats = data.get("last_analysis_stats", {}) or {}
+            stats = data.get("last_analysis_stats", {})
             return {
                 "enabled": True,
                 "malicious": stats.get("malicious", 0),
                 "suspicious": stats.get("suspicious", 0),
                 "harmless": stats.get("harmless", 0),
                 "undetected": stats.get("undetected", 0),
+                "total_engines": sum(stats.values()) if stats else 0
             }
-        return {"enabled": True, "error": True}
+        
+        # If no existing report, submit URL for analysis
+        submit_response = requests.post(
+            "https://www.virustotal.com/api/v3/urls",
+            headers={"x-apikey": VT_API_KEY, "accept": "application/json"},
+            data={"url": u},
+            timeout=10,
+        )
+        
+        if submit_response.status_code == 200:
+            analysis_id = submit_response.json().get('data', {}).get('id')
+            if analysis_id:
+                # Wait for analysis to complete (VT needs time to process)
+                time.sleep(3)
+                
+                # Get analysis results
+                analysis_response = requests.get(
+                    f"https://www.virustotal.com/api/v3/analyses/{analysis_id}",
+                    headers={"x-apikey": VT_API_KEY, "accept": "application/json"},
+                    timeout=15,
+                )
+                
+                if analysis_response.status_code == 200:
+                    analysis_data = analysis_response.json().get('data', {}).get('attributes', {})
+                    stats = analysis_data.get('stats', {})
+                    return {
+                        "enabled": True,
+                        "malicious": stats.get("malicious", 0),
+                        "suspicious": stats.get("suspicious", 0),
+                        "harmless": stats.get("harmless", 0),
+                        "undetected": stats.get("undetected", 0),
+                        "total_engines": sum(stats.values()) if stats else 0
+                    }
+        
+        return {"enabled": True, "error": "Failed to get results"}
+        
     except Exception as e:
         print(f"VirusTotal error: {e}")
-        return {"enabled": True, "error": True}
+        return {"enabled": True, "error": str(e)}
 
 def vt_file_lookup(file_hash: str):
     if not VT_API_KEY:
@@ -241,6 +255,7 @@ def vt_file_lookup(file_hash: str):
                 "undetected": stats.get("undetected", 0),
                 "type_description": data.get("type_description", ""),
                 "names": data.get("names", []),
+                "total_engines": sum(stats.values()) if stats else 0
             }
         return {"enabled": True, "error": True}
     except Exception as e:
@@ -268,37 +283,95 @@ def scan_qr_code(image_path):
         print(f"QR scan error: {e}")
         return None, "error"
 
+def score_fallback(signals: dict) -> dict:
+    """Fallback scoring when VirusTotal fails"""
+    s = 0
+    reasons = ["VirusTotal scan unavailable - using heuristic analysis"]
+    
+    df = signals["domain"]
+    if df.get("is_shortener"): 
+        s += 15
+        reasons.append("Shortener domain")
+    
+    if df.get("digits", 0) >= 3: 
+        s += 10
+        reasons.append("Many digits in domain")
+    
+    if df.get("hyphens", 0) >= 2: 
+        s += 10
+        reasons.append("Many hyphens in domain")
+    
+    if df.get("is_long_domain"): 
+        s += 10
+        reasons.append("Very long domain")
+    
+    if df.get("looks_dga_like"): 
+        s += 12
+        reasons.append("Domain looks algorithmically generated")
+    
+    if not signals["tls"]["ok"]:
+        s += 12
+        reasons.append("No HTTPS")
+    
+    snip = signals["snippet"]
+    if snip.get("has_login_words"): 
+        s += 8
+        reasons.append("Login/verification wording present")
+    
+    if signals.get("ip") is None:
+        s += 10
+        reasons.append("Host did not resolve")
+    
+    s = max(0, min(100, s))
+    band = next(b for lo, hi, b in RISK_BANDS if lo <= s <= hi)
+    return {"score": s, "band": band, "reasons": reasons}
+
 def score(signals: dict) -> dict:
     s = 0
     reasons = []
-
-    if signals["unshorten_hops"] > 0:
-        s += min(15, 5 * signals["unshorten_hops"])
-        reasons.append("Multiple redirects (possible shortener chain)")
-
-    df = signals["domain"]
-    if df.get("is_shortener"): s += 10; reasons.append("Shortener domain")
-    if df.get("digits", 0) >= 3: s += 10; reasons.append("Many digits in domain")
-    if df.get("hyphens", 0) >= 2: s += 10; reasons.append("Many hyphens in domain")
-    if df.get("is_long_domain"): s += 10; reasons.append("Very long domain")
-    if df.get("looks_dga_like"): s += 12; reasons.append("Domain looks algorithmically generated")
-
-    if not signals["tls"]["ok"]:
-        s += 12; reasons.append("No HTTPS")
-
-    snip = signals["snippet"]
-    if snip.get("has_login_words"): s += 8; reasons.append("Login/verification wording present")
-
-    if signals.get("ip") is None:
-        s += 10; reasons.append("Host did not resolve")
-
+    
+    # Use VirusTotal data as primary scoring factor
     vt = signals.get("virustotal", {})
     if vt.get("enabled") and not vt.get("error"):
-        s += min(40, 20 * vt.get("malicious", 0) + 10 * vt.get("suspicious", 0))
-        if vt.get("malicious", 0) > 0 or vt.get("suspicious", 0) > 0:
-            reasons.append("VirusTotal detections present")
-
+        malicious = vt.get("malicious", 0)
+        suspicious = vt.get("suspicious", 0)
+        total_engines = vt.get("total_engines", 0) or (malicious + suspicious + vt.get("harmless", 0) + vt.get("undetected", 0))
+        
+        if total_engines > 0:
+            # Calculate threat percentage
+            threat_percentage = ((malicious + suspicious) / total_engines) * 100
+            
+            # Base score primarily on VirusTotal results
+            s = min(100, threat_percentage * 2)  # Scale to 0-100
+            
+            if malicious > 0:
+                reasons.append(f"Detected as malicious by {malicious} security engines")
+            if suspicious > 0:
+                reasons.append(f"Detected as suspicious by {suspicious} security engines")
+            if malicious == 0 and suspicious == 0:
+                reasons.append("No threats detected by security engines")
+        else:
+            reasons.append("No scan results available from security engines")
+            s = 50  # Medium risk when no data
+    
+    # Add secondary heuristic factors (reduced weight)
+    df = signals["domain"]
+    if df.get("is_shortener"): 
+        s += 5
+        reasons.append("Shortener domain (potential redirection risk)")
+    
+    if not signals["tls"]["ok"]:
+        s += 10
+        reasons.append("No HTTPS (connection not encrypted)")
+    
+    if signals.get("ip") is None:
+        s += 5
+        reasons.append("Domain did not resolve to IP address")
+    
+    # Ensure score is within bounds
     s = max(0, min(100, s))
+    
+    # Determine risk band
     band = next(b for lo, hi, b in RISK_BANDS if lo <= s <= hi)
     return {"score": s, "band": band, "reasons": reasons}
 
@@ -307,14 +380,26 @@ def score_file(vt_result: dict) -> dict:
     reasons = []
     
     if vt_result.get("enabled") and not vt_result.get("error"):
-        s += min(80, 20 * vt_result.get("malicious", 0) + 10 * vt_result.get("suspicious", 0))
-        if vt_result.get("malicious", 0) > 0:
-            reasons.append(f"File detected as malicious by {vt_result.get('malicious', 0)} engines")
-        elif vt_result.get("suspicious", 0) > 0:
-            reasons.append(f"File detected as suspicious by {vt_result.get('suspicious', 0)} engines")
+        malicious = vt_result.get("malicious", 0)
+        suspicious = vt_result.get("suspicious", 0)
+        total_engines = vt_result.get("total_engines", 0) or (malicious + suspicious + vt_result.get("harmless", 0) + vt_result.get("undetected", 0))
+        
+        if total_engines > 0:
+            # Calculate threat percentage
+            threat_percentage = ((malicious + suspicious) / total_engines) * 100
+            
+            # Base score primarily on VirusTotal results
+            s = min(100, threat_percentage * 2)
+            
+            if malicious > 0:
+                reasons.append(f"Detected as malicious by {malicious} security engines")
+            if suspicious > 0:
+                reasons.append(f"Detected as suspicious by {suspicious} security engines")
+            if malicious == 0 and suspicious == 0:
+                reasons.append("No threats detected by security engines")
         else:
-            reasons.append("No threats detected by VirusTotal")
-            s = 10  # Low score for clean files
+            reasons.append("No scan results available from security engines")
+            s = 50  # Medium risk when no data
     else:
         reasons.append("VirusTotal scan not available")
         s = 50  # Medium score when scan is unavailable
@@ -342,21 +427,45 @@ def scan():
         ipaddr = resolve_ip(df.get("host", "")) if df else None
         tlsok, tlsmsg = tls_ok(final_url)
         snip = fetch_snippet(final_url)
-        vt = vt_lookup(final_url)
-
-        signals = {
-            "input": raw,
-            "normalized": url,
-            "final_url": final_url,
-            "unshorten_hops": hops,
-            "domain": df,
-            "ip": ipaddr,
-            "tls": {"ok": tlsok, "note": tlsmsg},
-            "snippet": snip,
-            "virustotal": vt,
-            "ts": int(time.time()),
-        }
-        verdict = score(signals)
+        
+        # VirusTotal results with timeout
+        vt = {}
+        try:
+            vt = vt_lookup(final_url)
+        except Exception as vt_error:
+            print(f"VirusTotal lookup failed: {vt_error}")
+            vt = {"enabled": True, "error": "VirusTotal scan failed"}
+        
+        if vt.get("error"):
+            # Create a basic score based on heuristics only
+            signals = {
+                "input": raw,
+                "normalized": url,
+                "final_url": final_url,
+                "unshorten_hops": hops,
+                "domain": df,
+                "ip": ipaddr,
+                "tls": {"ok": tlsok, "note": tlsmsg},
+                "snippet": snip,
+                "virustotal": vt,
+                "ts": int(time.time()),
+            }
+            verdict = score_fallback(signals)
+        else:
+            signals = {
+                "input": raw,
+                "normalized": url,
+                "final_url": final_url,
+                "unshorten_hops": hops,
+                "domain": df,
+                "ip": ipaddr,
+                "tls": {"ok": tlsok, "note": tlsmsg},
+                "snippet": snip,
+                "virustotal": vt,
+                "ts": int(time.time()),
+            }
+            verdict = score(signals)
+            
         return jsonify({"signals": signals, "verdict": verdict})
     except Exception as e:
         print(f"URL scan error: {e}")
@@ -443,7 +552,14 @@ def scan_qr():
                 final_url, hops = unshorten(decoded_content)
                 df = domain_features(final_url)
                 tlsok, tlsmsg = tls_ok(final_url)
-                vt = vt_lookup(final_url)
+                
+                # Get VirusTotal results for the URL
+                vt = {}
+                try:
+                    vt = vt_lookup(final_url)
+                except Exception as vt_error:
+                    print(f"VirusTotal lookup failed: {vt_error}")
+                    vt = {"enabled": True, "error": "VirusTotal scan failed"}
                 
                 signals = {
                     "final_url": final_url,
@@ -452,7 +568,12 @@ def scan_qr():
                     "tls": {"ok": tlsok, "note": tlsmsg},
                     "virustotal": vt,
                 }
-                verdict = score(signals)
+                
+                # Use appropriate scoring based on VT availability
+                if vt.get("error"):
+                    verdict = score_fallback(signals)
+                else:
+                    verdict = score(signals)
                 
                 return jsonify({
                     "decoded": decoded_content,
@@ -498,4 +619,3 @@ def health():
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "5000"))
     app.run(host="0.0.0.0", port=port, debug=True)
-    
