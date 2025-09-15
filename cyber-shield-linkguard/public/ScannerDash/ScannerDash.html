@@ -49,6 +49,10 @@
             <div class="d-flex align-items-center gap-3 mt-1">
               <div id="scanCounter" class="cs-sub small">Scans remaining: <span id="remainingScans">5</span>/5</div>
               <div id="planMode" class="plan-badge free-plan">FREE PLAN</div>
+              <button id="statsButton" class="btn-stats hidden" data-bs-toggle="modal" data-bs-target="#statsModal">
+                <i class="bi bi-bar-chart-fill"></i>
+                <span class="stats-text">View Stats</span>
+              </button>
             </div>
           </div>
         </div>
@@ -209,21 +213,122 @@
     <footer class="text-center cs-sub mt-4">© Msebetsi Solutions Pty Ltd</footer>
   </div>
 
-  <!-- Subscription Modal -->
-  <div class="modal fade" id="subscriptionModal" tabindex="-1" aria-labelledby="subscriptionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+  <!-- Stats Modal -->
+  <div class="modal fade" id="statsModal" tabindex="-1" aria-labelledby="statsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content cs-card">
         <div class="modal-header">
-          <h2 class="modal-title cs-candy-title" id="subscriptionModalLabel">Upgrade Your Plan</h2>
+          <h2 class="modal-title cs-candy-title" id="statsModalLabel">
+            <i class="bi bi-bar-chart-fill me-2"></i>Scan Statistics
+          </h2>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body text-center">
-          <i class="bi bi-emoji-frown display-1 text-warning mb-3"></i>
-          <h3>You've used all your free scans!</h3>
-          <p class="cs-sub mb-4">You've reached your limit of 5 free scans per day. Subscribe to get unlimited scans and access to all features.</p>
-          <a href="../Subscription/Subscription.html" class="cs-btn btn-login w-100">
-            <i class="bi bi-star-fill me-2"></i>View Subscription Plans
-          </a>
+        <div class="modal-body">
+          <!-- Loading state -->
+          <div id="statsLoading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Loading your scan statistics...</p>
+          </div>
+          
+          <!-- Stats content -->
+          <div id="statsContent" class="hidden">
+            <!-- Summary Cards -->
+            <div class="row mb-4">
+              <div class="col-md-4 mb-3">
+                <div class="stat-summary-card total-scans">
+                  <div class="stat-icon">
+                    <i class="bi bi-graph-up-arrow"></i>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-number" id="totalScans">0</div>
+                    <div class="stat-label">Total Scans</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="stat-summary-card malicious-scans">
+                  <div class="stat-icon">
+                    <i class="bi bi-shield-exclamation"></i>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-number" id="maliciousScans">0</div>
+                    <div class="stat-label">Malicious Detections</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="stat-summary-card safe-scans">
+                  <div class="stat-icon">
+                    <i class="bi bi-shield-check"></i>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-number" id="safeScans">0</div>
+                    <div class="stat-label">Safe Detections</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Scan Type Distribution -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <h4 class="mb-3"><i class="bi bi-pie-chart me-2"></i>Scan Type Distribution</h4>
+                <div class="chart-container-sm">
+                  <canvas id="scanTypeChart"></canvas>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Timeline Chart -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <h4 class="mb-3"><i class="bi bi-calendar-week me-2"></i>Scan Activity (Last 7 Days)</h4>
+                <div class="chart-container-sm">
+                  <canvas id="timelineChart"></canvas>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Recent Scans Table -->
+            <div class="row">
+              <div class="col-12">
+                <h4 class="mb-3"><i class="bi bi-clock-history me-2"></i>Recent Scans</h4>
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Content</th>
+                        <th>Result</th>
+                      </tr>
+                    </thead>
+                    <tbody id="recentScansTable">
+                      <!-- Will be populated by JavaScript -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Error state -->
+          <div id="statsError" class="text-center py-4 hidden">
+            <i class="bi bi-exclamation-triangle text-warning display-4 mb-3"></i>
+            <h4>Unable to Load Statistics</h4>
+            <p class="cs-sub">There was an error loading your scan statistics. Please try again later.</p>
+            <button class="cs-btn btn-login mt-3" onclick="loadUserStats()">
+              <i class="bi bi-arrow-repeat me-2"></i>Retry
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="cs-btn btn-guest" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="cs-btn btn-login" onclick="downloadStatsReport()">
+            <i class="bi bi-download me-2"></i>Download Report
+          </button>
         </div>
       </div>
     </div>

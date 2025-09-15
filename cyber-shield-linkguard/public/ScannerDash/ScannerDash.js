@@ -18,6 +18,8 @@ const toast = (msg, ms=2000) => {
 
 // Chart.js instance
 let resultsChart = null;
+let statsChart1 = null;
+let statsChart2 = null;
 
 // Initialize Chart.js
 function initChart() {
@@ -163,6 +165,17 @@ async function fetchWithSession(path, opts={}) {
 // Save scan result to database
 async function saveScanResult(scanData) {
   try {
+    // Determine threat level based on verdict band
+    let threatLevel = 'clean';
+    if (scanData.verdict_band === 'DANGER') {
+      threatLevel = 'malicious';
+    } else if (scanData.verdict_band === 'WARN') {
+      threatLevel = 'suspicious';
+    }
+    
+    // Add threat level to scan data
+    scanData.threat_level = threatLevel;
+    
     const response = await fetchWithSession('/api/scans/save', {
       method: 'POST',
       body: JSON.stringify(scanData)
@@ -679,6 +692,260 @@ async function checkUserPlan() {
   return 0; // Default to free plan
 }
 
+// Toggle stats button visibility based on plan mode
+function toggleStatsButton(planMode) {
+  const statsButton = document.getElementById('statsButton');
+  const isSubscribed = planMode === 1 || planMode === 2 || planMode === 3;
+  
+  if (isSubscribed) {
+    statsButton.classList.remove('hidden');
+  } else {
+    statsButton.classList.add('hidden');
+  }
+}
+
+// Initialize stats charts
+function initStatsCharts() {
+  // Destroy existing charts if they exist
+  if (statsChart1) {
+    statsChart1.destroy();
+  }
+  if (statsChart2) {
+    statsChart2.destroy();
+  }
+  
+  // Scan Type Chart
+  const typeCtx = document.getElementById('scanTypeChart').getContext('2d');
+  statsChart1 = new Chart(typeCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['URL Scans', 'File Scans', 'QR Scans'],
+      datasets: [{
+        data: [0, 0, 0],
+        backgroundColor: [
+          'rgba(0, 179, 255, 0.8)',
+          'rgba(255, 195, 107, 0.8)',
+          'rgba(167, 239, 182, 0.8)'
+        ],
+        borderColor: [
+          'rgb(0, 179, 255)',
+          'rgb(255, 195, 107)',
+          'rgb(167, 239, 182)'
+        ],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      },
+      animation: {
+        animateScale: true,
+        animateRotate: true
+      }
+    }
+  });
+  
+  // Timeline Chart
+  const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+  statsChart2 = new Chart(timelineCtx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Scans per Day',
+        data: [],
+        backgroundColor: 'rgba(233, 183, 201, 0.2)',
+        borderColor: 'rgba(233, 183, 201, 1)',
+        borderWidth: 2,
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }
+  });
+  
+  return { statsChart1, statsChart2 };
+}
+
+// Load user stats
+async function loadUserStats() {
+  const statsLoading = document.getElementById('statsLoading');
+  const statsContent = document.getElementById('statsContent');
+  const statsError = document.getElementById('statsError');
+  
+  show(statsLoading);
+  hide(statsContent);
+  hide(statsError);
+  
+  try {
+    const response = await fetchWithSession('/api/scans/stats');
+    
+    if (response.ok) {
+      const statsData = await response.json();
+      displayStats(statsData);
+    } else {
+      throw new Error('Failed to fetch stats');
+    }
+  } catch (error) {
+    console.error('Error loading stats:', error);
+    hide(statsLoading);
+    show(statsError);
+  }
+}
+
+// Display stats in modal
+function displayStats(statsData) {
+  const statsLoading = document.getElementById('statsLoading');
+  const statsContent = document.getElementById('statsContent');
+  
+  hide(statsLoading);
+  show(statsContent);
+  
+  // Update summary cards
+  document.getElementById('totalScans').textContent = statsData.totalScans || 0;
+  
+  // Calculate malicious and safe scans from threat levels
+  const maliciousScans = statsData.threatLevels?.malicious || 0;
+  const safeScans = (statsData.threatLevels?.clean || 0) + (statsData.threatLevels?.suspicious || 0);
+  
+  document.getElementById('maliciousScans').textContent = maliciousScans;
+  document.getElementById('safeScans').textContent = safeScans;
+  
+  // Update charts
+  if (statsChart1 && statsData.scanTypes) {
+    statsChart1.data.datasets[0].data = [
+      statsData.scanTypes.url || 0,
+      statsData.scanTypes.file || 0,
+      statsData.scanTypes.qr_code || 0
+    ];
+    statsChart1.update();
+  }
+  
+  if (statsChart2 && statsData.timeline) {
+    statsChart2.data.labels = statsData.timeline.labels || [];
+    statsChart2.data.datasets[0].data = statsData.timeline.data || [];
+    statsChart2.update();
+  }
+  
+  // Update recent scans table
+  const recentScansTable = document.getElementById('recentScansTable');
+  recentScansTable.innerHTML = '';
+  
+  if (statsData.recentScans && statsData.recentScans.length > 0) {
+    statsData.recentScans.forEach(scan => {
+      const row = document.createElement('tr');
+      
+      // Format date
+      const scanDate = new Date(scan.scanned_at);
+      const formattedDate = scanDate.toLocaleDateString();
+      
+      // Format scan type for display
+      const scanTypeMap = {
+        'url': 'URL',
+        'file': 'File',
+        'qr_code': 'QR Code'
+      };
+      const displayType = scanTypeMap[scan.scan_type] || scan.scan_type;
+      
+      // Truncate content if too long
+      let contentDisplay = scan.content;
+      if (contentDisplay.length > 30) {
+        contentDisplay = contentDisplay.substring(0, 30) + '...';
+      }
+      
+      // Format threat level with appropriate badge
+      let threatBadge = '';
+      if (scan.threat_level) {
+        const threatClass = scan.threat_level === 'malicious' ? 'badge-DANGER' : 
+                           scan.threat_level === 'suspicious' ? 'badge-WARN' : 'badge-SAFE';
+        const threatDisplay = scan.threat_level.charAt(0).toUpperCase() + scan.threat_level.slice(1);
+        threatBadge = `<span class="table-badge ${threatClass}">${threatDisplay}</span>`;
+      } else {
+        threatBadge = '<span class="text-muted">N/A</span>';
+      }
+      
+      row.innerHTML = `
+        <td>${formattedDate}</td>
+        <td>${displayType}</td>
+        <td title="${scan.content}">${contentDisplay}</td>
+        <td>${threatBadge}</td>
+      `;
+      
+      recentScansTable.appendChild(row);
+    });
+  } else {
+    recentScansTable.innerHTML = `
+      <tr>
+        <td colspan="4" class="text-center text-muted py-3">No scan history available</td>
+      </tr>
+    `;
+  }
+}
+
+// Download stats report
+function downloadStatsReport() {
+  toast('Preparing your download...');
+  
+  // In a real implementation, this would generate a PDF or CSV report
+  setTimeout(() => {
+    // Simulate download
+    const a = document.createElement('a');
+    a.href = 'data:text/plain;charset=utf-8,Scan Report - Generated on ' + new Date().toLocaleDateString();
+    a.download = 'scan-report-' + new Date().toISOString().split('T')[0] + '.txt';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    toast('Report downloaded successfully!');
+  }, 1500);
+}
+
+// Event listener for stats modal
+document.addEventListener('DOMContentLoaded', function() {
+  const statsModal = document.getElementById('statsModal');
+  
+  if (statsModal) {
+    statsModal.addEventListener('show.bs.modal', function() {
+      initStatsCharts();
+      loadUserStats();
+    });
+    
+    statsModal.addEventListener('hidden.bs.modal', function() {
+      // Clean up charts when modal is closed
+      if (statsChart1) {
+        statsChart1.destroy();
+        statsChart1 = null;
+      }
+      if (statsChart2) {
+        statsChart2.destroy();
+        statsChart2 = null;
+      }
+    });
+  }
+});
+
 // Initialize dashboard and check authentication
 (async function boot(){
   console.log('Dashboard initializing...');
@@ -701,24 +968,42 @@ async function checkUserPlan() {
         setUserUI({...userData, plan_mode: planMode}); 
         scanCounter.updateUI();
         initResults();
+        
+        // Toggle stats button based on plan mode
+        toggleStatsButton(planMode);
+        
         console.log('User authenticated successfully');
         return;
       } else {
         console.log('User not authenticated, redirecting to login');
-        sessionStorage.removeItem('plan_mode'); // Clear plan_mode if not authenticated
+        sessionStorage.removeItem('plan_mode');
         window.location.href = '../index.html';
         return;
       }
     } else {
       console.log('Auth check failed, redirecting to login');
-      sessionStorage.removeItem('plan_mode'); // Clear plan_mode on auth check failure
+      sessionStorage.removeItem('plan_mode');
       window.location.href = '../index.html';
       return;
     }
   } catch(e) {
     console.error('Failed to fetch user info', e);
-    sessionStorage.removeItem('plan_mode'); // Clear plan_mode on error
-    window.location.href = '../index.html';
-    return;
+    toast('Network error - using offline mode');
+    
+    // Initialize with default settings for offline use
+    initChart();
+    initResults();
+    scanCounter.updateUI();
+    
+    // Try to get user data from sessionStorage as fallback
+    const storedUserData = sessionStorage.getItem('userData');
+    if (storedUserData) {
+      try {
+        const userData = JSON.parse(storedUserData);
+        setUserUI(userData);
+      } catch (parseError) {
+        console.error('Error parsing stored user data:', parseError);
+      }
+    }
   }
 })();
