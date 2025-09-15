@@ -18,6 +18,8 @@ const toast = (msg, ms=2000) => {
 
 // Chart.js instance
 let resultsChart = null;
+let statsChart1 = null;
+let statsChart2 = null;
 
 // Initialize Chart.js
 function initChart() {
@@ -163,6 +165,17 @@ async function fetchWithSession(path, opts={}) {
 // Save scan result to database
 async function saveScanResult(scanData) {
   try {
+    // Determine threat level based on verdict band
+    let threatLevel = 'clean';
+    if (scanData.verdict_band === 'DANGER') {
+      threatLevel = 'malicious';
+    } else if (scanData.verdict_band === 'WARN') {
+      threatLevel = 'suspicious';
+    }
+    
+    // Add threat level to scan data
+    scanData.threat_level = threatLevel;
+    
     const response = await fetchWithSession('/api/scans/save', {
       method: 'POST',
       body: JSON.stringify(scanData)
@@ -811,15 +824,20 @@ function displayStats(statsData) {
   
   // Update summary cards
   document.getElementById('totalScans').textContent = statsData.totalScans || 0;
-  document.getElementById('maliciousScans').textContent = statsData.maliciousScans || 0;
-  document.getElementById('safeScans').textContent = statsData.safeScans || 0;
+  
+  // Calculate malicious and safe scans from threat levels
+  const maliciousScans = statsData.threatLevels?.malicious || 0;
+  const safeScans = (statsData.threatLevels?.clean || 0) + (statsData.threatLevels?.suspicious || 0);
+  
+  document.getElementById('maliciousScans').textContent = maliciousScans;
+  document.getElementById('safeScans').textContent = safeScans;
   
   // Update charts
   if (statsChart1 && statsData.scanTypes) {
     statsChart1.data.datasets[0].data = [
       statsData.scanTypes.url || 0,
       statsData.scanTypes.file || 0,
-      statsData.scanTypes.qr || 0
+      statsData.scanTypes.qr_code || 0
     ];
     statsChart1.update();
   }
@@ -839,8 +857,16 @@ function displayStats(statsData) {
       const row = document.createElement('tr');
       
       // Format date
-      const scanDate = new Date(scan.scan_date);
+      const scanDate = new Date(scan.scanned_at);
       const formattedDate = scanDate.toLocaleDateString();
+      
+      // Format scan type for display
+      const scanTypeMap = {
+        'url': 'URL',
+        'file': 'File',
+        'qr_code': 'QR Code'
+      };
+      const displayType = scanTypeMap[scan.scan_type] || scan.scan_type;
       
       // Truncate content if too long
       let contentDisplay = scan.content;
@@ -848,11 +874,22 @@ function displayStats(statsData) {
         contentDisplay = contentDisplay.substring(0, 30) + '...';
       }
       
+      // Format threat level with appropriate badge
+      let threatBadge = '';
+      if (scan.threat_level) {
+        const threatClass = scan.threat_level === 'malicious' ? 'badge-DANGER' : 
+                           scan.threat_level === 'suspicious' ? 'badge-WARN' : 'badge-SAFE';
+        const threatDisplay = scan.threat_level.charAt(0).toUpperCase() + scan.threat_level.slice(1);
+        threatBadge = `<span class="table-badge ${threatClass}">${threatDisplay}</span>`;
+      } else {
+        threatBadge = '<span class="text-muted">N/A</span>';
+      }
+      
       row.innerHTML = `
         <td>${formattedDate}</td>
-        <td>${scan.scan_type}</td>
+        <td>${displayType}</td>
         <td title="${scan.content}">${contentDisplay}</td>
-        <td><span class="table-badge badge-${scan.verdict_band}">${scan.verdict_band}</span></td>
+        <td>${threatBadge}</td>
       `;
       
       recentScansTable.appendChild(row);
@@ -951,8 +988,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   } catch(e) {
     console.error('Failed to fetch user info', e);
-    // Don't redirect on network errors - the user might still be authenticated
-    // Just show a message and let them continue using the app
     toast('Network error - using offline mode');
     
     // Initialize with default settings for offline use
@@ -972,7 +1007,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 })();
-
-// Global variables for stats charts
-let statsChart1 = null;
-let statsChart2 = null;

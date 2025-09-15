@@ -81,6 +81,11 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         |            |     ├── signup.css
         |            |     └── signup.js
         |            |
+        |            ├── profile/        
+        |            |     ├── profile.html
+        |            |     ├── profile.css
+        |            |     └── profile.js
+        |            |
         |            ├── supcom/        
         |            |     ├── supcom.html
         |            |     ├── supcom.css
@@ -90,6 +95,11 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         |            |     ├── ScannerDash.html
         |            |     ├── ScannerDash.css
         |            |     └── ScannerDash.js
+        |            |
+        |            ├── shareTeamCollab/        
+        |            |     ├── shareTeamCollab.html
+        |            |     ├── shareTeamCollab.css
+        |            |     └── shareTeamCollab.js
         |            |
         |            ├── Subscription/        
         |            |     ├── Subscription.html
@@ -127,6 +137,7 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         |            |     └── login.js
         |            |
         |            ├── index.html      
+        |            ├── logg.js
         |            ├── manifest.json
         |            ├── sw.js
         |            └── theme.css
