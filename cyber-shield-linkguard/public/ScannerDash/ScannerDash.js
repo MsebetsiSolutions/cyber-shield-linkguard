@@ -143,16 +143,22 @@ const scanCounter = {
 
 // Session-based fetch function (no JWT tokens needed)
 async function fetchWithSession(path, opts={}) {
-  const headers = {
-    'Content-Type': 'application/json',
-    ...opts.headers
-  };
+  // For FormData (file uploads), don't set Content-Type header
+  const headers = {};
+  
+  // Only set Content-Type for JSON requests
+  if (!(opts.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
+  
+  // Merge with any existing headers
+  Object.assign(headers, opts.headers || {});
   
   try {
     const response = await fetch(path, {
       ...opts,
       headers,
-      credentials: 'include' 
+      credentials: 'include' // This ensures session cookies are sent
     });
     
     return response;
@@ -161,6 +167,7 @@ async function fetchWithSession(path, opts={}) {
     throw error;
   }
 }
+
 
 // Save scan result to database
 async function saveScanResult(scanData) {
@@ -438,6 +445,21 @@ urlInput.addEventListener('keydown', e => {
   } 
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // File Scan functionality
 fileScanBtn.addEventListener('click', () => {
   const f = fileInput.files && fileInput.files[0]; 
@@ -454,11 +476,11 @@ async function runScanFile(file){
     const fd = new FormData(); 
     fd.append('file', file);
     
-    // Use regular fetch for file uploads (not fetchWithSession)
-    const r = await fetch('/api/scan_file', { 
-      method: 'POST', 
-      credentials: 'include', // Include session cookies
+    // Use fetchWithSession instead of regular fetch to include session cookies
+    const r = await fetchWithSession('/api/scan_file', { 
+      method: 'POST',
       body: fd 
+      // Note: fetchWithSession automatically handles credentials
     });
     
     const j = await r.json(); 
@@ -480,15 +502,6 @@ async function runScanFile(file){
     
     $('fileName').textContent = j.file.filename || '(file)'; 
     $('fileSha').textContent = j.file.sha256 ? ' · ' + j.file.sha256 : '';
-    
-    let vtSummary = '';
-    if (j.virustotal.enabled && !j.virustotal.error) {
-      vtSummary = `Malicious: ${j.virustotal.malicious || 0}, Suspicious: ${j.virustotal.suspicious || 0}, ` +
-                 `Harmless: ${j.virustotal.harmless || 0}, Undetected: ${j.virustotal.undetected || 0}`;
-    } else {
-      vtSummary = 'VirusTotal scan not available or failed';
-    }
-    $('vtSummaryFile').textContent = vtSummary;
     
     $('reasonsFile').innerHTML = '';
     
@@ -529,11 +542,20 @@ async function runScanFile(file){
     }
   } catch(e) { 
     console.error('File scan error:', e);
-    toast('Network error'); 
+    toast('Network error: ' + e.message); 
   } finally { 
     setBusy(fileScanBtn, false); 
   }
 }
+
+
+
+
+
+
+
+
+
 
 // QR Scan functionality
 qrScanBtn.addEventListener('click', () => {
@@ -551,11 +573,10 @@ async function runScanQr(file){
     const fd = new FormData(); 
     fd.append('file', file);
     
-    // Use regular fetch for file uploads (not fetchWithSession)
-    const r = await fetch('/api/scan_qr', { 
-      method: 'POST', 
-      credentials: 'include', // Include session cookies
-      body: fd 
+    // Use fetchWithSession instead of regular fetch
+    const r = await fetchWithSession('/api/scan_qr', { 
+      method: 'POST',
+      body: fd
     });
     
     const j = await r.json(); 
@@ -625,7 +646,7 @@ async function runScanQr(file){
     }
   } catch(e) { 
     console.error('QR scan error:', e);
-    toast('Network error'); 
+    toast('Network error: ' + e.message); 
   } finally { 
     setBusy(qrScanBtn, false); 
   }

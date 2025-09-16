@@ -407,6 +407,10 @@ def score_file(vt_result: dict) -> dict:
     band = next(b for lo, hi, b in RISK_BANDS if lo <= s <= hi)
     return {"score": s, "band": band, "reasons": reasons}
 
+
+
+
+
 # -------------------- API --------------------
 @app.route("/api/scan", methods=["POST"])
 def scan():
@@ -470,6 +474,12 @@ def scan():
         print(f"URL scan error: {e}")
         return jsonify({"error": "Failed to scan URL"}), 500
 
+
+
+
+
+
+
 @app.route("/api/scan_file", methods=["POST"])
 def scan_file():
     ip = request.headers.get("X-Forwarded-For", request.remote_addr)
@@ -519,6 +529,13 @@ def scan_file():
             return jsonify({"error": "Failed to scan file"}), 500
     
     return jsonify({"error": "File type not allowed"}), 400
+
+
+
+
+
+
+
 
 @app.route("/api/scan_qr", methods=["POST"])
 def scan_qr():

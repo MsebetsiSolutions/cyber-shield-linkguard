@@ -165,17 +165,17 @@ async function loadUserData() {
   try {
     const response = await fetchWithSession('/api/auth/me');
     
-    if(response.ok) {
+    if (response.ok) {
       const userData = await response.json();
       
       // Set user UI (top right corner)
       setUserUI(userData);
       
       // If we're on the settings page, populate the form fields
-      if ($('userName') && $('userEmail')) {
+      if ($('userName') && $('userEmail') && $('userPhone')) {
         $('userName').value = userData.full_name || '';
         $('userEmail').value = userData.email || '';
-        // Phone number is not stored in session, so we'll leave it empty
+        $('userPhone').value = userData.cellphone_number || '';
       }
       
       return userData;

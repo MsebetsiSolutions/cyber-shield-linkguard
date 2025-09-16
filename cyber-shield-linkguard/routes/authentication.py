@@ -201,7 +201,9 @@ def login():
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
-            cursor.execute('SELECT id, full_name, email, password, Plan_Mode FROM users WHERE email = ?', (email,))
+
+            # ✅ Include cellphone_number in query
+            cursor.execute('SELECT id, full_name, email, password, Plan_Mode, cellphone_number FROM users WHERE email = ?', (email,))
             user = cursor.fetchone()
 
             if not user:
@@ -214,21 +216,21 @@ def login():
             print(f"Input password: {password}")
 
             if bcrypt.checkpw(password.encode('utf-8'), stored_pw.encode('utf-8')):
-                # Create session data
                 session['user_id'] = user['id']
                 session['user_full_name'] = user['full_name']
                 session['user_email'] = user['email']
                 session['plan_mode'] = user['Plan_Mode']
+                session['cellphone_number'] = user['cellphone_number']  
                 session.permanent = True
                 
                 print(f"User {user['email']} logged in successfully. Session created.")
-                print(f"Session data: user_id={session.get('user_id')}, full_name={session.get('user_full_name')}, plan_mode={session.get('plan_mode')}")
                 conn.close()
 
                 return jsonify({
                     'message': 'Login successful',
                     'full_name': user['full_name'],
                     'email': user['email'],
+                    'cellphone_number': user['cellphone_number'], 
                     'user_id': user['id'],
                     'plan_mode': user['Plan_Mode'],
                     'authenticated': True
@@ -251,6 +253,7 @@ def login():
         return jsonify({'error': 'Login failed'}), 500
 
 
+
 # User Logout Endpoint - Clear Session
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
@@ -267,14 +270,13 @@ def logout():
 @auth_bp.route('/me', methods=['GET'])
 def get_current_user():
     try:
-        print(f"Session contents: {dict(session)}")  # Debug session contents
-        
         if 'user_id' in session and 'user_email' in session:
             return jsonify({
                 'authenticated': True,
                 'user_id': session['user_id'],
                 'full_name': session.get('user_full_name', ''),
                 'email': session['user_email'],
+                'cellphone_number': session.get('cellphone_number', ''),  # 👈 important
                 'plan_mode': session.get('plan_mode', 0)
             }), 200
         else:
@@ -282,6 +284,7 @@ def get_current_user():
     except Exception as e:
         print(f"Get user info error: {e}")
         return jsonify({'error': 'Failed to get user information'}), 500
+
 
 # forgot password implementation
 @auth_bp.route('forgot-password', methods=['POST'])
