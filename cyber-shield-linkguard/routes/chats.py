@@ -1,17 +1,31 @@
 import sqlite3
 from flask import Blueprint, jsonify, request, session
-import time
+
+#======================================================
+# ----------------- Chats Blueprint ------------------
+#======================================================
 
 chats_bp = Blueprint('chats', __name__)
 
+
+#======================================================
+# -------------------- Helpers -----------------------
+#======================================================
+
 def get_db_connection():
+    """Get database connection to the cyber-shield-linkguard database"""
     conn = sqlite3.connect('cyber-shield-linkguard.db')
     conn.row_factory = sqlite3.Row
     return conn
 
+
+#======================================================
+# ---------------------- API -------------------------
+#======================================================
+
 @chats_bp.route('/join', methods=['POST'])
 def join_chat():
-    # Check if user is authenticated via session
+    """Join the support chat for authenticated user"""
     if 'user_id' not in session:
         return jsonify({'error': 'Unauthorized, please log in'}), 401
     
@@ -45,8 +59,10 @@ def join_chat():
         print(f"Unexpected error when joining chat: {e}")
         return jsonify({'error': 'Unexpected error. Please try again.'}), 500
 
+
 @chats_bp.route('/member_count', methods=['GET'])
 def get_member_count():
+    """Get total count of chat members"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -62,8 +78,10 @@ def get_member_count():
         print(f"Unexpected error when getting member count: {e}")
         return jsonify({'member_count': 0}), 200
 
+
 @chats_bp.route('/check_joined', methods=['GET'])
 def check_joined():
+    """Check if authenticated user has joined the chat"""
     if 'user_id' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
     

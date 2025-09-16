@@ -1,5 +1,3 @@
-import email
-from urllib import response
 import bcrypt
 import sqlite3
 import os
@@ -10,10 +8,25 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+#======================================================
+# ---------------- Auth Blueprint --------------------
+#======================================================
+
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
+
+#======================================================
+# -------------------- Helpers -----------------------
+#======================================================
+
+def get_db_connection():
+    """Get database connection to the cyber-shield-linkguard database"""
+    conn = sqlite3.connect('cyber-shield-linkguard.db')
+    conn.row_factory = sqlite3.Row
+    return conn
+
 def send_email(to, name, subject, reset_url):
-    """Send email using MailerSend"""
+    """Send password reset email using MailerSend"""
     html_content = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -95,9 +108,7 @@ def send_email(to, name, subject, reset_url):
 
     try:
         ms = MailerSendClient()
-
         email = (EmailBuilder().from_email('test@test-ywj2lpnwmmqg7oqz.mlsender.net', 'Cybershield Linknguard').to_many([{'email': to, 'name': name}])).subject(subject).html(html_content).build()
-
         response = ms.emails.send(email)
 
         if response.status_code == 202:
@@ -106,16 +117,15 @@ def send_email(to, name, subject, reset_url):
             print("Failed to send email.") 
     except:
         print("Failed to send email.")
-        
-def get_db_connection():
-    conn = sqlite3.connect('cyber-shield-linkguard.db')
-    conn.row_factory = sqlite3.Row
-    return conn
 
 
-# User Registration Endpoint
+#======================================================
+# ---------------------- API -------------------------
+#======================================================
+
 @auth_bp.route('/signup', methods=['POST'])
 def signup():
+    """Create a new user account"""
     try:
         data = request.get_json()
         if not data:
@@ -134,13 +144,6 @@ def signup():
         hashed_pw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         hashed_pw_str = hashed_pw.decode('utf-8')
 
-        print(f"Full Name: {full_name}")
-        print(f"Email: {email}")
-        print(f"Original Password Length: {len(password)}")
-        print(f"Hashed Password: {hashed_pw}")
-        print(f"Hashed Password (decoded): {hashed_pw_str}")
-        print(f"Hashed Password Length: {len(hashed_pw_str)}")
-
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
@@ -158,8 +161,6 @@ def signup():
             conn.commit()
             user_id = cursor.lastrowid
             conn.close()
-
-            print(f"User created successfully with ID: {user_id}")
 
         except sqlite3.IntegrityError as e:
             print(f"Database integrity error: {e}")
@@ -181,14 +182,11 @@ def signup():
         return jsonify({'error': 'Signup failed'}), 500
 
 
-
-# User Login Endpoint - Session Based Authentication
 @auth_bp.route('/login', methods=['POST'])
 def login():
+    """Authenticate user and create session"""
     try:
         data = request.get_json()
-        print(f"Login attempt data: {data}")
-
         email = data.get('email', '').strip().lower()
         password = data.get('password', '')
 
@@ -202,41 +200,34 @@ def login():
             conn = get_db_connection()
             cursor = conn.cursor()
 
-            # ✅ Include cellphone_number in query
             cursor.execute('SELECT id, full_name, email, password, Plan_Mode, cellphone_number FROM users WHERE email = ?', (email,))
             user = cursor.fetchone()
 
             if not user:
                 conn.close()
-                print(f"User not found with email: {email}")
                 return jsonify({'error': 'Invalid email or password'}), 401
 
             stored_pw = user['password']
-            print(f"Stored password hash: {stored_pw}")
-            print(f"Input password: {password}")
-
             if bcrypt.checkpw(password.encode('utf-8'), stored_pw.encode('utf-8')):
                 session['user_id'] = user['id']
                 session['user_full_name'] = user['full_name']
                 session['user_email'] = user['email']
                 session['plan_mode'] = user['Plan_Mode']
-                session['cellphone_number'] = user['cellphone_number']  
+                session['cellphone_number'] = user['cellphone_number']
                 session.permanent = True
                 
-                print(f"User {user['email']} logged in successfully. Session created.")
                 conn.close()
 
                 return jsonify({
                     'message': 'Login successful',
                     'full_name': user['full_name'],
                     'email': user['email'],
-                    'cellphone_number': user['cellphone_number'], 
+                    'cellphone_number': user['cellphone_number'],
                     'user_id': user['id'],
                     'plan_mode': user['Plan_Mode'],
                     'authenticated': True
                 }), 200
             else:
-                print("Password does not match")
                 conn.close()
                 return jsonify({'error': 'Invalid email or password'}), 401
 
@@ -248,27 +239,23 @@ def login():
     
     except Exception as e:
         print(f"Login error: {e}")
-        import traceback
-        traceback.print_exc()
         return jsonify({'error': 'Login failed'}), 500
 
 
-
-# User Logout Endpoint - Clear Session
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
+    """Clear user session and logout"""
     try:
         session.clear()
-        print("User logged out. Session cleared.")
         return jsonify({'message': 'Logout successful'}), 200
     except Exception as e:
         print(f"Logout error: {e}")
         return jsonify({'error': 'Logout failed'}), 500
 
 
-# Get Current User Information from Session
 @auth_bp.route('/me', methods=['GET'])
 def get_current_user():
+    """Get current user information from session"""
     try:
         if 'user_id' in session and 'user_email' in session:
             return jsonify({
@@ -276,7 +263,7 @@ def get_current_user():
                 'user_id': session['user_id'],
                 'full_name': session.get('user_full_name', ''),
                 'email': session['user_email'],
-                'cellphone_number': session.get('cellphone_number', ''),  # 👈 important
+                'cellphone_number': session.get('cellphone_number', ''),
                 'plan_mode': session.get('plan_mode', 0)
             }), 200
         else:
@@ -286,33 +273,26 @@ def get_current_user():
         return jsonify({'error': 'Failed to get user information'}), 500
 
 
-# forgot password implementation
 @auth_bp.route('forgot-password', methods=['POST'])
 def forgot_password():
+    """Handle password reset request"""
     data = request.get_json()
-
     email = data.get('email', '').strip().lower()
 
     if not email:
         return jsonify({'error': 'Email is required'}), 400
     
     try:
-        # checking is email exists in the database
         conn = get_db_connection()
         cursor = conn.cursor()
 
         cursor.execute('select id from users where email = ?', (email,))
-
         user = cursor.fetchone()
 
         if user:
             user_id = user['id']
             serializer = URLSafeTimedSerializer(os.getenv('FLASK_SECRET_KEY'))
-
             token = serializer.dumps(email, salt='password-reset-salt')
-
-            print(f"Generated token for user {user_id}: {token}")
-
             reset_url = f"http://localhost:3000/reset-password/{token}"
 
             mail = send_email(email, 'Sivuyise', 'Password Reset Request', reset_url)
@@ -327,3 +307,4 @@ def forgot_password():
     except sqlite3.Error as e:
         print(f"Database error in forgot_password: {e}")
         return jsonify({'error': 'Database error occurred'}), 500
+    
