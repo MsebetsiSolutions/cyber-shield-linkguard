@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // DOM Elements
     const welcomeForm = document.getElementById('welcome-form');
     const joinChatBtn = document.getElementById('join-chat-btn');
     const chatInterface = document.getElementById('chat-interface');
-    
     const chatMessages = document.getElementById('chat-messages');
     const messageInput = document.getElementById('message-input');
     const sendBtn = document.getElementById('send-btn');
@@ -14,7 +14,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let currentUserFullName = "User";
 
-    // Function to fetch and display member count
+    //======================================================
+    // -------------------- Functions ----------------------
+    //======================================================
+
+    
+    // Fetch and display current member count
+    
     async function updateMemberCount() {
         try {
             const response = await fetch('/api/chats/member_count');
@@ -29,7 +35,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Check user authentication and chat joined status on load
+    
+    // Initialize page by checking authentication and chat status
+    
     async function initializePage() {
         try {
             const userResponse = await fetch('/api/auth/me');
@@ -70,17 +78,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Show the chat interface
+    
+    // Show the chat interface and hide welcome form
+    
     function showChatInterface() {
         welcomeForm.style.display = 'none';
         chatInterface.style.display = 'flex';
         scrollToBottom();
-        
-        // Add help icon to chat input
         addHelpIcon();
     }
     
-    // Add help icon to chat interface
+    
+    // Add help icon to chat input for user assistance
+    
     function addHelpIcon() {
         const chatInput = document.querySelector('.chat-input');
         const helpIcon = document.createElement('div');
@@ -88,14 +98,13 @@ document.addEventListener('DOMContentLoaded', function() {
         helpIcon.innerHTML = '<i class="fas fa-question-circle"></i>';
         helpIcon.title = 'Click for tips on asking questions';
         
-        helpIcon.addEventListener('click', function() {
-            showHelpModal();
-        });
-        
+        helpIcon.addEventListener('click', showHelpModal);
         chatInput.insertBefore(helpIcon, chatInput.firstChild);
     }
     
-    // Show help modal with question tips
+    
+    // Display modal with question asking tips
+    
     function showHelpModal() {
         const modal = document.createElement('div');
         modal.className = 'help-modal';
@@ -130,6 +139,83 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    
+    //Send message to chat
+    function sendMessage() {
+        const message = messageInput.value.trim();
+        if (message) {
+            const now = new Date();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', 'sent');
+            
+            messageElement.innerHTML = `
+                <div class="message-content">
+                    <div class="message-bubble">
+                        <p>${message}</p>
+                    </div>
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageElement);
+            messageInput.value = '';
+            scrollToBottom();
+            simulateResponse(message);
+        }
+    }
+
+    
+    //Simulate bot response based on user message
+    
+    function simulateResponse(userMessage) {
+        setTimeout(() => {
+            let response = "I'm here to help! Could you tell me more about your issue?";
+            const lowerCaseMessage = userMessage.toLowerCase();
+
+            for (const category of predefinedResponses) {
+                if (category.keywords.some(keyword => lowerCaseMessage.includes(keyword))) {
+                    response = category.responses[Math.floor(Math.random() * category.responses.length)];
+                    break; 
+                }
+            }
+            
+            const now = new Date();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', 'received');
+            
+            messageElement.innerHTML = `
+                <div class="message-avatar">
+                    <img src="../assets/com/TechnicalSupport.png" alt="Support Avatar">
+                </div>
+                <div class="message-content">
+                    <div class="message-sender">Tech Support</div>
+                    <div class="message-bubble">
+                        <p>${response}</p>
+                    </div>
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageElement);
+            scrollToBottom();
+        }, 1000 + Math.random() * 2000);
+    }
+    
+    
+    // Scroll chat messages to bottom
+     
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    //======================================================
+    // ---------------- Event Listeners -------------------
+    //======================================================
 
     // Handle joining the chat
     joinChatBtn.addEventListener('click', async function() {
@@ -166,42 +252,69 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Send message on button click
+    // Send message handlers
     sendBtn.addEventListener('click', sendMessage);
-    
-    // Send message on Enter key
     messageInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             sendMessage();
         }
     });
-    
-    function sendMessage() {
-        const message = messageInput.value.trim();
-        if (message) {
-            const now = new Date();
-            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // Chat list item selection
+    const chatItems = document.querySelectorAll('.chat-item');
+    chatItems.forEach(item => {
+        item.addEventListener('click', function() {
+            chatItems.forEach(chat => chat.classList.remove('active'));
+            this.classList.add('active');
             
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message', 'sent');
+            const chatType = this.getAttribute('data-chat');
+            const chatTitle = this.querySelector('h4').textContent;
             
-            messageElement.innerHTML = `
-                <div class="message-content">
-                    <div class="message-bubble">
-                        <p>${message}</p>
+            currentChatTitle.textContent = chatTitle;
+            currentChatAvatar.src = `../assets/com/${chatType}.png`;
+            
+            if (chatType === 'CyberShieldCommunity') {
+                updateMemberCount(); 
+            } else if (chatType === 'TechnicalSupport') {
+                currentChatMembers.textContent = 'Online now';
+            } else if (chatType === 'FeatureRequests') {
+                currentChatMembers.textContent = '245 suggestions';
+            } else if (chatType === 'BugReports') {
+                currentChatMembers.textContent = '89 issues reported';
+            }
+            
+            chatMessages.innerHTML = `
+                <div class="message-date">TODAY</div>
+                <div class="message received">
+                    <div class="message-avatar">
+                        <img src="../assets/com/${chatType}.png" alt="${chatTitle} Avatar">
                     </div>
-                    <div class="message-time">${time}</div>
+                    <div class="message-content">
+                        <div class="message-sender">${chatTitle} Admin</div>
+                        <div class="message-bubble">
+                            <p>Welcome to ${chatTitle}! How can we help you today?</p>
+                        </div>
+                        <div class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    </div>
                 </div>
             `;
             
-            chatMessages.appendChild(messageElement);
-            messageInput.value = '';
             scrollToBottom();
-            
-            simulateResponse(message);
+        });
+    });
+
+    // Exit chat confirmation
+    exitChatBtn.addEventListener('click', function(event) {
+        event.preventDefault();
+        if (confirm('Are you sure you want to exit the support chat?')) {
+            window.location.href = '../ScannerDash/ScannerDash.html';
         }
-    }
-    
+    });
+
+    //======================================================
+    // --------------- Predefined Responses ----------------
+    //======================================================
+
     const predefinedResponses = [
         {
             keywords: ['hello', 'hi', 'hey', 'greetings'],
@@ -328,14 +441,6 @@ document.addEventListener('DOMContentLoaded', function() {
             ]
         },
         {
-            keywords: ['virus total', 'virustotal', 'vt api'],
-            responses: [
-                "We use the VirusTotal API to provide comprehensive security scanning.",
-                "VirusTotal checks files and URLs against many security databases.",
-                "Our VirusTotal integration gives you powerful threat detection."
-            ]
-        },
-        {
             keywords: ['demo', 'test', 'trial'],
             responses: [
                 "The demo uses localStorage authentication for testing purposes only.",
@@ -353,97 +458,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     ];
 
-    function simulateResponse(userMessage) {
-        setTimeout(() => {
-            let response = "I'm here to help! Could you tell me more about your issue?";
-            const lowerCaseMessage = userMessage.toLowerCase();
+    //======================================================
+    // ------------------ Initialize ----------------------
+    //======================================================
 
-            for (const category of predefinedResponses) {
-                if (category.keywords.some(keyword => lowerCaseMessage.includes(keyword))) {
-                    response = category.responses[Math.floor(Math.random() * category.responses.length)];
-                    break; 
-                }
-            }
-            
-            const now = new Date();
-            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message', 'received');
-            
-            messageElement.innerHTML = `
-                <div class="message-avatar">
-                    <img src="../assets/com/TechnicalSupport.png" alt="Support Avatar">
-                </div>
-                <div class="message-content">
-                    <div class="message-sender">Tech Support</div>
-                    <div class="message-bubble">
-                        <p>${response}</p>
-                    </div>
-                    <div class="message-time">${time}</div>
-                </div>
-            `;
-            
-            chatMessages.appendChild(messageElement);
-            scrollToBottom();
-        }, 1000 + Math.random() * 2000);
-    }
-    
-    function scrollToBottom() {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-    
-    // Chat list item click handler
-    const chatItems = document.querySelectorAll('.chat-item');
-    chatItems.forEach(item => {
-        item.addEventListener('click', function() {
-            chatItems.forEach(chat => chat.classList.remove('active'));
-            this.classList.add('active');
-            
-            const chatType = this.getAttribute('data-chat');
-            const chatTitle = this.querySelector('h4').textContent;
-            
-            currentChatTitle.textContent = chatTitle;
-            currentChatAvatar.src = `../assets/com/${chatType}.png`;
-            
-            if (chatType === 'CyberShieldCommunity') {
-                updateMemberCount(); 
-            } else if (chatType === 'TechnicalSupport') {
-                currentChatMembers.textContent = 'Online now';
-            } else if (chatType === 'FeatureRequests') {
-                currentChatMembers.textContent = '245 suggestions';
-            } else if (chatType === 'BugReports') {
-                currentChatMembers.textContent = '89 issues reported';
-            }
-            
-            chatMessages.innerHTML = `
-                <div class="message-date">TODAY</div>
-                <div class="message received">
-                    <div class="message-avatar">
-                        <img src="../assets/com/${chatType}.png" alt="${chatTitle} Avatar">
-                    </div>
-                    <div class="message-content">
-                        <div class="message-sender">${chatTitle} Admin</div>
-                        <div class="message-bubble">
-                            <p>Welcome to ${chatTitle}! How can we help you today?</p>
-                        </div>
-                        <div class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                    </div>
-                </div>
-            `;
-            
-            scrollToBottom();
-        });
-    });
-
-    // Initialize the page on load
     initializePage();
-
-    // Exit chat button handler
-    exitChatBtn.addEventListener('click', function(event) {
-        event.preventDefault();
-        if (confirm('Are you sure you want to exit the support chat?')) {
-            window.location.href = '../ScannerDash/ScannerDash.html';
-        }
-    });
 });
