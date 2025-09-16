@@ -550,6 +550,7 @@ def scan_qr():
                 
                 final_url, hops = unshorten(decoded_content)
                 df = domain_features(final_url)
+                ipaddr = resolve_ip(df.get("host", "")) if df else None
                 tlsok, tlsmsg = tls_ok(final_url)
                 
                 # Get VirusTotal results for the URL
@@ -564,6 +565,7 @@ def scan_qr():
                     "final_url": final_url,
                     "unshorten_hops": hops,
                     "domain": df,
+                    "ip": ipaddr,
                     "tls": {"ok": tlsok, "note": tlsmsg},
                     "virustotal": vt,
                 }
@@ -596,7 +598,8 @@ def scan_qr():
     except Exception as e:
         print(f"QR scan error: {e}")
         return jsonify({"error": "Failed to scan QR code"}), 500
-
+    
+    
 # -------------------- Static / Health --------------------
 @app.route("/")
 def root():
