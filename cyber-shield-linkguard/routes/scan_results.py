@@ -1,4 +1,3 @@
-# cyber-shield-linkguard/routes/scan_results.py
 from flask import Blueprint, jsonify, request, session
 import sqlite3
 import datetime
@@ -22,7 +21,7 @@ def save_scan():
 
         scan_type = data.get('scan_type')
         content = data.get('content')
-        result = data.get('result') # it will be a JSON string of the scan output
+        result = data.get('result') 
         
         # Get the verdict band from the client-side JSON data, which is 'SAFE', 'WARN', 'DANGER'
         verdict_band = data.get('verdict_band') 
@@ -43,10 +42,9 @@ def save_scan():
         }
         threat_level = threat_level_mapping.get(verdict_band.upper(), 'clean') # Default to 'clean'
 
-        # Validate threat_level against CHECK constraint (redundant if mapping is correct, but good for safety)
+        # Validate threat_level against CHECK constraint
         valid_threat_levels = ['clean', 'suspicious', 'malicious']
         if threat_level not in valid_threat_levels:
-            # This should ideally not happen if the mapping is exhaustive for expected bands
             print(f"Warning: Mapped threat_level '{threat_level}' is not in valid_threat_levels.")
             return jsonify({'error': f"Invalid threat_level after mapping. Must be one of {', '.join(valid_threat_levels)}."}), 400
 
@@ -71,4 +69,147 @@ def save_scan():
         import traceback
         traceback.print_exc()
         return jsonify({'error': 'Failed to save scan result'}), 500
+
+# Get scan statistics
+@scan_results_bp.route('/stats', methods=['GET'])
+def get_scan_stats():
+    try:
+        # Check if user is authenticated
+        if 'user_id' not in session:
+            return jsonify({'error': 'Authentication required'}), 401
+            
+        user_id = session['user_id']
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get total scans count
+        cursor.execute('SELECT COUNT(*) as total FROM scans WHERE user_id = ?', (user_id,))
+        total_scans = cursor.fetchone()['total']
+        
+        # Get scans by type
+        cursor.execute('''
+            SELECT scan_type, COUNT(*) as count 
+            FROM scans 
+            WHERE user_id = ? 
+            GROUP BY scan_type
+        ''', (user_id,))
+        scan_types = {row['scan_type']: row['count'] for row in cursor.fetchall()}
+        
+        # Get threat level distribution
+        cursor.execute('''
+            SELECT threat_level, COUNT(*) as count 
+            FROM scans 
+            WHERE user_id = ? AND threat_level IS NOT NULL
+            GROUP BY threat_level
+        ''', (user_id,))
+        threat_levels = {row['threat_level']: row['count'] for row in cursor.fetchall()}
+        
+        # Get scans from the last 7 days for timeline
+        cursor.execute('''
+            SELECT DATE(scanned_at) as date, COUNT(*) as count 
+            FROM scans 
+            WHERE user_id = ? AND scanned_at >= DATE('now', '-7 days')
+            GROUP BY DATE(scanned_at)
+            ORDER BY date
+        ''', (user_id,))
+        
+        timeline_data = []
+        timeline_labels = []
+        for row in cursor.fetchall():
+            timeline_labels.append(row['date'])
+            timeline_data.append(row['count'])
+        
+        # Get recent scans (last 10)
+        cursor.execute('''
+            SELECT scan_id, scan_type, content, threat_level, scanned_at
+            FROM scans 
+            WHERE user_id = ?
+            ORDER BY scanned_at DESC
+            LIMIT 10
+        ''', (user_id,))
+        
+        recent_scans = []
+        for row in cursor.fetchall():
+            recent_scans.append({
+                'scan_id': row['scan_id'],
+                'scan_type': row['scan_type'],
+                'content': row['content'],
+                'threat_level': row['threat_level'],
+                'scanned_at': row['scanned_at']
+            })
+        
+        conn.close()
+        
+        return jsonify({
+            'totalScans': total_scans,
+            'scanTypes': scan_types,
+            'threatLevels': threat_levels,
+            'timeline': {
+                'labels': timeline_labels,
+                'data': timeline_data
+            },
+            'recentScans': recent_scans
+        }), 200
+        
+    except Exception as e:
+        print(f"Error fetching scan stats: {e}")
+        return jsonify({'error': 'Failed to fetch scan statistics'}), 500
+
+# Get scan history
+@scan_results_bp.route('/history', methods=['GET'])
+def get_scan_history():
+    try:
+        # Check if user is authenticated
+        if 'user_id' not in session:
+            return jsonify({'error': 'Authentication required'}), 401
+            
+        user_id = session['user_id']
+        
+        # Get pagination parameters
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 20))
+        offset = (page - 1) * per_page
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get total count
+        cursor.execute('SELECT COUNT(*) as total FROM scans WHERE user_id = ?', (user_id,))
+        total_count = cursor.fetchone()['total']
+        
+        # Get paginated scans
+        cursor.execute('''
+            SELECT scan_id, scan_type, content, threat_level, scanned_at
+            FROM scans 
+            WHERE user_id = ?
+            ORDER BY scanned_at DESC
+            LIMIT ? OFFSET ?
+        ''', (user_id, per_page, offset))
+        
+        scans = []
+        for row in cursor.fetchall():
+            scans.append({
+                'scan_id': row['scan_id'],
+                'scan_type': row['scan_type'],
+                'content': row['content'],
+                'threat_level': row['threat_level'],
+                'scanned_at': row['scanned_at']
+            })
+        
+        conn.close()
+        
+        return jsonify({
+            'scans': scans,
+            'pagination': {
+                'page': page,
+                'per_page': per_page,
+                'total': total_count,
+                'pages': (total_count + per_page - 1) // per_page
+            }
+        }), 200
+        
+    except Exception as e:
+        print(f"Error fetching scan history: {e}")
+        return jsonify({'error': 'Failed to fetch scan history'}), 500
     

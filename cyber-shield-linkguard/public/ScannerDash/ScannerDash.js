@@ -446,7 +446,7 @@ fileScanBtn.addEventListener('click', () => {
 });
 
 async function runScanFile(file){
-  if (!canScan('file')) return; // Pass scanType
+  if (!canScan('file')) return;
   
   setBusy(fileScanBtn, true, 'Uploading…');
   
@@ -454,6 +454,7 @@ async function runScanFile(file){
     const fd = new FormData(); 
     fd.append('file', file);
     
+    // Use regular fetch for file uploads (not fetchWithSession)
     const r = await fetch('/api/scan_file', { 
       method: 'POST', 
       credentials: 'include', // Include session cookies
@@ -516,7 +517,7 @@ async function runScanFile(file){
       scan_type: 'file',
       content: file.name,
       result: JSON.stringify(j),
-      verdict_band: j.verdict.band // Pass the verdict band
+      verdict_band: j.verdict.band
     };
     
     saveScanResult(scanData);
@@ -527,6 +528,7 @@ async function runScanFile(file){
       bsCollapse.hide();
     }
   } catch(e) { 
+    console.error('File scan error:', e);
     toast('Network error'); 
   } finally { 
     setBusy(fileScanBtn, false); 
@@ -541,7 +543,7 @@ qrScanBtn.addEventListener('click', () => {
 });
 
 async function runScanQr(file){
-  if (!canScan('qr')) return; // Pass scanType
+  if (!canScan('qr')) return;
   
   setBusy(qrScanBtn, true, 'Analyzing…');
   
@@ -549,6 +551,7 @@ async function runScanQr(file){
     const fd = new FormData(); 
     fd.append('file', file);
     
+    // Use regular fetch for file uploads (not fetchWithSession)
     const r = await fetch('/api/scan_qr', { 
       method: 'POST', 
       credentials: 'include', // Include session cookies
@@ -574,7 +577,7 @@ async function runScanQr(file){
     
     $('qrText').textContent = j.decoded || '(no data)';
     
-    let qrVerdictBand = 'SAFE'; // Default for non-URL QR codes
+    let qrVerdictBand = 'SAFE';
     if(j.type === 'url' && j.verdict) {
       show($('qrUrlBlock'));
       $('finalUrlQr').textContent = j.signals.final_url; 
@@ -588,7 +591,7 @@ async function runScanQr(file){
       });
       
       setBadge($('badgeQr'), j.verdict.band);
-      qrVerdictBand = j.verdict.band; // Set band from URL verdict
+      qrVerdictBand = j.verdict.band;
       
       const score = parseInt(j.verdict.score);
       if (score >= 80) {
@@ -602,7 +605,7 @@ async function runScanQr(file){
       }
     } else {
       hide($('qrUrlBlock'));
-      updateStats(0, 0, 1, 0); // Consider non-URL QR as harmless for stats if no other verdict
+      updateStats(0, 0, 1, 0);
     }
     
     // Save scan result to database
@@ -610,7 +613,7 @@ async function runScanQr(file){
       scan_type: 'qr_code',
       content: j.decoded || 'QR code image',
       result: JSON.stringify(j),
-      verdict_band: qrVerdictBand // Pass the verdict band (default or from URL scan)
+      verdict_band: qrVerdictBand
     };
     
     saveScanResult(scanData);
@@ -621,11 +624,15 @@ async function runScanQr(file){
       bsCollapse.hide();
     }
   } catch(e) { 
+    console.error('QR scan error:', e);
     toast('Network error'); 
   } finally { 
     setBusy(qrScanBtn, false); 
   }
 }
+
+
+
 
 // User dropdown functionality
 const userDropdownBtn = $('userDropdownBtn');
