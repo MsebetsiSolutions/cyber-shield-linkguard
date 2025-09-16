@@ -67,7 +67,6 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
