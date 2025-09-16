@@ -23,79 +23,69 @@ body {
   color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   min-height: 100vh;
+  font-size: 0.9rem;
 }
 
 /* Logo styling */
 .header-logo {
-  height: 60px;
+  height: 50px;
   width: auto;
   object-fit: contain;
+  transition: transform 0.3s ease;
 }
 
-/* Responsive adjustments for logo */
-@media (max-width: 768px) {
-  .header-logo {
-    height: 50px;
-  }
-  
-  .header-logo + .cs-sub {
-    margin-top: 0.5rem !important;
-  }
+.header-logo:hover {
+  transform: scale(1.05);
 }
 
-@media (max-width: 576px) {
-  .header-logo {
-    height: 40px;
-  }
-  
-  .d-flex.align-items-center {
-    flex-direction: column;
-    align-items: flex-start !important;
-  }
-}
-
-
-/* User Controls - copied from ScannerDash */
+/* User Controls */
 .user-controls {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: 15px;
+  right: 15px;
   z-index: 1000;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .user-name {
   font-weight: 600;
   color: var(--text);
   background: rgba(255, 255, 255, 0.7);
-  padding: 5px 12px;
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 4px 10px;
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  font-size: 0.85rem;
+}
+
+.user-name:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
 }
 
 .user-dropdown {
   position: relative;
 }
 
-.user-dropbtn {
+.user-dropdown-btn {
   background-color: var(--btn-settings);
   border: none;
   cursor: pointer;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   color: var(--text);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
   transition: all 0.3s ease;
 }
 
-.user-dropbtn:hover {
+.user-dropdown-btn:hover {
   transform: scale(1.05);
   background-color: var(--btn-danger);
   color: white;
@@ -106,36 +96,45 @@ body {
   position: absolute;
   right: 0;
   background-color: rgba(255, 255, 255, 0.95);
-  min-width: 200px;
-  border-radius: 0.5rem;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  min-width: 180px;
+  border-radius: 0.4rem;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(10px);
   z-index: 1;
-  margin-top: 10px;
-  padding: 0.5rem 0;
+  margin-top: 8px;
+  padding: 0.4rem 0;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .user-dropdown-content a {
   color: var(--text);
-  padding: 12px 16px;
+  padding: 10px 14px;
   text-decoration: none;
   display: block;
   text-align: left;
   transition: background-color 0.3s;
-  border-radius: 0.25rem;
-  margin: 0 0.5rem;
+  border-radius: 0.2rem;
+  margin: 0 0.4rem;
+  font-size: 0.9rem;
 }
 
 .user-dropdown-content a:hover {
   background-color: var(--btn-settings);
+  transform: translateX(4px);
 }
 
 .user-welcome {
-  padding: 12px 16px;
+  padding: 10px 14px;
   font-weight: 600;
   border-bottom: 1px solid var(--ring);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   color: var(--text);
+  font-size: 0.9rem;
 }
 
 .logout-btn {
@@ -143,14 +142,14 @@ body {
   border: none;
   cursor: pointer;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
   transition: all 0.3s ease;
 }
 
@@ -162,53 +161,69 @@ body {
 /* Card styling */
 .cs-card {
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 12px rgba(235, 159, 193, .15);
+  border-radius: 0.4rem;
+  box-shadow: 0 3px 10px rgba(235, 159, 193, .15);
   border: 1px solid rgba(255,255,255,.6);
   backdrop-filter: blur(1px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cs-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(235, 159, 193, .25);
 }
 
 /* Form elements */
 .form-label {
   font-weight: 600;
   color: var(--text);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.9rem;
 }
 
 .cs-input {
   background: #fff;
   border: 2px solid var(--ring);
-  border-radius: 0.5rem;
-  padding: .9rem 1rem;
+  border-radius: 0.4rem;
+  padding: .75rem .9rem;
   outline: none;
   width: 100%;
   transition: box-shadow .2s, transform .05s;
+  font-size: 0.9rem;
 }
 
 .cs-input:focus {
-  box-shadow: 0 0 0 4px rgba(233,183,201,.35);
+  box-shadow: 0 0 0 3px rgba(233,183,201,.35);
+  transform: translateY(-1px);
 }
 
 /* Buttons */
 .cs-btn {
   background: #fff;
   color: var(--text);
-  font-weight: 800;
-  letter-spacing: .25px;
-  padding: .9rem 1.2rem;
-  border-radius: 0.5rem;
+  font-weight: 700;
+  letter-spacing: .2px;
+  padding: .75rem 1rem;
+  border-radius: 0.4rem;
   border: 2px solid #ffffffaa;
   text-shadow: 0 1px 0 #ffffffaa;
-  box-shadow: 0 4px 0 #d5a3b9, 0 6px 12px rgba(201,113,155,.35);
+  box-shadow: 0 3px 0 #d5a3b9, 0 4px 8px rgba(201,113,155,.35);
   transition: transform .05s ease, box-shadow .2s ease;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 0.9rem;
+}
+
+.cs-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #d5a3b9, 0 6px 12px rgba(201,113,155,.4);
 }
 
 .cs-btn:active { 
-  transform: translateY(2px); 
-  box-shadow: 0 2px 0 #d5a3b9, 0 4px 8px rgba(201,113,155,.35); 
+  transform: translateY(1px); 
+  box-shadow: 0 2px 0 #d5a3b9, 0 3px 6px rgba(201,113,155,.35); 
 }
 
 .btn-save { 
@@ -230,22 +245,35 @@ body {
 .cs-sub { 
   color: var(--muted); 
   margin: 0;
+  font-size: 0.85rem;
 }
 
 .cs-candy-title {
-  font-weight: 900;
-  letter-spacing: .5px;
-  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: .4px;
+  font-size: 1.5rem;
   background: linear-gradient(90deg, var(--sky), var(--gold), var(--mint));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  animation: gradientShift 3s infinite alternate;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
 }
 
 /* Modal styling */
 .modal-content.cs-card {
-  border-radius: 0.5rem;
+  border-radius: 0.4rem;
   border: none;
+  animation: modalAppear 0.3s ease;
+}
+
+@keyframes modalAppear {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 /* Alert styling */
@@ -253,26 +281,33 @@ body {
   background-color: rgba(255, 111, 97, 0.2);
   border-color: var(--candy-red);
   color: var(--candy-red);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
+  border-radius: 0.4rem;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.85rem;
 }
 
 /* Toast notification */
 #toast {
   position: fixed;
   left: 50%;
-  bottom: 18px;
+  bottom: 15px;
   transform: translateX(-50%);
   background: #111827;
   color: #fff;
-  padding: .6rem .9rem;
-  border-radius: .5rem;
-  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+  padding: .5rem .8rem;
+  border-radius: .4rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
   opacity: 0;
   pointer-events: none;
   transition: opacity .25s;
-  font-size: .9rem;
+  font-size: 0.85rem;
   z-index: 1000;
+  animation: toastSlideUp 0.3s ease;
+}
+
+@keyframes toastSlideUp {
+  from { transform: translate(-50%, 15px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
 }
 
 #toast.show {
@@ -291,8 +326,8 @@ body {
 .invalid-feedback {
   display: none;
   width: 100%;
-  margin-top: 0.25rem;
-  font-size: 0.875em;
+  margin-top: 0.2rem;
+  font-size: 0.8em;
   color: #dc3545;
 }
 
@@ -328,26 +363,26 @@ body {
 /* Responsive adjustments */
 @media (max-width: 992px) {
   .cs-candy-title {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
   
   .user-name {
-    font-size: 0.9rem;
-    padding: 4px 10px;
+    font-size: 0.8rem;
+    padding: 3px 8px;
   }
 }
 
 @media (max-width: 768px) {
   .cs-candy-title {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
   
   .cs-card {
-    padding: 1.5rem !important;
+    padding: 1.2rem !important;
   }
   
   .user-name {
-    max-width: 120px;
+    max-width: 100px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -355,20 +390,29 @@ body {
 }
 
 @media (max-width: 576px) {
-  .container-fluid.py-4 {
-    padding: 1rem !important;
+  .container-fluid.py-3 {
+    padding: 0.8rem !important;
   }
   
   .cs-card {
-    border-radius: 0.5rem;
+    border-radius: 0.4rem;
   }
   
   .user-controls {
-    top: 10px;
-    right: 10px;
+    top: 8px;
+    right: 8px;
   }
   
   .user-name {
     display: none;
+  }
+  
+  .cs-btn {
+    padding: 0.65rem 0.9rem;
+    font-size: 0.85rem;
+  }
+  
+  .cs-input {
+    padding: 0.65rem 0.8rem;
   }
 }

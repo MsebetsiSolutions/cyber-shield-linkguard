@@ -433,13 +433,13 @@ def scan():
         tlsok, tlsmsg = tls_ok(final_url)
         snip = fetch_snippet(final_url)
         
-        # VirusTotal results with timeout
+        # results with timeout
         vt = {}
         try:
             vt = vt_lookup(final_url)
         except Exception as vt_error:
-            print(f"VirusTotal lookup failed: {vt_error}")
-            vt = {"enabled": True, "error": "VirusTotal scan failed"}
+            print(f"Cyber Shield lookup failed: {vt_error}")
+            vt = {"enabled": True, "error": "Cyber Shield scan failed"}
         
         if vt.get("error"):
             # Create a basic score based on heuristics only
@@ -513,7 +513,7 @@ def scan_file():
             
             return jsonify({
                 "file": file_info,
-                "virustotal": vt_result,
+                "Cyber Shield": vt_result,
                 "verdict": verdict
             })
         except Exception as e:
@@ -559,8 +559,8 @@ def scan_qr():
                 try:
                     vt = vt_lookup(final_url)
                 except Exception as vt_error:
-                    print(f"VirusTotal lookup failed: {vt_error}")
-                    vt = {"enabled": True, "error": "VirusTotal scan failed"}
+                    print(f"Cyber Shield lookup failed: {vt_error}")
+                    vt = {"enabled": True, "error": "Cyber Shield scan failed"}
                 
                 signals = {
                     "final_url": final_url,
@@ -568,7 +568,7 @@ def scan_qr():
                     "domain": df,
                     "ip": ipaddr,
                     "tls": {"ok": tlsok, "note": tlsmsg},
-                    "virustotal": vt,
+                    "Cyber Shield": vt,
                 }
                 
                 # Use appropriate scoring based on VT availability
