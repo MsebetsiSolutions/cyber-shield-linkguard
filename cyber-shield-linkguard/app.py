@@ -21,11 +21,15 @@ from routes.chats import chats_bp
 from dotenv import load_dotenv
 load_dotenv()
 
+
+
+#======================================================
 # -------------------- Flask setup --------------------
+#======================================================
+
 app = Flask(__name__, static_url_path="", static_folder="public")
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
-# Add secret key for session management
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret-key-change-in-production")
 
 # registering blueprints
@@ -35,14 +39,19 @@ app.register_blueprint(settings_bp)
 app.register_blueprint(scan_results_bp)
 app.register_blueprint(chats_bp, url_prefix='/api/chats')
 
-# Read VirusTotal API key from env (put it in .env as VT_API_KEY=...)
+
 VT_API_KEY = os.getenv("VT_API_KEY", "").strip()
 RATE_LIMIT_PER_MIN = int(os.getenv("RATE_LIMIT_PER_MIN", "60"))
 
-# Simple in-memory rate limiter (use Redis in production)
 _ip_bucket = {}
 
-# -------------------- Heuristics & constants --------------------
+
+
+
+#======================================================
+# -------------- Heuristics & constants ---------------
+#======================================================
+
 UA = {"User-Agent": "CyberShield-LinkGuard/1.0 (+https://msebetsi.co.za)"}
 
 SHORTENER_DOMAINS = set("""
@@ -58,10 +67,14 @@ RISK_BANDS = [
     (60, 100, "DANGER"),
 ]
 
-# Allow file types for upload
+# file types for upload
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx', 'exe', 'zip'}
 
-# -------------------- Helpers --------------------
+
+#======================================================
+# ---------------------- Helpers ----------------------
+#======================================================
+
 def get_db_connection():
     conn = sqlite3.connect('cyber-shield-linkguard.db')
     conn.row_factory = sqlite3.Row
@@ -206,10 +219,9 @@ def vt_lookup(u: str):
         if submit_response.status_code == 200:
             analysis_id = submit_response.json().get('data', {}).get('id')
             if analysis_id:
-                # Wait for analysis to complete (VT needs time to process)
+                # Wait for analysis to complete
                 time.sleep(3)
                 
-                # Get analysis results
                 analysis_response = requests.get(
                     f"https://www.virustotal.com/api/v3/analyses/{analysis_id}",
                     headers={"x-apikey": VT_API_KEY, "accept": "application/json"},
@@ -264,17 +276,11 @@ def vt_file_lookup(file_hash: str):
 def scan_qr_code(image_path):
     """Scan QR code from image file"""
     try:
-        # Read the image
-        image = cv2.imread(image_path)
-        
-        # Convert to grayscale
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        
-        # Use pyzbar to decode QR codes
+        image = cv2.imread(image_path)        
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)        
         decoded_objects = decode(gray)
         
         if decoded_objects:
-            # Return the first decoded QR code content
             return decoded_objects[0].data.decode('utf-8'), "url"
         else:
             return None, "unknown"
@@ -329,7 +335,6 @@ def score(signals: dict) -> dict:
     s = 0
     reasons = []
     
-    # Use VirusTotal data as primary scoring factor
     vt = signals.get("virustotal", {})
     if vt.get("enabled") and not vt.get("error"):
         malicious = vt.get("malicious", 0)
@@ -340,8 +345,7 @@ def score(signals: dict) -> dict:
             # Calculate threat percentage
             threat_percentage = ((malicious + suspicious) / total_engines) * 100
             
-            # Base score primarily on VirusTotal results
-            s = min(100, threat_percentage * 2)  # Scale to 0-100
+            s = min(100, threat_percentage * 2)  # Scale 0-100
             
             if malicious > 0:
                 reasons.append(f"Detected as malicious by {malicious} security engines")
@@ -367,7 +371,6 @@ def score(signals: dict) -> dict:
         s += 5
         reasons.append("Domain did not resolve to IP address")
     
-    # Ensure score is within bounds
     s = max(0, min(100, s))
     
     # Determine risk band
@@ -387,7 +390,6 @@ def score_file(vt_result: dict) -> dict:
             # Calculate threat percentage
             threat_percentage = ((malicious + suspicious) / total_engines) * 100
             
-            # Base score primarily on VirusTotal results
             s = min(100, threat_percentage * 2)
             
             if malicious > 0:
@@ -407,7 +409,11 @@ def score_file(vt_result: dict) -> dict:
     band = next(b for lo, hi, b in RISK_BANDS if lo <= s <= hi)
     return {"score": s, "band": band, "reasons": reasons}
 
-# -------------------- API --------------------
+
+#======================================================
+# ------------------------ API ------------------------
+#======================================================
+
 @app.route("/api/scan", methods=["POST"])
 def scan():
     ip = request.headers.get("X-Forwarded-For", request.remote_addr)
@@ -427,13 +433,13 @@ def scan():
         tlsok, tlsmsg = tls_ok(final_url)
         snip = fetch_snippet(final_url)
         
-        # VirusTotal results with timeout
+        # results with timeout
         vt = {}
         try:
             vt = vt_lookup(final_url)
         except Exception as vt_error:
-            print(f"VirusTotal lookup failed: {vt_error}")
-            vt = {"enabled": True, "error": "VirusTotal scan failed"}
+            print(f"Cyber Shield lookup failed: {vt_error}")
+            vt = {"enabled": True, "error": "Cyber Shield scan failed"}
         
         if vt.get("error"):
             # Create a basic score based on heuristics only
@@ -470,6 +476,7 @@ def scan():
         print(f"URL scan error: {e}")
         return jsonify({"error": "Failed to scan URL"}), 500
 
+
 @app.route("/api/scan_file", methods=["POST"])
 def scan_file():
     ip = request.headers.get("X-Forwarded-For", request.remote_addr)
@@ -492,15 +499,10 @@ def scan_file():
                 temp_path = temp_file.name
             
             # Calculate file hash
-            file_hash = get_file_hash(temp_path)
-            
-            # Lookup file in VirusTotal
-            vt_result = vt_file_lookup(file_hash)
-            
-            # Clean up temp file
+            file_hash = get_file_hash(temp_path)            
+            vt_result = vt_file_lookup(file_hash)            
             os.unlink(temp_path)
             
-            # Prepare response
             file_info = {
                 "filename": filename,
                 "sha256": file_hash,
@@ -511,7 +513,7 @@ def scan_file():
             
             return jsonify({
                 "file": file_info,
-                "virustotal": vt_result,
+                "Cyber Shield": vt_result,
                 "verdict": verdict
             })
         except Exception as e:
@@ -519,6 +521,7 @@ def scan_file():
             return jsonify({"error": "Failed to scan file"}), 500
     
     return jsonify({"error": "File type not allowed"}), 400
+
 
 @app.route("/api/scan_qr", methods=["POST"])
 def scan_qr():
@@ -534,15 +537,13 @@ def scan_qr():
         return jsonify({"error": "No file selected"}), 400
         
     try:
-        # Save image temporarily
+        # save image temporarily
         with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_file:
             file.save(temp_file.name)
             temp_path = temp_file.name
         
-        # Scan QR code
-        decoded_content, content_type = scan_qr_code(temp_path)
-        
-        # Clean up temp file
+        # scan QR code
+        decoded_content, content_type = scan_qr_code(temp_path)        
         os.unlink(temp_path)
         
         if decoded_content:
@@ -553,13 +554,13 @@ def scan_qr():
                 ipaddr = resolve_ip(df.get("host", "")) if df else None
                 tlsok, tlsmsg = tls_ok(final_url)
                 
-                # Get VirusTotal results for the URL
+                # Get results for the URL
                 vt = {}
                 try:
                     vt = vt_lookup(final_url)
                 except Exception as vt_error:
-                    print(f"VirusTotal lookup failed: {vt_error}")
-                    vt = {"enabled": True, "error": "VirusTotal scan failed"}
+                    print(f"Cyber Shield lookup failed: {vt_error}")
+                    vt = {"enabled": True, "error": "Cyber Shield scan failed"}
                 
                 signals = {
                     "final_url": final_url,
@@ -567,7 +568,7 @@ def scan_qr():
                     "domain": df,
                     "ip": ipaddr,
                     "tls": {"ok": tlsok, "note": tlsmsg},
-                    "virustotal": vt,
+                    "Cyber Shield": vt,
                 }
                 
                 # Use appropriate scoring based on VT availability
@@ -599,8 +600,10 @@ def scan_qr():
         print(f"QR scan error: {e}")
         return jsonify({"error": "Failed to scan QR code"}), 500
     
-    
-# -------------------- Static / Health --------------------
+
+#======================================================
+# ----------------- Static / Health -------------------
+#======================================================
 @app.route("/")
 def root():
     return send_from_directory("public", "index.html")
@@ -610,14 +613,17 @@ def static_proxy(path):
 
     if path.startswith('api'):
         return jsonify({'error': 'Not found'}), 404
-    # Allows serving assets like /assets/welcome-bg.png
+    
     return send_from_directory("public", path)
 
 @app.route("/health")
 def health():
     return jsonify({"ok": True})
 
-# -------------------- Entry --------------------
+
+#======================================================
+# ----------------------- Entry -----------------------
+#======================================================
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "5000"))
     app.run(host="0.0.0.0", port=port, debug=True)

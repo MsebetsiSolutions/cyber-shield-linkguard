@@ -143,16 +143,22 @@ const scanCounter = {
 
 // Session-based fetch function (no JWT tokens needed)
 async function fetchWithSession(path, opts={}) {
-  const headers = {
-    'Content-Type': 'application/json',
-    ...opts.headers
-  };
+  // For FormData (file uploads), don't set Content-Type header
+  const headers = {};
+  
+  // Only set Content-Type for JSON requests
+  if (!(opts.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
+  
+  // Merge with any existing headers
+  Object.assign(headers, opts.headers || {});
   
   try {
     const response = await fetch(path, {
       ...opts,
       headers,
-      credentials: 'include' 
+      credentials: 'include' // This ensures session cookies are sent
     });
     
     return response;
@@ -161,6 +167,7 @@ async function fetchWithSession(path, opts={}) {
     throw error;
   }
 }
+
 
 // Save scan result to database
 async function saveScanResult(scanData) {
@@ -200,6 +207,7 @@ const userNameDisplay = $('userNameDisplay');
 const logoutBtn = $('logout');
 const fileScanBtn = $('fileScanBtn'); // Get the File Scan button
 const qrScanBtn = $('qrScanBtn');     // Get the QR Scan button
+const twButton = $('twButton');       // Get the Team Workspace button
 
 function setUserUI(userData){ 
   console.log('Setting user UI with data:', userData); 
@@ -217,19 +225,21 @@ function setUserUI(userData){
       full_name: userData.full_name
     });
 
-    // New logic: Control button states based on plan_mode
+    // Control button states based on plan_mode
     controlScanButtons(userData.plan_mode);
+    controlTeamWorkspaceButton(userData.plan_mode); // New call for Team Workspace button
 
   } else { 
     welcomeMessage.textContent = ''; 
     userNameDisplay.textContent = 'User Name'; // Fallback text
     console.log('User not authenticated, using fallback');
-    // If not authenticated, disable all advanced scan buttons
+    // If not authenticated, disable all advanced scan buttons and hide team workspace
     controlScanButtons(0); // Treat as free plan (plan_mode 0)
+    controlTeamWorkspaceButton(0); // Treat as free plan (plan_mode 0)
   }
 }
 
-// New function to control button states
+// Function to control scan button states (File and QR)
 function controlScanButtons(planMode) {
   const isPaidPlan = planMode === 1 || planMode === 2 || planMode === 3;
 
@@ -248,6 +258,16 @@ function controlScanButtons(planMode) {
     qrScanBtn.title = 'Upgrade to a paid plan to scan QR codes';
   }
   console.log(`Plan Mode: ${planMode}, File Scan Enabled: ${!fileScanBtn.disabled}, QR Scan Enabled: ${!qrScanBtn.disabled}`);
+}
+
+// New function to control Team Workspace button visibility
+function controlTeamWorkspaceButton(planMode) {
+  if (planMode === 2 || planMode === 3) {
+    show(twButton);
+  } else {
+    hide(twButton);
+  }
+  console.log(`Plan Mode: ${planMode}, Team Workspace Visible: ${!twButton.classList.contains('hidden')}`);
 }
 
 // Logout functionality
@@ -333,8 +353,12 @@ function canScan(scanType = 'url') { // Add scanType parameter
   if (scanType === 'file' || scanType === 'qr') {
     if (userPlanMode === 0) { // Free plan cannot access file or QR scans
       toast('Upgrade your plan to unlock file and QR code scanning.');
-      const subscriptionModal = new bootstrap.Modal($('subscriptionModal'));
-      subscriptionModal.show();
+      // Only show modal if it's explicitly about subscription
+      const subscriptionModalElement = $('subscriptionModal');
+      if (subscriptionModalElement) {
+          const subscriptionModal = new bootstrap.Modal(subscriptionModalElement);
+          subscriptionModal.show();
+      }
       return false;
     }
   }
@@ -343,8 +367,12 @@ function canScan(scanType = 'url') { // Add scanType parameter
     return true;
   } else {
     toast('You have reached your daily scan limit. Please subscribe to continue scanning.');
-    const subscriptionModal = new bootstrap.Modal($('subscriptionModal'));
-    subscriptionModal.show();
+    // Only show modal if it's explicitly about subscription
+    const subscriptionModalElement = $('subscriptionModal');
+    if (subscriptionModalElement) {
+        const subscriptionModal = new bootstrap.Modal(subscriptionModalElement);
+        subscriptionModal.show();
+    }
     return false;
   }
 }
@@ -438,6 +466,21 @@ urlInput.addEventListener('keydown', e => {
   } 
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // File Scan functionality
 fileScanBtn.addEventListener('click', () => {
   const f = fileInput.files && fileInput.files[0]; 
@@ -454,11 +497,11 @@ async function runScanFile(file){
     const fd = new FormData(); 
     fd.append('file', file);
     
-    // Use regular fetch for file uploads (not fetchWithSession)
-    const r = await fetch('/api/scan_file', { 
-      method: 'POST', 
-      credentials: 'include', // Include session cookies
+    // Use fetchWithSession instead of regular fetch to include session cookies
+    const r = await fetchWithSession('/api/scan_file', { 
+      method: 'POST',
       body: fd 
+      // Note: fetchWithSession automatically handles credentials
     });
     
     const j = await r.json(); 
@@ -480,15 +523,6 @@ async function runScanFile(file){
     
     $('fileName').textContent = j.file.filename || '(file)'; 
     $('fileSha').textContent = j.file.sha256 ? ' · ' + j.file.sha256 : '';
-    
-    let vtSummary = '';
-    if (j.virustotal.enabled && !j.virustotal.error) {
-      vtSummary = `Malicious: ${j.virustotal.malicious || 0}, Suspicious: ${j.virustotal.suspicious || 0}, ` +
-                 `Harmless: ${j.virustotal.harmless || 0}, Undetected: ${j.virustotal.undetected || 0}`;
-    } else {
-      vtSummary = 'VirusTotal scan not available or failed';
-    }
-    $('vtSummaryFile').textContent = vtSummary;
     
     $('reasonsFile').innerHTML = '';
     
@@ -529,11 +563,20 @@ async function runScanFile(file){
     }
   } catch(e) { 
     console.error('File scan error:', e);
-    toast('Network error'); 
+    toast('Network error: ' + e.message); 
   } finally { 
     setBusy(fileScanBtn, false); 
   }
 }
+
+
+
+
+
+
+
+
+
 
 // QR Scan functionality
 qrScanBtn.addEventListener('click', () => {
@@ -551,11 +594,10 @@ async function runScanQr(file){
     const fd = new FormData(); 
     fd.append('file', file);
     
-    // Use regular fetch for file uploads (not fetchWithSession)
-    const r = await fetch('/api/scan_qr', { 
-      method: 'POST', 
-      credentials: 'include', // Include session cookies
-      body: fd 
+    // Use fetchWithSession instead of regular fetch
+    const r = await fetchWithSession('/api/scan_qr', { 
+      method: 'POST',
+      body: fd
     });
     
     const j = await r.json(); 
@@ -625,7 +667,7 @@ async function runScanQr(file){
     }
   } catch(e) { 
     console.error('QR scan error:', e);
-    toast('Network error'); 
+    toast('Network error: ' + e.message); 
   } finally { 
     setBusy(qrScanBtn, false); 
   }
@@ -909,6 +951,34 @@ function displayStats(statsData) {
     `;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Download stats report
 function downloadStatsReport() {

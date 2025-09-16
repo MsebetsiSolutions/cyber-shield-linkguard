@@ -69,7 +69,7 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         │      ├── routes/ 
         |      |     ├── _pycache_/
         |      |     ├── subscription.py
-        |      |     ├── an_results.py
+        |      |     ├── scan_results.py
         |      |     ├── settings.py
         |      |     ├── chats.py
         |      |     └── authentication.py
@@ -126,6 +126,11 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         |            |     ├── payment_sys.html
         |            |     ├── payment_sys.css
         |            |     └── payment_sys.js
+        |            |
+        |            ├── resetpassword/          
+        |            |     ├── resetpassword.html
+        |            |     ├── resetpassword.css
+        |            |     └── resetpassword.js
         |            |
         |            ├── clarity/          
         |            |     ├── clarity.html

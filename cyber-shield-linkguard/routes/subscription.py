@@ -2,16 +2,32 @@ import sqlite3
 import datetime
 from flask import Blueprint, jsonify, request, session
 
+#======================================================
+# ------------- Subscription Blueprint ---------------
+#======================================================
+
 subscription_bp = Blueprint('subscription', __name__, url_prefix='/api/subscription')
 
+
+#======================================================
+# -------------------- Helpers -----------------------
+#======================================================
+
 def get_db_connection():
+    """Create and return a database connection."""
     conn = sqlite3.connect('cyber-shield-linkguard.db')
     conn.row_factory = sqlite3.Row
     return conn
 
+
+#======================================================
+# ---------------------- API -------------------------
+#======================================================
+
 # Create subscription endpoint
 @subscription_bp.route('/create', methods=['POST'])
 def create_subscription():
+    """Create a new subscription for the authenticated user."""
     try:
         # Check if user is authenticated
         if 'user_id' not in session:
@@ -26,10 +42,10 @@ def create_subscription():
         plan_code = data.get('plan_code')
         price = data.get('price')
         
+        # Validate required fields
         if not all([plan_id, plan_name, plan_code, price]):
             return jsonify({'error': 'Missing required fields'}), 400
         
-        # Map plan names to plan mode values
         plan_mode_map = {
             'free': 0,
             'pro': 1,
@@ -53,7 +69,6 @@ def create_subscription():
                 (plan_mode, user_id)
             )
             
-            # Then create a new subscription record
             cursor.execute('''
                 INSERT INTO subscriptions (user_id, sub_plan, plan_code, price, date_expiry, plan_active)
                 VALUES (?, ?, ?, ?, ?, 1)
@@ -63,7 +78,6 @@ def create_subscription():
             subscription_id = cursor.lastrowid
             conn.close()
             
-            # Update session with new plan mode
             session['plan_mode'] = plan_mode
             
         except sqlite3.Error as e:
@@ -81,11 +95,13 @@ def create_subscription():
         print(f"Subscription creation error: {e}")
         return jsonify({'error': 'Subscription creation failed'}), 500
 
+
 # Get user's current subscription
 @subscription_bp.route('/current', methods=['GET'])
 def get_current_subscription():
+    """Get the current subscription for the authenticated user."""
     try:
-        # Check if user is authenticated
+
         if 'user_id' not in session:
             return jsonify({'error': 'Authentication required'}), 401
             
@@ -95,7 +111,6 @@ def get_current_subscription():
             conn = get_db_connection()
             cursor = conn.cursor()
             
-            # Get the most recent active subscription
             cursor.execute('''
                 SELECT s.*, u.Plan_Mode 
                 FROM subscriptions s 
@@ -114,7 +129,7 @@ def get_current_subscription():
                     'plan_mode': subscription['Plan_Mode']
                 }), 200
             else:
-                # Return default free plan if no subscription found
+
                 return jsonify({
                     'subscription': None,
                     'plan_mode': 0
@@ -128,11 +143,13 @@ def get_current_subscription():
         print(f"Get subscription error: {e}")
         return jsonify({'error': 'Failed to get subscription'}), 500
 
-# Get subscription statistics (moved from scans_bp)
+
+# Get subscription statistics
 @subscription_bp.route('/stats', methods=['GET'])
 def get_subscription_stats():
+    """Get subscription statistics and history for the authenticated user."""
     try:
-        # Check if user is authenticated
+        
         if 'user_id' not in session:
             return jsonify({'error': 'Authentication required'}), 401
             

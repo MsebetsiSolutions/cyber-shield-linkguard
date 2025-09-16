@@ -36,57 +36,170 @@ body {
   color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   min-height: 100vh;
+  font-size: 0.9rem;
 }
 
 /* Logo styling */
 .header-logo {
-  height: 60px;
+  height: 50px;
   width: auto;
   object-fit: contain;
+  transition: transform 0.3s ease;
 }
 
-/* Plan badge styling (from ScannerDash) */
-.plan-badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 700;
+.header-logo:hover {
+  transform: scale(1.05);
 }
 
-.free-plan {
-  background: var(--plan-free);
+/* User Controls */
+.user-controls {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-name {
+  font-weight: 600;
   color: var(--text);
+  background: rgba(255, 255, 255, 0.7);
+  padding: 4px 10px;
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  font-size: 0.85rem;
 }
 
-.pro-plan {
-  background: var(--plan-pro);
+.user-name:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
+}
+
+.user-dropdown {
+  position: relative;
+}
+
+.user-dropdown-btn {
+  background-color: var(--btn-settings);
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
   color: var(--text);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
 }
 
-.team-plan {
-  background: var(--plan-team);
+.user-dropdown-btn:hover {
+  transform: scale(1.05);
+  background-color: var(--btn-report);
+  color: white;
+}
+
+.user-dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  min-width: 180px;
+  border-radius: 0.4rem;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  z-index: 1;
+  margin-top: 8px;
+  padding: 0.4rem 0;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.user-dropdown-content a {
   color: var(--text);
+  padding: 10px 14px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+  transition: background-color 0.3s;
+  border-radius: 0.2rem;
+  margin: 0 0.4rem;
+  font-size: 0.9rem;
 }
 
-.enterprise-plan {
-  background: var(--plan-enterprise);
-  color: #fff;
+.user-dropdown-content a:hover {
+  background-color: var(--btn-settings);
+  transform: translateX(4px);
+}
+
+.user-welcome {
+  padding: 10px 14px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--ring);
+  margin-bottom: 0.4rem;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.logout-btn {
+  background-color: var(--btn-logout);
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: white;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  transform: scale(1.05);
+  background-color: #ff4d3a;
+}
+
+/* Card styling */
+.cs-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 0.4rem;
+  box-shadow: 0 3px 10px rgba(235, 159, 193, .15);
+  border: 1px solid rgba(255,255,255,.6);
+  backdrop-filter: blur(1px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cs-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(235, 159, 193, .25);
 }
 
 /* Current Plan Banner */
 .current-plan-banner {
   background: linear-gradient(90deg, var(--plan-current), #ffffff);
-  border-radius: 0.5rem;
-  border-left: 4px solid var(--candy-green);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 0.4rem;
+  border-left: 3px solid var(--candy-green);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  font-size: 0.9rem;
 }
 
 /* Plan Cards */
 .plan-card {
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
+  border-radius: 0.4rem;
+  padding: 1.2rem;
+  margin-bottom: 0.8rem;
   transition: all 0.3s ease;
   cursor: pointer;
   height: 100%;
@@ -102,7 +215,7 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
+  height: 3px;
   background: transparent;
   transition: all 0.3s ease;
 }
@@ -112,8 +225,8 @@ body {
 }
 
 .plan-card:hover {
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
 }
 
 .plan-free {
@@ -136,23 +249,23 @@ body {
 .plan-card.current-plan {
   background: linear-gradient(135deg, var(--plan-current) 0%, #ffffff 100%);
   border: 2px solid var(--candy-green);
-  box-shadow: 0 0 20px rgba(76, 196, 83, 0.2);
-  transform: scale(1.03);
+  box-shadow: 0 0 15px rgba(76, 196, 83, 0.15);
+  transform: scale(1.02);
 }
 
 .plan-card.current-plan::before {
   background: var(--candy-green);
-  height: 5px;
+  height: 4px;
 }
 
 /* Plan badges */
 .plan-badge {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
+  top: 8px;
+  right: 8px;
+  padding: 0.2rem 0.6rem;
+  border-radius: 16px;
+  font-size: 0.7rem;
   font-weight: 700;
   z-index: 1;
 }
@@ -169,42 +282,43 @@ body {
 
 .plan-header {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
   position: relative;
-  padding-top: 1rem;
+  padding-top: 0.8rem;
 }
 
 .plan-price {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 800;
-  margin: 0.5rem 0;
+  margin: 0.4rem 0;
   color: var(--text);
 }
 
 .plan-subtitle {
   color: var(--muted);
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
 }
 
 .plan-description {
   color: var(--muted);
-  font-size: 0.9rem;
-  min-height: 60px;
+  font-size: 0.85rem;
+  min-height: 50px;
 }
 
 .plan-features {
   list-style: none;
   padding: 0;
-  margin: 1.5rem 0;
-  min-height: 300px;
+  margin: 1.2rem 0;
+  min-height: 250px;
 }
 
 .plan-features li {
-  padding: 0.5rem 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   position: relative;
-  padding-left: 1.5rem;
+  padding-left: 1.2rem;
+  font-size: 0.85rem;
 }
 
 .plan-features li:last-child {
@@ -221,69 +335,84 @@ body {
 
 .plan-action {
   text-align: center;
-  margin-top: 1rem;
+  margin-top: 0.8rem;
 }
 
 .plan-action .btn {
-  border-radius: 20px;
-  padding: 0.5rem 1.5rem;
+  border-radius: 16px;
+  padding: 0.4rem 1.2rem;
   font-weight: 600;
+  font-size: 0.85rem;
 }
 
 /* Security badges */
 .security-badges {
   background: var(--security-badge);
-  border-radius: 0.5rem;
+  border-radius: 0.4rem;
   border: 1px solid var(--ring);
 }
 
 .badge-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
   background: white;
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.04);
+  font-size: 0.85rem;
 }
 
 .badge-item i {
   color: var(--candy-green);
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 /* Text styles */
 .cs-sub {
   color: var(--muted);
   margin: 0;
+  font-size: 0.85rem;
 }
 
 .cs-candy-title {
-  font-weight: 900;
-  letter-spacing: .5px;
-  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: .4px;
+  font-size: 1.5rem;
   background: linear-gradient(90deg, var(--sky), var(--gold), var(--mint));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  animation: gradientShift 3s infinite alternate;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
 }
 
 /* Toast notification */
 #toast {
   position: fixed;
   left: 50%;
-  bottom: 18px;
+  bottom: 15px;
   transform: translateX(-50%);
   background: #111827;
   color: #fff;
-  padding: .6rem .9rem;
-  border-radius: .5rem;
-  box-shadow: 0 极 18px rgba(0, 0, 0, .25);
+  padding: .5rem .8rem;
+  border-radius: .4rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
   opacity: 0;
   pointer-events: none;
   transition: opacity .25s;
-  font-size: .9rem;
+  font-size: 0.85rem;
   z-index: 1000;
+  animation: toastSlideUp 0.3s ease;
+}
+
+@keyframes toastSlideUp {
+  from { transform: translate(-50%, 15px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
 }
 
 #toast.show {
@@ -297,7 +426,7 @@ body {
   }
 
   50% {
-    transform: scale(1.05);
+    transform: scale(1.03);
   }
 
   100% {
@@ -309,123 +438,23 @@ body {
   animation: pulse 2s infinite;
 }
 
-/* User Controls */
-.user-controls {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.user-name {
-  font-weight: 600;
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.7);
-  padding: 5px 12px;
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.user-dropdown {
-  position: relative;
-}
-
-.user-dropbtn {
-  background-color: var(--btn-settings);
-  border: none;
-  cursor: pointer;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  color: var(--text);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-}
-
-.user-dropbtn:hover {
-  transform: scale(1.05);
-  background-color: var(--btn-report);
-  color: white;
-}
-
-.user-dropdown-content {
-  display: none;
-  position: absolute;
-  right: 0;
-  background-color: rgba(255, 255, 255, 0.95);
-  min-width: 200px;
-  border-radius: 0.5rem;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 极.2);
-  backdrop-filter: blur(10px);
-  z-index: 1;
-  margin-top: 10px;
-  padding: 0.5rem 0;
-}
-
-.user-dropdown-content a {
-  color: var(--text);
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-  text-align: left;
-  transition: background-color 0.3s;
-  border-radius: 0.25rem;
-  margin: 0 0.5rem;
-}
-
-.user-dropdown-content a:hover {
-  background-color: var(--btn-settings);
-}
-
-.user-welcome {
-  padding: 12极 16px;
-  font-weight: 600;
-  border-bottom: 1px solid var(--ring);
-  margin-bottom: 0.5rem;
-  color: var(--text);
-}
-
-.logout-btn {
-  background-color: var(--btn-logout);
-  border: none;
-  cursor: pointer;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-}
-
-.logout-btn:hover {
-  transform: scale(1.05);
-  background-color: #ff4d3a;
+.hidden {
+  display: none !important;
 }
 
 /* Responsive adjustments */
 @media (max-width: 992px) {
   .cs-candy-title {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
-
+  
   .user-name {
-    font-size: 0.9rem;
-    padding: 4px 10px;
+    font-size: 0.8rem;
+    padding: 3px 8px;
   }
-
+  
   .plan-features {
-    min-height: 320px;
+    min-height: 270px;
   }
 }
 
@@ -433,53 +462,57 @@ body {
   .plan-card {
     padding: 1rem;
   }
-
+  
   .plan-price {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
-
+  
   .user-name {
-    max-width: 120px;
+    max-width: 100px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
+  
   .plan-features {
     min-height: auto;
   }
-
+  
   .badge-item {
     flex: 0 0 100%;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
   }
 }
 
 @media (max-width: 576px) {
-  .container-fluid.py-4 {
-    padding: 1rem !important;
+  .container-fluid.py-3 {
+    padding: 0.8rem !important;
   }
-
+  
   .cs-card {
-    border-radius: 0.5rem;
+    border-radius: 0.4rem;
   }
-
+  
   .user-controls {
-    top: 10px;
-    right: 10px;
+    top: 8px;
+    right: 8px;
   }
-
+  
   .user-name {
     display: none;
   }
-
-  .d-flex.align-items-center.gap-3 {
+  
+  .d-flex.align-items-center.gap-2 {
     flex-direction: column;
     align-items: flex-start !important;
-    gap: 0.5rem !important;
+    gap: 0.4rem !important;
   }
-}
-
-.hidden {
-  display: none !important;
+  
+  .plan-card {
+    margin-bottom: 0.6rem;
+  }
+  
+  .plan-features li {
+    font-size: 0.8rem;
+  }
 }

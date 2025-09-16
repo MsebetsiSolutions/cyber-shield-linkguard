@@ -3,7 +3,16 @@ from flask import Blueprint, jsonify, request, session
 import bcrypt
 import re
 
+#======================================================
+# ---------------- Settings Blueprint ----------------
+#======================================================
+
 settings_bp = Blueprint('settings', __name__, url_prefix='/api/user')
+
+
+#======================================================
+# -------------------- Helpers -----------------------
+#======================================================
 
 def get_db_connection():
     """Get database connection to the cyber-shield-linkguard database"""
@@ -23,11 +32,15 @@ def validate_phone(phone):
     pattern = r'^\+?[1-9]\d{1,14}$'
     return re.match(pattern, phone) is not None
 
+
+#======================================================
+# ---------------------- API -------------------------
+#======================================================
+
 @settings_bp.route('/profile', methods=['GET'])
 def get_profile():
     """Get user profile information"""
     try:
-        # Check if user is authenticated via session
         if 'user_id' not in session:
             return jsonify({'error': 'Not authenticated'}), 401
         
@@ -36,7 +49,6 @@ def get_profile():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Get user profile information including phone number
         cursor.execute('SELECT id, email, full_name, phone_number, created_at FROM users WHERE id = ?', (user_id,))
         user = cursor.fetchone()
         conn.close()
@@ -63,13 +75,11 @@ def get_profile():
 def update_profile():
     """Update user profile information"""
     try:
-        # Check if user is authenticated via session
         if 'user_id' not in session:
             return jsonify({'error': 'Not authenticated'}), 401
         
         user_id = session['user_id']
         
-        # Get JSON data
         data = request.get_json()
         if not data:
             return jsonify({'error': 'No data provided'}), 400
@@ -141,13 +151,11 @@ def update_profile():
 def update_password():
     """Update user password"""
     try:
-        # Check if user is authenticated via session
         if 'user_id' not in session:
             return jsonify({'error': 'Not authenticated'}), 401
         
         user_id = session['user_id']
         
-        # Get JSON data
         data = request.get_json()
         if not data:
             return jsonify({'error': 'No data provided'}), 400
@@ -155,7 +163,6 @@ def update_password():
         current_password = data.get('currentPassword', '')
         new_password = data.get('newPassword', '')
 
-        # Basic validation
         if not current_password or not new_password:
             return jsonify({'error': 'Current password and new password are required'}), 400
         
@@ -205,13 +212,11 @@ def update_password():
 def delete_account():
     """Delete user account"""
     try:
-        # Check if user is authenticated via session
         if 'user_id' not in session:
             return jsonify({'error': 'Not authenticated'}), 401
         
         user_id = session['user_id']
         
-        # Get JSON data
         data = request.get_json()
         if not data:
             return jsonify({'error': 'No data provided'}), 400
