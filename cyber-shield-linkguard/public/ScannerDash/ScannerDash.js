@@ -207,6 +207,7 @@ const userNameDisplay = $('userNameDisplay');
 const logoutBtn = $('logout');
 const fileScanBtn = $('fileScanBtn'); // Get the File Scan button
 const qrScanBtn = $('qrScanBtn');     // Get the QR Scan button
+const twButton = $('twButton');       // Get the Team Workspace button
 
 function setUserUI(userData){ 
   console.log('Setting user UI with data:', userData); 
@@ -224,19 +225,21 @@ function setUserUI(userData){
       full_name: userData.full_name
     });
 
-    // New logic: Control button states based on plan_mode
+    // Control button states based on plan_mode
     controlScanButtons(userData.plan_mode);
+    controlTeamWorkspaceButton(userData.plan_mode); // New call for Team Workspace button
 
   } else { 
     welcomeMessage.textContent = ''; 
     userNameDisplay.textContent = 'User Name'; // Fallback text
     console.log('User not authenticated, using fallback');
-    // If not authenticated, disable all advanced scan buttons
+    // If not authenticated, disable all advanced scan buttons and hide team workspace
     controlScanButtons(0); // Treat as free plan (plan_mode 0)
+    controlTeamWorkspaceButton(0); // Treat as free plan (plan_mode 0)
   }
 }
 
-// New function to control button states
+// Function to control scan button states (File and QR)
 function controlScanButtons(planMode) {
   const isPaidPlan = planMode === 1 || planMode === 2 || planMode === 3;
 
@@ -255,6 +258,16 @@ function controlScanButtons(planMode) {
     qrScanBtn.title = 'Upgrade to a paid plan to scan QR codes';
   }
   console.log(`Plan Mode: ${planMode}, File Scan Enabled: ${!fileScanBtn.disabled}, QR Scan Enabled: ${!qrScanBtn.disabled}`);
+}
+
+// New function to control Team Workspace button visibility
+function controlTeamWorkspaceButton(planMode) {
+  if (planMode === 2 || planMode === 3) {
+    show(twButton);
+  } else {
+    hide(twButton);
+  }
+  console.log(`Plan Mode: ${planMode}, Team Workspace Visible: ${!twButton.classList.contains('hidden')}`);
 }
 
 // Logout functionality
@@ -340,8 +353,12 @@ function canScan(scanType = 'url') { // Add scanType parameter
   if (scanType === 'file' || scanType === 'qr') {
     if (userPlanMode === 0) { // Free plan cannot access file or QR scans
       toast('Upgrade your plan to unlock file and QR code scanning.');
-      const subscriptionModal = new bootstrap.Modal($('subscriptionModal'));
-      subscriptionModal.show();
+      // Only show modal if it's explicitly about subscription
+      const subscriptionModalElement = $('subscriptionModal');
+      if (subscriptionModalElement) {
+          const subscriptionModal = new bootstrap.Modal(subscriptionModalElement);
+          subscriptionModal.show();
+      }
       return false;
     }
   }
@@ -350,8 +367,12 @@ function canScan(scanType = 'url') { // Add scanType parameter
     return true;
   } else {
     toast('You have reached your daily scan limit. Please subscribe to continue scanning.');
-    const subscriptionModal = new bootstrap.Modal($('subscriptionModal'));
-    subscriptionModal.show();
+    // Only show modal if it's explicitly about subscription
+    const subscriptionModalElement = $('subscriptionModal');
+    if (subscriptionModalElement) {
+        const subscriptionModal = new bootstrap.Modal(subscriptionModalElement);
+        subscriptionModal.show();
+    }
     return false;
   }
 }
@@ -930,6 +951,34 @@ function displayStats(statsData) {
     `;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Download stats report
 function downloadStatsReport() {
