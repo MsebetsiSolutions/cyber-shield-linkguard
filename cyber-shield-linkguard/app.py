@@ -17,6 +17,7 @@ from routes.subscription import subscription_bp
 from routes.settings import settings_bp
 from routes.scan_results import scan_results_bp
 from routes.chats import chats_bp
+from routes.profile import profile_bp
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -38,6 +39,7 @@ app.register_blueprint(subscription_bp)
 app.register_blueprint(settings_bp)
 app.register_blueprint(scan_results_bp)
 app.register_blueprint(chats_bp, url_prefix='/api/chats')
+app.register_blueprint(profile_bp)
 
 
 VT_API_KEY = os.getenv("VT_API_KEY", "").strip()
@@ -289,9 +291,9 @@ def scan_qr_code(image_path):
         return None, "error"
 
 def score_fallback(signals: dict) -> dict:
-    """Fallback scoring when VirusTotal fails"""
+    """Fallback scoring when Cyber Shield fails"""
     s = 0
-    reasons = ["VirusTotal scan unavailable - using heuristic analysis"]
+    reasons = ["Cyber Shield scan unavailable - using heuristic analysis"]
     
     df = signals["domain"]
     if df.get("is_shortener"): 
@@ -335,7 +337,7 @@ def score(signals: dict) -> dict:
     s = 0
     reasons = []
     
-    vt = signals.get("virustotal", {})
+    vt = signals.get("Cyber Shield", {})
     if vt.get("enabled") and not vt.get("error"):
         malicious = vt.get("malicious", 0)
         suspicious = vt.get("suspicious", 0)
@@ -402,7 +404,7 @@ def score_file(vt_result: dict) -> dict:
             reasons.append("No scan results available from security engines")
             s = 50  # Medium risk when no data
     else:
-        reasons.append("VirusTotal scan not available")
+        reasons.append("Cyber Shield scan not available")
         s = 50  # Medium score when scan is unavailable
     
     s = max(0, min(100, s))
@@ -413,6 +415,331 @@ def score_file(vt_result: dict) -> dict:
 #======================================================
 # ------------------------ API ------------------------
 #======================================================
+
+@app.route("/api/users", methods=["GET"])
+def get_users():
+    """Get all users from the database for channel creation"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get all users with only necessary fields (excluding password)
+        cursor.execute("SELECT id, email, full_name, created_at FROM users ORDER BY full_name")
+        users = cursor.fetchall()
+        
+        # Convert to list of dictionaries
+        users_list = []
+        for user in users:
+            users_list.append({
+                'id': user['id'],
+                'email': user['email'],
+                'full_name': user['full_name'],
+                'created_at': user['created_at']
+            })
+        
+        conn.close()
+        return jsonify(users_list)
+    
+    except Exception as e:
+        print(f"Error fetching users: {e}")
+        return jsonify({"error": "Failed to fetch users"}), 500
+
+@app.route("/api/channels", methods=["POST"])
+def create_channel():
+    """Create a new channel"""
+    try:
+        # Check if user is logged in
+        if 'user_id' not in session:
+            return jsonify({"error": "You must be logged in to create a channel"}), 401
+        
+        # Get the current user ID from session
+        creator_id = session['user_id']
+        creator_name = session.get('user_full_name', '')
+        
+        # Debug logging
+        print(f"Creating channel with creator ID: {creator_id}, Name: {creator_name}")
+        print(f"Session data: {session}")
+        
+        data = request.get_json()
+        channel_name = data.get('name')
+        user_ids = data.get('users', [])
+        
+        # Make sure creator_id is an integer
+        try:
+            creator_id = int(creator_id)
+        except (ValueError, TypeError):
+            print(f"Warning: Invalid creator_id format: {creator_id}, defaulting to 1")
+            creator_id = 1
+        
+        # Make sure the creator is included in the members list
+        if creator_id not in user_ids:
+            user_ids.append(creator_id)
+        
+        if not channel_name:
+            return jsonify({"error": "Channel name is required"}), 400
+        
+        conn = sqlite3.connect('cyber-shield-linkguard.db')
+        cursor = conn.cursor()
+        
+        # Check if a channel with this name already exists
+        cursor.execute("SELECT id FROM channels WHERE name = ?", (channel_name,))
+        existing_channel = cursor.fetchone()
+        
+        if existing_channel:
+            # Channel already exists, get its ID and members
+            channel_id = existing_channel[0]
+            
+            # Get existing members
+            cursor.execute("SELECT user_id FROM channel_members WHERE channel_id = ?", (channel_id,))
+            existing_members = [row[0] for row in cursor.fetchall()]
+            
+            # Add any new members not already in the channel
+            for user_id in user_ids:
+                if user_id not in existing_members:
+                    cursor.execute(
+                        "INSERT OR IGNORE INTO channel_members (channel_id, user_id) VALUES (?, ?)",
+                        (channel_id, user_id)
+                    )
+            
+            conn.commit()
+            
+            # Get updated member list
+            cursor.execute("""
+                SELECT u.id, u.full_name 
+                FROM channel_members cm 
+                JOIN users u ON cm.user_id = u.id 
+                WHERE cm.channel_id = ?
+            """, (channel_id,))
+            members = cursor.fetchall()
+            members_list = [{"id": member[0], "full_name": member[1]} for member in members]
+            
+            conn.close()
+            
+            return jsonify({
+                "id": channel_id,
+                "name": channel_name,
+                "members": members_list,
+                "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "message": "Channel already exists, members updated"
+            })
+        else:
+            # Insert new channel if it doesn't exist
+            cursor.execute(
+                "INSERT INTO channels (name, created_by) VALUES (?, ?)",
+                (channel_name, creator_id)  # Using the logged-in user's ID
+            )
+            
+            channel_id = cursor.lastrowid
+            
+            # Add members to the channel
+            for user_id in user_ids:
+                cursor.execute(
+                    "INSERT OR IGNORE INTO channel_members (channel_id, user_id) VALUES (?, ?)",
+                    (channel_id, user_id)
+                )
+            
+            # Get member information for response
+            cursor.execute("""
+                SELECT u.id, u.full_name 
+                FROM channel_members cm 
+                JOIN users u ON cm.user_id = u.id 
+                WHERE cm.channel_id = ?
+            """, (channel_id,))
+            members = cursor.fetchall()
+            members_list = [{"id": member[0], "full_name": member[1]} for member in members]
+            
+            conn.commit()
+            conn.close()
+            
+            return jsonify({
+                "id": channel_id,
+                "name": channel_name,
+                "members": members_list,
+                "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "message": "Channel created successfully"
+            })
+    
+    except Exception as e:
+        print(f"Error creating channel: {e}")
+        return jsonify({"error": "Failed to create channel"}), 500
+
+@app.route("/api/channels/<int:channel_id>", methods=["DELETE"])
+def delete_channel(channel_id):
+    """Delete a channel"""
+    try:
+        conn = sqlite3.connect('cyber-shield-linkguard.db')
+        cursor = conn.cursor()
+        
+        # Delete channel (this will cascade delete channel_members due to ON DELETE CASCADE)
+        cursor.execute("DELETE FROM channels WHERE id = ?", (channel_id,))
+        
+        if cursor.rowcount == 0:
+            conn.close()
+            return jsonify({"error": "Channel not found"}), 404
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            "message": f"Channel {channel_id} deleted successfully"
+        })
+    
+    except Exception as e:
+        print(f"Error deleting channel: {e}")
+        return jsonify({"error": "Failed to delete channel"}), 500
+
+# Debug endpoint to check session data
+@app.route("/api/debug/session", methods=["GET"])
+def debug_session():
+    """Debug endpoint to check current session data"""
+    if 'user_id' not in session:
+        return jsonify({"authenticated": False, "message": "Not logged in"}), 200
+    
+    return jsonify({
+        "authenticated": True,
+        "user_id": session.get('user_id'),
+        "user_full_name": session.get('user_full_name'),
+        "user_email": session.get('user_email'),
+        "plan_mode": session.get('plan_mode'),
+        "session_keys": list(session.keys())
+    }), 200
+
+# Debug endpoint to check user data in database
+@app.route("/api/debug/users", methods=["GET"])
+def debug_users():
+    """Debug endpoint to check users in database"""
+    try:
+        conn = sqlite3.connect('cyber-shield-linkguard.db')
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        # Get all users
+        cursor.execute("SELECT id, full_name, email FROM users")
+        users = cursor.fetchall()
+        
+        user_list = [{
+            "id": user['id'], 
+            "full_name": user['full_name'], 
+            "email": user['email']
+        } for user in users]
+        
+        conn.close()
+        return jsonify({"users": user_list})
+    
+    except Exception as e:
+        print(f"Error fetching users for debug: {e}")
+        return jsonify({"error": "Failed to fetch users"}), 500
+
+@app.route("/api/channels", methods=["GET"])
+def get_channels():
+    """Get all channels with their members"""
+    try:
+        # Log current user from session
+        current_user_id = session.get('user_id')
+        current_user_name = session.get('user_full_name')
+        print(f"Getting channels for session user: ID={current_user_id}, Name={current_user_name}")
+        
+        conn = sqlite3.connect('cyber-shield-linkguard.db')
+        conn.row_factory = sqlite3.Row  # This makes the database return rows as dictionaries
+        cursor = conn.cursor()
+        
+        # Get all channels with creator info
+        cursor.execute("""
+            SELECT c.id, c.name, c.created_at, c.created_by, u.full_name as creator_name
+            FROM channels c
+            LEFT JOIN users u ON c.created_by = u.id
+            ORDER BY c.created_at DESC
+        """)
+        
+        channels = cursor.fetchall()
+        
+        channels_list = []
+        for channel in channels:
+            channel_id = channel['id']
+            name = channel['name']
+            created_at = channel['created_at']
+            creator_id = channel['created_by']
+            creator_name = channel['creator_name']
+            
+            print(f"Channel: {name}, Creator ID: {creator_id}, Creator Name: {creator_name}")
+            
+            # Get members for this channel
+            cursor.execute("""
+                SELECT u.id, u.full_name 
+                FROM channel_members cm 
+                JOIN users u ON cm.user_id = u.id 
+                WHERE cm.channel_id = ?
+                ORDER BY cm.joined_at
+            """, (channel_id,))
+            
+            members = cursor.fetchall()
+            members_list = [{"id": member['id'], "full_name": member['full_name']} for member in members]
+            
+            # Debug: print members
+            print(f"Channel {name} members: {members_list}")
+            
+            channels_list.append({
+                "id": channel_id,
+                "name": name,
+                "created_at": created_at,
+                "created_by": {
+                    "id": creator_id,
+                    "full_name": creator_name or "Unknown User"
+                },
+                "members": members_list
+            })
+        
+        conn.close()
+        return jsonify(channels_list)
+    
+    except Exception as e:
+        print(f"Error fetching channels: {e}")
+        return jsonify({"error": "Failed to fetch channels"}), 500
+
+# Debug endpoint to update a channel's creator
+@app.route("/api/debug/update_channel_creator/<int:channel_id>", methods=["POST"])
+def update_channel_creator(channel_id):
+    """Debug endpoint to update a channel's creator"""
+    try:
+        # Ensure user is logged in
+        if 'user_id' not in session:
+            return jsonify({"error": "You must be logged in to update a channel"}), 401
+        
+        # Get the current user ID from session
+        new_creator_id = session['user_id']
+        
+        conn = sqlite3.connect('cyber-shield-linkguard.db')
+        cursor = conn.cursor()
+        
+        # Check if channel exists
+        cursor.execute("SELECT id FROM channels WHERE id = ?", (channel_id,))
+        if not cursor.fetchone():
+            conn.close()
+            return jsonify({"error": "Channel not found"}), 404
+        
+        # Update the channel's creator
+        cursor.execute(
+            "UPDATE channels SET created_by = ? WHERE id = ?",
+            (new_creator_id, channel_id)
+        )
+        
+        # Make sure user is a member of the channel
+        cursor.execute(
+            "INSERT OR IGNORE INTO channel_members (channel_id, user_id) VALUES (?, ?)",
+            (channel_id, new_creator_id)
+        )
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            "success": True,
+            "message": f"Channel {channel_id} creator updated to user {new_creator_id}"
+        })
+    
+    except Exception as e:
+        print(f"Error updating channel creator: {e}")
+        return jsonify({"error": "Failed to update channel creator"}), 500
 
 @app.route("/api/scan", methods=["POST"])
 def scan():

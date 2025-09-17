@@ -307,6 +307,15 @@ def login():
                 
                 print(f"User {user['email']} logged in successfully. Session created.")
                 print(f"Session data: user_id={session.get('user_id')}, full_name={session.get('user_full_name')}, plan_mode={session.get('plan_mode')}")
+                
+                # Make sure user_id is stored as integer
+                if isinstance(session['user_id'], str):
+                    try:
+                        session['user_id'] = int(session['user_id'])
+                        print(f"Converted user_id from string to integer: {session['user_id']}")
+                    except ValueError:
+                        print(f"Warning: Could not convert user_id to integer: {session['user_id']}")
+                
                 conn.close()
 
                 return jsonify({
@@ -468,3 +477,4 @@ def reset_password(token):
     except Exception as e:
         print(f"Error in reset_password: {e}")
         return jsonify({'error': 'Invalid or expired token'}), 400
+    

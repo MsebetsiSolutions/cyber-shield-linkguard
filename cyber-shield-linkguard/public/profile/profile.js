@@ -120,15 +120,21 @@ async function checkUserPlan() {
 // Fetch user stats
 async function fetchUserStats() {
   try {    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    const response = await fetchWithSession('/api/user/profile/stats');
     
-    const stats = {
-      scansCount: 0
-    };
-    
-    // Animate the counter
-    animateValue($('scansCount'), 0, stats.scansCount, 1500);
+    if (response.ok) {
+      const data = await response.json();
+      
+      const stats = {
+        scansCount: data.total_scans || 0
+      };
+      
+      // Animate the counter
+      animateValue($('scansCount'), 0, stats.scansCount, 1500);
+    } else {
+      console.error('Failed to fetch user stats:', response.status);
+      $('scansCount').textContent = 'N/A';
+    }
     
   } catch (error) {
     console.error('Error fetching user stats:', error);
