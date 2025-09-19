@@ -212,27 +212,31 @@ document.querySelectorAll('.plan-card').forEach(card => {
     const planId = this.dataset.planId;
     const userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
     const planModeMap = { free: 0, pro: 1, team: 2, enterprise: 3 };
+    
     // If this is the current plan, show a message
     if (planModeMap[planId] === userPlanMode) {
       toast(`You're already on the ${planId.charAt(0).toUpperCase() + planId.slice(1)} plan`);
       return;
     }
-    if (planId === 'enterprise') {
-      toast('Please contact our sales team for enterprise pricing');
-      return;
-    }
+    
     // Store selected plan details
     const planName = this.querySelector('h4').textContent;
     const planPrice = planCodes[planId].price;
     const planCode = planCodes[planId].code;
+    
     localStorage.setItem('selectedPlan', JSON.stringify({
       id: planId,
       name: planName,
       price: planPrice,
       code: planCode
     }));
-    // Redirect to payment page
-    window.location.href = '../payment_sys/payment_sys.html';
+    
+    // Redirect to appropriate payment page based on plan
+    if (planId === 'enterprise') {
+      window.location.href = '../enterprice/enterprice_payment/enterprice_payment.html';
+    } else {
+      window.location.href = '../payment_sys/payment_sys.html';
+    }
   });
 });
 // Initialize subscription page

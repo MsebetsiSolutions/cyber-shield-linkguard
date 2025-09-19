@@ -753,6 +753,48 @@ function toggleStatsButton(planMode) {
   }
 }
 
+// Add this function to control Enterprise button visibility
+function controlEnterpriseButton(planMode) {
+  const enterpriseButton = document.getElementById('twEnterprise');
+  if (planMode === 3) { // Only show for Enterprise plan
+    show(enterpriseButton);
+  } else {
+    hide(enterpriseButton);
+  }
+  console.log(`Plan Mode: ${planMode}, Enterprise Button Visible: ${!enterpriseButton.classList.contains('hidden')}`);
+}
+
+function setUserUI(userData){ 
+  console.log('Setting user UI with data:', userData); 
+  
+  if(userData && userData.authenticated){ 
+    const welcomeText = `Welcome, ${userData.full_name || userData.email}!`;
+    const displayName = userData.full_name || userData.email.split('@')[0];
+    
+    welcomeMessage.textContent = welcomeText;
+    userNameDisplay.textContent = displayName;
+    
+    console.log('User UI updated:', {
+      welcomeText,
+      displayName,
+      full_name: userData.full_name
+    });
+
+    // Control button states based on plan_mode
+    controlScanButtons(userData.plan_mode);
+    controlTeamWorkspaceButton(userData.plan_mode);
+    controlEnterpriseButton(userData.plan_mode); 
+
+  } else { 
+    welcomeMessage.textContent = ''; 
+    userNameDisplay.textContent = 'User Name'; 
+    console.log('User not authenticated, using fallback');
+    controlScanButtons(0);
+    controlTeamWorkspaceButton(0);
+    controlEnterpriseButton(0); 
+  }
+}
+
 // Initialize stats charts
 function initStatsCharts() {
   // Destroy existing charts if they exist

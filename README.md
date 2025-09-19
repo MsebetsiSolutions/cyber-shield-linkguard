@@ -82,6 +82,26 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         |            |     ├── signup.css
         |            |     └── signup.js
         |            |
+        |            ├── enterprice/        
+        |            |     ├── enterprise-dashboard.html
+        |            |     ├── enterprise-dashboard.css
+        |            |     ├── enterprise-dashboard.js
+        |            |     |
+        |            |     ├── enter-dash/
+        |            |     |          ├── enterprise-dashboard.html
+        |            |     |          ├── enterprise-dashboard.css
+        |            |     |          └── enterprise-dashboard.js
+        |            |     |
+        |            |     ├── enterprice_payment/
+        |            |     |          ├── enterprice_payment.html
+        |            |     |          ├── enterprice_payment.css
+        |            |     |          └── enterprice_payment.js
+        |            |     |
+        |            |     └── start-enter/
+        |            |                ├── start-enter.html
+        |            |                ├── start-enter.css
+        |            |                └── start-enter.js
+        |            |
         |            ├── profile/        
         |            |     ├── profile.html
         |            |     ├── profile.css
@@ -150,3 +170,6 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         |                
         └── README.md
 
+
+
+---
