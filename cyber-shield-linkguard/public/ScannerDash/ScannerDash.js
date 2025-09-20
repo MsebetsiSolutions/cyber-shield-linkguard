@@ -86,18 +86,18 @@ const scanCounter = {
     // Reset scan count daily
     if (lastScanDate !== today) {
       localStorage.setItem('lastScanDate', today);
-      localStorage.setItem('remainingScans', '5');
-      return 5;
+      localStorage.setItem('remainingScans', '1'); // Changed from 5 to 1
+      return 1; // Changed from 5 to 1
     }
     
-    return parseInt(localStorage.getItem('remainingScans') || '5'); 
+    return parseInt(localStorage.getItem('remainingScans') || '1'); // Changed from 5 to 1
   },
   set remaining(v){ 
     localStorage.setItem('remainingScans', v.toString()); 
     localStorage.setItem('lastScanDate', new Date().toDateString()); // Update date when count changes
   },
   reset(){ 
-    this.remaining = 5; 
+    this.remaining = 1; // Changed from 5 to 1
     localStorage.setItem('lastScanDate', new Date().toDateString());
   },
   decrement(){ 
@@ -132,10 +132,6 @@ const scanCounter = {
       
       if(this.remaining === 0) {
         scanCounterEl.classList.add('text-danger');
-      } else if(this.remaining <= 2) {
-        scanCounterEl.classList.add('text-warning');
-      } else {
-        scanCounterEl.classList.add('text-success');
       }
     }
   }
@@ -158,7 +154,7 @@ async function fetchWithSession(path, opts={}) {
     const response = await fetch(path, {
       ...opts,
       headers,
-      credentials: 'include' // This ensures session cookies are sent
+      credentials: 'include' 
     });
     
     return response;
@@ -205,9 +201,9 @@ async function saveScanResult(scanData) {
 const welcomeMessage = $('welcomeMessage');
 const userNameDisplay = $('userNameDisplay');
 const logoutBtn = $('logout');
-const fileScanBtn = $('fileScanBtn'); // Get the File Scan button
-const qrScanBtn = $('qrScanBtn');     // Get the QR Scan button
-const twButton = $('twButton');       // Get the Team Workspace button
+const fileScanBtn = $('fileScanBtn'); 
+const qrScanBtn = $('qrScanBtn');     
+const twButton = $('twButton');     
 
 function setUserUI(userData){ 
   console.log('Setting user UI with data:', userData); 
@@ -225,17 +221,17 @@ function setUserUI(userData){
       full_name: userData.full_name
     });
 
-    // Control button states based on plan_mode
+    // button states based on plan_mode
     controlScanButtons(userData.plan_mode);
-    controlTeamWorkspaceButton(userData.plan_mode); // New call for Team Workspace button
+    controlTeamWorkspaceButton(userData.plan_mode);
 
   } else { 
     welcomeMessage.textContent = ''; 
     userNameDisplay.textContent = 'User Name'; // Fallback text
     console.log('User not authenticated, using fallback');
-    // If not authenticated, disable all advanced scan buttons and hide team workspace
-    controlScanButtons(0); // Treat as free plan (plan_mode 0)
-    controlTeamWorkspaceButton(0); // Treat as free plan (plan_mode 0)
+
+    controlScanButtons(0); 
+    controlTeamWorkspaceButton(0); 
   }
 }
 
@@ -243,18 +239,17 @@ function setUserUI(userData){
 function controlScanButtons(planMode) {
   const isPaidPlan = planMode === 1 || planMode === 2 || planMode === 3;
 
-  // URL Scan button is always enabled (subject to daily limit)
   $('scanBtn').disabled = false; 
 
   if (isPaidPlan) {
     fileScanBtn.disabled = false;
     qrScanBtn.disabled = false;
-    fileScanBtn.title = ''; // Clear title if previously set
-    qrScanBtn.title = '';   // Clear title if previously set
+    fileScanBtn.title = ''; 
+    qrScanBtn.title = '';  
   } else {
     fileScanBtn.disabled = true;
     qrScanBtn.disabled = true;
-    fileScanBtn.title = 'Upgrade to a paid plan to scan files'; // Tooltip for disabled buttons
+    fileScanBtn.title = 'Upgrade to a paid plan to scan files';
     qrScanBtn.title = 'Upgrade to a paid plan to scan QR codes';
   }
   console.log(`Plan Mode: ${planMode}, File Scan Enabled: ${!fileScanBtn.disabled}, QR Scan Enabled: ${!qrScanBtn.disabled}`);
@@ -348,12 +343,12 @@ function setBadge(el, band){
 
 // Check if user can scan (now also considers plan mode for file/qr scans)
 function canScan(scanType = 'url') { // Add scanType parameter
-  let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0'); // Get plan_mode from session storage
+  let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0'); 
   
   if (scanType === 'file' || scanType === 'qr') {
-    if (userPlanMode === 0) { // Free plan cannot access file or QR scans
+    if (userPlanMode === 0) { 
       toast('Upgrade your plan to unlock file and QR code scanning.');
-      // Only show modal if it's explicitly about subscription
+      
       const subscriptionModalElement = $('subscriptionModal');
       if (subscriptionModalElement) {
           const subscriptionModal = new bootstrap.Modal(subscriptionModalElement);
@@ -363,7 +358,7 @@ function canScan(scanType = 'url') { // Add scanType parameter
     }
   }
 
-  if (scanCounter.remaining > 0 || userPlanMode > 0) { // Paid users have unlimited scans
+  if (scanCounter.remaining > 0 || userPlanMode > 0) {
     return true;
   } else {
     toast('You have reached your daily scan limit. Please subscribe to continue scanning.');

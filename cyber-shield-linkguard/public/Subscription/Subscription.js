@@ -49,7 +49,7 @@ function setUserUI(userData) {
     });
     // Update current plan display based on plan_mode
     updateCurrentPlanDisplay(userData.plan_mode);
-    updatePlanBadge(userData.plan_mode); // Update the plan badge in header
+    updatePlanBadge(userData.plan_mode); 
   } else {
     if (welcomeMessage) welcomeMessage.textContent = '';
     if (userNameDisplay) userNameDisplay.textContent = 'User Name';
@@ -120,9 +120,9 @@ function updateScanCounterUI(planMode) {
     // Reset scan count daily
     if (lastScanDate !== today) {
       localStorage.setItem('lastScanDate', today);
-      localStorage.setItem('remainingScans', '5');
+      localStorage.setItem('remainingScans', '1');
     } else {
-      remainingScans = parseInt(localStorage.getItem('remainingScans') || '5');
+      remainingScans = parseInt(localStorage.getItem('remainingScans') || '1');
     }
     if (remainingScansEl) remainingScansEl.textContent = remainingScans;
     // Color coding based on remaining scans
@@ -130,14 +130,11 @@ function updateScanCounterUI(planMode) {
       scanCounter.classList.remove('text-danger', 'text-warning', 'text-success');
       if (remainingScans === 0) {
         scanCounter.classList.add('text-danger');
-      } else if (remainingScans <= 2) {
-        scanCounter.classList.add('text-warning');
-      } else {
-        scanCounter.classList.add('text-success');
       }
     }
   }
 }
+
 // Check user plan function
 async function checkUserPlan() {
   try {
