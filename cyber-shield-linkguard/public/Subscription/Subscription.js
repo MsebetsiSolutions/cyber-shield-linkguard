@@ -34,6 +34,8 @@ const scanCounterEl = $('scanCounter');
 const remainingScansEl = $('remainingScans');
 const currentPlanBanner = $('currentPlanBanner');
 const currentPlanText = $('currentPlanText');
+const manageSubscriptionBtn = $('manageSubscriptionBtn'); // Add this line
+
 function setUserUI(userData) {
   console.log('Setting user UI with data:', userData);
   if (userData && userData.authenticated) {
@@ -49,13 +51,29 @@ function setUserUI(userData) {
     });
     // Update current plan display based on plan_mode
     updateCurrentPlanDisplay(userData.plan_mode);
-    updatePlanBadge(userData.plan_mode); 
+    updatePlanBadge(userData.plan_mode);
+    // Control visibility of Increase Scans button
+    controlIncreaseScansButton(userData.plan_mode); // Add this line
   } else {
     if (welcomeMessage) welcomeMessage.textContent = '';
     if (userNameDisplay) userNameDisplay.textContent = 'User Name';
     console.log('User not authenticated, using fallback');
   }
 }
+
+// Add this new function to control the Increase Scans button visibility
+function controlIncreaseScansButton(planMode) {
+  if (manageSubscriptionBtn) {
+    if (planMode === 0) {
+      // Show button for free tier users
+      manageSubscriptionBtn.classList.remove('hidden');
+    } else {
+      // Hide button for paid users (plan_mode 1, 2, or 3)
+      manageSubscriptionBtn.classList.add('hidden');
+    }
+  }
+}
+
 // Update current plan display based on plan_mode
 function updateCurrentPlanDisplay(planMode) {
   const planMap = {
@@ -116,7 +134,7 @@ function updateScanCounterUI(planMode) {
     // Update scan count display
     const today = new Date().toDateString();
     const lastScanDate = localStorage.getItem('lastScanDate');
-    let remainingScans = 5;
+    let remainingScans = 1;
     // Reset scan count daily
     if (lastScanDate !== today) {
       localStorage.setItem('lastScanDate', today);
@@ -196,13 +214,15 @@ if (userDropdownBtn && userDropdown) {
     e.stopPropagation();
   });
 }
+
 // Subscription plan codes and prices
 const planCodes = {
   free: { code: 'CSLG-FREE-001', price: 0 },
   pro: { code: 'CSLG-PRO-002', price: 75 },
   team: { code: 'CSLG-TEAM-003', price: 200 },
-  enterprise: { code: 'CSLG-ENT-004', price: 0 } // Contact sales for price
+  enterprise: { code: 'CSLG-ENT-004', price: 0 } 
 };
+
 // Plan selection functionality
 document.querySelectorAll('.plan-card').forEach(card => {
   card.addEventListener('click', function () {
@@ -210,7 +230,6 @@ document.querySelectorAll('.plan-card').forEach(card => {
     const userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
     const planModeMap = { free: 0, pro: 1, team: 2, enterprise: 3 };
     
-    // If this is the current plan, show a message
     if (planModeMap[planId] === userPlanMode) {
       toast(`You're already on the ${planId.charAt(0).toUpperCase() + planId.slice(1)} plan`);
       return;
