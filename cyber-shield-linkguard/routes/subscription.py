@@ -2,6 +2,7 @@ import sqlite3
 import datetime
 from flask import Blueprint, jsonify, request, session
 
+
 #======================================================
 # ------------- Subscription Blueprint ---------------
 #======================================================
@@ -53,15 +54,26 @@ def create_subscription():
         except ValueError:
             return jsonify({'error': 'Invalid price format'}), 400
         
-        plan_mode_map = {
-            'free': 0,
-            'pro': 1,
-            'team': 2,
-            'enterprise': 3
-        }
-        
-        # Calculate expiry date (30 days from now)
-        expiry_date = (datetime.datetime.now() + datetime.timedelta(days=30)).isoformat()
+        # handling for "increase" plan
+        if plan_id == 'increase':
+            # For increase plan, keep user's plan_mode at 0 
+            plan_mode = 0
+
+            # expiry to 7 days
+            expiry_date = (datetime.datetime.now() + datetime.timedelta(days=7)).isoformat()
+            increased = 'yes'
+        else:
+            # Regular plan handling
+            plan_mode_map = {
+                'free': 0,
+                'pro': 1,
+                'team': 2,
+                'enterprise': 3
+            }
+            plan_mode = plan_mode_map.get(plan_id, 0)
+            # Set expiry to 30 days from now
+            expiry_date = (datetime.datetime.now() + datetime.timedelta(days=30)).isoformat()
+            increased = None
         
         user_id = session['user_id']
         
@@ -69,12 +81,12 @@ def create_subscription():
             conn = get_db_connection()
             cursor = conn.cursor()
             
-            # First, update the user's plan mode
-            plan_mode = plan_mode_map.get(plan_id, 0)
-            cursor.execute(
-                'UPDATE users SET Plan_Mode = ? WHERE id = ?',
-                (plan_mode, user_id)
-            )
+            # Only update user's plan mode if it's not an "increase" plan
+            if plan_id != 'increase':
+                cursor.execute(
+                    'UPDATE users SET Plan_Mode = ? WHERE id = ?',
+                    (plan_mode, user_id)
+                )
             
             # Deactivate any existing active subscriptions
             cursor.execute(
@@ -84,15 +96,17 @@ def create_subscription():
             
             # Insert new subscription
             cursor.execute('''
-                INSERT INTO subscriptions (user_id, sub_plan, plan_code, price, date_expiry, plan_active, team_size)
-                VALUES (?, ?, ?, ?, ?, 1, ?)
-            ''', (user_id, plan_name, plan_code, price, expiry_date, team_size))
+                INSERT INTO subscriptions (user_id, sub_plan, plan_code, price, date_expiry, plan_active, team_size, increased)
+                VALUES (?, ?, ?, ?, ?, 1, ?, ?)
+            ''', (user_id, plan_name, plan_code, price, expiry_date, team_size, increased))
             
             conn.commit()
             subscription_id = cursor.lastrowid
             conn.close()
             
-            session['plan_mode'] = plan_mode
+            # Update session only if it's not an "increase" plan
+            if plan_id != 'increase':
+                session['plan_mode'] = plan_mode
             
             return jsonify({
                 'message': 'Subscription created successfully',
@@ -108,7 +122,6 @@ def create_subscription():
     except Exception as e:
         print(f"Subscription creation error: {e}")
         return jsonify({'error': 'Subscription creation failed'}), 500
-
 
 # Get user's current subscription
 @subscription_bp.route('/current', methods=['GET'])

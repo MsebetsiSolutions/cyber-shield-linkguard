@@ -34,7 +34,7 @@ const scanCounterEl = $('scanCounter');
 const remainingScansEl = $('remainingScans');
 const currentPlanBanner = $('currentPlanBanner');
 const currentPlanText = $('currentPlanText');
-const manageSubscriptionBtn = $('manageSubscriptionBtn'); // Add this line
+const manageSubscriptionBtn = $('manageSubscriptionBtn');
 
 function setUserUI(userData) {
   console.log('Setting user UI with data:', userData);
@@ -53,7 +53,7 @@ function setUserUI(userData) {
     updateCurrentPlanDisplay(userData.plan_mode);
     updatePlanBadge(userData.plan_mode);
     // Control visibility of Increase Scans button
-    controlIncreaseScansButton(userData.plan_mode); // Add this line
+    controlIncreaseScansButton(userData.plan_mode);
   } else {
     if (welcomeMessage) welcomeMessage.textContent = '';
     if (userNameDisplay) userNameDisplay.textContent = 'User Name';
@@ -61,7 +61,7 @@ function setUserUI(userData) {
   }
 }
 
-// Add this new function to control the Increase Scans button visibility
+// Control the Increase Scans button visibility
 function controlIncreaseScansButton(planMode) {
   if (manageSubscriptionBtn) {
     if (planMode === 0) {
@@ -106,6 +106,7 @@ function updateCurrentPlanDisplay(planMode) {
     }
   }
 }
+
 // Update plan badge in header
 function updatePlanBadge(planMode) {
   const planBadge = document.getElementById('planMode');
@@ -123,6 +124,7 @@ function updatePlanBadge(planMode) {
   planBadge.classList.add(plan.class);
   planBadge.textContent = plan.text;
 }
+
 // Update scan counter UI based on plan mode
 function updateScanCounterUI(planMode) {
   const scanCounter = $('scanCounter');
@@ -168,6 +170,7 @@ async function checkUserPlan() {
   }
   return 0; // Default to free plan
 }
+
 // Logout functionality
 function handleLogout() {
   try {
@@ -191,12 +194,15 @@ function handleLogout() {
     window.location.href = '../index.html';
   }, 1000);
 }
+
 if (logoutBtn) {
   logoutBtn.addEventListener('click', handleLogout);
 }
+
 // User dropdown functionality
 const userDropdownBtn = $('userDropdownBtn');
 const userDropdown = $('userDropdown');
+
 // Toggle desktop dropdown
 if (userDropdownBtn && userDropdown) {
   userDropdownBtn.addEventListener('click', (e) => {
@@ -220,8 +226,25 @@ const planCodes = {
   free: { code: 'CSLG-FREE-001', price: 0 },
   pro: { code: 'CSLG-PRO-002', price: 75 },
   team: { code: 'CSLG-TEAM-003', price: 200 },
-  enterprise: { code: 'CSLG-ENT-004', price: 0 } 
+  enterprise: { code: 'CSLG-ENT-004', price: 0 },
+  increase: { code: 'CSLG-INCREASE-001', price: 25 }
 };
+
+// Add event listener for the Increase Scans button
+if (manageSubscriptionBtn) {
+  manageSubscriptionBtn.addEventListener('click', function() {
+    // Store selected plan details for the Increase Scans option
+    localStorage.setItem('selectedPlan', JSON.stringify({
+      id: 'increase',
+      name: 'Increase Scans',
+      price: planCodes.increase.price,
+      code: planCodes.increase.code
+    }));
+    
+    // Redirect to payment page
+    window.location.href = '../payment_sys/payment_sys.html';
+  });
+}
 
 // Plan selection functionality
 document.querySelectorAll('.plan-card').forEach(card => {
@@ -255,6 +278,7 @@ document.querySelectorAll('.plan-card').forEach(card => {
     }
   });
 });
+
 // Initialize subscription page
 (async function initSubscriptionPage() {
   console.log('Subscription page initializing...');
