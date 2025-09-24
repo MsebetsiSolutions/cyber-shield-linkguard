@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f6d9e5" />
+  <title>Cyber Shield LinkGuard - Intelligence Scanner</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --bg-pink: #f6d9e5;
+      --card: #ffffff;
+      --text: #2b2b2b;
+      --muted: #6b7280;
+      --mint: #00ff99;
+      --sky: #00b3ff;
+      --gold: #ffcc00;
+      --candy-red: #ff5b5b;
+      --candy-orange: #ffa64d;
+      --candy-green: #4cc453;
+      --ring: #e9b7c9;
+      --btn-login: #ff9f80;
+      --btn-signup: #a7efb6;
+      --btn-guest: #c4ebf9; 
+      --btn-settings: #d6bbfc;
+      --btn-report: #ff9f80; 
+      --btn-logout: #ff6f61;
+      --btn-dropdown: #d6bbfc;
+      --btn-subscribe: #ffd166;
+      --stat-malicious: #ff6f61;
+      --stat-suspicious: #ffc36b;
+      --stat-harmless: #a7efb6;
+      --stat-undetected: #c4ebf9;
+      --plan-free: #c4ebf9;
+      --plan-pro: #a7efb6;
+      --plan-team: #ffd166;
+      --plan-enterprise: #ff9f80;
+    }
+
+    body {
+      background: var(--bg-pink);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      min-height: 100vh;
+    }
+
+    /* User Controls */
+    .user-controls {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.7);
+      padding: 5px 12px;
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-dropdown-btn {
+      background-color: var(--btn-settings);
+      border: none;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: var(--text);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .logout-btn {
+      background-color: var(--btn-logout);
+      border: none;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Card styling */
+    .cs-card {
+      background: var(--card);
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 12px rgba(235, 159, 193, .15);
+      border: 1px solid var(--ring);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Inputs */
+    .cs-input {
+      background: #fff;
+      border: 2px solid var(--ring);
+      border-radius: 0.5rem;
+      padding: .9rem 1rem;
+      outline: none;
+      width: 100%;
+    }
+
+    .cs-input:focus {
+      box-shadow: 0 0 0 4px rgba(233,183,201,.35);
+    }
+
+    /* Buttons */
+    .cs-btn {
+      background: #fff;
+      color: var(--text);
+      font-weight: 800;
+      letter-spacing: .25px;
+      padding: .9rem 1.2rem;
+      border-radius: 0.5rem;
+      border: 2px solid #ffffffaa;
+      box-shadow: 0 4px 0 #d5a3b9, 0 6px 12px rgba(201,113,155,.35);
+      transition: transform .05s ease;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cs-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .cs-btn:active { 
+      transform: translateY(2px); 
+    }
+
+    .btn-login { background-color: var(--btn-login); color: #fff; }
+    .btn-signup { background-color: var(--btn-signup); color: var(--text); }
+    .btn-guest { background-color: var(--btn-guest); color: var(--text); }
+
+    /* Text styles */
+    .cs-sub { 
+      color: var(--muted); 
+      margin: 0;
+    }
+
+    /* Risk badges */
+    .risk-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .risk-high {
+      background-color: rgba(255, 91, 91, 0.15);
+      color: var(--candy-red);
+    }
+
+    .risk-medium {
+      background-color: rgba(255, 166, 77, 0.15);
+      color: var(--candy-orange);
+    }
+
+    .risk-low {
+      background-color: rgba(0, 179, 255, 0.15);
+      color: var(--sky);
+    }
+
+    .risk-none {
+      background-color: rgba(76, 196, 83, 0.15);
+      color: var(--candy-green);
+    }
+
+    .keyword-pill {
+      display: inline-block;
+      background: rgba(255, 77, 141, 0.1);
+      color: #ff4d8d;
+      padding: 4px 10px;
+      border-radius: 12px;
+      margin: 2px;
+      font-size: 0.8rem;
+    }
+
+    .source-badge {
+      background: linear-gradient(135deg, var(--sky), var(--mint));
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .scanning-animation {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 77, 141, 0.3);
+      border-radius: 50%;
+      border-top-color: #ff4d8d;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .risk-meter {
+      height: 10px;
+      border-radius: 5px;
+      background: linear-gradient(to right, var(--candy-green), var(--candy-orange), var(--candy-red));
+      margin: 10px 0;
+    }
+
+    .meter-pointer {
+      width: 20px;
+      height: 20px;
+      background: white;
+      border: 3px solid #ff4d8d;
+      border-radius: 50%;
+      position: relative;
+      top: -25px;
+      transition: left 1s ease;
+    }
+
+    .nav-pills .nav-link {
+      color: var(--text);
+      border-radius: 12px;
+      margin-right: 0.5rem;
+      padding: 0.5rem 1rem;
+    }
+
+    .nav-pills .nav-link.active {
+      background: linear-gradient(135deg, #ff4d8d, #ff80ab);
+      color: white;
+    }
+
+    .result-card {
+      border-left: 4px solid #ff4d8d;
+      transition: all 0.3s ease;
+    }
+
+    .result-card:hover {
+      transform: translateX(5px);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- User Info and Controls -->
+  <div class="user-controls">
+    <span id="userNameDisplay" class="user-name">Intelligence Analyst</span>
+    <button class="user-dropdown-btn">
+      <i class="bi bi-person-circle"></i>
+    </button>
+    <button class="logout-btn">
+      <i class="bi bi-box-arrow-right"></i>
+    </button>
+  </div>
+
+  <div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h1 class="mb-0"><i class="bi bi-shield-check me-2"></i>Intelligence Scanner</h1>
+            <div class="d-flex align-items-center gap-3 mt-1">
+              <div id="scanCounter" class="cs-sub small">Scans remaining: <span id="remainingScans">10</span>/10</div>
+              <div id="planMode" class="risk-badge risk-none">PROFESSIONAL TIER</div>
+              <button class="cs-btn btn-guest" onclick="window.location.href='ScannerDash.html'" style="width: auto;">
+                <i class="bi bi-arrow-left me-2"></i>Back to Main Scanner
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Left Column - Input Form -->
+      <div class="col-12 col-lg-5 mb-4">
+        <div class="cs-card p-4 h-100">
+          <h3 class="text-center mb-4"><i class="bi bi-search-heart me-2"></i>Comprehensive Background Check</h3>
+          <p class="text-center cs-sub mb-4">Advanced vetting for bilateral meeting participants</p>
+
+          <!-- Search Form -->
+          <div class="mb-4">
+            <h4 class="mb-3"><i class="bi bi-person-vcard me-2"></i>Subject Information</h4>
+            
+            <div class="mb-3">
+              <label class="form-label">Full Name</label>
+              <input id="fullName" class="cs-input form-control" placeholder="e.g. John Alexander Smith" />
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Known Aliases</label>
+              <input id="aliases" class="cs-input form-control" placeholder="Separate with commas" />
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Company/Organization</label>
+              <input id="companyName" class="cs-input form-control" placeholder="e.g. Example Corp" />
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Position/Role</label>
+              <input id="position" class="cs-input form-control" placeholder="e.g. CEO, Director, etc." />
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h4 class="mb-3"><i class="bi bi-geo-alt me-2"></i>Location Information</h4>
+            
+            <div class="mb-3">
+              <label class="form-label">Country of Residence</label>
+              <input id="country" class="cs-input form-control" placeholder="e.g. United States" />
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Countries of Operation</label>
+              <input id="operationCountries" class="cs-input form-control" placeholder="Separate with commas" />
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h4 class="mb-3"><i class="bi bi-link-45deg me-2"></i>Digital Footprint</h4>
+            
+            <div class="mb-3">
+              <label class="form-label">Domain/Website</label>
+              <input id="domainInput" class="cs-input form-control" placeholder="e.g. example.com" />
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Email Address</label>
+              <input id="emailInput" class="cs-input form-control" placeholder="e.g. john@example.com" />
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Social Media Profiles</label>
+              <input id="socialMedia" class="cs-input form-control" placeholder="LinkedIn, Twitter, etc. URLs" />
+            </div>
+          </div>
+            
+          <button id="intelScanBtn" class="cs-btn btn-login w-100 mt-3">
+            <i class="bi bi-shield-check me-2"></i>RUN INTELLIGENCE SCAN
+          </button>
+
+          <!-- AI Assistant Section -->
+          <div class="mt-4">
+            <h4 class="mb-3"><i class="bi bi-robot me-2"></i>AI-Powered Analysis</h4>
+            <div class="cs-card result-card">
+              <p class="cs-sub">Our system uses advanced AI to:</p>
+              <ul class="cs-sub">
+                <li>Scan thousands of data sources in seconds</li>
+                <li>Identify connections and patterns</li>
+                <li>Analyze sentiment and risk factors</li>
+                <li>Generate comprehensive threat assessments</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column - Results -->
+      <div class="col-12 col-lg-7">
+        <div class="cs-card p-4 h-100">
+          <h3 class="text-center mb-4"><i class="bi bi-file-earmark-text me-2"></i>Intelligence Report</h3>
+          
+          <!-- Overall Risk Assessment -->
+          <div class="mb-4 text-center hidden" id="overallRisk">
+            <h4>Overall Threat Assessment</h4>
+            <div class="risk-meter">
+              <div id="riskPointer" class="meter-pointer" style="left: 10%;"></div>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span>Low Risk</span>
+              <span>Medium Risk</span>
+              <span>High Risk</span>
+            </div>
+            <div id="riskScore" class="display-4 fw-bold mt-2">0%</div>
+            <span id="riskLabel" class="risk-badge risk-none">No significant risks found</span>
+          </div>
+
+          <!-- Results Tabs -->
+          <ul class="nav nav-pills mb-3" id="resultsTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="legal-tab" data-bs-toggle="pill" data-bs-target="#legal" type="button" role="tab">Legal & Regulatory</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="financial-tab" data-bs-toggle="pill" data-bs-target="#financial" type="button" role="tab">Financial</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="security-tab" data-bs-toggle="pill" data-bs-target="#security" type="button" role="tab">Security</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="reputation-tab" data-bs-toggle="pill" data-bs-target="#reputation" type="button" role="tab">Reputation</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="connections-tab" data-bs-toggle="pill" data-bs-target="#connections" type="button" role="tab">Connections</button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="resultsTabContent">
+            <!-- Legal Tab -->
+            <div class="tab-pane fade show active" id="legal" role="tabpanel">
+              <div id="legalResults">
+                <p class="text-center cs-sub">No legal data available yet. Run a scan to see results.</p>
+              </div>
+            </div>
+            
+            <!-- Financial Tab -->
+            <div class="tab-pane fade" id="financial" role="tabpanel">
+              <div id="financialResults">
+                <p class="text-center cs-sub">No financial data available yet. Run a scan to see results.</p>
+              </div>
+            </div>
+            
+            <!-- Security Tab -->
+            <div class="tab-pane fade" id="security" role="tabpanel">
+              <div id="securityResults">
+                <p class="text-center cs-sub">No security data available yet. Run a scan to see results.</p>
+              </div>
+            </div>
+            
+            <!-- Reputation Tab -->
+            <div class="tab-pane fade" id="reputation" role="tabpanel">
+              <div id="reputationResults">
+                <p class="text-center cs-sub">No reputation data available yet. Run a scan to see results.</p>
+              </div>
+            </div>
+            
+            <!-- Connections Tab -->
+            <div class="tab-pane fade" id="connections" role="tabpanel">
+              <div id="connectionsResults">
+                <p class="text-center cs-sub">No connection data available yet. Run a scan to see results.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Report Actions -->
+          <div class="d-flex gap-2 mt-4 hidden" id="reportActions">
+            <button class="cs-btn btn-guest">
+              <i class="bi bi-download me-2"></i>Export PDF
+            </button>
+            <button class="cs-btn btn-login">
+              <i class="bi bi-share me-2"></i>Share Report
+            </button>
+            <button class="cs-btn btn-signup">
+              <i class="bi bi-flag me-2"></i>Flag for Review
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="text-center cs-sub mt-4">© Msebetsi Solutions Pty Ltd | For authorized use only</footer>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Elements
+      const scanBtn = document.getElementById('intelScanBtn');
+      const overallRisk = document.getElementById('overallRisk');
+      const riskScore = document.getElementById('riskScore');
+      const riskLabel = document.getElementById('riskLabel');
+      const riskPointer = document.getElementById('riskPointer');
+      const reportActions = document.getElementById('reportActions');
+      
+      // Result containers
+      const legalResults = document.getElementById('legalResults');
+      const financialResults = document.getElementById('financialResults');
+      const securityResults = document.getElementById('securityResults');
+      const reputationResults = document.getElementById('reputationResults');
+      const connectionsResults = document.getElementById('connectionsResults');
+      
+      // Scan button event
+      scanBtn.addEventListener('click', function() {
+        const fullName = document.getElementById('fullName').value;
+        
+        if (!fullName) {
+          alert('Please enter at least a full name');
+          return;
+        }
+        
+        // Show scanning state
+        scanBtn.innerHTML = '<span class="scanning-animation me-2"></span> SCANNING...';
+        scanBtn.disabled = true;
+        
+        // Simulate scan progress
+        simulateIntelligenceScan();
+      });
+      
+      // Simulate the intelligence scanning process
+      function simulateIntelligenceScan() {
+        let progress = 0;
+        
+        const updateProgress = () => {
+          progress += 2;
+          
+          // Update progress text based on stage
+          if (progress < 20) {
+            scanBtn.innerHTML = `<span class="scanning-animation me-2"></span> Searching public records (${progress}%)`;
+          } else if (progress < 40) {
+            scanBtn.innerHTML = `<span class="scanning-animation me-2"></span> Checking regulatory databases (${progress}%)`;
+          } else if (progress < 60) {
+            scanBtn.innerHTML = `<span class="scanning-animation me-2"></span> Analyzing financial history (${progress}%)`;
+          } else if (progress < 80) {
+            scanBtn.innerHTML = `<span class="scanning-animation me-2"></span> Scanning security databases (${progress}%)`;
+          } else {
+            scanBtn.innerHTML = `<span class="scanning-animation me-2"></span> Compiling final report (${progress}%)`;
+          }
+          
+          // When complete
+          if (progress >= 100) {
+            setTimeout(() => {
+              completeScan();
+            }, 800);
+          } else {
+            setTimeout(updateProgress, 100);
+          }
+        };
+        
+        updateProgress();
+      }
+      
+      // Complete the scan and show results
+      function completeScan() {
+        scanBtn.innerHTML = '<i class="bi bi-shield-check me-2"></i>SCAN COMPLETE';
+        
+        // Show overall risk assessment
+        overallRisk.classList.remove('hidden');
+        reportActions.classList.remove('hidden');
+        
+        // Generate random risk score between 0-100
+        const riskValue = Math.floor(Math.random() * 100);
+        riskScore.textContent = `${riskValue}%`;
+        
+        // Position risk pointer (0% = left: 10%, 100% = left: 90%)
+        const pointerPosition = 10 + (riskValue * 0.8);
+        riskPointer.style.left = `${pointerPosition}%`;
+        
+        // Set risk label based on score
+        if (riskValue < 20) {
+          riskLabel.className = 'risk-badge risk-none';
+          riskLabel.textContent = 'Low Risk';
+        } else if (riskValue < 60) {
+          riskLabel.className = 'risk-badge risk-medium';
+          riskLabel.textContent = 'Medium Risk';
+        } else {
+          riskLabel.className = 'risk-badge risk-high';
+          riskLabel.textContent = 'High Risk';
+        }
+        
+        // Generate sample results for each category
+        generateLegalResults();
+        generateFinancialResults();
+        generateSecurityResults();
+        generateReputationResults();
+        generateConnectionsResults();
+        
+        // Re-enable scan button after a delay
+        setTimeout(() => {
+          scanBtn.innerHTML = '<i class="bi bi-shield-check me-2"></i>RUN INTELLIGENCE SCAN';
+          scanBtn.disabled = false;
+        }, 3000);
+      }
+      
+      // Generate sample legal results
+      function generateLegalResults() {
+        const hasLegalIssues = Math.random() > 0.4;
+        
+        if (hasLegalIssues) {
+          legalResults.innerHTML = `
+            <div class="result-card cs-card mb-3">
+              <div class="d-flex justify-content-between align-items-start">
+                <h5><i class="bi bi-journal-check text-danger me-2"></i>Legal & Regulatory Issues Found</h5>
+                <span class="risk-badge risk-high">High Severity</span>
+              </div>
+              <p class="cs-sub">The following potential legal concerns were identified:</p>
+              <ul>
+                <li>Subject mentioned in <span class="keyword-pill">lawsuit</span> regarding intellectual property rights (2022)</li>
+                <li>Company fined for <span class="keyword-pill">regulatory violations</span> in the EU (2021)</li>
+                <li>Previous <span class="keyword-pill">sanctions</span> violations noted in industry reports</li>
+                <li>Subject's name appears in <span class="keyword-pill">PEP databases</span> (Politically Exposed Person)</li>
+                <li>Company involved in <span class="keyword-pill">antitrust investigation</span> (2019-2020)</li>
+              </ul>
+              <div class="d-flex justify-content-between align-items-center mt-2">
+                <span class="source-badge">Global Legal Database</span>
+                <small class="cs-sub">Last updated: 3 days ago</small>
+              </div>
+            </div>
+          `;
+        } else {
+          legalResults.innerHTML = `
+            <div class="result-card cs-card mb-3">
+              <div class="d-flex justify-content-between align-items-start">
+                <h5><i class="bi bi-journal-check text-success me-2"></i>No Significant Legal Issues</h5>
+                <span class="risk-badge risk-none">Clean Record</span>
+              </div>
+              <p class="cs-sub">No lawsuits, regulatory actions, or significant legal proceedings found in public records.</p>
+              <div class="d-flex justify-content-between align-items-center mt-2">
+                <span class="source-badge">Legal Database</span>
+                <small class="cs-sub">Last updated: 2 days ago</small>
+              </div>
+            </div>
+          `;
+        }
+      }
+      
+      // Generate sample financial results
+      function generateFinancialResults() {
+        financialResults.innerHTML = `
+          <div class="result-card cs-card mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <h5><i class="bi bi-cash-coin text-warning me-2"></i>Financial Stability Assessment</h5>
+              <span class="risk-badge risk-medium">Moderate Risk</span>
+            </div>
+            <p class="cs-sub">Based on available financial data and business records:</p>
+            <ul>
+              <li>Company established in 2015, stable registration history</li>
+              <li>No recent <span class="keyword-pill">bankruptcy</span> filings or insolvency proceedings</li>
+              <li>Minor <span class="keyword-pill">tax lien</span> resolved in 2021</li>
+              <li>Moderate financial growth over past 3 years</li>
+              <li>Subject appears in <span class="keyword-pill">offshore leaks database</span> (2016)</li>
+              <li>Company structure includes entities in <span class="keyword-pill">tax haven jurisdictions</span></li>
+            </ul>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+              <span class="source-badge">Financial Intelligence</span>
+              <small class="cs-sub">Last updated: 1 week ago</small>
+            </div>
+          </div>
+        `;
+      }
+      
+      // Generate sample security results
+      function generateSecurityResults() {
+        securityResults.innerHTML = `
+          <div class="result-card cs-card mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <h5><i class="bi bi-shield-check text-info me-2"></i>Security Assessment</h5>
+              <span class="risk-badge risk-low">Low Risk</span>
+            </div>
+            <p class="cs-sub">Analysis of digital footprint and security indicators:</p>
+            <ul>
+              <li>Domain registered for 7 years, consistent ownership</li>
+              <li>No security blacklistings found on <span class="keyword-pill">AbuseIPDB</span> or similar services</li>
+              <li>Email servers properly configured with SPF/DKIM/DMARC</li>
+              <li>Website uses valid SSL certificate with strong encryption</li>
+              <li>No significant vulnerabilities detected in public-facing systems</li>
+              <li>Subject's email not found in major <span class="keyword-pill">data breaches</span></li>
+            </ul>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+              <span class="source-badge">Security Database</span>
+              <small class="cs-sub">Last updated: Today</small>
+            </div>
+          </div>
+        `;
+      }
+      
+      // Generate sample reputation results
+      function generateReputationResults() {
+        const hasNegativeNews = Math.random() > 0.7;
+        
+        let reputationHTML = `
+          <div class="result-card cs-card mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <h5><i class="bi bi-newspaper text-primary me-2"></i>Media & Public Perception</h5>
+              <span class="risk-badge ${hasNegativeNews ? 'risk-medium' : 'risk-low'}">${hasNegativeNews ? 'Mixed' : 'Mostly Positive'}</span>
+            </div>
+            <p class="cs-sub">Analysis of news coverage and public records:</p>
+            <ul>
+              <li>Generally positive industry presence with regular coverage in trade publications</li>
+        `;
+        
+        if (hasNegativeNews) {
+          reputationHTML += `
+            <li>Negative coverage regarding <span class="keyword-pill">labor practices</span> in 2022</li>
+            <li>Minor <span class="keyword-pill">controversy</span> surrounding executive comments last year</li>
+            <li>Subject criticized for <span class="keyword-pill">environmental record</span> in home country</li>
+          `;
+        }
+        
+        reputationHTML += `
+              <li>No significant <span class="keyword-pill">scandals</span> or major negative press found</li>
+              <li>Active social media presence with generally positive engagement</li>
+              <li>Subject has <span class="keyword-pill">spoken at industry conferences</span> (2019, 2021)</li>
+            </ul>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+              <span class="source-badge">Media Monitoring</span>
+              <small class="cs-sub">Last updated: Today</small>
+            </div>
+          </div>
+        `;
+        
+        reputationResults.innerHTML = reputationHTML;
+      }
+      
+      // Generate sample connections results
+      function generateConnectionsResults() {
+        connectionsResults.innerHTML = `
+          <div class="result-card cs-card mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <h5><i class="bi bi-diagram-3 text-info me-2"></i>Network Analysis</h5>
+              <span class="risk-badge risk-medium">Moderate Risk</span>
+            </div>
+            <p class="cs-sub">Analysis of professional connections and associations:</p>
+            <ul>
+              <li>Serves on board of 3 other companies in related industries</li>
+              <li>Former business partner was <span class="keyword-pill">investigated</span> for fraud (2018)</li>
+              <li>Company has suppliers in <span class="keyword-pill">high-risk jurisdictions</span></li>
+              <li>Subject attended university with several <span class="keyword-pill">government officials</span></li>
+              <li>No direct connections to <span class="keyword-pill">sanctioned entities</span> found</li>
+              <li>Member of industry association with <span class="keyword-pill">lobbying activities</span></li>
+            </ul>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+              <span class="source-badge">Network Analysis</span>
+              <small class="cs-sub">Last updated: 2 days ago</small>
+            </div>
+          </div>
+        `;
+      }
+    });
+  </script>
+</body>
+
+</html>
