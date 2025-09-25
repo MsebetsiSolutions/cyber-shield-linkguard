@@ -1,98 +1,159 @@
-const $ = id => document.getElementById(id);
 const show = el => el.classList.remove('hidden');
 const hide = el => el.classList.add('hidden');
-const setBusy = (btn, busy, text) => { 
-  btn.disabled = !!busy; 
-  if(text){ 
-    btn.dataset._orig = btn.dataset._orig || btn.textContent; 
-    btn.textContent = busy ? text : btn.dataset._orig; 
-  } 
+
+'use strict';
+
+const $ = id => document.getElementById(id);
+
+// Utility functions
+const setBusy = (btn, busy, text) => {
+  if (!btn) return;
+  btn.disabled = !!busy;
+  if (text) {
+    btn.dataset._orig = btn.dataset._orig || btn.textContent;
+    btn.textContent = busy ? text : btn.dataset._orig;
+  }
 };
 
-const toast = (msg, ms=2000) => { 
-  const t = $('toast'); 
-  t.textContent = msg; 
-  t.classList.add('show'); 
-  setTimeout(() => t.classList.remove('show'), ms); 
+// Toast notification
+const toast = (msg, ms = 2000) => {
+  const t = $('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), ms);
 };
 
+// Token management
 const token = {
-  get access(){ return localStorage.getItem('access') || ''; },
-  set access(v){ v ? localStorage.setItem('access', v) : localStorage.removeItem('access'); },
-  get refresh(){ return localStorage.getItem('refresh') || ''; },
-  set refresh(v){ v ? localStorage.setItem('refresh', v) : localStorage.removeItem('refresh'); },
-  clear(){ this.access=''; this.refresh=''; }
+  get access() { return localStorage.getItem('access') || ''; },
+  set access(v) { v ? localStorage.setItem('access', v) : localStorage.removeItem('access'); },
+  get refresh() { return localStorage.getItem('refresh') || ''; },
+  set refresh(v) { v ? localStorage.setItem('refresh', v) : localStorage.removeItem('refresh'); },
+  clear() { this.access = ''; this.refresh = ''; }
 };
 
-// Password visibility toggle
+
+// Setup password visibility toggle
+
 function setupPasswordToggle() {
-  // Toggle for login password
-  const togglePassword = $('#togglePassword');
-  const passwordInput = $('#loginPass');
-  
-  togglePassword.addEventListener('click', function() {
-    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-    passwordInput.setAttribute('type', type);
-    this.classList.toggle('bi-eye');
-    this.classList.toggle('bi-eye-slash');
+  const togglePassword = $('togglePassword');
+  const passwordInput = $('loginPass');
+
+  if (!togglePassword || !passwordInput) return;
+
+  togglePassword.addEventListener('click', () => {
+    // Determine the new type
+    const isHidden = passwordInput.type === 'password';
+    passwordInput.type = isHidden ? 'text' : 'password';
+
+    // Update the eye icon
+    if (isHidden) {
+      togglePassword.classList.remove('bi-eye-slash');
+      togglePassword.classList.add('bi-eye');
+      togglePassword.setAttribute('aria-label', 'Hide password');
+    } else {
+      togglePassword.classList.remove('bi-eye');
+      togglePassword.classList.add('bi-eye-slash');
+      togglePassword.setAttribute('aria-label', 'Show password');
+    }
+
+    // Keep the focus and caret at the end
+    const pos = passwordInput.value.length;
+    passwordInput.focus();
+    try {
+      passwordInput.setSelectionRange(pos, pos);
+    } catch (e) {
+    }
   });
 }
 
-// Event listeners
-$('doLogin').addEventListener('click', async () => {
-  const email = $('loginEmail').value.trim().toLowerCase(); 
-  const password = $('loginPass').value;
-  
-  if(!email || !password){ 
-    return toast('Missing email or password'); 
+// Handle login process
+
+async function handleLogin() {
+  const emailInput = $('loginEmail');
+  const passwordInput = $('loginPass');
+  const doLoginBtn = $('doLogin');
+
+  const email = emailInput.value.trim().toLowerCase();
+  const password = passwordInput.value;
+
+  if (!email || !password) {
+    toast('Missing email or password');
+    return;
   }
-  
-  setBusy($('doLogin'), true, 'Signing in…');
-  
-  try{
-    const r = await fetch('/api/auth/login', { 
-      method: 'POST', 
-      headers: {'Content-Type': 'application/json'}, 
+
+  setBusy(doLoginBtn, true, 'Signing in…');
+
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
-    
-    const j = await r.json(); 
-    if(!r.ok){ 
-      return toast(j.error || 'Login failed'); 
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      toast(data.error || 'Login failed');
+      return;
     }
-    
-    token.access = j.access_token; 
-    token.refresh = j.refresh_token; 
+
+    // Save tokens
+    token.access = data.access_token;
+    token.refresh = data.refresh_token;
+
     toast('Welcome back');
-    
+
     // Redirect to dashboard
     setTimeout(() => {
       window.location.href = '../ScannerDash/ScannerDash.html';
     }, 1000);
-    
-  } catch(e) { 
-    toast('Network error'); 
-  } finally { 
-    setBusy($('doLogin'), false); 
+
+  } catch (error) {
+    console.error('Login error:', error);
+    toast('Network error');
+  } finally {
+    setBusy(doLoginBtn, false);
   }
-});
+}
 
-// Allow form submission with Enter key
-$('loginEmail').addEventListener('keydown', e => {
-  if(e.key === 'Enter'){ 
-    e.preventDefault(); 
-    $('doLogin').click(); 
-  } 
-});
 
-$('loginPass').addEventListener('keydown', e => {
-  if(e.key === 'Enter'){ 
-    e.preventDefault(); 
-    $('doLogin').click(); 
-  } 
-});
-
-// Initialize
-document.addEventListener('DOMContentLoaded', function() {
+//Initialize events
+ 
+document.addEventListener('DOMContentLoaded', () => {
   setupPasswordToggle();
+
+  const doLoginBtn = $('doLogin');
+  const emailInput = $('loginEmail');
+  const passwordInput = $('loginPass');
+
+  // Login button click
+  if (doLoginBtn) {
+    doLoginBtn.addEventListener('click', handleLogin);
+  }
+
+  // Enter key on email or password triggers login
+  if (emailInput) {
+    emailInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleLogin();
+      }
+    });
+  }
+
+  if (passwordInput) {
+    passwordInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleLogin();
+      }
+    });
+  }
+
+  // Debug message if user already logged in
+  if (token.access) {
+    console.log('User already logged in with access token');
+  }
 });
