@@ -160,6 +160,11 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     ├── clarity.css
         |            |     └── clarity.js
         |            |
+        |            ├── admin/          
+        |            |     ├── admin.html
+        |            |     ├── admin.css
+        |            |     └── admin.js
+        |            |
         |            ├── login/          
         |            |     ├── login.html
         |            |     ├── login.css
