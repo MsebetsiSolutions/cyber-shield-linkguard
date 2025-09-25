@@ -25,12 +25,8 @@ Cyber Shield LinkGuard is a cross-platform cybersecurity tool designed to protec
 ### 2. Install dependencies
     ```bash
             pip install -r requirements.txt
-
-### 3. Configure environment
-    ```bash
-            cp .env.example .env  # then edit your VirusTotal key (optional)
-
-### 4. Run application
+ 
+### 3. Run application
     ```bash
             python app.py
 
@@ -48,7 +44,7 @@ For platforms using Procfile:
 web: gunicorn -w 2 -b 0.0.0.0:$PORT app:app
 
 Demo Authentication
-This build includes simple localStorage-based demo authentication (Login/Sign Up/Guest). Do not use for production without proper security enhancements.
+This build includes simple localStorage-based demo authentication (Login/Sign). Do not use for production without proper security enhancements.
 
 ## Project Structure
         cyber-shield-linkguard/
@@ -57,9 +53,10 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         |      |
         |      ├── app.py  
         |      ├── Procfile
+        |      ├── apt.txt
         |      ├── requirements.txt 
         |      ├── .gitignore
-        |      ├── .env.example
+        |      ├── .env
         |      |
         │      ├── venv/
         |      |     ├── bin/
@@ -120,12 +117,17 @@ This build includes simple localStorage-based demo authentication (Login/Sign Up
         |            ├── shareTeamCollab/        
         |            |     ├── shareTeamCollab.html
         |            |     ├── shareTeamCollab.css
-        |            |     └── shareTeamCollab.js
+        |            |     └── shareTeamCollab.js 
         |            |
         |            ├── Subscription/        
         |            |     ├── Subscription.html
         |            |     ├── Subscription.css
         |            |     └── Subscription.js
+        |            |
+        |            ├── BackgroundCheck/        
+        |            |     ├── ComprehensiveBackgroundCheck.html
+        |            |     ├── ComprehensiveBackgroundCheck.css
+        |            |     └── ComprehensiveBackgroundCheck.js
         |            |   
         |            ├── settings/          
         |            |     ├── settings.html

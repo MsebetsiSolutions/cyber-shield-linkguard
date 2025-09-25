@@ -86,15 +86,15 @@ const scanCounter = {
     // Reset scan count daily
     if (lastScanDate !== today) {
       localStorage.setItem('lastScanDate', today);
-      localStorage.setItem('remainingScans', '1'); // Changed from 5 to 1
-      return 1; // Changed from 5 to 1
+      localStorage.setItem('remainingScans', '1'); 
+      return 1; 
     }
     
-    return parseInt(localStorage.getItem('remainingScans') || '1'); // Changed from 5 to 1
+    return parseInt(localStorage.getItem('remainingScans') || '1'); 
   },
   set remaining(v){ 
     localStorage.setItem('remainingScans', v.toString()); 
-    localStorage.setItem('lastScanDate', new Date().toDateString()); // Update date when count changes
+    localStorage.setItem('lastScanDate', new Date().toDateString()); 
   },
   reset(){ 
     this.remaining = 1; // Changed from 5 to 1
@@ -106,7 +106,7 @@ const scanCounter = {
       this.updateUI();
       
       if (this.remaining === 0) {
-        // Show subscription modal if free scans are depleted
+
         setTimeout(() => {
           const subscriptionModal = new bootstrap.Modal($('subscriptionModal'));
           subscriptionModal.show();
@@ -164,7 +164,6 @@ async function fetchWithSession(path, opts={}) {
   }
 }
 
-
 // Save scan result to database
 async function saveScanResult(scanData) {
   try {
@@ -221,17 +220,21 @@ function setUserUI(userData){
       full_name: userData.full_name
     });
 
-    // button states based on plan_mode
+    // Control button states based on plan_mode
     controlScanButtons(userData.plan_mode);
     controlTeamWorkspaceButton(userData.plan_mode);
+    controlEnterpriseButton(userData.plan_mode);
+    controlBackgroundCheckButton(userData.plan_mode); 
 
   } else { 
     welcomeMessage.textContent = ''; 
-    userNameDisplay.textContent = 'User Name'; // Fallback text
+    userNameDisplay.textContent = 'User Name';
     console.log('User not authenticated, using fallback');
 
     controlScanButtons(0); 
     controlTeamWorkspaceButton(0); 
+    controlEnterpriseButton(0);
+    controlBackgroundCheckButton(0);
   }
 }
 
@@ -341,8 +344,8 @@ function setBadge(el, band){
   el.className = 'badge ' + band; 
 }
 
-// Check if user can scan (now also considers plan mode for file/qr scans)
-function canScan(scanType = 'url') { // Add scanType parameter
+// Check if user can scan 
+function canScan(scanType = 'url') {
   let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0'); 
   
   if (scanType === 'file' || scanType === 'qr') {
@@ -377,7 +380,7 @@ const urlInput = $('urlInput');
 const scanBtn = $('scanBtn');
 
 async function runScanUrl(url){
-  if (!canScan('url')) return; // Pass scanType
+  if (!canScan('url')) return; 
   setBusy(scanBtn, true, 'Scanning…');
   
   try{
@@ -415,15 +418,49 @@ async function runScanUrl(url){
     
     setBadge($('badgeUrl'), j.verdict.band);
     
-    const score = parseInt(j.verdict.score);
-    if (score >= 80) {
-      updateStats(1, 0, 0, 0);
-    } else if (score >= 50) {
-      updateStats(0, 1, 0, 0);
-    } else if (score >= 20) {
-      updateStats(0, 0, 1, 0);
+    // Process combined API results for URL
+    if (j.signals && j.signals.api_results) {
+        let totalMalicious = 0;
+        let totalSuspicious = 0;
+        let totalHarmless = 0;
+        let totalUndetected = 0;
+        let totalEngines = 0;
+        
+        j.signals.api_results.forEach(apiResult => {
+            if (apiResult.enabled && !apiResult.error) {
+                totalMalicious += apiResult.malicious || 0;
+                totalSuspicious += apiResult.suspicious || 0;
+                totalHarmless += apiResult.harmless || 0;
+                totalUndetected += apiResult.undetected || 0;
+                totalEngines += apiResult.total_engines || 1;
+            }
+        });
+        
+        if (totalEngines > 0) {
+            updateStats(totalMalicious, totalSuspicious, totalHarmless, totalUndetected);
+        } else {
+            const score = parseInt(j.verdict.score);
+            if (score >= 80) {
+                updateStats(1, 0, 0, 0);
+            } else if (score >= 50) {
+                updateStats(0, 1, 0, 0);
+            } else if (score >= 20) {
+                updateStats(0, 0, 1, 0);
+            } else {
+                updateStats(0, 0, 0, 1);
+            }
+        }
     } else {
-      updateStats(0, 0, 0, 1);
+        const score = parseInt(j.verdict.score);
+        if (score >= 80) {
+            updateStats(1, 0, 0, 0);
+        } else if (score >= 50) {
+            updateStats(0, 1, 0, 0);
+        } else if (score >= 20) {
+            updateStats(0, 0, 1, 0);
+        } else {
+            updateStats(0, 0, 0, 1);
+        }
     }
     
     // Save scan result to database
@@ -431,7 +468,7 @@ async function runScanUrl(url){
       scan_type: 'url',
       content: url,
       result: JSON.stringify(j),
-      verdict_band: j.verdict.band // Pass the verdict band
+      verdict_band: j.verdict.band 
     };
     
     saveScanResult(scanData);
@@ -461,21 +498,6 @@ urlInput.addEventListener('keydown', e => {
   } 
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // File Scan functionality
 fileScanBtn.addEventListener('click', () => {
   const f = fileInput.files && fileInput.files[0]; 
@@ -496,12 +518,16 @@ async function runScanFile(file){
     const r = await fetchWithSession('/api/scan_file', { 
       method: 'POST',
       body: fd 
-      // Note: fetchWithSession automatically handles credentials
     });
     
     const j = await r.json(); 
     if(!r.ok){ 
-      toast(j.error || 'File scan failed');
+      // More specific error messages
+      if (j.error && j.error.includes('File type not allowed')) {
+          toast('File type not supported. Please use: TXT, PDF, PNG, JPG, GIF, DOC, DOCX, EXE, ZIP');
+      } else {
+          toast(j.error || 'File scan failed');
+      }
       return;
     }
     
@@ -530,15 +556,52 @@ async function runScanFile(file){
     setBadge($('badgeFile'), j.verdict.band); 
     $('scoreFile').textContent = j.verdict.score;
     
-    const score = parseInt(j.verdict.score);
-    if (score >= 80) {
-      updateStats(1, 0, 0, 0);
-    } else if (score >= 50) {
-      updateStats(0, 1, 0, 0);
-    } else if (score >= 20) {
-      updateStats(0, 0, 1, 0);
+    // Process combined API results for files
+    if (j.api_results && j.api_results.length > 0) {
+        let totalMalicious = 0;
+        let totalSuspicious = 0;
+        let totalHarmless = 0;
+        let totalUndetected = 0;
+        let totalEngines = 0;
+        
+        j.api_results.forEach(apiResult => {
+            if (apiResult.enabled && !apiResult.error) {
+                totalMalicious += apiResult.malicious || 0;
+                totalSuspicious += apiResult.suspicious || 0;
+                totalHarmless += apiResult.harmless || 0;
+                totalUndetected += apiResult.undetected || 0;
+                totalEngines += apiResult.total_engines || 1;
+            }
+        });
+        
+        // If we have valid results, use them
+        if (totalEngines > 0) {
+            updateStats(totalMalicious, totalSuspicious, totalHarmless, totalUndetected);
+        } else {
+            // Fallback to verdict score if no engine data
+            const score = parseInt(j.verdict.score);
+            if (score >= 80) {
+                updateStats(1, 0, 0, 0);
+            } else if (score >= 50) {
+                updateStats(0, 1, 0, 0);
+            } else if (score >= 20) {
+                updateStats(0, 0, 1, 0);
+            } else {
+                updateStats(0, 0, 0, 1);
+            }
+        }
     } else {
-      updateStats(0, 0, 0, 1);
+        // Fallback when no API results
+        const score = parseInt(j.verdict.score);
+        if (score >= 80) {
+            updateStats(1, 0, 0, 0);
+        } else if (score >= 50) {
+            updateStats(0, 1, 0, 0);
+        } else if (score >= 20) {
+            updateStats(0, 0, 1, 0);
+        } else {
+            updateStats(0, 0, 0, 1);
+        }
     }
     
     // Save scan result to database
@@ -564,16 +627,9 @@ async function runScanFile(file){
   }
 }
 
-
-
-
-
-
-
-
-
-
 // QR Scan functionality
+const qrInput = $('qrInput');
+
 qrScanBtn.addEventListener('click', () => {
   const f = qrInput.files && qrInput.files[0]; 
   if(!f) return toast('Pick an image of a QR code'); 
@@ -589,17 +645,23 @@ async function runScanQr(file){
     const fd = new FormData(); 
     fd.append('file', file);
     
-    // Use fetchWithSession instead of regular fetch
     const r = await fetchWithSession('/api/scan_qr', { 
       method: 'POST',
       body: fd
     });
     
-    const j = await r.json(); 
-    if(!r.ok){ 
-      toast(j.error || 'QR scan failed');
-      return;
+    if (!r.ok) {
+      const errorData = await r.json();
+      // More specific error handling
+      if (r.status === 503) {
+        toast('QR scanning feature is currently unavailable. Please try again later or contact support.');
+        console.error('QR library error:', errorData.error);
+        return;
+      }
+      throw new Error(errorData.error || 'QR scan failed');
     }
+    
+    const j = await r.json(); 
     
     // Decrement scan count only for free users
     let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
@@ -630,15 +692,49 @@ async function runScanQr(file){
       setBadge($('badgeQr'), j.verdict.band);
       qrVerdictBand = j.verdict.band;
       
-      const score = parseInt(j.verdict.score);
-      if (score >= 80) {
-        updateStats(1, 0, 0, 0);
-      } else if (score >= 50) {
-        updateStats(0, 1, 0, 0);
-      } else if (score >= 20) {
-        updateStats(0, 0, 1, 0);
+      // Process combined API results for QR URL
+      if (j.signals && j.signals.api_results) {
+          let totalMalicious = 0;
+          let totalSuspicious = 0;
+          let totalHarmless = 0;
+          let totalUndetected = 0;
+          let totalEngines = 0;
+          
+          j.signals.api_results.forEach(apiResult => {
+              if (apiResult.enabled && !apiResult.error) {
+                  totalMalicious += apiResult.malicious || 0;
+                  totalSuspicious += apiResult.suspicious || 0;
+                  totalHarmless += apiResult.harmless || 0;
+                  totalUndetected += apiResult.undetected || 0;
+                  totalEngines += apiResult.total_engines || 1;
+              }
+          });
+          
+          if (totalEngines > 0) {
+              updateStats(totalMalicious, totalSuspicious, totalHarmless, totalUndetected);
+          } else {
+              const score = parseInt(j.verdict.score);
+              if (score >= 80) {
+                  updateStats(1, 0, 0, 0);
+              } else if (score >= 50) {
+                  updateStats(0, 1, 0, 0);
+              } else if (score >= 20) {
+                  updateStats(0, 0, 1, 0);
+              } else {
+                  updateStats(0, 0, 0, 1);
+              }
+          }
       } else {
-        updateStats(0, 0, 0, 1);
+          const score = parseInt(j.verdict.score);
+          if (score >= 80) {
+              updateStats(1, 0, 0, 0);
+          } else if (score >= 50) {
+              updateStats(0, 1, 0, 0);
+          } else if (score >= 20) {
+              updateStats(0, 0, 1, 0);
+          } else {
+              updateStats(0, 0, 0, 1);
+          }
       }
     } else {
       hide($('qrUrlBlock'));
@@ -662,14 +758,15 @@ async function runScanQr(file){
     }
   } catch(e) { 
     console.error('QR scan error:', e);
-    toast('Network error: ' + e.message); 
+    if (e.message.includes('library not installed')) {
+      toast('QR scanning is temporarily unavailable. Our team is working on a fix.');
+    } else {
+      toast('QR scan failed: ' + e.message); 
+    }
   } finally { 
     setBusy(qrScanBtn, false); 
   }
 }
-
-
-
 
 // User dropdown functionality
 const userDropdownBtn = $('userDropdownBtn');
@@ -725,7 +822,6 @@ async function checkUserPlan() {
       // Store plan_mode in sessionStorage for easy access
       sessionStorage.setItem('plan_mode', data.plan_mode);
       
-      // Update scan counter UI based on plan
       scanCounter.updateUI();
       
       return data.plan_mode;
@@ -733,7 +829,7 @@ async function checkUserPlan() {
   } catch (error) {
     console.error('Error checking user plan:', error);
   }
-  return 0; // Default to free plan
+  return 0; 
 }
 
 // Toggle stats button visibility based on plan mode
@@ -751,7 +847,7 @@ function toggleStatsButton(planMode) {
 // Add this function to control Enterprise button visibility
 function controlEnterpriseButton(planMode) {
   const enterpriseButton = document.getElementById('twEnterprise');
-  if (planMode === 3) { // Only show for Enterprise plan
+  if (planMode === 3) { 
     show(enterpriseButton);
   } else {
     hide(enterpriseButton);
@@ -759,6 +855,18 @@ function controlEnterpriseButton(planMode) {
   console.log(`Plan Mode: ${planMode}, Enterprise Button Visible: ${!enterpriseButton.classList.contains('hidden')}`);
 }
 
+// Control Background Check button visibility - UPDATED for plan_mode 2 and 3
+function controlBackgroundCheckButton(planMode) {
+  const reputationButton = document.getElementById('twReputation');
+  if (planMode === 2 || planMode === 3) { 
+    show(reputationButton);
+  } else {
+    hide(reputationButton);
+  }
+  console.log(`Plan Mode: ${planMode}, Background Check Button Visible: ${!reputationButton.classList.contains('hidden')}`);
+}
+
+// Updated setUserUI function with button controls
 function setUserUI(userData){ 
   console.log('Setting user UI with data:', userData); 
   
@@ -778,7 +886,8 @@ function setUserUI(userData){
     // Control button states based on plan_mode
     controlScanButtons(userData.plan_mode);
     controlTeamWorkspaceButton(userData.plan_mode);
-    controlEnterpriseButton(userData.plan_mode); 
+    controlEnterpriseButton(userData.plan_mode);
+    controlBackgroundCheckButton(userData.plan_mode); 
 
   } else { 
     welcomeMessage.textContent = ''; 
@@ -786,7 +895,8 @@ function setUserUI(userData){
     console.log('User not authenticated, using fallback');
     controlScanButtons(0);
     controlTeamWorkspaceButton(0);
-    controlEnterpriseButton(0); 
+    controlEnterpriseButton(0);
+    controlBackgroundCheckButton(0); 
   }
 }
 
@@ -988,34 +1098,6 @@ function displayStats(statsData) {
     `;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Download stats report
 function downloadStatsReport() {
