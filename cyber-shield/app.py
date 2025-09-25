@@ -71,6 +71,7 @@ app.register_blueprint(profile_bp)
 
 
 VT_API_KEY = os.getenv("VT_API_KEY", "").strip()
+DYMO_API_KEY = os.getenv("DYMO_API_KEY", "").strip()
 RATE_LIMIT_PER_MIN = int(os.getenv("RATE_LIMIT_PER_MIN", "60"))
 
 _ip_bucket = {}
@@ -213,13 +214,18 @@ def fetch_snippet(u: str):
 def base64_urlsafe(s: str) -> str:
     return base64.urlsafe_b64encode(s.encode()).decode().strip("=")
 
+#======================================================
+# ------------------ API Integrations -----------------
+#======================================================
+
 def vt_lookup(u: str):
+    """VirusTotal URL analysis"""
     if not VT_API_KEY:
-        return {"enabled": False}
+        return {"enabled": False, "error": "API key not configured"}
     
     try:
         # First try to get existing report
-        url_id = base64.urlsafe_b64encode(u.encode()).decode().strip('=')
+        url_id = base64_urlsafe(u)
         rep = requests.get(
             f"https://www.virustotal.com/api/v3/urls/{url_id}",
             headers={"x-apikey": VT_API_KEY, "accept": "application/json"},
@@ -235,7 +241,8 @@ def vt_lookup(u: str):
                 "suspicious": stats.get("suspicious", 0),
                 "harmless": stats.get("harmless", 0),
                 "undetected": stats.get("undetected", 0),
-                "total_engines": sum(stats.values()) if stats else 0
+                "total_engines": sum(stats.values()) if stats else 0,
+                "source": "virustotal"
             }
         
         # If no existing report, submit URL for analysis
@@ -267,24 +274,68 @@ def vt_lookup(u: str):
                         "suspicious": stats.get("suspicious", 0),
                         "harmless": stats.get("harmless", 0),
                         "undetected": stats.get("undetected", 0),
-                        "total_engines": sum(stats.values()) if stats else 0
+                        "total_engines": sum(stats.values()) if stats else 0,
+                        "source": "virustotal"
                     }
         
-        return {"enabled": True, "error": "Failed to get results"}
+        return {"enabled": True, "error": "Failed to get results", "source": "virustotal"}
         
     except Exception as e:
         print(f"VirusTotal error: {e}")
-        return {"enabled": True, "error": str(e)}
+        return {"enabled": True, "error": str(e), "source": "virustotal"}
+
+def dymo_lookup(u: str):
+    """Dymo API URL analysis"""
+    if not DYMO_API_KEY:
+        return {"enabled": False, "error": "API key not configured", "source": "dymo"}
+    
+    try:
+        # Dymo API endpoint 
+        headers = {
+            "Authorization": f"Bearer {DYMO_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        
+        # Example Dymo API call 
+        response = requests.post(
+            "https://api.dymo.com/v1/analyze",
+            headers=headers,
+            json={"url": u},
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            # Adjust these mappings based on Dymo API response structure
+            return {
+                "enabled": True,
+                "malicious": data.get("threat_score", 0) if data.get("is_malicious") else 0,
+                "suspicious": data.get("suspicious_score", 0),
+                "harmless": data.get("confidence", 100) if not data.get("is_malicious") else 0,
+                "undetected": data.get("unknown", 0),
+                "total_engines": 1,  
+                "source": "dymo",
+                "dymo_specific_data": data 
+            }
+        else:
+            return {"enabled": True, "error": f"API returned {response.status_code}", "source": "dymo"}
+            
+    except Exception as e:
+        print(f"Dymo API error: {e}")
+        return {"enabled": True, "error": str(e), "source": "dymo"}
 
 def vt_file_lookup(file_hash: str):
+    """VirusTotal file analysis"""
     if not VT_API_KEY:
-        return {"enabled": False}
+        return {"enabled": False, "error": "API key not configured"}
+    
     try:
         rep = requests.get(
             f"https://www.virustotal.com/api/v3/files/{file_hash}",
             headers={"x-apikey": VT_API_KEY, "accept": "application/json"},
             timeout=10,
         )
+        
         if rep.status_code == 200:
             data = rep.json().get("data", {}).get("attributes", {})
             stats = data.get("last_analysis_stats", {}) or {}
@@ -296,12 +347,88 @@ def vt_file_lookup(file_hash: str):
                 "undetected": stats.get("undetected", 0),
                 "type_description": data.get("type_description", ""),
                 "names": data.get("names", []),
-                "total_engines": sum(stats.values()) if stats else 0
+                "total_engines": sum(stats.values()) if stats else 0,
+                "source": "virustotal"
             }
-        return {"enabled": True, "error": True}
+        
+        return {"enabled": True, "error": "File not found in database", "source": "virustotal"}
+        
     except Exception as e:
         print(f"VirusTotal file error: {e}")
-        return {"enabled": True, "error": True}
+        return {"enabled": True, "error": str(e), "source": "virustotal"}
+
+def dymo_file_lookup(file_hash: str):
+    """Dymo API file analysis"""
+    if not DYMO_API_KEY:
+        return {"enabled": False, "error": "API key not configured", "source": "dymo"}
+    
+    try:
+        headers = {
+            "Authorization": f"Bearer {DYMO_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.post(
+            "https://api.dymo.com/v1/analyze/file", 
+            headers=headers,
+            json={"file_hash": file_hash},
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            return {
+                "enabled": True,
+                "malicious": data.get("threat_level", 0),
+                "suspicious": data.get("suspicion_score", 0),
+                "harmless": 100 - data.get("threat_level", 0),
+                "undetected": 0,
+                "total_engines": 1,
+                "source": "dymo",
+                "dymo_specific_data": data
+            }
+        else:
+            return {"enabled": True, "error": f"API returned {response.status_code}", "source": "dymo"}
+            
+    except Exception as e:
+        print(f"Dymo file API error: {e}")
+        return {"enabled": True, "error": str(e), "source": "dymo"}
+
+def combined_url_lookup(u: str):
+    """Combine results from multiple security APIs"""
+    results = []
+    
+    # VirusTotal scan
+    vt_result = vt_lookup(u)
+    if vt_result.get("enabled") and not vt_result.get("error"):
+        results.append(vt_result)
+    
+    # Dymo scan
+    dymo_result = dymo_lookup(u)
+    if dymo_result.get("enabled") and not dymo_result.get("error"):
+        results.append(dymo_result)
+    
+    return results
+
+def combined_file_lookup(file_hash: str):
+    """Combine results from multiple security APIs for files"""
+    results = []
+    
+    # VirusTotal scan
+    vt_result = vt_file_lookup(file_hash)
+    if vt_result.get("enabled") and not vt_result.get("error"):
+        results.append(vt_result)
+    
+    # Dymo scan
+    dymo_result = dymo_file_lookup(file_hash)
+    if dymo_result.get("enabled") and not dymo_result.get("error"):
+        results.append(dymo_result)
+    
+    return results
+
+#======================================================
+# ------------------ QR Code Scanning -----------------
+#======================================================
 
 def scan_qr_code(image_path):
     """Scan QR code from image file with multiple library support"""
@@ -383,11 +510,15 @@ def simple_qr_scan_fallback(image_path):
     except Exception as e:
         print(f"Simple QR fallback error: {e}")
         return None, "error"
-    
+
+#======================================================
+# ------------------- Scoring Logic -------------------
+#======================================================
+
 def score_fallback(signals: dict) -> dict:
-    """Fallback scoring when Cyber Shield fails"""
+    """Fallback scoring when security APIs fail"""
     s = 0
-    reasons = ["Cyber Shield scan unavailable - using heuristic analysis"]
+    reasons = ["Security scan unavailable - using heuristic analysis"]
     
     df = signals["domain"]
     if df.get("is_shortener"): 
@@ -427,33 +558,46 @@ def score_fallback(signals: dict) -> dict:
     band = next(b for lo, hi, b in RISK_BANDS if lo <= s <= hi)
     return {"score": s, "band": band, "reasons": reasons}
 
-def score(signals: dict) -> dict:
+def score_combined(api_results: list, signals: dict) -> dict:
+    """Score based on combined results from multiple APIs"""
     s = 0
     reasons = []
+    total_malicious = 0
+    total_suspicious = 0
+    total_engines = 0
+    successful_scans = 0
     
-    vt = signals.get("Cyber Shield", {})
-    if vt.get("enabled") and not vt.get("error"):
-        malicious = vt.get("malicious", 0)
-        suspicious = vt.get("suspicious", 0)
-        total_engines = vt.get("total_engines", 0) or (malicious + suspicious + vt.get("harmless", 0) + vt.get("undetected", 0))
-        
-        if total_engines > 0:
-            # Calculate threat percentage
-            threat_percentage = ((malicious + suspicious) / total_engines) * 100
+    for result in api_results:
+        if result.get("enabled") and not result.get("error"):
+            successful_scans += 1
+            malicious = result.get("malicious", 0)
+            suspicious = result.get("suspicious", 0)
+            engines = result.get("total_engines", 1)
             
-            s = min(100, threat_percentage * 2) 
+            total_malicious += malicious
+            total_suspicious += suspicious
+            total_engines += engines
+            
+            source_display = "Linkguard"
             
             if malicious > 0:
-                reasons.append(f"Detected as malicious by {malicious} security engines")
+                reasons.append(f"{source_display}: Detected as malicious by {malicious} engines")
             if suspicious > 0:
-                reasons.append(f"Detected as suspicious by {suspicious} security engines")
+                reasons.append(f"{source_display}: Detected as suspicious by {suspicious} engines")
             if malicious == 0 and suspicious == 0:
-                reasons.append("No threats detected by security engines")
-        else:
-            reasons.append("No scan results available from security engines")
-            s = 50  
+                reasons.append(f"{source_display}: No threats detected")
     
-    # Add secondary heuristic factors (reduced weight)
+    if successful_scans > 0 and total_engines > 0:
+        # Calculate combined threat percentage
+        threat_percentage = ((total_malicious + total_suspicious) / total_engines) * 100
+        s = min(100, threat_percentage * 1.5)  
+        
+        reasons.insert(0, f"Combined analysis from {successful_scans} security services")
+    else:
+        reasons.append("No successful security scans available")
+        s = 50  # Medium risk when no data
+    
+    # Add secondary heuristic factors
     df = signals["domain"]
     if df.get("is_shortener"): 
         s += 5
@@ -473,367 +617,52 @@ def score(signals: dict) -> dict:
     band = next(b for lo, hi, b in RISK_BANDS if lo <= s <= hi)
     return {"score": s, "band": band, "reasons": reasons}
 
-def score_file(vt_result: dict) -> dict:
+
+
+def score_file_combined(api_results: list) -> dict:
+    """Score files based on combined API results"""
     s = 0
     reasons = []
+    total_malicious = 0
+    total_suspicious = 0
+    total_engines = 0
+    successful_scans = 0
     
-    if vt_result.get("enabled") and not vt_result.get("error"):
-        malicious = vt_result.get("malicious", 0)
-        suspicious = vt_result.get("suspicious", 0)
-        total_engines = vt_result.get("total_engines", 0) or (malicious + suspicious + vt_result.get("harmless", 0) + vt_result.get("undetected", 0))
-        
-        if total_engines > 0:
-            # Calculate threat percentage
-            threat_percentage = ((malicious + suspicious) / total_engines) * 100
+    for result in api_results:
+        if result.get("enabled") and not result.get("error"):
+            successful_scans += 1
+            malicious = result.get("malicious", 0)
+            suspicious = result.get("suspicious", 0)
+            engines = result.get("total_engines", 1)
             
-            s = min(100, threat_percentage * 2)
+            total_malicious += malicious
+            total_suspicious += suspicious
+            total_engines += engines
+            
+            source_display = "Linkguard"
             
             if malicious > 0:
-                reasons.append(f"Detected as malicious by {malicious} security engines")
+                reasons.append(f"{source_display}: Detected as malicious by {malicious} engines")
             if suspicious > 0:
-                reasons.append(f"Detected as suspicious by {suspicious} security engines")
+                reasons.append(f"{source_display}: Detected as suspicious by {suspicious} engines")
             if malicious == 0 and suspicious == 0:
-                reasons.append("No threats detected by security engines")
-        else:
-            reasons.append("No scan results available from security engines")
-            s = 50  # Medium risk when no data
+                reasons.append(f"{source_display}: No threats detected")
+    
+    if successful_scans > 0 and total_engines > 0:
+        threat_percentage = ((total_malicious + total_suspicious) / total_engines) * 100
+        s = min(100, threat_percentage * 1.5)
+        reasons.insert(0, f"Combined analysis from {successful_scans} security services")
     else:
-        reasons.append("Cyber Shield scan not available")
-        s = 50  # Medium score when scan is unavailable
+        reasons.append("No security scan results available")
+        s = 50
     
     s = max(0, min(100, s))
     band = next(b for lo, hi, b in RISK_BANDS if lo <= s <= hi)
     return {"score": s, "band": band, "reasons": reasons}
 
-
 #======================================================
 # ------------------------ API ------------------------
 #======================================================
-
-@app.route("/api/users", methods=["GET"])
-def get_users():
-    """Get all users from the database for channel creation"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        
-        # Get all users with only necessary fields (excluding password)
-        cursor.execute("SELECT id, email, full_name, created_at FROM users ORDER BY full_name")
-        users = cursor.fetchall()
-        
-        # Convert to list of dictionaries
-        users_list = []
-        for user in users:
-            users_list.append({
-                'id': user['id'],
-                'email': user['email'],
-                'full_name': user['full_name'],
-                'created_at': user['created_at']
-            })
-        
-        conn.close()
-        return jsonify(users_list)
-    
-    except Exception as e:
-        print(f"Error fetching users: {e}")
-        return jsonify({"error": "Failed to fetch users"}), 500
-
-@app.route("/api/channels", methods=["POST"])
-def create_channel():
-    """Create a new channel"""
-    try:
-        # Check if user is logged in
-        if 'user_id' not in session:
-            return jsonify({"error": "You must be logged in to create a channel"}), 401
-        
-        # Get the current user ID from session
-        creator_id = session['user_id']
-        creator_name = session.get('user_full_name', '')
-        
-        # Debug logging
-        print(f"Creating channel with creator ID: {creator_id}, Name: {creator_name}")
-        print(f"Session data: {session}")
-        
-        data = request.get_json()
-        channel_name = data.get('name')
-        user_ids = data.get('users', [])
-        
-        # Make sure creator_id is an integer
-        try:
-            creator_id = int(creator_id)
-        except (ValueError, TypeError):
-            print(f"Warning: Invalid creator_id format: {creator_id}, defaulting to 1")
-            creator_id = 1
-        
-        # Make sure the creator is included in the members list
-        if creator_id not in user_ids:
-            user_ids.append(creator_id)
-        
-        if not channel_name:
-            return jsonify({"error": "Channel name is required"}), 400
-        
-        conn = sqlite3.connect('cyber-shield-linkguard.db')
-        cursor = conn.cursor()
-        
-        # Check if a channel with this name already exists
-        cursor.execute("SELECT id FROM channels WHERE name = ?", (channel_name,))
-        existing_channel = cursor.fetchone()
-        
-        if existing_channel:
-            # Channel already exists, get its ID and members
-            channel_id = existing_channel[0]
-            
-            # Get existing members
-            cursor.execute("SELECT user_id FROM channel_members WHERE channel_id = ?", (channel_id,))
-            existing_members = [row[0] for row in cursor.fetchall()]
-            
-            # Add any new members not already in the channel
-            for user_id in user_ids:
-                if user_id not in existing_members:
-                    cursor.execute(
-                        "INSERT OR IGNORE INTO channel_members (channel_id, user_id) VALUES (?, ?)",
-                        (channel_id, user_id)
-                    )
-            
-            conn.commit()
-            
-            # Get updated member list
-            cursor.execute("""
-                SELECT u.id, u.full_name 
-                FROM channel_members cm 
-                JOIN users u ON cm.user_id = u.id 
-                WHERE cm.channel_id = ?
-            """, (channel_id,))
-            members = cursor.fetchall()
-            members_list = [{"id": member[0], "full_name": member[1]} for member in members]
-            
-            conn.close()
-            
-            return jsonify({
-                "id": channel_id,
-                "name": channel_name,
-                "members": members_list,
-                "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "message": "Channel already exists, members updated"
-            })
-        else:
-            # Insert new channel if it doesn't exist
-            cursor.execute(
-                "INSERT INTO channels (name, created_by) VALUES (?, ?)",
-                (channel_name, creator_id)  # Using the logged-in user's ID
-            )
-            
-            channel_id = cursor.lastrowid
-            
-            # Add members to the channel
-            for user_id in user_ids:
-                cursor.execute(
-                    "INSERT OR IGNORE INTO channel_members (channel_id, user_id) VALUES (?, ?)",
-                    (channel_id, user_id)
-                )
-            
-            # Get member information for response
-            cursor.execute("""
-                SELECT u.id, u.full_name 
-                FROM channel_members cm 
-                JOIN users u ON cm.user_id = u.id 
-                WHERE cm.channel_id = ?
-            """, (channel_id,))
-            members = cursor.fetchall()
-            members_list = [{"id": member[0], "full_name": member[1]} for member in members]
-            
-            conn.commit()
-            conn.close()
-            
-            return jsonify({
-                "id": channel_id,
-                "name": channel_name,
-                "members": members_list,
-                "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "message": "Channel created successfully"
-            })
-    
-    except Exception as e:
-        print(f"Error creating channel: {e}")
-        return jsonify({"error": "Failed to create channel"}), 500
-
-@app.route("/api/channels/<int:channel_id>", methods=["DELETE"])
-def delete_channel(channel_id):
-    """Delete a channel"""
-    try:
-        conn = sqlite3.connect('cyber-shield-linkguard.db')
-        cursor = conn.cursor()
-        
-        # Delete channel (this will cascade delete channel_members due to ON DELETE CASCADE)
-        cursor.execute("DELETE FROM channels WHERE id = ?", (channel_id,))
-        
-        if cursor.rowcount == 0:
-            conn.close()
-            return jsonify({"error": "Channel not found"}), 404
-        
-        conn.commit()
-        conn.close()
-        
-        return jsonify({
-            "message": f"Channel {channel_id} deleted successfully"
-        })
-    
-    except Exception as e:
-        print(f"Error deleting channel: {e}")
-        return jsonify({"error": "Failed to delete channel"}), 500
-
-# Debug endpoint to check session data
-@app.route("/api/debug/session", methods=["GET"])
-def debug_session():
-    """Debug endpoint to check current session data"""
-    if 'user_id' not in session:
-        return jsonify({"authenticated": False, "message": "Not logged in"}), 200
-    
-    return jsonify({
-        "authenticated": True,
-        "user_id": session.get('user_id'),
-        "user_full_name": session.get('user_full_name'),
-        "user_email": session.get('user_email'),
-        "plan_mode": session.get('plan_mode'),
-        "session_keys": list(session.keys())
-    }), 200
-
-# Debug endpoint to check user data in database
-@app.route("/api/debug/users", methods=["GET"])
-def debug_users():
-    """Debug endpoint to check users in database"""
-    try:
-        conn = sqlite3.connect('cyber-shield-linkguard.db')
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        
-        # Get all users
-        cursor.execute("SELECT id, full_name, email FROM users")
-        users = cursor.fetchall()
-        
-        user_list = [{
-            "id": user['id'], 
-            "full_name": user['full_name'], 
-            "email": user['email']
-        } for user in users]
-        
-        conn.close()
-        return jsonify({"users": user_list})
-    
-    except Exception as e:
-        print(f"Error fetching users for debug: {e}")
-        return jsonify({"error": "Failed to fetch users"}), 500
-
-@app.route("/api/channels", methods=["GET"])
-def get_channels():
-    """Get all channels with their members"""
-    try:
-        # Log current user from session
-        current_user_id = session.get('user_id')
-        current_user_name = session.get('user_full_name')
-        print(f"Getting channels for session user: ID={current_user_id}, Name={current_user_name}")
-        
-        conn = sqlite3.connect('cyber-shield-linkguard.db')
-        conn.row_factory = sqlite3.Row  # This makes the database return rows as dictionaries
-        cursor = conn.cursor()
-        
-        # Get all channels with creator info
-        cursor.execute("""
-            SELECT c.id, c.name, c.created_at, c.created_by, u.full_name as creator_name
-            FROM channels c
-            LEFT JOIN users u ON c.created_by = u.id
-            ORDER BY c.created_at DESC
-        """)
-        
-        channels = cursor.fetchall()
-        
-        channels_list = []
-        for channel in channels:
-            channel_id = channel['id']
-            name = channel['name']
-            created_at = channel['created_at']
-            creator_id = channel['created_by']
-            creator_name = channel['creator_name']
-            
-            print(f"Channel: {name}, Creator ID: {creator_id}, Creator Name: {creator_name}")
-            
-            # Get members for this channel
-            cursor.execute("""
-                SELECT u.id, u.full_name 
-                FROM channel_members cm 
-                JOIN users u ON cm.user_id = u.id 
-                WHERE cm.channel_id = ?
-                ORDER BY cm.joined_at
-            """, (channel_id,))
-            
-            members = cursor.fetchall()
-            members_list = [{"id": member['id'], "full_name": member['full_name']} for member in members]
-            
-            # Debug: print members
-            print(f"Channel {name} members: {members_list}")
-            
-            channels_list.append({
-                "id": channel_id,
-                "name": name,
-                "created_at": created_at,
-                "created_by": {
-                    "id": creator_id,
-                    "full_name": creator_name or "Unknown User"
-                },
-                "members": members_list
-            })
-        
-        conn.close()
-        return jsonify(channels_list)
-    
-    except Exception as e:
-        print(f"Error fetching channels: {e}")
-        return jsonify({"error": "Failed to fetch channels"}), 500
-
-# Debug endpoint to update a channel's creator
-@app.route("/api/debug/update_channel_creator/<int:channel_id>", methods=["POST"])
-def update_channel_creator(channel_id):
-    """Debug endpoint to update a channel's creator"""
-    try:
-        # Ensure user is logged in
-        if 'user_id' not in session:
-            return jsonify({"error": "You must be logged in to update a channel"}), 401
-        
-        # Get the current user ID from session
-        new_creator_id = session['user_id']
-        
-        conn = sqlite3.connect('cyber-shield-linkguard.db')
-        cursor = conn.cursor()
-        
-        # Check if channel exists
-        cursor.execute("SELECT id FROM channels WHERE id = ?", (channel_id,))
-        if not cursor.fetchone():
-            conn.close()
-            return jsonify({"error": "Channel not found"}), 404
-        
-        # Update the channel's creator
-        cursor.execute(
-            "UPDATE channels SET created_by = ? WHERE id = ?",
-            (new_creator_id, channel_id)
-        )
-        
-        # Make sure user is a member of the channel
-        cursor.execute(
-            "INSERT OR IGNORE INTO channel_members (channel_id, user_id) VALUES (?, ?)",
-            (channel_id, new_creator_id)
-        )
-        
-        conn.commit()
-        conn.close()
-        
-        return jsonify({
-            "success": True,
-            "message": f"Channel {channel_id} creator updated to user {new_creator_id}"
-        })
-    
-    except Exception as e:
-        print(f"Error updating channel creator: {e}")
-        return jsonify({"error": "Failed to update channel creator"}), 500
 
 @app.route("/api/scan", methods=["POST"])
 def scan():
@@ -854,45 +683,29 @@ def scan():
         tlsok, tlsmsg = tls_ok(final_url)
         snip = fetch_snippet(final_url)
         
-        # results with timeout
-        vt = {}
-        try:
-            vt = vt_lookup(final_url)
-        except Exception as vt_error:
-            print(f"Cyber Shield lookup failed: {vt_error}")
-            vt = {"enabled": True, "error": "Cyber Shield scan failed"}
+        # Get combined results from multiple APIs
+        api_results = combined_url_lookup(final_url)
         
-        if vt.get("error"):
-            # Create a basic score based on heuristics only
-            signals = {
-                "input": raw,
-                "normalized": url,
-                "final_url": final_url,
-                "unshorten_hops": hops,
-                "domain": df,
-                "ip": ipaddr,
-                "tls": {"ok": tlsok, "note": tlsmsg},
-                "snippet": snip,
-                "virustotal": vt,
-                "ts": int(time.time()),
-            }
-            verdict = score_fallback(signals)
+        signals = {
+            "input": raw,
+            "normalized": url,
+            "final_url": final_url,
+            "unshorten_hops": hops,
+            "domain": df,
+            "ip": ipaddr,
+            "tls": {"ok": tlsok, "note": tlsmsg},
+            "snippet": snip,
+            "api_results": api_results,
+            "ts": int(time.time()),
+        }
+        
+        if api_results:
+            verdict = score_combined(api_results, signals)
         else:
-            signals = {
-                "input": raw,
-                "normalized": url,
-                "final_url": final_url,
-                "unshorten_hops": hops,
-                "domain": df,
-                "ip": ipaddr,
-                "tls": {"ok": tlsok, "note": tlsmsg},
-                "snippet": snip,
-                "virustotal": vt,
-                "ts": int(time.time()),
-            }
-            verdict = score(signals)
+            verdict = score_fallback(signals)
             
         return jsonify({"signals": signals, "verdict": verdict})
+        
     except Exception as e:
         print(f"URL scan error: {e}")
         return jsonify({"error": "Failed to scan URL"}), 500
@@ -921,7 +734,7 @@ def scan_file():
             
             # Calculate file hash
             file_hash = get_file_hash(temp_path)            
-            vt_result = vt_file_lookup(file_hash)            
+            api_results = combined_file_lookup(file_hash)            
             os.unlink(temp_path)
             
             file_info = {
@@ -930,11 +743,11 @@ def scan_file():
                 "size": os.path.getsize(temp_path) if os.path.exists(temp_path) else 0
             }
             
-            verdict = score_file(vt_result)
+            verdict = score_file_combined(api_results)
             
             return jsonify({
                 "file": file_info,
-                "Cyber Shield": vt_result,
+                "api_results": api_results,
                 "verdict": verdict
             })
         except Exception as e:
@@ -951,9 +764,7 @@ def scan_qr():
         return jsonify({"error": "Rate limit exceeded"}), 429
 
     if not QR_AVAILABLE:
-        # Provide more detailed error information
-        error_msg = "QR code scanning not available - required libraries not installed. "
-        error_msg += f"Available library: {QR_LIB if QR_LIB else 'None'}"
+        error_msg = f"QR code scanning not available. Available library: {QR_LIB if QR_LIB else 'None'}"
         return jsonify({"error": error_msg}), 503
 
     if 'file' not in request.files:
@@ -981,19 +792,14 @@ def scan_qr():
         
         if decoded_content:
             if content_type == "url" and decoded_content.startswith(('http://', 'https://')):
-                # Process URL scan
+                # Process URL scan with combined APIs
                 final_url, hops = unshorten(decoded_content)
                 df = domain_features(final_url)
                 ipaddr = resolve_ip(df.get("host", "")) if df else None
                 tlsok, tlsmsg = tls_ok(final_url)
                 
-                # Get results for the URL
-                vt = {}
-                try:
-                    vt = vt_lookup(final_url)
-                except Exception as vt_error:
-                    print(f"Cyber Shield lookup failed: {vt_error}")
-                    vt = {"enabled": True, "error": "Cyber Shield scan failed"}
+                # Get combined results from multiple APIs
+                api_results = combined_url_lookup(final_url)
                 
                 signals = {
                     "final_url": final_url,
@@ -1001,14 +807,13 @@ def scan_qr():
                     "domain": df,
                     "ip": ipaddr,
                     "tls": {"ok": tlsok, "note": tlsmsg},
-                    "Cyber Shield": vt,
+                    "api_results": api_results,
                 }
                 
-                # Use appropriate scoring based on VT availability
-                if vt.get("error"):
-                    verdict = score_fallback(signals)
+                if api_results:
+                    verdict = score_combined(api_results, signals)
                 else:
-                    verdict = score(signals)
+                    verdict = score_fallback(signals)
                 
                 return jsonify({
                     "decoded": decoded_content,
@@ -1017,11 +822,11 @@ def scan_qr():
                     "verdict": verdict
                 })
             else:
-                # For non-URL content or detected QR codes
+                # For non-URL content
                 return jsonify({
                     "decoded": decoded_content,
                     "type": content_type,
-                    "message": "QR code decoded successfully" if content_type == "url" else "Content extracted from QR code"
+                    "message": "QR code decoded successfully"
                 })
         else:
             return jsonify({
@@ -1032,7 +837,7 @@ def scan_qr():
     except Exception as e:
         print(f"QR scan error: {e}")
         return jsonify({"error": f"Failed to scan QR code: {str(e)}"}), 500
-    
+
 
 #======================================================
 # ----------------- Static / Health -------------------
@@ -1043,7 +848,6 @@ def root():
 
 @app.route("/<path:path>")
 def static_proxy(path):
-
     if path.startswith('api'):
         return jsonify({'error': 'Not found'}), 404
     
@@ -1052,7 +856,6 @@ def static_proxy(path):
 @app.route("/health")
 def health():
     return jsonify({"ok": True})
-
 
 #======================================================
 # ----------------------- Entry -----------------------
