@@ -20,24 +20,9 @@ const getTokenFromUrl = () => {
   return urlParams.get('token');
 };
 
-// Password validation
+// Password validation - Updated to match backend requirements (6-12 characters)
 const validatePassword = (password) => {
-  const requirements = {
-    length: password.length >= 8,
-    uppercase: /[A-Z]/.test(password),
-    lowercase: /[a-z]/.test(password),
-    number: /\d/.test(password),
-    special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
-  };
-  
-  const validCount = Object.values(requirements).filter(Boolean).length;
-  let strength = 'weak';
-  
-  if (validCount >= 5) strength = 'strong';
-  else if (validCount >= 4) strength = 'good';
-  else if (validCount >= 3) strength = 'fair';
-  
-  return { requirements, strength, validCount };
+  return password.length >= 6 && password.length <= 12;
 };
 
 // Update password input styling based on validation
@@ -51,9 +36,9 @@ const updatePasswordInput = (input, isValid) => {
 // Password input event listeners
 $('newPassword').addEventListener('input', (e) => {
   const password = e.target.value;
-  const validation = validatePassword(password);
+  const isValid = validatePassword(password);
   
-  updatePasswordInput(e.target, validation.validCount >= 4);
+  updatePasswordInput(e.target, isValid);
   
   // Check if passwords match when confirm password has value
   const confirmPassword = $('confirmPassword').value;
@@ -89,9 +74,8 @@ $('doReset').addEventListener('click', async () => {
     return toast('Passwords do not match');
   }
   
-  const validation = validatePassword(newPassword);
-  if (validation.validCount < 4) {
-    return toast('Password does not meet minimum requirements');
+  if (!validatePassword(newPassword)) {
+    return toast('Password must be between 6 and 12 characters');
   }
   
   setBusy($('doReset'), true, 'Updating...');

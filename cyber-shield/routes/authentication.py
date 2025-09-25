@@ -426,6 +426,17 @@ def forgot_password():
         print(f"Database error in forgot_password: {e}")
         return jsonify({'error': 'Database error occurred'}), 500
 
+# Verify reset token (optional endpoint for debugging)
+@auth_bp.route('/verify-reset-token/<token>', methods=['GET'])
+def verify_reset_token(token):
+    try:
+        serializer = URLSafeTimedSerializer(os.getenv('FLASK_SECRET_KEY'))
+        email = serializer.loads(token, salt='password-reset-salt', max_age=3600)
+        return jsonify({'valid': True, 'email': email}), 200
+    except Exception as e:
+        print(f"Token verification error: {e}")
+        return jsonify({'valid': False, 'error': str(e)}), 400
+
 # reset password implementation
 @auth_bp.route('/reset-password/<token>', methods=['POST'])
 def reset_password(token):
@@ -443,38 +454,36 @@ def reset_password(token):
         serializer = URLSafeTimedSerializer(os.getenv('FLASK_SECRET_KEY'))
         email = serializer.loads(token, salt='password-reset-salt', max_age=3600)
 
+    except Exception as e:
+        print(f"Token validation error: {e}")
+        return jsonify({'error': 'Invalid or expired token'}), 400
+
+    try:
         conn = get_db_connection()
         cursor = conn.cursor()
-
-        try:
-            
-            cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
-            user = cursor.fetchone()
-
-            if not user: 
-                conn.close()
-                return jsonify({'error': 'Invalid token or user not found'}), 400
-            
-            user_id = user['id']
-
-            hashedpw = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
-            password_str = hashedpw.decode('utf-8')
-
-            cursor.execute('UPDATE users SET password = ? WHERE id = ?', (password_str, user_id))
-            conn.commit()
-            conn.close()
-            # Return success response after password update
-            return jsonify({'message': 'Password updated successfully'}), 200
-
-        except Exception as e:
-            print(f"Error updating password: {e}")
-            return jsonify({'error': 'Failed to update password'}), 500
         
-        finally:
-            if conn:
-                conn.close()
-    
+        cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
+        user = cursor.fetchone()
+
+        if not user: 
+            conn.close()
+            return jsonify({'error': 'Invalid token or user not found'}), 400
+        
+        user_id = user['id']
+
+        hashedpw = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+        password_str = hashedpw.decode('utf-8')
+
+        cursor.execute('UPDATE users SET password = ? WHERE id = ?', (password_str, user_id))
+        conn.commit()
+        conn.close()
+        
+        # Return success response after password update
+        return jsonify({'message': 'Password updated successfully'}), 200
+
     except Exception as e:
-        print(f"Error in reset_password: {e}")
-        return jsonify({'error': 'Invalid or expired token'}), 400
+        print(f"Error updating password: {e}")
+        if 'conn' in locals():
+            conn.close()
+        return jsonify({'error': 'Failed to update password'}), 500
     
