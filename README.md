@@ -117,12 +117,17 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            ├── shareTeamCollab/        
         |            |     ├── shareTeamCollab.html
         |            |     ├── shareTeamCollab.css
-        |            |     └── shareTeamCollab.js
+        |            |     └── shareTeamCollab.js 
         |            |
         |            ├── Subscription/        
         |            |     ├── Subscription.html
         |            |     ├── Subscription.css
         |            |     └── Subscription.js
+        |            |
+        |            ├── BackgroundCheck/        
+        |            |     ├── ComprehensiveBackgroundCheck.html
+        |            |     ├── ComprehensiveBackgroundCheck.css
+        |            |     └── ComprehensiveBackgroundCheck.js
         |            |   
         |            ├── settings/          
         |            |     ├── settings.html

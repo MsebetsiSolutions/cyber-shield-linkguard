@@ -851,6 +851,19 @@ function controlEnterpriseButton(planMode) {
   console.log(`Plan Mode: ${planMode}, Enterprise Button Visible: ${!enterpriseButton.classList.contains('hidden')}`);
 }
 
+
+// control Background Check button visibility
+function controlBackgroundCheckButton(planMode) {
+  const reputationButton = document.getElementById('twReputation');
+  if (planMode === 3) { 
+    show(reputationButton);
+  } else {
+    hide(reputationButton);
+  }
+  console.log(`Plan Mode: ${planMode}, Background Check Button Visible: ${!reputationButton.classList.contains('hidden')}`);
+}
+
+
 // Updated setUserUI function with Enterprise button control
 function setUserUI(userData){ 
   console.log('Setting user UI with data:', userData); 
@@ -871,7 +884,8 @@ function setUserUI(userData){
     // Control button states based on plan_mode
     controlScanButtons(userData.plan_mode);
     controlTeamWorkspaceButton(userData.plan_mode);
-    controlEnterpriseButton(userData.plan_mode); 
+    controlEnterpriseButton(userData.plan_mode);
+    controlBackgroundCheckButton(userData.plan_mode); 
 
   } else { 
     welcomeMessage.textContent = ''; 
@@ -879,7 +893,8 @@ function setUserUI(userData){
     console.log('User not authenticated, using fallback');
     controlScanButtons(0);
     controlTeamWorkspaceButton(0);
-    controlEnterpriseButton(0); 
+    controlEnterpriseButton(0);
+    controlBackgroundCheckButton(0); 
   }
 }
 
