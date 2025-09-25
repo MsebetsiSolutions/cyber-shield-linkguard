@@ -7,9 +7,28 @@ import hashlib
 import tempfile
 from PIL import Image
 import cv2
-from pyzbar.pyzbar import decode
 import numpy as np
 import sqlite3
+
+
+# Try to import QR code libraries with fallbacks
+QR_AVAILABLE = False
+QR_LIB = None
+
+try:
+    from pyzbar.pyzbar import decode as pyzbar_decode
+    QR_LIB = "pyzbar"
+    QR_AVAILABLE = True
+    print("Using pyzbar for QR code scanning")
+except ImportError:
+    try:
+        from qreader import QReader
+        QR_LIB = "qreader"
+        QR_AVAILABLE = True
+        print("Using qreader for QR code scanning")
+    except ImportError:
+        print("No QR code library available - QR scanning disabled")
+
 
 #importing blueprints
 from routes.authentication import auth_bp
@@ -276,20 +295,37 @@ def vt_file_lookup(file_hash: str):
         return {"enabled": True, "error": True}
 
 def scan_qr_code(image_path):
-    """Scan QR code from image file"""
+    """Scan QR code from image file with multiple library support"""
+    if not QR_AVAILABLE:
+        return None, "QR scanning not available - library not installed"
+    
     try:
-        image = cv2.imread(image_path)        
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)        
-        decoded_objects = decode(gray)
+        if QR_LIB == "pyzbar":
+            image = cv2.imread(image_path)        
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)        
+            decoded_objects = pyzbar_decode(gray)
+            
+            if decoded_objects:
+                return decoded_objects[0].data.decode('utf-8'), "url"
+            else:
+                return None, "unknown"
+                
+        elif QR_LIB == "qreader":
+            qreader = QReader()
+            image = cv2.imread(image_path)
+            decoded_text = qreader.detect_and_decode(image=image)
+            
+            if decoded_text and decoded_text[0]:
+                return decoded_text[0], "url"
+            else:
+                return None, "unknown"
         
-        if decoded_objects:
-            return decoded_objects[0].data.decode('utf-8'), "url"
-        else:
-            return None, "unknown"
+        return None, "unknown"
+        
     except Exception as e:
         print(f"QR scan error: {e}")
         return None, "error"
-
+    
 def score_fallback(signals: dict) -> dict:
     """Fallback scoring when Cyber Shield fails"""
     s = 0
@@ -855,6 +891,10 @@ def scan_qr():
     ip = request.headers.get("X-Forwarded-For", request.remote_addr)
     if limited(ip):
         return jsonify({"error": "Rate limit exceeded"}), 429
+
+
+    if not QR_AVAILABLE:
+        return jsonify({"error": "QR code scanning not available - required libraries not installed"}), 503
 
     if 'file' not in request.files:
         return jsonify({"error": "No file provided"}), 400
