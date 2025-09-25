@@ -27,8 +27,17 @@ except ImportError:
         QR_AVAILABLE = True
         print("Using qreader for QR code scanning")
     except ImportError:
-        print("No QR code library available - QR scanning disabled")
-
+        try:
+            # Fallback: using OpenCV's built-in QR code detector
+            import cv2
+            if hasattr(cv2, 'QRCodeDetector'):
+                QR_LIB = "opencv"
+                QR_AVAILABLE = True
+                print("Using OpenCV for QR code scanning")
+            else:
+                print("No QR code library available - QR scanning disabled")
+        except ImportError:
+            print("No QR code library available - QR scanning disabled")
 
 #importing blueprints
 from routes.authentication import auth_bp
@@ -320,10 +329,59 @@ def scan_qr_code(image_path):
             else:
                 return None, "unknown"
         
+        elif QR_LIB == "opencv":
+            # Fallback using OpenCV's built-in QR code detector
+            image = cv2.imread(image_path)
+            qr_detector = cv2.QRCodeDetector()
+            decoded_text, points, straight_qrcode = qr_detector.detectAndDecode(image)
+            
+            if decoded_text:
+                return decoded_text, "url"
+            else:
+                return None, "unknown"
+        
         return None, "unknown"
         
     except Exception as e:
         print(f"QR scan error: {e}")
+        # Try one more fallback with basic image processing
+        try:
+            return simple_qr_scan_fallback(image_path)
+        except Exception as fallback_error:
+            print(f"Fallback QR scan also failed: {fallback_error}")
+            return None, "error"
+        
+def simple_qr_scan_fallback(image_path):
+    """Simple fallback QR scanning using basic image processing"""
+    try:
+        import cv2
+        import numpy as np
+        
+        # Read and preprocess image
+        image = cv2.imread(image_path)
+        if image is None:
+            return None, "error"
+            
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        
+        _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)        
+        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        # square-like contours
+        for contour in contours:
+            approx = cv2.approxPolyDP(contour, 0.02 * cv2.arcLength(contour, True), True)
+            if len(approx) == 4: 
+
+                x, y, w, h = cv2.boundingRect(contour)
+                if w > 50 and h > 50:  
+
+                    roi = gray[y:y+h, x:x+w]
+                    return "QR Code detected but decoding unavailable", "qr_detected"
+        
+        return None, "unknown"
+        
+    except Exception as e:
+        print(f"Simple QR fallback error: {e}")
         return None, "error"
     
 def score_fallback(signals: dict) -> dict:
@@ -383,7 +441,7 @@ def score(signals: dict) -> dict:
             # Calculate threat percentage
             threat_percentage = ((malicious + suspicious) / total_engines) * 100
             
-            s = min(100, threat_percentage * 2)  # Scale 0-100
+            s = min(100, threat_percentage * 2) 
             
             if malicious > 0:
                 reasons.append(f"Detected as malicious by {malicious} security engines")
@@ -393,7 +451,7 @@ def score(signals: dict) -> dict:
                 reasons.append("No threats detected by security engines")
         else:
             reasons.append("No scan results available from security engines")
-            s = 50  # Medium risk when no data
+            s = 50  
     
     # Add secondary heuristic factors (reduced weight)
     df = signals["domain"]
@@ -892,9 +950,11 @@ def scan_qr():
     if limited(ip):
         return jsonify({"error": "Rate limit exceeded"}), 429
 
-
     if not QR_AVAILABLE:
-        return jsonify({"error": "QR code scanning not available - required libraries not installed"}), 503
+        # Provide more detailed error information
+        error_msg = "QR code scanning not available - required libraries not installed. "
+        error_msg += f"Available library: {QR_LIB if QR_LIB else 'None'}"
+        return jsonify({"error": error_msg}), 503
 
     if 'file' not in request.files:
         return jsonify({"error": "No file provided"}), 400
@@ -903,9 +963,15 @@ def scan_qr():
     if file.filename == '':
         return jsonify({"error": "No file selected"}), 400
         
+    # Validate file type
+    allowed_image_types = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff'}
+    file_ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+    if file_ext not in allowed_image_types:
+        return jsonify({"error": f"File type not allowed. Supported types: {', '.join(allowed_image_types)}"}), 400
+        
     try:
         # save image temporarily
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f'.{file_ext}') as temp_file:
             file.save(temp_file.name)
             temp_path = temp_file.name
         
@@ -915,7 +981,7 @@ def scan_qr():
         
         if decoded_content:
             if content_type == "url" and decoded_content.startswith(('http://', 'https://')):
-                
+                # Process URL scan
                 final_url, hops = unshorten(decoded_content)
                 df = domain_features(final_url)
                 ipaddr = resolve_ip(df.get("host", "")) if df else None
@@ -951,11 +1017,11 @@ def scan_qr():
                     "verdict": verdict
                 })
             else:
-                # For non-URL content
+                # For non-URL content or detected QR codes
                 return jsonify({
                     "decoded": decoded_content,
                     "type": content_type,
-                    "message": "QR code decoded successfully"
+                    "message": "QR code decoded successfully" if content_type == "url" else "Content extracted from QR code"
                 })
         else:
             return jsonify({
@@ -965,7 +1031,7 @@ def scan_qr():
             })
     except Exception as e:
         print(f"QR scan error: {e}")
-        return jsonify({"error": "Failed to scan QR code"}), 500
+        return jsonify({"error": f"Failed to scan QR code: {str(e)}"}), 500
     
 
 #======================================================
