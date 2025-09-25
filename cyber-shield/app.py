@@ -46,6 +46,7 @@ from routes.settings import settings_bp
 from routes.scan_results import scan_results_bp
 from routes.chats import chats_bp
 from routes.profile import profile_bp
+from routes.teamCollab import team_collab_bp
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -68,6 +69,7 @@ app.register_blueprint(settings_bp)
 app.register_blueprint(scan_results_bp)
 app.register_blueprint(chats_bp, url_prefix='/api/chats')
 app.register_blueprint(profile_bp)
+app.register_blueprint(team_collab_bp)
 
 
 VT_API_KEY = os.getenv("VT_API_KEY", "").strip()
@@ -75,9 +77,6 @@ DYMO_API_KEY = os.getenv("DYMO_API_KEY", "").strip()
 RATE_LIMIT_PER_MIN = int(os.getenv("RATE_LIMIT_PER_MIN", "60"))
 
 _ip_bucket = {}
-
-
-
 
 #======================================================
 # -------------- Heuristics & constants ---------------
