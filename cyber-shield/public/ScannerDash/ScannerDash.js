@@ -564,16 +564,9 @@ async function runScanFile(file){
   }
 }
 
-
-
-
-
-
-
-
-
-
-// QR Scan functionality
+//----------------------------------------
+//------- QR Scan functionality-----------
+//----------------------------------------
 qrScanBtn.addEventListener('click', () => {
   const f = qrInput.files && qrInput.files[0]; 
   if(!f) return toast('Pick an image of a QR code'); 
@@ -589,17 +582,23 @@ async function runScanQr(file){
     const fd = new FormData(); 
     fd.append('file', file);
     
-    // Use fetchWithSession instead of regular fetch
     const r = await fetchWithSession('/api/scan_qr', { 
       method: 'POST',
       body: fd
     });
     
-    const j = await r.json(); 
-    if(!r.ok){ 
-      toast(j.error || 'QR scan failed');
-      return;
+    if (!r.ok) {
+      const errorData = await r.json();
+      // More specific error handling
+      if (r.status === 503) {
+        toast('QR scanning feature is currently unavailable. Please try again later or contact support.');
+        console.error('QR library error:', errorData.error);
+        return;
+      }
+      throw new Error(errorData.error || 'QR scan failed');
     }
+    
+    const j = await r.json(); 
     
     // Decrement scan count only for free users
     let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
@@ -662,12 +661,15 @@ async function runScanQr(file){
     }
   } catch(e) { 
     console.error('QR scan error:', e);
-    toast('Network error: ' + e.message); 
+    if (e.message.includes('library not installed')) {
+      toast('QR scanning is temporarily unavailable. Our team is working on a fix.');
+    } else {
+      toast('QR scan failed: ' + e.message); 
+    }
   } finally { 
     setBusy(qrScanBtn, false); 
   }
 }
-
 
 
 
