@@ -1,16 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Generate and display random code
     const codeDisplay = document.getElementById('codeDisplay');
     const verificationForm = document.getElementById('verificationForm');
-    const verificationInput = document.getElementById('verificationCode');
     const companyNameInput = document.getElementById('companyName');
+    const verificationInput = document.getElementById('verificationCode');
     const submitBtn = document.getElementById('submitBtn');
     
-    // Generate random code (7 characters: uppercase, lowercase, and numbers)
+    // Generate random verification code
     function generateRandomCode() {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         let result = '';
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < 6; i++) {
             result += characters.charAt(Math.floor(Math.random() * characters.length));
         }
         return result;
@@ -19,21 +18,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const verificationValue = generateRandomCode();
     codeDisplay.textContent = verificationValue;
     
-    // Form submission handler
-    verificationForm.addEventListener('submit', function(e) {
+    verificationForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        const enteredCode = verificationInput.value.trim();
         const companyName = companyNameInput.value.trim();
+        const enteredCode = verificationInput.value.trim();
         
-        // Validate company name
+        // Validate inputs
         if (!companyName) {
             showError('Please enter your company name');
             companyNameInput.focus();
             return;
         }
         
-        // Validate verification code
         if (!enteredCode) {
             showError('Please enter the verification code');
             verificationInput.focus();
@@ -47,65 +44,75 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Show success message
-        showSuccess('Verification successful! Redirecting to dashboard...');
-        
-        // Disable button during redirect
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        
-        // If validation passes, redirect to dashboard after a brief delay
-        setTimeout(() => {
-            window.location.href = '../enter-dash/enterprise-dashboard.html';
-        }, 1500);
+        // Verify with backend
+        try {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            
+            const response = await fetch('/api/enterprise/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    company_name: companyName,
+                    verification_code: enteredCode
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                showSuccess('Enterprise verification successful! Redirecting...');
+                
+                // Store company name for dashboard
+                localStorage.setItem('enterprise_company', companyName);
+                
+                setTimeout(() => {
+                    window.location.href = '../enter-dash/enterprise-dashboard.html';
+                }, 1500);
+            } else {
+                showError(data.error || 'Verification failed');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Verify & Continue';
+            }
+            
+        } catch (error) {
+            showError('Network error. Please try again.');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Verify & Continue';
+        }
     });
     
-    // Add some input effects for better UX
+    // Input effects
     const inputs = document.querySelectorAll('input');
     inputs.forEach(input => {
-        // Add focus effect
         input.addEventListener('focus', function() {
             this.parentElement.classList.add('focused');
         });
         
-        // Remove focus effect
         input.addEventListener('blur', function() {
             this.parentElement.classList.remove('focused');
         });
     });
     
-    // Function to show error messages
     function showError(message) {
-        // Remove any existing messages
         removeMessages();
-        
-        // Create error message element
         const errorDiv = document.createElement('div');
         errorDiv.className = 'message error';
         errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
-        
-        // Insert before the form
         verificationForm.parentNode.insertBefore(errorDiv, verificationForm);
-        
-        // Remove message after 5 seconds
         setTimeout(removeMessages, 5000);
     }
     
-    // Function to show success messages
     function showSuccess(message) {
-        // Remove any existing messages
         removeMessages();
-        
-        // Create success message element
         const successDiv = document.createElement('div');
         successDiv.className = 'message success';
         successDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
-        
-        // Insert before the form
         verificationForm.parentNode.insertBefore(successDiv, verificationForm);
     }
     
-    // Function to remove all messages
     function removeMessages() {
         const messages = document.querySelectorAll('.message');
         messages.forEach(message => message.remove());
@@ -125,15 +132,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         .message.error {
-            background: #ffebee;
-            color: #c62828;
-            border: 1px solid #ef9a9a;
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
         }
         
         .message.success {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border: 1px solid #a5d6a7;
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
         }
         
         @keyframes fadeIn {

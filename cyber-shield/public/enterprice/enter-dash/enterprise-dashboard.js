@@ -1,540 +1,536 @@
-/* ===== Mock data & helpers ===== */
-const reports = [
-  {
-    id: 1,
-    title: "Phishing kit distributed via zip",
-    severity: "High",
-    source: "http://malicious.example",
-    ts: "2025-09-16T06:10:00Z"
-  },
-  {
-    id: 2,
-    title: "Malware PE detected",
-    severity: "Critical",
-    source: "attachment:invoice.docx",
-    ts: "2025-09-15T19:45:00Z"
-  },
-  {
-    id: 3,
-    title: "Suspicious domain engaging in typosquatting",
-    severity: "Medium",
-    source: "typo-secure.com",
-    ts: "2025-09-15T11:02:00Z"
-  },
-  {
-    id: 4,
-    title: "QR redirecting to credential harvest",
-    severity: "High",
-    source: "qr://redirect/abc",
-    ts: "2025-09-14T08:12:00Z"
-  }
-];
-
-const feedItems = [
-  {
-    id: 1,
-    title: "IOC: 203.0.113.45 observed in brute-force",
-    time: "10m ago"
-  },
-  { 
-    id: 2, 
-    title: "Emerging CVE advisory: libfoo 3.2.1 - RCE", 
-    time: "2h ago" 
-  },
-  {
-    id: 3,
-    title: "New phishing campaign targeting finance teams",
-    time: "4h ago"
-  },
-  {
-    id: 4,
-    title: "Malicious APK observed on third-party store",
-    time: "1d ago"
-  }
-];
-
-// Updated user data with South African names and random company emails
-const users = [
-  { id: 1, name: "Aisha M.", email: "aisha@msebetsi.com", role: "Admin" },
-  { id: 2, name: "Thabo N.", email: "thabo@cyberdefense.co.za", role: "Analyst" },
-  { id: 3, name: "Lerato M.", email: "lerato@securetech.africa", role: "Developer" },
-  { id: 4, name: "Sipho D.", email: "sipho@dataguard.solutions", role: "Analyst" },
-  { id: 5, name: "Nomsa K.", email: "nomsa@africyber.co.za", role: "Manager" }
-];
-
-/* ===== USER MANAGEMENT ===== */
-// Get the current user (in a real app, this would come from your auth system)
-let currentUser = {
-  name: "Aisha M.",
-  email: "aisha@msebetsi.com",
-  role: "Admin"
-};
-
-/* ===== UI helpers ===== */
-function el(tag, attrs = {}, children = []) {
-  const e = document.createElement(tag);
-  for (const k in attrs) {
-    if (k.startsWith("on")) e.addEventListener(k.slice(2), attrs[k]);
-    else e.setAttribute(k, attrs[k]);
-  }
-  (Array.isArray(children) ? children : [children]).forEach((c) => {
-    if (typeof c === "string") e.appendChild(document.createTextNode(c));
-    else if (c) e.appendChild(c);
-  });
-  return e;
-}
-
-/* ===== SECTION NAVIGATION ===== */
-function switchSection(sectionName) {
-  // Hide all sections
-  document.querySelectorAll('.section-content').forEach(section => {
-    section.classList.remove('active');
-  });
-  
-  // Show the selected section
-  const targetSection = document.querySelector(`.${sectionName}-section`);
-  if (targetSection) {
-    targetSection.classList.add('active');
-  }
-  
-  // Update navigation
-  document.querySelectorAll('.nav a').forEach(link => {
-    link.classList.remove('active');
-    if (link.getAttribute('data-section') === sectionName) {
-      link.classList.add('active');
+class EnterpriseDashboard {
+    constructor() {
+        this.currentSection = 'overview';
+        this.companyName = localStorage.getItem('enterprise_company') || 'Enterprise';
+        this.init();
     }
-  });
-}
 
-/* ===== EXIT CONFIRMATION MODAL ===== */
-function setupExitModal() {
-  const logoButton = document.getElementById('logo-button');
-  const exitModal = document.getElementById('exit-modal');
-  const exitCancel = document.getElementById('exit-cancel');
-  const exitConfirm = document.getElementById('exit-confirm');
-  const usernamePlaceholder = document.getElementById('username-placeholder');
-  
-  // Set the username in the modal
-  usernamePlaceholder.textContent = currentUser.name;
-  
-  // Open modal when logo is clicked
-  if (logoButton) {
-    logoButton.addEventListener('click', () => {
-      exitModal.style.display = 'flex';
-    });
-  }
-  
-  // Close modal when cancel is clicked
-  if (exitCancel) {
-    exitCancel.addEventListener('click', () => {
-      exitModal.style.display = 'none';
-    });
-  }
-  
-  // Handle exit confirmation - UPDATED TO REDIRECT
-  if (exitConfirm) {
-    exitConfirm.addEventListener('click', () => {
-      // Redirect to the scanner dashboard
-      window.location.href = '../../ScannerDash/ScannerDash.html';
-    });
-  }
-}
-
-/* ===== NAVIGATION HANDLING ===== */
-function setupNavigation() {
-  document.querySelectorAll('.nav a').forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      const section = link.getAttribute('data-section');
-      
-      if (section === 'settings') {
-        switchSection('settings');
-      } else {
-        // For other sections, show a message (as per original code)
-        alert(`Navigation to ${section} is a UI mock. Implement section switching if needed.`);
-      }
-    });
-  });
-}
-
-/* Populate reports */
-const reportsList = document.getElementById("reports-list");
-function renderReports() {
-  if (!reportsList) return;
-  
-  reportsList.innerHTML = "";
-  for (const r of reports) {
-    const item = el("div", { class: "report", role: "listitem" }, [
-      el("div", {
-        style:
-          "width:10px;height:10px;border-radius:50%;background:" +
-          (r.severity === "Critical"
-            ? "var(--danger)"
-            : r.severity === "High"
-            ? "orange"
-            : "var(--accent)")
-      }),
-      el("div", { class: "meta" }, [
-        el("div", {}, [el("strong", {}, r.title)]),
-        el(
-          "div",
-          { class: "small muted" },
-          `${r.source} • ${new Date(r.ts).toLocaleString()}`
-        )
-      ]),
-      el("div", {}, [
-        el(
-          "button",
-          { class: "muted-btn", onclick: () => openReport(r.id) },
-          "View"
-        )
-      ])
-    ]);
-    reportsList.appendChild(item);
-  }
-}
-
-function openReport(id) {
-  const r = reports.find((x) => x.id === id);
-  if (!r) return alert("Report not found");
-  const modal = document.getElementById("modal");
-  document.getElementById("modal-title").textContent =
-    "Threat Report — " + r.title;
-  document.getElementById("modal-body").innerHTML = `
-    <div style="flex:1">
-      <div class="small">Source</div>
-      <div style="font-weight:700;margin-top:6px">${r.source}</div>
-      <div class="small" style="margin-top:12px">Severity: <strong>${
-        r.severity
-      }</strong></div>
-      <div class="small" style="margin-top:8px">Time: ${new Date(
-        r.ts
-      ).toLocaleString()}</div>
-      <div style="margin-top:12px" class="small">Details</div>
-      <div style="margin-top:6px">This is a mock report. Replace this section with detailed indicators, affected hosts, yara signatures, file hashes, recommended remediation steps, and attachments.</div>
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="scan-btn" onclick="ackReport(${id})">Acknowledge</button>
-        <button class="muted-btn" onclick="exportReport(${id})">Export</button>
-        <button class="muted-btn" onclick="pinToWorkspace(${id})">Pin to Workspace</button>
-      </div>
-    </div>
-  `;
-  modal.style.display = "flex";
-}
-
-function ackReport(id) {
-  alert("Report " + id + " acknowledged (mock)");
-  document.getElementById("modal").style.display = "none";
-}
-function exportReport(id) {
-  alert("Exporting report " + id + " (mock)");
-}
-function pinToWorkspace(id) {
-  alert("Pinned report " + id + " to workspace Collections (mock)");
-}
-
-/* Feed */
-function renderFeed() {
-  const feed = document.getElementById("feed");
-  if (!feed) return;
-  
-  feed.innerHTML = "";
-  for (const f of feedItems) {
-    const node = el("div", { class: "feed-item" }, [
-      el("div", {}, [
-        el("strong", {}, f.title),
-        el("div", { class: "time" }, f.time)
-      ]),
-      el("div", { class: "space" })
-    ]);
-    feed.appendChild(node);
-  }
-}
-
-/* Users */
-function renderUsers() {
-  const list = document.getElementById("users-list");
-  if (!list) return;
-  
-  list.innerHTML = "";
-  for (const u of users) {
-    const node = el("div", { class: "user" }, [
-      el(
-        "div",
-        {
-          style:
-            "width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:600"
-        },
-        u.name
-          .split(" ")
-          .map((s) => s[0])
-          .slice(0, 2)
-          .join("")
-      ),
-      el("div", {}, [
-        el("div", {}, u.name),
-        el("div", { class: "small muted" }, u.email)
-      ]),
-      el("div", { class: "space" }),
-      el("div", { class: "tag" }, u.role),
-      el(
-        "button",
-        { class: "muted-btn", onclick: () => removeUser(u.id) },
-        "Remove"
-      )
-    ]);
-    list.appendChild(node);
-  }
-}
-function removeUser(id) {
-  if (!confirm("Remove user?")) return;
-  const idx = users.findIndex((u) => u.id === id);
-  if (idx >= 0) users.splice(idx, 1);
-  renderUsers();
-}
-
-/* Workspace activities */
-function renderWorkspaceActivities() {
-  const container = document.getElementById("workspace-activities");
-  if (!container) return;
-  
-  container.innerHTML = "";
-  const acts = [
-    "Pinned report: Phishing kit distributed via zip",
-    "Shared report with Analysts group",
-    "Added Lerato M. to Collections workspace",
-    "Notebook added: Incident 2025-0916"
-  ];
-  acts.forEach((a) => {
-    container.appendChild(el("div", { class: "small" }, a));
-  });
-}
-
-/* Reputation checker (mock) */
-if (document.getElementById("rep-check")) {
-  document.getElementById("rep-check").addEventListener("click", () => {
-    const v = document.getElementById("rep-input").value.trim();
-    const out = document.getElementById("rep-result");
-    if (!v) {
-      out.textContent = "Enter an email or domain to check.";
-      return;
+    init() {
+        this.displayCompanyName();
+        this.setupNavigation();
+        this.setupEventListeners();
+        this.loadDashboardData();
+        this.checkEnterpriseAccess();
+        this.setupConstructionModal();
     }
-    // simple detection
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-    const isDomain = /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(v);
-    out.textContent = "Checking...";
-    setTimeout(() => {
-      // mock logic: domains containing "example" are good; "malicious" or "typo" are bad
-      const badKeywords = ["malicious", "typo", "phish", "bad"];
-      const foundBad = badKeywords.some((k) => v.toLowerCase().includes(k));
-      if (foundBad) {
-        out.innerHTML = `<span class="bad">Reputation: Poor</span> — Indicators found: phishing URLs, suspicious history.`;
-      } else {
-        if (isEmail) {
-          out.innerHTML = `<span class="ok">Reputation: Clean</span> — No public breaches found (mock).`;
-        } else if (isDomain) {
-          out.innerHTML = `<span class="ok">Reputation: Neutral</span> — Low risk observed in passive DNS (mock).`;
-        } else {
-      out.innerHTML = `<span class="muted">Unknown format</span>`;
+
+    displayCompanyName() {
+        const companyDisplay = document.getElementById('company-name-display');
+        if (companyDisplay) {
+            companyDisplay.textContent = this.companyName;
         }
-      }
-    }, 700);
-  });
-}
-
-if (document.getElementById("rep-reset")) {
-  document.getElementById("rep-reset").addEventListener("click", () => {
-    document.getElementById("rep-input").value = "";
-    document.getElementById("rep-result").textContent = "";
-  });
-}
-
-/* Scanning (mock) */
-if (document.getElementById("scan-url-btn")) {
-  document.getElementById("scan-url-btn").addEventListener("click", () => {
-    const v = document.getElementById("scan-input").value.trim();
-    if (!v) {
-      alert("Enter a URL or domain to scan");
-      return;
     }
-    simulateScan({ type: "url", value: v });
-  });
+
+    setupNavigation() {
+        // Navigation items
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = item.getAttribute('data-section');
+                this.switchSection(section);
+            });
+        });
+
+        // Quick action cards
+        document.getElementById('quick-scan')?.addEventListener('click', () => {
+            this.switchSection('scanner');
+        });
+
+        document.getElementById('team-management')?.addEventListener('click', () => {
+            this.switchSection('teams');
+        });
+
+        document.getElementById('reports-view')?.addEventListener('click', () => {
+            this.switchSection('reports');
+        });
+
+        document.getElementById('brand-check')?.addEventListener('click', () => {
+            this.switchSection('reputation');
+        });
+    }
+
+    setupEventListeners() {
+        // Exit modal
+        document.getElementById('logo-button')?.addEventListener('click', () => {
+            this.showExitModal();
+        });
+
+        document.getElementById('cancel-exit')?.addEventListener('click', () => {
+            this.hideExitModal();
+        });
+
+        document.getElementById('confirm-exit')?.addEventListener('click', () => {
+            window.location.href = '../../../ScannerDash/ScannerDash.html';
+        });
+
+        // Scanner functionality
+        this.setupScanner();
+
+        // Reports functionality
+        this.setupReports();
+
+        // Reputation functionality
+        this.setupReputation();
+
+        // Teams functionality
+        this.setupTeams();
+
+        // SIEM functionality
+        this.setupSIEM();
+
+        // Threat Feed functionality
+        this.setupThreatFeed();
+
+        // Support functionality
+        this.setupSupport();
+
+        // Settings functionality
+        this.setupSettings();
+    }
+
+    setupConstructionModal() {
+        // Close construction modal
+        document.getElementById('close-construction')?.addEventListener('click', () => {
+            this.hideConstructionModal();
+        });
+    }
+
+    showConstructionModal(message = "This feature is currently being developed and will be available soon.") {
+        document.getElementById('construction-message').textContent = message;
+        document.getElementById('construction-modal').classList.add('active');
+    }
+
+    hideConstructionModal() {
+        document.getElementById('construction-modal').classList.remove('active');
+    }
+
+    setupScanner() {
+        // Scan type switching
+        document.querySelectorAll('.scan-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.scan-option').forEach(opt => {
+                    opt.classList.remove('active');
+                });
+                option.classList.add('active');
+
+                const scanType = option.getAttribute('data-type');
+                this.showScanInput(scanType);
+            });
+        });
+
+        // URL scanning
+        document.getElementById('scan-url-btn')?.addEventListener('click', () => {
+            this.scanURL();
+        });
+
+        // File scanning
+        document.getElementById('file-input')?.addEventListener('change', (e) => {
+            this.scanFiles(e.target.files);
+        });
+
+        // QR scanning
+        document.getElementById('qr-input')?.addEventListener('change', (e) => {
+            this.scanQRCode(e.target.files[0]);
+        });
+    }
+
+    setupReports() {
+        document.getElementById('generate-report')?.addEventListener('click', () => {
+            this.showConstructionModal("Custom branded reports feature is under construction. This will allow you to generate detailed threat analysis reports with your company branding.");
+        });
+    }
+
+    setupReputation() {
+        document.getElementById('check-reputation')?.addEventListener('click', () => {
+            const domain = document.getElementById('domain-input').value.trim();
+            if (!domain) {
+                alert('Please enter a domain to check');
+                return;
+            }
+            this.showConstructionModal(`Brand reputation check for ${domain} is under construction. This feature will provide comprehensive reputation monitoring for your domains.`);
+        });
+
+        document.getElementById('save-monitoring')?.addEventListener('click', () => {
+            this.showConstructionModal("Continuous monitoring settings feature is under construction. This will enable 24/7 brand reputation monitoring with customizable alert thresholds.");
+        });
+    }
+
+    setupTeams() {
+        document.getElementById('add-user')?.addEventListener('click', () => {
+            const email = document.getElementById('user-email').value.trim();
+            if (!email) {
+                alert('Please enter user email');
+                return;
+            }
+            this.showConstructionModal(`Team member management feature is under construction. This will allow you to add ${email} to your enterprise team with role-based permissions.`);
+        });
+
+        document.getElementById('create-workspace')?.addEventListener('click', () => {
+            const name = document.getElementById('workspace-name').value.trim();
+            if (!name) {
+                alert('Please enter workspace name');
+                return;
+            }
+            this.showConstructionModal(`Workspace creation feature is under construction. This will create a new shared workspace named "${name}" for your team collaboration.`);
+        });
+    }
+
+    setupSIEM() {
+        document.getElementById('test-siem')?.addEventListener('click', () => {
+            this.showConstructionModal("SIEM integration testing feature is under construction. This will test the connection to your Security Information and Event Management system.");
+        });
+
+        document.getElementById('save-siem')?.addEventListener('click', () => {
+            this.showConstructionModal("SIEM configuration feature is under construction. This will save your SIEM integration settings for automatic threat data sharing.");
+        });
+    }
+
+    setupThreatFeed() {
+        document.getElementById('refresh-feed')?.addEventListener('click', () => {
+            this.showConstructionModal("Threat intelligence feed refresh feature is under construction. This will update the feed with the latest threat indicators and security advisories.");
+        });
+
+        document.getElementById('export-feed')?.addEventListener('click', () => {
+            this.showConstructionModal("Threat feed export feature is under construction. This will allow you to export threat intelligence data in various formats for analysis.");
+        });
+    }
+
+    setupSupport() {
+        document.getElementById('call-support')?.addEventListener('click', () => {
+            this.showConstructionModal("24/7 phone support feature is under construction. Enterprise customers will have access to dedicated phone support with priority routing.");
+        });
+
+        document.getElementById('start-chat')?.addEventListener('click', () => {
+            this.showConstructionModal("Live chat support feature is under construction. This will provide instant messaging support with dedicated enterprise support agents.");
+        });
+
+        document.getElementById('create-ticket')?.addEventListener('click', () => {
+            document.getElementById('ticket-creation').style.display = 'block';
+        });
+
+        document.getElementById('cancel-ticket')?.addEventListener('click', () => {
+            document.getElementById('ticket-creation').style.display = 'none';
+        });
+
+        document.getElementById('submit-ticket')?.addEventListener('click', () => {
+            const subject = document.getElementById('ticket-subject').value.trim();
+            if (!subject) {
+                alert('Please enter ticket subject');
+                return;
+            }
+            this.showConstructionModal("Priority ticket system feature is under construction. Your support ticket will be handled with priority by our dedicated customer success team.");
+            document.getElementById('ticket-creation').style.display = 'none';
+        });
+    }
+
+    setupSettings() {
+        // Settings tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                btn.classList.add('active');
+                const tabId = btn.getAttribute('data-tab') + '-tab';
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Settings buttons
+        document.querySelector('.save-settings-btn')?.addEventListener('click', () => {
+            this.showConstructionModal("Settings save feature is under construction. Your enterprise configuration will be saved across all team workspaces.");
+        });
+
+        document.querySelector('.reset-settings-btn')?.addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset all settings to defaults?')) {
+                this.showConstructionModal("Settings reset feature is under construction. This will restore all enterprise settings to their default values.");
+            }
+        });
+
+        // API key buttons
+        document.querySelector('.copy-btn')?.addEventListener('click', () => {
+            this.showConstructionModal("API key copy feature is under construction. This will copy your enterprise API key to the clipboard securely.");
+        });
+
+        document.querySelector('.regenerate-btn')?.addEventListener('click', () => {
+            if (confirm('Are you sure you want to regenerate your API key? This will invalidate the current key.')) {
+                this.showConstructionModal("API key regeneration feature is under construction. This will generate a new API key for your enterprise account.");
+            }
+        });
+    }
+
+    async checkEnterpriseAccess() {
+        try {
+            const response = await fetch('/api/enterprise/dashboard-data');
+            if (!response.ok) {
+                throw new Error('Enterprise access not verified');
+            }
+        } catch (error) {
+            alert('Enterprise access required. Redirecting to verification...');
+            window.location.href = '../start-enter/start-enter.html';
+        }
+    }
+
+    async loadDashboardData() {
+        try {
+            const response = await fetch('/api/enterprise/dashboard-data');
+            const data = await response.json();
+
+            if (response.ok) {
+                this.updateDashboardStats(data.stats);
+                this.displayRecentThreats(data.recent_threats);
+                this.displayTeamMembers(data.team_members || []);
+            }
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+            // Load mock data for demonstration
+            this.loadMockData();
+        }
+    }
+
+    loadMockData() {
+        // Mock dashboard stats
+        this.updateDashboardStats({
+            total_scans_today: 12482,
+            threats_found: 1128,
+            active_users: 2013,
+            workspaces: 18
+        });
+
+        // Mock recent threats
+        this.displayRecentThreats([
+            {
+                id: 1,
+                title: "Phishing kit distributed via zip",
+                severity: "High",
+                timestamp: new Date().toISOString()
+            },
+            {
+                id: 2,
+                title: "Malware PE detected in email attachment",
+                severity: "Critical",
+                timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+            },
+            {
+                id: 3,
+                title: "Suspicious domain engaging in typosquatting",
+                severity: "Medium",
+                timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString()
+            }
+        ]);
+
+        // Mock team members
+        this.displayTeamMembers([
+            { id: 1, name: "Aisha M.", email: "aisha@company.com", role: "Admin" },
+            { id: 2, name: "Thabo N.", email: "thabo@company.com", role: "Analyst" },
+            { id: 3, name: "Lerato M.", email: "lerato@company.com", role: "Developer" }
+        ]);
+    }
+
+    updateDashboardStats(stats) {
+        document.getElementById('total-scans').textContent = stats.total_scans_today.toLocaleString();
+        document.getElementById('threats-found').textContent = stats.threats_found.toLocaleString();
+        document.getElementById('active-users').textContent = stats.active_users.toLocaleString();
+        document.getElementById('workspaces').textContent = stats.workspaces;
+    }
+
+    displayRecentThreats(threats) {
+        const container = document.getElementById('recent-threats');
+        if (!container) return;
+
+        container.innerHTML = threats.map(threat => `
+            <div class="threat-item">
+                <div class="threat-severity ${threat.severity.toLowerCase()}">${threat.severity}</div>
+                <div class="threat-content">
+                    <div class="threat-title">${threat.title}</div>
+                    <div class="threat-time">${new Date(threat.timestamp).toLocaleString()}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    displayTeamMembers(members) {
+        const container = document.getElementById('team-members-body');
+        if (!container) return;
+
+        container.innerHTML = members.map(member => `
+            <div class="team-member">
+                <span>${member.name}</span>
+                <span>${member.email}</span>
+                <span>${member.role}</span>
+                <span>
+                    <button class="action-btn edit-btn" data-member="${member.id}">Edit</button>
+                    <button class="action-btn remove-btn" data-member="${member.id}">Remove</button>
+                </span>
+            </div>
+        `).join('');
+
+        // Add event listeners to action buttons
+        container.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const memberId = e.target.getAttribute('data-member');
+                this.showConstructionModal(`Team member editing feature is under construction. This will allow you to modify permissions for user ID: ${memberId}`);
+            });
+        });
+
+        container.querySelectorAll('.remove-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const memberId = e.target.getAttribute('data-member');
+                if (confirm('Are you sure you want to remove this team member?')) {
+                    this.showConstructionModal(`Team member removal feature is under construction. This will remove user ID: ${memberId} from your enterprise team.`);
+                }
+            });
+        });
+    }
+
+    switchSection(sectionName) {
+        // Hide all sections
+        document.querySelectorAll('.section-content').forEach(section => {
+            section.classList.remove('active');
+        });
+
+        // Update navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('data-section') === sectionName) {
+                item.classList.add('active');
+            }
+        });
+
+        // Show target section
+        const targetSection = document.querySelector(`.${sectionName}-section`);
+        if (targetSection) {
+            targetSection.classList.add('active');
+        }
+
+        this.currentSection = sectionName;
+    }
+
+    showScanInput(scanType) {
+        document.querySelectorAll('.scan-input-area > div').forEach(div => {
+            div.classList.remove('active');
+        });
+
+        const targetInput = document.querySelector(`.${scanType}-scan`);
+        if (targetInput) {
+            targetInput.classList.add('active');
+        }
+    }
+
+    async scanURL() {
+        const urlInput = document.getElementById('url-input');
+        const url = urlInput.value.trim();
+
+        if (!url) {
+            alert('Please enter a URL to scan');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/scan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url: url })
+            });
+
+            const result = await response.json();
+            this.displayScanResult(result, 'URL Scan');
+        } catch (error) {
+            this.displayError('Scan failed: ' + error.message);
+        }
+    }
+
+    async scanFiles(files) {
+        if (!files || files.length === 0) return;
+
+        const formData = new FormData();
+        for (let file of files) {
+            formData.append('file', file);
+        }
+
+        try {
+            const response = await fetch('/api/scan_file', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            this.displayScanResult(result, 'File Scan');
+        } catch (error) {
+            this.displayError('File scan failed: ' + error.message);
+        }
+    }
+
+    async scanQRCode(file) {
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('/api/scan_qr', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            this.displayScanResult(result, 'QR Scan');
+        } catch (error) {
+            this.displayError('QR scan failed: ' + error.message);
+        }
+    }
+
+    displayScanResult(result, scanType) {
+        const resultsContainer = document.getElementById('scan-results');
+        if (!resultsContainer) return;
+
+        let html = `
+            <div class="scan-result">
+                <div class="result-header">
+                    <h3>${scanType} Result</h3>
+                    <span class="scan-time">${new Date().toLocaleString()}</span>
+                </div>
+        `;
+
+        if (result.verdict) {
+            html += `
+                <div class="verdict verdict-${result.verdict.band.toLowerCase()}">
+                    <strong>Verdict:</strong> ${result.verdict.band} (Score: ${result.verdict.score}/100)
+                </div>
+                <div class="reasons">
+                    <strong>Reasons:</strong>
+                    <ul>
+                        ${result.verdict.reasons.map(reason => `<li>${reason}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        } else if (result.error) {
+            html += `<div class="error">Error: ${result.error}</div>`;
+        }
+
+        html += `</div>`;
+        resultsContainer.innerHTML = html;
+    }
+
+    displayError(message) {
+        const resultsContainer = document.getElementById('scan-results');
+        if (resultsContainer) {
+            resultsContainer.innerHTML = `<div class="error">${message}</div>`;
+        }
+    }
+
+    showExitModal() {
+        document.getElementById('exit-modal').classList.add('active');
+    }
+
+    hideExitModal() {
+        document.getElementById('exit-modal').classList.remove('active');
+    }
 }
 
-if (document.getElementById("upload-trigger")) {
-  document.getElementById("upload-trigger").addEventListener("click", () => {
-    document.getElementById("file-input").click();
-  });
-}
-
-if (document.getElementById("file-input")) {
-  document.getElementById("file-input").addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    simulateScan({ type: "file", value: file.name });
-  });
-}
-
-if (document.getElementById("open-qr")) {
-  document.getElementById("open-qr").addEventListener("click", () => {
-    openQRMock();
-  });
-}
-
-function simulateScan({ type, value }) {
-  const id = reports.length + 1;
-  const severity = Math.random() > 0.7 ? "High" : "Medium";
-  const title =
-    (type === "file" ? "File flagged" : "URL analysis") + " — " + value;
-  reports.unshift({
-    id,
-    title,
-    severity,
-    source: value,
-    ts: new Date().toISOString()
-  });
-  renderReports();
-  // add feed item
-  feedItems.unshift({
-    id: Date.now(),
-    title: `Scan result: ${value} — ${severity}`,
-    time: "just now"
-  });
-  renderFeed();
-  alert(`Scan complete (mock). Report ${id} added.`);
-}
-
-/* QR mock modal */
-function openQRMock() {
-  const modal = document.getElementById("modal");
-  document.getElementById("modal-title").textContent = "QR Scanner (mock)";
-  document.getElementById("modal-body").innerHTML = `
-    <div class="qr-canvas" id="qr-canvas">QR image</div>
-    <div style="flex:1">
-      <div class="small">Detected content</div>
-      <div id="qr-content" style="margin-top:8px;font-weight:700">https://phish.example/login</div>
-      <div style="margin-top:12px" id="qr-actions">
-        <button class="scan-btn" id="qr-scan-btn">Scan Content</button>
-        <button class="muted-btn" id="qr-ignore">Ignore</button>
-      </div>
-    </div>
-  `;
-  modal.style.display = "flex";
-  document.getElementById("qr-scan-btn").addEventListener("click", () => {
-    simulateScan({
-      type: "qr",
-      value: document.getElementById("qr-content").textContent
-    });
-    modal.style.display = "none";
-  });
-  document
-    .getElementById("qr-ignore")
-    .addEventListener("click", () => (modal.style.display = "none"));
-}
-
-if (document.getElementById("close-modal")) {
-  document.getElementById("close-modal").addEventListener("click", () => {
-    document.getElementById("modal").style.display = "none";
-  });
-}
-
-/* SIEM save (mock) */
-if (document.getElementById("siem-save")) {
-  document.getElementById("siem-save").addEventListener("click", () => {
-    const endpoint = document.getElementById("siem-endpoint").value.trim();
-    const token = document.getElementById("siem-token").value.trim();
-    if (!endpoint || !token) return alert("Provide endpoint and token");
-    document.getElementById("siem-last").textContent =
-      new Date().toLocaleString();
-    alert("SIEM settings saved (mock). Forwarding enabled.");
-  });
-}
-
-/* Invite & tickets */
-if (document.getElementById("invite-btn")) {
-  document.getElementById("invite-btn").addEventListener("click", () => {
-    const email = document.getElementById("invite-email").value.trim();
-    if (!email) return alert("Enter email to invite");
-    users.push({
-      id: Date.now(),
-      name: email.split("@")[0],
-      email,
-      role: "Member"
-    });
-    renderUsers();
-    alert("Invitation sent (mock).");
-    document.getElementById("invite-email").value = "";
-  });
-}
-
-if (document.getElementById("open-ticket")) {
-  document.getElementById("open-ticket").addEventListener("click", () => {
-    const text = document.getElementById("ticket-text").value.trim();
-    if (!text) return alert("Describe your issue");
-    alert("Ticket created (mock). Support will respond in the community forum.");
-    document.getElementById("ticket-text").value = "";
-  });
-}
-
-if (document.getElementById("refresh-feed")) {
-  document.getElementById("refresh-feed").addEventListener("click", () => {
-    // mock update
-    feedItems.unshift({
-      id: Date.now(),
-      title: "New advisory: Keep-alive attack observed",
-      time: "now"
-    });
-    renderFeed();
-  });
-}
-
-if (document.getElementById("export-feed")) {
-  document.getElementById("export-feed").addEventListener("click", () => alert("Exporting feed (mock)"));
-}
-
-if (document.getElementById("view-forum")) {
-  document.getElementById("view-forum").addEventListener("click", () => alert("Opening community forum (mock)"));
-}
-
-if (document.getElementById("open-workspaces")) {
-  document.getElementById("open-workspaces").addEventListener('click', () => alert("Opening workspaces (mock)"));
-}
-
-/* Simple nav */
-document.querySelectorAll(".nav a").forEach((a) => {
-  a.addEventListener("click", () => {
-    document
-      .querySelectorAll(".nav a")
-      .forEach((x) => x.classList.remove("active"));
-    a.classList.add("active");
-    alert("Navigation is a UI mock. Implement section switching if needed.");
-  });
+// Initialize dashboard when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new EnterpriseDashboard();
 });
-
-/* ===== INITIALIZATION ===== */
-window.addEventListener("DOMContentLoaded", () => {
-  // Existing initialization code
-  renderReports();
-  renderFeed();
-  renderUsers();
-  renderWorkspaceActivities();
-  
-  // New initialization
-  setupExitModal();
-  setupNavigation();
-  
-  // Set the current user name in the exit modal
-  const usernamePlaceholder = document.getElementById('username-placeholder');
-  if (usernamePlaceholder) {
-    usernamePlaceholder.textContent = currentUser.name;
-  }
-});
-
-// Accessibility: close modal with Esc
-window.addEventListener("keydown", (e) => {
-  if (e.key === "Escape")
-    document.getElementById("modal").style.display = "none";
-});
-
-// Expose a couple functions for testing in console
-window.__Cybershield = { simulateScan, reports, feedItems, users };
