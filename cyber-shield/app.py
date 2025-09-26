@@ -46,6 +46,9 @@ from routes.settings import settings_bp
 from routes.scan_results import scan_results_bp
 from routes.chats import chats_bp
 from routes.profile import profile_bp
+from routes.teamCollab import team_collab_bp
+from routes.admin import admin_bp
+from routes.enterprise import enterprise_bp
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -68,6 +71,9 @@ app.register_blueprint(settings_bp)
 app.register_blueprint(scan_results_bp)
 app.register_blueprint(chats_bp, url_prefix='/api/chats')
 app.register_blueprint(profile_bp)
+app.register_blueprint(team_collab_bp)
+app.register_blueprint(admin_bp)
+app.register_blueprint(enterprise_bp)
 
 
 VT_API_KEY = os.getenv("VT_API_KEY", "").strip()
@@ -75,9 +81,6 @@ DYMO_API_KEY = os.getenv("DYMO_API_KEY", "").strip()
 RATE_LIMIT_PER_MIN = int(os.getenv("RATE_LIMIT_PER_MIN", "60"))
 
 _ip_bucket = {}
-
-
-
 
 #======================================================
 # -------------- Heuristics & constants ---------------
@@ -105,6 +108,10 @@ ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx', 
 #======================================================
 # ---------------------- Helpers ----------------------
 #======================================================
+
+@app.route('/admin')
+def admin_redirect():
+    return redirect('/admin/login')
 
 def get_db_connection():
     conn = sqlite3.connect('cyber-shield-linkguard.db')

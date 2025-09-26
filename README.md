@@ -66,6 +66,8 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         │      ├── routes/ 
         |      |     ├── _pycache_/
         |      |     ├── subscription.py
+        |      |     ├── teamCollab.py
+        |      |     ├── admin.py
         |      |     ├── scan_results.py
         |      |     ├── settings.py
         |      |     ├── chats.py
@@ -158,6 +160,11 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     ├── clarity.html
         |            |     ├── clarity.css
         |            |     └── clarity.js
+        |            |
+        |            ├── admin/          
+        |            |     ├── admin.html
+        |            |     ├── admin.css
+        |            |     └── admin.js
         |            |
         |            ├── login/          
         |            |     ├── login.html
