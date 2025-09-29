@@ -349,8 +349,11 @@ def login():
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
     try:
+        user_id = session.get('user_id')
+        
         session.clear()
-        print("User logged out. Session cleared.")
+        print("User logged out. Flask session cleared.")
+        
         return jsonify({'message': 'Logout successful'}), 200
     except Exception as e:
         print(f"Logout error: {e}")
@@ -361,7 +364,7 @@ def logout():
 @auth_bp.route('/me', methods=['GET'])
 def get_current_user():
     try:
-        print(f"Session contents: {dict(session)}")  # Debug session contents
+        print(f"Session contents: {dict(session)}")  
         
         if 'user_id' in session and 'user_email' in session:
             return jsonify({

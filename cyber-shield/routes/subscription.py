@@ -1,18 +1,18 @@
 import sqlite3
 import datetime
+import secrets
+import hashlib
 from flask import Blueprint, jsonify, request, session
 
-
-#======================================================
+# ======================================================
 # ------------- Subscription Blueprint ---------------
-#======================================================
+# ======================================================
 
 subscription_bp = Blueprint('subscription', __name__, url_prefix='/api/subscription')
 
-
-#======================================================
+# ======================================================
 # -------------------- Helpers -----------------------
-#======================================================
+# ======================================================
 
 def get_db_connection():
     """Create and return a database connection."""
@@ -20,15 +20,35 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+def generate_secure_transaction_id():
+    """Generate a secure unique transaction ID."""
+    return f"CSLG_{secrets.token_hex(8)}_{int(datetime.datetime.now().timestamp())}"
 
-#======================================================
+def validate_payment_data(data):
+    """Validate payment data for security."""
+    required_fields = ['plan_id', 'plan_name', 'plan_code', 'price', 'payment_method']
+    
+    for field in required_fields:
+        if field not in data or not data[field]:
+            return False, f"Missing required field: {field}"
+    
+    # Validate price
+    try:
+        price = float(data['price'])
+        if price < 0:
+            return False, "Invalid price"
+    except (ValueError, TypeError):
+        return False, "Invalid price format"
+    
+    return True, "Valid"
+
+# ======================================================
 # ---------------------- API -------------------------
-#======================================================
+# ======================================================
 
-#  subscription endpoint
 @subscription_bp.route('/create', methods=['POST'])
 def create_subscription():
-    """Create a new subscription for the authenticated user."""
+    """Create a new subscription and payment record for the authenticated user."""
     try:
         # Check if user is authenticated
         if 'user_id' not in session:
@@ -37,29 +57,22 @@ def create_subscription():
         data = request.get_json()
         if not data:
             return jsonify({'error': 'No data provided'}), 400
+        
+        # Validate payment data
+        is_valid, validation_msg = validate_payment_data(data)
+        if not is_valid:
+            return jsonify({'error': validation_msg}), 400
             
         plan_id = data.get('plan_id')
         plan_name = data.get('plan_name')
         plan_code = data.get('plan_code')
-        price = data.get('price')
+        price = float(data.get('price'))
         team_size = data.get('team_size', 1)
-        
-        # Validate required fields
-        if not all([plan_id, plan_name, plan_code, price]):
-            return jsonify({'error': 'Missing required fields'}), 400
-        
-        # Validate price is a valid number
-        try:
-            price = float(price)
-        except ValueError:
-            return jsonify({'error': 'Invalid price format'}), 400
+        payment_method = data.get('payment_method', 'card')
         
         # handling for "increase" plan
         if plan_id == 'increase':
-            # For increase plan, keep user's plan_mode at 0 
             plan_mode = 0
-
-            # expiry to 7 days
             expiry_date = (datetime.datetime.now() + datetime.timedelta(days=7)).isoformat()
             increased = 'yes'
         else:
@@ -71,7 +84,6 @@ def create_subscription():
                 'enterprise': 3
             }
             plan_mode = plan_mode_map.get(plan_id, 0)
-            # Set expiry to 30 days from now
             expiry_date = (datetime.datetime.now() + datetime.timedelta(days=30)).isoformat()
             increased = None
         
@@ -100,8 +112,17 @@ def create_subscription():
                 VALUES (?, ?, ?, ?, ?, 1, ?, ?)
             ''', (user_id, plan_name, plan_code, price, expiry_date, team_size, increased))
             
-            conn.commit()
             subscription_id = cursor.lastrowid
+            
+            # Create payment record
+            transaction_id = generate_secure_transaction_id()
+            
+            cursor.execute('''
+                INSERT INTO payments (user_id, subscription_id, amount, currency, payment_method, status, transaction_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (user_id, subscription_id, price, 'ZAR', payment_method, 'completed', transaction_id))
+            
+            conn.commit()
             conn.close()
             
             # Update session only if it's not an "increase" plan
@@ -111,10 +132,14 @@ def create_subscription():
             return jsonify({
                 'message': 'Subscription created successfully',
                 'subscription_id': subscription_id,
+                'payment_id': transaction_id,
                 'plan_mode': plan_mode,
                 'expiry_date': expiry_date
             }), 201
             
+        except sqlite3.IntegrityError as e:
+            print(f"Database integrity error: {e}")
+            return jsonify({'error': 'Transaction ID already exists'}), 500
         except sqlite3.Error as e:
             print(f"Database error: {e}")
             return jsonify({'error': 'Database error occurred'}), 500
@@ -123,12 +148,42 @@ def create_subscription():
         print(f"Subscription creation error: {e}")
         return jsonify({'error': 'Subscription creation failed'}), 500
 
+@subscription_bp.route('/payment-history', methods=['GET'])
+def get_payment_history():
+    """Get payment history for the authenticated user."""
+    try:
+        if 'user_id' not in session:
+            return jsonify({'error': 'Authentication required'}), 401
+            
+        user_id = session['user_id']
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT p.*, s.sub_plan as plan_name 
+            FROM payments p 
+            LEFT JOIN subscriptions s ON p.subscription_id = s.sub_id 
+            WHERE p.user_id = ? 
+            ORDER BY p.created_at DESC
+        ''', (user_id,))
+        
+        payments = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        return jsonify({
+            'payments': payments
+        }), 200
+        
+    except Exception as e:
+        print(f"Error fetching payment history: {e}")
+        return jsonify({'error': 'Failed to fetch payment history'}), 500
+
 # Get user's current subscription
 @subscription_bp.route('/current', methods=['GET'])
 def get_current_subscription():
     """Get the current subscription for the authenticated user."""
     try:
-
         if 'user_id' not in session:
             return jsonify({'error': 'Authentication required'}), 401
             
@@ -156,7 +211,6 @@ def get_current_subscription():
                     'plan_mode': subscription['Plan_Mode']
                 }), 200
             else:
-
                 return jsonify({
                     'subscription': None,
                     'plan_mode': 0
@@ -170,13 +224,11 @@ def get_current_subscription():
         print(f"Get subscription error: {e}")
         return jsonify({'error': 'Failed to get subscription'}), 500
 
-
 # Get subscription statistics
 @subscription_bp.route('/stats', methods=['GET'])
 def get_subscription_stats():
     """Get subscription statistics and history for the authenticated user."""
     try:
-        
         if 'user_id' not in session:
             return jsonify({'error': 'Authentication required'}), 401
             
@@ -217,7 +269,6 @@ def get_subscription_stats():
         print(f"Error fetching subscription stats: {e}")
         return jsonify({'error': 'Failed to fetch subscription statistics'}), 500
 
-
 # Calculate enterprise pricing based on team size
 @subscription_bp.route('/calculate-enterprise-price', methods=['POST'])
 def calculate_enterprise_price():
@@ -247,4 +298,3 @@ def calculate_enterprise_price():
     except Exception as e:
         print(f"Price calculation error: {e}")
         return jsonify({'error': 'Failed to calculate price'}), 500
-    

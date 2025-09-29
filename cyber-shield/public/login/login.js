@@ -89,7 +89,8 @@ async function handleLogin() {
     const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password }),
+      credentials: 'include' 
     });
 
     const data = await response.json();
@@ -99,15 +100,17 @@ async function handleLogin() {
       return;
     }
 
-    // Save tokens
-    token.access = data.access_token;
-    token.refresh = data.refresh_token;
-
     toast('Welcome back');
+
+    // Get current session ID and redirect with it
+    const sessionId = window.CyberShieldSession?.getCurrentSessionId();
+    const redirectUrl = sessionId ? 
+      '../ScannerDash/ScannerDash.html?session=' + sessionId : 
+      '../ScannerDash/ScannerDash.html';
 
     // Redirect to dashboard
     setTimeout(() => {
-      window.location.href = '../ScannerDash/ScannerDash.html';
+      window.location.href = redirectUrl;
     }, 1000);
 
   } catch (error) {
@@ -117,7 +120,6 @@ async function handleLogin() {
     setBusy(doLoginBtn, false);
   }
 }
-
 
 //Initialize events
  
