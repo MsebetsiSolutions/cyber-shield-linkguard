@@ -34,7 +34,6 @@ function go(name){
   show(screens[name]); 
 }
 
-// Event listeners
 // Event listeners with session support
 $('btnLogin').addEventListener('click', () => {
   const sessionId = window.CyberShieldSession?.getCurrentSessionId();
