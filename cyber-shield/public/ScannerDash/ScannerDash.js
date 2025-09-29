@@ -269,29 +269,49 @@ function controlTeamWorkspaceButton(planMode) {
 }
 
 // Logout functionality
-function handleLogout() {
-  try {
-    fetchWithSession('/api/auth/logout', {
-      method: 'POST'
-    }).then(response => {
-      if (response.ok) {
-        console.log('Logout successful');
-      } else {
-        console.log('Logout API call failed, proceeding with client-side cleanup');
-      }
-    }).catch(e => {
-      console.log('Logout API call failed, proceeding with client-side cleanup');
-    });
-  } catch (e) {
-    console.log('Logout API call failed, proceeding with client-side cleanup');
-  }
-  
-  scanCounter.reset();
-  setUserUI(null); 
-  toast('Signed out');
-  setTimeout(() => {
-    window.location.href = '../index.html';
-  }, 1000);
+async function handleLogout() {
+    try {
+        // Get current session ID before clearing
+        const currentSessionId = window.CyberShieldSession?.getCurrentSessionId();
+        
+        // Call server logout to invalidate sessions
+        const logoutResponse = await fetchWithSession('/api/auth/logout', {
+            method: 'POST'
+        });
+        
+        if (logoutResponse.ok) {
+            console.log('logout successful');
+            
+            // Invalidate server-side sessions
+            if (currentSessionId) {
+                await fetch('/api/session/invalidate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+            }
+        }
+    } catch (e) {
+        console.log('Logout failed, proceeding with client');
+    }
+    
+    // Clear client-side data
+    scanCounter.reset();
+    setUserUI(null);
+    
+    // Clear session storage
+    sessionStorage.removeItem('cyberShieldSession');
+    sessionStorage.removeItem('userData');
+    sessionStorage.removeItem('plan_mode');
+    
+    toast('Signed out successfully');
+    
+    // Redirect to login page without session ID
+    setTimeout(() => {
+        window.location.href = '../login/login.html';
+    }, 1000);
 }
 
 logoutBtn.addEventListener('click', handleLogout);
@@ -307,6 +327,66 @@ fileInput.addEventListener('change', function() {
     fileLabelText.textContent = 'Choose file or drag here';
   }
 });
+
+
+async function checkAuthenticationWithSession() {
+    try {
+        const sessionId = window.CyberShieldSession?.getCurrentSessionId();
+        
+        console.log('Checking authentication with session:', sessionId);
+        
+        // First, check Flask session authentication (this is the main auth)
+        const r = await fetch('/api/auth/me', {
+            credentials: 'include'
+        });
+        console.log('Auth check response status:', r.status);
+        
+        if(r.ok){ 
+            const userData = await r.json(); 
+            console.log('User data received:', userData);
+            
+            if (userData.authenticated) {
+                console.log('User is authenticated via Flask session');
+                
+                // If we have a session ID, register it with the server
+                if (sessionId && userData.user_id) {
+                    try {
+                        await fetch('/api/session/create', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                session: sessionId,
+                                user_id: userData.user_id
+                            })
+                        });
+                        console.log('Session registered with server');
+                    } catch (e) {
+                        console.log('Failed to register session with server, but continuing:', e);
+                    }
+                }
+                
+                return userData;
+            } else {
+                console.log('User not authenticated via Flask session, redirecting to login');
+                // Don't clear URL session here, just redirect
+                window.location.href = '../login/login.html';
+                return false;
+            }
+        } else {
+            console.log('Auth check failed, redirecting to login');
+            window.location.href = '../login/login.html';
+            return false;
+        }
+    } catch(e) {
+        console.error('Authentication check failed:', e);
+        window.location.href = '../login/login.html';
+        return false;
+    }
+}
+
+
 
 // Initialize results display
 function initResults() {
@@ -326,6 +406,29 @@ function initResults() {
     updateChart(0, 0, 0, 0);
   }
 }
+
+
+async function validateServerSession(sessionId) {
+    try {
+        const response = await fetch('/api/session/validate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ session: sessionId })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            return data.valid;
+        }
+        return false;
+    } catch (error) {
+        console.error('Session validation error:', error);
+        return false;
+    }
+}
+
 
 // Update stats display
 function updateStats(malicious, suspicious, harmless, undetected) {
@@ -1144,62 +1247,59 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Initialize dashboard and check authentication
 (async function boot(){
-  console.log('Dashboard initializing...');
-  
-  try {
-    const r = await fetchWithSession('/api/auth/me');
-    console.log('Auth check response status:', r.status);
+    console.log('Dashboard initializing with enhanced session management...');
     
-    if(r.ok){ 
-      const userData = await r.json(); 
-      console.log('User data received:', userData);
-      
-      if (userData.authenticated) {
-        // Initialize chart
-        initChart();
+    try {
+        const userData = await checkAuthenticationWithSession();
         
-        // Check user plan and update UI accordingly
-        const planMode = await checkUserPlan();
+        if (userData) {
+            // Initialize chart
+            initChart();
+            
+            // Check user plan and update UI accordingly
+            const planMode = await checkUserPlan();
+            
+            setUserUI({...userData, plan_mode: planMode}); 
+            scanCounter.updateUI();
+            initResults();
+            
+            // Toggle stats button based on plan mode
+            toggleStatsButton(planMode);
+            
+            console.log('User authenticated successfully with valid session');
+            return;
+        }
+    } catch(e) {
+        console.error('Failed to initialize dashboard', e);
+        toast('Authentication error - please login again');
         
-        setUserUI({...userData, plan_mode: planMode}); 
-        scanCounter.updateUI();
-        initResults();
-        
-        // Toggle stats button based on plan mode
-        toggleStatsButton(planMode);
-        
-        console.log('User authenticated successfully');
-        return;
-      } else {
-        console.log('User not authenticated, redirecting to login');
+        // Clear everything and redirect
+        sessionStorage.removeItem('cyberShieldSession');
+        sessionStorage.removeItem('userData');
         sessionStorage.removeItem('plan_mode');
-        window.location.href = '../index.html';
-        return;
-      }
-    } else {
-      console.log('Auth check failed, redirecting to login');
-      sessionStorage.removeItem('plan_mode');
-      window.location.href = '../index.html';
-      return;
+        window.location.href = '../login/login.html';
     }
-  } catch(e) {
-    console.error('Failed to fetch user info', e);
-    toast('Network error - using offline mode');
-    
-    // Initialize with default settings for offline use
-    initChart();
-    initResults();
-    scanCounter.updateUI();
-    
-    // Try to get user data from sessionStorage as fallback
-    const storedUserData = sessionStorage.getItem('userData');
-    if (storedUserData) {
-      try {
-        const userData = JSON.parse(storedUserData);
-        setUserUI(userData);
-      } catch (parseError) {
-        console.error('Error parsing stored user data:', parseError);
-      }
-    }
-  }
 })();
+
+
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+        console.log('Page became visible, validating session...');
+        
+        const sessionId = window.CyberShieldSession?.getCurrentSessionId();
+        if (sessionId) {
+            validateServerSession(sessionId).then(isValid => {
+                if (!isValid) {
+                    console.log('Session invalid on page visibility, redirecting...');
+                    sessionStorage.removeItem('cyberShieldSession');
+                    window.location.href = '../login/login.html';
+                }
+            });
+        }
+    }
+});
+
+
+window.addEventListener('beforeunload', function() {
+
+});

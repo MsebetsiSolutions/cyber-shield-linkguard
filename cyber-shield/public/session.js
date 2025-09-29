@@ -1,5 +1,5 @@
 // SESSION MANAGEMENT FOR CYBER SHIELD LINKGUARD
-const SESSION_EXPIRY_MINUTES = 30; // 30 minutes for security app
+const SESSION_EXPIRY_MINUTES = 30;
 const CHARSET = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 // Generate a random session ID
@@ -15,48 +15,80 @@ function generateSessionId() {
 }
 
 // Validate and manage session
-function initSession() {
+async function initSession() {
     const urlParams = new URLSearchParams(window.location.search);
     let sessionId = urlParams.get('session');
     const storedSession = sessionStorage.getItem('cyberShieldSession');
 
+    // First, check if we have a valid Flask session (user is authenticated)
+    try {
+        const authCheck = await fetch('/api/auth/me', {
+            credentials: 'include'
+        });
+        
+        if (authCheck.ok) {
+            const userData = await authCheck.json();
+            if (userData.authenticated) {
+                console.log('User is authenticated via Flask session');
+                // User is logged in, we don't need to be as strict with URL session validation
+                if (!sessionId && storedSession) {
+                    const { id, expiry } = JSON.parse(storedSession);
+                    if (new Date().getTime() < expiry) {
+                        sessionId = id;
+                    }
+                }
+                
+                if (!sessionId) {
+                    sessionId = generateSessionId();
+                }
+                
+                // Ensure session is stored and URL is updated
+                const newExpiry = new Date().getTime() + (SESSION_EXPIRY_MINUTES * 60 * 1000);
+                sessionStorage.setItem('cyberShieldSession', JSON.stringify({
+                    id: sessionId,
+                    expiry: newExpiry
+                }));
+
+                updateUrlWithSession(sessionId);
+                setupSessionExpiryCheck();
+                return sessionId;
+            }
+        }
+    } catch (error) {
+        console.log('Auth check failed, proceeding with basic session management');
+    }
+
+    // If not authenticated, use the original session logic
+    let needsNewSession = false;
+
     if (storedSession) {
         const { id, expiry } = JSON.parse(storedSession);
 
+        // Check client-side expiry first
         if (new Date().getTime() > expiry) {
-            // Session expired, generate new one
-            sessionId = generateSessionId();
-            const newExpiry = new Date().getTime() + (SESSION_EXPIRY_MINUTES * 60 * 1000);
-            sessionStorage.setItem('cyberShieldSession', JSON.stringify({
-                id: sessionId,
-                expiry: newExpiry
-            }));
-
-            // Update URL with new session ID
-            updateUrlWithSession(sessionId);
-            console.log('New session generated:', sessionId);
+            needsNewSession = true;
         } else {
+            // For unauthenticated users, we can be more lenient with server validation
             sessionId = id;
-            // Ensure session ID is in URL
             if (!window.location.search.includes('session=')) {
                 updateUrlWithSession(sessionId);
             }
         }
     } else {
-        // No existing session
+        needsNewSession = true;
+    }
+
+    if (needsNewSession) {
+        // Generate new session
         sessionId = generateSessionId();
-        const expiry = new Date().getTime() + (SESSION_EXPIRY_MINUTES * 60 * 1000);
+        const newExpiry = new Date().getTime() + (SESSION_EXPIRY_MINUTES * 60 * 1000);
         sessionStorage.setItem('cyberShieldSession', JSON.stringify({
             id: sessionId,
-            expiry: expiry
+            expiry: newExpiry
         }));
 
-        // Add session to URL
-        if (!window.location.search.includes('session=')) {
-            updateUrlWithSession(sessionId);
-        }
-        
-        console.log('Initial session generated:', sessionId);
+        updateUrlWithSession(sessionId);
+        console.log('New session generated:', sessionId);
     }
 
     // Set up session expiry check
@@ -77,28 +109,48 @@ function updateUrlWithSession(sessionId) {
 
 // Set up periodic session expiry check
 function setupSessionExpiryCheck() {
-    setInterval(() => {
+    setInterval(async () => {
         const storedSession = sessionStorage.getItem('cyberShieldSession');
         if (storedSession) {
-            const { expiry } = JSON.parse(storedSession);
+            const { id, expiry } = JSON.parse(storedSession);
+            
+            // Check if user is authenticated - if yes, don't auto-refresh session
+            try {
+                const authCheck = await fetch('/api/auth/me', {
+                    credentials: 'include'
+                });
+                
+                if (authCheck.ok) {
+                    const userData = await authCheck.json();
+                    if (userData.authenticated) {
+                        // User is logged in, don't auto-refresh to avoid conflicts
+                        return;
+                    }
+                }
+            } catch (error) {
+                // Continue with normal session check
+            }
+            
             if (new Date().getTime() > expiry) {
-                const newSessionId = generateSessionId();
-                const newExpiry = new Date().getTime() + (SESSION_EXPIRY_MINUTES * 60 * 1000);
-                
-                sessionStorage.setItem('cyberShieldSession', JSON.stringify({
-                    id: newSessionId,
-                    expiry: newExpiry
-                }));
-
-                // Update URL
-                updateUrlWithSession(newSessionId);
-                console.log('Session refreshed:', newSessionId);
-                
-                // Update all internal links with new session ID
-                modifyInternalLinks();
+                await refreshSession();
             }
         }
     }, 60000); 
+}
+
+async function refreshSession() {
+    const newSessionId = generateSessionId();
+    const newExpiry = new Date().getTime() + (SESSION_EXPIRY_MINUTES * 60 * 1000);
+    
+    sessionStorage.setItem('cyberShieldSession', JSON.stringify({
+        id: newSessionId,
+        expiry: newExpiry
+    }));
+
+    updateUrlWithSession(newSessionId);
+    console.log('Session refreshed:', newSessionId);
+    
+    modifyInternalLinks();
 }
 
 // Get current session ID
@@ -140,9 +192,14 @@ function modifyInternalLinks() {
     });
 }
 
+function logout() {
+    sessionStorage.removeItem('cyberShieldSession');
+    window.location.href = '../login/login.html';
+}
+
 // Initialize session when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    initSession();
+document.addEventListener('DOMContentLoaded', async function() {
+    await initSession();
     modifyInternalLinks();
     
     // Observe DOM changes for dynamically added links
@@ -157,9 +214,29 @@ document.addEventListener('DOMContentLoaded', function() {
     observer.observe(document.body, { childList: true, subtree: true });
 });
 
-// Export for use in other modules
 window.CyberShieldSession = {
     getCurrentSessionId,
     generateSessionId,
-    initSession
+    initSession,
+    logout,
+    validateSessionWithServer: async function(sessionId) {
+        try {
+            const response = await fetch('/api/session/validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ session: sessionId })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                return data.valid;
+            }
+            return false;
+        } catch (error) {
+            console.error('Server session validation error:', error);
+            return true; 
+        }
+    }
 };

@@ -276,23 +276,44 @@ document.addEventListener("DOMContentLoaded", function () {
   // Logout user
   async function logoutUser() {
     try {
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        window.location.href = '../login/login.html';
-      } else {
-        // Force redirect even if logout API fails
-        window.location.href = '../login/login.html';
-      }
+        // Get current session ID before clearing
+        const currentSessionId = window.CyberShieldSession?.getCurrentSessionId();
+        
+        // Call server logout to invalidate sessions
+        const logoutResponse = await fetch('/api/auth/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+        
+        if (logoutResponse.ok) {
+            console.log('Logout successful');
+            
+            // Invalidate server-side sessions
+            if (currentSessionId) {
+                await fetch('/api/session/invalidate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+            }
+        }
     } catch (error) {
-      console.error('Logout error:', error);
-      // Force redirect
-      window.location.href = '../login/login.html';
+        console.log('Logout failed, proceeding with client');
     }
-  }
+    
+    // Clear client-side data
+    currentState.user = null;
+    
+    // Clear session storage
+    sessionStorage.removeItem('cyberShieldSession');
+    sessionStorage.removeItem('userData');
+    sessionStorage.removeItem('plan_mode');
+    
+    // Redirect to login page without session ID
+    window.location.href = '../login/login.html';
+}
 
   // Tab switching functionality
   function switchTab(tabName) {

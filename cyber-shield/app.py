@@ -106,19 +106,35 @@ ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx', 
 
 user_sessions = {}
 
+active_sessions = {}
+
 def validate_session(session_id):
-    """Validate session and return user data"""
+    """Validate session and return user data - more lenient for authenticated users"""
     if not session_id:
         return None
     
+    if 'user_id' in session:
+        if session_id in user_sessions:
+            session_data = user_sessions[session_id]
+
+            session_data['last_activity'] = time.time()
+            return session_data
+        else:
+            
+            return create_session(session_id, session.get('user_id'))
+    
+    
     if session_id in user_sessions:
         session_data = user_sessions[session_id]
-        # Check if session is expired (30 minutes)
-        if time.time() - session_data['created'] < 1800: 
+
+        if (time.time() - session_data['created'] < 1800 and 
+            session_data.get('active', True)):
+            session_data['last_activity'] = time.time()
             return session_data
         else:
             # Session expired, remove it
-            del user_sessions[session_id]
+            if session_id in user_sessions:
+                del user_sessions[session_id]
     
     return None
 
@@ -129,9 +145,72 @@ def create_session(session_id, user_id=None):
         'created': time.time(),
         'last_activity': time.time(),
         'user_id': user_id,
-        'message_count': 0
+        'message_count': 0,
+        'active': True  
     }
+    
+    # Track this session for the user
+    if user_id:
+        if user_id not in active_sessions:
+            active_sessions[user_id] = set()
+        active_sessions[user_id].add(session_id)
+    
     return user_sessions[session_id]
+
+
+def invalidate_user_sessions(user_id):
+    """Immediately invalidate all sessions for a user (on logout)"""
+    if user_id in active_sessions:
+        for session_id in active_sessions[user_id]:
+            if session_id in user_sessions:
+
+                user_sessions[session_id]['active'] = False
+
+                user_sessions[session_id]['cleanup_time'] = time.time() + 60
+        
+        del active_sessions[user_id]
+    return True
+
+
+def cleanup_expired_sessions():
+    """Clean up expired and inactive sessions"""
+    current_time = time.time()
+    sessions_to_remove = []
+    
+    for session_id, session_data in user_sessions.items():
+        if (current_time - session_data['created'] > 1800 or 
+            (not session_data.get('active', True) and 
+             session_data.get('cleanup_time', current_time) <= current_time)):
+            sessions_to_remove.append(session_id)
+    
+    for session_id in sessions_to_remove:
+        user_id = user_sessions[session_id].get('user_id')
+        if user_id and user_id in active_sessions:
+            active_sessions[user_id].discard(session_id)
+            if not active_sessions[user_id]:
+                del active_sessions[user_id]
+        
+        del user_sessions[session_id]
+
+
+@app.route('/api/session/invalidate', methods=['POST'])
+def invalidate_session_endpoint():
+    """Invalidate all sessions for the current user"""
+    try:
+
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'error': 'No user session found'}), 400
+        
+        invalidate_user_sessions(user_id)
+        return jsonify({'status': 'sessions_invalidated'})
+        
+    except Exception as e:
+        print(f"Session invalidation error: {e}")
+        return jsonify({'error': 'Failed to invalidate sessions'}), 500
+
+
+
 
 
 @app.route('/api/session/validate', methods=['POST'])
@@ -139,12 +218,16 @@ def validate_session_endpoint():
     session_id = request.json.get('session', '')
     session_data = validate_session(session_id)
     
+    cleanup_expired_sessions()
+    
     return jsonify({
         'valid': session_data is not None,
         'session': session_id,
         'user_id': session_data.get('user_id') if session_data else None,
         'message_count': session_data.get('message_count', 0) if session_data else 0
     })
+
+
 
 
 @app.route('/api/session/create', methods=['POST'])
@@ -162,6 +245,24 @@ def create_session_endpoint():
         'session': session_id,
         'user_id': user_id
     })
+
+
+def start_session_cleanup_task():
+    """Start background session cleanup (runs every 5 minutes)"""
+    def cleanup_task():
+        while True:
+            try:
+                cleanup_expired_sessions()
+                time.sleep(300)  # 5 minutes
+            except Exception as e:
+                print(f"Session cleanup error: {e}")
+                time.sleep(60)  # Wait 1 minute on error
+    
+    import threading
+    cleanup_thread = threading.Thread(target=cleanup_task, daemon=True)
+    cleanup_thread.start()
+
+start_session_cleanup_task()
 
 
 #======================================================
@@ -372,7 +473,7 @@ def dymo_lookup(u: str):
         
         if response.status_code == 200:
             data = response.json()
-            # Adjust these mappings based on Dymo API response structure
+            
             return {
                 "enabled": True,
                 "malicious": data.get("threat_score", 0) if data.get("is_malicious") else 0,

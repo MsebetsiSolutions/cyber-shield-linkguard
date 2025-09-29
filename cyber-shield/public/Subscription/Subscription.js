@@ -172,27 +172,48 @@ async function checkUserPlan() {
 }
 
 // Logout functionality
-function handleLogout() {
-  try {
-    fetchWithSession('/api/auth/logout', {
-      method: 'POST'
-    }).then(response => {
-      if (response.ok) {
-        console.log('Logout successful');
-      } else {
-        console.log('Logout API call failed, proceeding with client-side cleanup');
-      }
-    }).catch(e => {
-      console.log('Logout API call failed, proceeding with client-side cleanup');
-    });
-  } catch (e) {
-    console.log('Logout API call failed, proceeding with client-side cleanup');
-  }
-  setUserUI(null);
-  toast('Signed out');
-  setTimeout(() => {
-    window.location.href = '../index.html';
-  }, 1000);
+async function handleLogout() {
+    try {
+        // Get current session ID before clearing
+        const currentSessionId = window.CyberShieldSession?.getCurrentSessionId();
+        
+        // Call server logout to invalidate sessions
+        const logoutResponse = await fetchWithSession('/api/auth/logout', {
+            method: 'POST'
+        });
+        
+        if (logoutResponse.ok) {
+            console.log('Logout successful');
+            
+            // Invalidate server-side sessions
+            if (currentSessionId) {
+                await fetch('/api/session/invalidate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+            }
+        }
+    } catch (e) {
+        console.log('Logout failed, proceeding with client');
+    }
+    
+    // Clear client-side data
+    setUserUI(null);
+    
+    // Clear session storage
+    sessionStorage.removeItem('cyberShieldSession');
+    sessionStorage.removeItem('userData');
+    sessionStorage.removeItem('plan_mode');
+    
+    toast('Signed out successfully');
+    
+    // Redirect to login page without session ID
+    setTimeout(() => {
+        window.location.href = '../index.html';
+    }, 1000);
 }
 
 if (logoutBtn) {
