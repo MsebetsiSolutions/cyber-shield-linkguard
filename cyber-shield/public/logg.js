@@ -34,20 +34,27 @@ function go(name){
   show(screens[name]); 
 }
 
-// Event listeners with session support
-$('btnLogin').addEventListener('click', () => {
-  const sessionId = window.CyberShieldSession?.getCurrentSessionId();
-  const url = sessionId ? `login/login.html?session=${sessionId}` : 'login/login.html';
-  window.location.href = url;
-});
-
-$('btnSignup').addEventListener('click', () => {
-  const sessionId = window.CyberShieldSession?.getCurrentSessionId();
-  const url = sessionId ? `signup/signup.html?session=${sessionId}` : 'signup/signup.html';
-  window.location.href = url;
-});
-
-// Initialize
+// Event listeners with session support for multiple buttons
 document.addEventListener('DOMContentLoaded', function() {
+  // Handle all login buttons
+  const loginButtons = document.querySelectorAll('.login-btn, #btnLogin');
+  loginButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const sessionId = window.CyberShieldSession?.getCurrentSessionId();
+      const url = sessionId ? `login/login.html?session=${sessionId}` : 'login/login.html';
+      window.location.href = url;
+    });
+  });
+
+  // Handle all signup buttons
+  const signupButtons = document.querySelectorAll('.signup-btn, #btnSignup');
+  signupButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const sessionId = window.CyberShieldSession?.getCurrentSessionId();
+      const url = sessionId ? `signup/signup.html?session=${sessionId}` : 'signup/signup.html';
+      window.location.href = url;
+    });
+  });
+
   go('welcome');
 });

@@ -161,7 +161,7 @@ $('suPassConfirm').addEventListener('input', () => {
 
 // Navigation back to login
 $('backToLogin').addEventListener('click', () => {
-  window.location.href = '../index.html';
+  window.location.href = '../login/login.html';
 });
 
 // Initialize
