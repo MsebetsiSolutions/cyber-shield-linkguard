@@ -35,17 +35,17 @@ function go(name){
 }
 
 // Event listeners
+// Event listeners with session support
 $('btnLogin').addEventListener('click', () => {
-  window.location.href = 'login/login.html';
+  const sessionId = window.CyberShieldSession?.getCurrentSessionId();
+  const url = sessionId ? `login/login.html?session=${sessionId}` : 'login/login.html';
+  window.location.href = url;
 });
 
 $('btnSignup').addEventListener('click', () => {
-  window.location.href = 'signup/signup.html';
-});
-
-$('btnGuest').addEventListener('click', () => {
-  token.clear();
-  window.location.href = 'login/login.html';
+  const sessionId = window.CyberShieldSession?.getCurrentSessionId();
+  const url = sessionId ? `signup/signup.html?session=${sessionId}` : 'signup/signup.html';
+  window.location.href = url;
 });
 
 // Initialize
