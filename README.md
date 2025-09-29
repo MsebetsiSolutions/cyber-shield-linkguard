@@ -174,6 +174,7 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            ├── index.html      
         |            ├── logg.js
         |            ├── manifest.json
+        |            ├── session.js
         |            ├── sw.js
         |            └── theme.css
         |                
