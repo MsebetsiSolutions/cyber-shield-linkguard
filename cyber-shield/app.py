@@ -104,6 +104,65 @@ RISK_BANDS = [
 # file types for upload
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx', 'exe', 'zip'}
 
+user_sessions = {}
+
+def validate_session(session_id):
+    """Validate session and return user data"""
+    if not session_id:
+        return None
+    
+    if session_id in user_sessions:
+        session_data = user_sessions[session_id]
+        # Check if session is expired (30 minutes)
+        if time.time() - session_data['created'] < 1800: 
+            return session_data
+        else:
+            # Session expired, remove it
+            del user_sessions[session_id]
+    
+    return None
+
+
+def create_session(session_id, user_id=None):
+    """Create a new session"""
+    user_sessions[session_id] = {
+        'created': time.time(),
+        'last_activity': time.time(),
+        'user_id': user_id,
+        'message_count': 0
+    }
+    return user_sessions[session_id]
+
+
+@app.route('/api/session/validate', methods=['POST'])
+def validate_session_endpoint():
+    session_id = request.json.get('session', '')
+    session_data = validate_session(session_id)
+    
+    return jsonify({
+        'valid': session_data is not None,
+        'session': session_id,
+        'user_id': session_data.get('user_id') if session_data else None,
+        'message_count': session_data.get('message_count', 0) if session_data else 0
+    })
+
+
+@app.route('/api/session/create', methods=['POST'])
+def create_session_endpoint():
+    session_id = request.json.get('session', '')
+    user_id = request.json.get('user_id')
+    
+    if not session_id:
+        return jsonify({'error': 'Session ID required'}), 400
+    
+    session_data = create_session(session_id, user_id)
+    
+    return jsonify({
+        'status': 'created',
+        'session': session_id,
+        'user_id': user_id
+    })
+
 
 #======================================================
 # ---------------------- Helpers ----------------------
