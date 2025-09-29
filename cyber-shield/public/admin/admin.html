@@ -1,47 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cyber Shield - Admin Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='admin/admin.css') }}">
+    <link rel="stylesheet" href="admin.css">
 </head>
+
 <body>
-    <!-- Login Section (shown by default) -->
+    <!-- Login Section -->
     <div id="login-section" class="login-section">
         <div class="container-fluid vh-100 d-flex align-items-center justify-content-center">
             <div class="login-card">
                 <div class="login-header text-center mb-4">
-                    <img src="../assets/CYBER_SHIELD_LINKGUARD2.png" 
-                         alt="Cyber Shield Logo" 
-                         class="logo-img mb-3"
-                         style="max-height: 80px;">
+                    <img src="../assets/CYBER_SHIELD_LINKGUARD2.png" alt="Cyber Shield Logo" class="logo-img mb-3"
+                        style="max-height: 80px;">
                     <h1 class="h3 fw-bold">Cyber Shield</h1>
                     <p class="text-muted">Admin Portal</p>
                 </div>
-                
+
                 <form id="login-form" class="login-form">
                     <div id="login-alert" class="alert alert-danger d-none" role="alert"></div>
-                    
-                    <div class="mb-3">
+
+                    <div class="mb-3 input-with-icon">
                         <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
+                        <div class="position-relative">
+                            <i class="bi bi-person-fill input-icon"></i>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+                        </div>
                     </div>
-                    
-                    <div class="mb-3">
+
+                    <div class="mb-3 input-with-icon">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                        <div class="position-relative">
+                            <i class="bi bi-lock-fill input-icon"></i>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                            <i class="bi bi-eye-fill input-icon" style="left: auto; right: 0.75rem; cursor: pointer;" id="togglePassword"></i>
+                        </div>
                     </div>
-                    
+
                     <button type="submit" class="btn btn-primary w-100 py-2">
                         <span class="spinner-border spinner-border-sm d-none" id="login-spinner"></span>
-                        <span id="login-text">🚪 Login to Dashboard</span>
+                        <span id="login-text">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Login to Dashboard
+                        </span>
                     </button>
                 </form>
-                
+
                 <div class="login-footer text-center mt-4">
-                    <small class="text-muted">Restricted access. Authorized personnel only.</small>
+                    <small class="text-muted">
+                        <i class="bi bi-shield-lock me-1"></i>Restricted access. Authorized personnel only.
+                    </small>
                 </div>
             </div>
         </div>
@@ -53,14 +64,11 @@
             <!-- Sidebar -->
             <nav class="admin-sidebar">
                 <div class="sidebar-header">
-                    <img src="{{ url_for('static', filename='assets/CYBER_SHIELD_LINKGUARD2.png') }}" 
-                         alt="Cyber Shield Logo" 
-                         class="logo-img mb-2"
-                         style="max-height: 40px;">
-                    <h2>Cyber Shield</h2>
+                    <img src="../assets/CYBER_SHIELD_LINKGUARD2.png" alt="Cyber Shield Logo" class="logo-img mb-2"
+                        style="max-height: 70px;">
                     <p>Admin Dashboard</p>
                 </div>
-                
+
                 <ul class="sidebar-nav">
                     <li><a href="#" class="nav-link active" data-tab="dashboard">📊 Dashboard</a></li>
                     <li><a href="#" class="nav-link" data-tab="users">👥 Users</a></li>
@@ -70,7 +78,7 @@
                     <li><a href="#" class="nav-link" data-tab="audit">📋 Audit Logs</a></li>
                     <li><a href="#" class="nav-link" data-tab="settings">⚙️ Settings</a></li>
                 </ul>
-                
+
                 <div class="sidebar-footer">
                     <p>Logged in as: <strong id="admin-username"></strong></p>
                     <button id="logout-btn" class="btn-logout">🚪 Logout</button>
@@ -365,6 +373,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{ url_for('static', filename='admin/admin.js') }}"></script>
+    <script src="admin.js"></script>
+    <script src="../session.js"></script>
 </body>
+
 </html>

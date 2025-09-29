@@ -82,9 +82,6 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     └── signup.js
         |            |
         |            ├── enterprice/        
-        |            |     ├── enterprise-dashboard.html
-        |            |     ├── enterprise-dashboard.css
-        |            |     ├── enterprise-dashboard.js
         |            |     |
         |            |     ├── enter-dash/
         |            |     |          ├── enterprise-dashboard.html
@@ -174,6 +171,7 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            ├── index.html      
         |            ├── logg.js
         |            ├── manifest.json
+        |            ├── session.js
         |            ├── sw.js
         |            └── theme.css
         |                
