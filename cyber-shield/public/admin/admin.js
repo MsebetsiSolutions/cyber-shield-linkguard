@@ -7,30 +7,43 @@ class AdminDashboard {
     }
 
     init() {
-        this.checkAuthStatus();
+        // Always show login form first, don't auto-check auth status
+        this.showLogin();
         this.bindEvents();
         this.updateTime();
         setInterval(() => this.updateTime(), 1000);
+        
+        this.setupPasswordToggle();
     }
 
-    async checkAuthStatus() {
-        try {
-            // Try to load dashboard stats to check if user is authenticated
-            const response = await fetch('/admin/api/stats');
-            if (response.ok) {
-                this.showDashboard();
-            } else {
-                this.showLogin();
-            }
-        } catch (error) {
-            this.showLogin();
+    setupPasswordToggle() {
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.classList.toggle('bi-eye-fill');
+                this.classList.toggle('bi-eye-slash-fill');
+            });
         }
+    }
+
+    checkAuthStatus() {
+        // Don't auto-check auth status - always show login first
+        this.showLogin();
     }
 
     showLogin() {
         document.getElementById('login-section').classList.remove('d-none');
         document.getElementById('dashboard-section').classList.add('d-none');
         this.isLoggedIn = false;
+        
+        // Clear any previous form data
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('login-alert').classList.add('d-none');
     }
 
     showDashboard() {
@@ -64,9 +77,15 @@ class AdminDashboard {
         document.getElementById('refresh-teams')?.addEventListener('click', () => this.loadTeams());
         document.getElementById('refresh-audit')?.addEventListener('click', () => this.loadAuditLogs());
 
-        // Logout
+        // Logout - Redirect to index.html
         document.getElementById('logout-btn')?.addEventListener('click', () => {
-            window.location.href = '/admin/logout';
+            // Clear any admin session data
+            this.isLoggedIn = false;
+            
+            // Get current session ID for redirection
+            const sessionId = window.CyberShieldSession?.getCurrentSessionId();
+            const redirectUrl = sessionId ? `../index.html?session=${sessionId}` : '../index.html';
+            window.location.href = redirectUrl;
         });
 
         // Search and filters
@@ -112,7 +131,7 @@ class AdminDashboard {
         // Show loading state
         loginBtn.disabled = true;
         spinner.classList.remove('d-none');
-        loginText.textContent = 'Logging in...';
+        loginText.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Logging in...';
         alert.classList.add('d-none');
 
         try {
@@ -141,7 +160,7 @@ class AdminDashboard {
             // Reset loading state
             loginBtn.disabled = false;
             spinner.classList.add('d-none');
-            loginText.textContent = '🚪 Login to Dashboard';
+            loginText.innerHTML = '<i class="bi bi-box-arrow-in-right me-2"></i>Login to Dashboard';
         }
     }
 
@@ -198,6 +217,9 @@ class AdminDashboard {
     async loadDashboard() {
         try {
             const response = await fetch('/admin/api/stats');
+            if (!response.ok) {
+                throw new Error('Failed to load dashboard data');
+            }
             const data = await response.json();
 
             // Update stats
@@ -214,6 +236,7 @@ class AdminDashboard {
 
         } catch (error) {
             console.error('Error loading dashboard:', error);
+            this.showNotification('Error loading dashboard data', 'error');
         }
     }
 
@@ -287,6 +310,9 @@ class AdminDashboard {
     async loadRecentActivities() {
         try {
             const response = await fetch('/admin/api/audit-logs');
+            if (!response.ok) {
+                throw new Error('Failed to load recent activities');
+            }
             const logs = await response.json();
             
             const activitiesContainer = document.getElementById('recent-activities');
@@ -304,6 +330,9 @@ class AdminDashboard {
     async loadUsers() {
         try {
             const response = await fetch('/admin/api/users');
+            if (!response.ok) {
+                throw new Error('Failed to load users');
+            }
             const users = await response.json();
             
             const tbody = document.getElementById('users-tbody');
@@ -340,6 +369,9 @@ class AdminDashboard {
     async loadScans() {
         try {
             const response = await fetch('/admin/api/scans');
+            if (!response.ok) {
+                throw new Error('Failed to load scans');
+            }
             const scans = await response.json();
             
             const tbody = document.getElementById('scans-tbody');
@@ -370,6 +402,9 @@ class AdminDashboard {
     async loadPayments() {
         try {
             const response = await fetch('/admin/api/payments');
+            if (!response.ok) {
+                throw new Error('Failed to load payments');
+            }
             const payments = await response.json();
             
             const tbody = document.getElementById('payments-tbody');
@@ -398,6 +433,9 @@ class AdminDashboard {
     async loadTeams() {
         try {
             const response = await fetch('/admin/api/teams');
+            if (!response.ok) {
+                throw new Error('Failed to load teams');
+            }
             const teams = await response.json();
             
             const tbody = document.getElementById('teams-tbody');
@@ -419,6 +457,9 @@ class AdminDashboard {
     async loadAuditLogs() {
         try {
             const response = await fetch('/admin/api/audit-logs');
+            if (!response.ok) {
+                throw new Error('Failed to load audit logs');
+            }
             const logs = await response.json();
             
             const tbody = document.getElementById('audit-tbody');
