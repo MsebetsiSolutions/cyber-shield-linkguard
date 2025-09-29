@@ -82,6 +82,7 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     └── signup.js
         |            |
         |            ├── enterprice/        
+        |            |     |
         |            |     ├── enter-dash/
         |            |     |          ├── enterprise-dashboard.html
         |            |     |          ├── enterprise-dashboard.css
@@ -157,16 +158,10 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     ├── clarity.css
         |            |     └── clarity.js
         |            |
-        |            ├── admin/         
-        |            |     ├── adminLogin/
-        |            |     |     ├── adminLogin.html
-        |            |     |     ├── adminLogin.css
-        |            |     |     └── adminLogin.js
-        |            |     |
-        |            |     └─ adminDash/
-        |            |           ├── adminDash.html
-        |            |           ├── adminDash.css
-        |            |           └── adminDash.js
+        |            ├── admin/          
+        |            |     ├── admin.html
+        |            |     ├── admin.css
+        |            |     └── admin.js
         |            |
         |            ├── login/          
         |            |     ├── login.html
