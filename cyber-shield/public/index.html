@@ -6,635 +6,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LinkGuard - Secure Cyber Shield</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="theme.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1rem;
-    }
-
-    .header-content {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.75rem 0;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .logo img {
-      height: 35px;
-      width: auto;
-      object-fit: contain;
-    }
-
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      gap: .3rem;
-      cursor: pointer;
-      padding: .5rem;
-    }
-
-    .hamburger span {
-      width: 25px;
-      height: 2px;
-      background: var(--text);
-      border-radius: 2px;
-      transition: .3s;
-    }
-
-    .hamburger.active span:nth-child(1) {
-      transform: rotate(45deg) translate(6px, 6px);
-    }
-
-    .hamburger.active span:nth-child(2) {
-      opacity: 0;
-    }
-
-    .hamburger.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(6px, -6px);
-    }
-
-    nav {
-      display: flex;
-      gap: 1.5rem;
-      align-items: center;
-    }
-
-    nav a {
-      text-decoration: none;
-      color: var(--text);
-      font-weight: 500;
-      font-size: 0.9rem;
-      transition: color 0.3s;
-      cursor: pointer;
-    }
-
-    nav a:hover {
-      color: var(--sky);
-    }
-
-    .header-buttons {
-      display: flex;
-      gap: .5rem;
-    }
-
-    .mobile-buttons {
-      display: none;
-    }
-
-    .btn {
-      padding: .5rem 1.25rem;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all .3s;
-      display: inline-flex;
-      align-items: center;
-      gap: .4rem;
-      text-decoration: none;
-      font-size: 0.9rem;
-    }
-
-    .btn-login {
-      background: var(--btn-login);
-      color: #fff;
-    }
-
-    .btn-login:hover {
-      background: #f4511e;
-      transform: translateY(-1px);
-    }
-
-    .btn-signup {
-      background: var(--btn-signup);
-      color: var(--text);
-    }
-
-    .btn-signup:hover {
-      background: #388e3c;
-      color: #fff;
-      transform: translateY(-1px);
-    }
-
-    /* Hero */
-    .hero {
-      text-align: center;
-      padding: 4rem 1rem;
-      background: transparent;
-    }
-
-    .hero h1 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      background: linear-gradient(90deg, var(--btn-signup), var(--gold), var(--mint));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .hero p {
-      font-size: 1.1rem;
-      max-width: 600px;
-      margin: 0 auto 2rem;
-      background: linear-gradient(90deg, #03b3ff, #ff5b5b, #ffcc01);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .hero-buttons {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    /* Features */
-    .features {
-      padding: 4rem 1rem;
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(1px);
-    }
-
-    .section-header {
-      text-align: center;
-      margin-bottom: 3rem;
-    }
-
-    .section-header h2 {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .section-subtitle {
-      color: var(--muted);
-      font-size: 1rem;
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      transition: .3s;
-      border: 1px solid rgba(255, 255, 255, 0.8);
-    }
-
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    .card-icon {
-      width: 3rem;
-      height: 3rem;
-      border-radius: 0.75rem;
-      background: linear-gradient(135deg, var(--btn-login), var(--candy-orange));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1rem;
-    }
-
-    .card-icon i {
-      color: #fff;
-      font-size: 1.25rem;
-    }
-
-    .card h3 {
-      margin-bottom: .5rem;
-      color: var(--text);
-      font-size: 1.1rem;
-    }
-
-    .card p {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    /* Why Choose */
-    .why-choose {
-      padding: 4rem 1rem;
-      background: rgba(249, 250, 252, 0.8);
-      backdrop-filter: blur(1px);
-    }
-
-    .why-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-      align-items: center;
-    }
-
-    .feature-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .feature-item {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .feature-icon {
-      width: 2.5rem;
-      height: 2.5rem;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--candy-green), var(--btn-signup));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .feature-icon i {
-      color: #fff;
-      font-size: 1rem;
-    }
-
-    .feature-item h3 {
-      margin-bottom: .5rem;
-      color: var(--text);
-      font-size: 1rem;
-    }
-
-    .feature-item p {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .enterprise-card {
-      background: var(--card);
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      padding: 1.5rem;
-      text-align: center;
-    }
-
-    /* Modal Styles */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(5px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .modal-content {
-      background: var(--card);
-      border-radius: 10px;
-      padding: 2rem;
-      max-width: 800px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      transform: scale(0.7);
-      opacity: 0;
-      transition: all 0.3s ease;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-    }
-
-    .modal-overlay.active .modal-content {
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 2px solid var(--ring);
-    }
-
-    .modal-header h2 {
-      font-size: 1.8rem;
-      color: var(--text);
-      margin: 0;
-    }
-
-    .close-modal {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      color: var(--muted);
-      cursor: pointer;
-      transition: color 0.3s;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-    }
-
-    .close-modal:hover {
-      color: var(--text);
-      background: rgba(0, 0, 0, 0.05);
-    }
-
-    .about-subtitle {
-      font-size: 1rem;
-      color: var(--muted);
-      margin-bottom: 1.5rem;
-    }
-
-    .modal-body p {
-      margin-bottom: 1rem;
-      color: var(--muted);
-      font-size: 0.95rem;
-      line-height: 1.6;
-    }
-
-    .expertise-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin: 1.5rem 0;
-    }
-
-    .expertise-section h4 {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      margin-bottom: .75rem;
-      color: var(--text);
-      font-size: 1rem;
-    }
-
-    .expertise-section ul {
-      list-style: none;
-      padding-left: 0;
-    }
-
-    .expertise-section li {
-      margin-bottom: .5rem;
-      color: var(--muted);
-      font-size: 0.9rem;
-      padding-left: 1rem;
-      position: relative;
-    }
-
-    .expertise-section li:before {
-      content: "•";
-      color: var(--candy-green);
-      position: absolute;
-      left: 0;
-    }
-
-    footer {
-      background: transparent;
-      padding: 2rem 1rem;
-      text-align: center;
-      color: var(--muted);
-      border-top: 1px solid rgba(0, 0, 0, 0.1);
-    }
-
-    .footer-brand {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: .5rem;
-      font-weight: 700;
-      font-size: 1.1rem;
-      margin-bottom: 1rem;
-      color: var(--text);
-    }
-
-    .footer-copyright {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      font-size: 0.9rem;
-    }
-
-    .footer-settings {
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.3s;
-      display: inline-flex;
-      align-items: center;
-    }
-
-    .footer-settings:hover {
-      color: var(--sky);
-    }
-
-    /* Responsive Styles */
-    @media (max-width: 768px) {
-      .hamburger {
-        display: flex;
-      }
-
-      .header-content {
-        position: relative;
-      }
-
-      nav {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(10px);
-        flex-direction: column;
-        gap: 0;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height .3s ease;
-        align-items: stretch;
-      }
-
-      nav.active {
-        max-height: 400px;
-      }
-
-      nav a {
-        padding: 1rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        text-align: center;
-      }
-
-      .header-buttons {
-        display: none;
-      }
-
-      .mobile-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: .5rem;
-        padding: 1rem;
-        background: rgba(249, 249, 249, 0.8);
-      }
-
-      .mobile-buttons .btn {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .hero h1 {
-        font-size: 2rem;
-      }
-
-      .hero p {
-        font-size: 1rem;
-      }
-
-      .why-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .expertise-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .features-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .modal-content {
-        padding: 1.5rem;
-        width: 95%;
-      }
-
-      .modal-header h2 {
-        font-size: 1.5rem;
-      }
-    }
-
-    @media (min-width: 769px) {
-      .mobile-buttons {
-        display: none !important;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .logo img {
-        height: 30px;
-      }
-
-      .btn {
-        padding: .4rem 1rem;
-        font-size: .85rem;
-      }
-
-      .hero h1 {
-        font-size: 1.8rem;
-      }
-
-      .section-header h2 {
-        font-size: 1.6rem;
-      }
-
-      .card {
-        padding: 1.25rem;
-      }
-
-      .header-buttons {
-        gap: .4rem;
-      }
-
-      .header-buttons .btn {
-        padding: .4rem 1rem;
-        font-size: .8rem;
-      }
-
-      .modal-content {
-        padding: 1rem;
-      }
-
-      .footer-copyright {
-        flex-direction: column;
-        gap: 0.25rem;
-      }
-    }
-  </style>
 </head>
 
 <body>
   <header>
-    <div class="container">
+    <div class="container-fluid">
       <div class="header-content">
         <div class="logo">
           <img src="assets/CYBER_SHIELD_LINKGUARD2.png" alt="Cyber Shield LinkGuard Logo">
         </div>
-        <div class="hamburger" onclick="toggleMenu()">
+        <div class="hamburger" id="hamburger">
           <span></span>
           <span></span>
           <span></span>
         </div>
         <nav id="nav">
-          <a href="#features" onclick="closeMenu()">Features</a>
-          <a href="#why" onclick="closeMenu()">Why Choose</a>
-          <a onclick="openAboutModal()">About</a>
+          <a href="#features">Features</a>
+          <a href="#why">Why Choose</a>
+          <a id="aboutBtn">About</a>
           <div class="mobile-buttons">
-            <button class="btn btn-login login-btn">
+            <button class="btn btn-login" id="mobileLoginBtn">
               <i class="bi bi-box-arrow-in-right"></i>Login
             </button>
-            <button class="btn btn-signup signup-btn">
+            <button class="btn btn-signup" id="mobileSignupBtn">
               <i class="bi bi-person-plus"></i>Sign Up
             </button>
           </div>
         </nav>
         <div class="header-buttons">
-          <button class="btn btn-login login-btn">
+          <button class="btn btn-login" id="desktopLoginBtn">
             <i class="bi bi-box-arrow-in-right"></i>Login
           </button>
-          <button class="btn btn-signup signup-btn">
+          <button class="btn btn-signup" id="desktopSignupBtn">
             <i class="bi bi-person-plus"></i>Sign Up
           </button>
         </div>
@@ -642,89 +48,91 @@
     </div>
   </header>
 
-  <section class="hero">
-    <h1>Cyber Shield LinkGuard</h1>
-    <p>Protect yourself from malicious links, files, and QR codes with our privacy-first AI-powered security solution.
-    </p>
-    <div class="hero-buttons">
-      <button class="btn btn-signup signup-btn">
-        <i class="bi bi-shield-check"></i>Get Started
-      </button>
-    </div>
-  </section>
+  <main class="main-content">
+    <section class="hero">
+      <h1>Cyber Shield LinkGuard</h1>
+      <p>Protect yourself from malicious links, files, and QR codes with our privacy-first AI-powered security solution.
+      </p>
+      <div class="hero-buttons">
+        <button class="btn btn-signup" id="heroSignupBtn">
+          <i class="bi bi-shield-check"></i>Get Started
+        </button>
+      </div>
+    </section>
 
-  <section id="features" class="features">
-    <div class="container">
-      <div class="section-header">
-        <h2>Our Features</h2>
-        <p class="section-subtitle">Comprehensive protection with a modern, user-friendly experience</p>
-      </div>
-      <div class="features-grid">
-        <div class="card">
-          <div class="card-icon"><i class="bi bi-search"></i></div>
-          <h3>URL Scanning</h3>
-          <p>Analyze and identify malicious URLs instantly to stop phishing and unsafe links.</p>
+    <section id="features" class="features">
+      <div class="container">
+        <div class="section-header">
+          <h2>Our Features</h2>
+          <p class="section-subtitle">Comprehensive protection with a modern, user-friendly experience</p>
         </div>
-        <div class="card">
-          <div class="card-icon"><i class="bi bi-file-earmark-check"></i></div>
-          <h3>File Scanning</h3>
-          <p>Detect harmful files before they compromise your device or system.</p>
-        </div>
-        <div class="card">
-          <div class="card-icon" style="background:linear-gradient(135deg,var(--candy-green),var(--btn-signup));">
-            <i class="bi bi-qr-code-scan"></i>
+        <div class="features-grid">
+          <div class="card">
+            <div class="card-icon"><i class="bi bi-search"></i></div>
+            <h3>URL Scanning</h3>
+            <p>Analyze and identify malicious URLs instantly to stop phishing and unsafe links.</p>
           </div>
-          <h3>QR Code Scanning</h3>
-          <p>Decode QR codes safely to ensure they don't lead to dangerous destinations.</p>
+          <div class="card">
+            <div class="card-icon"><i class="bi bi-file-earmark-check"></i></div>
+            <h3>File Scanning</h3>
+            <p>Detect harmful files before they compromise your device or system.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon" style="background:linear-gradient(135deg,var(--candy-green),var(--btn-signup));">
+              <i class="bi bi-qr-code-scan"></i>
+            </div>
+            <h3>QR Code Scanning</h3>
+            <p>Decode QR codes safely to ensure they don't lead to dangerous destinations.</p>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section id="why" class="why-choose">
-    <div class="container">
-      <div class="section-header">
-        <h2>Why Choose LinkGuard?</h2>
-      </div>
-      <div class="why-grid">
-        <div class="feature-list">
-          <div class="feature-item">
-            <div class="feature-icon"><i class="bi bi-lock"></i></div>
-            <div>
-              <h3>End-to-End Encryption</h3>
-              <p>Your data is protected at every stage, ensuring complete confidentiality and security.</p>
+    <section id="why" class="why-choose">
+      <div class="container">
+        <div class="section-header">
+          <h2>Why Choose LinkGuard?</h2>
+        </div>
+        <div class="why-grid">
+          <div class="feature-list">
+            <div class="feature-item">
+              <div class="feature-icon"><i class="bi bi-lock"></i></div>
+              <div>
+                <h3>End-to-End Encryption</h3>
+                <p>Your data is protected at every stage, ensuring complete confidentiality and security.</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
+              <div>
+                <h3>Privacy-First Approach</h3>
+                <p>Your information remains secure and confidential with our privacy-focused architecture.</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon"><i class="bi bi-people"></i></div>
+              <div>
+                <h3>Developed by Experts</h3>
+                <p>Built by Msebetsi Solutions, leveraging a team with deep expertise and global achievements.</p>
+              </div>
             </div>
           </div>
-          <div class="feature-item">
-            <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
-            <div>
-              <h3>Privacy-First Approach</h3>
-              <p>Your information remains secure and confidential with our privacy-focused architecture.</p>
-            </div>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon"><i class="bi bi-people"></i></div>
-            <div>
-              <h3>Developed by Experts</h3>
-              <p>Built by Msebetsi Solutions, leveraging a team with deep expertise and global achievements.</p>
-            </div>
+          <div class="enterprise-card">
+            <i class="bi bi-globe" style="font-size:2rem;color:var(--candy-green);margin-bottom:1rem;"></i>
+            <h3>Enterprise-Grade Security</h3>
+            <p>Trusted by organizations worldwide for critical infrastructure protection.</p>
           </div>
         </div>
-        <div class="enterprise-card">
-          <i class="bi bi-globe" style="font-size:2rem;color:var(--candy-green);margin-bottom:1rem;"></i>
-          <h3>Enterprise-Grade Security</h3>
-          <p>Trusted by organizations worldwide for critical infrastructure protection.</p>
-        </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </main>
 
   <!-- About Modal -->
   <div class="modal-overlay" id="aboutModal">
     <div class="modal-content">
       <div class="modal-header">
         <h2>About the Developers</h2>
-        <button class="close-modal" onclick="closeAboutModal()">
+        <button class="close-modal" id="closeAboutModal">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
@@ -761,6 +169,221 @@
     </div>
   </div>
 
+  <!-- Login Modal -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>LOGIN</h2>
+        <button class="close-modal" id="closeLoginModal">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-2">
+          <div class="logo-container mb-2">
+            <img src="assets/CYBER_SHIELD_LINKGUARD2.png" alt="Cyber Shield LinkGuard" class="logo-image">
+          </div>
+        </div>
+
+        <form id="loginForm">
+          <div class="row">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+              <div class="row g-3">
+
+                <div class="col-12">
+                  <div class="position-relative">
+                    <i class="bi bi-envelope input-icon"></i>
+                    <input id="loginEmail" class="cs-input with-icon" type="email" placeholder="Email"
+                      autocomplete="username" required />
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="position-relative">
+                    <i class="bi bi-lock input-icon"></i>
+                    <input id="loginPass" class="cs-input with-icon" type="password" placeholder="Password"
+                      autocomplete="current-password" required />
+                    <i class="bi bi-eye-slash toggle-password" id="togglePassword" role="button" tabindex="0"
+                      aria-label="Show password"></i>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="row align-items-center">
+                    <div class="col-6">
+                      <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe">
+                        <label class="form-check-label small" for="rememberMe">Remember me</label>
+                      </div>
+                    </div>
+                    <div class="col-6 text-end">
+                      <button type="button" class="btn-link small" id="forgotPasswordBtn">Forgot password?</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <button type="button" id="doLogin" class="cs-btn btn-login w-100">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>LOGIN
+                  </button>
+                </div>
+
+                <div class="col-12 text-end">
+                  <span class="small">Don't have an account? </span>
+                  <button type="button" class="btn-link small" id="switchToSignup">Sign up</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2"></div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signup Modal -->
+  <div class="modal-overlay" id="signupModal">
+    <div class="modal-content" style="max-height: 85vh;">
+      <div class="modal-header">
+        <h2>Create Account</h2>
+        <button class="close-modal" id="closeSignupModal">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-2">
+          <div class="logo-container mb-2">
+            <img src="assets/CYBER_SHIELD_LINKGUARD2.png" alt="Cyber Shield LinkGuard" class="logo-image">
+          </div>
+          <p class="cs-sub">Join Cyber Shield LinkGuard for enhanced security</p>
+        </div>
+
+        <form id="signupForm">
+          <div class="row">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+              <div class="row g-3">
+                <div class="col-12">
+                  <div class="position-relative">
+                    <i class="bi bi-person input-icon"></i>
+                    <input name="full_name" id="fullName" class="cs-input with-icon" type="text" placeholder="Full name"
+                      autocomplete="name" required />
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="position-relative">
+                    <i class="bi bi-envelope input-icon"></i>
+                    <input name="email" id="suEmail" class="cs-input with-icon" type="email" placeholder="Email address"
+                      autocomplete="email" required />
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="position-relative">
+                    <i class="bi bi-lock input-icon"></i>
+                    <input name="password" id="suPass" class="cs-input with-icon" type="password"
+                      placeholder="Password (min 6 characters)" autocomplete="new-password" required />
+                    <i class="bi bi-eye-slash toggle-password" id="toggleSignupPassword"></i>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="position-relative">
+                    <i class="bi bi-lock-fill input-icon"></i>
+                    <input name="passConfirm" id="suPassConfirm" class="cs-input with-icon" type="password"
+                      placeholder="Confirm password" autocomplete="new-password" required />
+                    <i class="bi bi-eye-slash toggle-password" id="toggleSignupPasswordConfirm"></i>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div id="passwordError" class="alert alert-danger hidden mb-2" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <span id="passwordErrorText"></span>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="password-strength mb-2 hidden" id="passwordStrength">
+                    <div class="progress" style="height: 5px;">
+                      <div id="passwordStrengthBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <small id="passwordStrengthText" class="form-text"></small>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <button type="button" id="doSignup" class="cs-btn btn-signup w-100">
+                    <i class="bi bi-person-plus me-2"></i>SIGN UP
+                  </button>
+                </div>
+
+                <div class="col-12 text-end">
+                  <p class="cs-sub mb-0">Already have an account? <button type="button" class="btn-link"
+                      id="switchToLogin">Login here</button></p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2"></div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div class="modal-overlay" id="forgotPasswordModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Reset Password</h2>
+        <button class="close-modal" id="closeForgotPasswordModal">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-2">
+          <div class="logo-container mb-2">
+            <img src="assets/CYBER_SHIELD_LINKGUARD2.png" alt="Cyber Shield LinkGuard" class="logo-image">
+          </div>
+          <p class="cs-sub">Enter your email to receive a password reset link</p>
+        </div>
+
+        <form id="forgotPasswordForm">
+          <div class="row">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+              <div class="row g-3">
+                <div class="col-12">
+                  <div class="position-relative">
+                    <i class="bi bi-envelope input-icon"></i>
+                    <input id="resetEmail" class="cs-input with-icon" type="email" placeholder="Email" autocomplete="username" required />
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <button type="button" id="doReset" class="cs-btn btn-login w-100">
+                    <i class="bi bi-send me-2"></i>SEND RESET LINK
+                  </button>
+                </div>
+
+                <div class="col-12 text-end">
+                  <button type="button" class="btn-link" id="backToLogin">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Login
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <div class="footer-brand">
       <i class="bi bi-shield-check"></i> LinkGuard
@@ -775,65 +398,9 @@
 
   <div id="toast"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="session.js"></script>
   <script src="logg.js"></script>
-  <script>
-    function toggleMenu() {
-      const nav = document.getElementById('nav');
-      const hamburger = document.querySelector('.hamburger');
-      nav.classList.toggle('active');
-      hamburger.classList.toggle('active');
-    }
-
-    function closeMenu() {
-      const nav = document.getElementById('nav');
-      const hamburger = document.querySelector('.hamburger');
-      nav.classList.remove('active');
-      hamburger.classList.remove('active');
-    }
-
-    function openAboutModal() {
-      const modal = document.getElementById('aboutModal');
-      modal.classList.add('active');
-      document.body.style.overflow = 'hidden';
-      closeMenu();
-    }
-
-    function closeAboutModal() {
-      const modal = document.getElementById('aboutModal');
-      modal.classList.remove('active');
-      document.body.style.overflow = 'auto';
-    }
-
-    // Close modal when clicking outside the content
-    document.getElementById('aboutModal').addEventListener('click', function (e) {
-      if (e.target === this) {
-        closeAboutModal();
-      }
-    });
-
-    // Close modal with Escape key
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') {
-        closeAboutModal();
-      }
-    });
-
-    // Smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
-          closeMenu();
-        }
-      });
-    });
-  </script>
 </body>
 
 </html>

@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
       
       if (response.status === 401) {
         console.log('User not authenticated, redirecting to login');
-        window.location.href = '../login/login.html';
+        window.location.href = '../index.html';
         return;
       }
       
@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("User info loaded successfully");
       } else {
         console.log('User not authenticated, redirecting to login');
-        window.location.href = '../login/login.html';
+        window.location.href = '../index.html';
       }
     } catch (error) {
       console.error('Error fetching user info:', error);
@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
         
         if (!response.ok) {
           if (response.status === 401) {
-            window.location.href = '../login/login.html';
+            window.location.href = '../index.html';
             return;
           }
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -312,7 +312,7 @@ document.addEventListener("DOMContentLoaded", function () {
     sessionStorage.removeItem('plan_mode');
     
     // Redirect to login page without session ID
-    window.location.href = '../login/login.html';
+    window.location.href = '../index.html';
 }
 
   // Tab switching functionality
@@ -718,7 +718,7 @@ document.addEventListener("DOMContentLoaded", function () {
       
       if (!response.ok) {
         if (response.status === 401) {
-          window.location.href = '../login/login.html';
+          window.location.href = '../index.html';
           return;
         }
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -747,7 +747,7 @@ document.addEventListener("DOMContentLoaded", function () {
       
       if (!response.ok) {
         if (response.status === 401) {
-          window.location.href = '../login/login.html';
+          window.location.href = '../index.html';
           return;
         }
         throw new Error(`HTTP error! status: ${response.status}`);
