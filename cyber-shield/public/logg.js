@@ -36,6 +36,11 @@ function go(name){
 
 // Event listeners with session support for multiple buttons
 document.addEventListener('DOMContentLoaded', function() {
+  // Initialize session first
+  if (window.CyberShieldSession) {
+    window.CyberShieldSession.initSession();
+  }
+
   // Handle all login buttons
   const loginButtons = document.querySelectorAll('.login-btn, #btnLogin');
   loginButtons.forEach(button => {
