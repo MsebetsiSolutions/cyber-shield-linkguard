@@ -75,11 +75,6 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |      |
         │      └── public/ 
         |            ├── assets/
-        |            ├── icons/
-        |            ├── signup/              
-        |            |     ├── signup.html
-        |            |     ├── signup.css
-        |            |     └── signup.js
         |            |
         |            ├── enterprice/        
         |            |     |
@@ -133,11 +128,6 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     ├── settings.css
         |            |     └── settings.js
         |            |
-        |            ├── forgotPassword/              
-        |            |     ├── forgotPassword.html
-        |            |     ├── forgotPassword.css
-        |            |     └── forgotPassword.js
-        |            |
         |            ├── report/              
         |            |     ├── report.html
         |            |     ├── report.css
@@ -153,20 +143,10 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     ├── resetpassword.css
         |            |     └── resetpassword.js
         |            |
-        |            ├── clarity/          
-        |            |     ├── clarity.html
-        |            |     ├── clarity.css
-        |            |     └── clarity.js
-        |            |
         |            ├── admin/          
         |            |     ├── admin.html
         |            |     ├── admin.css
         |            |     └── admin.js
-        |            |
-        |            ├── login/          
-        |            |     ├── login.html
-        |            |     ├── login.css
-        |            |     └── login.js
         |            |
         |            ├── index.html      
         |            ├── logg.js
