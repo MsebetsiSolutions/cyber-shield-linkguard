@@ -98,7 +98,7 @@ $('doReset').addEventListener('click', async () => {
     
     // Redirect to login after success
     setTimeout(() => {
-      window.location.href = '../login/login.html';
+      window.location.href = '../index.html';
     }, 2000);
     
   } catch (error) {

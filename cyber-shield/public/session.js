@@ -30,7 +30,6 @@ async function initSession() {
             const userData = await authCheck.json();
             if (userData.authenticated) {
                 console.log('User is authenticated via Flask session');
-                // User is logged in, we don't need to be as strict with URL session validation
                 if (!sessionId && storedSession) {
                     const { id, expiry } = JSON.parse(storedSession);
                     if (new Date().getTime() < expiry) {
@@ -58,7 +57,6 @@ async function initSession() {
         console.log('Auth check failed, proceeding with basic session management');
     }
 
-    // If not authenticated, use the original session logic
     let needsNewSession = false;
 
     if (storedSession) {
@@ -68,7 +66,6 @@ async function initSession() {
         if (new Date().getTime() > expiry) {
             needsNewSession = true;
         } else {
-            // For unauthenticated users, we can be more lenient with server validation
             sessionId = id;
             if (!window.location.search.includes('session=')) {
                 updateUrlWithSession(sessionId);
@@ -123,12 +120,10 @@ function setupSessionExpiryCheck() {
                 if (authCheck.ok) {
                     const userData = await authCheck.json();
                     if (userData.authenticated) {
-                        // User is logged in, don't auto-refresh to avoid conflicts
                         return;
                     }
                 }
             } catch (error) {
-                // Continue with normal session check
             }
             
             if (new Date().getTime() > expiry) {
@@ -194,7 +189,7 @@ function modifyInternalLinks() {
 
 function logout() {
     sessionStorage.removeItem('cyberShieldSession');
-    window.location.href = '../login/login.html';
+    window.location.href = '../index.html';
 }
 
 // Initialize session when DOM is loaded

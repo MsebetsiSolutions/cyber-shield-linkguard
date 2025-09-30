@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 welcomeForm.style.display = 'flex';
                 updateMemberCount();
             } else {
-                window.location.href = '/login';
+                window.location.href = '/index.html';
             }
         } catch (error) {
             console.error('Error initializing page:', error);

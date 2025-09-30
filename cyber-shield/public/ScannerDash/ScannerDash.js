@@ -310,7 +310,7 @@ async function handleLogout() {
     
     // Redirect to login page without session ID
     setTimeout(() => {
-        window.location.href = '../login/login.html';
+        window.location.href = '../index.html';
     }, 1000);
 }
 
@@ -369,19 +369,19 @@ async function checkAuthenticationWithSession() {
                 
                 return userData;
             } else {
-                console.log('User not authenticated via Flask session, redirecting to login');
+                console.log('User not authenticated via Flask session, redirecting to index');
                 // Don't clear URL session here, just redirect
-                window.location.href = '../login/login.html';
+                window.location.href = '../index.html';
                 return false;
             }
         } else {
-            console.log('Auth check failed, redirecting to login');
-            window.location.href = '../login/login.html';
+            console.log('Auth check failed, redirecting to index');
+            window.location.href = '../index.html';
             return false;
         }
     } catch(e) {
         console.error('Authentication check failed:', e);
-        window.location.href = '../login/login.html';
+        window.location.href = '../index.html';
         return false;
     }
 }
@@ -1277,7 +1277,7 @@ document.addEventListener('DOMContentLoaded', function() {
         sessionStorage.removeItem('cyberShieldSession');
         sessionStorage.removeItem('userData');
         sessionStorage.removeItem('plan_mode');
-        window.location.href = '../login/login.html';
+        window.location.href = '../index.html';
     }
 })();
 
@@ -1292,7 +1292,7 @@ document.addEventListener('visibilitychange', function() {
                 if (!isValid) {
                     console.log('Session invalid on page visibility, redirecting...');
                     sessionStorage.removeItem('cyberShieldSession');
-                    window.location.href = '../login/login.html';
+                    window.location.href = '../index.html';
                 }
             });
         }

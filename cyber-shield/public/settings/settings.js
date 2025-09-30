@@ -134,7 +134,7 @@ async function handleLogout() {
     toast('Signed out successfully');
     
     setTimeout(() => {
-        window.location.href = '../login/login.html';
+        window.location.href = '../index.html';
     }, 1000);
 }
 
