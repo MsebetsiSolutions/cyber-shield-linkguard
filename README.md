@@ -155,6 +155,8 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            ├── sw.js
         |            └── theme.css
         |                
+        ├── SECURITY.md
+        |
         └── README.md
 
 

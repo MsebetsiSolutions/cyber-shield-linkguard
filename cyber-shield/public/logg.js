@@ -208,6 +208,24 @@ function validateForgotPasswordForm() {
   return true;
 }
 
+// Simple AOS (Animate On Scroll) implementation
+function initAOS() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('aos-animate');
+      }
+    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  });
+
+  document.querySelectorAll('[data-aos]').forEach(el => {
+    observer.observe(el);
+  });
+}
+
 // Login Functionality
 async function handleLogin() {
   if (!validateLoginForm()) return;
@@ -341,6 +359,10 @@ function setupEventListeners() {
   // Modal Controls
   $('aboutBtn').addEventListener('click', () => openModal('aboutModal'));
   $('closeAboutModal').addEventListener('click', () => closeModal('aboutModal'));
+  
+  // Developers Modal
+  $('developersBtn').addEventListener('click', () => openModal('developersModal'));
+  $('closeDevelopersModal').addEventListener('click', () => closeModal('developersModal'));
   
   // Login Modal
   $('desktopLoginBtn').addEventListener('click', () => openModal('loginModal'));
@@ -477,6 +499,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Hide error and strength indicators initially
   hide($('passwordStrength'));
   hide($('passwordError'));
+
+  // Initialize animations
+  initAOS();
 
   // Setup all event listeners
   setupEventListeners();
