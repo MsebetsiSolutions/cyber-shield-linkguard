@@ -21,7 +21,7 @@ We take security issues seriously. If you discover a vulnerability in **Cyber Sh
    Instead, report vulnerabilities responsibly via email or private channels.
 
 2. **Contact us at:**  
-   📧 **security@msebetsi-solutions.com**
+   📧 **security@msebetsi-solutions.co.za**
 
 3. **Provide as much detail as possible**, including:
    - Steps to reproduce the issue
