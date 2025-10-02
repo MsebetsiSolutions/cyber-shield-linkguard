@@ -41,7 +41,6 @@
   </div>
 
   <div class="container-fluid py-3">
-    <!-- Header -->
     <div class="row mb-3">
       <div class="col-12">
         <div class="d-flex justify-content-between align-items-center">
@@ -51,32 +50,42 @@
             <div class="d-flex align-items-center gap-2 mt-1">
               <div id="scanCounter" class="cs-sub small">Scans: <span id="remainingScans">1</span>/1</div>
               <div id="planMode" class="plan-badge free-plan">FREE</div>
-              <button id="statsButton" class="btn-stats hidden" data-bs-toggle="modal" data-bs-target="#statsModal">
-                <i class="bi bi-bar-chart-fill"></i>
-                <span class="stats-text">Stats</span>
-              </button>
-              <button id="twButton" class="btn-stats"
-                onclick="window.location.href='../shareTeamCollab/shareTeamCollab.html'">
-                <i class="bi bi-people-fill"></i>
-                <span class="stats-text">Team</span>
-              </button>
-              <button id="twEnterprise" class="btn-enterprise hidden"
-                onclick="window.location.href='../enterprice/start-enter/start-enter.html'">
-                <i class="bi bi-buildings"></i>
-                <span class="stats-text">Enterprise</span>
-              </button>
-              <button id="twReputation" class="btn-reputation hidden"
-                onclick="window.location.href='../BackgroundCheck/ComprehensiveBackgroundCheck.html'">
-                <i class="bi bi-building-check"></i>
-                <span class="stats-text">Background Check</span>
-              </button>
+              
+              <!-- Dropdown Control -->
+              <div class="features-dropdown">
+                <button class="features-dropdown-btn" id="featuresDropdownBtn">
+                  <i class="bi bi-grid-3x3-gap"></i>
+                  <span class="features-text">Features</span>
+                  <i class="bi bi-chevron-down ms-1 dropdown-arrow"></i>
+                </button>
+                <div class="features-dropdown-content" id="featuresDropdown">
+                  <button id="statsButton" class="feature-btn hidden" data-bs-toggle="modal" data-bs-target="#statsModal">
+                    <i class="bi bi-bar-chart-fill"></i>
+                    <span>Statistics</span>
+                  </button>
+                  <button id="twButton" class="feature-btn"
+                    onclick="window.location.href='../shareTeamCollab/shareTeamCollab.html'">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Team Workspace</span>
+                  </button>
+                  <button id="twEnterprise" class="feature-btn hidden"
+                    onclick="window.location.href='../enterprice/start-enter/start-enter.html'">
+                    <i class="bi bi-buildings"></i>
+                    <span>Enterprise</span>
+                  </button>
+                  <button id="twReputation" class="feature-btn hidden"
+                    onclick="window.location.href='../BackgroundCheck/ComprehensiveBackgroundCheck.html'">
+                    <i class="bi bi-building-check"></i>
+                    <span>Background Check</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Mobile Dropdown Toggle -->
     <div class="row d-lg-none mb-2">
       <div class="col-12">
         <button class="cs-btn btn-dropdown w-100" type="button" data-bs-toggle="collapse"
@@ -88,12 +97,10 @@
     </div>
 
     <div class="row">
-      <!-- Left Column - Controls (Desktop) / Collapsible (Mobile) -->
       <div class="col-12 col-lg-6 mb-3">
         <div class="cs-card p-3 h-100 collapse d-lg-block" id="mobileControls">
           <h4 class="text-center mb-3 d-none d-lg-block"><i class="bi bi-input-cursor-text me-1"></i>Scan Controls</h4>
 
-          <!-- URL Scan -->
           <div class="mb-3">
             <h5 class="mb-2"><i class="bi bi-link-45deg me-1"></i>Scan URL</h5>
             <input id="urlInput" class="cs-input mb-2" placeholder="e.g. https://example.com" />
@@ -103,7 +110,6 @@
           </div>
 
           <div class="row">
-            <!-- File Scan -->
             <div class="col-md-6 col-12 mb-3">
               <h5 class="mb-2"><i class="bi bi-file-earmark me-1"></i>Scan File</h5>
               <div class="file-upload-container mb-2">
@@ -119,7 +125,6 @@
               </button>
             </div>
 
-            <!-- QR Scan -->
             <div class="col-md-6 col-12 mb-3">
               <h5 class="mb-2"><i class="bi bi-qr-code me-1"></i>Scan QR Code</h5>
               <div class="file-upload-container mb-4">
@@ -138,12 +143,11 @@
         </div>
       </div>
 
-      <!-- Results Column -->
       <div class="col-12 col-lg-6">
         <div class="cs-card p-3 h-100">
           <h4 class="text-center mb-3"><i class="bi bi-graph-up me-1"></i>Scan Results</h4>
 
-          <!-- Results Overview -->
+          <!-- Results  -->
           <div class="results-overview mb-3 text-center hidden" id="resultsOverview">
             <div class="row">
               <div class="col-6 col-md-3">
@@ -172,13 +176,11 @@
               </div>
             </div>
 
-            <!-- Chart.js Visualization -->
             <div class="chart-container mt-3">
               <canvas id="resultsChart"></canvas>
             </div>
           </div>
 
-          <!-- Detailed Results -->
           <div class="result-section hidden" id="resultUrl">
             <h5 class="result-header">URL Scan Results</h5>
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -218,7 +220,6 @@
             </div>
           </div>
 
-          <!-- Empty State -->
           <div class="empty-state text-center" id="emptyState">
             <i class="bi bi-inbox empty-icon"></i>
             <h5>No Scan Results Yet</h5>
@@ -242,7 +243,6 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <!-- Loading state -->
           <div id="statsLoading" class="text-center py-3">
             <div class="spinner-border text-primary" role="status">
               <span class="visually-hidden">Loading...</span>
@@ -252,7 +252,6 @@
 
           <!-- Stats content -->
           <div id="statsContent" class="hidden">
-            <!-- Summary Cards -->
             <div class="row mb-3">
               <div class="col-md-4 mb-2">
                 <div class="stat-summary-card total-scans">
@@ -289,7 +288,7 @@
               </div>
             </div>
 
-            <!-- Scan Type Distribution -->
+            <!-- Scan Type -->
             <div class="row mb-3">
               <div class="col-12">
                 <h5 class="mb-2"><i class="bi bi-pie-chart me-1"></i>Scan Type Distribution</h5>
@@ -309,7 +308,7 @@
               </div>
             </div>
 
-            <!-- Recent Scans Table -->
+            <!-- Scans Table -->
             <div class="row">
               <div class="col-12">
                 <h5 class="mb-2"><i class="bi bi-clock-history me-1"></i>Recent Scans</h5>
@@ -324,7 +323,7 @@
                       </tr>
                     </thead>
                     <tbody id="recentScansTable">
-                      <!-- Will be populated by JavaScript -->
+
                     </tbody>
                   </table>
                 </div>
@@ -332,7 +331,6 @@
             </div>
           </div>
 
-          <!-- Error state -->
           <div id="statsError" class="text-center py-3 hidden">
             <i class="bi bi-exclamation-triangle text-warning display-4 mb-2"></i>
             <h5>Unable to Load Statistics</h5>
@@ -353,7 +351,6 @@
 
   <div id="toast"></div>
 
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../session.js"></script>
   <script src="ScannerDash.js"></script>
