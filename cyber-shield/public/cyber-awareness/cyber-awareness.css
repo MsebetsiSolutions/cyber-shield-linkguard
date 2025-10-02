@@ -1,0 +1,356 @@
+/* Minimal nav styles extracted from nav.html */
+:root {
+  --text: #2b2b2b;
+  --sky: #03b3ff;
+  --ring: #e9b7c9;
+  --btn-settings: #d6bbfc;
+  --btn-report: #ff9f80;
+  --btn-logout: #ff6f61;
+  --muted: #6b7280;
+}
+
+/* Page background image */
+body {
+  background-image: url('../assets/welcome-bg.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: var(--text);
+  font-family: 'Poppins', sans-serif;
+}
+
+header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(1px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.container-fluid {
+  max-width: 1200px;
+  margin: 2em auto;
+  padding: 0 1rem;
+}
+
+/* Make header sit flush to the top by removing the container's top margin there */
+header .container-fluid { margin: 0 auto; }
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  transition: transform 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.logo img {
+  height: 45px;
+  width: auto;
+  object-fit: contain;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: .3rem;
+  cursor: pointer;
+  padding: .5rem;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: .3s;
+}
+
+.hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(6px, 6px); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
+
+nav {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: color 0.3s;
+  cursor: pointer;
+}
+
+nav a:hover { color: var(--sky); }
+
+/* active nav link */
+.nav-link.active { color: var(--sky); font-weight: 700; border-bottom: 2px solid var(--sky); padding-bottom: 4px; }
+
+/* Platform label + select styling */
+.platform-label {
+  font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  margin-right: 8px;
+  white-space: nowrap;
+  font-size: 1rem;
+  color: var(--text);
+  letter-spacing: 0.2px;
+}
+
+.platform-select {
+  font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: #fff;
+  font-size: 1rem;
+  color: var(--text);
+  min-width: 180px;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  /* hide the label text on small screens to save space */
+  .platform-label { display: none; }
+  .platform-select { min-width: 120px; }
+}
+
+/* Responsive: show hamburger and collapse nav on small screens */
+@media (max-width: 768px) {
+  .hamburger { display: flex; }
+  .header-content { position: relative; }
+
+  nav {
+    position: absolute;
+    top: 100%; left: 0; right: 0;
+    background: rgba(255,255,255,0.98);
+    backdrop-filter: blur(1px);
+    flex-direction: column;
+    gap: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    max-height: 0; overflow: hidden; transition: max-height .3s ease; align-items: stretch;
+  }
+
+  nav.active { max-height: 400px; }
+  nav a { padding: 1rem; border-bottom: 1px solid rgba(0,0,0,0.1); text-align: center; }
+}
+
+/* Extracted user dropdown styles */
+.user-dropdown { position: relative; margin-right: 2px; }
+
+/* user controls wrapper: keeps profile and logout together */
+.user-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px; /* very small gap between profile and logout */
+  margin-left: 8px;
+}
+
+.user-dropdown-btn {
+  background-color: var(--btn-settings);
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: var(--text);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
+}
+
+.user-dropdown-btn:hover {
+  transform: scale(1.05);
+  background-color: var(--btn-report);
+  color: white;
+}
+
+.user-dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  min-width: 180px;
+  border-radius: 0.4rem;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  z-index: 1;
+  margin-top: 8px;
+  padding: 0.4rem 0;
+  animation: fadeIn 0.3s ease;
+}
+
+/* show dropdown on hover (desktop) or when JS adds .open */
+.user-dropdown.open .user-dropdown-content,
+.user-dropdown:hover .user-dropdown-content {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.user-dropdown-content a {
+  color: var(--text);
+  padding: 10px 14px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+  transition: background-color 0.3s;
+  border-radius: 0.2rem;
+  margin: 0 0.4rem;
+  font-size: 0.9rem;
+}
+
+.user-dropdown-content a:hover {
+  background-color: var(--btn-settings);
+  transform: translateX(4px);
+}
+
+.user-welcome {
+  padding: 10px 14px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--ring);
+  margin-bottom: 0.4rem;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.logout-btn {
+  background-color: var(--btn-logout);
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: white;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
+  margin-left: 2px;
+}
+
+.logout-btn:hover {
+  transform: scale(1.05);
+  background-color: #ff4d3a;
+}
+/* Mobile-specific controls inside the collapsed nav */
+.mobile-user-controls { display: none; flex-direction: column; gap: 0.25rem; padding: .5rem 1rem; }
+.mobile-user-controls .mobile-link { display: flex; align-items: center; gap: .5rem; padding: .5rem 0; text-decoration: none; color: var(--text); }
+.mobile-logout-btn { width: 100%; padding: .5rem; border: none; background: var(--btn-logout); color: #fff; border-radius: .4rem; cursor: pointer; }
+@media (max-width: 768px) {
+  .user-controls { display: none !important; }
+  .mobile-user-controls { display: flex !important; }
+  .mobile-user-controls .mobile-link { border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: .6rem; }
+}
+
+/* Page layout: ensure main fills the viewport so panels can stretch
+  and prevent the whole page from scrolling (panel will scroll internally) */
+html, body { height:100vh; margin:0; }
+body { display:flex; flex-direction:column; font-size:18px; overflow:hidden; }
+main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+/* Panel used inside the Phishing Simulation area to sit over the background image */
+.phishing-panel {
+  background: rgba(255,255,255,0.88); /* white with slight transparency */
+  border: 1px solid rgba(16,24,40,0.08);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 6px 18px rgba(12,18,30,0.06);
+  backdrop-filter: blur(4px);
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 1.05rem; /* slightly larger text inside the panel */
+  overflow: auto; /* allow the panel to scroll internally if needed */
+}
+
+@media (min-width: 769px) {
+  .phishing-panel { max-width: 920px; margin: 0 auto; }
+}
+
+/* Ensure the phishing section uses available vertical space */
+#phishing {
+  flex:1;
+  display:flex;
+  /* top-align content so the panel doesn't stick to the bottom */
+  align-items:flex-start;
+  justify-content:center;
+  padding-top:0.75rem;
+  margin: 0;
+ }
+/* pull the phishing container a bit up by removing the default top margin */
+#phishing .container-fluid {
+  height:100%;
+  padding:1rem;
+  box-sizing:border-box;
+  margin-top:0; }
+
+/* Larger form controls and labels */
+.platform-label { font-size:1.05rem; }
+.platform-select { font-size:1.05rem; padding:10px 12px; min-width:220px; }
+
+/* Generic input/button sizing used in the form */
+.cs-input {
+  padding: 10px 12px;
+  font-size: 1.02rem;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 8px;
+  height: 44px;
+}
+
+.cs-btn {
+  padding: 10px 16px;
+  font-size: 1.03rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Make certain action buttons match the logout styling */
+.cs-btn.logout-like {
+  background: var(--btn-logout);
+  color: #fff;
+  border: none;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+/* Make labels a bit larger and keep them aligned */
+label { font-size: 1.02rem; }
+
+/* Responsive: slightly smaller on narrow screens to avoid overflow */
+@media (max-width: 480px) {
+  body { font-size:16px; }
+  .platform-select { min-width:140px; padding:8px 10px; font-size:0.98rem; }
+  .cs-input { height:40px; padding:8px 10px; font-size:0.98rem; }
+  .platform-label { display:none; }
+}
