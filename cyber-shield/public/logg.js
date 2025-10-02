@@ -24,6 +24,54 @@ const token = {
   clear(){ this.access=''; this.refresh=''; }
 };
 
+// Typewriter Effect
+function initTypewriter() {
+  const typewriterElement = $('typewriter-text');
+  if (!typewriterElement) return;
+
+  const text = 'Cyber Shield LinkGuard';
+  let charIndex = 0;
+  let isDeleting = false;
+  let isPaused = false;
+
+  function type() {
+    if (isPaused) return;
+
+    const currentText = text.substring(0, charIndex);
+    typewriterElement.textContent = currentText;
+    typewriterElement.classList.add('typewriter');
+
+    if (!isDeleting && charIndex < text.length) {
+      // Typing
+      charIndex++;
+      setTimeout(type, 100);
+    } else if (isDeleting && charIndex > 0) {
+      // Deleting
+      charIndex--;
+      setTimeout(type, 50);
+    } else if (!isDeleting && charIndex === text.length) {
+      // Pause at the end of typing
+      isPaused = true;
+      setTimeout(() => {
+        isPaused = false;
+        isDeleting = true;
+        type();
+      }, 2000);
+    } else if (isDeleting && charIndex === 0) {
+      // Pause at the beginning after deleting
+      isPaused = true;
+      setTimeout(() => {
+        isPaused = false;
+        isDeleting = false;
+        type();
+      }, 500);
+    }
+  }
+
+  // Start the typewriter effect
+  type();
+}
+
 // Modal Management
 function openModal(modalId) {
   const modal = $(modalId);
@@ -351,6 +399,43 @@ async function handleForgotPassword() {
   }
 }
 
+// Mobile dropdown functionality
+function setupMobileDropdown() {
+  const dropdown = $('simulatorsDropdown');
+  const dropbtn = dropdown.querySelector('.dropbtn');
+  
+  dropbtn.addEventListener('click', (e) => {
+    if (window.innerWidth <= 768) {
+      e.preventDefault();
+      dropdown.classList.toggle('active');
+    }
+  });
+}
+
+// Simulator Signup Button Functionality
+function setupSimulatorSignup() {
+  const simulatorSignupBtn = $('simulatorSignupBtn');
+  
+  if (simulatorSignupBtn) {
+    simulatorSignupBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Close any open dropdowns
+      const dropdown = $('simulatorsDropdown');
+      dropdown.classList.remove('active');
+      
+      // Close mobile menu if open
+      closeMenu();
+      
+      // Open signup modal
+      openModal('signupModal');
+      
+      toast('Ready to upgrade your security! Sign up for team/enterprise features.');
+    });
+  }
+}
+
 // Event Listeners
 function setupEventListeners() {
   // Menu Toggle
@@ -482,6 +567,12 @@ function setupEventListeners() {
       e.preventDefault();
     });
   });
+
+  // Mobile dropdown setup
+  setupMobileDropdown();
+  
+  // Simulator signup button setup
+  setupSimulatorSignup();
 }
 
 // Initialize everything
@@ -490,6 +581,9 @@ document.addEventListener('DOMContentLoaded', function() {
   if (window.CyberShieldSession) {
     window.CyberShieldSession.initSession();
   }
+
+  // Initialize typewriter effect
+  initTypewriter();
 
   // Setup password toggles
   setupPasswordToggle('togglePassword', 'loginPass');

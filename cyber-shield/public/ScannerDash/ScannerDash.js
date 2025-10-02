@@ -21,6 +21,29 @@ let resultsChart = null;
 let statsChart1 = null;
 let statsChart2 = null;
 
+// Features dropdown functionality
+function initFeaturesDropdown() {
+  const featuresDropdownBtn = $('featuresDropdownBtn');
+  const featuresDropdown = $('featuresDropdown');
+  
+  if (!featuresDropdownBtn || !featuresDropdown) return;
+  
+  featuresDropdownBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    featuresDropdown.classList.toggle('show');
+  });
+  
+  document.addEventListener('click', (e) => {
+    if (!featuresDropdownBtn.contains(e.target) && !featuresDropdown.contains(e.target)) {
+      featuresDropdown.classList.remove('show');
+    }
+  });
+  
+  featuresDropdown.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+}
+
 // Initialize Chart.js
 function initChart() {
   const ctx = document.getElementById('resultsChart').getContext('2d');
@@ -83,7 +106,6 @@ const scanCounter = {
     const today = new Date().toDateString();
     const lastScanDate = localStorage.getItem('lastScanDate');
     
-    // Reset scan count daily
     if (lastScanDate !== today) {
       localStorage.setItem('lastScanDate', today);
       localStorage.setItem('remainingScans', '1'); 
@@ -97,7 +119,7 @@ const scanCounter = {
     localStorage.setItem('lastScanDate', new Date().toDateString()); 
   },
   reset(){ 
-    this.remaining = 1; // Changed from 5 to 1
+    this.remaining = 1; 
     localStorage.setItem('lastScanDate', new Date().toDateString());
   },
   decrement(){ 
@@ -120,7 +142,6 @@ const scanCounter = {
   updateUI(){
     const userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
     
-    // Hide scan counter for paid users
     if (userPlanMode > 0) {
       $('scanCounter').classList.add('hidden');
     } else {
@@ -137,17 +158,14 @@ const scanCounter = {
   }
 };
 
-// Session-based fetch function (no JWT tokens needed)
+// Session-based 
 async function fetchWithSession(path, opts={}) {
-  // For FormData (file uploads), don't set Content-Type header
   const headers = {};
   
-  // Only set Content-Type for JSON requests
   if (!(opts.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
   }
-  
-  // Merge with any existing headers
+
   Object.assign(headers, opts.headers || {});
   
   try {
@@ -167,7 +185,6 @@ async function fetchWithSession(path, opts={}) {
 // Save scan result to database
 async function saveScanResult(scanData) {
   try {
-    // Determine threat level based on verdict band
     let threatLevel = 'clean';
     if (scanData.verdict_band === 'DANGER') {
       threatLevel = 'malicious';
@@ -175,7 +192,6 @@ async function saveScanResult(scanData) {
       threatLevel = 'suspicious';
     }
     
-    // Add threat level to scan data
     scanData.threat_level = threatLevel;
     
     const response = await fetchWithSession('/api/scans/save', {
@@ -202,7 +218,6 @@ const userNameDisplay = $('userNameDisplay');
 const logoutBtn = $('logout');
 const fileScanBtn = $('fileScanBtn'); 
 const qrScanBtn = $('qrScanBtn');     
-const twButton = $('twButton');     
 
 function setUserUI(userData){ 
   console.log('Setting user UI with data:', userData); 
@@ -260,6 +275,7 @@ function controlScanButtons(planMode) {
 
 // New function to control Team Workspace button visibility
 function controlTeamWorkspaceButton(planMode) {
+  const twButton = $('twButton');
   if (planMode === 2 || planMode === 3) {
     show(twButton);
   } else {
@@ -271,10 +287,8 @@ function controlTeamWorkspaceButton(planMode) {
 // Logout functionality
 async function handleLogout() {
     try {
-        // Get current session ID before clearing
         const currentSessionId = window.CyberShieldSession?.getCurrentSessionId();
         
-        // Call server logout to invalidate sessions
         const logoutResponse = await fetchWithSession('/api/auth/logout', {
             method: 'POST'
         });
@@ -282,7 +296,6 @@ async function handleLogout() {
         if (logoutResponse.ok) {
             console.log('logout successful');
             
-            // Invalidate server-side sessions
             if (currentSessionId) {
                 await fetch('/api/session/invalidate', {
                     method: 'POST',
@@ -297,11 +310,9 @@ async function handleLogout() {
         console.log('Logout failed, proceeding with client');
     }
     
-    // Clear client-side data
     scanCounter.reset();
     setUserUI(null);
     
-    // Clear session storage
     sessionStorage.removeItem('cyberShieldSession');
     sessionStorage.removeItem('userData');
     sessionStorage.removeItem('plan_mode');
@@ -335,7 +346,6 @@ async function checkAuthenticationWithSession() {
         
         console.log('Checking authentication with session:', sessionId);
         
-        // First, check Flask session authentication (this is the main auth)
         const r = await fetch('/api/auth/me', {
             credentials: 'include'
         });
@@ -348,7 +358,6 @@ async function checkAuthenticationWithSession() {
             if (userData.authenticated) {
                 console.log('User is authenticated via Flask session');
                 
-                // If we have a session ID, register it with the server
                 if (sessionId && userData.user_id) {
                     try {
                         await fetch('/api/session/create', {
@@ -370,7 +379,6 @@ async function checkAuthenticationWithSession() {
                 return userData;
             } else {
                 console.log('User not authenticated via Flask session, redirecting to index');
-                // Don't clear URL session here, just redirect
                 window.location.href = '../index.html';
                 return false;
             }
@@ -386,8 +394,6 @@ async function checkAuthenticationWithSession() {
     }
 }
 
-
-
 // Initialize results display
 function initResults() {
   hide($('resultUrl'));
@@ -401,7 +407,6 @@ function initResults() {
   $('statHarmless').textContent = '0';
   $('statUndetected').textContent = '0';
   
-  // Reset chart if it exists
   if (resultsChart) {
     updateChart(0, 0, 0, 0);
   }
@@ -429,7 +434,6 @@ async function validateServerSession(sessionId) {
     }
 }
 
-
 // Update stats display
 function updateStats(malicious, suspicious, harmless, undetected) {
   $('statMalicious').textContent = malicious;
@@ -438,7 +442,6 @@ function updateStats(malicious, suspicious, harmless, undetected) {
   $('statUndetected').textContent = undetected;
   show($('resultsOverview'));
   
-  // Update chart
   updateChart(malicious, suspicious, harmless, undetected);
 }
 
@@ -468,7 +471,6 @@ function canScan(scanType = 'url') {
     return true;
   } else {
     toast('You have reached your daily scan limit. Please subscribe to continue scanning.');
-    // Only show modal if it's explicitly about subscription
     const subscriptionModalElement = $('subscriptionModal');
     if (subscriptionModalElement) {
         const subscriptionModal = new bootstrap.Modal(subscriptionModalElement);
@@ -498,7 +500,6 @@ async function runScanUrl(url){
       return;
     }
     
-    // Decrement scan count only for free users
     let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
     if (userPlanMode === 0) {
       scanCounter.decrement();
@@ -566,7 +567,6 @@ async function runScanUrl(url){
         }
     }
     
-    // Save scan result to database
     const scanData = {
       scan_type: 'url',
       content: url,
@@ -617,7 +617,6 @@ async function runScanFile(file){
     const fd = new FormData(); 
     fd.append('file', file);
     
-    // Use fetchWithSession instead of regular fetch to include session cookies
     const r = await fetchWithSession('/api/scan_file', { 
       method: 'POST',
       body: fd 
@@ -634,7 +633,6 @@ async function runScanFile(file){
       return;
     }
     
-    // Decrement scan count only for free users
     let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
     if (userPlanMode === 0) {
       scanCounter.decrement();
@@ -659,7 +657,6 @@ async function runScanFile(file){
     setBadge($('badgeFile'), j.verdict.band); 
     $('scoreFile').textContent = j.verdict.score;
     
-    // Process combined API results for files
     if (j.api_results && j.api_results.length > 0) {
         let totalMalicious = 0;
         let totalSuspicious = 0;
@@ -677,11 +674,9 @@ async function runScanFile(file){
             }
         });
         
-        // If we have valid results, use them
         if (totalEngines > 0) {
             updateStats(totalMalicious, totalSuspicious, totalHarmless, totalUndetected);
         } else {
-            // Fallback to verdict score if no engine data
             const score = parseInt(j.verdict.score);
             if (score >= 80) {
                 updateStats(1, 0, 0, 0);
@@ -694,7 +689,6 @@ async function runScanFile(file){
             }
         }
     } else {
-        // Fallback when no API results
         const score = parseInt(j.verdict.score);
         if (score >= 80) {
             updateStats(1, 0, 0, 0);
@@ -755,7 +749,6 @@ async function runScanQr(file){
     
     if (!r.ok) {
       const errorData = await r.json();
-      // More specific error handling
       if (r.status === 503) {
         toast('QR scanning feature is currently unavailable. Please try again later or contact support.');
         console.error('QR library error:', errorData.error);
@@ -766,7 +759,6 @@ async function runScanQr(file){
     
     const j = await r.json(); 
     
-    // Decrement scan count only for free users
     let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
     if (userPlanMode === 0) {
       scanCounter.decrement();
@@ -795,7 +787,6 @@ async function runScanQr(file){
       setBadge($('badgeQr'), j.verdict.band);
       qrVerdictBand = j.verdict.band;
       
-      // Process combined API results for QR URL
       if (j.signals && j.signals.api_results) {
           let totalMalicious = 0;
           let totalSuspicious = 0;
@@ -844,7 +835,6 @@ async function runScanQr(file){
       updateStats(0, 0, 1, 0);
     }
     
-    // Save scan result to database
     const scanData = {
       scan_type: 'qr_code',
       content: j.decoded || 'QR code image',
@@ -886,14 +876,19 @@ document.addEventListener('click', (e) => {
   if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
     userDropdown.style.display = 'none';
   }
+  
+  const featuresDropdown = $('featuresDropdown');
+  const featuresDropdownBtn = $('featuresDropdownBtn');
+  if (!featuresDropdownBtn.contains(e.target) && !featuresDropdown.contains(e.target)) {
+    featuresDropdown.classList.remove('show');
+  }
 });
 
-// Prevent dropdown from closing when clicking inside it
+// Prevent dropdown from closing 
 userDropdown.addEventListener('click', (e) => {
   e.stopPropagation();
 });
 
-// Update the plan badge based on user's plan mode
 function updatePlanBadge(planMode) {
   const planBadge = document.getElementById('planMode');
   if (!planBadge) return;
@@ -907,10 +902,8 @@ function updatePlanBadge(planMode) {
   
   const plan = planMap[planMode] || planMap[0];
   
-  // Remove all plan classes
   planBadge.classList.remove('free-plan', 'pro-plan', 'team-plan', 'enterprise-plan');
   
-  // Add the current plan class
   planBadge.classList.add(plan.class);
   planBadge.textContent = plan.text;
 }
@@ -922,7 +915,6 @@ async function checkUserPlan() {
     if (response.ok) {
       const data = await response.json();
       updatePlanBadge(data.plan_mode);
-      // Store plan_mode in sessionStorage for easy access
       sessionStorage.setItem('plan_mode', data.plan_mode);
       
       scanCounter.updateUI();
@@ -941,13 +933,13 @@ function toggleStatsButton(planMode) {
   const isSubscribed = planMode === 1 || planMode === 2 || planMode === 3;
   
   if (isSubscribed) {
-    statsButton.classList.remove('hidden');
+    show(statsButton);
   } else {
-    statsButton.classList.add('hidden');
+    hide(statsButton);
   }
 }
 
-// Add this function to control Enterprise button visibility
+// control Enterprise button visibility
 function controlEnterpriseButton(planMode) {
   const enterpriseButton = document.getElementById('twEnterprise');
   if (planMode === 3) { 
@@ -958,7 +950,7 @@ function controlEnterpriseButton(planMode) {
   console.log(`Plan Mode: ${planMode}, Enterprise Button Visible: ${!enterpriseButton.classList.contains('hidden')}`);
 }
 
-// Control Background Check button visibility - UPDATED for plan_mode 2 and 3
+// Control Background Check button visibility 
 function controlBackgroundCheckButton(planMode) {
   const reputationButton = document.getElementById('twReputation');
   if (planMode === 2 || planMode === 3) { 
@@ -991,6 +983,7 @@ function setUserUI(userData){
     controlTeamWorkspaceButton(userData.plan_mode);
     controlEnterpriseButton(userData.plan_mode);
     controlBackgroundCheckButton(userData.plan_mode); 
+    toggleStatsButton(userData.plan_mode);
 
   } else { 
     welcomeMessage.textContent = ''; 
@@ -1000,12 +993,12 @@ function setUserUI(userData){
     controlTeamWorkspaceButton(0);
     controlEnterpriseButton(0);
     controlBackgroundCheckButton(0); 
+    toggleStatsButton(0);
   }
 }
 
 // Initialize stats charts
 function initStatsCharts() {
-  // Destroy existing charts if they exist
   if (statsChart1) {
     statsChart1.destroy();
   }
@@ -1121,17 +1114,14 @@ function displayStats(statsData) {
   hide(statsLoading);
   show(statsContent);
   
-  // Update summary cards
   document.getElementById('totalScans').textContent = statsData.totalScans || 0;
   
-  // Calculate malicious and safe scans from threat levels
   const maliciousScans = statsData.threatLevels?.malicious || 0;
   const safeScans = (statsData.threatLevels?.clean || 0) + (statsData.threatLevels?.suspicious || 0);
   
   document.getElementById('maliciousScans').textContent = maliciousScans;
   document.getElementById('safeScans').textContent = safeScans;
   
-  // Update charts
   if (statsChart1 && statsData.scanTypes) {
     statsChart1.data.datasets[0].data = [
       statsData.scanTypes.url || 0,
@@ -1155,11 +1145,9 @@ function displayStats(statsData) {
     statsData.recentScans.forEach(scan => {
       const row = document.createElement('tr');
       
-      // Format date
       const scanDate = new Date(scan.scanned_at);
       const formattedDate = scanDate.toLocaleDateString();
       
-      // Format scan type for display
       const scanTypeMap = {
         'url': 'URL',
         'file': 'File',
@@ -1167,7 +1155,6 @@ function displayStats(statsData) {
       };
       const displayType = scanTypeMap[scan.scan_type] || scan.scan_type;
       
-      // Truncate content if too long
       let contentDisplay = scan.content;
       if (contentDisplay.length > 30) {
         contentDisplay = contentDisplay.substring(0, 30) + '...';
@@ -1202,11 +1189,11 @@ function displayStats(statsData) {
   }
 }
 
+
 // Download stats report
 function downloadStatsReport() {
   toast('Preparing your download...');
   
-  // In a real implementation, this would generate a PDF or CSV report
   setTimeout(() => {
     // Simulate download
     const a = document.createElement('a');
@@ -1232,7 +1219,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     statsModal.addEventListener('hidden.bs.modal', function() {
-      // Clean up charts when modal is closed
       if (statsChart1) {
         statsChart1.destroy();
         statsChart1 = null;
@@ -1245,7 +1231,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// Initialize dashboard and check authentication
+// dashboard and check authentication
 (async function boot(){
     console.log('Dashboard initializing with enhanced session management...');
     
@@ -1253,18 +1239,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const userData = await checkAuthenticationWithSession();
         
         if (userData) {
-            // Initialize chart
+            initFeaturesDropdown();            
             initChart();
             
-            // Check user plan and update UI accordingly
             const planMode = await checkUserPlan();
             
             setUserUI({...userData, plan_mode: planMode}); 
             scanCounter.updateUI();
             initResults();
-            
-            // Toggle stats button based on plan mode
-            toggleStatsButton(planMode);
             
             console.log('User authenticated successfully with valid session');
             return;
@@ -1273,7 +1255,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Failed to initialize dashboard', e);
         toast('Authentication error - please login again');
         
-        // Clear everything and redirect
         sessionStorage.removeItem('cyberShieldSession');
         sessionStorage.removeItem('userData');
         sessionStorage.removeItem('plan_mode');
