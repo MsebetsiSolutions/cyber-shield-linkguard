@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nav - LinkGuard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="cyber-awareness.css">
+</head>
+
+<body>
+  <header>
+    <div class="container-fluid">
+      <div class="header-content">
+        <div class="logo">
+          <img src="../assets/CYBER_SHIELD_LINKGUARD2.png" alt="Cyber Shield LinkGuard Logo">
+        </div>
+        <div class="hamburger" id="hamburger">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <nav id="nav">
+          <a class="nav-link" id="phishingLink" href="#phishing">Phishing Simulation</a>
+          <a class="nav-link" id="emailTemplateLink" href="#emailTemplate">Email Phishing Template</a>
+          
+          <!-- Mobile-only user controls (shown inside the collapsed nav) -->
+          <div class="mobile-user-controls">
+            <a class="mobile-link" href="../profile/profile.html"><i class="bi bi-person me-2"></i>Profile</a>
+            <a class="mobile-link" href="../settings/settings.html"><i class="bi bi-gear me-2"></i>Settings</a>
+            <a class="mobile-link" href="../Subscription/Subscription.html"><i class="bi bi-star-fill me-2"></i>Subscription</a>
+            <a class="mobile-link" href="../report/report.html"><i class="bi bi-flag me-2"></i>Report</a>
+            <button class="mobile-logout-btn" id="mobileLogout"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
+          </div>
+        </nav>
+        <div class="user-controls">
+          <div class="user-dropdown">
+            <button class="user-dropdown-btn" id="userDropdownBtn">
+              <i class="bi bi-person-circle"></i>
+            </button>
+            <div class="user-dropdown-content" id="userDropdown">
+              <div id="welcomeMessage" class="user-welcome"></div>
+              <a href="../profile/profile.html"><i class="bi bi-person me-2"></i>Profile</a>
+              <a href="../settings/settings.html"><i class="bi bi-gear me-2"></i>Settings</a>
+              <a href="../Subscription/Subscription.html"><i class="bi bi-star-fill me-2"></i>Subscription</a>
+              <a href="../report/report.html"><i class="bi bi-flag me-2"></i>Report</a>
+            </div>
+          </div>
+          <button id="logout" class="logout-btn">
+            <i class="bi bi-box-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="phishing" style="padding:1rem;">
+      <div class="container-fluid" style="max-width:1100px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
+          <div class="phishing-panel" style="margin:0 auto;max-width:720px;">
+            <div class="platform-control" style="margin:0 0 0.75rem 0;display:flex;align-items:center;justify-content:center;gap:.75rem;">
+              <span class="platform-label">Platform</span>
+              <select id="platformSelect" class="platform-select" aria-label="Select platform">
+                <option value="">Select Platform</option>
+                <option value="google">Google</option>
+                <option value="tiktok">TikTok</option>
+                <option value="facebook">Facebook</option>
+                <option value="x">X</option>
+                <option value="telegram">Telegram</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="instagram">Instagram</option>
+                <option value="snapchat">Snapchat</option>
+                <option value="netflix">Netflix</option>
+                <option value="amazon">Amazon</option>
+                <option value="microsoft">Microsoft</option>
+              </select>
+            </div>
+            <form id="generateEmailForm" style="display:flex;flex-direction:column;gap:1.6rem;">
+              <div style="display:flex;align-items:center;gap:.75rem;">
+                <label for="gFirst" style="min-width:120px;font-weight:600;">First name:</label>
+                <input id="gFirst" name="firstName" type="text" class="cs-input" style="flex:1;" />
+              </div>
+              <div style="display:flex;align-items:center;gap:.75rem;">
+                <label for="gLast" style="min-width:120px;font-weight:600;">Last name:</label>
+                <input id="gLast" name="lastName" type="text" class="cs-input" style="flex:1;" />
+              </div>
+              <div style="display:flex;align-items:center;gap:.75rem;">
+                <label for="gEmail" style="min-width:120px;font-weight:600;">Email:</label>
+                <input id="gEmail" name="email" type="email" class="cs-input" style="flex:1;" />
+              </div>
+              <div style="display:flex;align-items:center;gap:.75rem;">
+                <label for="gCompany" style="min-width:120px;font-weight:600;">Company:</label>
+                <input id="gCompany" name="company" type="text" class="cs-input" style="flex:1;" />
+              </div>
+              <div style="display:flex;align-items:center;gap:.75rem;">
+                <label for="gJob" style="min-width:120px;font-weight:600;">Job title:</label>
+                <input id="gJob" name="jobTitle" type="text" class="cs-input" style="flex:1;" />
+              </div>
+              <div style="text-align:center;margin-top:.25rem;">
+                <button type="submit" class="cs-btn logout-like" style="min-width:160px;">Generate email</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+   </main>
+
+  <script>
+    // Small script to toggle mobile nav and dropdown on click for demo purposes
+    (function(){
+      const hamburger = document.getElementById('hamburger');
+      const nav = document.getElementById('nav');
+      const userDropdownBtn = document.getElementById('userDropdownBtn');
+      const userDropdownWrap = document.querySelector('.user-dropdown');
+
+      hamburger && hamburger.addEventListener('click', function(){
+        this.classList.toggle('active');
+        nav.classList.toggle('active');
+      });
+
+      // toggle user dropdown
+      userDropdownBtn && userDropdownBtn.addEventListener('click', function(e){
+        e.stopPropagation();
+        userDropdownWrap && userDropdownWrap.classList.toggle('open');
+      });
+
+      // close dropdown when clicking outside
+      document.addEventListener('click', function(e){
+        if (!userDropdownWrap) return;
+        if (!userDropdownWrap.contains(e.target)) {
+          userDropdownWrap.classList.remove('open');
+        }
+      });
+
+      // Navigation behavior: default to Phishing Simulation on load
+      const phishingLink = document.getElementById('phishingLink');
+      const emailTemplateLink = document.getElementById('emailTemplateLink');
+      const navLinks = document.querySelectorAll('.nav-link');
+
+      function setActive(link) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        link && link.classList.add('active');
+      }
+
+      // Default active
+      if (phishingLink) setActive(phishingLink);
+
+      // Click handlers: set active and navigate/scroll if target exists
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e){
+          // If href is an in-page hash, scroll to it; otherwise, follow link
+          const href = this.getAttribute('href');
+          setActive(this);
+          
+          // Handle form visibility based on which tab is clicked
+          const phishingPanel = document.querySelector('.phishing-panel');
+          if (href === '#emailTemplate') {
+            // Hide the form when Email Phishing Template is clicked
+            if (phishingPanel) {
+              phishingPanel.style.display = 'none';
+            }
+            e.preventDefault(); // Prevent navigation since there's no emailTemplate section
+          } else if (href === '#phishing') {
+            // Show the form when Phishing Simulation is clicked
+            if (phishingPanel) {
+              phishingPanel.style.display = 'block';
+            }
+          }
+          
+          if (href && href.startsWith('#')) {
+            const target = document.querySelector(href);
+            if (target) {
+              e.preventDefault();
+              // jump immediately to the target (no smooth scroll)
+              target.scrollIntoView();
+            }
+          }
+          // close mobile nav after selection
+          nav.classList.remove('active');
+          const hamburgerEl = document.getElementById('hamburger');
+          hamburgerEl && hamburgerEl.classList.remove('active');
+        });
+      });
+
+      // Form handling for Phishing Simulation
+      const phishingForm = document.getElementById('phishingForm');
+      const toast = document.getElementById('toast');
+      const welcomeMessage = document.getElementById('welcomeMessage');
+
+      phishingForm && phishingForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        const f = new FormData(phishingForm);
+        const first = f.get('firstName')?.trim();
+        const last = f.get('lastName')?.trim();
+        const email = f.get('email')?.trim();
+        if (!first || !last || !email) {
+          showToast('Please fill the required fields');
+          return;
+        }
+        // pretend to submit
+        welcomeMessage && (welcomeMessage.textContent = `Welcome, ${first} ${last}`);
+        showToast('Phishing simulation started — check your email for details');
+        phishingForm.reset();
+      });
+
+      // mobile logout button mimic
+      const mobileLogout = document.getElementById('mobileLogout');
+      const logoutBtn = document.getElementById('logout');
+      mobileLogout && mobileLogout.addEventListener('click', function(){
+        // mirror desktop logout (if any)
+        logoutBtn && logoutBtn.click();
+      });
+
+      // Generate email form
+      const generateEmailForm = document.getElementById('generateEmailForm');
+      generateEmailForm && generateEmailForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        const fd = new FormData(generateEmailForm);
+        const first = fd.get('firstName')?.trim();
+        const last = fd.get('lastName')?.trim();
+        const email = fd.get('email')?.trim();
+        if (!first || !last || !email) { showToast('Please fill first name, last name and email'); return; }
+        showToast('Email generated (preview in your console)');
+        // small preview output in console for now
+        console.log('Generated email for', { first, last, email, company: fd.get('company'), jobTitle: fd.get('jobTitle'), platform: (platformSelect && platformSelect.value) });
+        generateEmailForm.reset();
+      });
+
+      function showToast(msg){
+        if (!toast) return;
+        toast.textContent = msg;
+        toast.style.opacity = '1';
+        toast.style.pointerEvents = 'auto';
+        setTimeout(()=>{ toast.style.opacity = '0'; toast.style.pointerEvents = 'none'; }, 3000);
+      }
+
+      // platform select handler
+      const platformSelect = document.getElementById('platformSelect');
+      platformSelect && (()=>{
+        // restore saved choice
+        try {
+          const saved = localStorage.getItem('platformSelect');
+          if (saved) platformSelect.value = saved;
+        } catch(e){}
+
+        platformSelect.addEventListener('change', function(){
+          const val = this.value || '';
+          try { localStorage.setItem('platformSelect', val); } catch(e){}
+          showToast(`Platform: ${val || 'Select Platform'}`);
+        });
+      })();
+      
+      // ensure the phishing panel fills the remaining viewport height below the header
+      function adjustPhishingPanelHeight(){
+        const headerEl = document.querySelector('header');
+        const panel = document.querySelector('#phishing .phishing-panel');
+        if (!panel) return;
+        const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
+        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+  // leave a bottom gap so the panel doesn't touch the bottom of the viewport
+  const bottomGap = 80; // px — adjust this value to change the bottom spacing
+  const available = Math.max(vh - headerH - bottomGap, 200);
+  // set panel exact height (leaving space at the bottom)
+  panel.style.height = available + 'px';
+        panel.style.minHeight = '0';
+      }
+
+      window.addEventListener('load', adjustPhishingPanelHeight);
+      window.addEventListener('resize', adjustPhishingPanelHeight);
+      // initial call
+      adjustPhishingPanelHeight();
+    })();
+  </script>
+</body>
+
+</html>
