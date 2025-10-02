@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#fddde6" />
+    <title>Cyber Shield LinkGuard - Cybersecurity Awareness</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="cyber-awareness.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16.png" />
+    <link rel="manifest" href="../assets/favicon/site.webmanifest" />
+</head>
+
+<body>
+    <!-- User Info and Controls -->
+    <div class="user-controls">
+        <span id="userNameDisplay" class="user-name">User Name</span>
+        <div class="user-dropdown">
+            <button class="user-dropdown-btn" id="userDropdownBtn">
+                <i class="bi bi-person-circle"></i>
+            </button>
+            <div class="user-dropdown-content" id="userDropdown">
+                <div id="welcomeMessage" class="user-welcome"></div>
+                <a href="../profile/profile.html"><i class="bi bi-person me-2"></i>Profile</a>
+                <a href="../settings/settings.html"><i class="bi bi-gear me-2"></i>Settings</a>
+                <a href="../Subscription/Subscription.html"><i class="bi bi-star-fill me-2"></i>Subscription</a>
+                <a href="../report/report.html"><i class="bi bi-flag me-2"></i>Report</a>
+            </div>
+        </div>
+        <button id="logout" class="logout-btn">
+            <i class="bi bi-box-arrow-right"></i>
+        </button>
+    </div>
+
+    <div class="container-fluid py-3">
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="../ScannerDash/ScannerDash.html">
+                            <img src="../assets/CYBER_SHIELD_LINKGUARD2.png" alt="Cyber Shield LinkGuard"
+                                class="header-logo me-2">
+                        </a>
+                        <div class="d-flex align-items-center gap-2 mt-1">
+                            <div id="planMode" class="plan-badge free-plan">FREE</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="cs-card p-4">
+                    <h3 class="text-center mb-4 cs-candy-title">
+                        <i class="bi bi-shield-check me-2"></i>Cybersecurity Awareness Training
+                    </h3>
+
+                    <!-- Navigation Tabs -->
+                    <div class="nav-tabs-container mb-4">
+                        <div class="nav nav-tabs" id="awarenessTabs" role="tablist">
+                            <button class="nav-link active" id="phishing-tab" data-bs-toggle="tab"
+                                data-bs-target="#phishing" type="button" role="tab">
+                                <i class="bi bi-envelope-exclamation me-2"></i>Phishing Replica
+                            </button>
+                            <button class="nav-link" id="email-template-tab" data-bs-toggle="tab"
+                                data-bs-target="#email-template" type="button" role="tab">
+                                <i class="bi bi-file-earmark-text me-2"></i>Email Phishing Replica
+                            </button>
+                            <button class="nav-link" id="detection-replica-tab" data-bs-toggle="tab"
+                                data-bs-target="#detection-replica" type="button" role="tab">
+                                <i class="bi bi-shield-exclamation me-2"></i>Detection Phishing Replica
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="awarenessTabContent">
+                        <!-- Phishing Simulation Tab -->
+                        <div class="tab-pane fade show active" id="phishing" role="tabpanel">
+                            <div class="phishing-panel">
+                                <div class="platform-control mb-4">
+                                    <span class="platform-label">Platform</span>
+                                    <select id="platformSelect" class="platform-select" aria-label="Select platform">
+                                        <option value="">Select Platform</option>
+                                        <option value="google">Google</option>
+                                        <option value="tiktok">TikTok</option>
+                                        <option value="facebook">Facebook</option>
+                                        <option value="x">X</option>
+                                        <option value="telegram">Telegram</option>
+                                        <option value="whatsapp">WhatsApp</option>
+                                        <option value="linkedin">LinkedIn</option>
+                                        <option value="instagram">Instagram</option>
+                                        <option value="snapchat">Snapchat</option>
+                                        <option value="netflix">Netflix</option>
+                                        <option value="amazon">Amazon</option>
+                                        <option value="microsoft">Microsoft</option>
+                                    </select>
+                                </div>
+
+                                <form id="generateEmailForm">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="gFirst" class="form-label">First Name</label>
+                                            <input id="gFirst" name="firstName" type="text" class="cs-input"
+                                                placeholder="Enter first name" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="gLast" class="form-label">Last Name</label>
+                                            <input id="gLast" name="lastName" type="text" class="cs-input"
+                                                placeholder="Enter last name" />
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="gEmail" class="form-label">Email Address</label>
+                                            <input id="gEmail" name="email" type="email" class="cs-input"
+                                                placeholder="Enter email address" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="gCompany" class="form-label">Company (Optional)</label>
+                                            <input id="gCompany" name="company" type="text" class="cs-input"
+                                                placeholder="Enter company name" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="gJob" class="form-label">Job Title (Optional)</label>
+                                            <input id="gJob" name="jobTitle" type="text" class="cs-input"
+                                                placeholder="Enter job title" />
+                                        </div>
+                                        <div class="col-12 text-center mt-4">
+                                            <button type="submit" class="cs-btn btn-login">
+                                                <i class="bi bi-envelope-plus me-2"></i>Generate Phishing Email
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Email Template Tab -->
+                        <div class="tab-pane fade" id="email-template" role="tabpanel">
+                            <div class="template-panel">
+                                <div class="text-center mb-4">
+                                    <i class="bi bi-file-earmark-text display-4 text-muted mb-3"></i>
+                                    <h4>Email Phishing Templates</h4>
+                                    <p class="cs-sub">Coming soon - A library of customizable phishing email templates
+                                        for security training</p>
+                                </div>
+
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="template-card">
+                                            <div class="template-icon">
+                                                <i class="bi bi-google"></i>
+                                            </div>
+                                            <h5>Google Security Alert</h5>
+                                            <p class="cs-sub">Simulate Google account security warnings</p>
+                                            <div class="badge badge-coming">Coming Soon</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="template-card">
+                                            <div class="template-icon">
+                                                <i class="bi bi-microsoft"></i>
+                                            </div>
+                                            <h5>Microsoft Login Required</h5>
+                                            <p class="cs-sub">Office 365 account verification templates</p>
+                                            <div class="badge badge-coming">Coming Soon</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="template-card">
+                                            <div class="template-icon">
+                                                <i class="bi bi-paypal"></i>
+                                            </div>
+                                            <h5>PayPal Security Update</h5>
+                                            <p class="cs-sub">Payment platform security notifications</p>
+                                            <div class="badge badge-coming">Coming Soon</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="template-card">
+                                            <div class="template-icon">
+                                                <i class="bi bi-bank"></i>
+                                            </div>
+                                            <h5>Bank Security Alert</h5>
+                                            <p class="cs-sub">Financial institution security warnings</p>
+                                            <div class="badge badge-coming">Coming Soon</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detection Phishing Replica Tab -->
+                        <div class="tab-pane fade" id="detection-replica" role="tabpanel">
+                            <div class="replica-container">
+                                <!-- Training Progress Section -->
+                                <div class="progress-panel mb-4">
+                                    <div class="training-progress">
+                                        <h4><i class="bi bi-list-check me-2"></i>Training Progress</h4>
+                                        <div class="steps-container">
+                                            <div class="step completed">
+                                                <i class="bi bi-check-circle-fill"></i>
+                                                <span>Email Security Basics</span>
+                                            </div>
+                                            <div class="step completed">
+                                                <i class="bi bi-check-circle-fill"></i>
+                                                <span>Link Analysis</span>
+                                            </div>
+                                            <div class="step active">
+                                                <i class="bi bi-arrow-right-circle"></i>
+                                                <span>QR Code Safety</span>
+                                            </div>
+                                            <div class="step">
+                                                <i class="bi bi-circle"></i>
+                                                <span>Attachment Security</span>
+                                            </div>
+                                            <div class="step">
+                                                <i class="bi bi-circle"></i>
+                                                <span>Social Engineering</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Email Client -->
+                                <div class="email-client-simulator">
+                                    <header class="email-header">
+                                        <div class="logo">
+                                            <i class="fas fa-envelope"></i>
+                                            <h1>SecureMail Client</h1>
+                                        </div>
+                                        <div class="time-display">
+                                            <i class="fas fa-clock"></i> <span id="time">10:45 AM</span>
+                                        </div>
+                                    </header>
+
+                                    <div class="email-content">
+                                        <div class="email-sidebar">
+                                            <button class="compose-btn">
+                                                <i class="fas fa-plus"></i> Compose
+                                            </button>
+                                            <ul class="folder-list">
+                                                <li class="folder-item active" data-folder="inbox">
+                                                    <i class="fas fa-inbox"></i> Inbox <span class="badge">5</span>
+                                                </li>
+                                                <li class="folder-item" data-folder="starred">
+                                                    <i class="fas fa-star"></i> Starred <span class="badge">2</span>
+                                                </li>
+                                                <li class="folder-item" data-folder="sent">
+                                                    <i class="fas fa-paper-plane"></i> Sent <span
+                                                        class="badge">12</span>
+                                                </li>
+                                                <li class="folder-item" data-folder="drafts">
+                                                    <i class="fas fa-file-alt"></i> Drafts <span class="badge">3</span>
+                                                </li>
+                                                <li class="folder-item" data-folder="trash">
+                                                    <i class="fas fa-trash"></i> Trash <span class="badge">8</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="email-list-container">
+                                            <div class="email-toolbar">
+                                                <div class="search-bar">
+                                                    <i class="fas fa-search"></i>
+                                                    <input type="text" placeholder="Search emails...">
+                                                </div>
+                                                <div class="toolbar-icons">
+                                                    <i class="fas fa-sync-alt" id="refreshEmails"></i>
+                                                    <i class="fas fa-filter"></i>
+                                                    <i class="fas fa-cog"></i>
+                                                </div>
+                                            </div>
+
+                                            <div class="email-list" id="emailList">
+                                                <!-- Inbox Emails -->
+                                                <div class="email-folder" id="inbox-folder">
+                                                    <div class="email-item unread" data-email="security">
+                                                        <div class="avatar">SB</div>
+                                                        <div class="content">
+                                                            <div class="header">
+                                                                <div class="subject">Urgent: Security Alert on Your
+                                                                    Account</div>
+                                                                <div class="time">9:30 AM</div>
+                                                            </div>
+                                                            <div class="preview">Dear user, we've detected suspicious
+                                                                activity on your account. Immediate action is
+                                                                required...</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="email-item" data-email="project">
+                                                        <div class="avatar">TM</div>
+                                                        <div class="content">
+                                                            <div class="header">
+                                                                <div class="subject">Project Update Meeting</div>
+                                                                <div class="time">Yesterday</div>
+                                                            </div>
+                                                            <div class="preview">Hi team, let's meet tomorrow at 10 AM
+                                                                to discuss the project milestones...</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="email-item" data-email="qr-scam">
+                                                        <div class="avatar">PS</div>
+                                                        <div class="content">
+                                                            <div class="header">
+                                                                <div class="subject">Your Package Delivery - QR Code
+                                                                    Inside</div>
+                                                                <div class="time">8:15 AM</div>
+                                                            </div>
+                                                            <div class="preview">Track your package delivery with the QR
+                                                                code attached. Click to view your shipment status...
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="email-item" data-email="image-scam">
+                                                        <div class="avatar">IS</div>
+                                                        <div class="content">
+                                                            <div class="header">
+                                                                <div class="subject">Important Document - Review
+                                                                    Required</div>
+                                                                <div class="time">7:45 AM</div>
+                                                            </div>
+                                                            <div class="preview">Please review the attached document and
+                                                                provide your feedback as soon as possible...</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="email-item" data-email="image-phishing">
+                                                        <div class="avatar">IP</div>
+                                                        <div class="content">
+                                                            <div class="header">
+                                                                <div class="subject">Your Photo Has Been Shared</div>
+                                                                <div class="time">7:30 AM</div>
+                                                            </div>
+                                                            <div class="preview">Someone has shared a photo of you.
+                                                                Click the image below to view and manage your privacy
+                                                                settings...</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="email-folder hidden" id="starred-folder">
+                                                    <div class="email-item" data-email="project">
+                                                        <div class="avatar">TM</div>
+                                                        <div class="content">
+                                                            <div class="header">
+                                                                <div class="subject">Project Update Meeting</div>
+                                                                <div class="time">Yesterday</div>
+                                                            </div>
+                                                            <div class="preview">Hi team, let's meet tomorrow at 10 AM
+                                                                to discuss the project milestones...</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="email-item" data-email="security">
+                                                        <div class="avatar">SB</div>
+                                                        <div class="content">
+                                                            <div class="header">
+                                                                <div class="subject">Urgent: Security Alert on Your
+                                                                    Account</div>
+                                                                <div class="time">9:30 AM</div>
+                                                            </div>
+                                                            <div class="preview">Dear user, we've detected suspicious
+                                                                activity on your account. Immediate action is
+                                                                required...</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="email-folder hidden" id="sent-folder">
+                                                    <div class="email-item">
+                                                        <div class="avatar">YT</div>
+                                                        <div class="content">
+                                                            <div class="header">
+                                                                <div class="subject">Re: Quarterly Report</div>
+                                                                <div class="time">Yesterday</div>
+                                                            </div>
+                                                            <div class="preview">Hi Thabo, I've attached the quarterly
+                                                                report for your review. Please let me know if you need
+                                                                any changes...</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="email-item">
+                                                        <div class="avatar">LM</div>
+                                                        <div class="content">
+                                                            <div class="header">
+                                                                <div class="subject">Meeting Notes</div>
+                                                                <div class="time">2 days ago</div>
+                                                            </div>
+                                                            <div class="preview">Hi Lerato, here are the notes from our
+                                                                meeting yesterday. Please review and add your
+                                                                comments...</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="email-folder hidden" id="drafts-folder">
+                                                    <div class="email-item">
+                                                        <div class="avatar">KT</div>
+                                                        <div class="content">
+                                                            <div class="header">
+                                                                <div class="subject">Budget Proposal 2024</div>
+                                                                <div class="time">Draft</div>
+                                                            </div>
+                                                            <div class="preview">Dear Finance Team, I'm writing to
+                                                                propose the budget for the upcoming fiscal year. The
+                                                                main areas of focus include...</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Trash -->
+                                                <div class="email-folder hidden" id="trash-folder">
+                                                    <div class="email-item">
+                                                        <div class="avatar">NS</div>
+                                                        <div class="content">
+                                                            <div class="header">
+                                                                <div class="subject">Weekly Newsletter</div>
+                                                                <div class="time">1 week ago</div>
+                                                            </div>
+                                                            <div class="preview">This week's industry updates and
+                                                                company news. Read about our latest achievements and
+                                                                upcoming events...</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="email-view">
+                                            <div class="email-view-content" id="securityEmail" style="display: none;">
+                                                <div class="email-header-view">
+                                                    <h2>Urgent: Security Alert on Your Account</h2>
+                                                    <div class="sender-info">
+                                                        <div class="sender-avatar">SB</div>
+                                                        <div class="sender-details">
+                                                            <div class="sender-name">Security Bureau</div>
+                                                            <div class="sender-email">security@secure-bureau.com</div>
+                                                        </div>
+                                                        <div class="email-date">Today, 9:30 AM</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="email-body">
+                                                    <p>Dear Valued Customer,</p>
+
+                                                    <p>We have detected unusual login attempts to your SecureMail
+                                                        account from a new device located in an unrecognized location.
+                                                        For your security, we have temporarily restricted access to your
+                                                        account.</p>
+
+                                                    <p>To restore full access and secure your account, please verify
+                                                        your identity by clicking the link below:</p>
+
+                                                    <a href="#" class="phishing-link" id="phishingLink">
+                                                        <i class="fas fa-lock"></i> Verify Your Account Now
+                                                    </a>
+
+                                                    <p>Please note that failure to verify your account within the next
+                                                        24 hours will result in permanent suspension of your SecureMail
+                                                        account.</p>
+
+                                                    <p>This is an automated message. Please do not reply to this email.
+                                                        If you did not attempt to access your account, please contact
+                                                        our support team immediately.</p>
+
+                                                    <p>Sincerely,<br>
+                                                        The Security Bureau Team</p>
+
+                                                    <div class="warning">
+                                                        <h3><i class="fas fa-exclamation-triangle"></i> Security Tip
+                                                        </h3>
+                                                        <p>Always verify the sender's email address and check for
+                                                            suspicious links before taking any action. Legitimate
+                                                            security emails will never ask you to verify sensitive
+                                                            information via email links.</p>
+                                                    </div>
+
+                                                    <div class="demo-instructions">
+                                                        <h3><i class="fas fa-info-circle"></i> Phishing Awareness Demo
+                                                        </h3>
+                                                        <p>This email contains a phishing attempt. Your task is to
+                                                            identify the suspicious element:</p>
+                                                        <ul class="instructions-list">
+                                                            <li>Hover over the <strong>"Verify Your Account
+                                                                    Now"</strong> button to inspect the link address
+                                                            </li>
+                                                            <li>Notice that the URL does <strong>not</strong> match the
+                                                                official domain of SecureMail</li>
+                                                            <li>This is a common phishing technique to steal your
+                                                                credentials</li>
+                                                        </ul>
+                                                    </div>
+
+                                                    <div class="actions">
+                                                        <button class="report-btn" id="reportBtn"><i
+                                                                class="fas fa-flag"></i> Report Phishing</button>
+                                                        <button class="verify-btn" id="verifyBtn"><i
+                                                                class="fas fa-check-circle"></i> Verify Link</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="email-view-content" id="qrEmail" style="display: none;">
+                                                <div class="email-header-view">
+                                                    <h2>Your Package Delivery - QR Code Inside</h2>
+                                                    <div class="sender-info">
+                                                        <div class="sender-avatar">PS</div>
+                                                        <div class="sender-details">
+                                                            <div class="sender-name">Package Services</div>
+                                                            <div class="sender-email">
+                                                                delivery@packageservices-verify.com</div>
+                                                        </div>
+                                                        <div class="email-date">Today, 8:15 AM</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="email-body">
+                                                    <p>Dear Customer,</p>
+
+                                                    <p>Your package #DL-7842-291 is out for delivery today. To track
+                                                        your shipment and provide delivery instructions, please scan the
+                                                        QR code below:</p>
+
+                                                    <div class="qr-container">
+                                                        <div class="qr-code" id="suspiciousQr">
+                                                            <div class="qr-placeholder">
+                                                                <i class="fas fa-qrcode fa-4x"></i>
+                                                                <p>Scan to track your package</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <p>Alternatively, you can click this link: <a href="#"
+                                                            class="suspicious-link">https://track-package-delivery.com/verify</a>
+                                                    </p>
+
+                                                    <p>Thank you for choosing our delivery service.</p>
+
+                                                    <p>Best regards,<br>
+                                                        Package Services Team</p>
+
+                                                    <div class="demo-instructions">
+                                                        <h3><i class="fas fa-info-circle"></i> QR Code Security Demo
+                                                        </h3>
+                                                        <p>This email contains a suspicious QR code. Your task:</p>
+                                                        <ul class="instructions-list">
+                                                            <li>QR codes can hide malicious URLs - always verify before
+                                                                scanning</li>
+                                                            <li>The sender email domain doesn't match the company name
+                                                            </li>
+                                                            <li>Legitimate delivery services use official domains</li>
+                                                        </ul>
+                                                    </div>
+
+                                                    <div class="actions">
+                                                        <button class="report-btn" id="reportQrBtn"><i
+                                                                class="fas fa-flag"></i> Report Suspicious QR</button>
+                                                        <button class="verify-btn" id="scanQrBtn"><i
+                                                                class="fas fa-camera"></i> Simulate QR Scan</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="email-view-content" id="imageEmail" style="display: none;">
+                                                <div class="email-header-view">
+                                                    <h2>Important Document - Review Required</h2>
+                                                    <div class="sender-info">
+                                                        <div class="sender-avatar">IS</div>
+                                                        <div class="sender-details">
+                                                            <div class="sender-name">Invoice Services</div>
+                                                            <div class="sender-email">
+                                                                billing@invoice-services-update.com</div>
+                                                        </div>
+                                                        <div class="email-date">Today, 7:45 AM</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="email-body">
+                                                    <p>Dear Client,</p>
+
+                                                    <p>Please find attached the important document that requires your
+                                                        immediate attention and review.</p>
+
+                                                    <div class="attachment-container">
+                                                        <div class="attachment">
+                                                            <i class="fas fa-file-pdf fa-2x"></i>
+                                                            <div class="attachment-info">
+                                                                <div class="attachment-name">Urgent_Document_Review.pdf
+                                                                </div>
+                                                                <div class="attachment-size">2.4 MB</div>
+                                                            </div>
+                                                            <button class="download-btn" id="downloadAttachment"><i
+                                                                    class="fas fa-download"></i></button>
+                                                        </div>
+                                                    </div>
+
+                                                    <p>The document contains time-sensitive information. Please download
+                                                        and review it as soon as possible.</p>
+
+                                                    <p>If you have any questions, please don't hesitate to contact us.
+                                                    </p>
+
+                                                    <p>Sincerely,<br>
+                                                        Invoice Services Department</p>
+
+                                                    <div class="demo-instructions">
+                                                        <h3><i class="fas fa-info-circle"></i> Malicious Attachment Demo
+                                                        </h3>
+                                                        <p>This email contains a suspicious attachment. Your task:</p>
+                                                        <ul class="instructions-list">
+                                                            <li>Unexpected attachments are common malware delivery
+                                                                methods</li>
+                                                            <li>Check the sender's email address for authenticity</li>
+                                                            <li>Legitimate companies use official email domains</li>
+                                                            <li>When in doubt, contact the company through official
+                                                                channels</li>
+                                                        </ul>
+                                                    </div>
+
+                                                    <div class="actions">
+                                                        <button class="report-btn" id="reportAttachmentBtn"><i
+                                                                class="fas fa-flag"></i> Report Suspicious
+                                                            Attachment</button>
+                                                        <button class="verify-btn" id="checkAttachmentBtn"><i
+                                                                class="fas fa-shield-alt"></i> Check Attachment</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="email-view-content" id="imagePhishingEmail"
+                                                style="display: none;">
+                                                <div class="email-header-view">
+                                                    <h2>Your Photo Has Been Shared</h2>
+                                                    <div class="sender-info">
+                                                        <div class="sender-avatar">IP</div>
+                                                        <div class="sender-details">
+                                                            <div class="sender-name">Image Protection</div>
+                                                            <div class="sender-email">alerts@image-protection-alert.com
+                                                            </div>
+                                                        </div>
+                                                        <div class="email-date">Today, 7:30 AM</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="email-body">
+                                                    <p>Dear User,</p>
+
+                                                    <p>Our system has detected that a photo of you has been shared
+                                                        publicly without your permission. Click the image below to view
+                                                        the photo and manage your privacy settings:</p>
+
+                                                    <div class="image-container">
+                                                        <div class="suspicious-image" id="suspiciousImage">
+                                                            <div class="image-placeholder">
+                                                                <i class="fas fa-image fa-4x"></i>
+                                                                <p>Click to view your shared photo</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <p>If this was not authorized by you, please take immediate action
+                                                        to protect your privacy.</p>
+
+                                                    <p>Best regards,<br>
+                                                        Image Protection Team</p>
+
+                                                    <div class="demo-instructions">
+                                                        <h3><i class="fas fa-info-circle"></i> Image Phishing Demo</h3>
+                                                        <p>This email contains a suspicious image link. Your task:</p>
+                                                        <ul class="instructions-list">
+                                                            <li>Images can contain hidden malicious links</li>
+                                                            <li>The sender domain doesn't match legitimate image
+                                                                protection services</li>
+                                                            <li>This is a social engineering tactic to trick you into
+                                                                clicking</li>
+                                                        </ul>
+                                                    </div>
+
+                                                    <div class="actions">
+                                                        <button class="report-btn" id="reportImageBtn"><i
+                                                                class="fas fa-flag"></i> Report Suspicious
+                                                            Image</button>
+                                                        <button class="verify-btn" id="checkImageBtn"><i
+                                                                class="fas fa-eye"></i> Inspect Image</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="email-view-content" id="projectEmail" style="display: none;">
+                                                <div class="email-header-view">
+                                                    <h2>Project Update Meeting</h2>
+                                                    <div class="sender-info">
+                                                        <div class="sender-avatar">TM</div>
+                                                        <div class="sender-details">
+                                                            <div class="sender-name">Thabo Mokoena</div>
+                                                            <div class="sender-email">t.mokoena@senetTech.com</div>
+                                                        </div>
+                                                        <div class="email-date">Yesterday</div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="email-body">
+                                                    <p>Hi team,</p>
+
+                                                    <p>Let's meet tomorrow at 10 AM in Conference Room B to discuss the
+                                                        project milestones and upcoming deadlines.</p>
+
+                                                    <p>Agenda:</p>
+                                                    <ul>
+                                                        <li>Q3 Project Review</li>
+                                                        <li>Upcoming Milestones</li>
+                                                        <li>Resource Allocation</li>
+                                                        <li>Risk Assessment</li>
+                                                    </ul>
+
+                                                    <p>Please bring your status reports and any concerns you'd like to
+                                                        discuss.</p>
+
+                                                    <p>Best,<br>
+                                                        Thabo</p>
+
+                                                    <div class="safe-email-note">
+                                                        <h3><i class="fas fa-check-circle"></i> This is a Legitimate
+                                                            Email</h3>
+                                                        <p>This email demonstrates proper security practices:</p>
+                                                        <ul class="instructions-list">
+                                                            <li>Sender uses company email domain</li>
+                                                            <li>No suspicious links or attachments</li>
+                                                            <li>Clear, professional communication</li>
+                                                            <li>Appropriate content for work context</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-center cs-sub mt-3">© Msebetsi Solutions Pty Ltd</footer>
+    </div>
+
+    <!-- Result -->
+    <div class="result-overlay" id="successOverlay">
+        <div class="result-card success">
+            <div class="result-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Phishing Attempt Detected!</h2>
+            <p>Well done! You successfully identified the phishing link in the email. The URL <span
+                    class="highlight">secure-login.xyz</span> does not match our official domain. Always verify URLs
+                before clicking.</p>
+            <div class="training-complete">Training Step Complete!</div>
+            <button class="close-btn">Continue</button>
+        </div>
+    </div>
+
+    <div class="result-overlay" id="failureOverlay">
+        <div class="result-card failure">
+            <div class="result-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h2>Phishing Attempt Successful!</h2>
+            <p>You clicked on a phishing link! This would have directed you to <span
+                    class="highlight">secure-login.xyz</span> (a fake site) instead of our official domain. Always hover
+                over links to inspect URLs before clicking.</p>
+            <button class="close-btn">Learn More</button>
+        </div>
+    </div>
+
+    <div class="result-overlay" id="qrSuccessOverlay">
+        <div class="result-card success">
+            <div class="result-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Suspicious QR Code Identified!</h2>
+            <p>Excellent! You detected that the QR code would redirect to a malicious site. QR codes can hide dangerous
+                URLs - always verify before scanning.</p>
+            <div class="training-complete">Training Step Complete!</div>
+            <button class="close-btn">Continue</button>
+        </div>
+    </div>
+
+    <div class="result-overlay" id="attachmentSuccessOverlay">
+        <div class="result-card success">
+            <div class="result-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Malicious Attachment Detected!</h2>
+            <p>Great work! You identified the suspicious attachment. Unexpected files from unknown senders often contain
+                malware.</p>
+            <div class="training-complete">Training Step Complete!</div>
+            <button class="close-btn">Continue</button>
+        </div>
+    </div>
+
+    <div class="result-overlay" id="imageSuccessOverlay">
+        <div class="result-card success">
+            <div class="result-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Suspicious Image Identified!</h2>
+            <p>Well done! You detected the malicious image link. Images can be used to hide phishing attempts and
+                malware distribution.</p>
+            <div class="training-complete">Training Step Complete!</div>
+            <button class="close-btn">Continue</button>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../session.js"></script>
+    <script src="cyber-awareness.js"></script>
+</body>
+
+</html>

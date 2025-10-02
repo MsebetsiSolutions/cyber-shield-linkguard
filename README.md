@@ -103,6 +103,11 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     ├── supcom.css
         |            |     └── supcom.js
         |            |
+        |            ├── cyber-awareness/        
+        |            |     ├── cyber-awareness.html
+        |            |     ├── cyber-awareness.css
+        |            |     └── cyber-awareness.js
+        |            |
         |            ├── ScannerDash/        
         |            |     ├── ScannerDash.html
         |            |     ├── ScannerDash.css
