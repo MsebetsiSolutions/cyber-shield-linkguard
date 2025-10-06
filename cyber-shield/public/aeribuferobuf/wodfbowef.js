@@ -1,4 +1,4 @@
-class AdminDashboard {
+class SystemAccessPortal {
   constructor() {
     this.currentTab = "dashboard";
     this.charts = {};
@@ -7,60 +7,50 @@ class AdminDashboard {
   }
 
   init() {
-    // Always show login form first, don't auto-check auth status
-    this.showLogin();
+    this.showAccessPortal();
     this.bindEvents();
     this.updateTime();
     setInterval(() => this.updateTime(), 1000);
-
     this.setupPasswordToggle();
   }
 
   setupPasswordToggle() {
-    const togglePassword = document.getElementById("togglePassword");
-    const passwordInput = document.getElementById("password");
+    const toggleVisibility = document.getElementById("toggle-visibility");
+    const passwordInput = document.getElementById("access-password");
 
-    if (togglePassword && passwordInput) {
-      togglePassword.addEventListener("click", function () {
-        const type =
-          passwordInput.getAttribute("type") === "password"
-            ? "text"
-            : "password";
+    if (toggleVisibility && passwordInput) {
+      toggleVisibility.addEventListener("click", function () {
+        const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
         passwordInput.setAttribute("type", type);
-        this.classList.toggle("bi-eye-fill");
-        this.classList.toggle("bi-eye-slash-fill");
+        this.querySelector('i').classList.toggle("bi-eye-fill");
+        this.querySelector('i').classList.toggle("bi-eye-slash-fill");
       });
     }
   }
 
-  checkAuthStatus() {
-    // Don't auto-check auth status - always show login first
-    this.showLogin();
-  }
-
-  showLogin() {
-    document.getElementById("login-section").classList.remove("d-none");
-    document.getElementById("dashboard-section").classList.add("d-none");
+  showAccessPortal() {
+    document.getElementById("access-portal").classList.remove("d-none");
+    document.getElementById("system-dashboard").classList.add("d-none");
     this.isLoggedIn = false;
 
-    // Clear any previous form data
-    document.getElementById("username").value = "";
-    document.getElementById("password").value = "";
-    document.getElementById("login-alert").classList.add("d-none");
+    // Clear form data
+    document.getElementById("access-username").value = "";
+    document.getElementById("access-password").value = "";
+    document.getElementById("access-alert").classList.add("d-none");
   }
 
-  showDashboard() {
-    document.getElementById("login-section").classList.add("d-none");
-    document.getElementById("dashboard-section").classList.remove("d-none");
+  showSystemDashboard() {
+    document.getElementById("access-portal").classList.add("d-none");
+    document.getElementById("system-dashboard").classList.remove("d-none");
     this.isLoggedIn = true;
     this.loadDashboard();
   }
 
   bindEvents() {
-    // Login form
-    document.getElementById("login-form").addEventListener("submit", (e) => {
+    // Access form submission
+    document.getElementById("access-form").addEventListener("submit", (e) => {
       e.preventDefault();
-      this.handleLogin();
+      this.handleSystemAccess();
     });
 
     // Tab navigation
@@ -74,28 +64,15 @@ class AdminDashboard {
     });
 
     // Refresh buttons
-    document
-      .getElementById("refresh-users")
-      ?.addEventListener("click", () => this.loadUsers());
-    document
-      .getElementById("refresh-scans")
-      ?.addEventListener("click", () => this.loadScans());
-    document
-      .getElementById("refresh-payments")
-      ?.addEventListener("click", () => this.loadPayments());
-    document
-      .getElementById("refresh-teams")
-      ?.addEventListener("click", () => this.loadTeams());
-    document
-      .getElementById("refresh-audit")
-      ?.addEventListener("click", () => this.loadAuditLogs());
+    document.getElementById("refresh-users")?.addEventListener("click", () => this.loadUsers());
+    document.getElementById("refresh-scans")?.addEventListener("click", () => this.loadScans());
+    document.getElementById("refresh-payments")?.addEventListener("click", () => this.loadPayments());
+    document.getElementById("refresh-teams")?.addEventListener("click", () => this.loadTeams());
+    document.getElementById("refresh-audit")?.addEventListener("click", () => this.loadAuditLogs());
 
     // Logout - Redirect to index.html
     document.getElementById("logout-btn")?.addEventListener("click", () => {
-      // Clear any admin session data
       this.isLoggedIn = false;
-
-      // Get current session ID for redirection
       const sessionId = window.CyberShieldSession?.getCurrentSessionId();
       const redirectUrl = sessionId
         ? `../index.html?session=${sessionId}`
@@ -108,30 +85,21 @@ class AdminDashboard {
       this.filterUsers(e.target.value);
     });
 
-    document
-      .getElementById("scan-type-filter")
-      ?.addEventListener("change", (e) => {
-        this.filterScans(e.target.value);
-      });
+    document.getElementById("scan-type-filter")?.addEventListener("change", (e) => {
+      this.filterScans(e.target.value);
+    });
 
-    document
-      .getElementById("payment-status-filter")
-      ?.addEventListener("change", (e) => {
-        this.filterPayments(e.target.value);
-      });
+    document.getElementById("payment-status-filter")?.addEventListener("change", (e) => {
+      this.filterPayments(e.target.value);
+    });
 
     // Modal events
-    const editUserModal = new bootstrap.Modal(
-      document.getElementById("edit-user-modal")
-    );
-
-    document
-      .getElementById("edit-user-form")
-      ?.addEventListener("submit", (e) => {
-        e.preventDefault();
-        this.saveUserChanges();
-        editUserModal.hide();
-      });
+    const editUserModal = new bootstrap.Modal(document.getElementById("edit-user-modal"));
+    document.getElementById("edit-user-form")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      this.saveUserChanges();
+      editUserModal.hide();
+    });
 
     // Quick actions
     document.getElementById("clear-cache")?.addEventListener("click", () => {
@@ -143,22 +111,19 @@ class AdminDashboard {
     });
   }
 
-  async handleLogin() {
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-    const loginBtn = document.querySelector(
-      '#login-form button[type="submit"]'
-    );
-    const spinner = document.getElementById("login-spinner");
-    const loginText = document.getElementById("login-text");
-    const alert = document.getElementById("login-alert");
+  async handleSystemAccess() {
+    const username = document.getElementById("access-username").value;
+    const password = document.getElementById("access-password").value;
+    const submitBtn = document.getElementById("access-submit");
+    const btnContent = submitBtn.querySelector('.btn-content');
+    const btnLoader = submitBtn.querySelector('.btn-loader');
+    const alert = document.getElementById("access-alert");
 
     // Show loading state
-    loginBtn.disabled = true;
-    spinner.classList.remove("d-none");
-    loginText.innerHTML =
-      '<i class="bi bi-arrow-repeat me-2"></i>Logging in...';
-    alert.classList.add("d-none");
+    submitBtn.disabled = true;
+    btnContent.classList.add('d-none');
+    btnLoader.classList.remove('d-none');
+    alert.classList.add('d-none');
 
     try {
       const response = await fetch("/admin/login", {
@@ -172,23 +137,21 @@ class AdminDashboard {
       const data = await response.json();
 
       if (data.success) {
-        this.showDashboard();
-        document.getElementById("admin-username").textContent =
-          data.user.username;
-        this.showNotification("Login successful!", "success");
+        this.showSystemDashboard();
+        document.getElementById("admin-username").textContent = data.user.username;
+        this.showNotification("Access granted. Welcome to System Dashboard.", "success");
       } else {
-        alert.textContent = data.message || "Login failed";
-        alert.classList.remove("d-none");
+        alert.querySelector('#alert-message').textContent = data.message || "Access denied. Invalid credentials.";
+        alert.classList.remove('d-none');
       }
     } catch (error) {
-      alert.textContent = "Network error. Please try again.";
-      alert.classList.remove("d-none");
+      alert.querySelector('#alert-message').textContent = "Network error. Please check your connection and try again.";
+      alert.classList.remove('d-none');
     } finally {
       // Reset loading state
-      loginBtn.disabled = false;
-      spinner.classList.add("d-none");
-      loginText.innerHTML =
-        '<i class="bi bi-box-arrow-in-right me-2"></i>Login to Dashboard';
+      submitBtn.disabled = false;
+      btnContent.classList.remove('d-none');
+      btnLoader.classList.add('d-none');
     }
   }
 
@@ -251,16 +214,11 @@ class AdminDashboard {
       const data = await response.json();
 
       // Update stats
-      document.getElementById("total-users").textContent =
-        data.total_users.toLocaleString();
-      document.getElementById("total-scans").textContent =
-        data.total_scans.toLocaleString();
-      document.getElementById("total-payments").textContent =
-        data.total_payments.toLocaleString();
-      document.getElementById("total-teams").textContent =
-        data.total_teams.toLocaleString();
-      document.getElementById("active-today").textContent =
-        data.active_today.toLocaleString();
+      document.getElementById("total-users").textContent = data.total_users.toLocaleString();
+      document.getElementById("total-scans").textContent = data.total_scans.toLocaleString();
+      document.getElementById("total-payments").textContent = data.total_payments.toLocaleString();
+      document.getElementById("total-teams").textContent = data.total_teams.toLocaleString();
+      document.getElementById("active-today").textContent = data.active_today.toLocaleString();
 
       // Create charts
       this.createThreatChart(data.threat_stats);
@@ -358,9 +316,7 @@ class AdminDashboard {
           (log) => `
                 <div class="activity-item">
                     <strong>${log.action}</strong> - ${log.description}
-                    <span class="activity-time">${new Date(
-                      log.created_at
-                    ).toLocaleString()}</span>
+                    <span class="activity-time">${new Date(log.created_at).toLocaleString()}</span>
                 </div>
             `
         )
@@ -387,27 +343,17 @@ class AdminDashboard {
                     <td>${this.escapeHtml(user.email)}</td>
                     <td>${this.escapeHtml(user.full_name)}</td>
                     <td>
-                        <span class="threat-badge plan-${this.getPlanClass(
-                          user.Plan_Mode
-                        )}">
+                        <span class="threat-badge plan-${this.getPlanClass(user.Plan_Mode)}">
                             ${this.getPlanName(user.Plan_Mode)}
                         </span>
                     </td>
-                    <td>${user.sub_plan || "None"} ${
-            user.plan_active ? "✅" : "❌"
-          }</td>
+                    <td>${user.sub_plan || "None"} ${user.plan_active ? "✅" : "❌"}</td>
                     <td>${new Date(user.created_at).toLocaleDateString()}</td>
                     <td>
-                        <button class="btn btn-primary btn-sm" onclick="admin.editUser(${
-                          user.id
-                        }, '${this.escapeHtml(user.email)}', '${this.escapeHtml(
-            user.full_name
-          )}', ${user.Plan_Mode})">
+                        <button class="btn btn-primary btn-sm" onclick="systemAccess.editUser(${user.id}, '${this.escapeHtml(user.email)}', '${this.escapeHtml(user.full_name)}', ${user.Plan_Mode})">
                             ✏️ Edit
                         </button>
-                        <button class="btn btn-danger btn-sm" onclick="admin.deleteUser(${
-                          user.id
-                        })">
+                        <button class="btn btn-danger btn-sm" onclick="systemAccess.deleteUser(${user.id})">
                             🗑️ Delete
                         </button>
                     </td>
@@ -440,9 +386,7 @@ class AdminDashboard {
                     <td>${this.escapeHtml(scan.email)}</td>
                     <td>${scan.scan_type}</td>
                     <td>
-                        <span class="threat-badge threat-${
-                          scan.threat_level || "unknown"
-                        }">
+                        <span class="threat-badge threat-${scan.threat_level || "unknown"}">
                             ${scan.threat_level || "unknown"}
                         </span>
                     </td>
@@ -459,26 +403,6 @@ class AdminDashboard {
     } catch (error) {
       console.error("Error loading scans:", error);
       this.showNotification("Error loading scans", "error");
-    }
-  }
-
-  // Add this to your admin.js in the setupPasswordToggle method
-  setupPasswordToggle() {
-    const togglePassword = document.getElementById("togglePassword");
-    const passwordInput = document.getElementById("password");
-
-    if (togglePassword && passwordInput) {
-      togglePassword.addEventListener("click", function () {
-        const type =
-          passwordInput.getAttribute("type") === "password"
-            ? "text"
-            : "password";
-        passwordInput.setAttribute("type", type);
-
-        // Toggle between eye and eye-slash icons
-        this.classList.toggle("bi-eye-fill");
-        this.classList.toggle("bi-eye-slash-fill");
-      });
     }
   }
 
@@ -577,10 +501,8 @@ class AdminDashboard {
   }
 
   loadSettings() {
-    document.getElementById("server-time").textContent =
-      new Date().toLocaleString();
-    document.getElementById("admin-user-info").textContent =
-      document.getElementById("admin-username").textContent;
+    document.getElementById("server-time").textContent = new Date().toLocaleString();
+    document.getElementById("admin-user-info").textContent = document.getElementById("admin-username").textContent;
   }
 
   editUser(id, email, name, plan) {
@@ -589,9 +511,7 @@ class AdminDashboard {
     document.getElementById("edit-user-name").value = name;
     document.getElementById("edit-user-plan").value = plan;
 
-    const editUserModal = new bootstrap.Modal(
-      document.getElementById("edit-user-modal")
-    );
+    const editUserModal = new bootstrap.Modal(document.getElementById("edit-user-modal"));
     editUserModal.show();
   }
 
@@ -650,11 +570,7 @@ class AdminDashboard {
   }
 
   async deleteUser(userId) {
-    if (
-      !confirm(
-        "Are you sure you want to delete this user? This action cannot be undone."
-      )
-    ) {
+    if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
       return;
     }
 
@@ -721,27 +637,17 @@ class AdminDashboard {
                 <td>${this.escapeHtml(user.email)}</td>
                 <td>${this.escapeHtml(user.full_name)}</td>
                 <td>
-                    <span class="threat-badge plan-${this.getPlanClass(
-                      user.Plan_Mode
-                    )}">
+                    <span class="threat-badge plan-${this.getPlanClass(user.Plan_Mode)}">
                         ${this.getPlanName(user.Plan_Mode)}
                     </span>
                 </td>
-                <td>${user.sub_plan || "None"} ${
-          user.plan_active ? "✅" : "❌"
-        }</td>
+                <td>${user.sub_plan || "None"} ${user.plan_active ? "✅" : "❌"}</td>
                 <td>${new Date(user.created_at).toLocaleDateString()}</td>
                 <td>
-                    <button class="btn btn-primary btn-sm" onclick="admin.editUser(${
-                      user.id
-                    }, '${this.escapeHtml(user.email)}', '${this.escapeHtml(
-          user.full_name
-        )}', ${user.Plan_Mode})">
+                    <button class="btn btn-primary btn-sm" onclick="systemAccess.editUser(${user.id}, '${this.escapeHtml(user.email)}', '${this.escapeHtml(user.full_name)}', ${user.Plan_Mode})">
                         ✏️ Edit
                     </button>
-                    <button class="btn btn-danger btn-sm" onclick="admin.deleteUser(${
-                      user.id
-                    })">
+                    <button class="btn btn-danger btn-sm" onclick="systemAccess.deleteUser(${user.id})">
                         🗑️ Delete
                     </button>
                 </td>
@@ -761,9 +667,7 @@ class AdminDashboard {
                 <td>${this.escapeHtml(scan.email)}</td>
                 <td>${scan.scan_type}</td>
                 <td>
-                    <span class="threat-badge threat-${
-                      scan.threat_level || "unknown"
-                    }">
+                    <span class="threat-badge threat-${scan.threat_level || "unknown"}">
                         ${scan.threat_level || "unknown"}
                     </span>
                 </td>
@@ -801,18 +705,15 @@ class AdminDashboard {
 
   updateTime() {
     const now = new Date();
-    document.getElementById("current-time").textContent = now.toLocaleString(
-      "en-US",
-      {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      }
-    );
+    document.getElementById("current-time").textContent = now.toLocaleString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
   }
 
   getPlanClass(planMode) {
@@ -836,11 +737,8 @@ class AdminDashboard {
   }
 
   showNotification(message, type) {
-    // Create notification element
     const notification = document.createElement("div");
-    notification.className = `alert alert-${
-      type === "success" ? "success" : "danger"
-    } alert-dismissible fade show`;
+    notification.className = `alert alert-${type === "success" ? "success" : "danger"} alert-dismissible fade show`;
     notification.style.cssText = `
             position: fixed;
             top: 20px;
@@ -872,7 +770,7 @@ class AdminDashboard {
   }
 }
 
-// Initialize the admin dashboard when the page loads
+// Initialize the system access portal when the page loads
 document.addEventListener("DOMContentLoaded", () => {
-  window.admin = new AdminDashboard();
+  window.systemAccess = new SystemAccessPortal();
 });

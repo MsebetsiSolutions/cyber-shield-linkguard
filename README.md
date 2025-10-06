@@ -148,15 +148,17 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     ├── resetpassword.css
         |            |     └── resetpassword.js
         |            |
-        |            ├── admin/          
-        |            |     ├── admin.html
-        |            |     ├── admin.css
-        |            |     └── admin.js
+        |            ├── aeribuferobuf/          
+        |            |          ├── wodfbowef.html
+        |            |          ├── wodfbowef.css
+        |            |          └── wodfbowef.js
         |            |
         |            ├── index.html      
         |            ├── logg.js
         |            ├── manifest.json
         |            ├── session.js
+        |            ├── robots.txt
+        |            ├── sitemap.xml
         |            ├── sw.js
         |            └── theme.css
         |                
