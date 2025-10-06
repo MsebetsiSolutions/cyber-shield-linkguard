@@ -4,237 +4,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Shield - System Access Portal</title>
+    <title>Secure Console</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="wodfbowef.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32Enterprice.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16Enterprice.png" />
+    <link rel="manifest" href="../assets/favicon/site.webmanifest" />
 </head>
 
 <body>
-    <!-- System Access Portal Section -->
-    <div id="access-portal" class="access-portal">
-        <div class="portal-background">
-            <div class="security-pattern"></div>
-            <div class="floating-elements">
-                <div class="floating-shield"></div>
-                <div class="floating-lock"></div>
-                <div class="floating-key"></div>
-            </div>
-        </div>
+    <!-- Secure Console Login -->
+    <div id="secure-console" class="secure-console">
+        <div class="console-background"></div>
         
-        <div class="portal-container">
-            <div class="portal-card">
-                <div class="security-header">
-                    <div class="security-badge">
-                        <i class="bi bi-shield-lock-fill"></i>
-                        <span>SECURE ACCESS</span>
-                    </div>
-                    <div class="connection-status">
-                        <div class="status-indicator connected"></div>
-                        <span>Secure Connection</span>
+        <div class="console-container">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <div class="terminal-title">
+                        <i class="bi bi-terminal"></i> Secure Console
                     </div>
                 </div>
 
-                <div class="portal-content">
-                    <div class="portal-brand">
-                        <div class="brand-icon">
-                            <i class="bi bi-cpu-fill"></i>
+                <div class="terminal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="terminal-output-container">
+                                <div class="terminal-output">
+                                    <div class="output-line">
+                                        <span class="prompt">system@secure:~$</span> Initializing secure session...
+                                    </div>
+                                    <div class="output-line">
+                                        <span class="prompt">system@secure:~$</span> Security protocols: ACTIVE
+                                    </div>
+                                    <div class="output-line">
+                                        <span class="prompt">system@secure:~$</span> Session timer: <span id="session-timer">05:00</span>
+                                    </div>
+                                    <div class="output-line">
+                                        <span class="prompt">system@secure:~$</span> Attempts remaining: <span id="attempts-counter">3</span>
+                                    </div>
+                                    <div class="output-line">
+                                        <span class="prompt">system@secure:~$</span> Ready for authentication...
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <h1 class="brand-title">System Access Portal</h1>
-                        <p class="brand-subtitle">Cyber Shield Infrastructure</p>
+
+                        <div class="col-md-6">
+                            <form id="console-login-form" class="console-login-form">
+                                <div id="console-alert" class="console-alert d-none">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    <span id="alert-message"></span>
+                                </div>
+
+                                <div class="input-group">
+                                    <span class="input-prompt">access@code:~$</span>
+                                    <div class="input-with-icon">
+                                        <i class="bi bi-shield-lock input-icon"></i>
+                                        <input type="text" class="console-input" id="access-code" name="access_code"
+                                            placeholder="Enter access code" required maxlength="20">
+                                    </div>
+                                </div>
+
+                                <div class="input-group">
+                                    <span class="input-prompt">key@secure:~$</span>
+                                    <div class="input-with-icon">
+                                        <i class="bi bi-key input-icon"></i>
+                                        <input type="password" class="console-input" id="access-key" name="access_key"
+                                            placeholder="Enter access key" required maxlength="30">
+                                        <i class="bi bi-eye-fill password-toggle" id="toggle-access-key"></i>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="console-submit">
+                                    <span class="btn-content">
+                                        <i class="bi bi-play-circle"></i>
+                                        <span>Execute</span>
+                                    </span>
+                                    <div class="btn-loader d-none">
+                                        <div class="spinner"></div>
+                                    </div>
+                                </button>
+                            </form>
+                        </div>
                     </div>
-
-                    <form id="access-form" class="access-form">
-                        <div class="form-header">
-                            <h2>Secure Authentication</h2>
-                            <p>Enter your credentials to access the system</p>
-                        </div>
-
-                        <div id="access-alert" class="alert alert-security d-none" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                            <span id="alert-message"></span>
-                        </div>
-
-                        <div class="input-group security-input">
-                            <span class="input-icon">
-                                <i class="bi bi-person-badge-fill"></i>
-                            </span>
-                            <input type="text" 
-                                   id="access-username" 
-                                   name="username" 
-                                   class="form-control security-field" 
-                                   placeholder="Access ID" 
-                                   required
-                                   autocomplete="username">
-                            <div class="input-validity"></div>
-                        </div>
-
-                        <div class="input-group security-input">
-                            <span class="input-icon">
-                                <i class="bi bi-key-fill"></i>
-                            </span>
-                            <input type="password" 
-                                   id="access-password" 
-                                   name="password" 
-                                   class="form-control security-field" 
-                                   placeholder="Security Key" 
-                                   required
-                                   autocomplete="current-password">
-                            <button type="button" class="visibility-toggle" id="toggle-visibility">
-                                <i class="bi bi-eye-fill"></i>
-                            </button>
-                            <div class="input-validity"></div>
-                        </div>
-
-                        <div class="security-features">
-                            <div class="feature-item">
-                                <i class="bi bi-shield-check"></i>
-                                <span>End-to-End Encryption</span>
-                            </div>
-                            <div class="feature-item">
-                                <i class="bi bi-clock-history"></i>
-                                <span>Session Timeout: 30min</span>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn-access" id="access-submit">
-                            <span class="btn-content">
-                                <i class="bi bi-fingerprint"></i>
-                                <span>Authenticate & Proceed</span>
-                            </span>
-                            <div class="btn-loader d-none">
-                                <div class="spinner"></div>
-                                <span>Verifying Credentials...</span>
-                            </div>
-                        </button>
-
-                        <div class="security-notice">
-                            <i class="bi bi-info-circle"></i>
-                            <p>This system is monitored for security purposes. Unauthorized access attempts will be logged and reported.</p>
-                        </div>
-                    </form>
                 </div>
 
-                <div class="portal-footer">
-                    <div class="footer-info">
-                        <div class="system-info">
-                            <span class="system-version">v2.4.1</span>
-                            <span class="system-build">Build 8472</span>
-                        </div>
-                    </div>
-                    <div class="technical-support">
-                        <i class="bi bi-headset"></i>
-                        <span>Technical Support: support@linkguard.co.za</span>
-                    </div>
+                <div class="terminal-footer">
+                    <span class="security-status">
+                        <i class="bi bi-shield-check"></i>
+                        <span id="security-status">SECURE CONNECTION ESTABLISHED</span>
+                    </span>
+                    <span class="session-info" id="session-info"></span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Dashboard Section (hidden by default) -->
-    <div id="system-dashboard" class="system-dashboard d-none">
-        <!-- Your existing dashboard content remains exactly the same -->
+    <div id="analytics-dashboard" class="analytics-dashboard d-none">
         <div class="admin-container">
-            <!-- Sidebar -->
             <nav class="admin-sidebar">
                 <div class="sidebar-header">
                     <img src="../assets/CYBER_SHIELD_LINKGUARD2.png" alt="Cyber Shield Logo" class="logo-img mb-2"
                         style="max-height: 70px;">
-                    <p>System Dashboard</p>
+                    <p>Dashboard</p>
                 </div>
 
                 <ul class="sidebar-nav">
-                    <li><a href="#" class="nav-link active" data-tab="dashboard">📊 Dashboard</a></li>
-                    <li><a href="#" class="nav-link" data-tab="users">👥 Users</a></li>
-                    <li><a href="#" class="nav-link" data-tab="scans">🔍 Scans</a></li>
-                    <li><a href="#" class="nav-link" data-tab="payments">💳 Payments</a></li>
-                    <li><a href="#" class="nav-link" data-tab="teams">👥 Teams</a></li>
-                    <li><a href="#" class="nav-link" data-tab="audit">📋 Audit Logs</a></li>
-                    <li><a href="#" class="nav-link" data-tab="settings">⚙️ Settings</a></li>
+                    <li><a href="#" class="nav-link active" data-tab="dashboard">📊 Overview</a></li>
+                    <li><a href="#" class="nav-link" data-tab="users">👥 User Metrics</a></li>
+                    <li><a href="#" class="nav-link" data-tab="scans">🔍 Scan Analytics</a></li>
+                    <li><a href="#" class="nav-link" data-tab="payments">💳 Revenue Stats</a></li>
+                    <li><a href="#" class="nav-link" data-tab="teams">👥 Team Insights</a></li>
+                    <li><a href="#" class="nav-link" data-tab="audit">📋 Activity Logs</a></li>
+                    <li><a href="#" class="nav-link" data-tab="settings">⚙️ System Config</a></li>
                 </ul>
 
                 <div class="sidebar-footer">
-                    <p>Logged in as: <strong id="admin-username"></strong></p>
-                    <button id="logout-btn" class="btn-logout">🚪 Logout</button>
+                    <p>User: <strong id="analytics-username-display"></strong></p>
+                    <button id="analytics-logout-btn" class="btn-analytics-logout">
+                        <i class="bi bi-box-arrow-right"></i>Exit Console
+                    </button>
                 </div>
             </nav>
 
-            <!-- Main Content -->
             <main class="admin-main">
                 <header class="admin-header">
-                    <h1 id="page-title">System Dashboard</h1>
+                    <h1 id="analytics-page-title">Overview</h1>
                     <div class="header-actions">
-                        <span id="current-time" class="badge bg-primary"></span>
+                        <span id="analytics-current-time" class="badge bg-primary"></span>
                     </div>
                 </header>
 
-                <!-- Dashboard Tab -->
                 <div id="dashboard-tab" class="tab-content active">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon">👥</div>
-                            <div class="stat-info">
-                                <h3 id="total-users">0</h3>
-                                <p>Total Users</p>
+                    <div class="dashboard-scrollable-content">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">👥</div>
+                                <div class="stat-info">
+                                    <h3 id="total-users">0</h3>
+                                    <p>Total Users</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">🔍</div>
+                                <div class="stat-info">
+                                    <h3 id="total-scans">0</h3>
+                                    <p>Total Scans</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">💳</div>
+                                <div class="stat-info">
+                                    <h3 id="total-payments">0</h3>
+                                    <p>Total Payments</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">👥</div>
+                                <div class="stat-info">
+                                    <h3 id="total-teams">0</h3>
+                                    <p>Total Teams</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">🔥</div>
+                                <div class="stat-info">
+                                    <h3 id="active-today">0</h3>
+                                    <p>Active Today</p>
+                                </div>
                             </div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">🔍</div>
-                            <div class="stat-info">
-                                <h3 id="total-scans">0</h3>
-                                <p>Total Scans</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">💳</div>
-                            <div class="stat-info">
-                                <h3 id="total-payments">0</h3>
-                                <p>Total Payments</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">👥</div>
-                            <div class="stat-info">
-                                <h3 id="total-teams">0</h3>
-                                <p>Total Teams</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">🔥</div>
-                            <div class="stat-info">
-                                <h3 id="active-today">0</h3>
-                                <p>Active Today</p>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="row mt-4">
-                        <div class="col-md-6">
-                            <div class="chart-card">
-                                <h3>Threat Level Distribution</h3>
-                                <canvas id="threatChart"></canvas>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="chart-card">
+                                    <h3>Threat Level Distribution</h3>
+                                    <canvas id="threatChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="chart-card">
+                                    <h3>Payment Status</h3>
+                                    <canvas id="paymentChart"></canvas>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="chart-card">
-                                <h3>Payment Status</h3>
-                                <canvas id="paymentChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="recent-activity mt-4">
-                        <h3>Recent Activity</h3>
-                        <div id="recent-activities" class="activity-list">
-                            <!-- Activities will be loaded here -->
+                        <div class="recent-activity mt-4">
+                            <h3>Recent Activity</h3>
+                            <div id="recent-activities" class="activity-list">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Users Tab -->
                 <div id="users-tab" class="tab-content">
                     <div class="tab-header">
-                        <h2>User Management</h2>
+                        <h2>User Metrics</h2>
                         <div class="tab-actions">
                             <input type="text" id="user-search" class="form-control" placeholder="Search users...">
                             <button id="refresh-users" class="btn-primary">🔄 Refresh</button>
@@ -254,16 +221,14 @@
                                 </tr>
                             </thead>
                             <tbody id="users-tbody">
-                                <!-- Users will be loaded here -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Scans Tab -->
                 <div id="scans-tab" class="tab-content">
                     <div class="tab-header">
-                        <h2>Scan History</h2>
+                        <h2>Scan Analytics</h2>
                         <div class="tab-actions">
                             <select id="scan-type-filter" class="form-select">
                                 <option value="">All Types</option>
@@ -287,16 +252,14 @@
                                 </tr>
                             </thead>
                             <tbody id="scans-tbody">
-                                <!-- Scans will be loaded here -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Payments Tab -->
                 <div id="payments-tab" class="tab-content">
                     <div class="tab-header">
-                        <h2>Payment History</h2>
+                        <h2>Revenue Statistics</h2>
                         <div class="tab-actions">
                             <select id="payment-status-filter" class="form-select">
                                 <option value="">All Status</option>
@@ -320,16 +283,14 @@
                                 </tr>
                             </thead>
                             <tbody id="payments-tbody">
-                                <!-- Payments will be loaded here -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Teams Tab -->
                 <div id="teams-tab" class="tab-content">
                     <div class="tab-header">
-                        <h2>Team Management</h2>
+                        <h2>Team Insights</h2>
                         <button id="refresh-teams" class="btn-primary">🔄 Refresh</button>
                     </div>
                     <div class="table-responsive">
@@ -344,16 +305,14 @@
                                 </tr>
                             </thead>
                             <tbody id="teams-tbody">
-                                <!-- Teams will be loaded here -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Audit Logs Tab -->
                 <div id="audit-tab" class="tab-content">
                     <div class="tab-header">
-                        <h2>Audit Logs</h2>
+                        <h2>Activity Logs</h2>
                         <button id="refresh-audit" class="btn-primary">🔄 Refresh</button>
                     </div>
                     <div class="table-responsive">
@@ -369,16 +328,14 @@
                                 </tr>
                             </thead>
                             <tbody id="audit-tbody">
-                                <!-- Audit logs will be loaded here -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Settings Tab -->
                 <div id="settings-tab" class="tab-content">
                     <div class="tab-header">
-                        <h2>System Settings</h2>
+                        <h2>System Configuration</h2>
                     </div>
                     <div class="row">
                         <div class="col-md-6">
@@ -389,8 +346,8 @@
                                     <span id="server-time">Loading...</span>
                                 </div>
                                 <div class="setting-item">
-                                    <label>Admin User:</label>
-                                    <span id="admin-user-info">Loading...</span>
+                                    <label>User:</label>
+                                    <span id="analytics-user-info">Loading...</span>
                                 </div>
                             </div>
                         </div>
@@ -407,7 +364,6 @@
         </div>
     </div>
 
-    <!-- Edit User Modal -->
     <div id="edit-user-modal" class="modal">
         <div class="modal-dialog">
             <div class="modal-content">

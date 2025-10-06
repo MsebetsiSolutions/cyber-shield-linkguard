@@ -1,56 +1,103 @@
-class SystemAccessPortal {
+class SecureConsole {
   constructor() {
     this.currentTab = "dashboard";
     this.charts = {};
     this.isLoggedIn = false;
+    this.sessionTimer = null;
+    this.sessionTime = 300; // 5 minutes in seconds
+    this.failedAttempts = 0;
+    this.maxAttempts = 3;
+    this.lockoutTime = 30; // 30 seconds lockout
+    this.isLocked = false;
     this.init();
   }
 
   init() {
-    this.showAccessPortal();
+    this.showSecureConsole();
     this.bindEvents();
-    this.updateTime();
-    setInterval(() => this.updateTime(), 1000);
+    this.startSessionTimer();
+    this.updateSessionInfo();
+    setInterval(() => this.updateSessionInfo(), 1000);
+
     this.setupPasswordToggle();
+    this.setupSecurityMeasures();
+  }
+
+  setupSecurityMeasures() {
+    // Input sanitization setup
+    this.setupInputSanitization();
+    
+    // Session monitoring
+    this.monitorSession();
+  }
+
+  setupInputSanitization() {
+    const sanitizeInput = (input) => {
+      // Remove potentially dangerous characters but allow normal login
+      return input.replace(/[<>"&\\]/g, '');
+    };
+
+    // Apply sanitization to all inputs
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('input', (e) => {
+        e.target.value = sanitizeInput(e.target.value);
+      });
+    });
+  }
+
+  monitorSession() {
+    // Monitor for tab/window focus changes
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        this.addOutputLine("Session visibility changed", "warning");
+      }
+    });
   }
 
   setupPasswordToggle() {
-    const toggleVisibility = document.getElementById("toggle-visibility");
-    const passwordInput = document.getElementById("access-password");
+    const togglePassword = document.getElementById("toggle-access-key");
+    const passwordInput = document.getElementById("access-key");
 
-    if (toggleVisibility && passwordInput) {
-      toggleVisibility.addEventListener("click", function () {
+    if (togglePassword && passwordInput) {
+      togglePassword.addEventListener("click", function () {
         const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
         passwordInput.setAttribute("type", type);
-        this.querySelector('i').classList.toggle("bi-eye-fill");
-        this.querySelector('i').classList.toggle("bi-eye-slash-fill");
+        this.classList.toggle("bi-eye-fill");
+        this.classList.toggle("bi-eye-slash-fill");
       });
     }
   }
 
-  showAccessPortal() {
-    document.getElementById("access-portal").classList.remove("d-none");
-    document.getElementById("system-dashboard").classList.add("d-none");
+  showSecureConsole() {
+    document.getElementById("secure-console").classList.remove("d-none");
+    document.getElementById("analytics-dashboard").classList.add("d-none");
     this.isLoggedIn = false;
 
-    // Clear form data
-    document.getElementById("access-username").value = "";
-    document.getElementById("access-password").value = "";
-    document.getElementById("access-alert").classList.add("d-none");
+    // Clear inputs
+    document.getElementById("access-code").value = "";
+    document.getElementById("access-key").value = "";
+    document.getElementById("console-alert").classList.add("d-none");
+
+    // Reset security state
+    this.failedAttempts = 0;
+    this.isLocked = false;
+    this.updateAttemptsCounter();
+    this.updateSecurityStatus("SECURE CONNECTION ESTABLISHED", "success");
   }
 
-  showSystemDashboard() {
-    document.getElementById("access-portal").classList.add("d-none");
-    document.getElementById("system-dashboard").classList.remove("d-none");
+  showAnalyticsDashboard() {
+    document.getElementById("secure-console").classList.add("d-none");
+    document.getElementById("analytics-dashboard").classList.remove("d-none");
     this.isLoggedIn = true;
     this.loadDashboard();
+    this.resetSessionTimer();
   }
 
   bindEvents() {
-    // Access form submission
-    document.getElementById("access-form").addEventListener("submit", (e) => {
+    // Console login form
+    document.getElementById("console-login-form").addEventListener("submit", (e) => {
       e.preventDefault();
-      this.handleSystemAccess();
+      this.handleConsoleLogin();
     });
 
     // Tab navigation
@@ -70,13 +117,11 @@ class SystemAccessPortal {
     document.getElementById("refresh-teams")?.addEventListener("click", () => this.loadTeams());
     document.getElementById("refresh-audit")?.addEventListener("click", () => this.loadAuditLogs());
 
-    // Logout - Redirect to index.html
-    document.getElementById("logout-btn")?.addEventListener("click", () => {
+    // Logout
+    document.getElementById("analytics-logout-btn")?.addEventListener("click", () => {
       this.isLoggedIn = false;
       const sessionId = window.CyberShieldSession?.getCurrentSessionId();
-      const redirectUrl = sessionId
-        ? `../index.html?session=${sessionId}`
-        : "../index.html";
+      const redirectUrl = sessionId ? `../index.html?session=${sessionId}` : "../index.html";
       window.location.href = redirectUrl;
     });
 
@@ -111,19 +156,27 @@ class SystemAccessPortal {
     });
   }
 
-  async handleSystemAccess() {
-    const username = document.getElementById("access-username").value;
-    const password = document.getElementById("access-password").value;
-    const submitBtn = document.getElementById("access-submit");
-    const btnContent = submitBtn.querySelector('.btn-content');
-    const btnLoader = submitBtn.querySelector('.btn-loader');
-    const alert = document.getElementById("access-alert");
+  async handleConsoleLogin() {
+    if (this.isLocked) {
+      this.showAlert("System temporarily locked. Please wait...");
+      return;
+    }
+
+    const accessCode = document.getElementById("access-code").value;
+    const accessKey = document.getElementById("access-key").value;
+    const loginBtn = document.querySelector(".console-submit");
+    const btnContent = loginBtn.querySelector(".btn-content");
+    const btnLoader = loginBtn.querySelector(".btn-loader");
+    const alert = document.getElementById("console-alert");
 
     // Show loading state
-    submitBtn.disabled = true;
-    btnContent.classList.add('d-none');
-    btnLoader.classList.remove('d-none');
-    alert.classList.add('d-none');
+    loginBtn.disabled = true;
+    btnContent.classList.add("d-none");
+    btnLoader.classList.remove("d-none");
+    alert.classList.add("d-none");
+
+    // Add authentication attempt to output
+    this.addOutputLine("Authentication attempt initiated...", "info");
 
     try {
       const response = await fetch("/admin/login", {
@@ -131,52 +184,242 @@ class SystemAccessPortal {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ 
+          username: accessCode, 
+          password: accessKey 
+        }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        this.showSystemDashboard();
-        document.getElementById("admin-username").textContent = data.user.username;
-        this.showNotification("Access granted. Welcome to System Dashboard.", "success");
+        this.addOutputLine("Authentication successful. Access granted.", "success");
+        this.failedAttempts = 0;
+        this.updateAttemptsCounter();
+        
+        setTimeout(() => {
+          this.showAnalyticsDashboard();
+          document.getElementById("analytics-username-display").textContent = data.user.username;
+          document.getElementById("analytics-user-info").textContent = data.user.username;
+          this.showNotification("Secure access established", "success");
+        }, 1000);
+        
       } else {
-        alert.querySelector('#alert-message').textContent = data.message || "Access denied. Invalid credentials.";
-        alert.classList.remove('d-none');
+        this.failedAttempts++;
+        this.updateAttemptsCounter();
+        this.addOutputLine(`Authentication failed. Attempt ${this.failedAttempts}/${this.maxAttempts}`, "error");
+        
+        if (this.failedAttempts >= this.maxAttempts) {
+          this.lockConsole("Maximum failed attempts reached");
+        } else {
+          this.showAlert(data.message || "Invalid credentials");
+        }
       }
     } catch (error) {
-      alert.querySelector('#alert-message').textContent = "Network error. Please check your connection and try again.";
-      alert.classList.remove('d-none');
+      this.failedAttempts++;
+      this.updateAttemptsCounter();
+      this.addOutputLine("Network error during authentication", "error");
+      this.showAlert("Network error. Please try again.");
     } finally {
-      // Reset loading state
-      submitBtn.disabled = false;
-      btnContent.classList.remove('d-none');
-      btnLoader.classList.add('d-none');
+      loginBtn.disabled = false;
+      btnContent.classList.remove("d-none");
+      btnLoader.classList.add("d-none");
     }
   }
 
+  lockConsole(reason) {
+    this.isLocked = true;
+    this.showAlert(`System locked: ${reason}. Please wait ${this.lockoutTime} seconds.`);
+    this.addOutputLine(`SYSTEM LOCKED: ${reason}`, "error");
+    this.updateSecurityStatus("SYSTEM LOCKED - SECURITY BREACH", "error");
+
+    // Disable form
+    document.getElementById("console-login-form").classList.add("disabled");
+    
+    // Start lockout timer
+    let lockoutTime = this.lockoutTime;
+    const lockoutInterval = setInterval(() => {
+      lockoutTime--;
+      this.updateSecurityStatus(`SYSTEM LOCKED - ${lockoutTime}s`, "error");
+      
+      if (lockoutTime <= 0) {
+        clearInterval(lockoutInterval);
+        this.isLocked = false;
+        this.failedAttempts = 0;
+        this.updateAttemptsCounter();
+        document.getElementById("console-login-form").classList.remove("disabled");
+        this.updateSecurityStatus("SECURE CONNECTION RE-ESTABLISHED", "success");
+        this.addOutputLine("System lockout period ended. Ready for authentication.", "success");
+        this.showAlert("System unlocked. You may try again.");
+      }
+    }, 1000);
+  }
+
+  startSessionTimer() {
+    this.sessionTimer = setInterval(() => {
+      this.sessionTime--;
+      this.updateSessionTimer();
+      
+      if (this.sessionTime <= 0 && this.isLoggedIn) {
+        this.autoLogout();
+      }
+    }, 1000);
+  }
+
+  resetSessionTimer() {
+    this.sessionTime = 300; // Reset to 5 minutes
+    this.updateSessionTimer();
+  }
+
+  updateSessionTimer() {
+    const minutes = Math.floor(this.sessionTime / 60);
+    const seconds = this.sessionTime % 60;
+    const timerElement = document.getElementById("session-timer");
+    if (timerElement) {
+      timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      // Change color when time is running low
+      if (this.sessionTime <= 60) {
+        timerElement.style.color = "var(--terminal-error)";
+      } else if (this.sessionTime <= 120) {
+        timerElement.style.color = "var(--terminal-warning)";
+      } else {
+        timerElement.style.color = "var(--terminal-success)";
+      }
+    }
+  }
+
+  updateAttemptsCounter() {
+    const attemptsElement = document.getElementById("attempts-counter");
+    if (attemptsElement) {
+      attemptsElement.textContent = this.maxAttempts - this.failedAttempts;
+      
+      // Change color based on remaining attempts
+      if (this.maxAttempts - this.failedAttempts <= 1) {
+        attemptsElement.style.color = "var(--terminal-error)";
+      } else if (this.maxAttempts - this.failedAttempts <= 2) {
+        attemptsElement.style.color = "var(--terminal-warning)";
+      } else {
+        attemptsElement.style.color = "var(--terminal-success)";
+      }
+    }
+  }
+
+  updateSecurityStatus(message, type = "info") {
+    const statusElement = document.getElementById("security-status");
+    if (statusElement) {
+      statusElement.textContent = message;
+      
+      switch (type) {
+        case "success":
+          statusElement.style.color = "var(--terminal-success)";
+          break;
+        case "warning":
+          statusElement.style.color = "var(--terminal-warning)";
+          break;
+        case "error":
+          statusElement.style.color = "var(--terminal-error)";
+          break;
+        default:
+          statusElement.style.color = "var(--terminal-text)";
+      }
+    }
+  }
+
+  updateSessionInfo() {
+    const now = new Date();
+    const sessionInfo = document.getElementById("session-info");
+    if (sessionInfo) {
+      sessionInfo.textContent = now.toLocaleTimeString();
+    }
+  }
+
+  addOutputLine(message, type = "info") {
+    const outputContainer = document.querySelector(".terminal-output");
+    const outputLine = document.createElement("div");
+    outputLine.className = "output-line";
+    
+    const prompt = document.createElement("span");
+    prompt.className = "prompt";
+    prompt.textContent = "system@secure:~$";
+    
+    const messageSpan = document.createElement("span");
+    messageSpan.textContent = ` ${message}`;
+    
+    switch (type) {
+      case "error":
+        messageSpan.style.color = "var(--terminal-error)";
+        break;
+      case "warning":
+        messageSpan.style.color = "var(--terminal-warning)";
+        break;
+      case "success":
+        messageSpan.style.color = "var(--terminal-success)";
+        break;
+      default:
+        messageSpan.style.color = "var(--terminal-text)";
+    }
+    
+    outputLine.appendChild(prompt);
+    outputLine.appendChild(messageSpan);
+    outputContainer.appendChild(outputLine);
+    
+    // Scroll to bottom
+    outputContainer.scrollTop = outputContainer.scrollHeight;
+  }
+
+  showAlert(message) {
+    const alert = document.getElementById("console-alert");
+    const alertMessage = document.getElementById("alert-message");
+    
+    alertMessage.textContent = message;
+    alert.classList.remove("d-none");
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+      alert.classList.add("d-none");
+    }, 5000);
+  }
+
+  autoLogout() {
+    this.addOutputLine("Session timeout - Auto-logout initiated", "warning");
+    this.showNotification("Session expired due to inactivity", "warning");
+    
+    setTimeout(() => {
+      this.showSecureConsole();
+    }, 2000);
+  }
+
   switchTab(tabName) {
-    // Update active tab in sidebar
     document.querySelectorAll(".nav-link").forEach((link) => {
       link.classList.remove("active");
     });
     document.querySelector(`[data-tab="${tabName}"]`).classList.add("active");
 
-    // Hide all tab content
     document.querySelectorAll(".tab-content").forEach((tab) => {
       tab.classList.remove("active");
     });
 
-    // Show selected tab
     document.getElementById(`${tabName}-tab`).classList.add("active");
 
-    // Update page title
-    document.getElementById("page-title").textContent =
-      tabName.charAt(0).toUpperCase() + tabName.slice(1) + " Management";
+    document.getElementById("analytics-page-title").textContent =
+      this.getTabTitle(tabName);
 
-    // Load tab data
     this.currentTab = tabName;
     this.loadTabData(tabName);
+  }
+
+  getTabTitle(tabName) {
+    const titles = {
+      dashboard: "Overview",
+      users: "User Metrics",
+      scans: "Scan Analytics",
+      payments: "Revenue Statistics",
+      teams: "Team Insights",
+      audit: "Activity Logs",
+      settings: "System Configuration"
+    };
+    return titles[tabName] || "Dashboard";
   }
 
   loadTabData(tabName) {
@@ -213,14 +456,17 @@ class SystemAccessPortal {
       }
       const data = await response.json();
 
-      // Update stats
-      document.getElementById("total-users").textContent = data.total_users.toLocaleString();
-      document.getElementById("total-scans").textContent = data.total_scans.toLocaleString();
-      document.getElementById("total-payments").textContent = data.total_payments.toLocaleString();
-      document.getElementById("total-teams").textContent = data.total_teams.toLocaleString();
-      document.getElementById("active-today").textContent = data.active_today.toLocaleString();
+      document.getElementById("total-users").textContent =
+        data.total_users.toLocaleString();
+      document.getElementById("total-scans").textContent =
+        data.total_scans.toLocaleString();
+      document.getElementById("total-payments").textContent =
+        data.total_payments.toLocaleString();
+      document.getElementById("total-teams").textContent =
+        data.total_teams.toLocaleString();
+      document.getElementById("active-today").textContent =
+        data.active_today.toLocaleString();
 
-      // Create charts
       this.createThreatChart(data.threat_stats);
       this.createPaymentChart(data.revenue_stats);
       this.loadRecentActivities();
@@ -316,7 +562,9 @@ class SystemAccessPortal {
           (log) => `
                 <div class="activity-item">
                     <strong>${log.action}</strong> - ${log.description}
-                    <span class="activity-time">${new Date(log.created_at).toLocaleString()}</span>
+                    <span class="activity-time">${new Date(
+                      log.created_at
+                    ).toLocaleString()}</span>
                 </div>
             `
         )
@@ -343,17 +591,27 @@ class SystemAccessPortal {
                     <td>${this.escapeHtml(user.email)}</td>
                     <td>${this.escapeHtml(user.full_name)}</td>
                     <td>
-                        <span class="threat-badge plan-${this.getPlanClass(user.Plan_Mode)}">
+                        <span class="threat-badge plan-${this.getPlanClass(
+                          user.Plan_Mode
+                        )}">
                             ${this.getPlanName(user.Plan_Mode)}
                         </span>
                     </td>
-                    <td>${user.sub_plan || "None"} ${user.plan_active ? "✅" : "❌"}</td>
+                    <td>${user.sub_plan || "None"} ${
+            user.plan_active ? "✅" : "❌"
+          }</td>
                     <td>${new Date(user.created_at).toLocaleDateString()}</td>
                     <td>
-                        <button class="btn btn-primary btn-sm" onclick="systemAccess.editUser(${user.id}, '${this.escapeHtml(user.email)}', '${this.escapeHtml(user.full_name)}', ${user.Plan_Mode})">
+                        <button class="btn btn-primary btn-sm" onclick="secureConsole.editUser(${
+                          user.id
+                        }, '${this.escapeHtml(user.email)}', '${this.escapeHtml(
+            user.full_name
+          )}', ${user.Plan_Mode})">
                             ✏️ Edit
                         </button>
-                        <button class="btn btn-danger btn-sm" onclick="systemAccess.deleteUser(${user.id})">
+                        <button class="btn btn-danger btn-sm" onclick="secureConsole.deleteUser(${
+                          user.id
+                        })">
                             🗑️ Delete
                         </button>
                     </td>
@@ -386,7 +644,9 @@ class SystemAccessPortal {
                     <td>${this.escapeHtml(scan.email)}</td>
                     <td>${scan.scan_type}</td>
                     <td>
-                        <span class="threat-badge threat-${scan.threat_level || "unknown"}">
+                        <span class="threat-badge threat-${
+                          scan.threat_level || "unknown"
+                        }">
                             ${scan.threat_level || "unknown"}
                         </span>
                     </td>
@@ -501,8 +761,10 @@ class SystemAccessPortal {
   }
 
   loadSettings() {
-    document.getElementById("server-time").textContent = new Date().toLocaleString();
-    document.getElementById("admin-user-info").textContent = document.getElementById("admin-username").textContent;
+    document.getElementById("server-time").textContent =
+      new Date().toLocaleString();
+    document.getElementById("analytics-user-info").textContent =
+      document.getElementById("analytics-username-display").textContent;
   }
 
   editUser(id, email, name, plan) {
@@ -511,7 +773,9 @@ class SystemAccessPortal {
     document.getElementById("edit-user-name").value = name;
     document.getElementById("edit-user-plan").value = plan;
 
-    const editUserModal = new bootstrap.Modal(document.getElementById("edit-user-modal"));
+    const editUserModal = new bootstrap.Modal(
+      document.getElementById("edit-user-modal")
+    );
     editUserModal.show();
   }
 
@@ -522,7 +786,6 @@ class SystemAccessPortal {
     const plan = document.getElementById("edit-user-plan").value;
 
     try {
-      // Update email
       await fetch("/admin/api/update-user", {
         method: "POST",
         headers: {
@@ -535,7 +798,6 @@ class SystemAccessPortal {
         }),
       });
 
-      // Update name
       await fetch("/admin/api/update-user", {
         method: "POST",
         headers: {
@@ -548,7 +810,6 @@ class SystemAccessPortal {
         }),
       });
 
-      // Update plan
       await fetch("/admin/api/update-user", {
         method: "POST",
         headers: {
@@ -570,7 +831,11 @@ class SystemAccessPortal {
   }
 
   async deleteUser(userId) {
-    if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this user? This action cannot be undone."
+      )
+    ) {
       return;
     }
 
@@ -637,17 +902,27 @@ class SystemAccessPortal {
                 <td>${this.escapeHtml(user.email)}</td>
                 <td>${this.escapeHtml(user.full_name)}</td>
                 <td>
-                    <span class="threat-badge plan-${this.getPlanClass(user.Plan_Mode)}">
+                    <span class="threat-badge plan-${this.getPlanClass(
+                      user.Plan_Mode
+                    )}">
                         ${this.getPlanName(user.Plan_Mode)}
                     </span>
                 </td>
-                <td>${user.sub_plan || "None"} ${user.plan_active ? "✅" : "❌"}</td>
+                <td>${user.sub_plan || "None"} ${
+          user.plan_active ? "✅" : "❌"
+        }</td>
                 <td>${new Date(user.created_at).toLocaleDateString()}</td>
                 <td>
-                    <button class="btn btn-primary btn-sm" onclick="systemAccess.editUser(${user.id}, '${this.escapeHtml(user.email)}', '${this.escapeHtml(user.full_name)}', ${user.Plan_Mode})">
+                    <button class="btn btn-primary btn-sm" onclick="secureConsole.editUser(${
+                      user.id
+                    }, '${this.escapeHtml(user.email)}', '${this.escapeHtml(
+          user.full_name
+        )}', ${user.Plan_Mode})">
                         ✏️ Edit
                     </button>
-                    <button class="btn btn-danger btn-sm" onclick="systemAccess.deleteUser(${user.id})">
+                    <button class="btn btn-danger btn-sm" onclick="secureConsole.deleteUser(${
+                      user.id
+                    })">
                         🗑️ Delete
                     </button>
                 </td>
@@ -667,7 +942,9 @@ class SystemAccessPortal {
                 <td>${this.escapeHtml(scan.email)}</td>
                 <td>${scan.scan_type}</td>
                 <td>
-                    <span class="threat-badge threat-${scan.threat_level || "unknown"}">
+                    <span class="threat-badge threat-${
+                      scan.threat_level || "unknown"
+                    }">
                         ${scan.threat_level || "unknown"}
                     </span>
                 </td>
@@ -703,19 +980,6 @@ class SystemAccessPortal {
       .join("");
   }
 
-  updateTime() {
-    const now = new Date();
-    document.getElementById("current-time").textContent = now.toLocaleString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-  }
-
   getPlanClass(planMode) {
     const plans = ["free", "pro", "team", "enterprise"];
     return plans[planMode] || "free";
@@ -738,7 +1002,9 @@ class SystemAccessPortal {
 
   showNotification(message, type) {
     const notification = document.createElement("div");
-    notification.className = `alert alert-${type === "success" ? "success" : "danger"} alert-dismissible fade show`;
+    notification.className = `alert alert-${
+      type === "success" ? "success" : "danger"
+    } alert-dismissible fade show`;
     notification.style.cssText = `
             position: fixed;
             top: 20px;
@@ -770,7 +1036,7 @@ class SystemAccessPortal {
   }
 }
 
-// Initialize the system access portal when the page loads
+// Initialize the secure console when the page loads
 document.addEventListener("DOMContentLoaded", () => {
-  window.systemAccess = new SystemAccessPortal();
+  window.secureConsole = new SecureConsole();
 });
