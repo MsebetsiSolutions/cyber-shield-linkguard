@@ -757,9 +757,13 @@ body {
 .email-item .preview {
   color: var(--muted);
   font-size: 0.85rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: block;            /* ensure block-level for truncation */
+  width: 100%;              /* take available width */
+  white-space: nowrap;      /* single line */
+  overflow: hidden;         /* hide overflow */
+  text-overflow: ellipsis;  /* show ellipsis for overflow */
+  line-height: 1.2rem;      /* keep consistent height */
+  max-height: 1.2rem;       /* enforce single-line height */
 }
 
 .email-item .time {
@@ -1207,4 +1211,337 @@ button {
 
 .hidden {
   display: none !important;
+}
+
+/* Generated Email Display Styles */
+#generatedEmailContainer {
+  margin-top: 2rem;
+  border-top: 2px solid var(--ring);
+  padding-top: 1.5rem;
+}
+
+.email-preview {
+  background: var(--card);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.email-header-info {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.email-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.email-meta span {
+  color: var(--muted);
+}
+
+.email-meta strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.email-body-content {
+  padding: 1.5rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.email-body-content h1,
+.email-body-content h2,
+.email-body-content h3 {
+  color: var(--text);
+  margin-bottom: 1rem;
+}
+
+.email-body-content p {
+  margin-bottom: 1rem;
+}
+
+.email-body-content a {
+  color: var(--sky);
+  text-decoration: underline;
+}
+
+.email-body-content a:hover {
+  color: var(--candy-red);
+}
+
+.phishing-warning {
+  margin-top: 1rem;
+}
+
+.phishing-warning .alert {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  color: #856404;
+  padding: 1rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.phishing-warning .alert i {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* Email display container animations */
+#generatedEmailContainer {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  display: none;
+}
+
+#generatedEmailContainer.show {
+  opacity: 1;
+  transform: translateY(0);
+  display: block;
+}
+
+/* Button spacing in email container */
+#generatedEmailContainer .cs-btn {
+  min-width: 120px;
+}
+
+/* Send email button styling */
+#sendEmailContent {
+  background: var(--btn-login);
+  border: none;
+  font-weight: 600;
+}
+
+#sendEmailContent:hover {
+  background: #ff8a66;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 159, 128, 0.3);
+}
+
+/* Save to draft button styling */
+#saveToDraftContent {
+  background: var(--btn-settings);
+  border: none;
+}
+
+#saveToDraftContent:hover {
+  background: #c9a9f0;
+  transform: translateY(-1px);
+}
+
+/* Responsive adjustments for email display */
+@media (max-width: 768px) {
+  .email-meta {
+    font-size: 0.8rem;
+  }
+  
+  .email-body-content {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  #generatedEmailContainer .cs-btn {
+    min-width: 100px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Email Editor Modal Styles */
+.email-editor-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.email-editor-content {
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.email-editor-header {
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--ring);
+  background: linear-gradient(135deg, var(--bg-pink) 0%, #f8f9fa 100%);
+  border-radius: 12px 12px 0 0;
+}
+
+.email-editor-header h5 {
+  color: var(--text);
+  font-weight: 600;
+  margin: 0;
+}
+
+.email-editor-body {
+  padding: 1.5rem;
+}
+
+/* Email Content Editor Styles */
+.email-content-editor {
+  border: 1px solid var(--ring);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--card);
+}
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 1px solid var(--ring);
+  flex-wrap: wrap;
+}
+
+.editor-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 0.5rem;
+  border-radius: 4px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.editor-btn:hover {
+  background: var(--card);
+  color: var(--text);
+  border-color: var(--ring);
+}
+
+.editor-btn:active,
+.editor-btn.active {
+  background: var(--sky);
+  color: white;
+  border-color: var(--sky);
+}
+
+.editor-separator {
+  width: 1px;
+  height: 24px;
+  background: var(--ring);
+  margin: 0 0.5rem;
+}
+
+.editor-content {
+  min-height: 200px;
+  padding: 1rem;
+  outline: none;
+  line-height: 1.6;
+  color: var(--text);
+  font-family: inherit;
+  overflow-y: auto;
+  max-height: 300px;
+}
+
+.editor-content:empty:before {
+  content: attr(placeholder);
+  color: var(--muted);
+  font-style: italic;
+}
+
+.editor-content p {
+  margin-bottom: 1rem;
+}
+
+.editor-content a {
+  color: var(--sky);
+  text-decoration: underline;
+}
+
+.editor-content strong {
+  font-weight: 600;
+}
+
+.editor-content em {
+  font-style: italic;
+}
+
+.editor-content u {
+  text-decoration: underline;
+}
+
+/* Edit Email button styling */
+#editEmailContent {
+  background: var(--btn-settings);
+  border: none;
+}
+
+#editEmailContent:hover {
+  background: #c9a9f0;
+  transform: translateY(-1px);
+}
+
+/* Modal responsive adjustments */
+@media (max-width: 768px) {
+  .email-editor-modal {
+    padding: 10px;
+  }
+  
+  .email-editor-content {
+    max-height: 95vh;
+  }
+  
+  .email-editor-header,
+  .email-editor-body {
+    padding: 1rem;
+  }
+  
+  .editor-toolbar {
+    padding: 0.5rem;
+  }
+  
+  .editor-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0.25rem;
+  }
+  
+  .editor-content {
+    min-height: 150px;
+    max-height: 200px;
+  }
 }
