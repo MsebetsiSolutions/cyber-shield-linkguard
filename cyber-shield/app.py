@@ -49,6 +49,8 @@ from routes.profile import profile_bp
 from routes.teamCollab import team_collab_bp
 from routes.admin import admin_bp
 from routes.enterprise import enterprise_bp
+from routes.phishing_replica import phishing_replica_bp
+
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -74,6 +76,7 @@ app.register_blueprint(profile_bp)
 app.register_blueprint(team_collab_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(enterprise_bp)
+app.register_blueprint(phishing_replica_bp)
 
 
 VT_API_KEY = os.getenv("VT_API_KEY", "").strip()
@@ -677,6 +680,104 @@ def simple_qr_scan_fallback(image_path):
     except Exception as e:
         print(f"Simple QR fallback error: {e}")
         return None, "error"
+
+
+@app.route("/api/scan_file_or_qr", methods=["POST"])
+def scan_file_or_qr():
+    """Combined endpoint that automatically detects if file is QR code or regular file"""
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+    if limited(ip):
+        return jsonify({"error": "Rate limit exceeded"}), 429
+
+    if 'file' not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+        
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+        
+    # Check file type
+    allowed_image_types = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff'}
+    file_ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+    
+    if file and allowed_file(file.filename):
+        try:
+            # Save file temporarily
+            filename = secure_filename(file.filename)
+            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                file.save(temp_file.name)
+                temp_path = temp_file.name
+            
+            # If it's an image, try QR code scanning first
+            if file_ext in allowed_image_types and QR_AVAILABLE:
+                decoded_content, content_type = scan_qr_code(temp_path)
+                
+                if decoded_content:
+                    # QR code found - return QR results
+                    os.unlink(temp_path)
+                    
+                    if content_type == "url" and decoded_content.startswith(('http://', 'https://')):
+                        # Process URL from QR code
+                        final_url, hops = unshorten(decoded_content)
+                        df = domain_features(final_url)
+                        ipaddr = resolve_ip(df.get("host", "")) if df else None
+                        tlsok, tlsmsg = tls_ok(final_url)
+                        
+                        api_results = combined_url_lookup(final_url)
+                        
+                        signals = {
+                            "final_url": final_url,
+                            "unshorten_hops": hops,
+                            "domain": df,
+                            "ip": ipaddr,
+                            "tls": {"ok": tlsok, "note": tlsmsg},
+                            "api_results": api_results,
+                        }
+                        
+                        if api_results:
+                            verdict = score_combined(api_results, signals)
+                        else:
+                            verdict = score_fallback(signals)
+                        
+                        return jsonify({
+                            "type": "qr_url",
+                            "decoded": decoded_content,
+                            "signals": signals,
+                            "verdict": verdict
+                        })
+                    else:
+                        # Non-URL QR content
+                        return jsonify({
+                            "type": "qr_content",
+                            "decoded": decoded_content,
+                            "content_type": content_type
+                        })
+            
+            # If not QR code or QR scanning failed, do regular file scan
+            file_hash = get_file_hash(temp_path)            
+            api_results = combined_file_lookup(file_hash)            
+            os.unlink(temp_path)
+            
+            file_info = {
+                "filename": filename,
+                "sha256": file_hash,
+                "size": os.path.getsize(temp_path) if os.path.exists(temp_path) else 0
+            }
+            
+            verdict = score_file_combined(api_results)
+            
+            return jsonify({
+                "type": "file",
+                "file": file_info,
+                "api_results": api_results,
+                "verdict": verdict
+            })
+            
+        except Exception as e:
+            print(f"Combined file/QR scan error: {e}")
+            return jsonify({"error": "Failed to scan file"}), 500
+    
+    return jsonify({"error": "File type not allowed"}), 400
 
 #======================================================
 # ------------------- Scoring Logic -------------------

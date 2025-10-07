@@ -183,10 +183,10 @@ async function checkUserPlan() {
   return 0; 
 }
 
-// Check if user has Enterprise access
-function checkEnterpriseAccess(planMode) {
-  if (planMode !== 3) {
-    toast('Enterprise feature requires Enterprise subscription');
+// Check if user has Team or Enterprise access (FIXED: Allow both plan_mode 2 and 3)
+function checkBackgroundCheckAccess(planMode) {
+  if (planMode !== 2 && planMode !== 3) {
+    toast('Background Check feature requires Team or Enterprise subscription');
     setTimeout(() => {
       window.location.href = '../ScannerDash/ScannerDash.html';
     }, 2000);
@@ -479,8 +479,8 @@ function initBackgroundCheck() {
         
         setUserUI({...userData, plan_mode: planMode}); 
         
-        // Check if user has Enterprise access
-        if (!checkEnterpriseAccess(planMode)) {
+        // Check if user has Team or Enterprise access (FIXED)
+        if (!checkBackgroundCheckAccess(planMode)) {
           return;
         }
         
