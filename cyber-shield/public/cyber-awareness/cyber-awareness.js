@@ -1181,3 +1181,724 @@ document.addEventListener('visibilitychange', function() {
         }
     }
 });
+
+// Global Phishing Patterns Quiz Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    initializeGlobalPatternsQuiz();
+    initializeEmailDatabase();
+});
+
+// CSV Email Database Functionality - Updated for Auto-loading Nigerian CSV
+function initializeEmailDatabase() {
+    const regionSelect = document.getElementById('regionSelect');
+    const emailViewerSection = document.getElementById('emailViewerSection');
+    const loadingState = document.getElementById('loadingState');
+    const emptyState = document.getElementById('emptyState');
+    const totalEmailsSpan = document.getElementById('totalEmails');
+    const regionInfo = document.getElementById('regionInfo');
+    
+    // Navigation elements
+    const prevEmailBtn = document.getElementById('prevEmailBtn');
+    const nextEmailBtn = document.getElementById('nextEmailBtn');
+    const emailCounter = document.getElementById('emailCounter');
+    const jumpToInput = document.getElementById('jumpToInput');
+    const jumpToBtn = document.getElementById('jumpToBtn');
+    
+    // Display elements
+    const emailSubjectDisplay = document.getElementById('emailSubjectDisplay');
+    const emailFromDisplay = document.getElementById('emailFromDisplay');
+    const emailDateDisplay = document.getElementById('emailDateDisplay');
+    const scamTypeBadge = document.getElementById('scamTypeBadge');
+    const riskLevelBadge = document.getElementById('riskLevelBadge');
+    const emailContentDisplay = document.getElementById('emailContentDisplay');
+    const analysisTagsDisplay = document.getElementById('analysisTagsDisplay');
+    const analysisExplanation = document.getElementById('analysisExplanation');
+    
+    // Action buttons
+    const markSafeBtn = document.getElementById('markSafeBtn');
+    const markDangerousBtn = document.getElementById('markDangerousBtn');
+    
+    let emailData = [];
+    let currentEmailIndex = 0;
+    let currentRegion = '';
+    
+    // Sample data for other regions (USA, India, Russia)
+    const sampleEmailData = {
+        usa: [
+            {
+                subject: "Action Required: Your Bank Account Will Be Suspended",
+                sender: "Bank of America Security <security@bankofamerica-alert.com>",
+                date: "2024-10-15",
+                content: `Dear Valued Customer,
+
+We have detected suspicious activity on your Bank of America account. Your account will be suspended within 24 hours unless you verify your information immediately.
+
+Click here to verify your account: http://bankofamerica-verification.secure-login.net
+
+You will need to provide:
+- Username and Password
+- Social Security Number
+- Account Number
+- Phone Number
+
+Failure to verify within 24 hours will result in permanent account closure.
+
+Bank of America Security Team
+DO NOT REPLY TO THIS EMAIL`,
+                scamType: "banking",
+                riskLevel: "high"
+            },
+            {
+                subject: "IRS Tax Refund: $2,847 Available for Immediate Claim",
+                sender: "Internal Revenue Service <refunds@irs-treasury.gov>",
+                date: "2024-10-14",
+                content: `OFFICIAL NOTICE FROM THE IRS
+
+You are eligible for a tax refund of $2,847.00 from the 2023 tax year.
+
+To receive your refund immediately, click the link below and provide your banking information:
+
+https://irs-refund-processing.treasury-gov.net/claim
+
+Required Information:
+- Social Security Number
+- Bank Account Number
+- Routing Number
+- Driver's License Number
+
+This refund will expire in 72 hours if not claimed.
+
+Internal Revenue Service
+U.S. Department of Treasury`,
+                scamType: "government",
+                riskLevel: "high"
+            }
+        ],
+        india: [
+            {
+                subject: "Complete Your KYC or Account Will Be Blocked - SBI",
+                sender: "State Bank of India <kyc@sbi-india.co.in>",
+                date: "2024-10-15",
+                content: `Dear SBI Customer,
+
+Your account KYC (Know Your Customer) verification is pending. As per RBI guidelines, your account will be blocked if KYC is not completed within 48 hours.
+
+Complete your KYC now: http://sbi-kyc-update.co.in
+
+Required Documents:
+- PAN Card
+- Aadhaar Card
+- Bank Account Details
+- Mobile OTP Verification
+
+Ignore this message at your own risk.
+
+State Bank of India
+Customer Service Team`,
+                scamType: "banking",
+                riskLevel: "high"
+            },
+            {
+                subject: "Job Offer: $2000/month Work From Home Opportunity",
+                sender: "TCS HR Department <hr@tcs-careers.co.in>",
+                date: "2024-10-14",
+                content: `Dear Job Seeker,
+
+Congratulations! You have been selected for a work-from-home position with Tata Consultancy Services (TCS).
+
+Position: Data Entry Operator
+Salary: $2000 per month
+Working Hours: 4 hours daily
+
+To confirm your position, pay a registration fee of ₹5000 to cover training materials and laptop shipping.
+
+Payment Details:
+Account Name: TCS Training Center
+Account Number: 1234567890
+IFSC Code: SBIN0001234
+
+Send payment confirmation to secure your job immediately.
+
+TCS HR Department`,
+                scamType: "job",
+                riskLevel: "medium"
+            }
+        ],
+        russia: [
+            {
+                subject: "Urgent: Critical Security Update Required",
+                sender: "Microsoft Security <security@microsoft-updates.ru>",
+                date: "2024-10-15",
+                content: `CRITICAL SECURITY ALERT
+
+Your Windows system has been compromised by malware. Immediate action is required to prevent data loss.
+
+Download the security patch immediately:
+https://microsoft-security-update.download-center.ru/patch.exe
+
+This update will:
+- Remove all malware
+- Secure your personal data
+- Protect against future attacks
+
+WARNING: Failure to install this update within 2 hours may result in complete system failure and data loss.
+
+Microsoft Security Team
+Incident ID: MS-2024-10-15-7829`,
+                scamType: "tech_support",
+                riskLevel: "high"
+            },
+            {
+                subject: "Love Letter from Natasha - Are You Single?",
+                sender: "Natasha Petrova <natasha.petrova@yandex.ru>",
+                date: "2024-10-14",
+                content: `Hello my dear friend,
+
+My name is Natasha, I am 28 years old beautiful woman from Moscow, Russia. I found your email and I think you seem like a very nice person.
+
+I am looking for serious relationship and maybe marriage with foreign man. I am lonely and want to find my true love.
+
+Please write me back if you are interested. I will send you my photos.
+
+I am waiting for your letter.
+
+With love and hope,
+Natasha
+
+P.S. If you are serious about relationship, I may need help with visa costs to visit you. It costs about $500.`,
+                scamType: "romance",
+                riskLevel: "medium"
+            }
+        ]
+    };
+    
+    // Region selection handler
+    regionSelect.addEventListener('change', function() {
+        const selectedRegion = this.value;
+        if (selectedRegion === 'africa') {
+            loadNigerianCSV();
+        } else if (selectedRegion && sampleEmailData[selectedRegion]) {
+            loadSampleEmails(selectedRegion);
+        } else {
+            showEmptyState();
+        }
+    });
+    
+    // Navigation handlers
+    prevEmailBtn.addEventListener('click', () => navigateEmail(-1));
+    nextEmailBtn.addEventListener('click', () => navigateEmail(1));
+    jumpToBtn.addEventListener('click', jumpToEmail);
+    jumpToInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') jumpToEmail();
+    });
+    
+    // Action button handlers
+    markSafeBtn.addEventListener('click', () => markEmail('safe'));
+    markDangerousBtn.addEventListener('click', () => markEmail('dangerous'));
+    
+    // Load Nigerian CSV file for Africa region
+    function loadNigerianCSV() {
+        showLoading();
+        currentRegion = 'africa';
+        const regionInfo = document.getElementById('regionInfo');
+        regionInfo.textContent = 'Loading authentic Nigerian scam emails from Lagos...';
+        
+        // Try multiple paths to fetch the CSV file
+        const csvPaths = [
+            '/Nigerian_Fraud.csv',
+            './Nigerian_Fraud.csv',
+            '../Nigerian_Fraud.csv',
+            'Nigerian_Fraud.csv'
+        ];
+        
+        let pathIndex = 0;
+        
+        function tryNextPath() {
+            if (pathIndex >= csvPaths.length) {
+                console.error('Failed to load CSV from any path');
+                showEmptyState();
+                totalEmailsSpan.textContent = 'Error loading emails';
+                regionInfo.textContent = 'Failed to load authentic Nigerian email data';
+                toast('Error: Could not locate Nigerian_Fraud.csv file. Please ensure it exists in the public folder.', 6000);
+                return;
+            }
+            
+            const currentPath = csvPaths[pathIndex];
+            console.log(`Trying to fetch CSV from: ${currentPath}`);
+            
+            fetch(currentPath)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status} for path: ${currentPath}`);
+                    }
+                    return response.text();
+                })
+                .then(csvText => {
+                    console.log(`Successfully loaded CSV from: ${currentPath}`);
+                    console.log(`CSV content length: ${csvText.length} characters`);
+                    console.log('First 500 characters of CSV:', csvText.substring(0, 500));
+                    
+                    emailData = parseNigerianCSV(csvText);
+                    currentEmailIndex = 0;
+                    
+                    console.log(`Parsed ${emailData.length} emails from CSV`);
+                    if (emailData.length > 0) {
+                        console.log('Sample email:', emailData[0]);
+                        showEmailViewer();
+                        displayCurrentEmail();
+                        updateNavigation();
+                        totalEmailsSpan.textContent = `${emailData.length} authentic emails from Nigerian scammers`;
+                        regionInfo.textContent = `Displaying ${emailData.length} real phishing emails from Lagos, Nigeria`;
+                        toast(`✅ Loaded ${emailData.length} authentic phishing emails from Lagos scammers for educational analysis`, 4000);
+                    } else {
+                        console.log('No valid emails found after parsing');
+                        showEmptyState();
+                        toast('⚠️ CSV file loaded but no valid emails found', 3000);
+                    }
+                })
+                .catch(error => {
+                    console.error(`Error loading CSV from ${currentPath}:`, error);
+                    pathIndex++;
+                    tryNextPath();
+                });
+        }
+        
+        tryNextPath();
+    }
+    
+    function loadSampleEmails(region) {
+        showLoading();
+        currentRegion = region;
+        regionInfo.textContent = `Loading ${region.toUpperCase()} phishing examples...`;
+        
+        // Simulate loading delay
+        setTimeout(() => {
+            emailData = sampleEmailData[region] || [];
+            currentEmailIndex = 0;
+            
+            if (emailData.length > 0) {
+                showEmailViewer();
+                displayCurrentEmail();
+                updateNavigation();
+                totalEmailsSpan.textContent = `${emailData.length} sample emails available`;
+                regionInfo.textContent = `${region.toUpperCase()} sample emails loaded`;
+            } else {
+                showEmptyState();
+            }
+        }, 1000);
+    }
+    
+    function parseNigerianCSV(csvText) {
+        console.log('Starting CSV parsing...');
+        
+        // Parse CSV properly handling multi-line quoted fields
+        const rows = parseCSVText(csvText);
+        console.log(`Total rows in CSV: ${rows.length}`);
+        
+        if (rows.length < 2) {
+            console.error('CSV file has insufficient rows');
+            return [];
+        }
+        
+        // Get headers from first row
+        const headers = rows[0];
+        console.log('CSV Headers:', headers);
+        
+        // Find column indices (case-insensitive search)
+        const senderIndex = headers.findIndex(h => h.toLowerCase().includes('sender') || h.toLowerCase().includes('from'));
+        const receiverIndex = headers.findIndex(h => h.toLowerCase().includes('receiver') || h.toLowerCase().includes('to'));
+        const dateIndex = headers.findIndex(h => h.toLowerCase().includes('date') || h.toLowerCase().includes('time'));
+        const subjectIndex = headers.findIndex(h => h.toLowerCase().includes('subject'));
+        const bodyIndex = headers.findIndex(h => h.toLowerCase().includes('body') || h.toLowerCase().includes('content') || h.toLowerCase().includes('message'));
+        const urlsIndex = headers.findIndex(h => h.toLowerCase().includes('urls') || h.toLowerCase().includes('url'));
+        const labelIndex = headers.findIndex(h => h.toLowerCase().includes('label') || h.toLowerCase().includes('class'));
+        
+        console.log('Column indices:', {
+            sender: senderIndex,
+            receiver: receiverIndex,
+            date: dateIndex,
+            subject: subjectIndex,
+            body: bodyIndex,
+            urls: urlsIndex,
+            label: labelIndex
+        });
+        
+        const emails = [];
+        let validEmails = 0;
+        let invalidEmails = 0;
+        
+        for (let i = 1; i < rows.length; i++) {
+            try {
+                const values = rows[i];
+                if (values.length >= Math.max(senderIndex, subjectIndex, bodyIndex) + 1) {
+                    const email = {
+                        sender: values[senderIndex] || 'Unknown Sender',
+                        receiver: values[receiverIndex] || '',
+                        date: values[dateIndex] || 'Unknown Date',
+                        subject: values[subjectIndex] || 'No Subject',
+                        content: values[bodyIndex] || 'No content available',
+                        urls: values[urlsIndex] || '0',
+                        label: values[labelIndex] || '1'
+                    };
+                    
+                    // Clean up the content
+                    email.subject = email.subject.trim();
+                    email.content = email.content.trim();
+                    email.sender = email.sender.trim();
+                    
+                    // Skip obviously empty or invalid emails
+                    if (email.subject.length > 3 && email.content.length > 10) {
+                        // Add derived fields
+                        email.riskLevel = determineRiskLevel(email);
+                        email.scamType = classifyScamType(email);
+                        emails.push(email);
+                        validEmails++;
+                    } else {
+                        invalidEmails++;
+                    }
+                } else {
+                    invalidEmails++;
+                }
+            } catch (error) {
+                console.error(`Error parsing row ${i}:`, error);
+                invalidEmails++;
+            }
+        }
+        
+        console.log(`CSV parsing complete. Valid emails: ${validEmails}, Invalid emails: ${invalidEmails}`);
+        return emails;
+    }
+    
+    function parseCSVText(csvText) {
+        const rows = [];
+        let currentRow = [];
+        let currentField = '';
+        let insideQuotes = false;
+        let i = 0;
+        
+        while (i < csvText.length) {
+            const char = csvText[i];
+            const nextChar = i < csvText.length - 1 ? csvText[i + 1] : null;
+            
+            if (char === '"') {
+                if (insideQuotes && nextChar === '"') {
+                    // Escaped quote
+                    currentField += '"';
+                    i += 2;
+                    continue;
+                } else {
+                    // Start or end of quoted field
+                    insideQuotes = !insideQuotes;
+                }
+            } else if (char === ',' && !insideQuotes) {
+                // End of field
+                currentRow.push(currentField);
+                currentField = '';
+            } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+                // End of row
+                if (currentField !== '' || currentRow.length > 0) {
+                    currentRow.push(currentField);
+                    if (currentRow.some(field => field.trim() !== '')) {
+                        rows.push(currentRow);
+                    }
+                    currentRow = [];
+                    currentField = '';
+                }
+                // Skip \r\n combinations
+                if (char === '\r' && nextChar === '\n') {
+                    i++;
+                }
+            } else {
+                currentField += char;
+            }
+            i++;
+        }
+        
+        // Add final row if exists
+        if (currentField !== '' || currentRow.length > 0) {
+            currentRow.push(currentField);
+            if (currentRow.some(field => field.trim() !== '')) {
+                rows.push(currentRow);
+            }
+        }
+        
+        return rows;
+    }
+    
+    function determineRiskLevel(email) {
+        const subject = (email.subject || '').toLowerCase();
+        const content = (email.content || '').toLowerCase();
+        
+        const highRiskWords = ['urgent', 'immediate', 'lottery', 'million', 'inheritance', 'wire transfer', 'western union', 'suspended', 'blocked', 'claim', 'beneficiary'];
+        const mediumRiskWords = ['opportunity', 'investment', 'business', 'partnership', 'confidential', 'verify', 'update', 'assistance', 'proposal'];
+        
+        const text = subject + ' ' + content;
+        const highCount = highRiskWords.filter(word => text.includes(word)).length;
+        const mediumCount = mediumRiskWords.filter(word => text.includes(word)).length;
+        
+        if (highCount >= 3) return 'high';
+        if (highCount >= 1 || mediumCount >= 3) return 'medium';
+        return 'low';
+    }
+    
+    function classifyScamType(email) {
+        const subject = (email.subject || '').toLowerCase();
+        const content = (email.content || '').toLowerCase();
+        const text = subject + ' ' + content;
+        
+        if (text.includes('lottery') || text.includes('won') || text.includes('winner') || text.includes('congratulations')) return 'lottery';
+        if (text.includes('inheritance') || text.includes('deceased') || text.includes('will') || text.includes('beneficiary')) return 'inheritance';
+        if (text.includes('business') || text.includes('investment') || text.includes('partnership') || text.includes('proposal')) return 'business';
+        if (text.includes('bank') || text.includes('account') || text.includes('suspended') || text.includes('frozen')) return 'banking';
+        if (text.includes('irs') || text.includes('tax') || text.includes('government') || text.includes('refund')) return 'government';
+        if (text.includes('job') || text.includes('employment') || text.includes('salary') || text.includes('work')) return 'job';
+        if (text.includes('love') || text.includes('relationship') || text.includes('dating') || text.includes('marriage')) return 'romance';
+        if (text.includes('security') || text.includes('virus') || text.includes('update') || text.includes('software')) return 'tech_support';
+        if (text.includes('assistance') || text.includes('help') || text.includes('urgent') || text.includes('confidential')) return 'advance_fee';
+        return 'other';
+    }
+    
+    function displayCurrentEmail() {
+        if (emailData.length === 0 || currentEmailIndex >= emailData.length) return;
+        
+        const email = emailData[currentEmailIndex];
+        
+        // Update display elements
+        emailSubjectDisplay.textContent = email.subject || 'No Subject';
+        emailFromDisplay.innerHTML = `<i class="bi bi-person me-1"></i>${escapeHtml(email.sender || 'Unknown Sender')}`;
+        emailDateDisplay.innerHTML = `<i class="bi bi-calendar me-1"></i>${email.date || 'Unknown Date'}`;
+        
+        // Update badges
+        const typeLabel = email.scamType.charAt(0).toUpperCase() + email.scamType.slice(1).replace('_', ' ');
+        scamTypeBadge.textContent = typeLabel;
+        
+        riskLevelBadge.textContent = `${email.riskLevel.toUpperCase()} RISK`;
+        riskLevelBadge.className = `badge risk-badge risk-${email.riskLevel}`;
+        
+        // Update content with proper formatting
+        const content = email.content || 'No content available';
+        // Convert line breaks to HTML and preserve formatting
+        const formattedContent = escapeHtml(content).replace(/\n/g, '<br>');
+        emailContentDisplay.innerHTML = formattedContent;
+        
+        // Update analysis
+        updateAnalysis(email);
+    }
+    
+    function updateAnalysis(email) {
+        // Generate analysis tags
+        const tags = generateAnalysisTags(email);
+        analysisTagsDisplay.innerHTML = tags.map(tag => 
+            `<span class="analysis-tag ${tag.type}">${tag.text}</span>`
+        ).join('');
+        
+        // Generate explanation
+        const explanation = generateAnalysisExplanation(email);
+        analysisExplanation.innerHTML = explanation;
+    }
+    
+    function generateAnalysisTags(email) {
+        const tags = [];
+        const text = ((email.subject || '') + ' ' + (email.content || '')).toLowerCase();
+        
+        if (text.includes('urgent') || text.includes('immediate')) {
+            tags.push({ text: 'Urgency Tactics', type: 'warning' });
+        }
+        if (text.includes('money') || text.includes('$') || text.includes('million') || text.includes('dollar')) {
+            tags.push({ text: 'Large Money Promise', type: '' });
+        }
+        if (text.includes('confidential') || text.includes('secret') || text.includes('private')) {
+            tags.push({ text: 'False Secrecy', type: 'warning' });
+        }
+        if (text.includes('fee') || text.includes('tax') || text.includes('charge') || text.includes('cost')) {
+            tags.push({ text: 'Advance Fee Request', type: '' });
+        }
+        if (text.includes('beneficiary') || text.includes('inheritance') || text.includes('claim')) {
+            tags.push({ text: 'False Inheritance', type: '' });
+        }
+        if (text.includes('assistance') || text.includes('help') || text.includes('partner')) {
+            tags.push({ text: 'False Partnership', type: 'warning' });
+        }
+        if (text.includes('god') || text.includes('blessing') || text.includes('prayer')) {
+            tags.push({ text: 'Religious Manipulation', type: 'info' });
+        }
+        if (text.includes('bank') || text.includes('account') || text.includes('transfer')) {
+            tags.push({ text: 'Banking Fraud', type: '' });
+        }
+        
+        return tags;
+    }
+    
+    function generateAnalysisExplanation(email) {
+        const riskLevel = email.riskLevel;
+        const scamType = email.scamType;
+        
+        let explanation = `<strong>Risk Assessment: ${riskLevel.toUpperCase()}</strong><br><br>`;
+        
+        if (currentRegion === 'africa') {
+            explanation += '<strong>Authentic Nigerian Scam Email</strong><br>';
+            explanation += 'This is a real phishing email from the Nigerian_Fraud.csv dataset, collected from actual Lagos-based scammers. ';
+        }
+        
+        switch (scamType) {
+            case 'inheritance':
+                explanation += 'Classic "419 scam" or advance fee fraud claiming you are entitled to a large inheritance. The scammer requests upfront fees to process the claim. All such emails are fraudulent.';
+                break;
+            case 'lottery':
+                explanation += 'Lottery scam claiming you\'ve won money in a lottery you never entered. They request personal information and fees to claim "winnings." Legitimate lotteries never work this way.';
+                break;
+            case 'business':
+                explanation += 'Business opportunity scam promising large returns for minimal effort. Often involves money laundering schemes or advance fee fraud disguised as investment opportunities.';
+                break;
+            case 'advance_fee':
+                explanation += 'Advance fee fraud where scammers request upfront payments for promised larger returns. This is the foundation of most Nigerian scams (419 fraud).';
+                break;
+            case 'banking':
+                explanation += 'Banking fraud attempting to steal credentials or convince victims to transfer money. Real banks never communicate this way via email.';
+                break;
+            case 'government':
+                explanation += 'Government impersonation scam. Real government agencies communicate primarily through postal mail and never request immediate payments via email.';
+                break;
+            case 'job':
+                explanation += 'Employment scam offering unrealistic salaries for simple work. Legitimate employers never charge fees for job opportunities.';
+                break;
+            case 'romance':
+                explanation += 'Romance scam where criminals create fake profiles to build relationships and eventually request money for emergencies or travel expenses.';
+                break;
+            case 'tech_support':
+                explanation += 'Tech support scam claiming your computer is infected. They may ask you to download malicious software or provide remote access.';
+                break;
+            default:
+                explanation += 'This email exhibits characteristics typical of advance fee fraud or 419 scams originating from Nigeria. Always verify through official channels.';
+        }
+        
+        if (currentRegion === 'africa') {
+            explanation += '<br><br><strong>Educational Value:</strong> Studying real scam emails like this helps you recognize the language patterns, emotional manipulation tactics, and structural elements that Nigerian scammers commonly use. This authentic data provides invaluable insight into actual criminal operations for training purposes.';
+        }
+        
+        return explanation;
+    }
+    
+    function navigateEmail(direction) {
+        const newIndex = currentEmailIndex + direction;
+        if (newIndex >= 0 && newIndex < emailData.length) {
+            currentEmailIndex = newIndex;
+            displayCurrentEmail();
+            updateNavigation();
+        }
+    }
+    
+    function jumpToEmail() {
+        const emailNumber = parseInt(jumpToInput.value);
+        if (emailNumber >= 1 && emailNumber <= emailData.length) {
+            currentEmailIndex = emailNumber - 1;
+            displayCurrentEmail();
+            updateNavigation();
+            jumpToInput.value = '';
+        } else {
+            toast(`Please enter a number between 1 and ${emailData.length}`, 3000);
+        }
+    }
+    
+    function updateNavigation() {
+        emailCounter.textContent = `Email ${currentEmailIndex + 1} of ${emailData.length}`;
+        prevEmailBtn.disabled = currentEmailIndex === 0;
+        nextEmailBtn.disabled = currentEmailIndex === emailData.length - 1;
+    }
+    
+    function markEmail(type) {
+        const message = type === 'safe' ? 
+            'This email has been marked as a safe example for educational purposes.' :
+            'This email has been marked as dangerous. Great job identifying the threats!';
+        toast(message, 3000);
+    }
+    
+    function showLoading() {
+        emailViewerSection.style.display = 'none';
+        emptyState.style.display = 'none';
+        loadingState.style.display = 'block';
+    }
+    
+    function showEmailViewer() {
+        loadingState.style.display = 'none';
+        emptyState.style.display = 'none';
+        emailViewerSection.style.display = 'block';
+    }
+    
+    function showEmptyState() {
+        loadingState.style.display = 'none';
+        emailViewerSection.style.display = 'none';
+        emptyState.style.display = 'block';
+        totalEmailsSpan.textContent = '0 emails available';
+        regionInfo.textContent = 'Select a region to start';
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+}
+
+function initializeGlobalPatternsQuiz() {
+    const quizButtons = document.querySelectorAll('.quiz-btn');
+    const quizResult = document.getElementById('quizResult');
+    
+    if (!quizButtons.length) return; // Quiz section was removed
+    
+    quizButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const selectedAnswer = this.dataset.answer;
+            const correctAnswer = 'africa'; // The lottery scam example is from Africa
+            
+            // Remove any previous classes
+            quizButtons.forEach(btn => {
+                btn.classList.remove('correct', 'incorrect');
+            });
+            
+            // Mark correct and incorrect answers
+            quizButtons.forEach(btn => {
+                if (btn.dataset.answer === correctAnswer) {
+                    btn.classList.add('correct');
+                } else if (btn.dataset.answer === selectedAnswer && selectedAnswer !== correctAnswer) {
+                    btn.classList.add('incorrect');
+                }
+            });
+            
+            // Show result
+            if (selectedAnswer === correctAnswer) {
+                quizResult.innerHTML = `
+                    <div class="correct-answer">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <strong>Correct!</strong> This is a classic African "419 scam" pattern involving lottery winnings and upfront fees.
+                    </div>
+                `;
+                quizResult.style.background = 'rgba(76, 196, 83, 0.1)';
+            } else {
+                quizResult.innerHTML = `
+                    <div class="incorrect-answer">
+                        <i class="bi bi-x-circle-fill"></i>
+                        <strong>Incorrect.</strong> This is actually a classic African "419 scam" pattern. These scams typically involve lottery winnings, inheritance claims, or business opportunities that require upfront fees.
+                    </div>
+                `;
+                quizResult.style.background = 'rgba(255, 91, 91, 0.1)';
+                quizResult.style.color = '#ff5b5b';
+            }
+            
+            quizResult.style.display = 'block';
+            
+            // Add educational information
+            setTimeout(() => {
+                const educationalNote = document.createElement('div');
+                educationalNote.className = 'educational-note mt-3';
+                educationalNote.innerHTML = `
+                    <h6><i class="bi bi-lightbulb"></i> Did you know?</h6>
+                    <p>The "419 scam" gets its name from Section 419 of the Nigerian Criminal Code. These scams have been around since the 1980s and have evolved from letters to emails and now social media messages.</p>
+                `;
+                if (!quizResult.querySelector('.educational-note')) {
+                    quizResult.appendChild(educationalNote);
+                }
+            }, 1000);
+        });
+    });
+}

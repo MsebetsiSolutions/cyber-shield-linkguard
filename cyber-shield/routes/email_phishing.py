@@ -37,6 +37,7 @@ def generate_phishing_email():
     if not first_name or not last_name or not email:
         return jsonify({'error': 'Provide the required fields: firstName, lastName and email'}), 400
 
+    
     # Load platform-specific template if available, otherwise fallback to generic
     template_html = load_template(f'{platform}-template.html')
     if not template_html:
@@ -73,20 +74,13 @@ def generate_phishing_email():
 def send_phishing_email():
     try:
         data = request.get_json()
-        from_email = data.get('from')
         to_email = data.get('to')
         subject = data.get('subject')
         html_content = data.get('html_content')
         email_type = data.get('type')
-
+        
         if not to_email:
             return jsonify({'error': 'Recipient email is required'}), 400
-
-        # Simulate sending (log)
-        print('Simulated email send:')
-        print(f'From: {from_email}')
-        print(f'To: {to_email}')
-        print(f'Subject: {subject}')
         
         
         try:
@@ -94,7 +88,8 @@ def send_phishing_email():
 
             email = (EmailBuilder().from_email('test@test-ywj2lpnwmmqg7oqz.mlsender.net', 'Test User').to(to_email)).subject(subject).html(html_content).build()
 
-            response =ms.emails.send(email)
+            print(f'Email content {email}')
+            response = ms.emails.send(email)
 
             if response.status_code == 202:
                 print("Email sent successfully!")
