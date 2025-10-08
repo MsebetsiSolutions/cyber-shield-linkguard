@@ -30,7 +30,7 @@ async function fetchWithSession(path, opts={}) {
   }
 }
 
-// Set user UI (Updated to match ScannerDash's user dropdown)
+// Set user UI
 const welcomeMessage = $('welcomeMessage');
 const userNameDisplay = $('userNameDisplay');
 const logoutBtn = $('logout'); 
@@ -44,8 +44,8 @@ function setUserUI(userData){
     const welcomeText = `Welcome, ${userData.full_name || userData.email}!`;
     const displayName = userData.full_name || userData.email.split('@')[0];
     
-    welcomeMessage.textContent = welcomeText;
-    userNameDisplay.textContent = displayName;
+    if (welcomeMessage) welcomeMessage.textContent = welcomeText;
+    if (userNameDisplay) userNameDisplay.textContent = displayName;
     
     console.log('User UI updated:', {
       welcomeText,
@@ -54,8 +54,8 @@ function setUserUI(userData){
     });
 
   } else { 
-    welcomeMessage.textContent = ''; 
-    userNameDisplay.textContent = 'User Name'; 
+    if (welcomeMessage) welcomeMessage.textContent = ''; 
+    if (userNameDisplay) userNameDisplay.textContent = 'User Name'; 
     console.log('User not authenticated, using fallback');
   }
 }
@@ -81,29 +81,30 @@ function handleLogout() {
   setUserUI(null); 
   toast('Signed out');
   setTimeout(() => {
-    window.location.href = '../index.html';
+    window.location.href = '../../index.html';
   }, 1000);
 }
 
-// Attach logout event listener
-logoutBtn.addEventListener('click', handleLogout);
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', handleLogout);
+}
 
-userDropdownBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
-});
+if (userDropdownBtn && userDropdown) {
+  userDropdownBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
+  });
 
-// Close dropdowns when clicking outside
-document.addEventListener('click', (e) => {
-  if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-    userDropdown.style.display = 'none';
-  }
-});
+  document.addEventListener('click', (e) => {
+    if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+      userDropdown.style.display = 'none';
+    }
+  });
 
-// Prevent dropdown from closing when clicking inside it
-userDropdown.addEventListener('click', (e) => {
-  e.stopPropagation();
-});
+  userDropdown.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+}
 
 // Display selected plan info
 function displaySelectedPlan() {
@@ -117,20 +118,21 @@ function displaySelectedPlan() {
     return;
   }
   
-  $('planName').textContent = selectedPlan.name;
-  $('planPrice').textContent = `R${selectedPlan.price} / month`;
+  if ($('planNameDisplay')) $('planNameDisplay').textContent = selectedPlan.name;
+  if ($('planPriceDisplay')) $('planPriceDisplay').textContent = `R${selectedPlan.price} / month`;
   
-  // Calculate and display annual price
   const monthlyPrice = parseFloat(selectedPlan.price);
   const annualPrice = monthlyPrice * 12;
-  $('annualPrice').textContent = `R${annualPrice.toFixed(2)}`;
+  if ($('annualPriceDisplay')) $('annualPriceDisplay').textContent = `R${annualPrice.toFixed(2)}`;
   
-  $('finalAmount').textContent = `R${annualPrice.toFixed(2)}`;
+  if ($('finalAmount')) $('finalAmount').textContent = `R${annualPrice.toFixed(2)}`;
 }
 
 // Detect card type based on number
 function detectCardType(cardNumber) {
   const cardTypeElement = $('cardType');
+  if (!cardTypeElement) return 'unknown';
+  
   const patterns = {
     visa: /^4/,
     mastercard: /^5[1-5]/,
@@ -212,7 +214,6 @@ async function calculateEnterprisePrice(teamSize) {
     }
   } catch (error) {
     console.error('Error calculating enterprise price:', error);
-    // Fallback calculation
     const basePrice = 2750;
     const totalPrice = basePrice * teamSize;
     return {
@@ -224,89 +225,135 @@ async function calculateEnterprisePrice(teamSize) {
   }
 }
 
-// Update price display in modal
+// price display in modal
 async function updatePriceDisplay(teamSize) {
   const priceData = await calculateEnterprisePrice(teamSize);
   
-  $('displayTeamSize').textContent = teamSize;
-  $('basePrice').textContent = `R${priceData.base_price.toFixed(2)}`;
-  $('monthlyTotal').textContent = `R${priceData.total_price.toFixed(2)}`;
-  $('annualTotal').textContent = `R${priceData.annual_price.toFixed(2)}`;
+  if ($('displayTeamSize')) $('displayTeamSize').textContent = teamSize;
+  if ($('basePrice')) $('basePrice').textContent = `R${priceData.base_price.toFixed(2)}`;
+  if ($('monthlyTotal')) $('monthlyTotal').textContent = `R${priceData.total_price.toFixed(2)}`;
+  if ($('annualTotal')) $('annualTotal').textContent = `R${priceData.annual_price.toFixed(2)}`;
   
-  // Calculate discount
   const baseTotal = priceData.base_price * teamSize;
   const discount = baseTotal - priceData.total_price;
-  $('discountAmount').textContent = `R${discount.toFixed(2)}`;
+  if ($('discountAmount')) $('discountAmount').textContent = `R${discount.toFixed(2)}`;
   
   return priceData;
 }
 
-// Generate PDF invoice
+// Generate PDF invoice 
 function generateInvoicePDF(companyData, teamSize, priceData) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   
-  // Add logo
-  doc.addImage('../../assets/CYBER_SHIELD_LINKGUARD2.png', 'PNG', 15, 15, 40, 15);
+  // Set African color scheme for PDF
+  const primaryColor = [212, 175, 55]; 
+  const secondaryColor = [139, 69, 19]; 
+  const accentColor = [34, 139, 34]; 
   
-  // Title
+  // Add header with African pattern
+  doc.setFillColor(15, 76, 58); 
+  doc.rect(0, 0, 210, 30, 'F');
+  
+  try {
+    doc.addImage('../../assets/CYBER_SHIELD_LINKGUARD2.png', 'PNG', 15, 8, 40, 15);
+  } catch (e) {
+    console.log('Logo not available for PDF');
+  }
+  
+  // Title with African colors
   doc.setFontSize(20);
-  doc.setTextColor(59, 130, 246);
-  doc.text('ENTERPRISE SUBSCRIPTION QUOTE', 105, 30, { align: 'center' });
-  
-  // Company information
-  doc.setFontSize(12);
-  doc.setTextColor(0, 0, 0);
-  doc.text(`Company: ${companyData.name}`, 20, 50);
-  doc.text(`Registration Number: ${companyData.regNumber}`, 20, 57);
-  doc.text(`Address: ${companyData.address}`, 20, 64);
-  doc.text(`Industry: ${companyData.industry}`, 20, 71);
-  doc.text(`VAT Number: ${companyData.vatNumber || 'Not provided'}`, 20, 78);
-  
-  // Billing information
-  doc.text(`Billing Contact: ${companyData.billingName}`, 20, 90);
-  doc.text(`Billing Email: ${companyData.billingEmail}`, 20, 97);
-  doc.text(`Billing Phone: ${companyData.billingPhone}`, 20, 104);
-  doc.text(`Billing Department: ${companyData.billingDepartment}`, 20, 111);
-  
-  // Price details
-  doc.setFontSize(14);
-  doc.setTextColor(59, 130, 246);
-  doc.text('PRICING DETAILS', 105, 125, { align: 'center' });
+  doc.setTextColor(212, 175, 55);
+  doc.text('ENTERPRISE QUOTE', 105, 20, { align: 'center' });
   
   doc.setFontSize(12);
   doc.setTextColor(0, 0, 0);
-  doc.text(`Team Size: ${teamSize} members`, 20, 135);
-  doc.text(`Base Price per Member: R${priceData.base_price.toFixed(2)}`, 20, 142);
-  doc.text(`Monthly Total: R${priceData.total_price.toFixed(2)}`, 20, 149);
-  doc.text(`Annual Total: R${priceData.annual_price.toFixed(2)}`, 20, 156);
   
-  // Terms and conditions
-  doc.setFontSize(10);
-  doc.setTextColor(100, 100, 100);
-  doc.text('This is a quotation for enterprise subscription services. Final invoice will be generated after', 20, 170);
-  doc.text('confirmation from our sales team. Terms and conditions apply.', 20, 175);
+  doc.setFont(undefined, 'bold');
+  doc.text('COMPANY INFORMATION', 20, 45);
+  doc.setFont(undefined, 'normal');
+  doc.text(`Company Name: ${companyData.name}`, 25, 55);
+  doc.text(`Registration Number: ${companyData.regNumber}`, 25, 62);
+  doc.text(`Address: ${companyData.address}`, 25, 69);
+  doc.text(`Industry: ${companyData.industry}`, 25, 76);
+  doc.text(`VAT Number: ${companyData.vatNumber || 'Not provided'}`, 25, 83);
   
-  // Footer
+  doc.setFont(undefined, 'bold');
+  doc.text('BILLING INFORMATION', 110, 45);
+  doc.setFont(undefined, 'normal');
+  doc.text(`Billing Contact: ${companyData.billingName}`, 115, 55);
+  doc.text(`Billing Email: ${companyData.billingEmail}`, 115, 62);
+  doc.text(`Billing Phone: ${companyData.billingPhone}`, 115, 69);
+  doc.text(`Billing Department: ${companyData.billingDepartment}`, 115, 76);
+  
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+  doc.text('BANK TRANSFER DETAILS', 105, 95, { align: 'center' });
+  
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(0, 0, 0);
+  doc.text('Bank: FNB Business Cheque', 20, 105);
+  doc.text('Account Number: 62467764827', 20, 112);
+  doc.text('Account Holder: Msebetsi Solutions', 20, 119);
+  doc.text('Branch Code: 253305 (Rosebank)', 20, 126);
+  doc.text('Email: tshepho@msebetsisolutions.com', 20, 133);
+  
+  doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  doc.rect(15, 140, 180, 8, 'F');
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.text('PRICING DETAILS', 105, 146, { align: 'center' });
+  
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(0, 0, 0);
+  doc.text(`Team Size: ${teamSize} members`, 20, 160);
+  doc.text(`Base Price per Member: R${priceData.base_price.toFixed(2)}`, 20, 167);
+  doc.text(`Monthly Total: R${priceData.total_price.toFixed(2)}`, 20, 174);
+  doc.text(`Annual Total: R${priceData.annual_price.toFixed(2)}`, 20, 181);
+  
+  doc.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
+  doc.rect(15, 190, 180, 8, 'F');
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.text('PAYMENT INSTRUCTIONS', 105, 196, { align: 'center' });
+  
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(0, 0, 0);
+  doc.text('1. Make an EFT payment to the bank account details provided above', 20, 208);
+  doc.text('2. Use your company name as the payment reference', 20, 215);
+  doc.text('3. Email the proof of payment to tshepho@msebetsisolutions.com', 20, 222);
+  doc.text('4. Your subscription will be activated within 24 hours of payment confirmation', 20, 229);
+  
+  doc.setFillColor(15, 76, 58);
+  doc.rect(0, 270, 210, 30, 'F');
   doc.setFontSize(8);
-  doc.text('© Msebetsi Solutions Pty Ltd - Cyber Shield LinkGuard Enterprise', 105, 280, { align: 'center' });
-  doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 105, 285, { align: 'center' });
+  doc.setTextColor(212, 175, 55);
+  doc.text('© Msebetsi Solutions Pty Ltd - Cyber Shield LinkGuard Enterprise', 105, 278, { align: 'center' });
+  doc.text(`Generated on: ${new Date().toLocaleDateString('en-ZA')}`, 105, 283, { align: 'center' });
   
-  // Save the PDF
-  doc.save(`CyberShield-Enterprise-Quote-${companyData.name}.pdf`);
+  const fileName = `CyberShield-Enterprise-Quote-${companyData.name.replace(/\s+/g, '-')}.pdf`;
+  doc.save(fileName);
+  
+  return fileName;
 }
 
-// Handle invoice request
+// Handle invoice request - UPDATED: No database interaction
 function setupInvoiceRequest() {
-  const invoiceRequestBtn = $('invoiceRequestBtn');
+  const requestInvoiceBtn = $('requestInvoiceBtn');
   const confirmInvoiceRequest = $('confirmInvoiceRequest');
   const teamSizeSelect = $('teamSize');
-  const invoiceModal = new bootstrap.Modal($('invoiceModal'));
+  const invoiceModalElement = $('invoiceModal');
+  
+  if (!requestInvoiceBtn || !confirmInvoiceRequest || !teamSizeSelect || !invoiceModalElement) {
+    console.log('Invoice request elements not found');
+    return;
+  }
+  
+  const invoiceModal = new bootstrap.Modal(invoiceModalElement);
   let currentPriceData = null;
   
-  invoiceRequestBtn.addEventListener('click', () => {
+  requestInvoiceBtn.addEventListener('click', () => {
     invoiceModal.show();
-    // Initialize with default team size
     updatePriceDisplay(1).then(data => {
       currentPriceData = data;
     });
@@ -318,81 +365,60 @@ function setupInvoiceRequest() {
   });
   
   confirmInvoiceRequest.addEventListener('click', async () => {
-    if (!$('invoiceAgreement').checked) {
+    const invoiceAgreement = $('invoiceAgreement');
+    if (!invoiceAgreement.checked) {
       toast('Please agree to be contacted by our sales team');
       return;
     }
     
-    const teamSize = parseInt($('teamSize').value);
-    const selectedPlan = JSON.parse(localStorage.getItem('selectedPlan') || '{}');
+    const companyName = $('modalCompanyName').value;
+    const regNumber = $('modalCompanyRegNumber').value;
+    const address = $('modalCompanyAddress').value;
+    const industry = $('modalIndustry').value;
     
-    // Collect company information
+    if (!companyName || !regNumber || !address || !industry) {
+      toast('Please fill in all required company information fields');
+      return;
+    }
+    
+    const teamSize = parseInt(teamSizeSelect.value);
+    
     const companyData = {
-      name: $('companyName').value,
-      regNumber: $('companyRegNumber').value,
-      address: $('companyAddress').value,
-      vatNumber: $('vatNumber').value,
-      industry: $('industry').value,
-      employees: $('employees').value,
-      billingName: $('billingName').value,
-      billingEmail: $('billingEmail').value,
-      billingPhone: $('billingPhone').value,
-      billingDepartment: $('billingDepartment').value
+      name: companyName,
+      regNumber: regNumber,
+      address: address,
+      vatNumber: $('modalVatNumber').value,
+      industry: industry,
+      employees: "To be specified",
+      billingName: companyName, 
+      billingEmail: "To be provided",
+      billingPhone: "To be provided",
+      billingDepartment: "To be provided"
     };
     
-    // Show loading state
     confirmInvoiceRequest.innerHTML = '<i class="bi bi-arrow-repeat spinner"></i> Generating PDF...';
     confirmInvoiceRequest.disabled = true;
     
     try {
-      // Generate PDF invoice
-      generateInvoicePDF(companyData, teamSize, currentPriceData);
+      const fileName = generateInvoicePDF(companyData, teamSize, currentPriceData);
       
-      // Create enterprise subscription with plan_mode 3
-      const subscriptionData = {
-        plan_id: 'enterprise',
-        plan_name: 'Enterprise Team',
-        plan_code: 'ENT_TEAM',
-        price: currentPriceData.total_price,
-        team_size: teamSize
-      };
+      invoiceModal.hide();
+      toast(`Invoice generated successfully! File: ${fileName}`);
       
-      const response = await fetchWithSession('/api/subscription/create', {
-        method: 'POST',
-        body: JSON.stringify(subscriptionData)
-      });
+      confirmInvoiceRequest.innerHTML = 'Generate & Download PDF Invoice';
+      confirmInvoiceRequest.disabled = false;
       
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Enterprise subscription created:', result);
-        
-        // Clear selected plan from storage
-        localStorage.removeItem('selectedPlan');
-        
-        invoiceModal.hide();
-        toast('Invoice generated and enterprise subscription created! Our sales team will contact you within 24 hours.');
-        
-        // Redirect to start page after successful request
-        setTimeout(() => {
-          window.location.href = '../start-enter/start-enter.html';
-        }, 3000);
-      } else {
-        throw new Error('Failed to create subscription');
-      }
     } catch (error) {
-      console.error('Invoice request error:', error);
-      toast('Invoice request failed. Please try again.');
+      console.error('Invoice generation error:', error);
+      toast('Invoice generation failed. Please try again.');
       
-      // Reset button state
-      confirmInvoiceRequest.innerHTML = 'Confirm Request & Download PDF';
+      confirmInvoiceRequest.innerHTML = 'Generate & Download PDF Invoice';
       confirmInvoiceRequest.disabled = false;
     }
   });
 }
 
-// Add validation functions
 function isValidCardNumber(cardNumber) {
-  // Basic Luhn algorithm validation
   let sum = 0;
   let isEven = false;
   
@@ -428,89 +454,6 @@ function isValidExpiryDate(expiryDate) {
   return true;
 }
 
-// Payment form handling - Enhanced version
-$('paymentForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const selectedPlan = JSON.parse(localStorage.getItem('selectedPlan') || '{}');
-  const cardNumber = $('cardNumber').value.replace(/\s/g, '');
-  const cardName = $('cardName').value;
-  const expiryDate = $('expiryDate').value;
-  const cvv = $('cvv').value;
-  const zipCode = $('zipCode').value;
-  const email = $('billingEmail').value;
-  
-  // Enhanced validation
-  if (!cardNumber || !cardName || !expiryDate || !cvv || !zipCode || !email) {
-    toast('Please fill in all required fields');
-    return;
-  }
-  
-  // Validate card number (basic Luhn algorithm check)
-  if (!isValidCardNumber(cardNumber)) {
-    toast('Please enter a valid card number');
-    return;
-  }
-  
-  // Validate expiry date
-  if (!isValidExpiryDate(expiryDate)) {
-    toast('Please enter a valid expiration date (MM/YY)');
-    return;
-  }
-  
-  if (!$('termsAgreement').checked) {
-    toast('Please agree to the Terms of Service and Enterprise Agreement');
-    return;
-  }
-  
-  // Show loading state
-  const submitBtn = $('paymentForm').querySelector('button[type="submit"]');
-  const originalText = submitBtn.innerHTML;
-  submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spinner"></i> Processing...';
-  submitBtn.disabled = true;
-  
-  try {
-    // Create enterprise subscription with plan_mode 3
-    const subscriptionData = {
-      plan_id: 'enterprise',
-      plan_name: selectedPlan.name || 'Enterprise',
-      plan_code: selectedPlan.code || 'ENTERPRISE',
-      price: parseFloat(selectedPlan.price) || 2750,
-      team_size: 1 // Default team size for direct payment
-    };
-    
-    const response = await fetchWithSession('/api/subscription/create', {
-      method: 'POST',
-      body: JSON.stringify(subscriptionData)
-    });
-    
-    const result = await response.json();
-    
-    if (response.ok) {
-      console.log('Subscription created:', result);
-      
-      // Clear selected plan from storage
-      localStorage.removeItem('selectedPlan');
-      
-      toast('Payment successful! Your enterprise subscription has been activated.');
-      
-      // Redirect to start page after successful payment
-      setTimeout(() => {
-        window.location.href = '../start-enter/start-enter.html';
-      }, 2000);
-    } else {
-      throw new Error(result.error || 'Payment failed');
-    }
-  } catch (error) {
-    console.error('Payment error:', error);
-    toast(error.message || 'Payment failed. Please try again.');
-    
-    // Reset button state
-    submitBtn.innerHTML = originalText;
-    submitBtn.disabled = false;
-  }
-});
-
 // Initialize payment page
 (async function boot(){
   console.log('Enterprise Payment page initializing...');
@@ -527,34 +470,39 @@ $('paymentForm').addEventListener('submit', async (e) => {
         setUserUI(userData); 
         displaySelectedPlan();
         
-        // Set up event listeners for formatters
-        $('cardNumber').addEventListener('input', (e) => {
-          e.target.value = formatCardNumber(e.target.value);
-          detectCardType(e.target.value);
-        });
+        const cardNumberInput = $('cardNumber');
+        if (cardNumberInput) {
+          cardNumberInput.addEventListener('input', (e) => {
+            e.target.value = formatCardNumber(e.target.value);
+            detectCardType(e.target.value);
+          });
+        }
         
-        $('expiryDate').addEventListener('input', (e) => {
-          e.target.value = formatExpiryDate(e.target.value);
-        });
+        const expiryDateInput = $('expiryDate');
+        if (expiryDateInput) {
+          expiryDateInput.addEventListener('input', (e) => {
+            e.target.value = formatExpiryDate(e.target.value);
+          });
+        }
         
-        // Set up invoice request
         setupInvoiceRequest();
         
         console.log('Enterprise Payment page initialized successfully');
         return;
       } else {
-        console.log('User not authenticated, redirecting to login');
-        window.location.href = '../index.html';
+        console.log('User not authenticated, but staying on page for enterprise payment');
+        displaySelectedPlan();
         return;
       }
     } else {
-      console.log('Auth check failed, redirecting to login');
-      window.location.href = '../index.html';
+      console.log('Auth check failed, but staying on page for enterprise payment');
+      displaySelectedPlan();
       return;
     }
   } catch(e) {
     console.error('Failed to fetch user info', e);
-    window.location.href = '../index.html';
+    console.log('Error occurred, but staying on page for enterprise payment');
+    displaySelectedPlan();
     return;
   }
 })();
