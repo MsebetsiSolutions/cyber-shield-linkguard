@@ -311,6 +311,144 @@ def update_user():
         conn.close()
         return jsonify({'error': str(e)}), 500
 
+@admin_bp.route('/admin/api/update-user-plan', methods=['POST'])
+@admin_login_required
+def update_user_plan():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    plan_mode = data.get('plan_mode')
+    
+    print(f"Received update request - User ID: {user_id}, Plan Mode: {plan_mode}")  
+    
+    if not all([user_id, plan_mode is not None]):
+        return jsonify({'error': 'Missing parameters'}), 400
+    
+    try:
+        plan_mode = int(plan_mode)
+        if plan_mode not in [0, 1, 2, 3]:
+            return jsonify({'error': 'Invalid plan mode. Must be 0, 1, 2, or 3'}), 400
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Plan mode must be a valid integer'}), 400
+    
+    conn = get_db_connection()
+    try:
+        user = conn.execute('SELECT id, email FROM users WHERE id = ?', (user_id,)).fetchone()
+        if not user:
+            conn.close()
+            return jsonify({'error': 'User not found'}), 404
+        
+        plan_details = {
+            0: {
+                'sub_plan': 'Free Tier',
+                'plan_code': 'CSLG-FREE-001',
+                'price': 0.0,
+                'team_size': 1
+            },
+            1: {
+                'sub_plan': 'Pro Tier',
+                'plan_code': 'CSLG-PRO-002',
+                'price': 75.0,
+                'team_size': 1
+            },
+            2: {
+                'sub_plan': 'Team Tier',
+                'plan_code': 'CSLG-TEAM-003',
+                'price': 200.0,
+                'team_size': 5
+            },
+            3: {
+                'sub_plan': 'Enterprise Tier',
+                'plan_code': 'CSLG-ENT-004',
+                'price': 2750.0,
+                'team_size': 50
+            }
+        }
+        
+        plan_info = plan_details[plan_mode]
+        
+        expiry_date = (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d %H:%M:%S')
+        created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        conn.execute('UPDATE users SET Plan_Mode = ? WHERE id = ?', (plan_mode, user_id))
+        
+        existing_sub = conn.execute(
+            'SELECT sub_id FROM subscriptions WHERE user_id = ? AND plan_active = 1',
+            (user_id,)
+        ).fetchone()
+        
+        if existing_sub:
+            conn.execute('''
+                UPDATE subscriptions 
+                SET sub_plan = ?, plan_code = ?, price = ?, date_expiry = ?, 
+                    plan_active = 1, team_size = ?, increased = NULL
+                WHERE user_id = ? AND plan_active = 1
+            ''', (
+                plan_info['sub_plan'],
+                plan_info['plan_code'],
+                plan_info['price'],
+                expiry_date,
+                plan_info['team_size'],
+                user_id
+            ))
+            subscription_id = existing_sub['sub_id']
+        else:
+            cursor = conn.execute('''
+                INSERT INTO subscriptions 
+                (user_id, sub_plan, plan_code, price, date_expiry, plan_active, team_size, created_at, increased)
+                VALUES (?, ?, ?, ?, ?, 1, ?, ?, NULL)
+            ''', (
+                user_id,
+                plan_info['sub_plan'],
+                plan_info['plan_code'],
+                plan_info['price'],
+                expiry_date,
+                plan_info['team_size'],
+                created_at
+            ))
+            subscription_id = cursor.lastrowid
+        
+        if plan_info['price'] > 0:
+            import random
+            import string
+            transaction_id = 'CSLG-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
+            
+            conn.execute('''
+                INSERT INTO payments 
+                (user_id, subscription_id, amount, currency, payment_method, status, transaction_id, created_at, card_last_four)
+                VALUES (?, ?, ?, 'ZAR', 'EFT', 'completed', ?, ?, NULL)
+            ''', (
+                user_id,
+                subscription_id,
+                plan_info['price'],
+                transaction_id,
+                created_at
+            ))
+        
+        conn.commit()
+        
+        conn.execute('''
+            INSERT INTO audit_logs (user_id, action, description, ip_address) 
+            VALUES (?, ?, ?, ?)
+        ''', (session.get('admin_id'), 'admin_plan_update', 
+              f'Admin updated user {user_id} ({user["email"]}) plan to {plan_mode} ({plan_info["sub_plan"]})', 
+              request.remote_addr))
+        conn.commit()
+        
+        conn.close()
+        
+        plan_names = ["Free", "Pro", "Team", "Enterprise"]
+        response_message = f'Plan updated successfully to {plan_names[plan_mode]}'
+        if plan_info['price'] > 0:
+            response_message += f'. Payment of ZAR {plan_info["price"]} recorded.'
+        
+        return jsonify({'success': True, 'message': response_message})
+        
+    except Exception as e:
+        print(f"Error updating user plan: {str(e)}")  
+        conn.close()
+        return jsonify({'error': str(e)}), 500
+
+
 @admin_bp.route('/admin/api/delete-user', methods=['POST'])
 @admin_login_required
 def delete_user():

@@ -1,63 +1,62 @@
-const $ = id => document.getElementById(id);
-const show = el => el.classList.remove('hidden');
-const hide = el => el.classList.add('hidden');
+const $ = (id) => document.getElementById(id);
+const show = (el) => el.classList.remove("hidden");
+const hide = (el) => el.classList.add("hidden");
 const toast = (msg, ms = 2000) => {
-  const t = $('toast');
+  const t = $("toast");
   t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), ms);
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), ms);
 };
 // Session-based fetch function
 async function fetchWithSession(path, opts = {}) {
   const headers = {
-    'Content-Type': 'application/json',
-    ...opts.headers
+    "Content-Type": "application/json",
+    ...opts.headers,
   };
   try {
     const response = await fetch(path, {
       ...opts,
       headers,
-      credentials: 'include'
+      credentials: "include",
     });
     return response;
   } catch (error) {
-    console.error('Fetch error:', error);
+    console.error("Fetch error:", error);
     throw error;
   }
 }
 
 // Set user UI
-const welcomeMessage = $('welcomeMessage');
-const userNameDisplay = $('userNameDisplay');
-const logoutBtn = $('logout');
-const scanCounterEl = $('scanCounter');
-const remainingScansEl = $('remainingScans');
-const currentPlanBanner = $('currentPlanBanner');
-const currentPlanText = $('currentPlanText');
-const manageSubscriptionBtn = $('manageSubscriptionBtn');
+const welcomeMessage = $("welcomeMessage");
+const userNameDisplay = $("userNameDisplay");
+const logoutBtn = $("logout");
+const scanCounterEl = $("scanCounter");
+const remainingScansEl = $("remainingScans");
+const currentPlanBanner = $("currentPlanBanner");
+const currentPlanText = $("currentPlanText");
+const manageSubscriptionBtn = $("manageSubscriptionBtn");
 
 function setUserUI(userData) {
-  console.log('Setting user UI with data:', userData);
+  console.log("Setting user UI with data:", userData);
   if (userData && userData.authenticated) {
     const welcomeText = `Welcome, ${userData.full_name || userData.email}!`;
-    const displayName = userData.full_name || userData.email.split('@')[0];
+    const displayName = userData.full_name || userData.email.split("@")[0];
     if (welcomeMessage) welcomeMessage.textContent = welcomeText;
     if (userNameDisplay) userNameDisplay.textContent = displayName;
-    console.log('User UI updated:', {
+    console.log("User UI updated:", {
       welcomeText,
       displayName,
       full_name: userData.full_name,
-      plan_mode: userData.plan_mode
+      plan_mode: userData.plan_mode,
     });
-    // Update current plan display based on plan_mode
+
     updateCurrentPlanDisplay(userData.plan_mode);
     updatePlanBadge(userData.plan_mode);
-    // Control visibility of Increase Scans button
     controlIncreaseScansButton(userData.plan_mode);
   } else {
-    if (welcomeMessage) welcomeMessage.textContent = '';
-    if (userNameDisplay) userNameDisplay.textContent = 'User Name';
-    console.log('User not authenticated, using fallback');
+    if (welcomeMessage) welcomeMessage.textContent = "";
+    if (userNameDisplay) userNameDisplay.textContent = "User Name";
+    console.log("User not authenticated, using fallback");
   }
 }
 
@@ -65,11 +64,9 @@ function setUserUI(userData) {
 function controlIncreaseScansButton(planMode) {
   if (manageSubscriptionBtn) {
     if (planMode === 0) {
-      // Show button for free tier users
-      manageSubscriptionBtn.classList.remove('hidden');
+      manageSubscriptionBtn.classList.remove("hidden");
     } else {
-      // Hide button for paid users (plan_mode 1, 2, or 3)
-      manageSubscriptionBtn.classList.add('hidden');
+      manageSubscriptionBtn.classList.add("hidden");
     }
   }
 }
@@ -77,79 +74,86 @@ function controlIncreaseScansButton(planMode) {
 // Update current plan display based on plan_mode
 function updateCurrentPlanDisplay(planMode) {
   const planMap = {
-    0: { name: 'Free Tier', badgeId: 'freeBadge' },
-    1: { name: 'Pro Tier', badgeId: 'proBadge' },
-    2: { name: 'Team Tier', badgeId: 'teamBadge' },
-    3: { name: 'Enterprise Tier', badgeId: 'enterpriseBadge' }
+    0: { name: "Free Tier", badgeId: "freeBadge" },
+    1: { name: "Pro Tier", badgeId: "proBadge" },
+    2: { name: "Team Tier", badgeId: "teamBadge" },
+    3: { name: "Enterprise Tier", badgeId: "enterpriseBadge" },
   };
+
   const currentPlan = planMap[planMode] || planMap[0];
-  // Update banner text
   if (currentPlanText) {
     currentPlanText.textContent = `You're currently on the ${currentPlan.name} plan`;
   }
-  // Remove current plan styling from all cards
-  document.querySelectorAll('.plan-card').forEach(card => {
-    card.classList.remove('current-plan', 'pulse-animation');
-    const badge = card.querySelector('.plan-badge.current-badge');
+
+  document.querySelectorAll(".plan-card").forEach((card) => {
+    card.classList.remove("current-plan", "pulse-animation");
+    const badge = card.querySelector(".plan-badge.current-badge");
     if (badge) {
-      badge.style.display = 'none';
+      badge.style.display = "none";
     }
   });
-  // Apply current plan styling to the correct card
-  const currentPlanCard = document.querySelector(`.plan-card[data-plan-id="${Object.keys(planMap).find(key => planMap[key].name === currentPlan.name).toLowerCase()}"]`);
+
+  const currentPlanCard = document.querySelector(
+    `.plan-card[data-plan-id="${Object.keys(planMap)
+      .find((key) => planMap[key].name === currentPlan.name)
+      .toLowerCase()}"]`
+  );
   if (currentPlanCard) {
-    currentPlanCard.classList.add('current-plan', 'pulse-animation');
-    // Show the current badge
-    const badge = currentPlanCard.querySelector('.plan-badge.current-badge');
+    currentPlanCard.classList.add("current-plan", "pulse-animation");
+    const badge = currentPlanCard.querySelector(".plan-badge.current-badge");
     if (badge) {
-      badge.style.display = 'block';
+      badge.style.display = "block";
     }
   }
 }
 
 // Update plan badge in header
 function updatePlanBadge(planMode) {
-  const planBadge = document.getElementById('planMode');
+  const planBadge = document.getElementById("planMode");
   if (!planBadge) return;
   const planMap = {
-    0: { text: 'FREE PLAN', class: 'free-plan' },
-    1: { text: 'PRO PLAN', class: 'pro-plan' },
-    2: { text: 'TEAM PLAN', class: 'team-plan' },
-    3: { text: 'ENTERPRISE', class: 'enterprise-plan' }
+    0: { text: "FREE PLAN", class: "free-plan" },
+    1: { text: "PRO PLAN", class: "pro-plan" },
+    2: { text: "TEAM PLAN", class: "team-plan" },
+    3: { text: "ENTERPRISE", class: "enterprise-plan" },
   };
   const plan = planMap[planMode] || planMap[0];
-  // Remove all plan classes
-  planBadge.classList.remove('free-plan', 'pro-plan', 'team-plan', 'enterprise-plan');
-  // Add the current plan class
+  planBadge.classList.remove(
+    "free-plan",
+    "pro-plan",
+    "team-plan",
+    "enterprise-plan"
+  );
   planBadge.classList.add(plan.class);
   planBadge.textContent = plan.text;
 }
 
 // Update scan counter UI based on plan mode
 function updateScanCounterUI(planMode) {
-  const scanCounter = $('scanCounter');
-  // Hide scan counter for paid users (plan_mode 1, 2, or 3)
+  const scanCounter = $("scanCounter");
   if (planMode === 1 || planMode === 2 || planMode === 3) {
     hide(scanCounter);
   } else {
     show(scanCounter);
     // Update scan count display
     const today = new Date().toDateString();
-    const lastScanDate = localStorage.getItem('lastScanDate');
+    const lastScanDate = localStorage.getItem("lastScanDate");
     let remainingScans = 1;
-    // Reset scan count daily
     if (lastScanDate !== today) {
-      localStorage.setItem('lastScanDate', today);
-      localStorage.setItem('remainingScans', '1');
+      localStorage.setItem("lastScanDate", today);
+      localStorage.setItem("remainingScans", "1");
     } else {
-      remainingScans = parseInt(localStorage.getItem('remainingScans') || '1');
+      remainingScans = parseInt(localStorage.getItem("remainingScans") || "1");
     }
     if (remainingScansEl) remainingScansEl.textContent = remainingScans;
-    // Color coding based on remaining scans
     if (scanCounter) {
-      scanCounter.classList.remove('text-danger', 'text-warning', 'text-success');
+      scanCounter.classList.remove(
+        "text-danger",
+        "text-warning",
+        "text-success"
+      );
       if (remainingScans === 0) {
-        scanCounter.classList.add('text-danger');
+        scanCounter.classList.add("text-danger");
       }
     }
   }
@@ -158,112 +162,111 @@ function updateScanCounterUI(planMode) {
 // Check user plan function
 async function checkUserPlan() {
   try {
-    const response = await fetchWithSession('/api/subscription/current');
+    const response = await fetchWithSession("/api/subscription/current");
     if (response.ok) {
       const data = await response.json();
-      // Update scan counter UI based on plan mode
       updateScanCounterUI(data.plan_mode);
       return data.plan_mode;
     }
   } catch (error) {
-    console.error('Error checking user plan:', error);
+    console.error("Error checking user plan:", error);
   }
-  return 0; // Default to free plan
+  return 0;
 }
 
 // Logout functionality
 async function handleLogout() {
-    try {
-        // Get current session ID before clearing
-        const currentSessionId = window.CyberShieldSession?.getCurrentSessionId();
-        
-        // Call server logout to invalidate sessions
-        const logoutResponse = await fetchWithSession('/api/auth/logout', {
-            method: 'POST'
+  try {
+    const currentSessionId = window.CyberShieldSession?.getCurrentSessionId();
+
+    const logoutResponse = await fetchWithSession("/api/auth/logout", {
+      method: "POST",
+    });
+
+    if (logoutResponse.ok) {
+      console.log("Logout successful");
+
+      if (currentSessionId) {
+        await fetch("/api/session/invalidate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({}),
         });
-        
-        if (logoutResponse.ok) {
-            console.log('Logout successful');
-            
-            // Invalidate server-side sessions
-            if (currentSessionId) {
-                await fetch('/api/session/invalidate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({})
-                });
-            }
-        }
-    } catch (e) {
-        console.log('Logout failed, proceeding with client');
+      }
     }
-    
-    // Clear client-side data
-    setUserUI(null);
-    
-    // Clear session storage
-    sessionStorage.removeItem('cyberShieldSession');
-    sessionStorage.removeItem('userData');
-    sessionStorage.removeItem('plan_mode');
-    
-    toast('Signed out successfully');
-    
-    // Redirect to login page without session ID
-    setTimeout(() => {
-        window.location.href = '../index.html';
-    }, 1000);
+  } catch (e) {
+    console.log("Logout failed, proceeding with client");
+  }
+
+  setUserUI(null);
+
+  sessionStorage.removeItem("cyberShieldSession");
+  sessionStorage.removeItem("userData");
+  sessionStorage.removeItem("plan_mode");
+
+  toast("Signed out successfully");
+
+  setTimeout(() => {
+    window.location.href = "../index.html";
+  }, 1000);
 }
 
 if (logoutBtn) {
-  logoutBtn.addEventListener('click', handleLogout);
+  logoutBtn.addEventListener("click", handleLogout);
 }
 
-// User dropdown functionality
-const userDropdownBtn = $('userDropdownBtn');
-const userDropdown = $('userDropdown');
+const userDropdownBtn = $("userDropdownBtn");
+const userDropdown = $("userDropdown");
 
 // Toggle desktop dropdown
 if (userDropdownBtn && userDropdown) {
-  userDropdownBtn.addEventListener('click', (e) => {
+  userDropdownBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
+    userDropdown.style.display =
+      userDropdown.style.display === "block" ? "none" : "block";
   });
   // Close dropdowns when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-      userDropdown.style.display = 'none';
+  document.addEventListener("click", (e) => {
+    if (
+      !userDropdownBtn.contains(e.target) &&
+      !userDropdown.contains(e.target)
+    ) {
+      userDropdown.style.display = "none";
     }
   });
   // Prevent dropdown from closing when clicking inside it
-  userDropdown.addEventListener('click', (e) => {
+  userDropdown.addEventListener("click", (e) => {
     e.stopPropagation();
   });
 }
 
 // Subscription plan codes and prices
 const planCodes = {
-  free: { code: 'CSLG-FREE-001', price: 0 },
-  pro: { code: 'CSLG-PRO-002', price: 75 },
-  team: { code: 'CSLG-TEAM-003', price: 200 },
-  enterprise: { code: 'CSLG-ENT-004', price: 0 },
-  increase: { code: 'CSLG-INCREASE-001', price: 25 }
+  free: { code: "CSLG-FREE-001", price: 0 },
+  pro: { code: "CSLG-PRO-002", price: 75 },
+  team: { code: "CSLG-TEAM-003", price: 200 },
+  enterprise: { code: "CSLG-ENT-004", price: 0 },
+  increase: { code: "CSLG-INCREASE-001", price: 25 },
 };
 
 // Add event listener for the Increase Scans button
 if (manageSubscriptionBtn) {
-  manageSubscriptionBtn.addEventListener('click', function() {
+  manageSubscriptionBtn.addEventListener("click", function () {
     // Store selected plan details for the Increase Scans option
-    localStorage.setItem('selectedPlan', JSON.stringify({
-      id: 'increase',
-      name: 'Increase Scans',
-      price: planCodes.increase.price,
-      code: planCodes.increase.code
-    }));
-    
+    localStorage.setItem(
+      "selectedPlan",
+      JSON.stringify({
+        id: "increase",
+        name: "Increase Scans",
+        price: planCodes.increase.price,
+        code: planCodes.increase.code,
+      })
+    );
+
     // Redirect to payment page
-    window.location.href = '../payment_sys/payment_sys.html';
+    window.location.href = "../payment_sys/payment_sys.html";
   });
 }
 
@@ -279,7 +282,6 @@ document.querySelectorAll('.plan-card').forEach(card => {
       return;
     }
     
-    // Store selected plan details
     const planName = this.querySelector('h4').textContent;
     const planPrice = planCodes[planId].price;
     const planCode = planCodes[planId].code;
@@ -291,45 +293,86 @@ document.querySelectorAll('.plan-card').forEach(card => {
       code: planCode
     }));
     
-    // Redirect to appropriate payment page based on plan
-    if (planId === 'enterprise') {
-      window.location.href = '../enterprice/enterprice_payment/enterprice_payment.html';
-    } else {
-      window.location.href = '../payment_sys/payment_sys.html';
+    console.log('Selected plan:', planId, 'Redirecting to payment page...');
+    
+    try {
+      if (planId === 'enterprise') {
+        const enterprisePath = '../enterprice/enterprice_payment/enterprice_payment.html';
+        console.log('Redirecting to enterprise payment:', enterprisePath);
+        
+        fetch(enterprisePath, { method: 'HEAD' })
+          .then(response => {
+            if (response.ok) {
+              window.location.href = enterprisePath;
+            } else {
+              throw new Error('Enterprise payment page not found');
+            }
+          })
+          .catch(error => {
+            console.error('Error accessing enterprise payment page:', error);
+            toast('Enterprise payment page is currently unavailable');
+            setTimeout(() => {
+              window.location.href = '../ScannerDash/ScannerDash.html';
+            }, 2000);
+          });
+      } else {
+        const paymentPath = '../payment_sys/payment_sys.html';
+        console.log('Redirecting to payment system:', paymentPath);
+        
+        fetch(paymentPath, { method: 'HEAD' })
+          .then(response => {
+            if (response.ok) {
+              window.location.href = paymentPath;
+            } else {
+              throw new Error('Payment page not found');
+            }
+          })
+          .catch(error => {
+            console.error('Error accessing payment page:', error);
+            toast('Payment page is currently unavailable');
+            setTimeout(() => {
+              window.location.href = '../ScannerDash/ScannerDash.html';
+            }, 2000);
+          });
+      }
+    } catch (error) {
+      console.error('Error during redirect:', error);
+      toast('An error occurred during redirection');
+      setTimeout(() => {
+        window.location.href = '../ScannerDash/ScannerDash.html';
+      }, 2000);
     }
   });
 });
 
 // Initialize subscription page
 (async function initSubscriptionPage() {
-  console.log('Subscription page initializing...');
+  console.log("Subscription page initializing...");
   try {
-    const r = await fetchWithSession('/api/auth/me');
+    const r = await fetchWithSession("/api/auth/me");
     if (r.ok) {
       const userData = await r.json();
       if (userData.authenticated) {
-        // Store user info in sessionStorage for easy access
-        sessionStorage.setItem('user_id', userData.user_id || '');
-        sessionStorage.setItem('full_name', userData.full_name || '');
-        sessionStorage.setItem('email', userData.email || '');
-        sessionStorage.setItem('plan_mode', userData.plan_mode || '0');
+        sessionStorage.setItem("user_id", userData.user_id || "");
+        sessionStorage.setItem("full_name", userData.full_name || "");
+        sessionStorage.setItem("email", userData.email || "");
+        sessionStorage.setItem("plan_mode", userData.plan_mode || "0");
         setUserUI(userData);
-        // Check user plan and update UI accordingly
         await checkUserPlan();
-        console.log('Subscription page initialized successfully');
+        console.log("Subscription page initialized successfully");
         return;
       } else {
-        console.log('User not authenticated, redirecting to login');
-        window.location.href = '../index.html';
+        console.log("User not authenticated, redirecting to login");
+        window.location.href = "../index.html";
         return;
       }
     } else {
-      console.log('Auth check failed, redirecting to login');
-      window.location.href = '../index.html';
+      console.log("Auth check failed, redirecting to login");
+      window.location.href = "../index.html";
       return;
     }
   } catch (error) {
-    console.error('Error initializing subscription page:', error);
-    window.location.href = '../index.html';
+    console.error("Error initializing subscription page:", error);
+    window.location.href = "../index.html";
   }
 })();
