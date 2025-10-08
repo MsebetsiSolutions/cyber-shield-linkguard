@@ -311,6 +311,50 @@ def update_user():
         conn.close()
         return jsonify({'error': str(e)}), 500
 
+@admin_bp.route('/admin/api/update-user-plan', methods=['POST'])
+@admin_login_required
+def update_user_plan():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    plan_mode = data.get('plan_mode')
+    
+    print(f"Received update request - User ID: {user_id}, Plan Mode: {plan_mode}")  
+    
+    if not all([user_id, plan_mode is not None]):
+        return jsonify({'error': 'Missing parameters'}), 400
+    
+    try:
+        plan_mode = int(plan_mode)
+        if plan_mode not in [0, 1, 2, 3]:
+            return jsonify({'error': 'Invalid plan mode. Must be 0, 1, 2, or 3'}), 400
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Plan mode must be a valid integer'}), 400
+    
+    conn = get_db_connection()
+    try:
+        user = conn.execute('SELECT id, email FROM users WHERE id = ?', (user_id,)).fetchone()
+        if not user:
+            conn.close()
+            return jsonify({'error': 'User not found'}), 404
+        
+        conn.execute('UPDATE users SET Plan_Mode = ? WHERE id = ?', (plan_mode, user_id))
+        conn.commit()
+        
+        conn.execute('''
+            INSERT INTO audit_logs (user_id, action, description, ip_address) 
+            VALUES (?, ?, ?, ?)
+        ''', (session.get('admin_id'), 'admin_plan_update', 
+              f'Admin updated user {user_id} ({user["email"]}) plan to {plan_mode}', 
+              request.remote_addr))
+        conn.commit()
+        
+        conn.close()
+        return jsonify({'success': True, 'message': f'Plan updated successfully to {["Free", "Pro", "Team", "Enterprise"][plan_mode]}'})
+    except Exception as e:
+        print(f"Error updating user plan: {str(e)}")  
+        conn.close()
+        return jsonify({'error': str(e)}), 500
+
 @admin_bp.route('/admin/api/delete-user', methods=['POST'])
 @admin_login_required
 def delete_user():

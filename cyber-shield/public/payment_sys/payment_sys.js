@@ -22,11 +22,14 @@ function validateEmail(email) {
   return emailRegex.test(email);
 }
 
-// Generate unique payment reference
-function generatePaymentReference() {
+// Generate unique payment reference based on plan code
+function generatePaymentReference(planCode) {
   const timestamp = Date.now().toString(36).toUpperCase();
   const random = Math.random().toString(36).substring(2, 5).toUpperCase();
-  return `CSLG-${timestamp}-${random}`;
+  
+  // Create reference based on plan code
+  const planPrefix = planCode.replace('CSLG-', '').split('-')[0];
+  return `${planCode}-${timestamp}-${random}`;
 }
 
 // Session-based fetch function
@@ -159,151 +162,18 @@ function displaySelectedPlan() {
     return;
   }
   
-  if ($('planName')) $('planName').textContent = selectedPlan.name;
-  if ($('planPrice')) $('planPrice').textContent = `R${selectedPlan.price} / month`;
-  if ($('planCode')) $('planCode').textContent = selectedPlan.code;
+  // Update plan summary section
+  if ($('planNameDisplay')) $('planNameDisplay').textContent = selectedPlan.name;
+  if ($('planPriceDisplay')) $('planPriceDisplay').textContent = `R${selectedPlan.price}${selectedPlan.id === 'increase' ? '' : ' / month'}`;
+  if ($('planCodeDisplay')) $('planCodeDisplay').textContent = selectedPlan.code;
   
-  // Generate and display payment reference
-  const paymentReference = generatePaymentReference();
+  // Generate and display payment reference based on plan code
+  const paymentReference = generatePaymentReference(selectedPlan.code);
   if ($('paymentReference')) $('paymentReference').textContent = paymentReference;
+  if ($('paymentReferenceDisplay')) $('paymentReferenceDisplay').textContent = paymentReference;
   
   // Store reference for later use
   sessionStorage.setItem('paymentReference', paymentReference);
-}
-
-// Show success modal
-function showSuccessModal(userName) {
-  // Set user name in modal
-  if ($('userNameModal')) {
-    $('userNameModal').textContent = userName || 'User';
-  }
-  
-  // Show modal
-  const successModalElement = $('successModal');
-  if (successModalElement) {
-    const successModal = new bootstrap.Modal(successModalElement);
-    successModal.show();
-    
-    // Redirect when modal is closed
-    successModalElement.addEventListener('hidden.bs.modal', function () {
-      window.location.href = '../ScannerDash/ScannerDash.html';
-    });
-  }
-}
-
-// Handle proof of payment upload
-const proofUploadForm = $('proofUploadForm');
-if (proofUploadForm) {
-  proofUploadForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    console.log('Proof upload form submitted');
-    
-    const fileInput = $('proofFile');
-    const senderEmail = $('senderEmail') ? $('senderEmail').value.trim() : '';
-    const additionalNotes = $('additionalNotes') ? $('additionalNotes').value.trim() : '';
-    const selectedPlan = JSON.parse(localStorage.getItem('selectedPlan') || '{}');
-    const paymentReference = sessionStorage.getItem('paymentReference');
-    
-    // Validation
-    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-      toast('Please select a proof of payment file');
-      return;
-    }
-    
-    const file = fileInput.files[0];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    
-    if (file.size > maxSize) {
-      toast('File size must be less than 5MB');
-      return;
-    }
-    
-    if (!validateEmail(senderEmail)) {
-      toast('Please enter a valid email address');
-      return;
-    }
-    
-    // Show loading state
-    const submitBtn = proofUploadForm.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spinner"></i> Sending...';
-    submitBtn.disabled = true;
-    
-    try {
-      // Create form data for file upload
-      const formData = new FormData();
-      formData.append('proof_file', file);
-      formData.append('sender_email', senderEmail);
-      formData.append('additional_notes', additionalNotes);
-      formData.append('plan_name', selectedPlan.name);
-      formData.append('plan_price', selectedPlan.price);
-      formData.append('payment_reference', paymentReference);
-      
-      console.log('Sending proof of payment to server...');
-      
-      // Use fetch without credentials for file upload
-      const response = await fetch('/api/subscription/submit-proof', {
-        method: 'POST',
-        body: formData
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Proof submission successful:', result);
-        
-        // Clear form
-        proofUploadForm.reset();
-        
-        // Get user name for modal
-        const userName = sessionStorage.getItem('full_name') || (userNameDisplay ? userNameDisplay.textContent : 'User');
-        
-        // Show success modal instead of toast
-        showSuccessModal(userName);
-        
-      } else {
-        const errorText = await response.text();
-        console.error('Proof submission failed:', errorText);
-        let errorMessage = 'Failed to submit proof. Please try again or email directly.';
-        
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = errorData.error || errorMessage;
-        } catch (e) {
-          // If not JSON, use the text as is
-          errorMessage = errorText || errorMessage;
-        }
-        
-        toast(errorMessage);
-        
-        // Reset button state
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-      }
-    } catch (error) {
-      console.error('Proof submission error:', error);
-      toast('Failed to submit proof. Please try again or email directly to tshepho@msebetsisolutions.com');
-      
-      // Reset button state
-      submitBtn.innerHTML = originalText;
-      submitBtn.disabled = false;
-    }
-  });
-}
-
-// Card payment tab functionality
-const cardTab = document.getElementById('card-tab');
-if (cardTab) {
-  cardTab.addEventListener('click', function(e) {
-    console.log('Card payment tab clicked');
-    // Show construction modal
-    const constructionModalElement = $('constructionModal');
-    if (constructionModalElement) {
-      const constructionModal = new bootstrap.Modal(constructionModalElement);
-      constructionModal.show();
-    } else {
-      console.error('Construction modal element not found');
-    }
-  });
 }
 
 // Disable card payment form interactions
