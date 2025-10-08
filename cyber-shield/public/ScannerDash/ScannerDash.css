@@ -18,6 +18,7 @@
   --btn-logout: #ff6f61;
   --btn-dropdown: #d6bbfc;
   --btn-subscribe: #ffd166;
+  --btn-camera: #6f42c1;
   --stat-malicious: #ff6f61;
   --stat-suspicious: #ffc36b;
   --stat-harmless: #a7efb6;
@@ -169,7 +170,50 @@ body {
   background-color: #ff4d3a;
 }
 
-/* Features Dropdown */
+/* Round Camera Button - NEW STYLE */
+.camera-round-btn {
+  background-color: var(--btn-camera);
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: white;
+  box-shadow: 0 3px 8px rgba(111, 66, 193, 0.3);
+  transition: all 0.3s ease;
+}
+
+.camera-round-btn:hover {
+  transform: scale(1.05);
+  background-color: #5a2d96;
+  color: white;
+  box-shadow: 0 4px 12px rgba(111, 66, 193, 0.4);
+}
+
+.camera-round-btn:active {
+  transform: scale(0.98);
+}
+
+.camera-round-btn:disabled {
+  background-color: #a0a0a0;
+  color: #e0e0e0;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.camera-round-btn:disabled:hover {
+  background-color: #a0a0a0;
+  transform: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Features Dropdown - Mobile Responsive */
 .features-dropdown {
   position: relative;
   display: inline-block;
@@ -212,6 +256,7 @@ body {
   right: 0;
   background: rgba(255, 255, 255, 0.95);
   min-width: 200px;
+  max-width: 90vw;
   border-radius: 0.4rem;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(10px);
@@ -258,7 +303,27 @@ body {
   text-align: center;
 }
 
-/* Specific styling for twAwareness to ensure consistency */
+/* Upgrade message in features dropdown */
+.feature-upgrade-message {
+  padding: 10px 12px;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(255, 209, 102, 0.2), rgba(255, 159, 128, 0.2));
+  border-radius: 0.3rem;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px dashed var(--btn-subscribe);
+}
+
+.feature-upgrade-message i {
+  color: var(--btn-subscribe);
+}
+
+/* twAwareness to ensure consistency */
 #twAwareness {
   width: 100%;
   background: transparent;
@@ -270,7 +335,7 @@ body {
   font-size: 0.85rem;
   border-radius: 0.3rem;
   cursor: pointer;
-  display: flex !important; /* Override hidden class */
+  display: flex !important; 
   align-items: center;
   gap: 8px;
   transition: all 0.3s ease;
@@ -350,6 +415,130 @@ body {
   border-color: var(--candy-green);
   background: rgba(167, 239, 182, 0.2);
   transform: scale(1.01);
+}
+
+/* File Preview */
+.file-preview-container {
+  border: 2px solid var(--ring);
+  border-radius: 0.4rem;
+  padding: 0.8rem;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.file-preview {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.preview-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.preview-placeholder i {
+  font-size: 2rem;
+  opacity: 0.6;
+}
+
+.clear-preview-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--candy-red);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.clear-preview-btn:hover {
+  background: #ff4d3a;
+  transform: scale(1.1);
+}
+
+/* Camera Modal Styles */
+.camera-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  background: #000;
+}
+
+#cameraVideo {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.camera-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.scanner-frame {
+  width: 200px;
+  height: 200px;
+  border: 2px solid var(--candy-green);
+  border-radius: 0.4rem;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  animation: pulse 2s infinite;
+}
+
+.scanner-instruction {
+  color: white;
+  margin-top: 220px;
+  text-align: center;
+  font-size: 0.9rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.camera-error {
+  padding: 1rem;
+  background: rgba(255, 111, 97, 0.1);
+  border: 1px solid var(--candy-red);
+  border-radius: 0.4rem;
+  color: var(--candy-red);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.camera-error i {
+  font-size: 1.2rem;
 }
 
 /* Stats overview */
@@ -829,6 +1018,50 @@ body {
   .chart-container-sm {
     height: 180px;
   }
+
+  /* Mobile responsive features dropdown */
+  .features-dropdown-content {
+    right: auto;
+    left: 0;
+    min-width: 180px;
+    max-width: 85vw;
+  }
+
+  .features-dropdown-btn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+
+  .features-text {
+    display: inline;
+  }
+
+  .feature-btn {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  /* Camera modal mobile adjustments */
+  .camera-container {
+    max-width: 100%;
+  }
+
+  .scanner-frame {
+    width: 180px;
+    height: 180px;
+  }
+
+  .scanner-instruction {
+    margin-top: 200px;
+    font-size: 0.8rem;
+  }
+
+  /* Round camera button mobile adjustments */
+  .camera-round-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+  }
 }
 
 .file-upload-label {
@@ -848,14 +1081,6 @@ body {
 }
 
 .file-upload-label:hover i {
-  color: var(--candy-green);
-}
-
-#qrInput + .file-upload-label i {
-  color: var(--sky);
-}
-
-#qrInput + .file-upload-label:hover i {
   color: var(--candy-green);
 }
 
@@ -967,63 +1192,88 @@ body {
   .features-dropdown-btn {
     padding: 6px 10px;
   }
+
+  .features-dropdown-content {
+    min-width: 160px;
+    max-width: 80vw;
+  }
+
+  .feature-btn {
+    padding: 6px 8px;
+    font-size: 0.75rem;
+  }
+
+  .feature-btn i {
+    font-size: 0.9rem;
+  }
+
+  .scanner-frame {
+    width: 160px;
+    height: 160px;
+  }
+
+  .scanner-instruction {
+    margin-top: 180px;
+    font-size: 0.75rem;
+  }
+
+  /* Round camera button */
+  .camera-round-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+}
+
+/* Camera Modal */
+.modal-footer.justify-content-center {
+  border-top: none;
+  padding-top: 0;
+}
+
+.modal-footer .camera-round-btn {
+  width: 50px;
+  height: 50px;
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.modal-footer .camera-round-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Switch Camera button */
+#switchCameraBtn {
+  background-color: var(--btn-signup);
+  box-shadow: 0 3px 8px rgba(167, 239, 182, 0.3);
+}
+
+#switchCameraBtn:hover {
+  background-color: #8fe8a3;
+}
+
+/* Cancel button  */
+.modal-footer .camera-round-btn[data-bs-dismiss="modal"] {
+  background-color: var(--btn-logout);
+  box-shadow: 0 3px 8px rgba(255, 111, 97, 0.3);
+}
+
+.modal-footer .camera-round-btn[data-bs-dismiss="modal"]:hover {
+  background-color: #ff4d3a;
+}
+
+@media (max-width: 576px) {
+  .modal-footer .camera-round-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.2rem;
+  }
+  
+  .modal-footer .camera-round-btn.me-3 {
+    margin-right: 1rem !important;
+  }
 }
 
 .hidden {
   display: none !important;
-}
-
-/* Enterprise Button */
-.btn-enterprise {
-  background: linear-gradient(135deg, var(--plan-enterprise), #ff7f50);
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: 6px 12px;
-  font-weight: 600;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 3px 8px rgba(255, 159, 128, 0.3);
-}
-
-.btn-enterprise:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 159, 128, 0.4);
-  background: linear-gradient(135deg, #ff7f50, var(--plan-enterprise));
-}
-
-.btn-enterprise:active {
-  transform: translateY(0);
-}
-
-/* Responsive for buttons */
-@media (max-width: 576px) {
-  .btn-enterprise .stats-text {
-    display: none;
-  }
-  
-  .btn-enterprise {
-    padding: 6px 10px;
-  }
-}
-
-.btn-reputation {
-  background-color: #6f42c1; 
-  color: white;
-  border: none;
-  padding: 0.375rem 0.75rem;
-  border-radius: 2rem;
-  cursor: pointer;
-}
-
-.btn-reputation:hover {
-  background-color: #5a2d96;
-}
-
-.btn-reputation.hidden {
-  display: none;
 }

@@ -4,166 +4,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Shield - Admin Portal</title>
+    <title>Secure Console</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="admin.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="wodfbowef.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32Enterprice.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16Enterprice.png" />
+    <link rel="manifest" href="../assets/favicon/site.webmanifest" />
 </head>
 
 <body>
-    <!-- Login Section -->
-    <div id="login-section" class="login-section">
-        <div class="container-fluid vh-100 d-flex align-items-center justify-content-center">
-            <div class="login-card">
-                <div class="login-header text-center mb-4">
-                    <img src="../assets/CYBER_SHIELD_LINKGUARD2.png" alt="Cyber Shield Logo" class="logo-img mb-3"
-                        style="max-height: 80px;">
-                    <h1 class="h3 fw-bold">Cyber Shield</h1>
-                    <p class="text-muted">Admin Portal</p>
+    <!-- Secure Console Login -->
+    <div id="secure-console" class="secure-console">
+        <div class="console-background"></div>
+        
+        <div class="console-container">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <div class="terminal-title">
+                        <i class="bi bi-terminal"></i> Secure Console
+                    </div>
                 </div>
 
-                <form id="login-form" class="login-form">
-                    <div id="login-alert" class="alert alert-danger d-none" role="alert"></div>
+                <div class="terminal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="terminal-output-container">
+                                <div class="terminal-output">
+                                    <div class="output-line">
+                                        <span class="prompt">system@secure:~$</span> Initializing secure session...
+                                    </div>
+                                    <div class="output-line">
+                                        <span class="prompt">system@secure:~$</span> Security protocols: ACTIVE
+                                    </div>
+                                    <div class="output-line">
+                                        <span class="prompt">system@secure:~$</span> Session timer: <span id="session-timer">05:00</span>
+                                    </div>
+                                    <div class="output-line">
+                                        <span class="prompt">system@secure:~$</span> Attempts remaining: <span id="attempts-counter">3</span>
+                                    </div>
+                                    <div class="output-line">
+                                        <span class="prompt">system@secure:~$</span> Ready for authentication...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="mb-3 input-with-icon">
-                        <label for="username" class="form-label">Username</label>
-                        <div class="position-relative">
-                            <i class="bi bi-person-fill input-icon"></i>
-                            <input type="text" class="form-control" id="username" name="username"
-                                placeholder="Enter your username" required>
+                        <div class="col-md-6">
+                            <form id="console-login-form" class="console-login-form">
+                                <div id="console-alert" class="console-alert d-none">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    <span id="alert-message"></span>
+                                </div>
+
+                                <div class="input-group">
+                                    <span class="input-prompt">access@code:~$</span>
+                                    <div class="input-with-icon">
+                                        <i class="bi bi-shield-lock input-icon"></i>
+                                        <input type="text" class="console-input" id="access-code" name="access_code"
+                                            placeholder="Enter access code" required maxlength="20">
+                                    </div>
+                                </div>
+
+                                <div class="input-group">
+                                    <span class="input-prompt">key@secure:~$</span>
+                                    <div class="input-with-icon">
+                                        <i class="bi bi-key input-icon"></i>
+                                        <input type="password" class="console-input" id="access-key" name="access_key"
+                                            placeholder="Enter access key" required maxlength="30">
+                                        <i class="bi bi-eye-fill password-toggle" id="toggle-access-key"></i>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="console-submit">
+                                    <span class="btn-content">
+                                        <i class="bi bi-play-circle"></i>
+                                        <span>Execute</span>
+                                    </span>
+                                    <div class="btn-loader d-none">
+                                        <div class="spinner"></div>
+                                    </div>
+                                </button>
+                            </form>
                         </div>
                     </div>
+                </div>
 
-                    <div class="mb-3 input-with-icon">
-                        <label for="password" class="form-label">Password</label>
-                        <div class="position-relative">
-                            <i class="bi bi-lock-fill input-icon"></i>
-                            <input type="password" class="form-control" id="password" name="password"
-                                placeholder="Enter your password" required>
-                            <i class="bi bi-eye-fill input-icon password-toggle"
-                                style="left: auto; right: 0.75rem; cursor: pointer;" id="togglePassword"></i>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100 py-2">
-                        <span class="spinner-border spinner-border-sm d-none" id="login-spinner"></span>
-                        <span id="login-text">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Login to Dashboard
-                        </span>
-                    </button>
-                </form>
-
-                <div class="login-footer text-center mt-4">
-                    <small class="text-muted">
-                        <i class="bi bi-shield-lock me-1"></i>Restricted access. Authorized personnel only.
-                    </small>
+                <div class="terminal-footer">
+                    <span class="security-status">
+                        <i class="bi bi-shield-check"></i>
+                        <span id="security-status">SECURE CONNECTION ESTABLISHED</span>
+                    </span>
+                    <span class="session-info" id="session-info"></span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Dashboard Section (hidden by default) -->
-    <div id="dashboard-section" class="dashboard-section d-none">
+    <div id="analytics-dashboard" class="analytics-dashboard d-none">
         <div class="admin-container">
-            <!-- Sidebar -->
             <nav class="admin-sidebar">
                 <div class="sidebar-header">
                     <img src="../assets/CYBER_SHIELD_LINKGUARD2.png" alt="Cyber Shield Logo" class="logo-img mb-2"
                         style="max-height: 70px;">
-                    <p>Admin Dashboard</p>
+                    <p>Dashboard</p>
                 </div>
 
                 <ul class="sidebar-nav">
-                    <li><a href="#" class="nav-link active" data-tab="dashboard">📊 Dashboard</a></li>
-                    <li><a href="#" class="nav-link" data-tab="users">👥 Users</a></li>
-                    <li><a href="#" class="nav-link" data-tab="scans">🔍 Scans</a></li>
-                    <li><a href="#" class="nav-link" data-tab="payments">💳 Payments</a></li>
-                    <li><a href="#" class="nav-link" data-tab="teams">👥 Teams</a></li>
-                    <li><a href="#" class="nav-link" data-tab="audit">📋 Audit Logs</a></li>
-                    <li><a href="#" class="nav-link" data-tab="settings">⚙️ Settings</a></li>
+                    <li><a href="#" class="nav-link active" data-tab="dashboard">📊 Overview</a></li>
+                    <li><a href="#" class="nav-link" data-tab="users">👥 User Metrics</a></li>
+                    <li><a href="#" class="nav-link" data-tab="scans">🔍 Scan Analytics</a></li>
+                    <li><a href="#" class="nav-link" data-tab="payments">💳 Revenue Stats</a></li>
+                    <li><a href="#" class="nav-link" data-tab="teams">👥 Team Insights</a></li>
+                    <li><a href="#" class="nav-link" data-tab="audit">📋 Activity Logs</a></li>
+                    <li><a href="#" class="nav-link" data-tab="settings">⚙️ System Config</a></li>
                 </ul>
 
                 <div class="sidebar-footer">
-                    <p>Logged in as: <strong id="admin-username"></strong></p>
-                    <button id="logout-btn" class="btn-logout">🚪 Logout</button>
+                    <p>User: <strong id="analytics-username-display"></strong></p>
+                    <button id="analytics-logout-btn" class="btn-analytics-logout">
+                        <i class="bi bi-box-arrow-right"></i>Exit Console
+                    </button>
                 </div>
             </nav>
 
-            <!-- Main Content -->
             <main class="admin-main">
                 <header class="admin-header">
-                    <h1 id="page-title">Admin Dashboard</h1>
+                    <h1 id="analytics-page-title">Overview</h1>
                     <div class="header-actions">
-                        <span id="current-time" class="badge bg-primary"></span>
+                        <span id="analytics-current-time" class="badge bg-primary"></span>
                     </div>
                 </header>
 
-                <!-- Dashboard Tab -->
                 <div id="dashboard-tab" class="tab-content active">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon">👥</div>
-                            <div class="stat-info">
-                                <h3 id="total-users">0</h3>
-                                <p>Total Users</p>
+                    <div class="dashboard-scrollable-content">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">👥</div>
+                                <div class="stat-info">
+                                    <h3 id="total-users">0</h3>
+                                    <p>Total Users</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">🔍</div>
+                                <div class="stat-info">
+                                    <h3 id="total-scans">0</h3>
+                                    <p>Total Scans</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">💳</div>
+                                <div class="stat-info">
+                                    <h3 id="total-payments">0</h3>
+                                    <p>Total Payments</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">👥</div>
+                                <div class="stat-info">
+                                    <h3 id="total-teams">0</h3>
+                                    <p>Total Teams</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">🔥</div>
+                                <div class="stat-info">
+                                    <h3 id="active-today">0</h3>
+                                    <p>Active Today</p>
+                                </div>
                             </div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">🔍</div>
-                            <div class="stat-info">
-                                <h3 id="total-scans">0</h3>
-                                <p>Total Scans</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">💳</div>
-                            <div class="stat-info">
-                                <h3 id="total-payments">0</h3>
-                                <p>Total Payments</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">👥</div>
-                            <div class="stat-info">
-                                <h3 id="total-teams">0</h3>
-                                <p>Total Teams</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">🔥</div>
-                            <div class="stat-info">
-                                <h3 id="active-today">0</h3>
-                                <p>Active Today</p>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="row mt-4">
-                        <div class="col-md-6">
-                            <div class="chart-card">
-                                <h3>Threat Level Distribution</h3>
-                                <canvas id="threatChart"></canvas>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="chart-card">
+                                    <h3>Threat Level Distribution</h3>
+                                    <canvas id="threatChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="chart-card">
+                                    <h3>Payment Status</h3>
+                                    <canvas id="paymentChart"></canvas>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="chart-card">
-                                <h3>Payment Status</h3>
-                                <canvas id="paymentChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="recent-activity mt-4">
-                        <h3>Recent Activity</h3>
-                        <div id="recent-activities" class="activity-list">
-                            <!-- Activities will be loaded here -->
+                        <div class="recent-activity mt-4">
+                            <h3>Recent Activity</h3>
+                            <div id="recent-activities" class="activity-list">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Users Tab -->
                 <div id="users-tab" class="tab-content">
                     <div class="tab-header">
-                        <h2>User Management</h2>
+                        <h2>User Metrics</h2>
                         <div class="tab-actions">
                             <input type="text" id="user-search" class="form-control" placeholder="Search users...">
                             <button id="refresh-users" class="btn-primary">🔄 Refresh</button>
@@ -183,16 +221,14 @@
                                 </tr>
                             </thead>
                             <tbody id="users-tbody">
-                                <!-- Users will be loaded here -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Scans Tab -->
                 <div id="scans-tab" class="tab-content">
                     <div class="tab-header">
-                        <h2>Scan History</h2>
+                        <h2>Scan Analytics</h2>
                         <div class="tab-actions">
                             <select id="scan-type-filter" class="form-select">
                                 <option value="">All Types</option>
@@ -216,16 +252,14 @@
                                 </tr>
                             </thead>
                             <tbody id="scans-tbody">
-                                <!-- Scans will be loaded here -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Payments Tab -->
                 <div id="payments-tab" class="tab-content">
                     <div class="tab-header">
-                        <h2>Payment History</h2>
+                        <h2>Revenue Statistics</h2>
                         <div class="tab-actions">
                             <select id="payment-status-filter" class="form-select">
                                 <option value="">All Status</option>
@@ -249,16 +283,14 @@
                                 </tr>
                             </thead>
                             <tbody id="payments-tbody">
-                                <!-- Payments will be loaded here -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Teams Tab -->
                 <div id="teams-tab" class="tab-content">
                     <div class="tab-header">
-                        <h2>Team Management</h2>
+                        <h2>Team Insights</h2>
                         <button id="refresh-teams" class="btn-primary">🔄 Refresh</button>
                     </div>
                     <div class="table-responsive">
@@ -273,16 +305,14 @@
                                 </tr>
                             </thead>
                             <tbody id="teams-tbody">
-                                <!-- Teams will be loaded here -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Audit Logs Tab -->
                 <div id="audit-tab" class="tab-content">
                     <div class="tab-header">
-                        <h2>Audit Logs</h2>
+                        <h2>Activity Logs</h2>
                         <button id="refresh-audit" class="btn-primary">🔄 Refresh</button>
                     </div>
                     <div class="table-responsive">
@@ -298,16 +328,14 @@
                                 </tr>
                             </thead>
                             <tbody id="audit-tbody">
-                                <!-- Audit logs will be loaded here -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Settings Tab -->
                 <div id="settings-tab" class="tab-content">
                     <div class="tab-header">
-                        <h2>System Settings</h2>
+                        <h2>System Configuration</h2>
                     </div>
                     <div class="row">
                         <div class="col-md-6">
@@ -318,8 +346,8 @@
                                     <span id="server-time">Loading...</span>
                                 </div>
                                 <div class="setting-item">
-                                    <label>Admin User:</label>
-                                    <span id="admin-user-info">Loading...</span>
+                                    <label>User:</label>
+                                    <span id="analytics-user-info">Loading...</span>
                                 </div>
                             </div>
                         </div>
@@ -336,7 +364,6 @@
         </div>
     </div>
 
-    <!-- Edit User Modal -->
     <div id="edit-user-modal" class="modal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -376,7 +403,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="admin.js"></script>
+    <script src="wodfbowef.js"></script>
     <script src="../session.js"></script>
 </body>
 

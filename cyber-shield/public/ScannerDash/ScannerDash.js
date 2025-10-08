@@ -21,6 +21,12 @@ let resultsChart = null;
 let statsChart1 = null;
 let statsChart2 = null;
 
+// Camera variables
+let cameraStream = null;
+let cameraModal = null;
+let currentFacingMode = 'environment'; // 'environment' for rear camera, 'user' for front
+let qrScanningActive = false;
+
 // Features dropdown functionality
 function initFeaturesDropdown() {
   const featuresDropdownBtn = $('featuresDropdownBtn');
@@ -128,7 +134,6 @@ const scanCounter = {
       this.updateUI();
       
       if (this.remaining === 0) {
-
         setTimeout(() => {
           const subscriptionModal = new bootstrap.Modal($('subscriptionModal'));
           subscriptionModal.show();
@@ -217,7 +222,7 @@ const welcomeMessage = $('welcomeMessage');
 const userNameDisplay = $('userNameDisplay');
 const logoutBtn = $('logout');
 const fileScanBtn = $('fileScanBtn'); 
-const qrScanBtn = $('qrScanBtn');     
+const cameraBtn = $('cameraBtn');
 
 function setUserUI(userData){ 
   console.log('Setting user UI with data:', userData); 
@@ -237,9 +242,8 @@ function setUserUI(userData){
 
     // Control button states based on plan_mode
     controlScanButtons(userData.plan_mode);
-    controlTeamWorkspaceButton(userData.plan_mode);
-    controlEnterpriseButton(userData.plan_mode);
-    controlBackgroundCheckButton(userData.plan_mode); 
+    controlFeaturesDropdown(userData.plan_mode);
+    controlCameraButton(userData.plan_mode);
 
   } else { 
     welcomeMessage.textContent = ''; 
@@ -247,9 +251,8 @@ function setUserUI(userData){
     console.log('User not authenticated, using fallback');
 
     controlScanButtons(0); 
-    controlTeamWorkspaceButton(0); 
-    controlEnterpriseButton(0);
-    controlBackgroundCheckButton(0);
+    controlFeaturesDropdown(0);
+    controlCameraButton(0);
   }
 }
 
@@ -261,27 +264,51 @@ function controlScanButtons(planMode) {
 
   if (isPaidPlan) {
     fileScanBtn.disabled = false;
-    qrScanBtn.disabled = false;
     fileScanBtn.title = ''; 
-    qrScanBtn.title = '';  
   } else {
     fileScanBtn.disabled = true;
-    qrScanBtn.disabled = true;
-    fileScanBtn.title = 'Upgrade to a paid plan to scan files';
-    qrScanBtn.title = 'Upgrade to a paid plan to scan QR codes';
+    fileScanBtn.title = 'Upgrade to a paid plan to scan files and QR codes';
   }
-  console.log(`Plan Mode: ${planMode}, File Scan Enabled: ${!fileScanBtn.disabled}, QR Scan Enabled: ${!qrScanBtn.disabled}`);
+  console.log(`Plan Mode: ${planMode}, File/QR Scan Enabled: ${!fileScanBtn.disabled}`);
 }
 
-// New function to control Team Workspace button visibility
-function controlTeamWorkspaceButton(planMode) {
-  const twButton = $('twButton');
-  if (planMode === 2 || planMode === 3) {
-    show(twButton);
+// Control camera button based on plan mode - UPDATED FOR NEW ROUND BUTTON
+function controlCameraButton(planMode) {
+  const isPaidPlan = planMode === 1 || planMode === 2 || planMode === 3;
+
+  // Camera button is now ALWAYS VISIBLE for all users
+  show(cameraBtn);
+
+  if (isPaidPlan) {
+    cameraBtn.disabled = false;
+    cameraBtn.title = 'Scan QR code using camera';
   } else {
-    hide(twButton);
+    cameraBtn.disabled = true;
+    cameraBtn.title = 'Upgrade to a paid plan to use camera for QR scanning';
   }
-  console.log(`Plan Mode: ${planMode}, Team Workspace Visible: ${!twButton.classList.contains('hidden')}`);
+  console.log(`Plan Mode: ${planMode}, Camera Enabled: ${!cameraBtn.disabled}`);
+}
+
+// Control features dropdown based on plan mode
+function controlFeaturesDropdown(planMode) {
+  const statsButton = $('statsButton');
+  const twButton = $('twButton');
+  const twEnterprise = $('twEnterprise');
+  const twReputation = $('twReputation');
+  const upgradeMessage = $('upgradeMessage');
+
+  // Show/hide features based on plan mode
+  if (planMode >= 1) show(statsButton); else hide(statsButton);
+  if (planMode >= 2) show(twButton); else hide(twButton);
+  if (planMode >= 3) show(twEnterprise); else hide(twEnterprise);
+  if (planMode >= 2) show(twReputation); else hide(twReputation);
+
+  // Show upgrade message if no features are available
+  if (planMode === 0) {
+    show(upgradeMessage);
+  } else {
+    hide(upgradeMessage);
+  }
 }
 
 // Logout functionality
@@ -327,18 +354,247 @@ async function handleLogout() {
 
 logoutBtn.addEventListener('click', handleLogout);
 
-// File input handling
+// File input and preview handling
 const fileInput = $('fileInput');
 const fileLabelText = $('fileLabelText');
+const filePreview = $('filePreview');
+const previewImage = $('previewImage');
+const previewPlaceholder = $('previewPlaceholder');
+const previewFileName = $('previewFileName');
+const clearPreview = $('clearPreview');
+
+// Image file types for preview
+const imageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp', 'image/webp'];
 
 fileInput.addEventListener('change', function() {
   if (this.files && this.files[0]) {
-    fileLabelText.textContent = this.files[0].name;
+    const file = this.files[0];
+    fileLabelText.textContent = file.name;
+    
+    // Show preview
+    show(filePreview);
+    
+    if (imageTypes.includes(file.type)) {
+      // It's an image - show image preview
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        previewImage.src = e.target.result;
+        show(previewImage);
+        hide(previewPlaceholder);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // It's a document - show placeholder
+      hide(previewImage);
+      show(previewPlaceholder);
+      previewFileName.textContent = file.name;
+    }
   } else {
     fileLabelText.textContent = 'Choose file or drag here';
+    hide(filePreview);
   }
 });
 
+// Clear preview
+clearPreview.addEventListener('click', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  fileInput.value = '';
+  fileLabelText.textContent = 'Choose file or drag here';
+  hide(filePreview);
+});
+
+// Camera functionality for QR code scanning
+function initCameraButton() {
+  cameraModal = new bootstrap.Modal($('cameraModal'));
+  const switchCameraBtn = $('switchCameraBtn');
+  
+  // Camera button click handler - UPDATED FOR NEW ROUND BUTTON
+  cameraBtn.addEventListener('click', function() {
+    if (this.disabled) {
+      toast('Upgrade to a paid plan to use camera for QR scanning');
+      
+      // Optionally redirect to subscription page
+      setTimeout(() => {
+        window.location.href = '../Subscription/Subscription.html';
+      }, 1500);
+      return;
+    }
+    openCameraModal();
+  });
+  
+  // Switch camera button
+  switchCameraBtn.addEventListener('click', function() {
+    currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+    stopCamera();
+    startCamera();
+  });
+  
+  // Handle modal close
+  $('cameraModal').addEventListener('hidden.bs.modal', function() {
+    stopCamera();
+    qrScanningActive = false;
+  });
+}
+
+// Open camera modal and start camera
+async function openCameraModal() {
+  cameraModal.show();
+  await startCamera();
+}
+
+// Start camera stream
+async function startCamera() {
+  const video = $('cameraVideo');
+  const cameraError = $('cameraError');
+  
+  hide(cameraError);
+  
+  try {
+    const constraints = {
+      video: {
+        facingMode: currentFacingMode,
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    };
+    
+    cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    video.srcObject = cameraStream;
+    
+    // Wait for video to be ready
+    video.onloadedmetadata = () => {
+      video.play();
+      startQRScanning();
+    };
+    
+  } catch (error) {
+    console.error('Camera error:', error);
+    show(cameraError);
+    $('cameraErrorText').textContent = getCameraErrorMessage(error);
+  }
+}
+
+// Stop camera stream
+function stopCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+  }
+  qrScanningActive = false;
+}
+
+// Get user-friendly camera error message
+function getCameraErrorMessage(error) {
+  switch (error.name) {
+    case 'NotAllowedError':
+      return 'Camera access denied. Please allow camera permissions in your browser settings.';
+    case 'NotFoundError':
+      return 'No camera found on this device.';
+    case 'NotSupportedError':
+      return 'Camera not supported in this browser.';
+    case 'NotReadableError':
+      return 'Camera is already in use by another application.';
+    default:
+      return 'Unable to access camera. Please check your permissions.';
+  }
+}
+
+// Start QR code scanning from camera
+function startQRScanning() {
+  const video = $('cameraVideo');
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  
+  qrScanningActive = true;
+  
+  function scanQRCode() {
+    if (!qrScanningActive || video.readyState !== video.HAVE_ENOUGH_DATA) {
+      requestAnimationFrame(scanQRCode);
+      return;
+    }
+    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height);
+    
+    if (code) {
+      // QR code found!
+      handleQRCodeDetected(code.data);
+      return;
+    }
+    
+    requestAnimationFrame(scanQRCode);
+  }
+  
+  scanQRCode();
+}
+
+// Handle detected QR code
+function handleQRCodeDetected(qrData) {
+  console.log('QR Code detected:', qrData);
+  stopCamera();
+  cameraModal.hide();
+  
+  // Process the QR code data
+  processQRCodeResult(qrData);
+}
+
+// Process QR code result
+async function processQRCodeResult(qrData) {
+  if (!canScan('qr')) return;
+  
+  toast('QR code detected! Processing...');
+  
+  try {
+    // Check if it's a URL
+    if (isValidUrl(qrData)) {
+      // It's a URL, scan it
+      urlInput.value = qrData;
+      await runScanUrl(qrData);
+    } else {
+      // It's plain text, show in results
+      hide($('emptyState'));
+      hide($('resultUrl'));
+      hide($('resultFile'));
+      show($('resultQr'));
+      
+      $('qrText').textContent = qrData;
+      hide($('qrUrlBlock'));
+      updateStats(0, 0, 1, 0);
+      
+      const scanData = {
+        scan_type: 'qr_code',
+        content: qrData,
+        result: JSON.stringify({ decoded: qrData, type: 'text' }),
+        verdict_band: 'SAFE'
+      };
+      
+      saveScanResult(scanData);
+      
+      let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
+      if (userPlanMode === 0) {
+        scanCounter.decrement();
+      }
+    }
+  } catch (error) {
+    console.error('Error processing QR code:', error);
+    toast('Error processing QR code');
+  }
+}
+
+// Check if string is a valid URL
+function isValidUrl(string) {
+  try {
+    new URL(string);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
 
 async function checkAuthenticationWithSession() {
     try {
@@ -411,7 +667,6 @@ function initResults() {
     updateChart(0, 0, 0, 0);
   }
 }
-
 
 async function validateServerSession(sessionId) {
     try {
@@ -601,30 +856,55 @@ urlInput.addEventListener('keydown', e => {
   } 
 });
 
-// File Scan functionality
+// Combined File/QR Scan functionality
 fileScanBtn.addEventListener('click', () => {
   const f = fileInput.files && fileInput.files[0]; 
   if(!f) return toast('Choose a file first'); 
-  runScanFile(f); 
+  runScanFileOrQR(f); 
 });
 
-async function runScanFile(file){
+async function runScanFileOrQR(file){
   if (!canScan('file')) return;
   
-  setBusy(fileScanBtn, true, 'Uploading…');
+  setBusy(fileScanBtn, true, 'Analyzing…');
   
   try{
     const fd = new FormData(); 
     fd.append('file', file);
     
-    const r = await fetchWithSession('/api/scan_file', { 
+    // Check if file is an image (potential QR code)
+    const isImage = file.type.startsWith('image/');
+    let endpoint = '/api/scan_file';
+    
+    if (isImage) {
+      // Try QR code scanning first for images
+      try {
+        const qrResponse = await fetchWithSession('/api/scan_qr', { 
+          method: 'POST',
+          body: fd 
+        });
+        
+        if (qrResponse.ok) {
+          const qrData = await qrResponse.json();
+          
+          // If QR code was successfully decoded, use QR results
+          if (qrData.decoded) {
+            return handleQRResult(qrData, file);
+          }
+        }
+      } catch (qrError) {
+        console.log('QR scan failed, falling back to file scan:', qrError);
+      }
+    }
+    
+    // If not an image or QR scan failed, do regular file scan
+    const r = await fetchWithSession(endpoint, { 
       method: 'POST',
       body: fd 
     });
     
     const j = await r.json(); 
     if(!r.ok){ 
-      // More specific error messages
       if (j.error && j.error.includes('File type not allowed')) {
           toast('File type not supported. Please use: TXT, PDF, PNG, JPG, GIF, DOC, DOCX, EXE, ZIP');
       } else {
@@ -633,38 +913,53 @@ async function runScanFile(file){
       return;
     }
     
-    let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
-    if (userPlanMode === 0) {
-      scanCounter.decrement();
-    }
+    handleFileResult(j, file);
     
-    hide($('emptyState'));
-    hide($('resultUrl'));
-    hide($('resultQr'));
-    show($('resultFile'));
+  } catch(e) { 
+    console.error('File/QR scan error:', e);
+    toast('Scan failed: ' + e.message); 
+  } finally { 
+    setBusy(fileScanBtn, false); 
+  }
+}
+
+function handleQRResult(j, file) {
+  let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
+  if (userPlanMode === 0) {
+    scanCounter.decrement();
+  }
+  
+  hide($('emptyState'));
+  hide($('resultUrl'));
+  hide($('resultFile'));
+  show($('resultQr'));
+  
+  $('qrText').textContent = j.decoded || '(no data)';
+  
+  let qrVerdictBand = 'SAFE';
+  if(j.type === 'url' && j.verdict) {
+    show($('qrUrlBlock'));
+    $('finalUrlQr').textContent = j.signals.final_url; 
+    $('scoreQr').textContent = j.verdict.score;
+    $('reasonsQr').innerHTML = '';
     
-    $('fileName').textContent = j.file.filename || '(file)'; 
-    $('fileSha').textContent = j.file.sha256 ? ' · ' + j.file.sha256 : '';
-    
-    $('reasonsFile').innerHTML = '';
-    
-    (j.verdict.reasons || []).forEach(x => { 
+    j.verdict.reasons.forEach(x => { 
       const li = document.createElement('li'); 
       li.textContent = x; 
-      $('reasonsFile').appendChild(li);
+      $('reasonsQr').appendChild(li);
     });
     
-    setBadge($('badgeFile'), j.verdict.band); 
-    $('scoreFile').textContent = j.verdict.score;
+    setBadge($('badgeQr'), j.verdict.band);
+    qrVerdictBand = j.verdict.band;
     
-    if (j.api_results && j.api_results.length > 0) {
+    if (j.signals && j.signals.api_results) {
         let totalMalicious = 0;
         let totalSuspicious = 0;
         let totalHarmless = 0;
         let totalUndetected = 0;
         let totalEngines = 0;
         
-        j.api_results.forEach(apiResult => {
+        j.signals.api_results.forEach(apiResult => {
             if (apiResult.enabled && !apiResult.error) {
                 totalMalicious += apiResult.malicious || 0;
                 totalSuspicious += apiResult.suspicious || 0;
@@ -700,124 +995,71 @@ async function runScanFile(file){
             updateStats(0, 0, 0, 1);
         }
     }
-    
-    // Save scan result to database
-    const scanData = {
-      scan_type: 'file',
-      content: file.name,
-      result: JSON.stringify(j),
-      verdict_band: j.verdict.band
-    };
-    
-    saveScanResult(scanData);
-    
-    if (window.innerWidth < 992) {
-      const mobileControls = document.getElementById('mobileControls');
-      const bsCollapse = new bootstrap.Collapse(mobileControls, {toggle: false});
-      bsCollapse.hide();
-    }
-  } catch(e) { 
-    console.error('File scan error:', e);
-    toast('Network error: ' + e.message); 
-  } finally { 
-    setBusy(fileScanBtn, false); 
+  } else {
+    hide($('qrUrlBlock'));
+    updateStats(0, 0, 1, 0);
+  }
+  
+  const scanData = {
+    scan_type: 'qr_code',
+    content: j.decoded || 'QR code image',
+    result: JSON.stringify(j),
+    verdict_band: qrVerdictBand
+  };
+  
+  saveScanResult(scanData);
+  
+  if (window.innerWidth < 992) {
+    const mobileControls = document.getElementById('mobileControls');
+    const bsCollapse = new bootstrap.Collapse(mobileControls, {toggle: false});
+    bsCollapse.hide();
   }
 }
 
-// QR Scan functionality
-const qrInput = $('qrInput');
-
-qrScanBtn.addEventListener('click', () => {
-  const f = qrInput.files && qrInput.files[0]; 
-  if(!f) return toast('Pick an image of a QR code'); 
-  runScanQr(f); 
-});
-
-async function runScanQr(file){
-  if (!canScan('qr')) return;
+function handleFileResult(j, file) {
+  let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
+  if (userPlanMode === 0) {
+    scanCounter.decrement();
+  }
   
-  setBusy(qrScanBtn, true, 'Analyzing…');
+  hide($('emptyState'));
+  hide($('resultUrl'));
+  hide($('resultQr'));
+  show($('resultFile'));
   
-  try{
-    const fd = new FormData(); 
-    fd.append('file', file);
-    
-    const r = await fetchWithSession('/api/scan_qr', { 
-      method: 'POST',
-      body: fd
-    });
-    
-    if (!r.ok) {
-      const errorData = await r.json();
-      if (r.status === 503) {
-        toast('QR scanning feature is currently unavailable. Please try again later or contact support.');
-        console.error('QR library error:', errorData.error);
-        return;
-      }
-      throw new Error(errorData.error || 'QR scan failed');
-    }
-    
-    const j = await r.json(); 
-    
-    let userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
-    if (userPlanMode === 0) {
-      scanCounter.decrement();
-    }
-    
-    hide($('emptyState'));
-    hide($('resultUrl'));
-    hide($('resultFile'));
-    show($('resultQr'));
-    
-    $('qrText').textContent = j.decoded || '(no data)';
-    
-    let qrVerdictBand = 'SAFE';
-    if(j.type === 'url' && j.verdict) {
-      show($('qrUrlBlock'));
-      $('finalUrlQr').textContent = j.signals.final_url; 
-      $('scoreQr').textContent = j.verdict.score;
-      $('reasonsQr').innerHTML = '';
+  $('fileName').textContent = file.name; 
+  $('fileSha').textContent = j.file.sha256 ? ' · ' + j.file.sha256 : '';
+  
+  $('reasonsFile').innerHTML = '';
+  
+  (j.verdict.reasons || []).forEach(x => { 
+    const li = document.createElement('li'); 
+    li.textContent = x; 
+    $('reasonsFile').appendChild(li);
+  });
+  
+  setBadge($('badgeFile'), j.verdict.band); 
+  $('scoreFile').textContent = j.verdict.score;
+  
+  if (j.api_results && j.api_results.length > 0) {
+      let totalMalicious = 0;
+      let totalSuspicious = 0;
+      let totalHarmless = 0;
+      let totalUndetected = 0;
+      let totalEngines = 0;
       
-      j.verdict.reasons.forEach(x => { 
-        const li = document.createElement('li'); 
-        li.textContent = x; 
-        $('reasonsQr').appendChild(li);
+      j.api_results.forEach(apiResult => {
+          if (apiResult.enabled && !apiResult.error) {
+              totalMalicious += apiResult.malicious || 0;
+              totalSuspicious += apiResult.suspicious || 0;
+              totalHarmless += apiResult.harmless || 0;
+              totalUndetected += apiResult.undetected || 0;
+              totalEngines += apiResult.total_engines || 1;
+          }
       });
       
-      setBadge($('badgeQr'), j.verdict.band);
-      qrVerdictBand = j.verdict.band;
-      
-      if (j.signals && j.signals.api_results) {
-          let totalMalicious = 0;
-          let totalSuspicious = 0;
-          let totalHarmless = 0;
-          let totalUndetected = 0;
-          let totalEngines = 0;
-          
-          j.signals.api_results.forEach(apiResult => {
-              if (apiResult.enabled && !apiResult.error) {
-                  totalMalicious += apiResult.malicious || 0;
-                  totalSuspicious += apiResult.suspicious || 0;
-                  totalHarmless += apiResult.harmless || 0;
-                  totalUndetected += apiResult.undetected || 0;
-                  totalEngines += apiResult.total_engines || 1;
-              }
-          });
-          
-          if (totalEngines > 0) {
-              updateStats(totalMalicious, totalSuspicious, totalHarmless, totalUndetected);
-          } else {
-              const score = parseInt(j.verdict.score);
-              if (score >= 80) {
-                  updateStats(1, 0, 0, 0);
-              } else if (score >= 50) {
-                  updateStats(0, 1, 0, 0);
-              } else if (score >= 20) {
-                  updateStats(0, 0, 1, 0);
-              } else {
-                  updateStats(0, 0, 0, 1);
-              }
-          }
+      if (totalEngines > 0) {
+          updateStats(totalMalicious, totalSuspicious, totalHarmless, totalUndetected);
       } else {
           const score = parseInt(j.verdict.score);
           if (score >= 80) {
@@ -830,34 +1072,33 @@ async function runScanQr(file){
               updateStats(0, 0, 0, 1);
           }
       }
-    } else {
-      hide($('qrUrlBlock'));
-      updateStats(0, 0, 1, 0);
-    }
-    
-    const scanData = {
-      scan_type: 'qr_code',
-      content: j.decoded || 'QR code image',
-      result: JSON.stringify(j),
-      verdict_band: qrVerdictBand
-    };
-    
-    saveScanResult(scanData);
-    
-    if (window.innerWidth < 992) {
-      const mobileControls = document.getElementById('mobileControls');
-      const bsCollapse = new bootstrap.Collapse(mobileControls, {toggle: false});
-      bsCollapse.hide();
-    }
-  } catch(e) { 
-    console.error('QR scan error:', e);
-    if (e.message.includes('library not installed')) {
-      toast('QR scanning is temporarily unavailable. Our team is working on a fix.');
-    } else {
-      toast('QR scan failed: ' + e.message); 
-    }
-  } finally { 
-    setBusy(qrScanBtn, false); 
+  } else {
+      const score = parseInt(j.verdict.score);
+      if (score >= 80) {
+          updateStats(1, 0, 0, 0);
+      } else if (score >= 50) {
+          updateStats(0, 1, 0, 0);
+      } else if (score >= 20) {
+          updateStats(0, 0, 1, 0);
+      } else {
+          updateStats(0, 0, 0, 1);
+      }
+  }
+  
+  // Save scan result to database
+  const scanData = {
+    scan_type: 'file',
+    content: file.name,
+    result: JSON.stringify(j),
+    verdict_band: j.verdict.band
+  };
+  
+  saveScanResult(scanData);
+  
+  if (window.innerWidth < 992) {
+    const mobileControls = document.getElementById('mobileControls');
+    const bsCollapse = new bootstrap.Collapse(mobileControls, {toggle: false});
+    bsCollapse.hide();
   }
 }
 
@@ -925,76 +1166,6 @@ async function checkUserPlan() {
     console.error('Error checking user plan:', error);
   }
   return 0; 
-}
-
-// Toggle stats button visibility based on plan mode
-function toggleStatsButton(planMode) {
-  const statsButton = document.getElementById('statsButton');
-  const isSubscribed = planMode === 1 || planMode === 2 || planMode === 3;
-  
-  if (isSubscribed) {
-    show(statsButton);
-  } else {
-    hide(statsButton);
-  }
-}
-
-// control Enterprise button visibility
-function controlEnterpriseButton(planMode) {
-  const enterpriseButton = document.getElementById('twEnterprise');
-  if (planMode === 3) { 
-    show(enterpriseButton);
-  } else {
-    hide(enterpriseButton);
-  }
-  console.log(`Plan Mode: ${planMode}, Enterprise Button Visible: ${!enterpriseButton.classList.contains('hidden')}`);
-}
-
-// Control Background Check button visibility 
-function controlBackgroundCheckButton(planMode) {
-  const reputationButton = document.getElementById('twReputation');
-  if (planMode === 2 || planMode === 3) { 
-    show(reputationButton);
-  } else {
-    hide(reputationButton);
-  }
-  console.log(`Plan Mode: ${planMode}, Background Check Button Visible: ${!reputationButton.classList.contains('hidden')}`);
-}
-
-// Updated setUserUI function with button controls
-function setUserUI(userData){ 
-  console.log('Setting user UI with data:', userData); 
-  
-  if(userData && userData.authenticated){ 
-    const welcomeText = `Welcome, ${userData.full_name || userData.email}!`;
-    const displayName = userData.full_name || userData.email.split('@')[0];
-    
-    welcomeMessage.textContent = welcomeText;
-    userNameDisplay.textContent = displayName;
-    
-    console.log('User UI updated:', {
-      welcomeText,
-      displayName,
-      full_name: userData.full_name
-    });
-
-    // Control button states based on plan_mode
-    controlScanButtons(userData.plan_mode);
-    controlTeamWorkspaceButton(userData.plan_mode);
-    controlEnterpriseButton(userData.plan_mode);
-    controlBackgroundCheckButton(userData.plan_mode); 
-    toggleStatsButton(userData.plan_mode);
-
-  } else { 
-    welcomeMessage.textContent = ''; 
-    userNameDisplay.textContent = 'User Name'; 
-    console.log('User not authenticated, using fallback');
-    controlScanButtons(0);
-    controlTeamWorkspaceButton(0);
-    controlEnterpriseButton(0);
-    controlBackgroundCheckButton(0); 
-    toggleStatsButton(0);
-  }
 }
 
 // Initialize stats charts
@@ -1189,7 +1360,6 @@ function displayStats(statsData) {
   }
 }
 
-
 // Download stats report
 function downloadStatsReport() {
   toast('Preparing your download...');
@@ -1241,6 +1411,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (userData) {
             initFeaturesDropdown();            
             initChart();
+            initCameraButton();
             
             const planMode = await checkUserPlan();
             
@@ -1262,7 +1433,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 })();
 
-
 document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
         console.log('Page became visible, validating session...');
@@ -1280,7 +1450,9 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 
-
 window.addEventListener('beforeunload', function() {
-
+  // Stop camera when page is about to unload
+  if (cameraStream) {
+    stopCamera();
+  }
 });
