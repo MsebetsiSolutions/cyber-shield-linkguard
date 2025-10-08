@@ -22,69 +22,11 @@ function validateEmail(email) {
   return emailRegex.test(email);
 }
 
-// Security: Validate card number using Luhn algorithm
-function validateCardNumber(cardNumber) {
-  const cleanNumber = cardNumber.replace(/\s/g, '');
-  
-  // Check if it's all digits and correct length
-  if (!/^\d+$/.test(cleanNumber) || cleanNumber.length < 13 || cleanNumber.length > 19) {
-    return false;
-  }
-  
-  // Luhn algorithm implementation
-  let sum = 0;
-  let isEven = false;
-  
-  for (let i = cleanNumber.length - 1; i >= 0; i--) {
-    let digit = parseInt(cleanNumber.charAt(i), 10);
-    
-    if (isEven) {
-      digit *= 2;
-      if (digit > 9) {
-        digit -= 9;
-      }
-    }
-    
-    sum += digit;
-    isEven = !isEven;
-  }
-  
-  return sum % 10 === 0;
-}
-
-// Security: Validate expiry date
-function validateExpiryDate(expiryDate) {
-  const expiryRegex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
-  if (!expiryRegex.test(expiryDate)) {
-    return false;
-  }
-  
-  const [month, year] = expiryDate.split('/').map(Number);
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear() % 100;
-  const currentMonth = currentDate.getMonth() + 1;
-  
-  if (year < currentYear || (year === currentYear && month < currentMonth)) {
-    return false;
-  }
-  
-  return true;
-}
-
-function validateCVV(cvv) {
-  return /^\d{3,4}$/.test(cvv);
-}
-
-function formatCardNumber(cardNumber) {
-  return cardNumber.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim();
-}
-
-function formatExpiryDate(expiryDate) {
-  const cleaned = expiryDate.replace(/\D/g, '');
-  if (cleaned.length >= 2) {
-    return cleaned.substring(0, 2) + '/' + cleaned.substring(2, 4);
-  }
-  return cleaned;
+// Generate unique payment reference
+function generatePaymentReference() {
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 5).toUpperCase();
+  return `CSLG-${timestamp}-${random}`;
 }
 
 // Session-based fetch function
@@ -122,8 +64,8 @@ function setUserUI(userData){
     const welcomeText = `Welcome, ${userData.full_name || userData.email}!`;
     const displayName = userData.full_name || userData.email.split('@')[0];
     
-    welcomeMessage.textContent = welcomeText;
-    userNameDisplay.textContent = displayName;
+    if (welcomeMessage) welcomeMessage.textContent = welcomeText;
+    if (userNameDisplay) userNameDisplay.textContent = displayName;
     
     console.log('User UI updated:', {
       welcomeText,
@@ -132,8 +74,8 @@ function setUserUI(userData){
     });
 
   } else { 
-    welcomeMessage.textContent = ''; 
-    userNameDisplay.textContent = 'User Name'; 
+    if (welcomeMessage) welcomeMessage.textContent = ''; 
+    if (userNameDisplay) userNameDisplay.textContent = 'User Name'; 
     console.log('User not authenticated, using fallback');
   }
 }
@@ -182,24 +124,28 @@ async function handleLogout() {
 }
 
 // Attach logout event listener
-logoutBtn.addEventListener('click', handleLogout);
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', handleLogout);
+}
 
-userDropdownBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
-});
+if (userDropdownBtn && userDropdown) {
+  userDropdownBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
+  });
 
-// Close dropdowns when clicking outside
-document.addEventListener('click', (e) => {
-  if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-    userDropdown.style.display = 'none';
-  }
-});
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+      userDropdown.style.display = 'none';
+    }
+  });
 
-// Prevent dropdown from closing when clicking inside it
-userDropdown.addEventListener('click', (e) => {
-  e.stopPropagation();
-});
+  // Prevent dropdown from closing when clicking inside it
+  userDropdown.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+}
 
 // Display selected plan info
 function displaySelectedPlan() {
@@ -213,174 +159,160 @@ function displaySelectedPlan() {
     return;
   }
   
-  $('planName').textContent = selectedPlan.name;
-  $('planPrice').textContent = `R${selectedPlan.price} / month`;
-  $('planCode').textContent = selectedPlan.code;
+  if ($('planName')) $('planName').textContent = selectedPlan.name;
+  if ($('planPrice')) $('planPrice').textContent = `R${selectedPlan.price} / month`;
+  if ($('planCode')) $('planCode').textContent = selectedPlan.code;
+  
+  // Generate and display payment reference
+  const paymentReference = generatePaymentReference();
+  if ($('paymentReference')) $('paymentReference').textContent = paymentReference;
+  
+  // Store reference for later use
+  sessionStorage.setItem('paymentReference', paymentReference);
 }
 
-// Payment form validation and submission
-$('paymentForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const selectedPlan = JSON.parse(localStorage.getItem('selectedPlan') || '{}');
-  const cardNumber = $('cardNumber').value.replace(/\s/g, '');
-  const cardName = $('cardName').value.trim();
-  const expiryDate = $('expiryDate').value;
-  const cvv = $('cvv').value;
-  const zipCode = $('zipCode').value;
-  const email = $('email').value.trim();
-  
-  // Security: Input validation
-  if (!cardNumber || !cardName || !expiryDate || !cvv || !zipCode || !email) {
-    toast('Please fill in all fields');
-    return;
+// Show success modal
+function showSuccessModal(userName) {
+  // Set user name in modal
+  if ($('userNameModal')) {
+    $('userNameModal').textContent = userName || 'User';
   }
   
-  if (!validateEmail(email)) {
-    toast('Please enter a valid email address');
-    return;
-  }
-  
-  if (!validateCardNumber(cardNumber)) {
-    toast('Please enter a valid card number');
-    return;
-  }
-  
-  if (!validateExpiryDate(expiryDate)) {
-    toast('Please enter a valid expiry date (MM/YY)');
-    return;
-  }
-  
-  if (!validateCVV(cvv)) {
-    toast('Please enter a valid CVV (3 or 4 digits)');
-    return;
-  }
-  
-  if (!/^\d{5}$/.test(zipCode)) {
-    toast('Please enter a valid 5-digit ZIP code');
-    return;
-  }
-  
-  // Security: Sanitize inputs
-  const sanitizedCardName = sanitizeInput(cardName);
-  const sanitizedEmail = sanitizeInput(email);
-  
-  // Show loading state
-  const submitBtn = $('paymentForm').querySelector('button[type="submit"]');
-  const originalText = submitBtn.innerHTML;
-  submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spinner"></i> Processing...';
-  submitBtn.disabled = true;
-  
-  try {
-    // Call backend to process payment and create subscription
-    const response = await fetchWithSession('/api/subscription/process-payment', {
-      method: 'POST',
-      body: JSON.stringify({
-        plan_data: {
-          plan_id: selectedPlan.id,
-          plan_name: selectedPlan.name,
-          plan_code: selectedPlan.code,
-          price: selectedPlan.price,
-          team_size: selectedPlan.team_size || 1
-        },
-        payment_data: {
-          card_number: cardNumber,
-          expiry_date: expiryDate,
-          cvv: cvv,
-          card_holder: sanitizedCardName,
-          email: sanitizedEmail,
-          zip_code: zipCode
-        }
-      })
-    });
+  // Show modal
+  const successModalElement = $('successModal');
+  if (successModalElement) {
+    const successModal = new bootstrap.Modal(successModalElement);
+    successModal.show();
     
-    if (response.ok) {
-      const result = await response.json();
+    // Redirect when modal is closed
+    successModalElement.addEventListener('hidden.bs.modal', function () {
+      window.location.href = '../ScannerDash/ScannerDash.html';
+    });
+  }
+}
+
+// Handle proof of payment upload
+const proofUploadForm = $('proofUploadForm');
+if (proofUploadForm) {
+  proofUploadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    console.log('Proof upload form submitted');
+    
+    const fileInput = $('proofFile');
+    const senderEmail = $('senderEmail') ? $('senderEmail').value.trim() : '';
+    const additionalNotes = $('additionalNotes') ? $('additionalNotes').value.trim() : '';
+    const selectedPlan = JSON.parse(localStorage.getItem('selectedPlan') || '{}');
+    const paymentReference = sessionStorage.getItem('paymentReference');
+    
+    // Validation
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+      toast('Please select a proof of payment file');
+      return;
+    }
+    
+    const file = fileInput.files[0];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    
+    if (file.size > maxSize) {
+      toast('File size must be less than 5MB');
+      return;
+    }
+    
+    if (!validateEmail(senderEmail)) {
+      toast('Please enter a valid email address');
+      return;
+    }
+    
+    // Show loading state
+    const submitBtn = proofUploadForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spinner"></i> Sending...';
+    submitBtn.disabled = true;
+    
+    try {
+      // Create form data for file upload
+      const formData = new FormData();
+      formData.append('proof_file', file);
+      formData.append('sender_email', senderEmail);
+      formData.append('additional_notes', additionalNotes);
+      formData.append('plan_name', selectedPlan.name);
+      formData.append('plan_price', selectedPlan.price);
+      formData.append('payment_reference', paymentReference);
       
-      // Clear sensitive data from form
-      $('paymentForm').reset();
+      console.log('Sending proof of payment to server...');
       
-      // Clear selected plan from storage
-      localStorage.removeItem('selectedPlan');
+      // Use fetch without credentials for file upload
+      const response = await fetch('/api/subscription/submit-proof', {
+        method: 'POST',
+        body: formData
+      });
       
-      toast('Payment successful! Your subscription has been activated.');
-      
-      // Redirect to dashboard after successful payment
-      setTimeout(() => {
-        window.location.href = '../ScannerDash/ScannerDash.html';
-      }, 2000);
-    } else {
-      const error = await response.json();
-      toast(error.error || 'Payment failed. Please try again.');
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Proof submission successful:', result);
+        
+        // Clear form
+        proofUploadForm.reset();
+        
+        // Get user name for modal
+        const userName = sessionStorage.getItem('full_name') || (userNameDisplay ? userNameDisplay.textContent : 'User');
+        
+        // Show success modal instead of toast
+        showSuccessModal(userName);
+        
+      } else {
+        const errorText = await response.text();
+        console.error('Proof submission failed:', errorText);
+        let errorMessage = 'Failed to submit proof. Please try again or email directly.';
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // If not JSON, use the text as is
+          errorMessage = errorText || errorMessage;
+        }
+        
+        toast(errorMessage);
+        
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    } catch (error) {
+      console.error('Proof submission error:', error);
+      toast('Failed to submit proof. Please try again or email directly to tshepho@msebetsisolutions.com');
       
       // Reset button state
       submitBtn.innerHTML = originalText;
       submitBtn.disabled = false;
     }
-  } catch (error) {
-    console.error('Payment error:', error);
-    toast('Payment failed. Please try again.');
-    
-    // Reset button state
-    submitBtn.innerHTML = originalText;
-    submitBtn.disabled = false;
-  }
-});
+  });
+}
 
-// Input formatting and validation
-$('cardNumber').addEventListener('input', function(e) {
-  const cursorPosition = e.target.selectionStart;
-  const formatted = formatCardNumber(e.target.value);
-  e.target.value = formatted;
-  
-  // Restore cursor position
-  const diff = formatted.length - e.target.value.length;
-  e.target.setSelectionRange(cursorPosition + diff, cursorPosition + diff);
-});
+// Card payment tab functionality
+const cardTab = document.getElementById('card-tab');
+if (cardTab) {
+  cardTab.addEventListener('click', function(e) {
+    console.log('Card payment tab clicked');
+    // Show construction modal
+    const constructionModalElement = $('constructionModal');
+    if (constructionModalElement) {
+      const constructionModal = new bootstrap.Modal(constructionModalElement);
+      constructionModal.show();
+    } else {
+      console.error('Construction modal element not found');
+    }
+  });
+}
 
-$('expiryDate').addEventListener('input', function(e) {
-  const cursorPosition = e.target.selectionStart;
-  const formatted = formatExpiryDate(e.target.value);
-  e.target.value = formatted;
-  
-  // Restore cursor position
-  const diff = formatted.length - e.target.value.length;
-  e.target.setSelectionRange(cursorPosition + diff, cursorPosition + diff);
-});
-
-// Security: Prevent non-numeric input for CVV and ZIP
-$('cvv').addEventListener('input', function(e) {
-  e.target.value = e.target.value.replace(/\D/g, '');
-});
-
-$('zipCode').addEventListener('input', function(e) {
-  e.target.value = e.target.value.replace(/\D/g, '');
-});
-
-// Security: Real-time validation feedback
-$('cardNumber').addEventListener('blur', function() {
-  if (this.value && !validateCardNumber(this.value)) {
-    this.style.borderColor = 'var(--candy-red)';
-  } else if (this.value) {
-    this.style.borderColor = 'var(--candy-green)';
-  }
-});
-
-$('expiryDate').addEventListener('blur', function() {
-  if (this.value && !validateExpiryDate(this.value)) {
-    this.style.borderColor = 'var(--candy-red)';
-  } else if (this.value) {
-    this.style.borderColor = 'var(--candy-green)';
-  }
-});
-
-$('email').addEventListener('blur', function() {
-  if (this.value && !validateEmail(this.value)) {
-    this.style.borderColor = 'var(--candy-red)';
-  } else if (this.value) {
-    this.style.borderColor = 'var(--candy-green)';
-  }
-});
+// Disable card payment form interactions
+const paymentForm = $('paymentForm');
+if (paymentForm) {
+  paymentForm.querySelectorAll('input, button').forEach(element => {
+    element.disabled = true;
+  });
+}
 
 // Initialize payment page
 (async function boot(){
@@ -419,6 +351,7 @@ $('email').addEventListener('blur', function() {
 // Security: Clear sensitive data when leaving page
 window.addEventListener('beforeunload', function() {
   localStorage.removeItem('selectedPlan');
+  sessionStorage.removeItem('paymentReference');
 });
 
 // Security: Prevent form resubmission

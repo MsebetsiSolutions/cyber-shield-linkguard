@@ -2,6 +2,7 @@ import sqlite3
 import datetime
 import random
 import string
+import os
 from flask import Blueprint, jsonify, request, session
 
 # ======================================================
@@ -295,6 +296,105 @@ def process_payment():
         print(f"Payment processing error: {e}")
         return jsonify({'error': 'Payment processing failed'}), 500
 
+@subscription_bp.route('/submit-proof', methods=['POST'])
+def submit_proof_of_payment():
+    """Handle EFT proof of payment submission."""
+    try:
+        print("Received proof of payment submission request")
+        
+        # Check if user is authenticated via session
+        if 'user_id' not in session:
+            print("User not authenticated in session")
+            return jsonify({'error': 'Authentication required'}), 401
+        
+        user_id = session['user_id']
+        print(f"Processing proof for user_id: {user_id}")
+        
+        # Get form data
+        sender_email = request.form.get('sender_email')
+        additional_notes = request.form.get('additional_notes', '')
+        plan_name = request.form.get('plan_name')
+        plan_price = request.form.get('plan_price')
+        payment_reference = request.form.get('payment_reference')
+        
+        print(f"Form data received - Email: {sender_email}, Plan: {plan_name}, Price: {plan_price}, Ref: {payment_reference}")
+        
+        # Validate required fields
+        if not all([sender_email, plan_name, plan_price, payment_reference]):
+            error_msg = f"Missing required fields. Email: {bool(sender_email)}, Plan: {bool(plan_name)}, Price: {bool(plan_price)}, Ref: {bool(payment_reference)}"
+            print(error_msg)
+            return jsonify({'error': 'Missing required fields'}), 400
+        
+        # Handle file upload
+        proof_file = request.files.get('proof_file')
+        file_path = None
+        
+        if proof_file and proof_file.filename:
+            print(f"Processing file upload: {proof_file.filename}")
+            # Create uploads directory if it doesn't exist
+            upload_dir = 'uploads/proof_of_payment'
+            os.makedirs(upload_dir, exist_ok=True)
+            
+            # Generate unique filename
+            file_extension = os.path.splitext(proof_file.filename)[1]
+            filename = f"pop_{user_id}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}{file_extension}"
+            file_path = os.path.join(upload_dir, filename)
+            
+            # Save file
+            try:
+                proof_file.save(file_path)
+                print(f"File saved successfully: {file_path}")
+            except Exception as file_error:
+                print(f"Error saving file: {file_error}")
+                return jsonify({'error': 'Failed to save proof file'}), 500
+        else:
+            print("No proof file provided")
+        
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            
+            # Insert EFT payment record
+            cursor.execute('''
+                INSERT INTO EFTPayment (user_id, selected_plan, price, plan_code, Reference, pop, email, status, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                user_id,
+                plan_name,
+                float(plan_price),
+                payment_reference,  # Using payment_reference as plan_code
+                payment_reference,  # Using payment_reference as Reference
+                file_path,
+                sender_email,
+                'pending',
+                datetime.datetime.now().isoformat()
+            ))
+            
+            eft_payment_id = cursor.lastrowid
+            
+            conn.commit()
+            conn.close()
+            
+            print(f"EFT payment record created successfully with ID: {eft_payment_id}")
+            
+            return jsonify({
+                'message': 'Proof of payment submitted successfully',
+                'eft_payment_id': eft_payment_id,
+                'payment_reference': payment_reference,
+                'status': 'pending'
+            }), 201
+            
+        except sqlite3.Error as e:
+            print(f"Database error: {e}")
+            return jsonify({'error': 'Database error occurred'}), 500
+            
+    except Exception as e:
+        print(f"Proof submission error: {str(e)}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        return jsonify({'error': 'Failed to submit proof of payment'}), 500
+
+
 # Get user's current subscription
 @subscription_bp.route('/current', methods=['GET'])
 def get_current_subscription():
@@ -458,3 +558,4 @@ def calculate_enterprise_price():
     except Exception as e:
         print(f"Price calculation error: {e}")
         return jsonify({'error': 'Failed to calculate price'}), 500
+    
