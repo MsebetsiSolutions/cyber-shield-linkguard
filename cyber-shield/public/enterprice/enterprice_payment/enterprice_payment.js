@@ -544,17 +544,17 @@ $('paymentForm').addEventListener('submit', async (e) => {
         return;
       } else {
         console.log('User not authenticated, redirecting to login');
-        window.location.href = '../index.html';
+        window.location.href = '../../ScannerDash/ScannerDash.html';
         return;
       }
     } else {
       console.log('Auth check failed, redirecting to login');
-      window.location.href = '../index.html';
+      window.location.href = '../../ScannerDash/ScannerDash.html';
       return;
     }
   } catch(e) {
     console.error('Failed to fetch user info', e);
-    window.location.href = '../index.html';
+    window.location.href = '../../ScannerDash/ScannerDash.html';
     return;
   }
 })();

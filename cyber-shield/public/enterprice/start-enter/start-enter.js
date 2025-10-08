@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const verificationInput = document.getElementById('verificationCode');
     const submitBtn = document.getElementById('submitBtn');
     
-    // Generate random verification code
     function generateRandomCode() {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         let result = '';
@@ -18,13 +17,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const verificationValue = generateRandomCode();
     codeDisplay.textContent = verificationValue;
     
+    codeDisplay.style.animation = 'pulse 2s infinite';
+    
     verificationForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const companyName = companyNameInput.value.trim();
         const enteredCode = verificationInput.value.trim();
         
-        // Validate inputs
         if (!companyName) {
             showError('Please enter your company name');
             companyNameInput.focus();
@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Verify with backend
         try {
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
@@ -65,7 +64,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 showSuccess('Enterprise verification successful! Redirecting...');
                 
-                // Store company name for dashboard
                 localStorage.setItem('enterprise_company', companyName);
                 
                 setTimeout(() => {
@@ -84,7 +82,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Input effects
     const inputs = document.querySelectorAll('input');
     inputs.forEach(input => {
         input.addEventListener('focus', function() {
@@ -117,35 +114,21 @@ document.addEventListener('DOMContentLoaded', function() {
         const messages = document.querySelectorAll('.message');
         messages.forEach(message => message.remove());
     }
-    
-    // Add styles for messages
+
     const style = document.createElement('style');
     style.textContent = `
-        .message {
-            padding: 12px 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: fadeIn 0.3s ease;
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
         }
         
-        .message.error {
-            background: #fee2e2;
-            color: #dc2626;
-            border: 1px solid #fecaca;
+        .form-group input {
+            transition: all 0.3s ease;
         }
         
-        .message.success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .code-display {
+            transition: all 0.3s ease;
         }
     `;
     document.head.appendChild(style);
