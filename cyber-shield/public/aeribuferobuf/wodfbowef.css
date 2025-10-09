@@ -405,6 +405,8 @@ body {
   margin-left: 280px;
   background: #000;
   color: var(--terminal-text);
+  height: 100vh;
+  position: relative;
 }
 
 .admin-header {
@@ -430,41 +432,49 @@ body {
   align-items: center;
 }
 
-/* Dashboard Scrollable Content */
-.dashboard-scrollable-content {
-  max-height: calc(100vh - 200px);
-  overflow-y: auto;
-  padding-right: 10px;
-}
-
-/* Custom Scrollbar for Dashboard */
-.dashboard-scrollable-content::-webkit-scrollbar {
-  width: 8px;
-}
-
-.dashboard-scrollable-content::-webkit-scrollbar-track {
-  background: var(--terminal-bg);
-  border-radius: 4px;
-}
-
-.dashboard-scrollable-content::-webkit-scrollbar-thumb {
-  background: var(--terminal-accent);
-  border-radius: 4px;
-}
-
-.dashboard-scrollable-content::-webkit-scrollbar-thumb:hover {
-  background: var(--terminal-prompt);
-}
-
 /* Tab Content */
 .tab-content {
   display: none;
+  height: calc(100vh - 200px);
+  overflow: hidden;
 }
 
 .tab-content.active {
   display: block;
 }
 
+/* Scrollable Content Areas */
+.dashboard-scrollable-content,
+.tab-scrollable-content {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+/* Custom Scrollbar for Dashboard and Tabs */
+.dashboard-scrollable-content::-webkit-scrollbar,
+.tab-scrollable-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dashboard-scrollable-content::-webkit-scrollbar-track,
+.tab-scrollable-content::-webkit-scrollbar-track {
+  background: var(--terminal-bg);
+  border-radius: 4px;
+}
+
+.dashboard-scrollable-content::-webkit-scrollbar-thumb,
+.tab-scrollable-content::-webkit-scrollbar-thumb {
+  background: var(--terminal-accent);
+  border-radius: 4px;
+}
+
+.dashboard-scrollable-content::-webkit-scrollbar-thumb:hover,
+.tab-scrollable-content::-webkit-scrollbar-thumb:hover {
+  background: var(--terminal-prompt);
+}
+
+/* Tab Header */
 .tab-header {
   display: flex;
   justify-content: space-between;
@@ -472,6 +482,7 @@ body {
   margin-bottom: 2rem;
   flex-wrap: wrap;
   gap: 1rem;
+  padding: 1rem 0;
 }
 
 .tab-actions {
@@ -677,6 +688,8 @@ body {
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid var(--terminal-border);
+  max-height: calc(100vh - 300px);
+  overflow-y: auto;
 }
 
 .data-table {
@@ -697,6 +710,9 @@ body {
   background: rgba(0, 255, 136, 0.1);
   font-weight: 600;
   color: var(--terminal-text);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .data-table tr:hover {
@@ -944,14 +960,20 @@ body {
   .admin-main {
     margin-left: 0;
     padding: 1rem;
+    height: auto;
+  }
+
+  .tab-content {
+    height: auto;
   }
 
   .stats-grid {
     grid-template-columns: 1fr;
   }
 
-  .dashboard-scrollable-content {
-    max-height: none;
+  .dashboard-scrollable-content,
+  .tab-scrollable-content {
+    height: auto;
     overflow-y: visible;
   }
 
@@ -963,6 +985,10 @@ body {
   .tab-actions {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .table-responsive {
+    max-height: none;
   }
 }
 
@@ -1005,4 +1031,11 @@ body {
   animation: shimmer 1s infinite linear;
   background: linear-gradient(to right, var(--terminal-bg) 8%, rgba(0, 255, 136, 0.1) 18%, var(--terminal-bg) 33%);
   background-size: 800px 104px;
+}
+
+/* Scrollspy active state */
+.nav-link.active {
+  background: rgba(0, 255, 136, 0.15) !important;
+  border-left-color: var(--terminal-accent) !important;
+  color: var(--terminal-text) !important;
 }

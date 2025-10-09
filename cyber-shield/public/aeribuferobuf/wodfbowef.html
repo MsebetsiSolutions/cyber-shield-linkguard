@@ -13,7 +13,7 @@
     <link rel="manifest" href="../assets/favicon/site.webmanifest" />
 </head>
 
-<body>
+<body data-bs-spy="scroll" data-bs-target="#analytics-sidebar" data-bs-offset="100">
     <!-- Secure Console Login -->
     <div id="secure-console" class="secure-console">
         <div class="console-background"></div>
@@ -105,7 +105,7 @@
 
     <div id="analytics-dashboard" class="analytics-dashboard d-none">
         <div class="admin-container">
-            <nav class="admin-sidebar">
+            <nav id="analytics-sidebar" class="admin-sidebar">
                 <div class="sidebar-header">
                     <img src="../assets/CYBER_SHIELD_LINKGUARD2.png" alt="Cyber Shield Logo" class="logo-img mb-2"
                         style="max-height: 70px;">
@@ -113,13 +113,13 @@
                 </div>
 
                 <ul class="sidebar-nav">
-                    <li><a href="#" class="nav-link active" data-tab="dashboard">📊 Overview</a></li>
-                    <li><a href="#" class="nav-link" data-tab="users">👥 User Management</a></li>
-                    <li><a href="#" class="nav-link" data-tab="scans">🔍 Scan Analytics</a></li>
-                    <li><a href="#" class="nav-link" data-tab="payments">💳 Revenue Stats</a></li>
-                    <li><a href="#" class="nav-link" data-tab="teams">👥 Team Insights</a></li>
-                    <li><a href="#" class="nav-link" data-tab="audit">📋 Activity Logs</a></li>
-                    <li><a href="#" class="nav-link" data-tab="settings">⚙️ System Config</a></li>
+                    <li><a href="#dashboard-tab" class="nav-link active" data-tab="dashboard">📊 Overview</a></li>
+                    <li><a href="#users-tab" class="nav-link" data-tab="users">👥 User Management</a></li>
+                    <li><a href="#scans-tab" class="nav-link" data-tab="scans">🔍 Scan Analytics</a></li>
+                    <li><a href="#payments-tab" class="nav-link" data-tab="payments">💳 Revenue Stats</a></li>
+                    <li><a href="#teams-tab" class="nav-link" data-tab="teams">👥 Team Insights</a></li>
+                    <li><a href="#audit-tab" class="nav-link" data-tab="audit">📋 Activity Logs</a></li>
+                    <li><a href="#settings-tab" class="nav-link" data-tab="settings">⚙️ System Config</a></li>
                 </ul>
 
                 <div class="sidebar-footer">
@@ -251,175 +251,197 @@
                 </div>
 
                 <div id="users-tab" class="tab-content">
-                    <div class="tab-header">
-                        <h2>User Management</h2>
-                        <div class="tab-actions">
-                            <input type="text" id="user-search" class="form-control" placeholder="Search users...">
-                            <button id="refresh-users" class="btn-primary">🔄 Refresh</button>
-                            <button id="export-users" class="btn-primary">📊 Export</button>
+                    <div class="tab-scrollable-content">
+                        <div class="tab-header">
+                            <div class="row">
+                                <div class="col-md-8>
+                                    <input type="text" id="user-search" class="form-control"
+                                        placeholder="Search users...">
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <button id="refresh-users" class="btn-primary">🔄 Refresh</button>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <button id="export-users" class="btn-primary">📊 Export</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="table-responsive">
-                        <table id="users-table" class="data-table table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Email</th>
-                                    <th>Full Name</th>
-                                    <th>Current Plan</th>
-                                    <th>Plan Actions</th>
-                                    <th>Subscription</th>
-                                    <th>Created At</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="users-tbody">
-                            </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table id="users-table" class="data-table table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Email</th>
+                                        <th>Full Name</th>
+                                        <th>Current Plan</th>
+                                        <th>Plan Actions</th>
+                                        <th>Subscription</th>
+                                        <th>Created At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-tbody">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <div id="scans-tab" class="tab-content">
-                    <div class="tab-header">
-                        <h2>Scan Analytics</h2>
-                        <div class="tab-actions">
-                            <select id="scan-type-filter" class="form-select">
-                                <option value="">All Types</option>
-                                <option value="url">URL</option>
-                                <option value="file">File</option>
-                                <option value="qr_code">QR Code</option>
-                            </select>
-                            <select id="threat-level-filter" class="form-select">
-                                <option value="">All Threat Levels</option>
-                                <option value="malicious">Malicious</option>
-                                <option value="suspicious">Suspicious</option>
-                                <option value="harmless">Harmless</option>
-                            </select>
-                            <button id="refresh-scans" class="btn-primary">🔄 Refresh</button>
+                    <div class="tab-scrollable-content">
+                        <div class="tab-header">
+                            <h2>Scan Analytics</h2>
+                            <div class="tab-actions">
+                                <select id="scan-type-filter" class="form-select">
+                                    <option value="">All Types</option>
+                                    <option value="url">URL</option>
+                                    <option value="file">File</option>
+                                    <option value="qr_code">QR Code</option>
+                                </select>
+                                <select id="threat-level-filter" class="form-select">
+                                    <option value="">All Threat Levels</option>
+                                    <option value="malicious">Malicious</option>
+                                    <option value="suspicious">Suspicious</option>
+                                    <option value="harmless">Harmless</option>
+                                </select>
+                                <button id="refresh-scans" class="btn-primary">🔄 Refresh</button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="table-responsive">
-                        <table id="scans-table" class="data-table table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Scan ID</th>
-                                    <th>User</th>
-                                    <th>Type</th>
-                                    <th>Threat Level</th>
-                                    <th>Content</th>
-                                    <th>Scanned At</th>
-                                </tr>
-                            </thead>
-                            <tbody id="scans-tbody">
-                            </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table id="scans-table" class="data-table table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Scan ID</th>
+                                        <th>User</th>
+                                        <th>Type</th>
+                                        <th>Threat Level</th>
+                                        <th>Content</th>
+                                        <th>Scanned At</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scans-tbody">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <div id="payments-tab" class="tab-content">
-                    <div class="tab-header">
-                        <h2>Revenue Statistics</h2>
-                        <div class="tab-actions">
-                            <select id="payment-status-filter" class="form-select">
-                                <option value="">All Status</option>
-                                <option value="completed">Completed</option>
-                                <option value="pending">Pending</option>
-                                <option value="failed">Failed</option>
-                            </select>
-                            <button id="refresh-payments" class="btn-primary">🔄 Refresh</button>
+                    <div class="tab-scrollable-content">
+                        <div class="tab-header">
+                            <h2>Revenue Statistics</h2>
+                            <div class="tab-actions">
+                                <select id="payment-status-filter" class="form-select">
+                                    <option value="">All Status</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="failed">Failed</option>
+                                </select>
+                                <button id="refresh-payments" class="btn-primary">🔄 Refresh</button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="table-responsive">
-                        <table id="payments-table" class="data-table table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Payment ID</th>
-                                    <th>User</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                    <th>Method</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
-                            <tbody id="payments-tbody">
-                            </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table id="payments-table" class="data-table table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Payment ID</th>
+                                        <th>User</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Method</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payments-tbody">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <div id="teams-tab" class="tab-content">
-                    <div class="tab-header">
-                        <h2>Team Insights</h2>
-                        <button id="refresh-teams" class="btn-primary">🔄 Refresh</button>
-                    </div>
-                    <div class="table-responsive">
-                        <table id="teams-table" class="data-table table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Team ID</th>
-                                    <th>Name</th>
-                                    <th>Creator</th>
-                                    <th>Members</th>
-                                    <th>Created At</th>
-                                </tr>
-                            </thead>
-                            <tbody id="teams-tbody">
-                            </tbody>
-                        </table>
+                    <div class="tab-scrollable-content">
+                        <div class="tab-header">
+                            <h2>Team Insights</h2>
+                            <button id="refresh-teams" class="btn-primary">🔄 Refresh</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="teams-table" class="data-table table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Team ID</th>
+                                        <th>Name</th>
+                                        <th>Creator</th>
+                                        <th>Members</th>
+                                        <th>Created At</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="teams-tbody">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <div id="audit-tab" class="tab-content">
-                    <div class="tab-header">
-                        <h2>Activity Logs</h2>
-                        <button id="refresh-audit" class="btn-primary">🔄 Refresh</button>
-                    </div>
-                    <div class="table-responsive">
-                        <table id="audit-table" class="data-table table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Log ID</th>
-                                    <th>User</th>
-                                    <th>Action</th>
-                                    <th>Description</th>
-                                    <th>IP Address</th>
-                                    <th>Timestamp</th>
-                                </tr>
-                            </thead>
-                            <tbody id="audit-tbody">
-                            </tbody>
-                        </table>
+                    <div class="tab-scrollable-content">
+                        <div class="tab-header">
+                            <h2>Activity Logs</h2>
+                            <button id="refresh-audit" class="btn-primary">🔄 Refresh</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="audit-table" class="data-table table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Log ID</th>
+                                        <th>User</th>
+                                        <th>Action</th>
+                                        <th>Description</th>
+                                        <th>IP Address</th>
+                                        <th>Timestamp</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="audit-tbody">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <div id="settings-tab" class="tab-content">
-                    <div class="tab-header">
-                        <h2>System Configuration</h2>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="setting-card">
-                                <h3>System Information</h3>
-                                <div class="setting-item">
-                                    <label>Server Time:</label>
-                                    <span id="server-time">Loading...</span>
-                                </div>
-                                <div class="setting-item">
-                                    <label>User:</label>
-                                    <span id="analytics-user-info">Loading...</span>
-                                </div>
-                                <div class="setting-item">
-                                    <label>Last Data Refresh:</label>
-                                    <span id="last-refresh-time">Never</span>
+                    <div class="tab-scrollable-content">
+                        <div class="tab-header">
+                            <h2>System Configuration</h2>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="setting-card">
+                                    <h3>System Information</h3>
+                                    <div class="setting-item">
+                                        <label>Server Time:</label>
+                                        <span id="server-time">Loading...</span>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>User:</label>
+                                        <span id="analytics-user-info">Loading...</span>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>Last Data Refresh:</label>
+                                        <span id="last-refresh-time">Never</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="setting-card">
-                                <h3>Quick Actions</h3>
-                                <button id="clear-cache" class="btn-warning">🗑️ Clear Cache</button>
-                                <button id="backup-db" class="btn-primary">💾 Backup Database</button>
-                                <button id="system-health" class="btn-primary">❤️ System Health</button>
+                            <div class="col-md-6">
+                                <div class="setting-card">
+                                    <h3>Quick Actions</h3>
+                                    <button id="clear-cache" class="btn-warning">🗑️ Clear Cache</button>
+                                    <button id="backup-db" class="btn-primary">💾 Backup Database</button>
+                                    <button id="system-health" class="btn-primary">❤️ System Health</button>
+                                </div>
                             </div>
                         </div>
                     </div>
