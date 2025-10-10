@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 import os
 from markupsafe import escape
 from datetime import datetime
@@ -73,12 +73,24 @@ def generate_phishing_email():
 @email_phishing_bp.route('/send', methods=['POST'])
 def send_phishing_email():
     try:
+        # Check if user is authenticated
+        if 'user_id' not in session:
+            return jsonify({'error': 'Unauthorized'}), 401
+            
         data = request.get_json()
         to_email = data.get('to')
         subject = data.get('subject')
         html_content = data.get('html_content')
         email_type = data.get('type')
-        
+
+        # Extract recipient details for database storage (handle different field name formats)
+        first_name = data.get('first_name') or data.get('firstname') or ''
+        last_name = data.get('last_name') or data.get('lastname') or ''
+        email = data.get('email') or to_email or ''
+        company = data.get('company') or ''
+        role = data.get('role') or data.get('jobtitle') or ''
+        platform = data.get('platform') or 'generic'
+
         if not to_email:
             return jsonify({'error': 'Recipient email is required'}), 400
         
@@ -86,15 +98,44 @@ def send_phishing_email():
         try:
             ms = MailerSendClient()
 
-            email = (EmailBuilder().from_email('test@test-ywj2lpnwmmqg7oqz.mlsender.net', 'Test User').to(to_email)).subject(subject).html(html_content).build()
+            email_obj = (EmailBuilder().from_email('test@test-ywj2lpnwmmqg7oqz.mlsender.net', 'Test User').to(to_email)).subject(subject).html(html_content).build()
 
-            print(f'Email content {email}')
-            response = ms.emails.send(email)
+            print(f'Email content {email_obj}')
+            response = ms.emails.send(email_obj)
 
             if response.status_code == 202:
                 print("Email sent successfully!")
+                
+                # Store email data in database after successful send
+                try:
+                    user_id = session['user_id']
+                    sent_at = datetime.now().isoformat()
+
+                    conn = sqlite3.connect('cyber-shield-linkguard.db')
+                    cursor = conn.cursor()
+
+                    cursor.execute('''
+                        INSERT INTO cyber_training (
+                            user_id, target_name, target_surname, target_email, 
+                            target_company, target_title, html_content, sent_at, status
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', (
+                        user_id, first_name, last_name, to_email, 
+                        company, role, html_content, sent_at, 'sent'
+                    ))
+                    
+                    email_id = cursor.lastrowid  # Get the inserted email ID
+                    conn.commit()
+                    conn.close()
+                    print(f'Email training data stored for user: {user_id} with ID: {email_id}')
+                    
+                except Exception as db_err:
+                    print(f'Database error: {db_err}')
+                    # Don't fail the email send if database storage fails
+
                 return jsonify({'status': 'success',
-                                'message': 'Email sent successfully'}), 200
+                                'message': 'Email sent successfully',
+                                'email_id': email_id}), 200
             else:
                 print(f"Failed to send email. Status code: {response.status_code}")
                 print(f"Response: {response.text if hasattr(response, 'text') else 'No response text'}")
@@ -102,43 +143,167 @@ def send_phishing_email():
                                 'message': 'Failed to send email'}), 500
             
         except Exception as e:
-            print(f'Email send error: {e}')   
-        response = {
-            'status': 'success',
-            'message': 'Training email sent successfully',
-            'email_id': f"train_{datetime.now().strftime('%Y%m%d%H%M%S')}",
-            'sent_to': to_email,
-            'sent_at': datetime.now().isoformat(),
-            'type': email_type
-        }
-        return jsonify(response)
+            print(f'Email send error: {e}')
+            return jsonify({'error': 'Failed to send email'}), 500
+            
     except Exception as e:
         print(f'Email send error: {e}')
         return jsonify({'error': 'Failed to send email'}), 500
 
 
+@email_phishing_bp.route('/sent', methods=['GET'])
+def get_sent_emails():
+    """Retrieve sent training emails for the authenticated user"""
+    try:
+        # Check if user is authenticated
+        if 'user_id' not in session:
+            return jsonify({'error': 'Unauthorized'}), 401
+            
+        user_id = session['user_id']
+        
+        conn = sqlite3.connect('cyber-shield-linkguard.db')
+        conn.row_factory = sqlite3.Row  # This allows us to access columns by name
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT id, target_name, target_surname, target_email, 
+                   target_company, target_title, html_content, sent_at
+            FROM cyber_training 
+            WHERE user_id = ? AND status = 'sent'
+            ORDER BY sent_at DESC
+        ''', (user_id,))
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        # Convert rows to list of dictionaries
+        sent_emails = []
+        for row in rows:
+            sent_emails.append({
+                'id': row['id'],
+                'target_name': row['target_name'],
+                'target_surname': row['target_surname'],
+                'target_email': row['target_email'],
+                'target_company': row['target_company'],
+                'target_title': row['target_title'],
+                'html_content': row['html_content'],
+                'sent_at': row['sent_at']
+            })
+        
+        return jsonify({
+            'status': 'success',
+            'sent_emails': sent_emails,
+            'count': len(sent_emails)
+        }), 200
+        
+    except Exception as e:
+        print(f'Error retrieving sent emails: {e}')
+        return jsonify({'error': 'Failed to retrieve sent emails'}), 500
+
+
+@email_phishing_bp.route('/drafts', methods=['GET'])
+def get_draft_emails():
+    """Retrieve draft training emails for the authenticated user"""
+    try:
+        # Check if user is authenticated
+        if 'user_id' not in session:
+            return jsonify({'error': 'Unauthorized'}), 401
+            
+        user_id = session['user_id']
+        
+        conn = sqlite3.connect('cyber-shield-linkguard.db')
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT id, target_name, target_surname, target_email, 
+                   target_company, target_title, html_content, sent_at
+            FROM cyber_training 
+            WHERE user_id = ? AND status = 'draft'
+            ORDER BY sent_at DESC
+        ''', (user_id,))
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        # Convert rows to list of dictionaries
+        draft_emails = []
+        for row in rows:
+            draft_emails.append({
+                'id': row['id'],
+                'target_name': row['target_name'],
+                'target_surname': row['target_surname'],
+                'target_email': row['target_email'],
+                'target_company': row['target_company'],
+                'target_title': row['target_title'],
+                'html_content': row['html_content'],
+                'sent_at': row['sent_at']
+            })
+        
+        return jsonify({
+            'status': 'success',
+            'draft_emails': draft_emails,
+            'count': len(draft_emails)
+        }), 200
+        
+    except Exception as e:
+        print(f'Error retrieving draft emails: {e}')
+        return jsonify({'error': 'Failed to retrieve draft emails'}), 500
+
+
 @email_phishing_bp.route('/draft', methods=['POST'])
 def save_email_draft():
     try:
+        # Check if user is authenticated
+        if 'user_id' not in session:
+            return jsonify({'error': 'Unauthorized'}), 401
+            
         data = request.get_json() or {}
         from_email = data.get('from') or data.get('sender_email') or ''
         to_email = data.get('to') or data.get('recipient_email') or ''
-        subject = data.get('subject') or 'Training Email'
+        subject = data.get('subject') or 'Training Email Draft'
         html_content = data.get('html_content') or data.get('content') or ''
         email_type = data.get('type') or 'phishing_training'
 
-        draft_id = f'draft_{datetime.now().strftime("%Y%m%d%H%M%S")}'
+        # Extract recipient details for database storage (handle different field name formats)
+        first_name = data.get('first_name') or data.get('firstname') or ''
+        last_name = data.get('last_name') or data.get('lastname') or ''
+        email = data.get('email') or to_email or ''
+        company = data.get('company') or ''
+        role = data.get('role') or data.get('jobtitle') or ''
 
-        print('Simulated draft save:')
-        print(f'Draft ID: {draft_id}')
-        print(f'From: {from_email}')
-        print(f'To: {to_email}')
+        # Save draft to database
+        try:
+            user_id = session['user_id']
+            saved_at = datetime.now().isoformat()
+
+            conn = sqlite3.connect('cyber-shield-linkguard.db')
+            cursor = conn.cursor()
+
+            cursor.execute('''
+                INSERT INTO cyber_training (
+                    user_id, target_name, target_surname, target_email, 
+                    target_company, target_title, html_content, sent_at, status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                user_id, first_name, last_name, to_email, 
+                company, role, html_content, saved_at, 'draft'
+            ))
+            
+            draft_id = cursor.lastrowid
+            conn.commit()
+            conn.close()
+            print(f'Email draft saved for user: {user_id}')
+            
+        except Exception as db_err:
+            print(f'Database error saving draft: {db_err}')
+            return jsonify({'error': 'Failed to save draft to database'}), 500
 
         response = {
             'status': 'success',
             'message': 'Email saved to drafts successfully',
             'draft_id': draft_id,
-            'saved_at': datetime.now().isoformat(),
+            'saved_at': saved_at,
             'recipient': to_email,
             'subject': subject,
             'type': email_type
@@ -147,3 +312,8 @@ def save_email_draft():
     except Exception as e:
         print(f'Draft save error: {e}')
         return jsonify({'error': 'Failed to save email to drafts'}), 500
+    
+
+@email_phishing_bp.route('/clicked', methods=['POST'])
+def clicked_email():
+    pass

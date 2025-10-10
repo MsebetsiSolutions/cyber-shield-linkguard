@@ -2,6 +2,7 @@ import sqlite3
 import datetime
 import random
 import string
+import os
 from flask import Blueprint, jsonify, request, session
 
 # ======================================================
@@ -458,3 +459,4 @@ def calculate_enterprise_price():
     except Exception as e:
         print(f"Price calculation error: {e}")
         return jsonify({'error': 'Failed to calculate price'}), 500
+    

@@ -379,6 +379,36 @@ def get_current_user():
         print(f"Get user info error: {e}")
         return jsonify({'error': 'Failed to get user information'}), 500
 
+@auth_bp.route('/check-session', methods=['GET'])
+def check_session():
+    """Check if user has a valid session"""
+    try:
+        print(f"Session check - Session contents: {dict(session)}")  
+        
+        if 'user_id' in session and 'user_email' in session:
+            # Parse full name into first and last name
+            full_name = session.get('user_full_name', '')
+            name_parts = full_name.split(' ', 1) if full_name else ['', '']
+            first_name = name_parts[0] if len(name_parts) > 0 else 'User'
+            last_name = name_parts[1] if len(name_parts) > 1 else ''
+            
+            return jsonify({
+                'authenticated': True,
+                'user': {
+                    'id': session['user_id'],
+                    'firstName': first_name,
+                    'lastName': last_name,
+                    'full_name': session.get('user_full_name', ''),
+                    'email': session['user_email'],
+                    'plan_mode': session.get('plan_mode', 0)
+                }
+            }), 200
+        else:
+            return jsonify({'authenticated': False}), 200
+    except Exception as e:
+        print(f"Session check error: {e}")
+        return jsonify({'authenticated': False, 'error': 'Session check failed'}), 500
+
 # forgot password implementation
 @auth_bp.route('/forgot-password', methods=['POST'])
 def forgot_password():
