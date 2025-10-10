@@ -315,10 +315,22 @@ function sendGeneratedEmail() {
   }
 
   // Simulate sending email via API
-  sendPhishingEmailAPI(emailData)
+  const emailDataWithRecipient = {
+    ...emailData,
+    ...window.currentRecipientDetails // Add stored recipient details
+  };
+  
+  sendPhishingEmailAPI(emailDataWithRecipient)
     .then(result => {
       toast('Training email sent successfully!');
       console.log('Email sent:', result);
+      
+      // Add sent email to Detection Phishing Replica sent folder with email ID
+      const emailWithId = {
+        ...emailDataWithRecipient,
+        email_id: result.email_id // Store the email ID from the response
+      };
+      insertSentEmailToMailbox(emailWithId, window.currentRecipientDetails);
     })
     .catch(error => {
       console.error('Failed to send email:', error);
@@ -338,20 +350,20 @@ function saveEmailToDraft() {
     return;
   }
 
+  // Include recipient details from stored data
+  const emailDataWithRecipient = {
+    ...emailData,
+    ...window.currentRecipientDetails // Add stored recipient details
+  };
+
   // Save to drafts via API
-  saveEmailDraftAPI(emailData)
+  saveEmailDraftAPI(emailDataWithRecipient)
     .then(result => {
       toast('Email saved to drafts successfully!');
       console.log('Email saved to draft:', result);
 
-      // Insert the saved draft into the Detection Replica mailbox UI so users
-      // can see and open the draft immediately without reloading.
-      try {
-        const draftId = result && result.draft_id ? result.draft_id : `draft_${Date.now()}`;
-        insertDraftToMailbox(draftId, emailData, result && result.saved_at);
-      } catch (e) {
-        console.warn('Failed to insert draft into mailbox UI:', e);
-      }
+      // Refresh drafts to show the newly saved draft
+      loadDraftEmailsFromDatabase();
     })
     .catch(error => {
       console.error('Failed to save to drafts:', error);
@@ -530,6 +542,500 @@ function insertDraftToMailbox(draftId, emailData, savedAt) {
       badge.textContent = current + 1;
     }
   }
+}
+
+// Insert a sent email into the Detection Phishing Replica sent folder
+function insertSentEmailToMailbox(emailData, recipientDetails) {
+  const emailList = document.getElementById('emailList');
+  const sentFolderId = 'sent-folder';
+
+  if (!emailList) {
+    console.warn('Email list container not found, cannot insert sent email');
+    return;
+  }
+
+  // Ensure sent folder exists
+  let sentFolder = document.getElementById(sentFolderId);
+  if (!sentFolder) {
+    sentFolder = document.createElement('div');
+    sentFolder.className = 'email-folder hidden';
+    sentFolder.id = sentFolderId;
+    emailList.appendChild(sentFolder);
+  }
+
+  // Build preview text (strip HTML and truncate)
+  const stripHtml = html => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html || '';
+    return tmp.textContent || tmp.innerText || '';
+  };
+
+  const previewText = (emailData.html_content ? stripHtml(emailData.html_content) : '').slice(0, 120);
+  const sentAt = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+  const recipientName = recipientDetails ? `${recipientDetails.first_name} ${recipientDetails.last_name}`.trim() : (emailData.to || 'Unknown');
+
+  // Create email item element
+  const item = document.createElement('div');
+  item.className = 'email-item';
+  // Store the email ID for click tracking
+  if (emailData.email_id) {
+    item.dataset.emailId = emailData.email_id;
+  }
+  item.innerHTML = `
+    <div class="avatar">${recipientName.split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()}</div>
+    <div class="content">
+      <div class="header">
+        <div class="subject">To: ${recipientName} - ${(emailData.subject || 'Training Email').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+        <div class="time">${sentAt}</div>
+      </div>
+      <div class="preview">${previewText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+    </div>
+  `;
+
+  // Add click handler to show the sent email
+  item.addEventListener('click', function() {
+    // Hide all existing email views
+    const emailViews = document.querySelectorAll('.email-view-content');
+    emailViews.forEach(v => v.style.display = 'none');
+
+    // Create sent email view
+    const viewId = `sentView_${Date.now()}`;
+    const sentView = document.createElement('div');
+    sentView.className = 'email-view-content';
+    sentView.id = viewId;
+    sentView.innerHTML = `
+      <div class="email-header-view">
+        <h2>${(emailData.subject || 'Training Email').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h2>
+        <div class="sender-info">
+          <div class="sender-avatar">${recipientName.split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()}</div>
+          <div class="sender-details">
+            <div class="sender-name">To: ${recipientName}</div>
+            <div class="sender-email">${emailData.to || ''}</div>
+          </div>
+          <div class="email-date">${new Date().toLocaleDateString()}, ${sentAt}</div>
+        </div>
+      </div>
+      <div class="email-body">
+        ${emailData.html_content || ''}
+        <div class="training-indicator" style="margin-top: 20px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 4px;">
+          <strong><i class="fas fa-graduation-cap"></i> Training Email Sent</strong>
+          <p>This phishing simulation email was successfully sent to ${recipientName} (${emailData.to}) for cybersecurity training purposes.</p>
+        </div>
+      </div>
+    `;
+
+    // Append to the email view container
+    const emailViewContainer = document.querySelector('.email-view');
+    if (emailViewContainer) {
+      emailViewContainer.appendChild(sentView);
+    }
+
+    // Add click tracking to the email content if email_id is available
+    if (emailData.email_id) {
+      addClickTrackingToEmailContent(sentView, emailData.email_id);
+    }
+
+    // Display the sent email view
+    sentView.style.display = 'block';
+
+    // Update active state for email items
+    const emailItems = document.querySelectorAll('.email-item');
+    emailItems.forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+  });
+
+  // Append item to the sent folder (newest first)
+  sentFolder.insertBefore(item, sentFolder.firstChild);
+
+  // Update sent badge count in folder list
+  const sentFolderBtn = document.querySelector('.folder-item[data-folder="sent"]');
+  if (sentFolderBtn) {
+    const badge = sentFolderBtn.querySelector('.badge');
+    if (badge) {
+      const current = parseInt(badge.textContent || '0', 10) || 0;
+      badge.textContent = current + 1;
+    }
+  }
+
+  console.log('Sent email added to Detection Phishing Replica sent folder');
+}
+
+// Load sent emails from database and populate sent folder
+async function loadSentEmailsFromDatabase() {
+  try {
+    const response = await fetchWithSession('/api/phishing/sent', {
+      method: 'GET'
+    });
+
+    if (!response.ok) {
+      console.error('Failed to load sent emails');
+      return;
+    }
+
+    const result = await response.json();
+    const sentEmails = result.sent_emails || [];
+
+    // Clear existing sent emails in the folder
+    const sentFolder = document.getElementById('sent-folder');
+    if (sentFolder) {
+      sentFolder.innerHTML = '';
+    }
+
+    // Add each sent email to the folder
+    sentEmails.forEach(email => {
+      const recipientDetails = {
+        first_name: email.target_name,
+        last_name: email.target_surname,
+        email: email.target_email,
+        company: email.target_company,
+        role: email.target_title
+      };
+
+      const emailData = {
+        to: email.target_email,
+        subject: 'Training Email', // We can enhance this if we store subject
+        html_content: email.html_content,
+        sent_at: email.sent_at
+      };
+
+      // Use the existing function but modify it to handle database data
+      insertSentEmailFromDatabase(emailData, recipientDetails, email.sent_at, email.id);
+    });
+
+    // Update sent folder badge count
+    const sentFolderBtn = document.querySelector('.folder-item[data-folder="sent"]');
+    if (sentFolderBtn) {
+      const badge = sentFolderBtn.querySelector('.badge');
+      if (badge) {
+        badge.textContent = sentEmails.length;
+      }
+    }
+
+    console.log(`Loaded ${sentEmails.length} sent emails from database`);
+
+  } catch (error) {
+    console.error('Error loading sent emails:', error);
+  }
+}
+
+// Load draft emails from database and populate drafts folder
+async function loadDraftEmailsFromDatabase() {
+  try {
+    const response = await fetchWithSession('/api/phishing/drafts', {
+      method: 'GET'
+    });
+
+    if (!response.ok) {
+      console.error('Failed to load draft emails');
+      return;
+    }
+
+    const result = await response.json();
+    const draftEmails = result.draft_emails || [];
+
+    // Clear existing draft emails in the folder
+    const draftsFolder = document.getElementById('drafts-folder');
+    if (draftsFolder) {
+      draftsFolder.innerHTML = '';
+    }
+
+    // Add each draft email to the folder
+    draftEmails.forEach(email => {
+      const recipientDetails = {
+        first_name: email.target_name,
+        last_name: email.target_surname,
+        email: email.target_email,
+        company: email.target_company,
+        role: email.target_title
+      };
+
+      const emailData = {
+        to: email.target_email,
+        subject: 'Training Email Draft',
+        html_content: email.html_content,
+        saved_at: email.sent_at
+      };
+
+      // Insert draft using existing pattern
+      insertDraftFromDatabase(emailData, recipientDetails, email.sent_at, email.id);
+    });
+
+    // Update drafts folder badge count
+    const draftsFolderBtn = document.querySelector('.folder-item[data-folder="drafts"]');
+    if (draftsFolderBtn) {
+      const badge = draftsFolderBtn.querySelector('.badge');
+      if (badge) {
+        badge.textContent = draftEmails.length;
+      }
+    }
+
+    console.log(`Loaded ${draftEmails.length} draft emails from database`);
+
+  } catch (error) {
+    console.error('Error loading draft emails:', error);
+  }
+}
+
+// Insert draft email from database (similar to insertDraftToMailbox but handles database format)
+function insertDraftFromDatabase(emailData, recipientDetails, savedAt, draftId) {
+  const emailList = document.getElementById('emailList');
+  const draftsFolderId = 'drafts-folder';
+
+  if (!emailList) {
+    console.warn('Email list container not found, cannot insert draft');
+    return;
+  }
+
+  // Ensure drafts folder exists
+  let draftsFolder = document.getElementById(draftsFolderId);
+  if (!draftsFolder) {
+    draftsFolder = document.createElement('div');
+    draftsFolder.className = 'email-folder hidden';
+    draftsFolder.id = draftsFolderId;
+    emailList.appendChild(draftsFolder);
+  }
+
+  // Build preview text (strip HTML and truncate)
+  const stripHtml = html => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html || '';
+    return tmp.textContent || tmp.innerText || '';
+  };
+
+  const previewText = (emailData.html_content ? stripHtml(emailData.html_content) : '').slice(0, 120);
+  const savedTime = savedAt ? new Date(savedAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : 'Unknown';
+  const recipientName = recipientDetails ? `${recipientDetails.first_name} ${recipientDetails.last_name}`.trim() : (emailData.to || 'Unknown');
+
+  // Create email item element
+  const item = document.createElement('div');
+  item.className = 'email-item';
+  item.setAttribute('data-draft-id', draftId);
+  item.innerHTML = `
+    <div class="avatar">${recipientName.split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()}</div>
+    <div class="content">
+      <div class="header">
+        <div class="subject">Draft: ${recipientName} - ${(emailData.subject || 'Training Email Draft').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+        <div class="time">${savedTime}</div>
+      </div>
+      <div class="preview">${previewText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+    </div>
+  `;
+
+  // Add click handler to show the draft
+  item.addEventListener('click', function() {
+    // Hide all existing email views
+    const emailViews = document.querySelectorAll('.email-view-content');
+    emailViews.forEach(v => v.style.display = 'none');
+
+    // Create draft email view
+    const viewId = `draftView_${draftId}_${Date.now()}`;
+    const draftView = document.createElement('div');
+    draftView.className = 'email-view-content';
+    draftView.id = viewId;
+    draftView.innerHTML = `
+      <div class="email-header-view">
+        <h2>${(emailData.subject || 'Training Email Draft').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h2>
+        <div class="sender-info">
+          <div class="sender-avatar">${recipientName.split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()}</div>
+          <div class="sender-details">
+            <div class="sender-name">Draft for: ${recipientName}</div>
+            <div class="sender-email">${emailData.to || ''}</div>
+          </div>
+          <div class="email-date">${savedAt ? new Date(savedAt).toLocaleDateString() : 'Unknown'}, ${savedTime}</div>
+        </div>
+      </div>
+      <div class="email-body">
+        ${emailData.html_content || ''}
+        <div class="training-indicator" style="margin-top: 20px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+          <strong><i class="fas fa-edit"></i> Draft Email</strong>
+          <p>This is a draft phishing simulation email for ${recipientName} (${emailData.to}).</p>
+          ${recipientDetails.company ? `<p><strong>Company:</strong> ${recipientDetails.company}</p>` : ''}
+          ${recipientDetails.role ? `<p><strong>Role:</strong> ${recipientDetails.role}</p>` : ''}
+          <div style="margin-top: 10px;">
+            <button class="btn btn-primary btn-sm" onclick="editDraft(${draftId})">
+              <i class="fas fa-edit"></i> Edit Draft
+            </button>
+            <button class="btn btn-success btn-sm" onclick="sendDraft(${draftId})">
+              <i class="fas fa-paper-plane"></i> Send Draft
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Append to the email view container
+    const emailViewContainer = document.querySelector('.email-view');
+    if (emailViewContainer) {
+      emailViewContainer.appendChild(draftView);
+    }
+
+    // Display the draft view
+    draftView.style.display = 'block';
+
+    // Update active state for email items
+    const emailItems = document.querySelectorAll('.email-item');
+    emailItems.forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+  });
+
+  // Append item to the drafts folder
+  draftsFolder.appendChild(item);
+}
+
+// Insert sent email from database (similar to insertSentEmailToMailbox but handles database format)
+function insertSentEmailFromDatabase(emailData, recipientDetails, sentAt, emailId) {
+  const emailList = document.getElementById('emailList');
+  const sentFolderId = 'sent-folder';
+
+  if (!emailList) {
+    console.warn('Email list container not found, cannot insert sent email');
+    return;
+  }
+
+  // Ensure sent folder exists
+  let sentFolder = document.getElementById(sentFolderId);
+  if (!sentFolder) {
+    sentFolder = document.createElement('div');
+    sentFolder.className = 'email-folder hidden';
+    sentFolder.id = sentFolderId;
+    emailList.appendChild(sentFolder);
+  }
+
+  // Build preview text (strip HTML and truncate)
+  const stripHtml = html => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html || '';
+    return tmp.textContent || tmp.innerText || '';
+  };
+
+  const previewText = (emailData.html_content ? stripHtml(emailData.html_content) : '').slice(0, 120);
+  const sentTime = sentAt ? new Date(sentAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : 'Unknown';
+  const recipientName = recipientDetails ? `${recipientDetails.first_name} ${recipientDetails.last_name}`.trim() : (emailData.to || 'Unknown');
+
+  // Create email item element
+  const item = document.createElement('div');
+  item.className = 'email-item';
+  // Store the email ID for reference
+  if (emailId) {
+    item.dataset.emailId = emailId;
+  }
+  item.innerHTML = `
+    <div class="avatar">${recipientName.split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()}</div>
+    <div class="content">
+      <div class="header">
+        <div class="subject">To: ${recipientName} - ${(emailData.subject || 'Training Email').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+        <div class="time">${sentTime}</div>
+      </div>
+      <div class="preview">${previewText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+    </div>
+  `;
+
+  // Add click handler to show the sent email
+  item.addEventListener('click', function() {
+    // Hide all existing email views
+    const emailViews = document.querySelectorAll('.email-view-content');
+    emailViews.forEach(v => v.style.display = 'none');
+
+    // Create sent email view
+    const viewId = `sentView_${Date.now()}_${Math.random()}`;
+    const sentView = document.createElement('div');
+    sentView.className = 'email-view-content';
+    sentView.id = viewId;
+    sentView.innerHTML = `
+      <div class="email-header-view">
+        <h2>${(emailData.subject || 'Training Email').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h2>
+        <div class="sender-info">
+          <div class="sender-avatar">${recipientName.split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()}</div>
+          <div class="sender-details">
+            <div class="sender-name">To: ${recipientName}</div>
+            <div class="sender-email">${emailData.to || ''}</div>
+          </div>
+          <div class="email-date">${sentAt ? new Date(sentAt).toLocaleDateString() : 'Unknown'}, ${sentTime}</div>
+        </div>
+      </div>
+      <div class="email-body" id="emailBody_${emailId}">
+        ${emailData.html_content || ''}
+        <div class="training-indicator" style="margin-top: 20px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 4px;">
+          <strong><i class="fas fa-graduation-cap"></i> Training Email Sent</strong>
+          <p>This phishing simulation email was sent to ${recipientName} (${emailData.to}) for cybersecurity training purposes.</p>
+          ${recipientDetails.company ? `<p><strong>Company:</strong> ${recipientDetails.company}</p>` : ''}
+          ${recipientDetails.role ? `<p><strong>Role:</strong> ${recipientDetails.role}</p>` : ''}
+        </div>
+      </div>
+    `;
+
+    // Append to the email view container
+    const emailViewContainer = document.querySelector('.email-view');
+    if (emailViewContainer) {
+      emailViewContainer.appendChild(sentView);
+    }
+
+    // Display the sent email view
+    sentView.style.display = 'block';
+
+    // Update active state for email items
+    const emailItems = document.querySelectorAll('.email-item');
+    emailItems.forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+  });
+
+  // Append item to the sent folder
+  sentFolder.appendChild(item);
+}
+
+// Record email click via API
+async function recordEmailClick(emailId) {
+  try {
+    const response = await fetchWithSession(`/api/phishing/click/${emailId}`, {
+      method: 'POST'
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to record click');
+    }
+
+    const result = await response.json();
+    console.log('Click recorded:', result);
+    return result;
+    
+  } catch (error) {
+    console.error('Error recording email click:', error);
+    throw error;
+  }
+}
+
+// Show training alert modal
+function showTrainingAlert(clickedText) {
+  const warningModal = document.createElement('div');
+  warningModal.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.8); z-index: 10000; display: flex; 
+    align-items: center; justify-content: center;
+  `;
+  warningModal.innerHTML = `
+    <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; text-align: center;">
+      <h3 style="color: #dc3545; margin-bottom: 20px;">
+        <i class="fas fa-exclamation-triangle"></i> Training Alert
+      </h3>
+      <p style="margin-bottom: 20px;">You clicked on "${clickedText}"! This was a training exercise.</p>
+      <p style="margin-bottom: 20px; font-weight: bold;">In a real phishing scenario, this could:</p>
+      <ul style="text-align: left; margin-bottom: 20px;">
+        <li>Install malware on your device</li>
+        <li>Steal your personal information</li>
+        <li>Compromise your accounts</li>
+        <li>Give attackers access to your company systems</li>
+      </ul>
+      <div style="background: #d4edda; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <strong style="color: #155724;">🛡️ Training Success!</strong><br>
+        <span style="color: #155724;">This click has been recorded for training analysis.</span>
+      </div>
+      <button onclick="this.parentElement.parentElement.remove()" 
+              style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+        I Understand
+      </button>
+    </div>
+  `;
+  document.body.appendChild(warningModal);
 }
 
 // exportEmailAsTrainingMaterial removed: was unused in this file. Keep training exports in a dedicated utilities module if needed.
@@ -735,6 +1241,16 @@ function initPhishingSimulation() {
         if (response.ok) {
           const result = await response.json();
           
+          // Store recipient details for later use when sending
+          window.currentRecipientDetails = {
+            first_name: first,
+            last_name: last,
+            email: email,
+            company: company,
+            role: jobTitle,
+            platform: platform
+          };
+          
           // Display the generated email
           displayGeneratedEmail(result);
           
@@ -904,8 +1420,8 @@ function initDetectionPhishingReplica() {
       });
     });
     
-    // Select first email by default in inbox
-    const firstEmail = document.querySelector('#inbox-folder .email-item');
+    // Select first email by default in clicked folder
+    const firstEmail = document.querySelector('#clicked-folder .email-item');
     if (firstEmail) {
       firstEmail.click();
     }
@@ -917,10 +1433,23 @@ function initDetectionPhishingReplica() {
     if (refreshButton) {
       refreshButton.addEventListener('click', function() {
         setBusy(this, true);
-        setTimeout(() => {
-          setBusy(this, false);
-          toast('Emails refreshed');
-        }, 1000);
+        
+        // Reload sent emails, drafts, and clicked emails from database
+        Promise.all([
+          loadSentEmailsFromDatabase(),
+          loadDraftEmailsFromDatabase(),
+          loadClickedEmailsFromDatabase()
+        ]).then(() => {
+          setTimeout(() => {
+            setBusy(this, false);
+            toast('Emails refreshed');
+          }, 1000);
+        }).catch(() => {
+          setTimeout(() => {
+            setBusy(this, false);
+            toast('Failed to refresh emails');
+          }, 1000);
+        });
       });
     }
   }
@@ -1128,6 +1657,13 @@ function initDetectionPhishingReplica() {
   initQrInteractions();
   initAttachmentInteractions();
   initImageInteractions();
+  
+  // Load sent emails from database
+  loadSentEmailsFromDatabase();
+  
+  // Load draft emails from database
+  loadDraftEmailsFromDatabase();
+  
   initOverlayClose();
 }
 

@@ -49,6 +49,7 @@ from routes.profile import profile_bp
 from routes.teamCollab import team_collab_bp
 from routes.admin import admin_bp
 from routes.enterprise import enterprise_bp
+from routes.learning_hub import learning_hub_bp
 
 # importing email phishing blueprint
 from routes.email_phishing import email_phishing_bp
@@ -80,6 +81,7 @@ app.register_blueprint(profile_bp)
 app.register_blueprint(team_collab_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(enterprise_bp)
+app.register_blueprint(learning_hub_bp)
 
 # registering email phishing blueprint
 app.register_blueprint(email_phishing_bp, url_prefix='/api/phishing')
