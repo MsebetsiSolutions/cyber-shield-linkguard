@@ -25,19 +25,25 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-image: url('../assets/welcome-bg.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             min-height: 100vh;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
         }
 
         .container {
             max-width: 1200px;
-            margin: 18px auto 0; /* push content below sticky header */
-            padding: 0 16px;
+            margin: 20px auto 0; /* proper spacing below sticky header */
+            padding: 0 20px 20px 20px; /* left, bottom, right padding (no top padding) */
         }
 
         /* Header (full-width sticky) */
         .header {
+            position: -webkit-sticky; /* Safari support */
             position: sticky;
             top: 0;
             left: 0;
@@ -45,6 +51,7 @@
             background: white;
             z-index: 1050;
             box-shadow: 0 6px 18px rgba(2,6,23,0.08);
+            margin: 0; /* Ensure no margin interferes */
         }
 
         .header-inner {
@@ -752,19 +759,7 @@
             }
         });
 
-        // Ensure content isn't hidden behind sticky header
-        function adjustBodyPaddingForHeader(){
-            const header = document.querySelector('.header');
-            if (!header) return;
-            const rect = header.getBoundingClientRect();
-            // add a small extra spacing
-            document.body.style.paddingTop = (rect.height + 6) + 'px';
-        }
-
-        window.addEventListener('load', adjustBodyPaddingForHeader);
-        window.addEventListener('resize', adjustBodyPaddingForHeader);
-        // call once in case the header is already loaded
-        adjustBodyPaddingForHeader();
+        // Header is positioned sticky at the top - no body padding needed
     </script>
 </body>
 </html>

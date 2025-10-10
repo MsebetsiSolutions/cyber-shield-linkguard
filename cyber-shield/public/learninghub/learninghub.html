@@ -12,7 +12,7 @@
     <header class="header">
         <div class="header-container">
             <div class="header-left">
-                <a href="../ScannerDash/ScannerDash.html">
+                <a href="../learninghub-admin/dashboard.html">
                    <img src="../assets/favicon/favicon-16x16.png" alt="LearnHub Logo" class="logo" width="50">
                 </a>
                 <h1>LearnHub</h1>
@@ -96,8 +96,8 @@
                         </svg>
                     </div>
                 </div>
-                <div class="stat-value">4</div>
-                <div class="stat-trend">+2 this month</div>
+                <div class="stat-value">0</div>
+                <div class="stat-trend">+0 this month</div>
             </div>
 
             <div class="stat-card">
@@ -109,8 +109,8 @@
                         </svg>
                     </div>
                 </div>
-                <div class="stat-value">7</div>
-                <div class="stat-trend">+1 this week</div>
+                <div class="stat-value">0</div>
+                <div class="stat-trend">+0 this week</div>
             </div>
 
             <div class="stat-card">
@@ -122,8 +122,8 @@
                         </svg>
                     </div>
                 </div>
-                <div class="stat-value">156</div>
-                <div class="stat-trend">+12 this week</div>
+                <div class="stat-value">0</div>
+                <div class="stat-trend">+0 this week</div>
             </div>
 
             <div class="stat-card">
@@ -135,8 +135,8 @@
                         </svg>
                     </div>
                 </div>
-                <div class="stat-value">78%</div>
-                <div class="stat-trend">+5%</div>
+                <div class="stat-value">0</div>
+                <div class="stat-trend">+0</div>
             </div>
         </div>
 
@@ -180,7 +180,22 @@
                     <div class="category-pills" id="category-pills"></div>
                 </div>
 
-                <div class="course-grid course-grid-3" id="all-courses"></div>
+                <div class="course-grid course-grid-3" id="all-courses">
+                    <div class="course-card" onclick="navigateToCourse('ethical-hacking')" style="cursor: pointer;">
+                        <img src="../assets/emailphish.png" alt="Ethical Hacking: Comprehensive Training Guide" class="course-image">
+                        <div class="course-content">
+                            <span class="course-category">Ethical Hacking</span>
+                            <h4 class="course-title">Ethical Hacking: Comprehensive Training Guide</h4>
+                            <p class="course-description">Mastering Global Cybersecurity for Universities, Government Training, and 
+Industry Experts </p>
+                            <div class="course-meta">
+                                <span>⭐ 0</span>
+                                <span>👥 0</span>
+                                <span>⏱️ 20h</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div id="no-results" class="hidden" style="text-align: center; padding: 3rem; color: #6b7280;">
                     <p>No courses found matching your criteria.</p>
                 </div>
@@ -283,6 +298,35 @@
         </div>
     </div>
 
+    <!-- Course Under Construction Modal -->
+    <div id="course-construction-modal" class="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" onclick="closeCourseConstructionModal()">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            <div class="modal-header">
+                <h3 class="modal-title">🚧 Course Under Construction</h3>
+                <p class="modal-description">This course is still being developed. Leave your email to be notified when it's ready!</p>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="notify-email">Email Address</label>
+                    <input type="email" class="input" id="notify-email" placeholder="your@email.com" required>
+                </div>
+
+                <div class="alert-info">
+                    <p>📧 <strong>We'll notify you:</strong> As soon as this course goes live, you'll be the first to know!</p>
+                </div>
+
+                <button class="btn btn-primary" style="width: 100%;" onclick="submitNotificationRequest()">
+                    Notify Me When Ready
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Course Data
         const courses = [
@@ -369,7 +413,7 @@
         // Create Course Card
         function createCourseCard(course) {
             return `
-                <div class="course-card">
+                <div class="course-card" onclick="navigateToCourse(${course.id})" style="cursor: pointer;">
                     <img src="${course.image}" alt="${course.title}" class="course-image">
                     <div class="course-content">
                         <span class="course-category">${course.category}</span>
@@ -421,11 +465,18 @@
             const container = document.getElementById('all-courses');
             const filtered = filterCoursesByCategory();
             
+            // Get existing hardcoded course card
+            const existingCard = container.querySelector('.course-card');
+            const existingCardHTML = existingCard ? existingCard.outerHTML : '';
+            
             if (filtered.length === 0) {
-                container.innerHTML = '';
+                // Keep existing card even when no filtered results
+                container.innerHTML = existingCardHTML;
                 document.getElementById('no-results').classList.remove('hidden');
             } else {
-                container.innerHTML = filtered.map(createCourseCard).join('');
+                // Combine existing card with filtered courses
+                const dynamicCards = filtered.map(createCourseCard).join('');
+                container.innerHTML = existingCardHTML + dynamicCards;
                 document.getElementById('no-results').classList.add('hidden');
             }
         }
@@ -462,11 +513,22 @@
             });
 
             const container = document.getElementById('all-courses');
-            if (filtered.length === 0) {
+            // Get existing hardcoded course card
+            const existingCard = container.querySelector('.course-card');
+            const existingCardHTML = existingCard ? existingCard.outerHTML : '';
+            
+            // Check if hardcoded card matches search
+            const hardcodedMatches = searchQuery === '' || 
+                'complete web development bootcamp'.includes(searchQuery) ||
+                'master web development with html css javascript react and nodejs from scratch'.includes(searchQuery);
+            
+            if (filtered.length === 0 && !hardcodedMatches) {
                 container.innerHTML = '';
                 document.getElementById('no-results').classList.remove('hidden');
             } else {
-                container.innerHTML = filtered.map(createCourseCard).join('');
+                const dynamicCards = filtered.map(createCourseCard).join('');
+                const finalHTML = hardcodedMatches ? existingCardHTML + dynamicCards : dynamicCards;
+                container.innerHTML = finalHTML;
                 document.getElementById('no-results').classList.add('hidden');
             }
         }
@@ -515,6 +577,14 @@
             }
         }
 
+        // Navigate to Course
+        function navigateToCourse(courseId) {
+            // Store course ID for the modal to use
+            window.selectedCourseId = courseId;
+            // Show course under construction modal instead of navigating
+            openCourseConstructionModal();
+        }
+
         // Continue Learning Modal
         function openContinueLearningModal() {
             const modal = document.getElementById('continue-learning-modal');
@@ -522,7 +592,7 @@
             const inProgressCourses = courses.filter(c => c.progress);
 
             content.innerHTML = inProgressCourses.map(course => `
-                <div class="continue-card">
+                <div class="continue-card" onclick="navigateToCourse(${course.id})" style="cursor: pointer;">
                     <div class="continue-card-header">
                         <img src="${course.image}" alt="${course.title}" class="continue-card-image">
                         <div class="continue-card-info">
@@ -534,7 +604,7 @@
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: ${course.progress}%"></div>
                     </div>
-                    <button class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;">Continue</button>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 0.75rem;" onclick="event.stopPropagation(); navigateToCourse(${course.id})">Continue</button>
                 </div>
             `).join('') + `
                 <button class="btn btn-outline" style="width: 100%;" onclick="closeContinueLearningModal()">
@@ -664,6 +734,68 @@
             switchTab('all-courses');
         }
 
+        // Course Construction Modal
+        function openCourseConstructionModal() {
+            document.getElementById('course-construction-modal').classList.add('active');
+        }
+
+        function closeCourseConstructionModal() {
+            document.getElementById('course-construction-modal').classList.remove('active');
+            document.getElementById('notify-email').value = '';
+        }
+
+        function submitNotificationRequest() {
+            const email = document.getElementById('notify-email').value.trim();
+            
+            if (!email) {
+                alert('Please enter your email address.');
+                return;
+            }
+            
+            // Simple email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+            
+            // Show loading state
+            const submitButton = document.querySelector('#course-construction-modal .btn-primary');
+            const originalText = submitButton.textContent;
+            submitButton.textContent = 'Submitting...';
+            submitButton.disabled = true;
+            
+            // Send data to backend
+            fetch('/api/learning/course-notification', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    course_id: window.selectedCourseId || 'unknown'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || 'Thank you! We\'ll notify you when the course is ready.');
+                    closeCourseConstructionModal();
+                } else {
+                    alert(data.error || 'An error occurred. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please check your connection and try again.');
+            })
+            .finally(() => {
+                // Restore button state
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            });
+        }
+
         // Close modals on overlay click
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('modal-overlay')) {
@@ -681,6 +813,7 @@
                 closeSearchModal();
                 closeReferModal();
                 closeContinueLearningModal();
+                closeCourseConstructionModal();
             }
         });
 
