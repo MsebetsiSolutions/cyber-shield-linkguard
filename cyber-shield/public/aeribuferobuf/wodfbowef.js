@@ -4,16 +4,17 @@ class SecureConsole {
     this.charts = {};
     this.isLoggedIn = false;
     this.sessionTimer = null;
-    this.sessionTime = 300; // 5 minutes in seconds
+    this.sessionTime = 300; 
     this.failedAttempts = 0;
     this.maxAttempts = 3;
-    this.lockoutTime = 30; // 30 seconds lockout
+    this.lockoutTime = 30; 
     this.isLocked = false;
     this.autoRefreshInterval = null;
     this.lastDataRefresh = null;
     this.usersData = null;
     this.scansData = null;
     this.paymentsData = null;
+    this.scrollSpy = null;
     this.init();
   }
 
@@ -26,6 +27,18 @@ class SecureConsole {
 
     this.setupPasswordToggle();
     this.setupSecurityMeasures();
+    this.initializeScrollSpy();
+  }
+
+  initializeScrollSpy() {
+    // Initialize Bootstrap ScrollSpy
+    const dataSpyList = [].slice.call(document.querySelectorAll('[data-bs-spy="scroll"]'));
+    dataSpyList.forEach((dataSpyEl) => {
+      this.scrollSpy = new bootstrap.ScrollSpy(dataSpyEl, {
+        target: '#analytics-sidebar',
+        offset: 100
+      });
+    });
   }
 
   setupSecurityMeasures() {
@@ -103,6 +116,11 @@ class SecureConsole {
     this.loadDashboard();
     this.resetSessionTimer();
 
+    // Reinitialize scrollspy when dashboard is shown
+    setTimeout(() => {
+      this.initializeScrollSpy();
+    }, 100);
+
     // Start auto-refresh for dashboard data
     this.startAutoRefresh();
   }
@@ -126,12 +144,19 @@ class SecureConsole {
       });
     }
 
-    // Tab navigation
+    // Tab navigation with smooth scroll
     document.querySelectorAll(".nav-link").forEach((link) => {
       link.addEventListener("click", (e) => {
         e.preventDefault();
         if (this.isLoggedIn) {
-          this.switchTab(link.dataset.tab);
+          const targetTab = link.dataset.tab;
+          this.switchTab(targetTab);
+          
+          // Smooth scroll to the target tab
+          const targetElement = document.getElementById(`${targetTab}-tab`);
+          if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth' });
+          }
         }
       });
     });
@@ -511,6 +536,7 @@ class SecureConsole {
   }
 
   switchTab(tabName) {
+    // Update active nav links
     document.querySelectorAll(".nav-link").forEach((link) => {
       link.classList.remove("active");
     });
@@ -518,6 +544,7 @@ class SecureConsole {
     const activeLink = document.querySelector(`[data-tab="${tabName}"]`);
     if (activeLink) activeLink.classList.add("active");
 
+    // Update active tab content
     document.querySelectorAll(".tab-content").forEach((tab) => {
       tab.classList.remove("active");
     });
@@ -525,11 +552,18 @@ class SecureConsole {
     const activeTab = document.getElementById(`${tabName}-tab`);
     if (activeTab) activeTab.classList.add("active");
 
+    // Update page title
     const pageTitle = document.getElementById("analytics-page-title");
     if (pageTitle) pageTitle.textContent = this.getTabTitle(tabName);
 
     this.currentTab = tabName;
     this.loadTabData(tabName);
+
+    // Reset scroll position for the new tab
+    const scrollableContent = activeTab.querySelector('.dashboard-scrollable-content, .tab-scrollable-content');
+    if (scrollableContent) {
+      scrollableContent.scrollTop = 0;
+    }
   }
 
   getTabTitle(tabName) {
