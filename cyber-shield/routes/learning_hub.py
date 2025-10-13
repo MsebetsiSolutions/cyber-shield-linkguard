@@ -47,4 +47,45 @@ def course_notification():
     except sqlite3.Error as e:
         print(f"Database error: {str(e)}")
         return jsonify({'error': 'Database error occurred'}), 500
+
+@learning_hub_bp.route('/courses', methods=['GET'])
+def get_courses():
+    try:
+        # Connect to database and fetch courses
+        conn = sqlite3.connect('cyber-shield-linkguard.db')
+        cursor = conn.cursor()
+        
+        # Fetch all courses
+        cursor.execute('''
+            SELECT id, title, category, duration, level, description, content, created_at
+            FROM courses
+            ORDER BY created_at DESC
+        ''')
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        # Convert to list of dictionaries
+        courses = []
+        for row in rows:
+            courses.append({
+                'id': row[0],
+                'title': row[1],
+                'category': row[2],
+                'duration': row[3],
+                'level': row[4],
+                'description': row[5],
+                'content': row[6],
+                'created_at': row[7]
+            })
+        
+        return jsonify({
+            'success': True,
+            'courses': courses,
+            'count': len(courses)
+        }), 200
+        
+    except sqlite3.Error as e:
+        print(f"Database error: {str(e)}")
+        return jsonify({'error': 'Database error occurred'}), 500
         
