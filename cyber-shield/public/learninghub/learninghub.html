@@ -1610,6 +1610,159 @@
         </div>
     </div>
     
+    <!-- Embedded Course Page (inlined from course_page (1).html) -->
+    <div id="embedded-course" class="hidden">
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            :root { --primary: #2563eb; --primary-dark: #1e40af; --secondary: #8b5cf6; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; --dark: #1e293b; --gray: #64748b; --light-gray: #f1f5f9; --border: #e2e8f0; }
+            .header { background: white; border-bottom: 1px solid var(--border); padding: 1rem 0; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+            .header-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+            .logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: inherit; }
+            .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border: none; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+            .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--dark); }
+            .btn-outline:hover { background: var(--light-gray); }
+            .btn-primary { background: var(--primary); color: white; }
+            .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+            .course-container { display: grid; grid-template-columns: 380px 1fr; max-width: 1800px; margin: 0 auto; min-height: calc(100vh - 70px); }
+            .curriculum-sidebar { background: white; border-right: 1px solid var(--border); overflow-y: auto; height: calc(100vh - 70px); position: sticky; top: 70px; }
+            .curriculum-header { padding: 1.5rem; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; }
+            .curriculum-title { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem; }
+            .curriculum-progress { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; }
+            .progress-bar { flex: 1; height: 6px; background: rgba(255,255,255,0.3); border-radius: 3px; overflow: hidden; }
+            .progress-fill { height: 100%; background: white; border-radius: 3px; transition: width 0.3s; }
+            .week-section { border-bottom: 1px solid var(--border); }
+            .week-header { padding: 1rem 1.5rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; background: var(--light-gray); }
+            .week-header:hover { background: #e5e9f0; }
+            .week-info { flex: 1; }
+            .week-title { font-weight: 700; font-size: 0.875rem; color: var(--dark); margin-bottom: 0.25rem; }
+            .week-meta { font-size: 0.75rem; color: var(--gray); }
+            .week-icon { color: var(--gray); transition: transform 0.2s; }
+            .week-section.expanded .week-icon { transform: rotate(180deg); }
+            .lessons-list { display: none; background: white; }
+            .week-section.expanded .lessons-list { display: block; }
+            .lesson-item { padding: 0.875rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+            .lesson-item:hover { background: var(--light-gray); }
+            .lesson-item.active { background: #eff6ff; border-left-color: var(--primary); }
+            .lesson-item.completed { opacity: 0.7; }
+            .lesson-checkbox { width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
+            .lesson-item.completed .lesson-checkbox { background: var(--success); border-color: var(--success); color: white; }
+            .lesson-details { flex: 1; min-width: 0; }
+            .lesson-title { font-size: 0.875rem; font-weight: 500; color: var(--dark); margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .lesson-item.active .lesson-title { color: var(--primary); font-weight: 600; }
+            .lesson-duration { font-size: 0.75rem; color: var(--gray); }
+            .content-area { background: white; overflow-y: auto; height: calc(100vh - 70px); }
+            .lesson-content { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+            .video-container { background: #000; border-radius: 0.75rem; overflow: hidden; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+            iframe { width: 100%; aspect-ratio: 16/9; border: none; }
+            .lesson-header { margin-bottom: 2rem; }
+            .lesson-number-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; padding: 0.375rem 0.875rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 600; margin-bottom: 1rem; }
+            .lesson-main-title { font-size: 2rem; font-weight: 700; color: var(--dark); margin-bottom: 0.75rem; }
+            .lesson-info-bar { display: flex; gap: 1.5rem; color: var(--gray); font-size: 0.875rem; }
+            .lesson-info-item { display: flex; align-items: center; gap: 0.375rem; }
+            .content-tabs { border-bottom: 2px solid var(--border); margin-bottom: 2rem; display: flex; gap: 2rem; }
+            .tab-button { padding: 0.75rem 0; background: none; border: none; font-weight: 600; color: var(--gray); cursor: pointer; position: relative; transition: color 0.2s; }
+            .tab-button:hover { color: var(--dark); }
+            .tab-button.active { color: var(--primary); }
+            .tab-button.active::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: var(--primary); }
+            .tab-content { display: none; }
+            .tab-content.active { display: block; }
+            .content-section { background: white; border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+            .section-title { font-size: 1.25rem; font-weight: 700; color: var(--dark); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+            .section-title i { color: var(--primary); }
+            .section-content { color: var(--dark); line-height: 1.8; }
+            .section-content p { margin-bottom: 1rem; }
+            .section-content ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+            .section-content li { margin-bottom: 0.5rem; }
+            .activity-box { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 4px solid var(--warning); border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+            .activity-title { font-weight: 700; color: #92400e; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+            .activity-content { color: #78350f; line-height: 1.7; }
+            .case-study-box { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-left: 4px solid var(--primary); border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+            .case-study-title { font-weight: 700; color: #1e40af; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+            .case-study-content { color: #1e3a8a; line-height: 1.7; }
+            .lesson-navigation { display: flex; justify-content: space-between; gap: 1rem; padding-top: 2rem; border-top: 1px solid var(--border); margin-top: 3rem; }
+            .nav-btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+            .nav-btn-prev { background: var(--light-gray); color: var(--dark); border: 1px solid var(--border); }
+            .nav-btn-prev:hover { background: #e5e9f0; }
+            .nav-btn-next { background: var(--primary); color: white; border: none; margin-left: auto; }
+            .nav-btn-next:hover { background: var(--primary-dark); transform: translateY(-1px); }
+            .notes-section { background: var(--light-gray); border-radius: 0.75rem; padding: 1.5rem; margin-top: 2rem; }
+            .notes-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+            .notes-title { font-weight: 700; color: var(--dark); display: flex; align-items: center; gap: 0.5rem; }
+            .notes-textarea { width: 100%; min-height: 150px; padding: 1rem; border: 1px solid var(--border); border-radius: 0.5rem; font-family: inherit; resize: vertical; font-size: 0.875rem; }
+            .save-notes-btn { margin-top: 1rem; padding: 0.5rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+            .save-notes-btn:hover { background: var(--primary-dark); }
+            .save-success { display: none; color: var(--success); font-size: 0.875rem; margin-top: 0.5rem; align-items: center; gap: 0.5rem; }
+            .save-success.show { display: flex; }
+            .resources-list { display: grid; gap: 1rem; }
+            .resource-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-gray); border-radius: 0.5rem; transition: all 0.2s; cursor: pointer; text-decoration: none; color: inherit; }
+            .resource-item:hover { background: #e5e9f0; transform: translateX(4px); }
+            .resource-icon { width: 3rem; height: 3rem; background: white; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.5rem; }
+            .resource-info { flex: 1; }
+            .resource-name { font-weight: 600; color: var(--dark); margin-bottom: 0.25rem; }
+            .resource-type { font-size: 0.875rem; color: var(--gray); }
+            .resource-download { color: var(--primary); font-size: 1.25rem; }
+            @media (max-width: 1024px) { .course-container { grid-template-columns: 1fr; } .curriculum-sidebar { display: none; } .content-area { height: auto; } }
+            @media (max-width: 768px) { .lesson-content { padding: 1rem; } .lesson-main-title { font-size: 1.5rem; } .content-tabs { gap: 1rem; overflow-x: auto; } }
+        </style>
+        <div style="padding: 1rem;">
+            <a href="#" class="btn btn-outline" onclick="showHomePage(); document.getElementById('embedded-course').classList.add('hidden'); return false;"><i class="bi bi-arrow-left"></i> Back to Courses</a>
+        </div>
+        <div class="course-container">
+            <aside class="curriculum-sidebar">
+                <!-- Curriculum will be populated dynamically from database -->
+                <div class="curriculum-header">
+                    <div class="curriculum-title">Loading...</div>
+                    <div class="curriculum-progress">
+                        <span>0 of 0 lessons</span>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+                        <span>0%</span>
+                    </div>
+                </div>
+            </aside>
+            <main class="content-area">
+                <div class="lesson-content">
+                    <div class="video-container">
+                        <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <div class="lesson-header">
+                        <div class="lesson-number-badge"><i class="bi bi-play-circle"></i> Lesson 1.2</div>
+                        <h1 class="lesson-main-title">CIA Triad Deep Dive</h1>
+                        <div class="lesson-info-bar">
+                            <div class="lesson-info-item"><i class="bi bi-clock"></i><span>50 minutes</span></div>
+                            <div class="lesson-info-item"><i class="bi bi-camera-video"></i><span>30 min video</span></div>
+                            <div class="lesson-info-item"><i class="bi bi-calendar-week"></i><span>Week 1</span></div>
+                        </div>
+                    </div>
+                    <div class="content-tabs">
+                        <button class="tab-button active" onclick="(function(){document.getElementById('embedded-tab-0').classList.add('active');document.getElementById('embedded-tab-1').classList.remove('active');document.getElementById('embedded-tab-2').classList.remove('active');document.getElementById('embedded-tab-3').classList.remove('active'); Array.from(document.querySelectorAll('#embedded-course .tab-button')).forEach((b,i)=>b.classList.toggle('active', i===0));})()"><i class="bi bi-book"></i> Overview</button>
+                        <button class="tab-button" onclick="(function(){document.getElementById('embedded-tab-0').classList.remove('active');document.getElementById('embedded-tab-1').classList.add('active');document.getElementById('embedded-tab-2').classList.remove('active');document.getElementById('embedded-tab-3').classList.remove('active'); Array.from(document.querySelectorAll('#embedded-course .tab-button')).forEach((b,i)=>b.classList.toggle('active', i===1));})()"><i class="bi bi-journal-text"></i> Content</button>
+                        <button hidden class="tab-button" onclick="(function(){document.getElementById('embedded-tab-0').classList.remove('active');document.getElementById('embedded-tab-1').classList.remove('active');document.getElementById('embedded-tab-2').classList.add('active');document.getElementById('embedded-tab-3').classList.remove('active'); Array.from(document.querySelectorAll('#embedded-course .tab-button')).forEach((b,i)=>b.classList.toggle('active', i===2));})()"><i class="bi bi-pen"></i> Notes</button>
+                        <button class="tab-button" onclick="(function(){document.getElementById('embedded-tab-0').classList.remove('active');document.getElementById('embedded-tab-1').classList.remove('active');document.getElementById('embedded-tab-2').classList.remove('active');document.getElementById('embedded-tab-3').classList.add('active'); Array.from(document.querySelectorAll('#embedded-course .tab-button')).forEach((b,i)=>b.classList.toggle('active', i===3));})()"><i class="bi bi-file-earmark"></i> Resources</button>
+                    </div>
+                    <div class="tab-content active" id="embedded-tab-0">
+                        <div class="content-section"><h2 class="section-title"><i class="bi bi-lightbulb"></i> The Stakes</h2><div class="section-content"><p>Before we dive in, let's set the scene. Imagine a single data breach that costs a company $4 million. This isn't a scare tactic; it's the average cost businesses face. As future SOC analysts, pentesters, and compliance officers, your work is the primary defense against these losses.</p></div></div>
+                        <div class="activity-box"><div class="activity-title"><i class="bi bi-question-circle"></i> Reflection Activity</div><div class="activity-content">Which industry's security interests you the most? Keep this in mind as we progress. The threats we discuss will impact each of these sectors differently.</div></div>
+                        <div class="content-section"><h2 class="section-title"><i class="bi bi-list-check"></i> Learning Objectives</h2><div class="section-content"><ul><li>Understand the three pillars of the CIA Triad</li><li>Apply the CIA Triad to real-world scenarios</li><li>Identify vulnerabilities in each component</li><li>Implement basic security controls</li></ul></div></div>
+                    </div>
+                    <div class="tab-content" id="embedded-tab-1">
+                        <div class="content-section"><h2 class="section-title"><i class="bi bi-shield-check"></i> Global Threat Landscape</h2><div class="section-content"><p>The digital economy is under constant siege. Here are the top threats facing businesses worldwide:</p><ul><li><strong>Ransomware:</strong> Targeting logistics firms (e.g., Maersk attack)</li><li><strong>API Attacks:</strong> Exploiting unsecured endpoints (e.g., Twitter API breach)</li><li><strong>Insider Threats:</strong> Employees leaking data (e.g., Tesla sabotage)</li></ul></div></div>
+                        <div class="content-section"><h2 class="section-title"><i class="bi bi-tools"></i> Defender's Toolkit - CIA Triad</h2><div class="section-content"><p>The CIA Triad isn't just theory; it's the language of business risk:</p><ul><li><strong>Confidentiality:</strong> Encrypting patient records (HIPAA/GDPR)</li><li><strong>Integrity:</strong> Detecting tampered invoices in an ERP system</li><li><strong>Availability:</strong> Preventing DDoS on an e-commerce site during peak sales</li></ul></div></div>
+                        <div class="case-study-box"><div class="case-study-title"><i class="bi bi-briefcase"></i> Case Study: E-Commerce Breach</div><div class="case-study-content"><p>A popular e-commerce site's database is sold on the dark web. Working in teams (U.S. cloud engineer, EU GDPR expert, Asian pentester), analyze which CIA element failed and propose a 3-step mitigation plan using NIST guidelines.</p></div></div>
+                        <div class="activity-box"><div class="activity-title"><i class="bi bi-laptop"></i> Hands-On Activity</div><div class="activity-content"><p><strong>Scenario:</strong> A fintech's customer data is exposed due to cloud misconfigurations.</p><p><strong>Task:</strong> Work in teams to propose fixes using Kali Linux for testing.</p><p><strong>Deliverable:</strong> 3-step mitigation plan</p></div></div>
+                    </div>
+                    <div class="tab-content" id="embedded-tab-2">
+                        <div  class="notes-section"><div class="notes-header"><div class="notes-title"><i class="bi bi-pen"></i> My Notes</div></div><textarea class="notes-textarea" id="embedded-lessonNotes" placeholder="Take notes about this lesson..."></textarea><button class="save-notes-btn" onclick="(function(){var s=document.getElementById('embedded-saveSuccess'); s.classList.add('show'); setTimeout(()=>s.classList.remove('show'),3000);})()"><i class="bi bi-save"></i> Save Notes</button><div class="save-success" id="embedded-saveSuccess"><i class="bi bi-check-circle-fill"></i> Notes saved successfully!</div></div>
+                    </div>
+                    <div class="tab-content" id="embedded-tab-3">
+                        <div class="content-section"><h2 class="section-title"><i class="bi bi-file-earmark-text"></i> Downloadable Resources</h2><div class="resources-list"><a href="#" class="resource-item"><div class="resource-icon"><i class="bi bi-file-pdf"></i></div><div class="resource-info"><div class="resource-name">CIA Triad Framework Guide</div><div class="resource-type">PDF • 2.4 MB</div></div><i class="bi bi-download resource-download"></i></a><a href="#" class="resource-item"><div class="resource-icon"><i class="bi bi-file-earmark-code"></i></div><div class="resource-info"><div class="resource-name">Security Assessment Checklist</div><div class="resource-type">XLSX • 156 KB</div></div><i class="bi bi-download resource-download"></i></a><a href="#" class="resource-item"><div class="resource-icon"><i class="bi bi-file-slides"></i></div><div class="resource-info"><div class="resource-name">Lesson Slides</div><div class="resource-type">PPTX • 8.2 MB</div></div><i class="bi bi-download resource-download"></i></a><a href="#" class="resource-item"><div class="resource-icon"><i class="bi bi-link-45deg"></i></div><div class="resource-info"><div class="resource-name">NIST Cybersecurity Framework</div><div class="resource-type">External Link</div></div><i class="bi bi-box-arrow-up-right resource-download"></i></a><a href="#" class="resource-item"><div class="resource-icon"><i class="bi bi-file-text"></i></div><div class="resource-info"><div class="resource-name">Case Study Solutions</div><div class="resource-type">DOCX • 324 KB</div></div><i class="bi bi-download resource-download"></i></a></div></div>
+                        <div class="content-section"><h2 class="section-title"><i class="bi bi-link-45deg"></i> Additional Resources</h2><div class="section-content"><ul><li><a href="#" style="color: var(--primary);">OWASP Top 10 Security Risks</a></li><li><a href="#" style="color: var(--primary);">CIS Controls v8</a></li><li><a href="#" style="color: var(--primary);">ISO 27001 Information Security Standard</a></li><li><a href="#" style="color: var(--primary);">SANS Cybersecurity Resources</a></li></ul></div></div>
+                    </div>
+                    <div class="lesson-navigation"><button class="nav-btn nav-btn-prev" onclick="alert('Navigate to previous lesson')"><i class="bi bi-chevron-left"></i> Previous Lesson</button><button class="nav-btn nav-btn-next" onclick="alert('Navigate to next lesson')">Next Lesson <i class="bi bi-chevron-right"></i></button></div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
     <!-- Admin Access Button -->
     <div class="admin-access">
         <button class="admin-btn" id="adminBtn" title="Admin Access">
@@ -1737,12 +1890,12 @@
             renderRecommendedCourses();
             renderCategoryPills();
             
-            // Auto-open continue learning modal after 1 second if user has progress
-            setTimeout(() => {
-                if (Object.keys(userProgress).length > 0) {
-                    openContinueLearningModal();
-                }
-            }, 1000);
+            // Auto-open continue learning modal disabled
+            // setTimeout(() => {
+            //     if (Object.keys(userProgress).length > 0) {
+            //         openContinueLearningModal();
+            //     }
+            // }, 1000);
         }
 
         // Initialize Admin Panel
@@ -1784,53 +1937,90 @@
             closeAdminPanel();
         }
 
-        // Load published courses from localStorage
+        // Load published courses from database API
         function loadPublishedCourses() {
-            const storedCourses = localStorage.getItem('learningHubCourses');
-            
-            if (storedCourses) {
-                const allStoredCourses = JSON.parse(storedCourses);
-                const publishedCourses = allStoredCourses.filter(course => course.status === 'published');
-                
-                // Transform stored courses to match the expected format
-                courses = publishedCourses.map((course, index) => {
-                    const progress = userProgress[course.id] || 0;
-                    return {
-                        id: course.id,
-                        title: course.title,
-                        description: course.description,
-                        fullDescription: course.fullDescription || course.description,
-                        image: course.image || getCourseImage(course.category),
-                        category: course.category,
-                        duration: course.duration + 'h',
-                        students: course.students || Math.floor(Math.random() * 10000) + 1000,
-                        rating: course.rating || (Math.random() * 0.5 + 4.5).toFixed(1),
-                        instructor: course.instructor || "LearnHub Instructor",
-                        progress: progress,
-                        currentLesson: Math.floor(progress / 100 * 10) + 1,
-                        totalLessons: course.lessons ? course.lessons.length : 10,
-                        nextLesson: "Next Lesson: " + (Math.floor(progress / 100 * 10) + 2),
-                        lessons: course.lessons || [
-                            { title: "Introduction to Cybersecurity", duration: "15 min" },
-                            { title: "Security Fundamentals", duration: "20 min" },
-                            { title: "Threat Landscape", duration: "25 min" },
-                            { title: "Security Controls", duration: "30 min" },
-                            { title: "Risk Assessment", duration: "20 min" }
-                        ]
-                    };
+            // Fetch courses from the database via API
+            fetch('/api/learning/courses')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load courses from server');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Handle the response format from learning_hub.py
+                    let publishedCourses = [];
+                    if (data.success && Array.isArray(data.courses)) {
+                        publishedCourses = data.courses.filter(course => course.status === 'published');
+                    } else if (Array.isArray(data)) {
+                        publishedCourses = data.filter(course => course.status === 'published');
+                    }
+                    
+                    // Transform courses from database to match the expected format
+                    courses = publishedCourses.map((course) => {
+                        const progress = userProgress[course.id] || 0;
+                        
+                        // Parse JSON fields
+                        let lessons = [];
+                        try {
+                            lessons = course.lessons_json ? JSON.parse(course.lessons_json) : [];
+                        } catch (e) {
+                            console.error('Error parsing lessons_json:', e);
+                            lessons = [];
+                        }
+                        
+                        return {
+                            id: course.id,
+                            title: course.title,
+                            description: course.description,
+                            fullDescription: course.full_description || course.description,
+                            image: course.image || getCourseImage(course.category),
+                            category: course.category,
+                            duration: course.duration + 'h',
+                            students: course.students || 0,
+                            rating: course.rating || 0.0,
+                            instructor: course.instructor || "LearnHub Instructor",
+                            progress: progress,
+                            currentLesson: Math.floor(progress / 100 * (lessons.length || 1)) + 1,
+                            totalLessons: lessons.length || 0,
+                            nextLesson: lessons.length > 0 ? "Next Lesson: " + (Math.floor(progress / 100 * lessons.length) + 2) : "No lessons available",
+                            lessons: lessons,
+                            // Store additional fields for course detail view
+                            youtube_url: course.youtube_url,
+                            intro_stakes: course.intro_stakes,
+                            intro_reflection: course.intro_reflection,
+                            sections_json: course.sections_json,
+                            activities_json: course.activities_json,
+                            objectives_json: course.objectives_json,
+                            case_studies_json: course.case_studies_json,
+                            resources_json: course.resources_json,
+                            additional_links_json: course.additional_links_json,
+                            week: course.week,
+                            day: course.day
+                        };
+                    });
+                    
+                    // Update the UI after courses are loaded
+                    updateStats();
+                    renderInProgressCourses();
+                    renderAllCourses();
+                    renderRecommendedCourses();
+                    
+                    console.log(`Loaded ${courses.length} published courses from database`);
+                })
+                .catch(error => {
+                    console.error('Error loading courses from database:', error);
+                    
+                    // Fallback to sample courses if API fails
+                    console.log('Falling back to sample courses...');
+                    courses = getSampleCourses();
+                    
+                    // Update the UI with fallback data
+                    updateStats();
+                    renderInProgressCourses();
+                    renderAllCourses();
+                    renderRecommendedCourses();
                 });
-            } else {
-                // If no stored courses, use sample courses and initialize storage
-                courses = getSampleCourses();
-                // Initialize localStorage with sample courses as published
-                const sampleCoursesForStorage = courses.map(course => ({
-                    ...course,
-                    status: 'published',
-                    students: course.students || Math.floor(Math.random() * 10000) + 1000,
-                    rating: course.rating || (Math.random() * 0.5 + 4.5).toFixed(1)
-                }));
-                localStorage.setItem('learningHubCourses', JSON.stringify(sampleCoursesForStorage));
-            }
         }
 
         function getSampleCourses() {
@@ -2279,45 +2469,270 @@
                 alert(`🎉 Successfully enrolled in ${currentCourse.title}!`);
             }
             
-            // Update course viewer with course data
-            document.getElementById('course-viewer-title').textContent = currentCourse.title;
-            document.getElementById('course-viewer-meta').innerHTML = `
-                <span><i class="bi bi-clock"></i> ${currentCourse.duration}</span>
-                <span><i class="bi bi-bar-chart"></i> Intermediate</span>
-                <span><i class="bi bi-download"></i> Resources Available</span>
-            `;
+            // Populate course content from database
+            populateCourseContent(currentCourse);
             
-            const progress = userProgress[courseId] || 0;
-            document.getElementById('course-progress-text').textContent = `${progress}% Complete`;
-            document.getElementById('course-progress-bar').style.width = `${progress}%`;
-            document.getElementById('course-lessons-count').textContent = 
-                `${Math.floor(progress / 100 * currentCourse.lessons.length)}/${currentCourse.lessons.length} Lessons`;
+            // Show embedded course content
+            document.getElementById('main-content').classList.add('hidden');
+            document.getElementById('course-viewer').classList.add('hidden');
+            document.getElementById('embedded-course').classList.remove('hidden');
+        }
+        
+        // Populate course content dynamically from database
+        function populateCourseContent(course) {
+            // Parse JSON fields
+            let sections = [];
+            let activities = [];
+            let lessons = [];
+            let objectives = [];
+            let caseStudies = [];
+            let resources = [];
+            let additionalLinks = [];
             
-            // Populate lessons
-            const lessonsList = document.getElementById('course-lessons-list');
-            lessonsList.innerHTML = '';
-            
-            if (currentCourse.lessons && currentCourse.lessons.length > 0) {
-                currentCourse.lessons.forEach((lesson, index) => {
-                    const lessonItem = document.createElement('li');
-                    lessonItem.className = 'lesson-list-item';
-                    const isCompleted = index < Math.floor(progress / 100 * currentCourse.lessons.length);
-                    lessonItem.innerHTML = `
-                        <a href="#" class="lesson-link ${isCompleted ? 'active' : ''}" onclick="playLesson(${index}); return false;">
-                            <i class="bi ${isCompleted ? 'bi-check-circle-fill' : 'bi-play-circle'}"></i>
-                            <span>${index + 1}. ${lesson.title}</span>
-                            <span class="lesson-duration">${lesson.duration}</span>
-                        </a>
-                    `;
-                    lessonsList.appendChild(lessonItem);
-                });
-            } else {
-                lessonsList.innerHTML = '<li class="lesson-list-item">No lessons available yet.</li>';
+            try {
+                sections = course.sections_json ? JSON.parse(course.sections_json) : [];
+                activities = course.activities_json ? JSON.parse(course.activities_json) : [];
+                lessons = course.lessons ? course.lessons : (course.lessons_json ? JSON.parse(course.lessons_json) : []);
+                objectives = course.objectives_json ? JSON.parse(course.objectives_json) : [];
+                caseStudies = course.case_studies_json ? JSON.parse(course.case_studies_json) : [];
+                resources = course.resources_json ? JSON.parse(course.resources_json) : [];
+                additionalLinks = course.additional_links_json ? JSON.parse(course.additional_links_json) : [];
+            } catch (e) {
+                console.error('Error parsing course JSON fields:', e);
             }
             
-            // Show course viewer and hide main content
-            document.getElementById('main-content').classList.add('hidden');
-            document.getElementById('course-viewer').classList.remove('hidden');
+            // Update lessons sidebar - Use actual week from course data
+            const lessonsContainer = document.querySelector('#embedded-course .curriculum-sidebar');
+            if (lessonsContainer) {
+                if (lessons.length > 0) {
+                    const progress = userProgress[course.id] || 0;
+                    const completedLessons = Math.floor(progress / 100 * lessons.length);
+                    
+                    // Use the actual week number from the course
+                    const weekNum = course.week || 1;
+                    const dayNum = course.day || 1;
+                    
+                    // Build complete sidebar HTML
+                    let lessonsList = '<div class="curriculum-header"><div class="curriculum-title">' + course.title + '</div><div class="curriculum-progress"><span>' + 
+                        completedLessons + ' of ' + lessons.length + ' lessons</span><div class="progress-bar"><div class="progress-fill" style="width: ' + 
+                        progress + '%"></div></div><span>' + Math.round(progress) + '%</span></div></div>';
+                    
+                    // Calculate total duration for all lessons
+                    const totalDuration = lessons.reduce((sum, lesson) => {
+                        const dur = lesson.duration || '0';
+                        const mins = parseInt(dur.toString().replace(/\D/g, '')) || 0;
+                        return sum + mins;
+                    }, 0);
+                    
+                    // Create Week section with actual week number from database
+                    lessonsList += `
+                        <div class="week-section expanded">
+                            <div class="week-header" onclick="this.parentElement.classList.toggle('expanded')">
+                                <div class="week-info">
+                                    <div class="week-title">Week ${weekNum}</div>
+                                    <div class="week-meta">${lessons.length} lesson${lessons.length > 1 ? 's' : ''} • ${Math.floor(totalDuration / 60)}h ${totalDuration % 60}m</div>
+                                </div>
+                                <i class="bi bi-chevron-down week-icon"></i>
+                            </div>
+                            <div class="lessons-list">
+                    `;
+                    
+                    // Display lessons with week.day numbering (e.g., 1.1, 1.2, etc.)
+                    lessons.forEach((lesson, idx) => {
+                        const isCompleted = (userProgress[course.id] || 0) > (idx / lessons.length * 100);
+                        const isActive = idx === 0; // First lesson active by default
+                        
+                        // Format as Week.Day (e.g., "1.1" for week 1 day 1)
+                        const lessonNumber = `${weekNum}.${dayNum + idx}`;
+                        const lessonTitle = lesson.title || 'Lesson ' + (idx + 1);
+                        
+                        lessonsList += `
+                            <div class="lesson-item ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}" onclick="playLesson(${idx})">
+                                <div class="lesson-checkbox">${isCompleted ? '<i class="bi bi-check"></i>' : ''}</div>
+                                <div class="lesson-details">
+                                    <div class="lesson-title">${lessonNumber} ${lessonTitle}</div>
+                                    <div class="lesson-duration">${lesson.duration || '30 min'}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    lessonsList += '</div></div>';
+                    
+                    lessonsContainer.innerHTML = lessonsList;
+                } else {
+                    // No lessons available
+                    lessonsContainer.innerHTML = `
+                        <div class="curriculum-header">
+                            <div class="curriculum-title">${course.title}</div>
+                            <div class="curriculum-progress">
+                                <span>No lessons available</span>
+                            </div>
+                        </div>
+                        <div style="padding: 2rem; text-align: center; color: var(--gray);">
+                            <i class="bi bi-inbox" style="font-size: 3rem; display: block; margin-bottom: 1rem;"></i>
+                            <p>No lessons have been added to this course yet.</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Update video player
+            const videoContainer = document.querySelector('#embedded-course .video-container iframe');
+            if (videoContainer && course.youtube_url) {
+                // Extract YouTube video ID
+                let videoId = '';
+                if (course.youtube_url.includes('youtu.be/')) {
+                    videoId = course.youtube_url.split('youtu.be/')[1].split('?')[0];
+                } else if (course.youtube_url.includes('youtube.com/watch?v=')) {
+                    videoId = course.youtube_url.split('v=')[1].split('&')[0];
+                } else if (course.youtube_url.includes('youtube.com/embed/')) {
+                    videoId = course.youtube_url.split('embed/')[1].split('?')[0];
+                }
+                
+                if (videoId) {
+                    videoContainer.src = `https://www.youtube.com/embed/${videoId}`;
+                }
+            }
+            
+            // Update lesson header
+            const lessonHeader = document.querySelector('#embedded-course .lesson-header');
+            if (lessonHeader) {
+                // Format: Week 1, then 1.1 Lesson Title
+                const weekNum = course.week || 1;
+                const dayNum = course.day || 1;
+                const lessonNum = `${weekNum}.${dayNum}`;
+                const lessonTitle = lessons[0]?.title || course.title;
+                
+                lessonHeader.innerHTML = `
+                    <div class="lesson-number-badge"><i class="bi bi-play-circle"></i> Week ${weekNum}</div>
+                    <h1 class="lesson-main-title">${lessonNum} ${lessonTitle}</h1>
+                    <div class="lesson-info-bar">
+                        <div class="lesson-info-item"><i class="bi bi-clock"></i><span>${course.duration}</span></div>
+                        <div class="lesson-info-item"><i class="bi bi-person"></i><span>${course.instructor}</span></div>
+                        <div class="lesson-info-item"><i class="bi bi-star-fill"></i><span>${course.rating} Rating</span></div>
+                    </div>
+                `;
+            }
+            
+            // Update Overview tab
+            const overviewTab = document.getElementById('embedded-tab-0');
+            if (overviewTab) {
+                let overviewHTML = '';
+                
+                // The Stakes
+                if (course.intro_stakes) {
+                    overviewHTML += `
+                        <div class="content-section">
+                            <h2 class="section-title"><i class="bi bi-lightbulb"></i> The Stakes</h2>
+                            <div class="section-content"><p>${course.intro_stakes}</p></div>
+                        </div>
+                    `;
+                }
+                
+                // Reflection Activity
+                if (course.intro_reflection) {
+                    overviewHTML += `
+                        <div class="activity-box">
+                            <div class="activity-title"><i class="bi bi-question-circle"></i> Reflection Activity</div>
+                            <div class="activity-content">${course.intro_reflection}</div>
+                        </div>
+                    `;
+                }
+                
+                // Learning Objectives
+                if (objectives.length > 0) {
+                    overviewHTML += `
+                        <div class="content-section">
+                            <h2 class="section-title"><i class="bi bi-list-check"></i> Learning Objectives</h2>
+                            <div class="section-content">
+                                <ul>
+                                    ${objectives.map(obj => `<li>${obj}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                overviewTab.innerHTML = overviewHTML || '<p>No overview content available.</p>';
+            }
+            
+            // Update Content tab
+            const contentTab = document.getElementById('embedded-tab-1');
+            if (contentTab) {
+                let contentHTML = '';
+                
+                // Sections
+                sections.forEach(section => {
+                    contentHTML += `
+                        <div class="content-section">
+                            <h2 class="section-title"><i class="bi bi-shield-check"></i> ${section.title}</h2>
+                            <div class="section-content">${section.content}</div>
+                        </div>
+                    `;
+                });
+                
+                // Case Studies
+                caseStudies.forEach(caseStudy => {
+                    contentHTML += `
+                        <div class="case-study-box">
+                            <div class="case-study-title"><i class="bi bi-briefcase"></i> ${caseStudy.title}</div>
+                            <div class="case-study-content">${caseStudy.description}</div>
+                        </div>
+                    `;
+                });
+                
+                // Activities
+                activities.forEach(activity => {
+                    contentHTML += `
+                        <div class="activity-box">
+                            <div class="activity-title"><i class="bi bi-laptop"></i> ${activity.title}</div>
+                            <div class="activity-content">${activity.description}</div>
+                        </div>
+                    `;
+                });
+                
+                contentTab.innerHTML = contentHTML || '<p>No content available.</p>';
+            }
+            
+            // Update Resources tab
+            const resourcesTab = document.getElementById('embedded-tab-3');
+            if (resourcesTab) {
+                let resourcesHTML = '<div class="content-section"><h2 class="section-title"><i class="bi bi-file-earmark-text"></i> Downloadable Resources</h2><div class="resources-list">';
+                
+                resources.forEach(resource => {
+                    const icon = resource.type?.toLowerCase().includes('pdf') ? 'file-pdf' : 
+                                resource.type?.toLowerCase().includes('doc') ? 'file-earmark-word' :
+                                resource.type?.toLowerCase().includes('xls') ? 'file-earmark-excel' :
+                                resource.type?.toLowerCase().includes('ppt') ? 'file-slides' : 'file-earmark-text';
+                    
+                    resourcesHTML += `
+                        <a href="${resource.url || '#'}" class="resource-item" target="_blank">
+                            <div class="resource-icon"><i class="bi bi-${icon}"></i></div>
+                            <div class="resource-info">
+                                <div class="resource-name">${resource.name || 'Resource'}</div>
+                                <div class="resource-type">${resource.type || 'File'}</div>
+                            </div>
+                            <i class="bi bi-download resource-download"></i>
+                        </a>
+                    `;
+                });
+                
+                resourcesHTML += '</div></div>';
+                
+                // Additional Links
+                if (additionalLinks.length > 0) {
+                    resourcesHTML += '<div class="content-section"><h2 class="section-title"><i class="bi bi-link-45deg"></i> Additional Resources</h2><div class="section-content"><ul>';
+                    
+                    additionalLinks.forEach(link => {
+                        resourcesHTML += `<li><a href="${link.url || '#'}" target="_blank" style="color: var(--primary);">${link.title || 'Link'}</a></li>`;
+                    });
+                    
+                    resourcesHTML += '</ul></div></div>';
+                }
+                
+                resourcesTab.innerHTML = resourcesHTML;
+            }
         }
 
         // Play Lesson
