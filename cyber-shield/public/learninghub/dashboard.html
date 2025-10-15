@@ -1846,29 +1846,33 @@ You'll gain hands-on experience with..."></textarea>
         }
 
         // Switch between tabs
-        function switchTab(tabName, eventSource = null) {
-            // Remove active class from all tabs and contents
-            document.querySelectorAll('.tab-trigger').forEach(tab => {
-                tab.classList.remove('active');
-            });
+        function switchTab(tabName) {
+            // Hide all tab content
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
             
-            // Add active class to selected tab
-            if (eventSource) {
-                eventSource.classList.add('active');
+            // Show selected tab content
+            const selectedTab = document.getElementById(`tab-${tabName}`);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
             }
-            document.getElementById(`tab-${tabName}`).classList.add('active');
             
-            // Update navigation
+            // Update navigation active states
             document.querySelectorAll('.admin-nav a').forEach(link => {
-                if (link.getAttribute('data-tab') === tabName) {
+                link.classList.remove('active');
+            });
+            
+            // Find and activate the clicked link by checking onclick attribute
+            document.querySelectorAll('.admin-nav a').forEach(link => {
+                const onclickAttr = link.getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes(`'${tabName}'`)) {
                     link.classList.add('active');
-                } else {
-                    link.classList.remove('active');
                 }
             });
+            
+            // Return false to prevent default anchor behavior
+            return false;
         }
 
         // Setup event listeners
@@ -3203,6 +3207,34 @@ You'll gain hands-on experience with..."></textarea>
                 </div>
                 <div class="markdown-tabs">
                     <button type="button" class="markdown-tab active" onclick="switchMarkdownTab('${uniqueId}', 'edit')">
+                        <i class="bi bi-pencil"></i> Edit
+                    </button>
+                    <button type="button" class="markdown-tab" onclick="switchMarkdownTab('${uniqueId}', 'preview')">
+                        <i class="bi bi-eye"></i> Preview
+                    </button>
+                </div>
+                <div class="markdown-content"></div>
+            `;
+            
+            // Move textarea into markdown content
+            const content = container.querySelector('.markdown-content');
+            textarea.classList.add('markdown-editor', 'active');
+            content.appendChild(textarea);
+            
+            // Add preview div
+            const preview = document.createElement('div');
+            preview.className = 'markdown-preview';
+            preview.id = uniqueId + '-preview';
+            preview.innerHTML = '<em style="color: var(--gray);">Preview will appear here...</em>';
+            content.appendChild(preview);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initAdminPanel);
+    </script>
+</body>
+</html>
+ass="markdown-tab active" onclick="switchMarkdownTab('${uniqueId}', 'edit')">
                         <i class="bi bi-pencil"></i> Edit
                     </button>
                     <button type="button" class="markdown-tab" onclick="switchMarkdownTab('${uniqueId}', 'preview')">
