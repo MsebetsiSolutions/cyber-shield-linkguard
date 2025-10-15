@@ -50,12 +50,16 @@ def course_notification():
 
 @learning_hub_bp.route('/courses', methods=['GET'])
 def get_courses():
+    """Get all courses - returns individual course/lesson entries or grouped by title"""
     try:
+        # Check if grouping is requested
+        group_by_title = request.args.get('grouped', 'false').lower() == 'true'
+        
         # Connect to database and fetch courses
         conn = sqlite3.connect('cyber-shield-linkguard.db')
         cursor = conn.cursor()
         
-        # Fetch all courses with all fields needed by dashboard
+        # Fetch all courses with all fields, ordered by title, week, day for grouping
         cursor.execute('''
             SELECT id, title, lesson_title, description, full_description, category, duration, 
                    instructor, image, youtube_url, intro_stakes, intro_reflection,
@@ -63,7 +67,7 @@ def get_courses():
                    rating, created_at, updated_at, completions, week, day,
                    objectives_json, case_studies_json, resources_json, additional_links_json
             FROM course
-            ORDER BY created_at DESC
+            ORDER BY title, week, day
         ''')
         
         rows = cursor.fetchall()
@@ -102,10 +106,73 @@ def get_courses():
                 'additional_links_json': row[26]
             })
         
+        # If grouping is requested, group courses by title
+        if group_by_title:
+            grouped_courses = {}
+            
+            for course in courses:
+                title = course['title']
+                
+                if title not in grouped_courses:
+                    # Create course group with first entry's metadata
+                    grouped_courses[title] = {
+                        'id': course['id'],  # Use first lesson's ID
+                        'title': title,
+                        'description': course['description'],
+                        'full_description': course['full_description'],
+                        'category': course['category'],
+                        'instructor': course['instructor'],
+                        'image': course['image'],
+                        'students': course['students'],
+                        'rating': course['rating'],
+                        'status': course['status'],
+                        'created_at': course['created_at'],
+                        'updated_at': course['updated_at'],
+                        'lessons': [],
+                        'total_duration': 0
+                    }
+                
+                # Add lesson to group
+                grouped_courses[title]['lessons'].append({
+                    'id': course['id'],
+                    'week': course['week'],
+                    'day': course['day'],
+                    'lesson_title': course['lesson_title'],
+                    'duration': course['duration'],
+                    'youtube_url': course['youtube_url'],
+                    'intro_stakes': course['intro_stakes'],
+                    'intro_reflection': course['intro_reflection'],
+                    'sections_json': course['sections_json'],
+                    'activities_json': course['activities_json'],
+                    'objectives_json': course['objectives_json'],
+                    'case_studies_json': course['case_studies_json'],
+                    'resources_json': course['resources_json'],
+                    'additional_links_json': course['additional_links_json']
+                })
+                grouped_courses[title]['total_duration'] += course['duration']
+            
+            # Convert to list and add computed fields
+            result = []
+            for course_data in grouped_courses.values():
+                course_data['duration'] = course_data['total_duration']
+                course_data['total_lessons'] = len(course_data['lessons'])
+                result.append(course_data)
+            
+            print(f"Grouped {len(courses)} course entries into {len(result)} courses")
+            
+            return jsonify({
+                'success': True,
+                'courses': result,
+                'count': len(result),
+                'grouped': True
+            }), 200
+        
+        # Return ungrouped courses (default)
         return jsonify({
             'success': True,
             'courses': courses,
-            'count': len(courses)
+            'count': len(courses),
+            'grouped': False
         }), 200
         
     except sqlite3.Error as e:

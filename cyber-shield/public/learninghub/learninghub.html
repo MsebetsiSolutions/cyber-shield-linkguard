@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LearnHub - Cybersecurity Learning Platform</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         /* Base Styles */
         /* Admin Button Styles */
@@ -1673,6 +1675,36 @@
             .section-content p { margin-bottom: 1rem; }
             .section-content ul { margin-left: 1.5rem; margin-bottom: 1rem; }
             .section-content li { margin-bottom: 0.5rem; }
+            
+            /* Markdown Rendered Content Styles */
+            .markdown-content h1 { font-size: 2rem; font-weight: 700; margin: 1.5rem 0 1rem; color: var(--dark); }
+            .markdown-content h2 { font-size: 1.5rem; font-weight: 700; margin: 1.25rem 0 0.75rem; color: var(--dark); }
+            .markdown-content h3 { font-size: 1.25rem; font-weight: 600; margin: 1rem 0 0.5rem; color: var(--dark); }
+            .markdown-content h4, .markdown-content h5, .markdown-content h6 { font-weight: 600; margin: 0.75rem 0 0.5rem; color: var(--dark); }
+            .markdown-content p { margin: 0.75rem 0; line-height: 1.7; }
+            .markdown-content strong { font-weight: 700; color: var(--dark); }
+            .markdown-content em { font-style: italic; }
+            .markdown-content ul, .markdown-content ol { margin: 0.75rem 0; padding-left: 2rem; }
+            .markdown-content li { margin: 0.25rem 0; }
+            .markdown-content code { background: #e2e8f0; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-family: 'Courier New', monospace; font-size: 0.875em; color: #c7254e; }
+            .markdown-content pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin: 1rem 0; }
+            .markdown-content pre code { background: none; color: inherit; padding: 0; }
+            .markdown-content blockquote { border-left: 4px solid var(--primary); padding-left: 1rem; margin: 1rem 0; color: var(--gray); font-style: italic; }
+            .markdown-content a { color: var(--primary); text-decoration: none; }
+            .markdown-content a:hover { text-decoration: underline; }
+            .markdown-content hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+            .markdown-content table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+            .markdown-content th, .markdown-content td { border: 1px solid var(--border); padding: 0.5rem; text-align: left; }
+            .markdown-content th { background: var(--light-gray); font-weight: 600; }
+            
+            /* Apply markdown styles to activity and case study content too */
+            .activity-content, .case-study-content { line-height: 1.7; }
+            .activity-content h1, .activity-content h2, .activity-content h3,
+            .case-study-content h1, .case-study-content h2, .case-study-content h3 { font-weight: 600; margin: 0.75rem 0 0.5rem; }
+            .activity-content strong, .case-study-content strong { font-weight: 700; }
+            .activity-content code, .case-study-content code { background: rgba(0,0,0,0.1); padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-family: 'Courier New', monospace; font-size: 0.875em; }
+            .activity-content ul, .activity-content ol, .case-study-content ul, .case-study-content ol { margin: 0.5rem 0; padding-left: 1.5rem; }
+            .activity-content li, .case-study-content li { margin: 0.25rem 0; }
             .activity-box { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 4px solid var(--warning); border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.5rem; }
             .activity-title { font-weight: 700; color: #92400e; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
             .activity-content { color: #78350f; line-height: 1.7; }
@@ -1939,8 +1971,8 @@
 
         // Load published courses from database API
         function loadPublishedCourses() {
-            // Fetch courses from the database via API
-            fetch('/api/learning/courses')
+            // Fetch GROUPED courses from the database via API
+            fetch('/api/learning/courses?grouped=true')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Failed to load courses from server');
@@ -1949,25 +1981,19 @@
                 })
                 .then(data => {
                     // Handle the response format from learning_hub.py
-                    let publishedCourses = [];
+                    let groupedCourses = [];
                     if (data.success && Array.isArray(data.courses)) {
-                        publishedCourses = data.courses.filter(course => course.status === 'published');
+                        groupedCourses = data.courses.filter(course => course.status === 'published');
                     } else if (Array.isArray(data)) {
-                        publishedCourses = data.filter(course => course.status === 'published');
+                        groupedCourses = data.filter(course => course.status === 'published');
                     }
                     
-                    // Transform courses from database to match the expected format
-                    courses = publishedCourses.map((course) => {
+                    // Backend already grouped courses by title with lessons array
+                    // Just need to format for UI and add progress
+                    courses = groupedCourses.map(course => {
                         const progress = userProgress[course.id] || 0;
-                        
-                        // Parse JSON fields
-                        let lessons = [];
-                        try {
-                            lessons = course.lessons_json ? JSON.parse(course.lessons_json) : [];
-                        } catch (e) {
-                            console.error('Error parsing lessons_json:', e);
-                            lessons = [];
-                        }
+                        const totalLessons = course.total_lessons || course.lessons?.length || 0;
+                        const currentLessonIndex = Math.floor(progress / 100 * totalLessons);
                         
                         return {
                             id: course.id,
@@ -1977,28 +2003,18 @@
                             image: course.image || getCourseImage(course.category),
                             category: course.category,
                             duration: course.duration + 'h',
+                            instructor: course.instructor || "LearnHub Instructor",
                             students: course.students || 0,
                             rating: course.rating || 0.0,
-                            instructor: course.instructor || "LearnHub Instructor",
+                            lessons: course.lessons || [],
+                            totalLessons: totalLessons,
                             progress: progress,
-                            currentLesson: Math.floor(progress / 100 * (lessons.length || 1)) + 1,
-                            totalLessons: lessons.length || 0,
-                            nextLesson: lessons.length > 0 ? "Next Lesson: " + (Math.floor(progress / 100 * lessons.length) + 2) : "No lessons available",
-                            lessons: lessons,
-                            // Store additional fields for course detail view
-                            youtube_url: course.youtube_url,
-                            intro_stakes: course.intro_stakes,
-                            intro_reflection: course.intro_reflection,
-                            sections_json: course.sections_json,
-                            activities_json: course.activities_json,
-                            objectives_json: course.objectives_json,
-                            case_studies_json: course.case_studies_json,
-                            resources_json: course.resources_json,
-                            additional_links_json: course.additional_links_json,
-                            week: course.week,
-                            day: course.day
+                            currentLesson: currentLessonIndex + 1,
+                            nextLesson: totalLessons > 0 ? "Next: " + (course.lessons[Math.min(currentLessonIndex + 1, totalLessons - 1)]?.lesson_title || "Complete") : "No lessons"
                         };
                     });
+                    
+                    console.log(`Loaded ${courses.length} grouped courses (from ${data.grouped ? 'server-side' : 'ungrouped'} data)`);
                     
                     // Update the UI after courses are loaded
                     updateStats();
@@ -2287,13 +2303,15 @@
         // Create Course Card
         function createCourseCard(course) {
             const progress = userProgress[course.id] || 0;
+            // Strip Markdown from description for card preview (just show plain text)
+            const plainDescription = course.description ? course.description.replace(/[#*`_\[\]]/g, '').substring(0, 120) + (course.description.length > 120 ? '...' : '') : '';
             return `
                 <div class="course-card" onclick="openCourseViewer('${course.id}')" style="cursor: pointer;">
                     <img src="${course.image}" alt="${course.title}" class="course-image">
                     <div class="course-content">
                         <span class="course-category">${course.category}</span>
                         <h4 class="course-title">${course.title}</h4>
-                        <p class="course-description">${course.description}</p>
+                        <p class="course-description">${plainDescription}</p>
                         <div class="course-meta">
                             <span>⭐ ${course.rating}</span>
                             <span>👥 ${course.students.toLocaleString()}</span>
@@ -2501,63 +2519,92 @@
                 console.error('Error parsing course JSON fields:', e);
             }
             
-            // Update lessons sidebar - Use actual week from course data
+            // Update lessons sidebar - Group lessons by week dynamically from database
             const lessonsContainer = document.querySelector('#embedded-course .curriculum-sidebar');
             if (lessonsContainer) {
                 if (lessons.length > 0) {
+                    console.log('=== POPULATING COURSE SIDEBAR ===');
+                    console.log('Course:', course.title);
+                    console.log('Total lessons:', lessons.length);
+                    console.log('Lessons data:', lessons);
+                    
                     const progress = userProgress[course.id] || 0;
                     const completedLessons = Math.floor(progress / 100 * lessons.length);
-                    
-                    // Use the actual week number from the course
-                    const weekNum = course.week || 1;
-                    const dayNum = course.day || 1;
                     
                     // Build complete sidebar HTML
                     let lessonsList = '<div class="curriculum-header"><div class="curriculum-title">' + course.title + '</div><div class="curriculum-progress"><span>' + 
                         completedLessons + ' of ' + lessons.length + ' lessons</span><div class="progress-bar"><div class="progress-fill" style="width: ' + 
                         progress + '%"></div></div><span>' + Math.round(progress) + '%</span></div></div>';
                     
-                    // Calculate total duration for all lessons
-                    const totalDuration = lessons.reduce((sum, lesson) => {
-                        const dur = lesson.duration || '0';
-                        const mins = parseInt(dur.toString().replace(/\D/g, '')) || 0;
-                        return sum + mins;
-                    }, 0);
-                    
-                    // Create Week section with actual week number from database
-                    lessonsList += `
-                        <div class="week-section expanded">
-                            <div class="week-header" onclick="this.parentElement.classList.toggle('expanded')">
-                                <div class="week-info">
-                                    <div class="week-title">Week ${weekNum}</div>
-                                    <div class="week-meta">${lessons.length} lesson${lessons.length > 1 ? 's' : ''} • ${Math.floor(totalDuration / 60)}h ${totalDuration % 60}m</div>
-                                </div>
-                                <i class="bi bi-chevron-down week-icon"></i>
-                            </div>
-                            <div class="lessons-list">
-                    `;
-                    
-                    // Display lessons with week.day numbering (e.g., 1.1, 1.2, etc.)
+                    // Group lessons by week number from database
+                    const lessonsByWeek = {};
                     lessons.forEach((lesson, idx) => {
-                        const isCompleted = (userProgress[course.id] || 0) > (idx / lessons.length * 100);
-                        const isActive = idx === 0; // First lesson active by default
-                        
-                        // Format as Week.Day (e.g., "1.1" for week 1 day 1)
-                        const lessonNumber = `${weekNum}.${dayNum + idx}`;
-                        const lessonTitle = lesson.title || 'Lesson ' + (idx + 1);
-                        
-                        lessonsList += `
-                            <div class="lesson-item ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}" onclick="playLesson(${idx})">
-                                <div class="lesson-checkbox">${isCompleted ? '<i class="bi bi-check"></i>' : ''}</div>
-                                <div class="lesson-details">
-                                    <div class="lesson-title">${lessonNumber} ${lessonTitle}</div>
-                                    <div class="lesson-duration">${lesson.duration || '30 min'}</div>
-                                </div>
-                            </div>
-                        `;
+                        const weekNum = lesson.week || 1;
+                        if (!lessonsByWeek[weekNum]) {
+                            lessonsByWeek[weekNum] = [];
+                        }
+                        lessonsByWeek[weekNum].push({ ...lesson, globalIndex: idx });
                     });
                     
-                    lessonsList += '</div></div>';
+                    console.log('Lessons grouped by week:', lessonsByWeek);
+                    
+                    // Get sorted week numbers
+                    const weekNumbers = Object.keys(lessonsByWeek).map(Number).sort((a, b) => a - b);
+                    
+                    console.log('Week numbers (sorted):', weekNumbers);
+                    
+                    // Create a week section for each week
+                    weekNumbers.forEach((weekNum, weekIdx) => {
+                        const weekLessons = lessonsByWeek[weekNum];
+                        
+                        // Calculate total duration for this week's lessons
+                        const weekDuration = weekLessons.reduce((sum, lesson) => {
+                            const dur = lesson.duration || '0';
+                            const mins = parseInt(dur.toString().replace(/\D/g, '')) || 0;
+                            return sum + mins;
+                        }, 0);
+                        
+                        // First week is expanded by default, others collapsed
+                        const isExpanded = weekIdx === 0 ? 'expanded' : '';
+                        
+                        lessonsList += `
+                            <div class="week-section ${isExpanded}">
+                                <div class="week-header" onclick="this.parentElement.classList.toggle('expanded')">
+                                    <div class="week-info">
+                                        <div class="week-title">Week ${weekNum}</div>
+                                        <div class="week-meta">${weekLessons.length} lesson${weekLessons.length > 1 ? 's' : ''} • ${Math.floor(weekDuration / 60)}h ${weekDuration % 60}m</div>
+                                    </div>
+                                    <i class="bi bi-chevron-down week-icon"></i>
+                                </div>
+                                <div class="lessons-list">
+                        `;
+                        
+                        // Display lessons for this week with week.day numbering
+                        weekLessons.forEach((lesson) => {
+                            const idx = lesson.globalIndex;
+                            const isCompleted = (userProgress[course.id] || 0) > (idx / lessons.length * 100);
+                            const isActive = idx === 0; // First lesson overall is active
+                            
+                            // Use actual week.day from database (e.g., "1.1" for week 1 day 1)
+                            const lessonNumber = `${lesson.week}.${lesson.day}`;
+                            const lessonTitle = lesson.lesson_title || `Lesson ${idx + 1}`;
+                            
+                            lessonsList += `
+                                <div class="lesson-item ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}" onclick="playLesson(${idx})">
+                                    <div class="lesson-checkbox">${isCompleted ? '<i class="bi bi-check"></i>' : ''}</div>
+                                    <div class="lesson-details">
+                                        <div class="lesson-title">${lessonNumber} ${lessonTitle}</div>
+                                        <div class="lesson-duration">${lesson.duration || '30'} min</div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        lessonsList += '</div></div>'; // Close lessons-list and week-section
+                    });
+                    
+                    console.log('Created week sections for weeks:', weekNumbers);
+                    console.log('=== SIDEBAR HTML GENERATED ===');
                     
                     lessonsContainer.innerHTML = lessonsList;
                 } else {
@@ -2595,14 +2642,15 @@
                 }
             }
             
-            // Update lesson header
+            // Update lesson header - Use first lesson's data if available
             const lessonHeader = document.querySelector('#embedded-course .lesson-header');
             if (lessonHeader) {
-                // Format: Week 1, then 1.1 Lesson Title
-                const weekNum = course.week || 1;
-                const dayNum = course.day || 1;
+                // Get first lesson's week and day
+                const firstLesson = lessons[0] || {};
+                const weekNum = firstLesson.week || course.week || 1;
+                const dayNum = firstLesson.day || course.day || 1;
                 const lessonNum = `${weekNum}.${dayNum}`;
-                const lessonTitle = lessons[0]?.title || course.title;
+                const lessonTitle = firstLesson.lesson_title || firstLesson.title || course.title;
                 
                 lessonHeader.innerHTML = `
                     <div class="lesson-number-badge"><i class="bi bi-play-circle"></i> Week ${weekNum}</div>
@@ -2654,84 +2702,31 @@
                     `;
                 }
                 
-                overviewTab.innerHTML = overviewHTML || '<p>No overview content available.</p>';
+                overviewTab.innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray);">Loading lesson content...</p>';
             }
             
-            // Update Content tab
+            // Initialize Content tab with placeholder
             const contentTab = document.getElementById('embedded-tab-1');
             if (contentTab) {
-                let contentHTML = '';
-                
-                // Sections
-                sections.forEach(section => {
-                    contentHTML += `
-                        <div class="content-section">
-                            <h2 class="section-title"><i class="bi bi-shield-check"></i> ${section.title}</h2>
-                            <div class="section-content">${section.content}</div>
-                        </div>
-                    `;
-                });
-                
-                // Case Studies
-                caseStudies.forEach(caseStudy => {
-                    contentHTML += `
-                        <div class="case-study-box">
-                            <div class="case-study-title"><i class="bi bi-briefcase"></i> ${caseStudy.title}</div>
-                            <div class="case-study-content">${caseStudy.description}</div>
-                        </div>
-                    `;
-                });
-                
-                // Activities
-                activities.forEach(activity => {
-                    contentHTML += `
-                        <div class="activity-box">
-                            <div class="activity-title"><i class="bi bi-laptop"></i> ${activity.title}</div>
-                            <div class="activity-content">${activity.description}</div>
-                        </div>
-                    `;
-                });
-                
-                contentTab.innerHTML = contentHTML || '<p>No content available.</p>';
+                contentTab.innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray);">Loading lesson content...</p>';
             }
             
-            // Update Resources tab
+            // Initialize Resources tab with placeholder
             const resourcesTab = document.getElementById('embedded-tab-3');
             if (resourcesTab) {
-                let resourcesHTML = '<div class="content-section"><h2 class="section-title"><i class="bi bi-file-earmark-text"></i> Downloadable Resources</h2><div class="resources-list">';
-                
-                resources.forEach(resource => {
-                    const icon = resource.type?.toLowerCase().includes('pdf') ? 'file-pdf' : 
-                                resource.type?.toLowerCase().includes('doc') ? 'file-earmark-word' :
-                                resource.type?.toLowerCase().includes('xls') ? 'file-earmark-excel' :
-                                resource.type?.toLowerCase().includes('ppt') ? 'file-slides' : 'file-earmark-text';
-                    
-                    resourcesHTML += `
-                        <a href="${resource.url || '#'}" class="resource-item" target="_blank">
-                            <div class="resource-icon"><i class="bi bi-${icon}"></i></div>
-                            <div class="resource-info">
-                                <div class="resource-name">${resource.name || 'Resource'}</div>
-                                <div class="resource-type">${resource.type || 'File'}</div>
-                            </div>
-                            <i class="bi bi-download resource-download"></i>
-                        </a>
-                    `;
-                });
-                
-                resourcesHTML += '</div></div>';
-                
-                // Additional Links
-                if (additionalLinks.length > 0) {
-                    resourcesHTML += '<div class="content-section"><h2 class="section-title"><i class="bi bi-link-45deg"></i> Additional Resources</h2><div class="section-content"><ul>';
-                    
-                    additionalLinks.forEach(link => {
-                        resourcesHTML += `<li><a href="${link.url || '#'}" target="_blank" style="color: var(--primary);">${link.title || 'Link'}</a></li>`;
-                    });
-                    
-                    resourcesHTML += '</ul></div></div>';
-                }
-                
-                resourcesTab.innerHTML = resourcesHTML;
+                resourcesTab.innerHTML = '<p style="padding: 2rem; text-align: center; color: var(--gray);">Loading lesson resources...</p>';
+            }
+            
+            // NOTE: Content tabs (Overview, Content, Resources) will be populated 
+            // by updateLessonContentTabs() function which is called from playLesson()
+            // This ensures tabs show lesson-specific content that changes when clicking different lessons
+            
+            // Automatically load the first lesson when course opens
+            if (course.lessons && course.lessons.length > 0) {
+                // Use setTimeout to ensure DOM is ready
+                setTimeout(() => {
+                    playLesson(0);
+                }, 100);
             }
         }
 
@@ -2740,22 +2735,57 @@
             if (!currentCourse || !currentCourse.lessons || lessonIndex >= currentCourse.lessons.length) return;
             
             const lesson = currentCourse.lessons[lessonIndex];
+            console.log('Playing lesson:', lesson);
             
-            // Update video player (simulated)
-            document.getElementById('youtube-link').textContent = "Click to watch on YouTube";
-            document.getElementById('youtube-link').href = "https://youtube.com"; // Placeholder YouTube link
+            // Update video player with actual YouTube URL
+            const videoIframe = document.querySelector('#embedded-course .video-container iframe');
+            if (videoIframe && lesson.youtube_url) {
+                // Extract YouTube video ID and embed
+                let videoId = '';
+                if (lesson.youtube_url.includes('youtu.be/')) {
+                    videoId = lesson.youtube_url.split('youtu.be/')[1].split('?')[0];
+                } else if (lesson.youtube_url.includes('youtube.com/watch?v=')) {
+                    videoId = lesson.youtube_url.split('v=')[1].split('&')[0];
+                } else if (lesson.youtube_url.includes('youtube.com/embed/')) {
+                    videoId = lesson.youtube_url.split('embed/')[1].split('?')[0];
+                }
+                
+                if (videoId) {
+                    videoIframe.src = `https://www.youtube.com/embed/${videoId}`;
+                }
+            }
             
-            // Update active lesson in the list
-            document.querySelectorAll('.lesson-link').forEach((link, index) => {
+            // Update lesson title and info under video
+            const lessonNumberBadge = document.querySelector('#embedded-course .lesson-number-badge');
+            const lessonMainTitle = document.querySelector('#embedded-course .lesson-main-title');
+            
+            if (lessonNumberBadge) {
+                lessonNumberBadge.innerHTML = `<i class="bi bi-play-circle"></i> Week ${lesson.week}`;
+            }
+            
+            if (lessonMainTitle) {
+                lessonMainTitle.textContent = `${lesson.week}.${lesson.day} ${lesson.lesson_title || 'Lesson ' + (lessonIndex + 1)}`;
+            }
+            
+            // Update lesson info bar
+            const lessonInfoBar = document.querySelector('#embedded-course .lesson-info-bar');
+            if (lessonInfoBar) {
+                lessonInfoBar.innerHTML = `
+                    <div class="lesson-info-item"><i class="bi bi-clock"></i><span>${lesson.duration || 30} minutes</span></div>
+                    <div class="lesson-info-item"><i class="bi bi-camera-video"></i><span>${lesson.duration || 30} min video</span></div>
+                    <div class="lesson-info-item"><i class="bi bi-calendar-week"></i><span>Week ${lesson.week}, Day ${lesson.day}</span></div>
+                `;
+            }
+            
+            // NEW: Update content tabs with lesson-specific data
+            updateLessonContentTabs(lesson);
+            
+            // Update active lesson in the sidebar list
+            document.querySelectorAll('#embedded-course .lesson-item').forEach((item, index) => {
                 if (index === lessonIndex) {
-                    link.classList.add('active');
-                    link.querySelector('i').className = 'bi bi-play-circle-fill';
-                } else if (index < lessonIndex) {
-                    link.classList.add('active');
-                    link.querySelector('i').className = 'bi bi-check-circle-fill';
+                    item.classList.add('active');
                 } else {
-                    link.classList.remove('active');
-                    link.querySelector('i').className = 'bi bi-play-circle';
+                    item.classList.remove('active');
                 }
             });
             
@@ -2766,13 +2796,175 @@
             userProgress[currentCourse.id] = newProgress;
             localStorage.setItem('learnHubUserProgress', JSON.stringify(userProgress));
             
-            document.getElementById('course-progress-text').textContent = `${Math.round(newProgress)}% Complete`;
-            document.getElementById('course-progress-bar').style.width = `${newProgress}%`;
-            document.getElementById('course-lessons-count').textContent = 
+            const progressText = document.getElementById('course-progress-text');
+            const progressBar = document.getElementById('course-progress-bar');
+            const lessonsCount = document.getElementById('course-lessons-count');
+            
+            if (progressText) progressText.textContent = `${Math.round(newProgress)}% Complete`;
+            if (progressBar) progressBar.style.width = `${newProgress}%`;
+            if (lessonsCount) lessonsCount.textContent = 
                 `${Math.floor(newProgress / 100 * currentCourse.lessons.length)}/${currentCourse.lessons.length} Lessons`;
             
             updateStats();
             renderInProgressCourses();
+        }
+        
+        // Update content tabs with lesson-specific data
+        function updateLessonContentTabs(lesson) {
+            console.log('Updating content tabs for lesson:', lesson.lesson_title);
+            
+            // Parse lesson-specific JSON fields
+            let objectives = [];
+            let sections = [];
+            let activities = [];
+            let caseStudies = [];
+            let resources = [];
+            let additionalLinks = [];
+            
+            try {
+                objectives = lesson.objectives_json ? JSON.parse(lesson.objectives_json) : [];
+                sections = lesson.sections_json ? JSON.parse(lesson.sections_json) : [];
+                activities = lesson.activities_json ? JSON.parse(lesson.activities_json) : [];
+                caseStudies = lesson.case_studies_json ? JSON.parse(lesson.case_studies_json) : [];
+                resources = lesson.resources_json ? JSON.parse(lesson.resources_json) : [];
+                additionalLinks = lesson.additional_links_json ? JSON.parse(lesson.additional_links_json) : [];
+            } catch (e) {
+                console.error('Error parsing lesson JSON fields:', e);
+            }
+            
+            console.log('Lesson content:', {
+                stakes: !!lesson.intro_stakes,
+                reflection: !!lesson.intro_reflection,
+                objectives: objectives.length,
+                sections: sections.length,
+                activities: activities.length,
+                caseStudies: caseStudies.length,
+                resources: resources.length,
+                additionalLinks: additionalLinks.length
+            });
+            
+            // Update Overview tab
+            const overviewTab = document.getElementById('embedded-tab-0');
+            if (overviewTab) {
+                let overviewHTML = '';
+                
+                // The Stakes (lesson-specific)
+                if (lesson.intro_stakes) {
+                    overviewHTML += `
+                        <div class="content-section">
+                            <h2 class="section-title"><i class="bi bi-lightbulb"></i> The Stakes</h2>
+                            <div class="section-content">${renderMarkdownContent(lesson.intro_stakes)}</div>
+                        </div>
+                    `;
+                }
+                
+                // Reflection Activity (lesson-specific)
+                if (lesson.intro_reflection) {
+                    overviewHTML += `
+                        <div class="activity-box">
+                            <div class="activity-title"><i class="bi bi-question-circle"></i> Reflection Activity</div>
+                            <div class="activity-content">${renderMarkdownContent(lesson.intro_reflection)}</div>
+                        </div>
+                    `;
+                }
+                
+                // Learning Objectives (lesson-specific)
+                if (objectives.length > 0) {
+                    overviewHTML += `
+                        <div class="content-section">
+                            <h2 class="section-title"><i class="bi bi-list-check"></i> Learning Objectives</h2>
+                            <div class="section-content">
+                                <ul>
+                                    ${objectives.map(obj => `<li>${obj}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                overviewTab.innerHTML = overviewHTML || '<p style="padding: 2rem; text-align: center; color: var(--gray);">No overview content available for this lesson.</p>';
+            }
+            
+            // Update Content tab
+            const contentTab = document.getElementById('embedded-tab-1');
+            if (contentTab) {
+                let contentHTML = '';
+                
+                // Sections (lesson-specific)
+                sections.forEach(section => {
+                    contentHTML += `
+                        <div class="content-section">
+                            <h2 class="section-title"><i class="bi bi-shield-check"></i> ${section.title}</h2>
+                            <div class="section-content">${renderMarkdownContent(section.content)}</div>
+                        </div>
+                    `;
+                });
+                
+                // Case Studies (lesson-specific)
+                caseStudies.forEach(caseStudy => {
+                    contentHTML += `
+                        <div class="case-study-box">
+                            <div class="case-study-title"><i class="bi bi-briefcase"></i> ${caseStudy.title}</div>
+                            <div class="case-study-content">${renderMarkdownContent(caseStudy.description)}</div>
+                        </div>
+                    `;
+                });
+                
+                // Activities (lesson-specific)
+                activities.forEach(activity => {
+                    contentHTML += `
+                        <div class="activity-box">
+                            <div class="activity-title"><i class="bi bi-laptop"></i> ${activity.title}</div>
+                            <div class="activity-content">${renderMarkdownContent(activity.description)}</div>
+                        </div>
+                    `;
+                });
+                
+                contentTab.innerHTML = contentHTML || '<p style="padding: 2rem; text-align: center; color: var(--gray);">No content available for this lesson.</p>';
+            }
+            
+            // Update Resources tab
+            const resourcesTab = document.getElementById('embedded-tab-3');
+            if (resourcesTab) {
+                let resourcesHTML = '';
+                
+                if (resources.length > 0) {
+                    resourcesHTML += '<div class="content-section"><h2 class="section-title"><i class="bi bi-file-earmark-text"></i> Downloadable Resources</h2><div class="resources-list">';
+                    
+                    resources.forEach(resource => {
+                        const icon = resource.type?.toLowerCase().includes('pdf') ? 'file-pdf' : 
+                                    resource.type?.toLowerCase().includes('doc') ? 'file-earmark-word' :
+                                    resource.type?.toLowerCase().includes('xls') ? 'file-earmark-excel' :
+                                    resource.type?.toLowerCase().includes('ppt') ? 'file-slides' : 'file-earmark-text';
+                        
+                        resourcesHTML += `
+                            <a href="${resource.url || '#'}" class="resource-item" target="_blank">
+                                <div class="resource-icon"><i class="bi bi-${icon}"></i></div>
+                                <div class="resource-info">
+                                    <div class="resource-name">${resource.name || 'Resource'}</div>
+                                    <div class="resource-type">${resource.type || 'File'}</div>
+                                </div>
+                                <i class="bi bi-download resource-download"></i>
+                            </a>
+                        `;
+                    });
+                    
+                    resourcesHTML += '</div></div>';
+                }
+                
+                // Additional Links (lesson-specific)
+                if (additionalLinks.length > 0) {
+                    resourcesHTML += '<div class="content-section"><h2 class="section-title"><i class="bi bi-link-45deg"></i> Additional Resources</h2><div class="section-content"><ul>';
+                    
+                    additionalLinks.forEach(link => {
+                        resourcesHTML += `<li><a href="${link.url || '#'}" target="_blank" style="color: var(--primary);">${link.title || 'Link'}</a></li>`;
+                    });
+                    
+                    resourcesHTML += '</ul></div></div>';
+                }
+                
+                resourcesTab.innerHTML = resourcesHTML || '<p style="padding: 2rem; text-align: center; color: var(--gray);">No resources available for this lesson.</p>';
+            }
         }
 
         // Show Home Page
@@ -3047,6 +3239,35 @@
                 closeContinueLearningModal();
             }
         });
+
+        // ==================== MARKDOWN RENDERING ====================
+        
+        // Helper function to render Markdown to HTML
+        function renderMarkdown(text) {
+            if (!text || typeof text !== 'string') return '';
+            
+            // Configure marked options
+            marked.setOptions({
+                breaks: true,
+                gfm: true,
+                headerIds: true,
+                mangle: false
+            });
+            
+            try {
+                return marked.parse(text);
+            } catch (error) {
+                console.error('Error rendering markdown:', error);
+                return text; // Return original text if parsing fails
+            }
+        }
+        
+        // Helper function to safely render Markdown and wrap in container
+        function renderMarkdownContent(text) {
+            if (!text) return '';
+            const html = renderMarkdown(text);
+            return `<div class="markdown-content">${html}</div>`;
+        }
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', init);
