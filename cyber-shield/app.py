@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory, session
+from flask import Flask, request, jsonify, send_from_directory, session, redirect
 from urllib.parse import urlparse
 import os, time, re, socket, requests, tldextract
 import base64
@@ -49,7 +49,12 @@ from routes.profile import profile_bp
 from routes.teamCollab import team_collab_bp
 from routes.admin import admin_bp
 from routes.enterprise import enterprise_bp
-from routes.phishing_replica import phishing_replica_bp
+from routes.learning_hub import learning_hub_bp
+
+# importing email phishing blueprint
+from routes.email_phishing import email_phishing_bp
+
+# from routes.phishing_replica import phishing_replica_bp
 
 
 from dotenv import load_dotenv
@@ -76,7 +81,12 @@ app.register_blueprint(profile_bp)
 app.register_blueprint(team_collab_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(enterprise_bp)
-app.register_blueprint(phishing_replica_bp)
+app.register_blueprint(learning_hub_bp)
+
+# registering email phishing blueprint
+app.register_blueprint(email_phishing_bp, url_prefix='/api/phishing')
+
+# app.register_blueprint(phishing_replica_bp)
 
 
 VT_API_KEY = os.getenv("VT_API_KEY", "").strip()

@@ -6,17 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#fddde6" />
     <title>Cyber Shield LinkGuard - Cybersecurity Awareness</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <link rel="stylesheet" href="cyber-awareness.css">
-
-    <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16.png" />
     <link rel="manifest" href="../assets/favicon/site.webmanifest" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
 </head>
 
 <body>
@@ -71,13 +68,17 @@
                                 data-bs-target="#phishing" type="button" role="tab">
                                 <i class="bi bi-envelope-exclamation me-2"></i>Phishing Replica
                             </button>
-                            <button class="nav-link" id="email-template-tab" data-bs-toggle="tab"
+                            <button hidden class="nav-link" id="email-template-tab" data-bs-toggle="tab"
                                 data-bs-target="#email-template" type="button" role="tab">
                                 <i class="bi bi-file-earmark-text me-2"></i>Email Phishing Replica
                             </button>
                             <button class="nav-link" id="detection-replica-tab" data-bs-toggle="tab"
                                 data-bs-target="#detection-replica" type="button" role="tab">
                                 <i class="bi bi-shield-exclamation me-2"></i>Detection Phishing Replica
+                            </button>
+                            <button class="nav-link" id="global-patterns-tab" data-bs-toggle="tab"
+                                data-bs-target="#global-patterns" type="button" role="tab">
+                                <i class="bi bi-globe2 me-2"></i>Global Phishing Patterns
                             </button>
                         </div>
                     </div>
@@ -91,18 +92,18 @@
                                     <span class="platform-label">Platform</span>
                                     <select id="platformSelect" class="platform-select" aria-label="Select platform">
                                         <option value="">Select Platform</option>
-                                        <option value="google">Google</option>
-                                        <option value="tiktok">TikTok</option>
-                                        <option value="facebook">Facebook</option>
-                                        <option value="x">X</option>
-                                        <option value="telegram">Telegram</option>
-                                        <option value="whatsapp">WhatsApp</option>
-                                        <option value="linkedin">LinkedIn</option>
-                                        <option value="instagram">Instagram</option>
-                                        <option value="snapchat">Snapchat</option>
-                                        <option value="netflix">Netflix</option>
-                                        <option value="amazon">Amazon</option>
-                                        <option value="microsoft">Microsoft</option>
+                                        <option hidden value="google">Google</option>
+                                        <option hidden value="tiktok">TikTok</option>
+                                        <option hidden value="facebook">Facebook</option>
+                                        <option hidden value="x">X</option>
+                                        <option hidden value="telegram">Telegram</option>
+                                        <option hidden value="whatsapp">WhatsApp</option>
+                                        <option hidden value="linkedin">LinkedIn</option>
+                                        <option hidden value="instagram">Instagram</option>
+                                        <option hidden value="snapchat">Snapchat</option>
+                                        <option hidden value="netflix">Netflix</option>
+                                        <option hidden value="amazon">Amazon</option>
+                                        <option  value="microsoft">Microsoft</option>
                                     </select>
                                 </div>
 
@@ -140,11 +141,104 @@
                                         </div>
                                     </div>
                                 </form>
+
+                                <!-- Generated Email Display Area -->
+                                <div id="generatedEmailContainer" class="mt-4" style="display: none;">
+                                    <div class="cs-card">
+                                        <div class="d-flex align-items-center justify-content-between mb-3">
+                                            <h5 class="mb-0">
+                                                <i class="bi bi-envelope-check me-2"></i>Generated Phishing Email
+                                            </h5>
+                                            <button id="closeEmailDisplay" class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </div>
+                                        <div id="generatedEmailContent" class="border rounded p-3 bg-light">
+                                            <!-- Email content will be inserted here -->
+                                        </div>
+                                        <div class="mt-3 text-center">
+                                           <!-- <button hidden  id="editEmailContent" class="cs-btn btn-secondary me-2">
+                                                <i class="bi bi-pencil me-1"></i>Edit Email
+                                            </button>-->
+                                            <button id="sendEmailContent" class="cs-btn btn-login me-2">
+                                                <i class="bi bi-send me-1"></i>Send Email
+                                            </button>
+                                            <button id="saveToDraftContent" class="cs-btn btn-secondary">
+                                                <i class="bi bi-save me-1"></i>Save to Draft
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Email Editor Modal -->
+                                <div id="emailEditorModal" class="email-editor-modal" style="display: none;">
+                                    <div class="email-editor-content">
+                                        <div class="email-editor-header">
+                                            <h5 class="mb-0">
+                                                <i class="bi bi-pencil-square me-2"></i>Edit Phishing Email
+                                            </h5>
+                                            <button id="closeEmailEditor" class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="email-editor-body">
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="editSenderName" class="form-label">Sender Name</label>
+                                                    <input id="editSenderName" type="text" class="cs-input" placeholder="Sender Name">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="editSenderEmail" class="form-label">Sender Email</label>
+                                                    <input id="editSenderEmail" type="email" class="cs-input" placeholder="sender@example.com">
+                                                </div>
+                                                <div class="col-12">
+                                                    <label for="editSubject" class="form-label">Subject</label>
+                                                    <input id="editSubject" type="text" class="cs-input" placeholder="Email Subject">
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="editEmailBody" class="form-label">Email Content</label>
+                                                <div id="emailContentEditor" class="email-content-editor">
+                                                    <div class="editor-toolbar">
+                                                        <button type="button" class="editor-btn" data-command="bold" title="Bold">
+                                                            <i class="bi bi-type-bold"></i>
+                                                        </button>
+                                                        <button type="button" class="editor-btn" data-command="italic" title="Italic">
+                                                            <i class="bi bi-type-italic"></i>
+                                                        </button>
+                                                        <button type="button" class="editor-btn" data-command="underline" title="Underline">
+                                                            <i class="bi bi-type-underline"></i>
+                                                        </button>
+                                                        <span class="editor-separator"></span>
+                                                        <button type="button" class="editor-btn" data-command="createLink" title="Insert Link">
+                                                            <i class="bi bi-link-45deg"></i>
+                                                        </button>
+                                                        <button type="button" class="editor-btn" data-command="insertHTML" data-value="<br>" title="Line Break">
+                                                            <i class="bi bi-arrow-return-left"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div id="editEmailBody" class="editor-content" contenteditable="true" placeholder="Edit your email content here..."></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="text-center">
+                                                <button id="saveEmailChanges" class="cs-btn btn-login me-2">
+                                                    <i class="bi bi-check-circle me-1"></i>Save Changes
+                                                </button>
+                                                <button id="cancelEmailEdit" class="cs-btn btn-secondary">
+                                                    <i class="bi bi-x-circle me-1"></i>Cancel
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Email Template Tab -->
-                        <div class="tab-pane fade" id="email-template" role="tabpanel">
+                        <div hidden class="tab-pane fade" id="email-template" role="tabpanel">
                             <div class="template-panel">
                                 <div class="text-center mb-4">
                                     <i class="bi bi-file-earmark-text display-4 text-muted mb-3"></i>
@@ -202,7 +296,7 @@
                         <div class="tab-pane fade" id="detection-replica" role="tabpanel">
                             <div class="replica-container">
                                 <!-- Training Progress Section -->
-                                <div class="progress-panel mb-4">
+                                <div hidden class="progress-panel mb-4">
                                     <div class="training-progress">
                                         <h4><i class="bi bi-list-check me-2"></i>Training Progress</h4>
                                         <div class="steps-container">
@@ -248,22 +342,18 @@
                                                 <i class="fas fa-plus"></i> Compose
                                             </button>
                                             <ul class="folder-list">
-                                                <li class="folder-item active" data-folder="inbox">
-                                                    <i class="fas fa-inbox"></i> Inbox <span class="badge">5</span>
+                                                <li class="folder-item active" data-folder="clicked">
+                                                    <i class="fas fa-click"></i> Clicked <span class="badge">0</span>
                                                 </li>
-                                                <li class="folder-item" data-folder="starred">
-                                                    <i class="fas fa-star"></i> Starred <span class="badge">2</span>
-                                                </li>
+                                                
                                                 <li class="folder-item" data-folder="sent">
                                                     <i class="fas fa-paper-plane"></i> Sent <span
-                                                        class="badge">12</span>
+                                                        class="badge">0</span>
                                                 </li>
                                                 <li class="folder-item" data-folder="drafts">
-                                                    <i class="fas fa-file-alt"></i> Drafts <span class="badge">3</span>
+                                                    <i class="fas fa-file-alt"></i> Drafts <span class="badge">0</span>
                                                 </li>
-                                                <li class="folder-item" data-folder="trash">
-                                                    <i class="fas fa-trash"></i> Trash <span class="badge">8</span>
-                                                </li>
+                                                
                                             </ul>
                                         </div>
 
@@ -281,159 +371,22 @@
                                             </div>
 
                                             <div class="email-list" id="emailList">
-                                                <!-- Inbox Emails -->
-                                                <div class="email-folder" id="inbox-folder">
-                                                    <div class="email-item unread" data-email="security">
-                                                        <div class="avatar">SB</div>
-                                                        <div class="content">
-                                                            <div class="header">
-                                                                <div class="subject">Urgent: Security Alert on Your
-                                                                    Account</div>
-                                                                <div class="time">9:30 AM</div>
-                                                            </div>
-                                                            <div class="preview">Dear user, we've detected suspicious
-                                                                activity on your account. Immediate action is
-                                                                required...</div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="email-item" data-email="project">
-                                                        <div class="avatar">TM</div>
-                                                        <div class="content">
-                                                            <div class="header">
-                                                                <div class="subject">Project Update Meeting</div>
-                                                                <div class="time">Yesterday</div>
-                                                            </div>
-                                                            <div class="preview">Hi team, let's meet tomorrow at 10 AM
-                                                                to discuss the project milestones...</div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="email-item" data-email="qr-scam">
-                                                        <div class="avatar">PS</div>
-                                                        <div class="content">
-                                                            <div class="header">
-                                                                <div class="subject">Your Package Delivery - QR Code
-                                                                    Inside</div>
-                                                                <div class="time">8:15 AM</div>
-                                                            </div>
-                                                            <div class="preview">Track your package delivery with the QR
-                                                                code attached. Click to view your shipment status...
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="email-item" data-email="image-scam">
-                                                        <div class="avatar">IS</div>
-                                                        <div class="content">
-                                                            <div class="header">
-                                                                <div class="subject">Important Document - Review
-                                                                    Required</div>
-                                                                <div class="time">7:45 AM</div>
-                                                            </div>
-                                                            <div class="preview">Please review the attached document and
-                                                                provide your feedback as soon as possible...</div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="email-item" data-email="image-phishing">
-                                                        <div class="avatar">IP</div>
-                                                        <div class="content">
-                                                            <div class="header">
-                                                                <div class="subject">Your Photo Has Been Shared</div>
-                                                                <div class="time">7:30 AM</div>
-                                                            </div>
-                                                            <div class="preview">Someone has shared a photo of you.
-                                                                Click the image below to view and manage your privacy
-                                                                settings...</div>
-                                                        </div>
-                                                    </div>
+                                                <!-- Clicked Emails -->
+                                                <div class="email-folder" id="clicked-folder">
+                                                    <!-- Clicked emails will be populated here -->
                                                 </div>
 
-                                                <div class="email-folder hidden" id="starred-folder">
-                                                    <div class="email-item" data-email="project">
-                                                        <div class="avatar">TM</div>
-                                                        <div class="content">
-                                                            <div class="header">
-                                                                <div class="subject">Project Update Meeting</div>
-                                                                <div class="time">Yesterday</div>
-                                                            </div>
-                                                            <div class="preview">Hi team, let's meet tomorrow at 10 AM
-                                                                to discuss the project milestones...</div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="email-item" data-email="security">
-                                                        <div class="avatar">SB</div>
-                                                        <div class="content">
-                                                            <div class="header">
-                                                                <div class="subject">Urgent: Security Alert on Your
-                                                                    Account</div>
-                                                                <div class="time">9:30 AM</div>
-                                                            </div>
-                                                            <div class="preview">Dear user, we've detected suspicious
-                                                                activity on your account. Immediate action is
-                                                                required...</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
+                                                <!-- Sent Emails -->
                                                 <div class="email-folder hidden" id="sent-folder">
-                                                    <div class="email-item">
-                                                        <div class="avatar">YT</div>
-                                                        <div class="content">
-                                                            <div class="header">
-                                                                <div class="subject">Re: Quarterly Report</div>
-                                                                <div class="time">Yesterday</div>
-                                                            </div>
-                                                            <div class="preview">Hi Thabo, I've attached the quarterly
-                                                                report for your review. Please let me know if you need
-                                                                any changes...</div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="email-item">
-                                                        <div class="avatar">LM</div>
-                                                        <div class="content">
-                                                            <div class="header">
-                                                                <div class="subject">Meeting Notes</div>
-                                                                <div class="time">2 days ago</div>
-                                                            </div>
-                                                            <div class="preview">Hi Lerato, here are the notes from our
-                                                                meeting yesterday. Please review and add your
-                                                                comments...</div>
-                                                        </div>
-                                                    </div>
+                                                    <!-- Sent emails will be populated here -->
                                                 </div>
 
+                                                <!-- Drafts Emails -->
                                                 <div class="email-folder hidden" id="drafts-folder">
-                                                    <div class="email-item">
-                                                        <div class="avatar">KT</div>
-                                                        <div class="content">
-                                                            <div class="header">
-                                                                <div class="subject">Budget Proposal 2024</div>
-                                                                <div class="time">Draft</div>
-                                                            </div>
-                                                            <div class="preview">Dear Finance Team, I'm writing to
-                                                                propose the budget for the upcoming fiscal year. The
-                                                                main areas of focus include...</div>
-                                                        </div>
-                                                    </div>
+                                                    <!-- Drafts will be populated here -->
                                                 </div>
 
-                                                <!-- Trash -->
-                                                <div class="email-folder hidden" id="trash-folder">
-                                                    <div class="email-item">
-                                                        <div class="avatar">NS</div>
-                                                        <div class="content">
-                                                            <div class="header">
-                                                                <div class="subject">Weekly Newsletter</div>
-                                                                <div class="time">1 week ago</div>
-                                                            </div>
-                                                            <div class="preview">This week's industry updates and
-                                                                company news. Read about our latest achievements and
-                                                                upcoming events...</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                
                                             </div>
                                         </div>
 
@@ -742,6 +695,259 @@
                                                         </ul>
                                                     </div>
                                                 </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Global Phishing Patterns Tab -->
+                        <div class="tab-pane fade" id="global-patterns" role="tabpanel">
+                            <div class="replica-container">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="pattern-header mb-4">
+                                            <h3><i class="bi bi-globe2 me-2"></i>Global Phishing Patterns by Region</h3>
+                                            <p class="text-muted">Learn about different phishing tactics used around the world to better protect yourself</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-4">
+                                    <!-- Africa Patterns -->
+                                    <div class="col-md-6 col-lg-3">
+                                        <div class="pattern-card africa-card">
+                                            <div class="pattern-header">
+                                                <div class="pattern-flag">🌍</div>
+                                                <h4>Africa</h4>
+                                                <span class="pattern-badge">419 Scams</span>
+                                            </div>
+                                            <div class="pattern-content">
+                                                <h5>Common Patterns:</h5>
+                                                <ul class="pattern-list">
+                                                    <li>Nigerian Prince scams</li>
+                                                    <li>Lottery winnings notifications</li>
+                                                    <li>Inheritance claims</li>
+                                                    <li>Charity/humanitarian appeals</li>
+                                                    <li>Investment opportunities</li>
+                                                </ul>
+                                                <div class="pattern-example">
+                                                    <strong>Example Subject:</strong><br>
+                                                    "URGENT: Claim Your $2.5M Inheritance"
+                                                </div>
+                                                <div class="pattern-warning">
+                                                    <i class="bi bi-exclamation-triangle"></i>
+                                                    Often use emotional appeals and urgency
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- USA Patterns -->
+                                    <div class="col-md-6 col-lg-3">
+                                        <div class="pattern-card usa-card">
+                                            <div class="pattern-header">
+                                                <div class="pattern-flag">🇺🇸</div>
+                                                <h4>USA</h4>
+                                                <span class="pattern-badge">Corporate Impersonation</span>
+                                            </div>
+                                            <div class="pattern-content">
+                                                <h5>Common Patterns:</h5>
+                                                <ul class="pattern-list">
+                                                    <li>Bank security alerts</li>
+                                                    <li>IRS tax notifications</li>
+                                                    <li>Amazon/PayPal account issues</li>
+                                                    <li>Social Security suspensions</li>
+                                                    <li>COVID-19 relief scams</li>
+                                                </ul>
+                                                <div class="pattern-example">
+                                                    <strong>Example Subject:</strong><br>
+                                                    "Action Required: Your Account Will Be Suspended"
+                                                </div>
+                                                <div class="pattern-warning">
+                                                    <i class="bi bi-exclamation-triangle"></i>
+                                                    Mimic trusted institutions and government agencies
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- India Patterns -->
+                                    <div class="col-md-6 col-lg-3">
+                                        <div class="pattern-card india-card">
+                                            <div class="pattern-header">
+                                                <div class="pattern-flag">🇮🇳</div>
+                                                <h4>India</h4>
+                                                <span class="pattern-badge">Tech Support</span>
+                                            </div>
+                                            <div class="pattern-content">
+                                                <h5>Common Patterns:</h5>
+                                                <ul class="pattern-list">
+                                                    <li>Fake tech support calls</li>
+                                                    <li>KYC verification scams</li>
+                                                    <li>UPI/digital wallet fraud</li>
+                                                    <li>Job opportunity scams</li>
+                                                    <li>Educational loan offers</li>
+                                                </ul>
+                                                <div class="pattern-example">
+                                                    <strong>Example Subject:</strong><br>
+                                                    "Complete Your KYC or Account Will Be Blocked"
+                                                </div>
+                                                <div class="pattern-warning">
+                                                    <i class="bi bi-exclamation-triangle"></i>
+                                                    Target digital payment users and students
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Russia Patterns -->
+                                    <div class="col-md-6 col-lg-3">
+                                        <div class="pattern-card russia-card">
+                                            <div class="pattern-header">
+                                                <div class="pattern-flag">🇷🇺</div>
+                                                <h4>Russia</h4>
+                                                <span class="pattern-badge">Advanced Persistent</span>
+                                            </div>
+                                            <div class="pattern-content">
+                                                <h5>Common Patterns:</h5>
+                                                <ul class="pattern-list">
+                                                    <li>Business email compromise</li>
+                                                    <li>Fake software updates</li>
+                                                    <li>Government service impersonation</li>
+                                                    <li>Cryptocurrency scams</li>
+                                                    <li>Romance scams</li>
+                                                </ul>
+                                                <div class="pattern-example">
+                                                    <strong>Example Subject:</strong><br>
+                                                    "Critical Security Update Required"
+                                                </div>
+                                                <div class="pattern-warning">
+                                                    <i class="bi bi-exclamation-triangle"></i>
+                                                    Often sophisticated and well-researched
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Phishing Email Database Section -->
+                                <div class="row mt-5">
+                                    <div class="col-12">
+                                        <div class="email-database-section">
+                                            <h4><i class="bi bi-database me-2"></i>Real Phishing Email Database</h4>
+                                            <p class="text-muted mb-4">Browse actual phishing emails from different regions to understand their tactics</p>
+                                            
+                                            <!-- Region Selection -->
+                                            <div class="region-selection mb-4">
+                                                <div class="row g-3 align-items-center">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Select Region:</label>
+                                                        <select class="form-select" id="regionSelect">
+                                                            <option value="">Choose a region...</option>
+                                                            <option value="africa">🌍 Africa (Lagos, Nigeria)</option>
+                                                            <option value="usa">🇺🇸 USA</option>
+                                                            <option value="india">🇮🇳 India</option>
+                                                            <option value="russia">🇷🇺 Russia</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="email-stats">
+                                                            <span class="badge bg-primary" id="totalEmails">0 emails available</span>
+                                                            <span class="badge bg-info ms-2" id="regionInfo">Select a region to start</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Email Viewer Section -->
+                                            <div class="email-viewer-section" id="emailViewerSection" style="display: none;">
+                                                <!-- Email Navigation -->
+                                                <div class="email-navigation mb-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div class="email-counter">
+                                                            <span class="badge bg-info" id="emailCounter">Email 1 of 0</span>
+                                                        </div>
+                                                        <div class="navigation-controls">
+                                                            <button class="btn btn-outline-primary me-2" id="prevEmailBtn" disabled>
+                                                                <i class="bi bi-chevron-left"></i> Previous
+                                                            </button>
+                                                            <button class="btn btn-outline-primary" id="nextEmailBtn" disabled>
+                                                                Next <i class="bi bi-chevron-right"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Email Display -->
+                                                <div class="email-display-card" id="emailDisplayCard">
+                                                    <div class="email-header-section">
+                                                        <div class="row">
+                                                            <div class="col-md-8">
+                                                                <h5 class="email-subject-display" id="emailSubjectDisplay">Loading...</h5>
+                                                                <div class="email-meta">
+                                                                    <span class="email-from" id="emailFromDisplay">
+                                                                        <i class="bi bi-person me-1"></i>Loading...
+                                                                    </span>
+                                                                    <span class="email-date" id="emailDateDisplay">
+                                                                        <i class="bi bi-calendar me-1"></i>Loading...
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4 text-end">
+                                                                <div class="email-badges">
+                                                                    <span class="badge scam-type-badge" id="scamTypeBadge">Loading...</span>
+                                                                    <span class="badge risk-badge" id="riskLevelBadge">Loading...</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="email-content-section">
+                                                        <div class="email-content-display" id="emailContentDisplay">
+                                                            Loading email content...
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Analysis Section -->
+                                                    <div class="email-analysis-section" id="emailAnalysisSection">
+                                                        <h6><i class="bi bi-shield-exclamation me-2"></i>Threat Analysis</h6>
+                                                        <div class="analysis-tags" id="analysisTagsDisplay">
+                                                            <!-- Analysis tags will be inserted here -->
+                                                        </div>
+                                                        <div class="analysis-explanation mt-3" id="analysisExplanation">
+                                                            <!-- Detailed analysis will be inserted here -->
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Quick Navigation -->
+                                                <div class="quick-navigation mt-3">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        
+                                                        <div class="jump-to">
+                                                            <input type="number" class="form-control form-control-sm d-inline-block" 
+                                                                   id="jumpToInput" placeholder="Go to email #" style="width: 130px;">
+                                                            <button class="btn btn-sm btn-outline-primary ms-2" id="jumpToBtn">Go</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Loading State -->
+                                            <div class="loading-state text-center py-5" id="loadingState" style="display: none;">
+                                                <div class="spinner-border text-primary mb-3" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                                <p class="text-muted">Loading phishing emails...</p>
+                                            </div>
+
+                                            <!-- Empty State -->
+                                            <div class="empty-state text-center py-5" id="emptyState">
+                                                <i class="bi bi-inbox display-1 text-muted mb-3"></i>
+                                                <h5 class="text-muted">Select a region to view phishing emails</h5>
+                                                <p class="text-muted">Choose from Africa, USA, India, or Russia to explore regional phishing patterns</p>
                                             </div>
                                         </div>
                                     </div>

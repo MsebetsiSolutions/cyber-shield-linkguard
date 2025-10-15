@@ -1,5 +1,5 @@
-// SESSION MANAGEMENT FOR CYBER SHIELD LINKGUARD
-const SESSION_EXPIRY_MINUTES = 30;
+
+const SESSION_EXPIRY_MINUTES = 5;
 const CHARSET = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 // Generate a random session ID
@@ -20,7 +20,6 @@ async function initSession() {
     let sessionId = urlParams.get('session');
     const storedSession = sessionStorage.getItem('cyberShieldSession');
 
-    // First, check if we have a valid Flask session (user is authenticated)
     try {
         const authCheck = await fetch('/api/auth/me', {
             credentials: 'include'
@@ -62,7 +61,6 @@ async function initSession() {
     if (storedSession) {
         const { id, expiry } = JSON.parse(storedSession);
 
-        // Check client-side expiry first
         if (new Date().getTime() > expiry) {
             needsNewSession = true;
         } else {
@@ -76,7 +74,6 @@ async function initSession() {
     }
 
     if (needsNewSession) {
-        // Generate new session
         sessionId = generateSessionId();
         const newExpiry = new Date().getTime() + (SESSION_EXPIRY_MINUTES * 60 * 1000);
         sessionStorage.setItem('cyberShieldSession', JSON.stringify({
@@ -88,7 +85,6 @@ async function initSession() {
         console.log('New session generated:', sessionId);
     }
 
-    // Set up session expiry check
     setupSessionExpiryCheck();
     
     return sessionId;
