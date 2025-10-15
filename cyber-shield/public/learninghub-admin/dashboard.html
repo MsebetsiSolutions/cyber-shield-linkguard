@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnHub - Admin Panel</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --light-gray: #f1f5f9;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        /* Header Styles */
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .admin-nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .admin-nav a {
+            text-decoration: none;
+            color: var(--gray);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .admin-nav a:hover {
+            color: var(--primary);
+        }
+
+        .admin-nav a.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--dark);
+        }
+
+        .btn-outline:hover {
+            background: var(--light-gray);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #0da271;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        /* Main Content */
+        .main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-description {
+            color: var(--gray);
+            font-size: 1.125rem;
+        }
+
+        /* Admin Tabs */
+        .admin-tabs {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin-bottom: 3rem;
+        }
+
+        .tabs-list {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            background: var(--light-gray);
+        }
+
+        .tab-trigger {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            font-weight: 600;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-trigger.active {
+            background: white;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form Styles */
+        .form-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .input, .textarea, .select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-family: inherit;
+        }
+
+        .textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Course List */
+        .course-list {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .course-item {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .course-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .course-info {
+            flex: 1;
+        }
+
+        .course-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .course-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--gray);
+        }
+
+        .course-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-published {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Lesson Management - ENHANCED */
+        .lessons-container {
+            margin-top: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .lesson-header {
+            background: var(--light-gray);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 1rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .lesson-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .lesson-item:last-child {
+            border-bottom: none;
+        }
+
+        .lesson-item input {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+
+        .lesson-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .add-lesson-btn {
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        /* YouTube URL Field */
+        .youtube-field {
+            background: #f8fafc;
+            border: 1px dashed var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .youtube-preview {
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 0.375rem;
+            border: 1px solid var(--border);
+            font-size: 0.875rem;
+        }
+
+        .youtube-preview a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .youtube-preview a:hover {
+            text-decoration: underline;
+        }
+
+        /* Content Sections */
+        .content-section {
+            background: var(--light-gray);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title i {
+            color: var(--primary);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .stat-title {
+            font-size: 0.875rem;
+            color: var(--gray);
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-trend {
+            font-size: 0.875rem;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 2rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray);
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.375rem;
+        }
+
+        .modal-close:hover {
+            background: var(--light-gray);
+        }
+
+        .modal-header {
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-body {
+            padding: 1rem 2rem 2rem;
+        }
+
+        /* Alert Styles */
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .icon {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        .icon-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-container {
+                padding: 0 1rem;
+            }
+
+            .admin-nav {
+                display: none;
+            }
+
+            .main {
+                padding: 1rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .course-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .course-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .modal-overlay {
+                padding: 1rem;
+            }
+
+            .modal-header,
+            .modal-body {
+                padding: 1.5rem;
+            }
+
+            .lesson-header,
+            .lesson-item {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="learninghub.html" class="logo">
+                   <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzI1NjNlYiI+PHBhdGggZD0iTTEyIDJMMiA3bDEwIDUgMTAtNS0xMC01ek0yIDE3bDEwIDUgMTAtNVY3bC0xMCA1djEweiIvPjwvc3ZnPg==" alt="LearnHub Logo" width="40">
+                   <h1>LearnHub Admin</h1>
+                </a>
+                <nav class="admin-nav">
+                    <a href="#" class="active" onclick="switchTab('dashboard')">Dashboard</a>
+                    <a href="#" onclick="switchTab('upload')">Upload Course</a>
+                    <a href="#" onclick="switchTab('manage')">Manage Courses</a>
+                    <a href="#" onclick="switchTab('analytics')">Analytics</a>
+                </nav>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-outline" onclick="goToLearningHub()">
+                    <i class="bi bi-arrow-left"></i>
+                    Back to LearnHub
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Dashboard Tab -->
+        <div id="tab-dashboard" class="tab-content active">
+            <div class="page-header">
+                <h1 class="page-title">Admin Dashboard</h1>
+                <p class="page-description">Manage your learning content and track performance</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Total Courses</div>
+                        <div class="stat-icon" style="background-color: #3b82f6;">
+                            <i class="bi bi-journal-bookmark-fill"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="total-courses">0</div>
+                    <div class="stat-trend" id="courses-trend">+0 this month</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Published Courses</div>
+                        <div class="stat-icon" style="background-color: #10b981;">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="published-courses">0</div>
+                    <div class="stat-trend" id="published-trend">+0 this week</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Total Students</div>
+                        <div class="stat-icon" style="background-color: #9333ea;">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="total-students">0</div>
+                    <div class="stat-trend" id="students-trend">+0 this week</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Completion Rate</div>
+                        <div class="stat-icon" style="background-color: #f59e0b;">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="completion-rate">0%</div>
+                    <div class="stat-trend" id="completion-trend">+0</div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="form-container">
+                <h2 style="margin-bottom: 1.5rem;">Recent Activity</h2>
+                <div id="recent-activity">
+                    <p style="text-align: center; color: var(--gray); padding: 2rem;">No recent activity</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Course Tab -->
+        <div id="tab-upload" class="tab-content">
+            <div class="page-header">
+                <h1 class="page-title">Upload New Course</h1>
+                <p class="page-description">Create and publish new learning content with YouTube integration</p>
+            </div>
+
+            <div id="upload-alert" class="alert hidden"></div>
+
+            <div class="form-container">
+                <form id="course-form">
+                    <div class="form-group">
+                        <label class="form-label" for="course-title">Course Title</label>
+                        <input type="text" class="input" id="course-title" placeholder="Enter course title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="course-description">Course Description</label>
+                        <textarea class="textarea" id="course-description" placeholder="Describe what students will learn in this course" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="course-full-description">Full Course Description</label>
+                        <textarea class="textarea" id="course-full-description" placeholder="Provide a detailed description of the course content" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="course-category">Category</label>
+                            <select class="select" id="course-category" required>
+                                <option value="">Select a category</option>
+                                <option value="Cybersecurity Fundamentals">Cybersecurity Fundamentals</option>
+                                <option value="Network Security">Network Security</option>
+                                <option value="Ethical Hacking">Ethical Hacking</option>
+                                <option value="Digital Forensics">Digital Forensics</option>
+                                <option value="Risk Management">Risk Management</option>
+                                <option value="Compliance & Governance">Compliance & Governance</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="course-duration">Duration (hours)</label>
+                            <input type="number" class="input" id="course-duration" placeholder="e.g., 40" min="1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="course-instructor">Instructor</label>
+                        <input type="text" class="input" id="course-instructor" placeholder="Course instructor name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="course-image">Course Image URL</label>
+                        <input type="text" class="input" id="course-image" placeholder="https://example.com/image.jpg">
+                        <small style="color: var(--gray); margin-top: 0.5rem; display: block;">Leave empty to use a default image based on category</small>
+                    </div>
+
+                    <!-- YouTube Integration -->
+                    <div class="form-group">
+                        <label class="form-label">YouTube Integration</label>
+                        <div class="youtube-field">
+                            <label class="form-label" for="youtube-url">YouTube Video URL</label>
+                            <input type="url" class="input" id="youtube-url" placeholder="https://www.youtube.com/watch?v=..." onchange="updateYouTubePreview()">
+                            <small style="color: var(--gray); margin-top: 0.5rem; display: block;">Add the main YouTube video URL for this course</small>
+                            <div id="youtube-preview" class="youtube-preview hidden">
+                                <strong>Preview:</strong> <a href="#" id="youtube-preview-link" target="_blank">Watch on YouTube</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Course Content Sections -->
+                    <div class="form-group">
+                        <label class="form-label">Course Content Structure</label>
+                        
+                        <!-- Introduction Section -->
+                        <div class="content-section">
+                            <div class="section-header">
+                                <h3 class="section-title">Introduction Section</h3>
+                            </div>
+                            <div class="content-card">
+                                <h4 class="card-title"><i class="bi bi-lightbulb"></i>The Stakes Content</h4>
+                                <textarea class="textarea" id="intro-stakes" placeholder="Describe why this course matters..." rows="3">Before we dive in, let's set the scene. Imagine a single data breach that costs a company $4 million. This isn't a scare tactic; it's the average cost businesses face. As future SOC analysts, pentesters, and compliance officers, your work is the primary defense against these losses.</textarea>
+                            </div>
+                            <div class="content-card">
+                                <h4 class="card-title"><i class="bi bi-question-circle"></i>Reflection Activity</h4>
+                                <textarea class="textarea" id="intro-reflection" placeholder="Add reflection questions..." rows="3">Which industry's security interests you the most? Keep this in mind as we progress. The threats we discuss will impact each of these sectors differently.</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Main Content Sections -->
+                        <div class="content-section">
+                            <div class="section-header">
+                                <h3 class="section-title">Main Content Sections</h3>
+                                <button type="button" class="btn btn-outline btn-sm" onclick="addContentSection()">
+                                    <i class="bi bi-plus"></i> Add Section
+                                </button>
+                            </div>
+                            <div id="content-sections">
+                                <!-- Content sections will be added here dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Activities Section -->
+                        <div class="content-section">
+                            <div class="section-header">
+                                <h3 class="section-title">Hands-On Activities</h3>
+                                <button type="button" class="btn btn-outline btn-sm" onclick="addActivity()">
+                                    <i class="bi bi-plus"></i> Add Activity
+                                </button>
+                            </div>
+                            <div id="activities-container">
+                                <!-- Activities will be added here dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lessons Section -->
+                    <div class="form-group">
+                        <label class="form-label">Course Lessons</label>
+                        <div class="lessons-container">
+                            <div class="lesson-header">
+                                <span>Lesson Title</span>
+                                <span>Duration</span>
+                                <span>YouTube URL</span>
+                                <span>Actions</span>
+                            </div>
+                            <div id="lessons-container">
+                                <!-- Lessons will be added here dynamically -->
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline add-lesson-btn" onclick="addLesson()">
+                            <i class="bi bi-plus-circle"></i>
+                            Add Lesson
+                        </button>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="saveAsDraft()">Save as Draft</button>
+                        <button type="submit" class="btn btn-primary">Publish Course</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Manage Courses Tab -->
+        <div id="tab-manage" class="tab-content">
+            <div class="page-header">
+                <h1 class="page-title">Manage Courses</h1>
+                <p class="page-description">Edit, update, or remove existing courses</p>
+            </div>
+
+            <div id="manage-alert" class="alert hidden"></div>
+
+            <div class="course-list" id="courses-list">
+                <!-- Courses will be loaded here dynamically -->
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="tab-analytics" class="tab-content">
+            <div class="page-header">
+                <h1 class="page-title">Analytics</h1>
+                <p class="page-description">Track course performance and student engagement</p>
+            </div>
+
+            <div class="form-container">
+                <h2 style="margin-bottom: 1.5rem;">Course Performance</h2>
+                <div id="analytics-content">
+                    <p style="text-align: center; color: var(--gray); padding: 2rem;">Analytics data will appear here once courses are published and students start enrolling.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Edit Course Modal -->
+    <div id="edit-course-modal" class="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" onclick="closeEditModal()">
+                <i class="bi bi-x"></i>
+            </button>
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Course</h3>
+            </div>
+            <div class="modal-body">
+                <form id="edit-course-form">
+                    <input type="hidden" id="edit-course-id">
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-course-title">Course Title</label>
+                        <input type="text" class="input" id="edit-course-title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="edit-course-description">Course Description</label>
+                        <textarea class="textarea" id="edit-course-description" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="edit-course-full-description">Full Course Description</label>
+                        <textarea class="textarea" id="edit-course-full-description" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="edit-course-category">Category</label>
+                            <select class="select" id="edit-course-category" required>
+                                <option value="">Select a category</option>
+                                <option value="Cybersecurity Fundamentals">Cybersecurity Fundamentals</option>
+                                <option value="Network Security">Network Security</option>
+                                <option value="Ethical Hacking">Ethical Hacking</option>
+                                <option value="Digital Forensics">Digital Forensics</option>
+                                <option value="Risk Management">Risk Management</option>
+                                <option value="Compliance & Governance">Compliance & Governance</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="edit-course-duration">Duration (hours)</label>
+                            <input type="number" class="input" id="edit-course-duration" min="1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="edit-course-instructor">Instructor</label>
+                        <input type="text" class="input" id="edit-course-instructor" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="edit-course-image">Course Image URL</label>
+                        <input type="text" class="input" id="edit-course-image">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Course Status</label>
+                        <div style="display: flex; gap: 1rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="radio" name="edit-course-status" value="draft"> Draft
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="radio" name="edit-course-status" value="published"> Published
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Course</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let courses = [];
+        let currentEditingCourse = null;
+        let lessonCounter = 0;
+        let sectionCounter = 0;
+        let activityCounter = 0;
+
+        // Initialize the admin panel
+        function initAdminPanel() {
+            loadCourses();
+            updateDashboardStats();
+            renderCoursesList();
+            setupEventListeners();
+            addDefaultContentSections();
+            addDefaultActivity();
+        }
+
+        // Load courses from localStorage
+        function loadCourses() {
+            const storedCourses = localStorage.getItem('learningHubCourses');
+            if (storedCourses) {
+                courses = JSON.parse(storedCourses);
+            } else {
+                courses = [];
+            }
+        }
+
+        // Save courses to localStorage
+        function saveCourses() {
+            localStorage.setItem('learningHubCourses', JSON.stringify(courses));
+        }
+
+        // Update dashboard statistics
+        function updateDashboardStats() {
+            const totalCourses = courses.length;
+            const publishedCourses = courses.filter(course => course.status === 'published').length;
+            const totalStudents = courses.reduce((sum, course) => sum + (course.students || 0), 0);
+            
+            // Calculate completion rate (simplified for demo)
+            const completionRate = publishedCourses > 0 ? Math.round((publishedCourses / totalCourses) * 100) : 0;
+            
+            document.getElementById('total-courses').textContent = totalCourses;
+            document.getElementById('published-courses').textContent = publishedCourses;
+            document.getElementById('total-students').textContent = totalStudents.toLocaleString();
+            document.getElementById('completion-rate').textContent = `${completionRate}%`;
+            
+            // Update trends (simplified for demo)
+            document.getElementById('courses-trend').textContent = totalCourses > 0 ? `+${totalCourses} total` : 'No courses yet';
+            document.getElementById('published-trend').textContent = publishedCourses > 0 ? `+${publishedCourses} published` : 'No published courses';
+            document.getElementById('students-trend').textContent = totalStudents > 0 ? `+${totalStudents} enrolled` : 'No students yet';
+            document.getElementById('completion-trend').textContent = completionRate > 0 ? `+${completionRate}% rate` : 'No data';
+            
+            // Update recent activity
+            updateRecentActivity();
+        }
+
+        // Update recent activity
+        function updateRecentActivity() {
+            const activityContainer = document.getElementById('recent-activity');
+            
+            if (courses.length === 0) {
+                activityContainer.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 2rem;">No recent activity</p>';
+                return;
+            }
+            
+            // Sort courses by creation date (newest first)
+            const sortedCourses = [...courses].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            // Show latest 5 activities
+            const recentCourses = sortedCourses.slice(0, 5);
+            
+            activityContainer.innerHTML = recentCourses.map(course => `
+                <div class="course-item" style="margin-bottom: 1rem;">
+                    <div class="course-info">
+                        <div class="course-title">${course.title}</div>
+                        <div class="course-meta">
+                            <span>${course.category}</span>
+                            <span>${new Date(course.createdAt).toLocaleDateString()}</span>
+                            <span class="status-badge ${course.status === 'published' ? 'status-published' : 'status-draft'}">
+                                ${course.status}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Switch between tabs
+        function switchTab(tabName) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab-trigger').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Add active class to selected tab
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.admin-nav a').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Course form submission
+            document.getElementById('course-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                publishCourse();
+            });
+            
+            // Edit course form submission
+            document.getElementById('edit-course-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                updateCourse();
+            });
+            
+            // Add initial lesson when page loads
+            addLesson();
+        }
+
+        // Add default content sections
+        function addDefaultContentSections() {
+            const defaultSections = [
+                {
+                    title: "Global Threat Landscape",
+                    content: "The digital economy is under constant siege. Here are the top threats facing businesses worldwide..."
+                },
+                {
+                    title: "Defender's Toolkit - CIA Triad",
+                    content: "The CIA Triad isn't just theory; it's the language of business risk..."
+                }
+            ];
+            
+            defaultSections.forEach(section => {
+                addContentSection(section.title, section.content);
+            });
+        }
+
+        // Add default activity
+        function addDefaultActivity() {
+            addActivity("Case Study Analysis", "A popular e-commerce site suffers a Magecart attack. Analyze which CIA Triad elements were compromised.");
+        }
+
+        // Add a new content section
+        function addContentSection(title = "", content = "") {
+            sectionCounter++;
+            const sectionsContainer = document.getElementById('content-sections');
+            
+            const sectionDiv = document.createElement('div');
+            sectionDiv.className = 'content-card';
+            sectionDiv.innerHTML = `
+                <div class="card-title">
+                    <i class="bi bi-file-text"></i>
+                    <input type="text" class="input" placeholder="Section Title" value="${title}" style="flex: 1;" required>
+                </div>
+                <textarea class="textarea" placeholder="Section content..." rows="4" required>${content}</textarea>
+                <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="removeContentSection(this)">
+                        <i class="bi bi-trash"></i> Remove
+                    </button>
+                </div>
+            `;
+            
+            sectionsContainer.appendChild(sectionDiv);
+        }
+
+        // Remove a content section
+        function removeContentSection(button) {
+            const sectionDiv = button.closest('.content-card');
+            sectionDiv.remove();
+        }
+
+        // Add a new activity
+        function addActivity(title = "", description = "") {
+            activityCounter++;
+            const activitiesContainer = document.getElementById('activities-container');
+            
+            const activityDiv = document.createElement('div');
+            activityDiv.className = 'content-card';
+            activityDiv.innerHTML = `
+                <div class="card-title">
+                    <i class="bi bi-tools"></i>
+                    <input type="text" class="input" placeholder="Activity Title" value="${title}" style="flex: 1;" required>
+                </div>
+                <textarea class="textarea" placeholder="Activity description and instructions..." rows="3" required>${description}</textarea>
+                <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="removeActivity(this)">
+                        <i class="bi bi-trash"></i> Remove
+                    </button>
+                </div>
+            `;
+            
+            activitiesContainer.appendChild(activityDiv);
+        }
+
+        // Remove an activity
+        function removeActivity(button) {
+            const activityDiv = button.closest('.content-card');
+            activityDiv.remove();
+        }
+
+        // Add a new lesson to the course form
+        function addLesson() {
+            lessonCounter++;
+            const lessonsContainer = document.getElementById('lessons-container');
+            
+            const lessonDiv = document.createElement('div');
+            lessonDiv.className = 'lesson-item';
+            lessonDiv.innerHTML = `
+                <input type="text" placeholder="Lesson title" required>
+                <input type="text" placeholder="Duration (e.g., 15 min)" required>
+                <input type="url" placeholder="YouTube URL (optional)">
+                <div class="lesson-actions">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="removeLesson(this)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            lessonsContainer.appendChild(lessonDiv);
+        }
+
+        // Remove a lesson from the course form
+        function removeLesson(button) {
+            const lessonItem = button.closest('.lesson-item');
+            lessonItem.remove();
+        }
+
+        // Update YouTube preview
+        function updateYouTubePreview() {
+            const youtubeUrl = document.getElementById('youtube-url').value;
+            const previewDiv = document.getElementById('youtube-preview');
+            const previewLink = document.getElementById('youtube-preview-link');
+            
+            if (youtubeUrl) {
+                previewLink.href = youtubeUrl;
+                previewDiv.classList.remove('hidden');
+            } else {
+                previewDiv.classList.add('hidden');
+            }
+        }
+
+        // Publish a new course
+        function publishCourse() {
+            // Get form values
+            const title = document.getElementById('course-title').value;
+            const description = document.getElementById('course-description').value;
+            const fullDescription = document.getElementById('course-full-description').value;
+            const category = document.getElementById('course-category').value;
+            const duration = parseInt(document.getElementById('course-duration').value);
+            const instructor = document.getElementById('course-instructor').value;
+            const image = document.getElementById('course-image').value;
+            const youtubeUrl = document.getElementById('youtube-url').value;
+            
+            // Get content sections
+            const sectionElements = document.querySelectorAll('#content-sections .content-card');
+            const sections = Array.from(sectionElements).map(sectionEl => {
+                const title = sectionEl.querySelector('input').value;
+                const content = sectionEl.querySelector('textarea').value;
+                return { title, content };
+            });
+            
+            // Get activities
+            const activityElements = document.querySelectorAll('#activities-container .content-card');
+            const activities = Array.from(activityElements).map(activityEl => {
+                const title = activityEl.querySelector('input').value;
+                const description = activityEl.querySelector('textarea').value;
+                return { title, description };
+            });
+            
+            // Get lessons
+            const lessonElements = document.querySelectorAll('#lessons-container .lesson-item');
+            const lessons = Array.from(lessonElements).map(lessonEl => {
+                const inputs = lessonEl.querySelectorAll('input');
+                return {
+                    title: inputs[0].value,
+                    duration: inputs[1].value,
+                    youtubeUrl: inputs[2].value
+                };
+            });
+            
+            // Get introduction content
+            const introStakes = document.getElementById('intro-stakes').value;
+            const introReflection = document.getElementById('intro-reflection').value;
+            
+            // Validate form
+            if (!title || !description || !fullDescription || !category || !duration || !instructor) {
+                showAlert('upload-alert', 'Please fill in all required fields', 'error');
+                return;
+            }
+            
+            if (lessons.length === 0) {
+                showAlert('upload-alert', 'Please add at least one lesson', 'error');
+                return;
+            }
+            
+            // Load existing courses first
+            const existingCourses = JSON.parse(localStorage.getItem('learningHubCourses') || '[]');
+            
+            // Create course object with enhanced structure
+            const course = {
+                id: generateId(),
+                title,
+                description,
+                fullDescription,
+                category,
+                duration,
+                instructor,
+                image: image || getDefaultImage(category),
+                youtubeUrl: youtubeUrl || null,
+                // New content structure
+                content: {
+                    introduction: {
+                        stakes: introStakes,
+                        reflection: introReflection
+                    },
+                    sections: sections,
+                    activities: activities
+                },
+                lessons,
+                status: 'published',
+                students: Math.floor(Math.random() * 10000) + 1000,
+                rating: (Math.random() * 0.5 + 4.5).toFixed(1),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            // Add to existing courses array (don't replace, just append)
+            const updatedCourses = [...existingCourses, course];
+            localStorage.setItem('learningHubCourses', JSON.stringify(updatedCourses));
+            
+            // Show success message
+            showAlert('upload-alert', 'Course published successfully!', 'success');
+            
+            // Reset form
+            document.getElementById('course-form').reset();
+            document.getElementById('lessons-container').innerHTML = '';
+            document.getElementById('content-sections').innerHTML = '';
+            document.getElementById('activities-container').innerHTML = '';
+            document.getElementById('youtube-preview').classList.add('hidden');
+            
+            // Reset counters and add default content
+            lessonCounter = 0;
+            sectionCounter = 0;
+            activityCounter = 0;
+            addLesson();
+            addDefaultContentSections();
+            addDefaultActivity();
+            
+            // Update dashboard and courses list
+            updateDashboardStats();
+            renderCoursesList();
+            
+            // Switch to manage tab
+            switchTab('manage');
+        }
+
+        // Save course as draft
+        function saveAsDraft() {
+            // Get form values
+            const title = document.getElementById('course-title').value;
+            const description = document.getElementById('course-description').value;
+            const fullDescription = document.getElementById('course-full-description').value;
+            const category = document.getElementById('course-category').value;
+            const duration = parseInt(document.getElementById('course-duration').value);
+            const instructor = document.getElementById('course-instructor').value;
+            const image = document.getElementById('course-image').value;
+            const youtubeUrl = document.getElementById('youtube-url').value;
+            
+            // Get content sections
+            const sectionElements = document.querySelectorAll('#content-sections .content-card');
+            const sections = Array.from(sectionElements).map(sectionEl => {
+                const title = sectionEl.querySelector('input').value;
+                const content = sectionEl.querySelector('textarea').value;
+                return { title, content };
+            });
+            
+            // Get activities
+            const activityElements = document.querySelectorAll('#activities-container .content-card');
+            const activities = Array.from(activityElements).map(activityEl => {
+                const title = activityEl.querySelector('input').value;
+                const description = activityEl.querySelector('textarea').value;
+                return { title, description };
+            });
+            
+            // Get lessons
+            const lessonElements = document.querySelectorAll('#lessons-container .lesson-item');
+            const lessons = Array.from(lessonElements).map(lessonEl => {
+                const inputs = lessonEl.querySelectorAll('input');
+                return {
+                    title: inputs[0].value,
+                    duration: inputs[1].value,
+                    youtubeUrl: inputs[2].value
+                };
+            });
+            
+            // Get introduction content
+            const introStakes = document.getElementById('intro-stakes').value;
+            const introReflection = document.getElementById('intro-reflection').value;
+            
+            // Validate required fields
+            if (!title || !description || !fullDescription || !category || !duration || !instructor) {
+                showAlert('upload-alert', 'Please fill in all required fields', 'error');
+                return;
+            }
+            
+            // Create course object with enhanced structure
+            const course = {
+                id: generateId(),
+                title,
+                description,
+                fullDescription,
+                category,
+                duration,
+                instructor,
+                image: image || getDefaultImage(category),
+                youtubeUrl: youtubeUrl || null,
+                // New content structure
+                content: {
+                    introduction: {
+                        stakes: introStakes,
+                        reflection: introReflection
+                    },
+                    sections: sections,
+                    activities: activities
+                },
+                lessons,
+                status: 'draft',
+                students: 0,
+                rating: '0.0',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            // Add to courses array
+            courses.push(course);
+            saveCourses();
+            
+            // Show success message
+            showAlert('upload-alert', 'Course saved as draft!', 'success');
+            
+            // Reset form
+            document.getElementById('course-form').reset();
+            document.getElementById('lessons-container').innerHTML = '';
+            document.getElementById('content-sections').innerHTML = '';
+            document.getElementById('activities-container').innerHTML = '';
+            document.getElementById('youtube-preview').classList.add('hidden');
+            
+            // Reset counters and add default content
+            lessonCounter = 0;
+            sectionCounter = 0;
+            activityCounter = 0;
+            addLesson();
+            addDefaultContentSections();
+            addDefaultActivity();
+            
+            // Update dashboard and courses list
+            updateDashboardStats();
+            renderCoursesList();
+        }
+
+        // Render courses list in manage tab
+        function renderCoursesList() {
+            const coursesList = document.getElementById('courses-list');
+            
+            if (courses.length === 0) {
+                coursesList.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: var(--gray);">
+                        <p>No courses yet. <a href="#" onclick="switchTab('upload')">Create your first course</a></p>
+                    </div>
+                `;
+                return;
+            }
+            
+            coursesList.innerHTML = courses.map(course => `
+                <div class="course-item">
+                    <div class="course-info">
+                        <div class="course-title">${course.title}</div>
+                        <div class="course-meta">
+                            <span>${course.category}</span>
+                            <span>${course.duration}h</span>
+                            <span>${course.students.toLocaleString()} students</span>
+                            <span class="status-badge ${course.status === 'published' ? 'status-published' : 'status-draft'}">
+                                ${course.status}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="course-actions">
+                        <button class="btn btn-outline btn-sm" onclick="editCourse('${course.id}')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteCourse('${course.id}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Edit a course
+        function editCourse(courseId) {
+            const course = courses.find(c => c.id === courseId);
+            if (!course) return;
+            
+            currentEditingCourse = course;
+            
+            // Populate form with course data
+            document.getElementById('edit-course-id').value = course.id;
+            document.getElementById('edit-course-title').value = course.title;
+            document.getElementById('edit-course-description').value = course.description;
+            document.getElementById('edit-course-full-description').value = course.fullDescription;
+            document.getElementById('edit-course-category').value = course.category;
+            document.getElementById('edit-course-duration').value = course.duration;
+            document.getElementById('edit-course-instructor').value = course.instructor;
+            document.getElementById('edit-course-image').value = course.image;
+            
+            // Set status radio button
+            document.querySelectorAll('input[name="edit-course-status"]').forEach(radio => {
+                radio.checked = radio.value === course.status;
+            });
+            
+            // Show modal
+            document.getElementById('edit-course-modal').classList.add('active');
+        }
+
+        // Update a course
+        function updateCourse() {
+            const courseId = document.getElementById('edit-course-id').value;
+            const courseIndex = courses.findIndex(c => c.id === courseId);
+            
+            if (courseIndex === -1) return;
+            
+            // Get form values
+            const title = document.getElementById('edit-course-title').value;
+            const description = document.getElementById('edit-course-description').value;
+            const fullDescription = document.getElementById('edit-course-full-description').value;
+            const category = document.getElementById('edit-course-category').value;
+            const duration = parseInt(document.getElementById('edit-course-duration').value);
+            const instructor = document.getElementById('edit-course-instructor').value;
+            const image = document.getElementById('edit-course-image').value;
+            const status = document.querySelector('input[name="edit-course-status"]:checked').value;
+            
+            // Update course
+            courses[courseIndex] = {
+                ...courses[courseIndex],
+                title,
+                description,
+                fullDescription,
+                category,
+                duration,
+                instructor,
+                image: image || getDefaultImage(category),
+                status,
+                updatedAt: new Date().toISOString()
+            };
+            
+            saveCourses();
+            closeEditModal();
+            renderCoursesList();
+            updateDashboardStats();
+            
+            showAlert('manage-alert', 'Course updated successfully!', 'success');
+        }
+
+        // Delete a course
+        function deleteCourse(courseId) {
+            if (!confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+                return;
+            }
+            
+            courses = courses.filter(c => c.id !== courseId);
+            saveCourses();
+            renderCoursesList();
+            updateDashboardStats();
+            
+            showAlert('manage-alert', 'Course deleted successfully!', 'success');
+        }
+
+        // Close edit modal
+        function closeEditModal() {
+            document.getElementById('edit-course-modal').classList.remove('active');
+            currentEditingCourse = null;
+        }
+
+        // Show alert message
+        function showAlert(containerId, message, type) {
+            const alertContainer = document.getElementById(containerId);
+            alertContainer.textContent = message;
+            alertContainer.className = `alert alert-${type}`;
+            alertContainer.classList.remove('hidden');
+            
+            // Hide alert after 5 seconds
+            setTimeout(() => {
+                alertContainer.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Generate a unique ID
+        function generateId() {
+            return 'course-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Get default image based on category
+        function getDefaultImage(category) {
+            const images = {
+                'Cybersecurity Fundamentals': 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
+                'Network Security': 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
+                'Ethical Hacking': 'https://images.unsplash.com/photo-1563089145-599997674d42?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
+                'Digital Forensics': 'https://images.unsplash.com/photo-1563206767-5b18f218e8de?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
+                'Risk Management': 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400',
+                'Compliance & Governance': 'https://images.unsplash.com/photo-1552664730-d307ca884978?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400'
+            };
+            
+            return images[category] || images['Cybersecurity Fundamentals'];
+        }
+
+        // Navigate back to LearnHub
+        function goToLearningHub() {
+            window.location.href = 'learninghub.html';
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initAdminPanel);
+    </script>
+</body>
+</html>

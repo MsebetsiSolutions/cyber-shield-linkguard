@@ -4,16 +4,17 @@ class SecureConsole {
     this.charts = {};
     this.isLoggedIn = false;
     this.sessionTimer = null;
-    this.sessionTime = 300; // 5 minutes in seconds
+    this.sessionTime = 300; 
     this.failedAttempts = 0;
     this.maxAttempts = 3;
-    this.lockoutTime = 30; // 30 seconds lockout
+    this.lockoutTime = 30; 
     this.isLocked = false;
     this.autoRefreshInterval = null;
     this.lastDataRefresh = null;
     this.usersData = null;
     this.scansData = null;
     this.paymentsData = null;
+    this.scrollSpy = null;
     this.init();
   }
 
@@ -26,6 +27,18 @@ class SecureConsole {
 
     this.setupPasswordToggle();
     this.setupSecurityMeasures();
+    this.initializeScrollSpy();
+  }
+
+  initializeScrollSpy() {
+    // Initialize Bootstrap ScrollSpy
+    const dataSpyList = [].slice.call(document.querySelectorAll('[data-bs-spy="scroll"]'));
+    dataSpyList.forEach((dataSpyEl) => {
+      this.scrollSpy = new bootstrap.ScrollSpy(dataSpyEl, {
+        target: '#analytics-sidebar',
+        offset: 100
+      });
+    });
   }
 
   setupSecurityMeasures() {
@@ -103,6 +116,11 @@ class SecureConsole {
     this.loadDashboard();
     this.resetSessionTimer();
 
+    // Reinitialize scrollspy when dashboard is shown
+    setTimeout(() => {
+      this.initializeScrollSpy();
+    }, 100);
+
     // Start auto-refresh for dashboard data
     this.startAutoRefresh();
   }
@@ -126,12 +144,19 @@ class SecureConsole {
       });
     }
 
-    // Tab navigation
+    // Tab navigation with smooth scroll
     document.querySelectorAll(".nav-link").forEach((link) => {
       link.addEventListener("click", (e) => {
         e.preventDefault();
         if (this.isLoggedIn) {
-          this.switchTab(link.dataset.tab);
+          const targetTab = link.dataset.tab;
+          this.switchTab(targetTab);
+          
+          // Smooth scroll to the target tab
+          const targetElement = document.getElementById(`${targetTab}-tab`);
+          if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth' });
+          }
         }
       });
     });
@@ -449,6 +474,7 @@ class SecureConsole {
       currentTime.textContent = now.toLocaleTimeString();
     }
   }
+  
 
   addOutputLine(message, type = "info") {
     const outputContainer = document.querySelector(".terminal-output");
@@ -511,6 +537,7 @@ class SecureConsole {
   }
 
   switchTab(tabName) {
+    // Update active nav links
     document.querySelectorAll(".nav-link").forEach((link) => {
       link.classList.remove("active");
     });
@@ -518,6 +545,7 @@ class SecureConsole {
     const activeLink = document.querySelector(`[data-tab="${tabName}"]`);
     if (activeLink) activeLink.classList.add("active");
 
+    // Update active tab content
     document.querySelectorAll(".tab-content").forEach((tab) => {
       tab.classList.remove("active");
     });
@@ -525,11 +553,18 @@ class SecureConsole {
     const activeTab = document.getElementById(`${tabName}-tab`);
     if (activeTab) activeTab.classList.add("active");
 
+    // Update page title
     const pageTitle = document.getElementById("analytics-page-title");
     if (pageTitle) pageTitle.textContent = this.getTabTitle(tabName);
 
     this.currentTab = tabName;
     this.loadTabData(tabName);
+
+    // Reset scroll position for the new tab
+    const scrollableContent = activeTab.querySelector('.dashboard-scrollable-content, .tab-scrollable-content');
+    if (scrollableContent) {
+      scrollableContent.scrollTop = 0;
+    }
   }
 
   getTabTitle(tabName) {
@@ -568,8 +603,91 @@ class SecureConsole {
       case "settings":
         this.loadSettings();
         break;
+        case "review-bug":
+        this.loadBugReports();
+        break;
     }
   }
+
+  async loadBugReports() {
+    try {
+        const response = await fetch("/admin/api/bug-reports");
+        if (!response.ok) {
+            throw new Error("Failed to load bug reports");
+        }
+        const data = await response.json();
+
+        // Update statistics
+        this.updateElementText("total-bug-reports", data.statistics.total_reports?.toLocaleString() || "0");
+        this.updateElementText("users-with-reports", data.statistics.unique_users?.toLocaleString() || "0");
+
+        // Populate table
+        const tbody = document.getElementById("bug-reports-tbody");
+        if (tbody) {
+            tbody.innerHTML = data.reports.map(report => `
+                <tr>
+                    <td>${report.id}</td>
+                    <td>
+                        ${report.user_id ? 
+                            `${report.user_id}${report.email ? ` (${this.escapeHtml(report.email)})` : ''}` : 
+                            'Anonymous'
+                        }
+                    </td>
+                    <td>${this.escapeHtml(report.heading || 'No heading')}</td>
+                    <td title="${this.escapeHtml(report.description || '')}">
+                        ${this.truncateText(report.description, 100)}
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="secureConsole.viewBugReport(${report.id})">
+                            👁️ View
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="secureConsole.deleteBugReport(${report.id})">
+                            🗑️ Delete
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        this.updateLastRefreshTime();
+    } catch (error) {
+        console.error("Error loading bug reports:", error);
+        this.showNotification("Error loading bug reports", "error");
+    }
+}
+
+async deleteBugReport(reportId) {
+  if (!confirm("Are you sure you want to delete this bug report? This action cannot be undone.")) {
+      return;
+  }
+
+  try {
+      // Note: You'll need to add a DELETE endpoint in your Flask app for this
+      const response = await fetch(`/admin/api/delete-bug-report/${reportId}`, {
+          method: 'DELETE',
+      });
+
+      if (response.ok) {
+          this.loadBugReports();
+          this.showNotification("Bug report deleted successfully!", "success");
+      } else {
+          this.showNotification("Error deleting bug report", "error");
+      }
+  } catch (error) {
+      console.error("Error deleting bug report:", error);
+      this.showNotification("Error deleting bug report", "error");
+  }
+}
+
+
+viewBugReport(reportId) {
+  const bugReportsBtn = document.querySelector('[data-tab="review-bug"]');
+  if (bugReportsBtn) {
+      bugReportsBtn.click();
+  }
+  
+  this.showNotification(`Viewing bug report #${reportId} - implement modal view as needed`, "info");
+}
 
   async loadDashboard() {
     try {

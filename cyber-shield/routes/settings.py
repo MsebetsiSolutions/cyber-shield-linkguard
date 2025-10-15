@@ -147,6 +147,57 @@ def update_profile():
         print(f"Error in update_profile: {e}")
         return jsonify({'error': 'Failed to update profile'}), 500
 
+
+@settings_bp.route('/bug-report', methods=['POST'])
+def submit_bug_report():
+    """Submit a bug report to the CST table"""
+    try:
+        if 'user_id' not in session:
+            return jsonify({'error': 'Not authenticated'}), 401
+        
+        user_id = session['user_id']
+        
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        heading = data.get('heading', '').strip()
+        description = data.get('description', '').strip()
+        
+        # Basic validation
+        if not heading:
+            return jsonify({'error': 'Issue heading is required'}), 400
+        
+        if not description:
+            return jsonify({'error': 'Issue description is required'}), 400
+        
+        if len(description) < 10:
+            return jsonify({'error': 'Please provide a more detailed description (at least 10 characters)'}), 400
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            INSERT INTO CST (user_id, heading, description) 
+            VALUES (?, ?, ?)
+        ''', (user_id, heading, description))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'message': 'Bug report submitted successfully',
+            'report_id': cursor.lastrowid
+        }), 200
+        
+    except sqlite3.Error as e:
+        print(f"Database error in submit_bug_report: {e}")
+        return jsonify({'error': 'Database error occurred'}), 500
+    except Exception as e:
+        print(f"Error in submit_bug_report: {e}")
+        return jsonify({'error': 'Failed to submit bug report'}), 500
+
+
 @settings_bp.route('/password', methods=['PUT'])
 def update_password():
     """Update user password"""
