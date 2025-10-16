@@ -1,0 +1,373 @@
+<div class="card">
+  <div class="card-head">
+    <h3>Settings</h3>
+    <div class="actions">
+      <button class="btn sm ghost" id="btnExportCfg"><i class="bi bi-download"></i> Export JSON</button>
+      <label class="btn sm ghost" style="cursor:pointer">
+        <i class="bi bi-upload"></i> Import JSON
+        <input id="cfgImport" type="file" accept="application/json" style="display:none">
+      </label>
+    </div>
+  </div>
+  <p class="muted">Organization profile, users & roles, API keys, and integrations (SIEM, EDR, sandbox, TIP). All secrets are stored server-side.</p>
+
+  <!-- ORG -->
+  <div class="grid two">
+    <div class="card">
+      <h3>Organization</h3>
+      <label>Name</label>
+      <input id="orgName" value="Msebetsi Solutions">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <div>
+          <label>Timezone</label>
+          <input id="orgTz" placeholder="Africa/Johannesburg" value="Africa/Johannesburg">
+        </div>
+        <div>
+          <label>Theme</label>
+          <select id="orgTheme">
+            <option value="system">System</option>
+            <option value="dark" selected>Dark</option>
+            <option value="light">Light</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn sm" id="btnOrgSave"><i class="bi bi-save"></i> Save</button>
+      </div>
+      <small class="muted">Backend: <code>POST /api/settings/org/save</code> and <code>/api/settings/org/get</code></small>
+    </div>
+
+    <!-- INTEGRATIONS QUICK -->
+    <div class="card">
+      <h3>Integrations (Quick)</h3>
+      <label>Splunk HEC URL</label>
+      <input id="hecUrl" placeholder="https://splunk.example.com:8088">
+      <label style="margin-top:6px">Splunk HEC Token</label>
+      <input id="hecToken" type="password" placeholder="x-xxxx-xxxx">
+      <label style="margin-top:6px">VirusTotal API Key</label>
+      <input id="vtKey" type="password" placeholder="vt-xxxxxxxx">
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn sm" id="btnSaveIntegrations"><i class="bi bi-save"></i> Save</button>
+        <button class="btn sm ghost" id="btnTestSplunk"><i class="bi bi-plug"></i> Test Splunk</button>
+        <button class="btn sm ghost" id="btnTestVT"><i class="bi bi-plug"></i> Test VT</button>
+      </div>
+      <small class="muted">Backend: <code>/api/settings/secret/set</code>, <code>/api/settings/secret/test</code></small>
+    </div>
+  </div>
+</div>
+
+<!-- USERS & ROLES -->
+<div class="card" style="margin-top:12px">
+  <div class="card-head">
+    <h3>Users & Roles</h3>
+    <div class="actions">
+      <button class="btn sm ghost" id="btnUserRefresh"><i class="bi bi-arrow-repeat"></i></button>
+    </div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h3>Invite User</h3>
+      <div style="display:grid;grid-template-columns:1.4fr .6fr .6fr;gap:8px">
+        <div>
+          <label>Email</label>
+          <input id="invEmail" placeholder="analyst@corp.com">
+        </div>
+        <div>
+          <label>Role</label>
+          <select id="invRole">
+            <option>Viewer</option><option>Analyst</option><option>Engineer</option><option>Admin</option>
+          </select>
+        </div>
+        <div>
+          <label>Require 2FA</label>
+          <select id="inv2fa">
+            <option>Yes</option><option>No</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn sm" id="btnInvite"><i class="bi bi-person-plus"></i> Invite</button>
+      </div>
+      <small class="muted">Backend: <code>POST /api/settings/users/invite</code></small>
+    </div>
+
+    <div class="card">
+      <h3>RBAC Matrix</h3>
+      <table class="table compact">
+        <thead><tr><th>Role</th><th>View</th><th>Triage</th><th>Enrich</th><th>Pentest</th><th>Admin</th></tr></thead>
+        <tbody>
+          <tr><td>Viewer</td><td>✔</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><td>Analyst</td><td>✔</td><td>✔</td><td>✔</td><td>—</td><td>—</td></tr>
+          <tr><td>Engineer</td><td>✔</td><td>✔</td><td>✔</td><td>✔</td><td>—</td></tr>
+          <tr><td>Admin</td><td>✔</td><td>✔</td><td>✔</td><td>✔</td><td>✔</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <table class="table compact" id="userTable" style="margin-top:8px">
+    <thead><tr><th>Email</th><th>Role</th><th>2FA</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- INTEGRATIONS (DETAILED) -->
+<div class="card" style="margin-top:12px">
+  <div class="card-head">
+    <h3>Integrations (Detailed)</h3>
+  </div>
+  <div class="grid two">
+    <div class="card">
+      <h3>SIEM</h3>
+      <label>Elastic Ingest URL</label>
+      <input id="esUrl" placeholder="https://elastic.example.com:9200/_ingest">
+      <label style="margin-top:6px">QRadar EFR URL</label>
+      <input id="qradarUrl" placeholder="https://qradar.example/api/siem">
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn sm" id="btnSaveSiem"><i class="bi bi-save"></i> Save</button>
+        <button class="btn sm ghost" id="btnTestSiem"><i class="bi bi-plug"></i> Test</button>
+      </div>
+      <small class="muted">Backend: <code>/api/settings/siem/save</code>, <code>/api/settings/siem/test</code></small>
+    </div>
+
+    <div class="card">
+      <h3>EDR / Sandbox / TIP</h3>
+      <label>CrowdStrike API Key</label>
+      <input id="csKey" type="password" placeholder="falcon-xxxxxxxx">
+      <label style="margin-top:6px">Hybrid Analysis API Key</label>
+      <input id="haKey" type="password" placeholder="ha-xxxxxxxx">
+      <label style="margin-top:6px">AlienVault OTX Key</label>
+      <input id="otxKey" type="password" placeholder="otx-xxxxxxxx">
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn sm" id="btnSaveSec"><i class="bi bi-save"></i> Save</button>
+        <button class="btn sm ghost" id="btnTestSec"><i class="bi bi-plug"></i> Test</button>
+      </div>
+      <small class="muted">Backend: <code>/api/settings/secret/set</code> (per key), <code>/api/settings/secret/test</code></small>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:8px">
+    <h3>Webhooks</h3>
+    <div style="display:grid;grid-template-columns:1.2fr .8fr;gap:8px">
+      <input id="whUrl" placeholder="https://hooks.slack.com/services/...">
+      <input id="whName" placeholder="Label (e.g., Slack #soc-alerts)">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn sm" id="btnAddWebhook"><i class="bi bi-plus-circle"></i> Add</button>
+      <button class="btn sm ghost" id="btnTestWebhook"><i class="bi bi-broadcast-pin"></i> Test</button>
+    </div>
+    <ul id="whList" style="margin-top:8px"></ul>
+    <small class="muted">Backend: <code>/api/settings/webhooks/list|add|remove|test</code></small>
+  </div>
+</div>
+
+<!-- AUDIT LOG -->
+<div class="card" style="margin-top:12px">
+  <div class="card-head">
+    <h3>Audit Log</h3>
+    <div class="actions">
+      <button class="btn sm ghost" id="btnAuditRefresh"><i class="bi bi-arrow-repeat"></i></button>
+    </div>
+  </div>
+  <table class="table compact" id="auditTable">
+    <thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Detail</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <small class="muted">Backend: <code>/api/settings/audit/list</code> (last 200 entries)</small>
+</div>
+
+<script>
+(function(){
+  const $ = (s,p=document)=>p.querySelector(s);
+  const esc = s => (s==null?"":String(s)).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+
+  // ===== ORG =====
+  async function loadOrg(){
+    const r = await fetch("/api/settings/org/get",{method:"POST"}).catch(()=>null);
+    const data = r ? await r.json().catch(()=>({})) : {};
+    if (data.name) $("#orgName").value = data.name;
+    if (data.timezone) $("#orgTz").value = data.timezone;
+    if (data.theme) $("#orgTheme").value = data.theme;
+  }
+  $("#btnOrgSave").addEventListener("click", async ()=>{
+    const body = { name: $("#orgName").value, timezone: $("#orgTz").value, theme: $("#orgTheme").value };
+    await fetch("/api/settings/org/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    // optional: apply theme locally
+    document.documentElement.dataset.theme = body.theme;
+  });
+
+  // ===== SECRET HELPERS =====
+  async function saveSecret(name, value){
+    return fetch("/api/settings/secret/set",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,value})});
+  }
+  async function testSecret(name){
+    const r = await fetch("/api/settings/secret/test",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name})});
+    const t = await r.text(); alert(`${name}: ${r.ok?"OK":"FAILED"}\n${t||""}`);
+  }
+
+  // Quick integrations
+  $("#btnSaveIntegrations").addEventListener("click", async ()=>{
+    await saveSecret("splunk_hec_url", $("#hecUrl").value);
+    await saveSecret("splunk_hec_token", $("#hecToken").value);
+    await saveSecret("virustotal_api_key", $("#vtKey").value);
+    alert("Saved.");
+  });
+  $("#btnTestSplunk").addEventListener("click", ()=> testSecret("splunk_hec"));
+  $("#btnTestVT").addEventListener("click", ()=> testSecret("virustotal"));
+
+  // Detailed
+  $("#btnSaveSiem").addEventListener("click", async ()=>{
+    await fetch("/api/settings/siem/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+      elastic_url: $("#esUrl").value, qradar_url: $("#qradarUrl").value
+    })});
+    alert("SIEM settings saved.");
+  });
+  $("#btnTestSiem").addEventListener("click", async ()=>{
+    const r = await fetch("/api/settings/siem/test",{method:"POST"});
+    alert(r.ok?"SIEM connectivity OK":"SIEM test failed");
+  });
+
+  $("#btnSaveSec").addEventListener("click", async ()=>{
+    await saveSecret("crowdstrike_api_key", $("#csKey").value);
+    await saveSecret("hybrid_analysis_api_key", $("#haKey").value);
+    await saveSecret("otx_api_key", $("#otxKey").value);
+    alert("Security keys saved.");
+  });
+  $("#btnTestSec").addEventListener("click", async ()=>{
+    const keys = ["crowdstrike","hybrid_analysis","otx"];
+    for (const k of keys) await testSecret(k);
+  });
+
+  // ===== USERS =====
+  const userBody = $("#userTable tbody");
+  async function loadUsers(){
+    const r = await fetch("/api/settings/users/list",{method:"POST"}).catch(()=>null);
+    const data = r ? await r.json().catch(()=>({users:[]})) : {users:[]};
+    userBody.innerHTML = "";
+    (data.users||[]).forEach(u=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${esc(u.email)}</td>
+        <td>
+          <select data-act="role" data-email="${esc(u.email)}">
+            ${["Viewer","Analyst","Engineer","Admin"].map(x=>`<option ${x===u.role?"selected":""}>${x}</option>`).join("")}
+          </select>
+        </td>
+        <td>
+          <select data-act="2fa" data-email="${esc(u.email)}">
+            <option ${u.twofa?"selected":""}>Enabled</option>
+            <option ${!u.twofa?"selected":""}>Disabled</option>
+          </select>
+        </td>
+        <td>${esc(u.status||"Active")}</td>
+        <td>
+          <button class="btn sm ghost" data-act="disable" data-email="${esc(u.email)}"><i class="bi bi-slash-circle"></i></button>
+          <button class="btn sm ghost" data-act="reset" data-email="${esc(u.email)}"><i class="bi bi-shield-lock"></i></button>
+        </td>
+      `;
+      userBody.appendChild(tr);
+    });
+  }
+  $("#btnUserRefresh").addEventListener("click", loadUsers);
+
+  $("#btnInvite").addEventListener("click", async ()=>{
+    const body = { email: $("#invEmail").value, role: $("#invRole").value, require_2fa: $("#inv2fa").value==="Yes" };
+    await fetch("/api/settings/users/invite",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    loadUsers();
+  });
+
+  $("#userTable").addEventListener("change", async (e)=>{
+    const t = e.target;
+    const email = t.getAttribute("data-email");
+    if (!email) return;
+    const act = t.getAttribute("data-act");
+    if (act==="role"){
+      await fetch("/api/settings/users/update",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email, role: t.value})});
+    } else if (act==="2fa"){
+      await fetch("/api/settings/users/update",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email, twofa: t.value==="Enabled"})});
+    }
+  });
+
+  $("#userTable").addEventListener("click", async (e)=>{
+    const btn = e.target.closest("button[data-act]");
+    if (!btn) return;
+    const email = btn.getAttribute("data-email");
+    const act = btn.getAttribute("data-act");
+    if (act==="disable"){
+      await fetch("/api/settings/users/disable",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
+    } else if (act==="reset"){
+      await fetch("/api/settings/users/reset-2fa",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
+    }
+    loadUsers();
+  });
+
+  // ===== WEBHOOKS =====
+  const whList = $("#whList");
+  async function loadWebhooks(){
+    const r = await fetch("/api/settings/webhooks/list",{method:"POST"}).catch(()=>null);
+    const data = r ? await r.json().catch(()=>({webhooks:[]})) : {webhooks:[]};
+    whList.innerHTML = "";
+    (data.webhooks||[]).forEach(w=>{
+      const li = document.createElement("li");
+      li.innerHTML = `${esc(w.name||w.url)} <code>${esc(w.url)}</code> <button class="btn sm ghost" data-del="${esc(w.id)}"><i class="bi bi-trash"></i></button>`;
+      whList.appendChild(li);
+    });
+  }
+  $("#btnAddWebhook").addEventListener("click", async ()=>{
+    await fetch("/api/settings/webhooks/add",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name: $("#whName").value, url: $("#whUrl").value})});
+    $("#whUrl").value=""; $("#whName").value=""; loadWebhooks();
+  });
+  $("#btnTestWebhook").addEventListener("click", async ()=>{
+    const r = await fetch("/api/settings/webhooks/test",{method:"POST"});
+    alert(r.ok?"Webhook test sent":"Webhook test failed");
+  });
+  $("#whList").addEventListener("click", async (e)=>{
+    const btn = e.target.closest("button[data-del]");
+    if (!btn) return;
+    const id = btn.getAttribute("data-del");
+    await fetch("/api/settings/webhooks/remove",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id})});
+    loadWebhooks();
+  });
+
+  // ===== AUDIT =====
+  async function loadAudit(){
+    const r = await fetch("/api/settings/audit/list",{method:"POST"}).catch(()=>null);
+    const data = r ? await r.json().catch(()=>({rows:[]})) : {rows:[]};
+    const body = $("#auditTable tbody");
+    body.innerHTML = "";
+    (data.rows||[]).forEach(x=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${esc(x.ts)}</td><td>${esc(x.user)}</td><td>${esc(x.action)}</td><td>${esc(x.detail||"")}</td>`;
+      body.appendChild(tr);
+    });
+  }
+  $("#btnAuditRefresh").addEventListener("click", loadAudit);
+
+  // ===== CONFIG EXPORT / IMPORT =====
+  $("#btnExportCfg").addEventListener("click", async ()=>{
+    const r = await fetch("/api/settings/export",{method:"POST"});
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "soc_settings.json"; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),600);
+  });
+  $("#cfgImport").addEventListener("change", async (e)=>{
+    const file = e.target.files[0]; if (!file) return;
+    const text = await file.text();
+    await fetch("/api/settings/import",{method:"POST",headers:{"Content-Type":"application/json"},body:text});
+    alert("Settings imported.");
+    init(); // reload everything
+  });
+
+  // ===== INIT =====
+  async function init(){
+    loadOrg();
+    loadUsers();
+    loadWebhooks();
+    loadAudit();
+  }
+  init();
+})();
+</script>
