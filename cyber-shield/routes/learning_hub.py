@@ -433,6 +433,68 @@ def upload_course():
         traceback.print_exc()
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
+@learning_hub_bp.route('/courses/<course_id>', methods=['GET'])
+def get_course(course_id):
+    """Get a single course/lesson by ID"""
+    try:
+        conn = sqlite3.connect('cyber-shield-linkguard.db')
+        cursor = conn.cursor()
+        
+        # Fetch course with all fields
+        cursor.execute('''
+            SELECT id, title, lesson_title, description, full_description, category, duration, 
+                   instructor, image, youtube_url, intro_stakes, intro_reflection,
+                   sections_json, activities_json, lessons_json, status, students, 
+                   rating, created_at, updated_at, completions, week, day,
+                   objectives_json, case_studies_json, resources_json, additional_links_json
+            FROM course
+            WHERE id = ?
+        ''', (course_id,))
+        
+        row = cursor.fetchone()
+        conn.close()
+        
+        if not row:
+            return jsonify({'error': 'Course not found'}), 404
+        
+        course = {
+            'id': row[0],
+            'title': row[1],
+            'lesson_title': row[2],
+            'description': row[3],
+            'full_description': row[4],
+            'category': row[5],
+            'duration': row[6],
+            'instructor': row[7],
+            'image': row[8],
+            'youtube_url': row[9],
+            'intro_stakes': row[10],
+            'intro_reflection': row[11],
+            'sections_json': row[12],
+            'activities_json': row[13],
+            'lessons_json': row[14],
+            'status': row[15],
+            'students': row[16] or 0,
+            'rating': row[17] or 0.0,
+            'created_at': row[18],
+            'updated_at': row[19],
+            'completions': row[20] or 0,
+            'week': row[21],
+            'day': row[22],
+            'objectives_json': row[23],
+            'case_studies_json': row[24],
+            'resources_json': row[25],
+            'additional_links_json': row[26]
+        }
+        
+        return jsonify({
+            'success': True,
+            'course': course
+        }), 200
+        
+    except sqlite3.Error as e:
+        print(f"Database error: {str(e)}")
+        return jsonify({'error': 'Database error occurred'}), 500
 
 @learning_hub_bp.route('/courses/<course_id>', methods=['PUT'])
 def update_course(course_id):
