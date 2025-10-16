@@ -31,9 +31,6 @@ Cyber Shield LinkGuard is a cross-platform cybersecurity tool designed to protec
             python app.py
 
 
-
-
-
 Open http://127.0.0.1:5000 in your browser.
 
 ## Deploy
@@ -46,15 +43,20 @@ web: gunicorn -w 2 -b 0.0.0.0:$PORT app:app
 Demo Authentication
 This build includes simple localStorage-based demo authentication (Login/Sign). Do not use for production without proper security enhancements.
 
+
+---
+
+
 ## Project Structure
         cyber-shield-linkguard/
         |
-        ├── cyber-shield-linkguard/
+        ├── cyber-shield/
         |      |
         |      ├── app.py  
         |      ├── Procfile
         |      ├── apt.txt
         |      ├── requirements.txt 
+        |      ├── soc_dashboard.db
         |      ├── .gitignore
         |      ├── .env
         |      |
@@ -67,11 +69,31 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |      |     ├── _pycache_/
         |      |     ├── subscription.py
         |      |     ├── teamCollab.py
+        |      |     ├── learning_hub.py
         |      |     ├── admin.py
+        |      |     ├── enterprise.py
         |      |     ├── scan_results.py
+        |      |     ├── course_upload.py.bak
+        |      |     ├── profile.py
+        |      |     ├── email_phishing.py
         |      |     ├── settings.py
         |      |     ├── chats.py
         |      |     └── authentication.py
+        |      |
+        │      ├── backend/ 
+        |      |     ├── _pycache_/
+        |      |     ├── routes_database.py
+        |      |     ├── routes_monitoring.py
+        |      |     ├── routes_pentesting.py
+        |      |     ├── database.py
+        |      |     ├── monitoring.py
+        |      |     ├── pentesting.py
+        |      |     ├── routes_alerts.py
+        |      |     ├── routes_host.py
+        |      |     ├── routes_intel.py
+        |      |     ├── routes_monitor.py
+        |      |     ├── routes_reports.py
+        |      |     └── routes_settings.py
         |      |
         │      └── public/ 
         |            ├── assets/
@@ -112,6 +134,29 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     ├── ScannerDash.html
         |            |     ├── ScannerDash.css
         |            |     └── ScannerDash.js
+        |            |
+        |            ├── soc/        
+        |            |     |
+        |            |     ├── assets/
+        |            |     |      ├── css/
+        |            |     |      |    └── style.css
+        |            |     |      |
+        |            |     |      └── js/
+        |            |     |           ├── data/
+        |            |     |           |    └── sample-data.js
+        |            |     |           |
+        |            |     |           ├── monitoring.js
+        |            |     |           └── app.js
+        |            |     |
+        |            |     ├── pages/
+        |            |     |      ├── alerts.html
+        |            |     |      ├── intel.html
+        |            |     |      ├── monitoring.html
+        |            |     |      ├── pentesting.html
+        |            |     |      ├── reports.html
+        |            |     |      └── settings.html
+        |            |     |
+        |            |     └── index.html
         |            |
         |            ├── shareTeamCollab/        
         |            |     ├── shareTeamCollab.html
@@ -169,3 +214,4 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
 
 
 ---
+
