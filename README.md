@@ -17,6 +17,10 @@ Cyber Shield LinkGuard is a cross-platform cybersecurity tool designed to protec
 - **Responsive Design** – Works seamlessly on mobile and desktop
 - **Cyber Shield Community** – System assistance and troubleshooting, Reporting bugs and issues, Sharing ideas and suggestions, Community support and discussions
 
+
+---
+
+
 ## Quick Start
 ### 1. Create virtual environment
     ```bash        
@@ -32,6 +36,10 @@ Cyber Shield LinkGuard is a cross-platform cybersecurity tool designed to protec
 
 
 Open http://127.0.0.1:5000 in your browser.
+
+
+---
+
 
 ## Deploy
 Any VPS/Platform-as-a-Service works.
@@ -198,7 +206,7 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |          ├── wodfbowef.css
         |            |          └── wodfbowef.js
         |            |
-        |            ├── index.html      
+        |            ├── index.html
         |            ├── logg.js
         |            ├── manifest.json
         |            ├── session.js
@@ -206,7 +214,7 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            ├── sitemap.xml
         |            ├── sw.js
         |            └── theme.css
-        |                
+        |
         ├── SECURITY.md
         |
         └── README.md

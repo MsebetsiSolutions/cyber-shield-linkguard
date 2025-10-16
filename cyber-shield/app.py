@@ -40,7 +40,7 @@ except ImportError:
             print("No QR code library available - QR scanning disabled")
 
 #importing blueprints
-from routes.authentication import auth_bp
+from routes.authentication import auth_bp, init_mail  
 from routes.subscription import subscription_bp
 from routes.settings import settings_bp
 from routes.scan_results import scan_results_bp
@@ -62,9 +62,6 @@ from backend.routes_database import database_bp
 from backend.routes_monitoring import monitoring_bp
 from backend.routes_pentesting import pentesting_bp
 
-#from backend.pentesting import pentesting_bp  
-
-
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -78,6 +75,9 @@ app = Flask(__name__, static_url_path="", static_folder="public")
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret-key-change-in-production")
+
+# Initialize Flask-Mail 
+init_mail(app)
 
 # registering blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
