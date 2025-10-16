@@ -580,21 +580,124 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.2s;
+            transition: all 0.3s;
+            position: relative;
         }
 
         .course-item:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: var(--primary);
         }
 
         .course-info {
             flex: 1;
+            padding: 0.5rem;
+            margin: -0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .course-info:hover {
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .course-info:active {
+            background: rgba(37, 99, 235, 0.1);
         }
 
         .course-title {
             font-size: 1.125rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            color: var(--primary);
+        }
+
+        .course-lessons-details {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 1rem 1rem;
+            padding: 1.5rem;
+            margin-top: -1rem;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .course-lessons-details h3 {
+            margin: 0 0 1rem 0;
+            color: var(--dark);
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .course-lessons-details .week-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .course-lessons-details .week-title {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .course-lessons-details .lesson-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .course-lessons-details .lesson-item-display {
+            padding: 0.75rem;
+            background: white;
+            border-left: 3px solid var(--primary);
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .course-lessons-details .lesson-item-display:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transform: translateX(4px);
+        }
+
+        .course-lessons-details .lesson-info-display {
+            flex: 1;
+        }
+
+        .course-lessons-details .lesson-day {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .course-lessons-details .lesson-title-display {
+            margin-left: 0.5rem;
+        }
+
+        .course-lessons-details .lesson-duration {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-left: 0.5rem;
         }
 
         .course-meta {
@@ -1097,22 +1200,14 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="course-image">Course Image URL</label>
-                        <input type="text" class="input" id="course-image" placeholder="https://example.com/image.jpg">
-                        <small style="color: var(--gray); margin-top: 0.5rem; display: block;">Leave empty to use a default image based on category</small>
-                    </div>
-
-                    <!-- YouTube Integration -->
-                    <div class="form-group">
-                        <label class="form-label">YouTube Integration</label>
-                        <div class="youtube-field">
-                            <label class="form-label" for="youtube-url">YouTube Video URL</label>
-                            <input type="url" class="input" id="youtube-url" placeholder="https://www.youtube.com/watch?v=..." onchange="updateYouTubePreview()">
-                            <small style="color: var(--gray); margin-top: 0.5rem; display: block;">Add the main YouTube video URL for this course</small>
-                            <div id="youtube-preview" class="youtube-preview hidden">
-                                <strong>Preview:</strong> <a href="#" id="youtube-preview-link" target="_blank">Watch on YouTube</a>
-                            </div>
+                        <label class="form-label" for="course-image">Course Image</label>
+                        <input type="file" class="input" id="course-image-file" accept="image/*" onchange="handleImageUpload(this)" style="margin-bottom: 0.5rem;">
+                        <div id="image-preview" style="display: none; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+                            <img id="preview-img" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid var(--border);">
+                            <button type="button" class="btn btn-outline btn-sm" onclick="clearImageUpload()" style="margin-left: 0.5rem;">Remove</button>
                         </div>
+                        <input type="hidden" id="course-image" value="">
+                        <small style="color: var(--gray); margin-top: 0.5rem; display: block;">Upload an image from your device or leave empty to use a default image based on category</small>
                     </div>
 
                     <!-- Course Content Sections -->
@@ -1335,8 +1430,7 @@ You'll gain hands-on experience with..."></textarea>
                         <div class="lessons-container">
                             <div class="lesson-header">
                                 <span>Resource Name</span>
-                                <span>Resource Type</span>
-                                <span>PDF URL</span>
+                                <span>PDF File</span>
                                 <span>Actions</span>
                             </div>
                             <div id="resources-container">
@@ -1354,7 +1448,6 @@ You'll gain hands-on experience with..."></textarea>
                         <div class="lessons-container">
                             <div class="lesson-header">
                                 <span>Link Title</span>
-                                <span>Link Type</span>
                                 <span>URL</span>
                                 <span>Actions</span>
                             </div>
@@ -1460,20 +1553,14 @@ You'll gain hands-on experience with..."></textarea>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="edit-course-image">Course Image URL</label>
-                        <input type="text" class="input" id="edit-course-image">
-                    </div>
-
-                    <!-- YouTube Integration -->
-                    <div class="form-group">
-                        <label class="form-label">YouTube Integration</label>
-                        <div class="youtube-field">
-                            <label class="form-label" for="edit-youtube-url">YouTube Video URL</label>
-                            <input type="url" class="input" id="edit-youtube-url" placeholder="https://www.youtube.com/watch?v=...">
-                            <div id="edit-youtube-preview" class="youtube-preview hidden">
-                                <strong>Preview:</strong> <a href="#" id="edit-youtube-preview-link" target="_blank">Watch on YouTube</a>
-                            </div>
+                        <label class="form-label" for="edit-course-image">Course Image</label>
+                        <input type="file" class="input" id="edit-course-image-file" accept="image/*" onchange="handleEditImageUpload(this)" style="margin-bottom: 0.5rem;">
+                        <div id="edit-image-preview" style="display: none; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+                            <img id="edit-preview-img" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid var(--border);">
+                            <button type="button" class="btn btn-outline btn-sm" onclick="clearEditImageUpload()" style="margin-left: 0.5rem;">Remove</button>
                         </div>
+                        <input type="hidden" id="edit-course-image" value="">
+                        <small style="color: var(--gray); margin-top: 0.5rem; display: block;">Upload a new image from your device or leave empty to keep existing/default image</small>
                     </div>
 
                     <!-- Introduction Section -->
@@ -1564,10 +1651,175 @@ You'll gain hands-on experience with..."></textarea>
         </div>
     </div>
 
+    <!-- Edit Lesson Content Modal -->
+    <div id="edit-lesson-modal" class="modal-overlay">
+        <div class="modal" style="max-width: 900px;">
+            <button class="modal-close" onclick="closeEditLessonModal()">
+                <i class="bi bi-x"></i>
+            </button>
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Lesson Content</h3>
+                <p id="lesson-modal-subtitle" style="color: var(--gray); font-size: 0.9rem; margin-top: 0.5rem;"></p>
+            </div>
+            <div class="modal-body">
+                <form id="edit-lesson-form">
+                    <input type="hidden" id="lesson-edit-id">
+                    
+                    <!-- Lesson Title -->
+                    <div class="form-group">
+                        <label class="form-label" for="lesson-edit-title">Lesson Title</label>
+                        <input type="text" class="input" id="lesson-edit-title" required>
+                    </div>
+
+                    <!-- Week and Day -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="lesson-edit-week">Week</label>
+                            <input type="number" class="input" id="lesson-edit-week" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="lesson-edit-day">Day</label>
+                            <input type="number" class="input" id="lesson-edit-day" min="1" required>
+                        </div>
+                    </div>
+
+                    <!-- Duration and YouTube -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="lesson-edit-duration">Duration (hours)</label>
+                            <input type="number" class="input" id="lesson-edit-duration" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="lesson-edit-youtube">YouTube URL</label>
+                            <input type="url" class="input" id="lesson-edit-youtube" placeholder="https://www.youtube.com/watch?v=...">
+                        </div>
+                    </div>
+
+                    <!-- Introduction Section -->
+                    <div class="form-group">
+                        <label class="form-label">Introduction</label>
+                        <div class="content-section">
+                            <div class="content-card">
+                                <h4 class="card-title"><i class="bi bi-lightbulb"></i> The Stakes</h4>
+                                <textarea class="textarea" id="lesson-edit-intro-stakes" placeholder="Why this lesson matters..." rows="3"></textarea>
+                            </div>
+                            <div class="content-card">
+                                <h4 class="card-title"><i class="bi bi-question-circle"></i> Reflection</h4>
+                                <textarea class="textarea" id="lesson-edit-intro-reflection" placeholder="Reflection questions..." rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Objectives -->
+                    <div class="form-group">
+                        <label class="form-label">Learning Objectives</label>
+                        <div class="content-section">
+                            <div class="section-header">
+                                <h3 class="section-title">What Students Will Learn</h3>
+                                <button type="button" class="btn btn-outline btn-sm" onclick="addLessonObjective()">
+                                    <i class="bi bi-plus"></i> Add Objective
+                                </button>
+                            </div>
+                            <div id="lesson-objectives-list">
+                                <!-- Objectives will be added here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content Sections -->
+                    <div class="form-group">
+                        <label class="form-label">Content Sections</label>
+                        <div class="content-section">
+                            <div class="section-header">
+                                <h3 class="section-title">Main Content</h3>
+                                <button type="button" class="btn btn-outline btn-sm" onclick="addLessonContentSection()">
+                                    <i class="bi bi-plus"></i> Add Section
+                                </button>
+                            </div>
+                            <div id="lesson-content-sections">
+                                <!-- Content sections will be added here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activities -->
+                    <div class="form-group">
+                        <label class="form-label">Hands-On Activities</label>
+                        <div class="content-section">
+                            <div class="section-header">
+                                <h3 class="section-title">Practice Activities</h3>
+                                <button type="button" class="btn btn-outline btn-sm" onclick="addLessonActivity()">
+                                    <i class="bi bi-plus"></i> Add Activity
+                                </button>
+                            </div>
+                            <div id="lesson-activities-container">
+                                <!-- Activities will be added here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Case Studies -->
+                    <div class="form-group">
+                        <label class="form-label">Case Studies</label>
+                        <div class="content-section">
+                            <div class="section-header">
+                                <h3 class="section-title">Real-World Scenarios</h3>
+                                <button type="button" class="btn btn-outline btn-sm" onclick="addLessonCaseStudy()">
+                                    <i class="bi bi-plus"></i> Add Case Study
+                                </button>
+                            </div>
+                            <div id="lesson-case-studies-container">
+                                <!-- Case studies will be added here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resources -->
+                    <div class="form-group">
+                        <label class="form-label">Resources</label>
+                        <div class="content-section">
+                            <div class="section-header">
+                                <h3 class="section-title">Additional Resources</h3>
+                                <button type="button" class="btn btn-outline btn-sm" onclick="addLessonResource()">
+                                    <i class="bi bi-plus"></i> Add Resource
+                                </button>
+                            </div>
+                            <div id="lesson-resources-container">
+                                <!-- Resources will be added here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Links -->
+                    <div class="form-group">
+                        <label class="form-label">Additional Links</label>
+                        <div class="content-section">
+                            <div class="section-header">
+                                <h3 class="section-title">External Resources</h3>
+                                <button type="button" class="btn btn-outline btn-sm" onclick="addLessonLink()">
+                                    <i class="bi bi-plus"></i> Add Link
+                                </button>
+                            </div>
+                            <div id="lesson-links-container">
+                                <!-- Links will be added here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="closeEditLessonModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Lesson</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global variables
         let courses = [];
         let currentEditingCourse = null;
+        let currentEditingLesson = null;
         let lessonCounter = 0;
         let sectionCounter = 0;
         let activityCounter = 0;
@@ -1904,10 +2156,13 @@ You'll gain hands-on experience with..."></textarea>
         }
 
         // Add a new content section
-        function addContentSection(title = "", content = "") {
+        function addContentSection(title = "", content = "", image = "") {
             sectionCounter++;
             const sectionsContainer = document.getElementById('content-sections');
             const uniqueId = 'section-content-' + sectionCounter;
+            const imageInputId = 'section-image-file-' + sectionCounter;
+            const imageDataId = 'section-image-data-' + sectionCounter;
+            const imagePreviewId = 'section-image-preview-' + sectionCounter;
             
             const sectionDiv = document.createElement('div');
             sectionDiv.className = 'content-card';
@@ -1955,9 +2210,22 @@ You'll gain hands-on experience with..."></textarea>
                         </div>
                     </div>
                 </div>
+                <div style="margin-top: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                        <i class="bi bi-image"></i> Section Image (Optional)
+                    </label>
+                    <input type="file" id="${imageInputId}" accept="image/*" onchange="handleSectionImageUpload('${imageInputId}', '${imageDataId}', '${imagePreviewId}')" style="${image ? 'display: none;' : 'display: block;'}">
+                    <input type="hidden" id="${imageDataId}" value="${image}">
+                    <div id="${imagePreviewId}" style="margin-top: 0.5rem; ${image ? 'display: block;' : 'display: none;'}">
+                        <img src="${image}" style="max-width: 200px; border-radius: 8px; border: 1px solid var(--border);">
+                        <button type="button" class="btn btn-outline btn-sm" onclick="clearSectionImageUpload('${imageInputId}', '${imageDataId}', '${imagePreviewId}')" style="margin-left: 0.5rem;">
+                            <i class="bi bi-x"></i> Remove Image
+                        </button>
+                    </div>
+                </div>
                 <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
                     <button type="button" class="btn btn-outline btn-sm" onclick="removeContentSection(this)">
-                        <i class="bi bi-trash"></i> Remove
+                        <i class="bi bi-trash"></i> Remove Section
                     </button>
                 </div>
             `;
@@ -2124,25 +2392,38 @@ You'll gain hands-on experience with..."></textarea>
 
         // Add a new resource to the course form
         function addResource() {
+            const resourceCounter = Date.now();
             const resourcesContainer = document.getElementById('resources-container');
+            const pdfInputId = 'resource-pdf-file-' + resourceCounter;
+            const pdfDataId = 'resource-pdf-data-' + resourceCounter;
+            const pdfNameId = 'resource-pdf-name-' + resourceCounter;
             
             const resourceDiv = document.createElement('div');
             resourceDiv.className = 'lesson-item';
+            resourceDiv.style.display = 'flex';
+            resourceDiv.style.flexDirection = 'column';
+            resourceDiv.style.gap = '0.5rem';
+            resourceDiv.style.padding = '1rem';
+            resourceDiv.style.border = '1px solid var(--border)';
+            resourceDiv.style.borderRadius = '8px';
             resourceDiv.innerHTML = `
-                <input type="text" placeholder="Resource name" required>
-                <select required>
-                    <option value="">Select type</option>
-                    <option value="PDF">PDF Document</option>
-                    <option value="Worksheet">Worksheet</option>
-                    <option value="Template">Template</option>
-                    <option value="Guide">Guide</option>
-                    <option value="Checklist">Checklist</option>
-                </select>
-                <input type="url" placeholder="PDF URL" required>
-                <div class="lesson-actions">
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input type="text" class="input" placeholder="Resource name" required style="flex: 1;">
                     <button type="button" class="btn btn-outline btn-sm" onclick="removeResource(this)">
-                        <i class="bi bi-trash"></i>
+                        <i class="bi bi-trash"></i> Remove
                     </button>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                        <i class="bi bi-file-pdf"></i> PDF File (Required)
+                    </label>
+                    <input type="file" id="${pdfInputId}" accept=".pdf,application/pdf" onchange="handleResourcePdfUpload('${pdfInputId}', '${pdfDataId}', '${pdfNameId}')" required style="margin-bottom: 0.5rem;">
+                    <input type="hidden" id="${pdfDataId}">
+                    <input type="hidden" id="${pdfNameId}">
+                    <div id="${pdfNameId}-display" style="display: none; padding: 0.5rem; background: var(--success-light, #d4edda); border-radius: 4px; margin-top: 0.5rem;">
+                        <i class="bi bi-file-pdf-fill" style="color: #dc3545;"></i>
+                        <span style="margin-left: 0.5rem; color: var(--success-dark, #155724);"></span>
+                    </div>
                 </div>
             `;
             
@@ -2162,17 +2443,8 @@ You'll gain hands-on experience with..."></textarea>
             const linkDiv = document.createElement('div');
             linkDiv.className = 'lesson-item';
             linkDiv.innerHTML = `
-                <input type="text" placeholder="Link title" required>
-                <select required>
-                    <option value="">Select type</option>
-                    <option value="Website">Website</option>
-                    <option value="Documentation">Documentation</option>
-                    <option value="Tool">Online Tool</option>
-                    <option value="Article">Article</option>
-                    <option value="Video">Video</option>
-                    <option value="Course">External Course</option>
-                </select>
-                <input type="url" placeholder="URL" required>
+                <input type="text" placeholder="Link title" required style="flex: 1;">
+                <input type="url" placeholder="URL" required style="flex: 1;">
                 <div class="lesson-actions">
                     <button type="button" class="btn btn-outline btn-sm" onclick="removeAdditionalLink(this)">
                         <i class="bi bi-trash"></i>
@@ -2203,6 +2475,139 @@ You'll gain hands-on experience with..."></textarea>
             }
         }
 
+        // Handle image upload for new course
+        function handleImageUpload(input) {
+            const file = input.files[0];
+            if (file) {
+                // Check file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Image size should be less than 5MB');
+                    input.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Image = e.target.result;
+                    document.getElementById('course-image').value = base64Image;
+                    document.getElementById('preview-img').src = base64Image;
+                    document.getElementById('image-preview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Clear image upload for new course
+        function clearImageUpload() {
+            document.getElementById('course-image-file').value = '';
+            document.getElementById('course-image').value = '';
+            document.getElementById('image-preview').style.display = 'none';
+            document.getElementById('preview-img').src = '';
+        }
+
+        // Handle image upload for edit course
+        function handleEditImageUpload(input) {
+            const file = input.files[0];
+            if (file) {
+                // Check file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Image size should be less than 5MB');
+                    input.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Image = e.target.result;
+                    document.getElementById('edit-course-image').value = base64Image;
+                    document.getElementById('edit-preview-img').src = base64Image;
+                    document.getElementById('edit-image-preview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Clear image upload for edit course
+        function clearEditImageUpload() {
+            document.getElementById('edit-course-image-file').value = '';
+            document.getElementById('edit-course-image').value = '';
+            document.getElementById('edit-image-preview').style.display = 'none';
+            document.getElementById('edit-preview-img').src = '';
+            // Show the file input again after removing image
+            document.getElementById('edit-course-image-file').style.display = 'block';
+        }
+
+        // Handle image upload for content sections
+        function handleSectionImageUpload(fileInputId, dataInputId, previewId) {
+            const fileInput = document.getElementById(fileInputId);
+            const file = fileInput.files[0];
+            
+            if (file) {
+                // Check file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Image size should be less than 5MB');
+                    fileInput.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Image = e.target.result;
+                    document.getElementById(dataInputId).value = base64Image;
+                    
+                    const previewDiv = document.getElementById(previewId);
+                    previewDiv.querySelector('img').src = base64Image;
+                    previewDiv.style.display = 'block';
+                    fileInput.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Clear section image upload
+        function clearSectionImageUpload(fileInputId, dataInputId, previewId) {
+            document.getElementById(fileInputId).value = '';
+            document.getElementById(dataInputId).value = '';
+            document.getElementById(previewId).style.display = 'none';
+            document.getElementById(previewId).querySelector('img').src = '';
+            document.getElementById(fileInputId).style.display = 'block';
+        }
+
+        // Handle PDF upload for resources
+        function handleResourcePdfUpload(fileInputId, dataInputId, nameInputId) {
+            const fileInput = document.getElementById(fileInputId);
+            const file = fileInput.files[0];
+            
+            if (file) {
+                // Check if file is PDF
+                if (file.type !== 'application/pdf') {
+                    alert('Please select a PDF file');
+                    fileInput.value = '';
+                    return;
+                }
+                
+                // Check file size (max 10MB for PDFs)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('PDF size should be less than 10MB');
+                    fileInput.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Pdf = e.target.result;
+                    document.getElementById(dataInputId).value = base64Pdf;
+                    document.getElementById(nameInputId).value = file.name;
+                    
+                    // Show file name
+                    const displayDiv = document.getElementById(nameInputId + '-display');
+                    displayDiv.querySelector('span').textContent = file.name;
+                    displayDiv.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
         // Publish a new course
         function publishCourse() {
             // Get form values
@@ -2216,14 +2621,14 @@ You'll gain hands-on experience with..."></textarea>
             const duration = parseInt(document.getElementById('course-duration').value);
             const instructor = document.getElementById('course-instructor').value;
             const image = document.getElementById('course-image').value;
-            const youtubeUrl = document.getElementById('youtube-url').value;
             
             // Get content sections
             const sectionElements = document.querySelectorAll('#content-sections .content-card');
             const sections = Array.from(sectionElements).map(sectionEl => {
-                const title = sectionEl.querySelector('input').value;
+                const title = sectionEl.querySelector('input[type="text"]').value;
                 const content = sectionEl.querySelector('textarea').value;
-                return { title, content };
+                const imageData = sectionEl.querySelector('input[type="hidden"]').value;
+                return { title, content, image: imageData || '' };
             });
             
             // Get activities
@@ -2249,13 +2654,16 @@ You'll gain hands-on experience with..."></textarea>
             });
             
             // Get resources
-            const resourceElements = document.querySelectorAll('#resources-container .resource-item, #resources-container .lesson-item');
+            const resourceElements = document.querySelectorAll('#resources-container .lesson-item');
             const resources = Array.from(resourceElements).map(resEl => {
-                const inputs = resEl.querySelectorAll('input');
+                const nameInput = resEl.querySelector('input[type="text"]');
+                const pdfDataInput = resEl.querySelector('input[type="hidden"]:nth-of-type(1)');
+                const pdfNameInput = resEl.querySelector('input[type="hidden"]:nth-of-type(2)');
                 return {
-                    name: inputs[0]?.value || '',
-                    type: inputs[1]?.value || '',
-                    url: inputs[2]?.value || ''
+                    name: nameInput?.value || '',
+                    type: 'PDF',
+                    pdf_data: pdfDataInput?.value || '',
+                    pdf_filename: pdfNameInput?.value || ''
                 };
             });
             
@@ -2265,8 +2673,7 @@ You'll gain hands-on experience with..."></textarea>
                 const inputs = linkEl.querySelectorAll('input');
                 return {
                     title: inputs[0]?.value || '',
-                    type: inputs[1]?.value || '',
-                    url: inputs[2]?.value || ''
+                    url: inputs[1]?.value || ''
                 };
             });
             
@@ -2311,7 +2718,7 @@ You'll gain hands-on experience with..."></textarea>
                 duration,
                 instructor,
                 image: image || getDefaultImage(category),
-                youtube_url: youtubeUrl || null,
+                youtube_url: null,  // YouTube URLs are now lesson-specific, not course-level
                 intro_stakes: introStakes,
                 intro_reflection: introReflection,
                 sections_json: JSON.stringify(sections),
@@ -2340,7 +2747,7 @@ You'll gain hands-on experience with..."></textarea>
             console.log('Duration:', course.duration, 'hours');
             console.log('Instructor:', course.instructor);
             console.log('Image URL:', course.image);
-            console.log('YouTube URL:', course.youtube_url);
+            console.log('YouTube URL (course-level):', course.youtube_url, '(always null - videos are lesson-specific)');
             console.log('Sections:', sections.length, 'items');
             console.log('Activities:', activities.length, 'items');
             console.log('Objectives:', objectives.length, 'items');
@@ -2423,14 +2830,14 @@ You'll gain hands-on experience with..."></textarea>
             const duration = parseInt(document.getElementById('course-duration').value);
             const instructor = document.getElementById('course-instructor').value;
             const image = document.getElementById('course-image').value;
-            const youtubeUrl = document.getElementById('youtube-url').value;
             
             // Get content sections
             const sectionElements = document.querySelectorAll('#content-sections .content-card');
             const sections = Array.from(sectionElements).map(sectionEl => {
-                const title = sectionEl.querySelector('input').value;
+                const title = sectionEl.querySelector('input[type="text"]').value;
                 const content = sectionEl.querySelector('textarea').value;
-                return { title, content };
+                const imageData = sectionEl.querySelector('input[type="hidden"]').value;
+                return { title, content, image: imageData || '' };
             });
             
             // Get activities
@@ -2456,13 +2863,16 @@ You'll gain hands-on experience with..."></textarea>
             });
             
             // Get resources
-            const resourceElements = document.querySelectorAll('#resources-container .resource-item, #resources-container .lesson-item');
+            const resourceElements = document.querySelectorAll('#resources-container .lesson-item');
             const resources = Array.from(resourceElements).map(resEl => {
-                const inputs = resEl.querySelectorAll('input');
+                const nameInput = resEl.querySelector('input[type="text"]');
+                const pdfDataInput = resEl.querySelector('input[type="hidden"]:nth-of-type(1)');
+                const pdfNameInput = resEl.querySelector('input[type="hidden"]:nth-of-type(2)');
                 return {
-                    name: inputs[0]?.value || '',
-                    type: inputs[1]?.value || '',
-                    url: inputs[2]?.value || ''
+                    name: nameInput?.value || '',
+                    type: 'PDF',
+                    pdf_data: pdfDataInput?.value || '',
+                    pdf_filename: pdfNameInput?.value || ''
                 };
             });
             
@@ -2472,8 +2882,7 @@ You'll gain hands-on experience with..."></textarea>
                 const inputs = linkEl.querySelectorAll('input');
                 return {
                     title: inputs[0]?.value || '',
-                    type: inputs[1]?.value || '',
-                    url: inputs[2]?.value || ''
+                    url: inputs[1]?.value || ''
                 };
             });
             
@@ -2493,7 +2902,7 @@ You'll gain hands-on experience with..."></textarea>
                 lessons = [{
                     title: lessonTitle,
                     duration: duration + ' hours',
-                    youtubeUrl: youtubeUrl || ''
+                    youtubeUrl: ''
                 }];
             }
             
@@ -2518,7 +2927,7 @@ You'll gain hands-on experience with..."></textarea>
                 duration,
                 instructor,
                 image: image || getDefaultImage(category),
-                youtube_url: youtubeUrl || null,
+                youtube_url: null,  // YouTube URLs are now lesson-specific, not course-level
                 intro_stakes: introStakes,
                 intro_reflection: introReflection,
                 sections_json: JSON.stringify(sections),
@@ -2634,9 +3043,12 @@ You'll gain hands-on experience with..."></textarea>
                 }
                 
                 return `
-                <div class="course-item">
-                    <div class="course-info">
-                        <div class="course-title">${course.title}</div>
+                <div class="course-item" data-course-id="${course.id}">
+                    <div class="course-info" onclick="toggleCourseDetails('${course.id}', event)" style="cursor: pointer; flex: 1;">
+                        <div class="course-title">
+                            ${course.title}
+                            <i class="bi bi-chevron-down" id="chevron-${course.id}" style="margin-left: 0.5rem; transition: transform 0.3s; font-size: 0.9rem;"></i>
+                        </div>
                         <div class="course-meta">
                             <span>${course.category || 'Uncategorized'}</span>
                             <span>${course.duration || course.total_duration || 0}h</span>
@@ -2646,25 +3058,34 @@ You'll gain hands-on experience with..."></textarea>
                             </span>
                         </div>
                         <div class="course-details">
-                            <small>${totalLessons} total lesson${totalLessons !== 1 ? 's' : ''} (${lessonsBreakdown})</small>
+                            <small style="color: var(--primary); font-weight: 500;">
+                                <i class="bi bi-list-ul"></i>
+                                ${totalLessons} total lesson${totalLessons !== 1 ? 's' : ''} (${lessonsBreakdown}) • Click to expand
+                            </small>
                         </div>
                     </div>
-                    <div class="course-actions">
-                        <button class="btn btn-outline btn-sm" onclick="viewCourseDetails('${course.id}')">
-                            <i class="bi bi-eye"></i>
+                    <div class="course-actions" onclick="event.stopPropagation()">
+                        <button class="btn btn-primary btn-sm" onclick="editCourseMetadata('${course.id}')" title="Edit Course Info">
+                            <i class="bi bi-pencil"></i>
                         </button>
                         <button class="btn btn-danger btn-sm" onclick="confirmDeleteCourse('${course.id}', '${course.title.replace(/'/g, "\\'")}')">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
                 </div>
+                <div class="course-lessons-details" id="lessons-${course.id}" style="display: none;"></div>
                 `;
             }).join('');
         }
 
         // Add content section in edit mode
-        function addContentSectionInEdit(title = "", content = "") {
+        function addContentSectionInEdit(title = "", content = "", image = "") {
+            sectionCounter++;
             const sectionsContainer = document.getElementById('edit-content-sections');
+            const imageInputId = 'edit-section-image-file-' + sectionCounter;
+            const imageDataId = 'edit-section-image-data-' + sectionCounter;
+            const imagePreviewId = 'edit-section-image-preview-' + sectionCounter;
+            
             const sectionDiv = document.createElement('div');
             sectionDiv.className = 'content-card';
             sectionDiv.innerHTML = `
@@ -2673,9 +3094,22 @@ You'll gain hands-on experience with..."></textarea>
                     <input type="text" class="input" placeholder="Section Title" value="${title}" style="flex: 1;" required>
                 </div>
                 <textarea class="textarea" placeholder="Section content..." rows="4" required>${content}</textarea>
+                <div style="margin-top: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                        <i class="bi bi-image"></i> Section Image (Optional)
+                    </label>
+                    <input type="file" id="${imageInputId}" accept="image/*" onchange="handleSectionImageUpload('${imageInputId}', '${imageDataId}', '${imagePreviewId}')" style="${image ? 'display: none;' : 'display: block;'}">
+                    <input type="hidden" id="${imageDataId}" value="${image}">
+                    <div id="${imagePreviewId}" style="margin-top: 0.5rem; ${image ? 'display: block;' : 'display: none;'}">
+                        <img src="${image}" style="max-width: 200px; border-radius: 8px; border: 1px solid var(--border);">
+                        <button type="button" class="btn btn-outline btn-sm" onclick="clearSectionImageUpload('${imageInputId}', '${imageDataId}', '${imagePreviewId}')" style="margin-left: 0.5rem;">
+                            <i class="bi bi-x"></i> Remove Image
+                        </button>
+                    </div>
+                </div>
                 <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
                     <button type="button" class="btn btn-outline btn-sm" onclick="removeContentSection(this)">
-                        <i class="bi bi-trash"></i> Remove
+                        <i class="bi bi-trash"></i> Remove Section
                     </button>
                 </div>
             `;
@@ -2755,9 +3189,23 @@ You'll gain hands-on experience with..."></textarea>
             document.getElementById('edit-course-duration').value = course.duration;
             document.getElementById('edit-course-instructor').value = course.instructor;
             document.getElementById('edit-course-image').value = course.image || '';
-            document.getElementById('edit-youtube-url').value = course.youtube_url || '';
             document.getElementById('edit-intro-stakes').value = course.intro_stakes || '';
             document.getElementById('edit-intro-reflection').value = course.intro_reflection || '';
+            
+            // Handle image display - hide file input if course already has an image
+            const editImageFileInput = document.getElementById('edit-course-image-file');
+            const editImagePreview = document.getElementById('edit-image-preview');
+            
+            if (course.image) {
+                // Course has an image - show only preview and hide file input
+                editImageFileInput.style.display = 'none';
+                document.getElementById('edit-preview-img').src = course.image;
+                editImagePreview.style.display = 'block';
+            } else {
+                // No image - show file input and hide preview
+                editImageFileInput.style.display = 'block';
+                editImagePreview.style.display = 'none';
+            }
             
             // Update YouTube preview
             updateEditYouTubePreview();
@@ -2766,7 +3214,7 @@ You'll gain hands-on experience with..."></textarea>
             const sections = typeof course.sections_json === 'string' ? 
                 JSON.parse(course.sections_json || '[]') : (course.sections_json || []);
             sections.forEach(section => {
-                addContentSectionInEdit(section.title, section.content);
+                addContentSectionInEdit(section.title, section.content, section.image || '');
             });
             
             // Parse and populate activities
@@ -2807,7 +3255,6 @@ You'll gain hands-on experience with..."></textarea>
             const duration = parseInt(document.getElementById('edit-course-duration').value);
             const instructor = document.getElementById('edit-course-instructor').value;
             const image = document.getElementById('edit-course-image').value;
-            const youtubeUrl = document.getElementById('edit-youtube-url').value;
             const introStakes = document.getElementById('edit-intro-stakes').value;
             const introReflection = document.getElementById('edit-intro-reflection').value;
             const status = document.querySelector('input[name="edit-course-status"]:checked').value;
@@ -2815,9 +3262,10 @@ You'll gain hands-on experience with..."></textarea>
             // Get content sections
             const sectionElements = document.querySelectorAll('#edit-content-sections .content-card');
             const sections = Array.from(sectionElements).map(sectionEl => {
-                const title = sectionEl.querySelector('input').value;
+                const title = sectionEl.querySelector('input[type="text"]').value;
                 const content = sectionEl.querySelector('textarea').value;
-                return { title, content };
+                const imageData = sectionEl.querySelector('input[type="hidden"]').value;
+                return { title, content, image: imageData || '' };
             });
             
             // Get activities
@@ -2849,7 +3297,7 @@ You'll gain hands-on experience with..."></textarea>
                 duration,
                 instructor,
                 image: image || getDefaultImage(category),
-                youtube_url: youtubeUrl,
+                youtube_url: null,  // YouTube URLs are now lesson-specific, not course-level
                 intro_stakes: introStakes,
                 intro_reflection: introReflection,
                 sections_json: JSON.stringify(sections),
@@ -2890,71 +3338,92 @@ You'll gain hands-on experience with..."></textarea>
             });
         }
 
-        // Delete a course
-        // View course details (expand to show all lessons)
-        function viewCourseDetails(courseId) {
-            const course = courses.find(c => c.id == courseId);
-            if (!course) return;
+        // Toggle course details (show/hide lessons)
+        function toggleCourseDetails(courseId, event) {
+            // Prevent event bubbling
+            if (event) event.stopPropagation();
             
-            const lessons = course.lessons || [];
+            const detailsDiv = document.getElementById(`lessons-${courseId}`);
+            const chevron = document.getElementById(`chevron-${courseId}`);
             
-            // Group lessons by week
-            const lessonsByWeek = {};
-            lessons.forEach(lesson => {
-                const week = lesson.week || 1;
-                if (!lessonsByWeek[week]) {
-                    lessonsByWeek[week] = [];
-                }
-                lessonsByWeek[week].push(lesson);
-            });
+            if (!detailsDiv) return;
             
-            // Build detailed view
-            let detailsHTML = `
-                <div style="padding: 1.5rem; background: white; border-radius: 8px; margin-top: 1rem;">
-                    <h3 style="margin-bottom: 1rem;">${course.title} - Lesson Details</h3>
-                    <p><strong>Category:</strong> ${course.category} | <strong>Total Duration:</strong> ${course.duration || course.total_duration}h</p>
-                    <p><strong>Total Lessons:</strong> ${lessons.length}</p>
-                    <hr style="margin: 1rem 0;">
-            `;
-            
-            // Sort and display by week
-            const weeks = Object.keys(lessonsByWeek).map(Number).sort((a, b) => a - b);
-            weeks.forEach(week => {
-                const weekLessons = lessonsByWeek[week].sort((a, b) => a.day - b.day);
-                detailsHTML += `
-                    <div style="margin-bottom: 1.5rem;">
-                        <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Week ${week}</h4>
-                        <ul style="list-style: none; padding: 0;">
-                `;
+            // Toggle visibility
+            if (detailsDiv.style.display === 'none' || detailsDiv.style.display === '') {
+                // Show lessons
+                const course = courses.find(c => c.id == courseId);
+                if (!course) return;
                 
-                weekLessons.forEach(lesson => {
-                    detailsHTML += `
-                        <li style="padding: 0.5rem; border-left: 3px solid var(--primary); margin-bottom: 0.5rem; padding-left: 1rem;">
-                            <strong>Day ${lesson.day}:</strong> ${lesson.lesson_title || 'Untitled Lesson'} 
-                            <span style="color: var(--gray); font-size: 0.9rem;">(${lesson.duration || 30} min)</span>
-                        </li>
-                    `;
+                const lessons = course.lessons || [];
+                
+                // Group lessons by week
+                const lessonsByWeek = {};
+                lessons.forEach(lesson => {
+                    const week = lesson.week || 1;
+                    if (!lessonsByWeek[week]) {
+                        lessonsByWeek[week] = [];
+                    }
+                    lessonsByWeek[week].push(lesson);
                 });
                 
-                detailsHTML += '</ul></div>';
-            });
-            
-            detailsHTML += `
-                    <button class="btn btn-primary" onclick="this.parentElement.remove()">Close Details</button>
-                </div>
-            `;
-            
-            // Show details below the course item
-            const courseItem = event.target.closest('.course-item');
-            if (courseItem) {
-                const existingDetails = courseItem.nextElementSibling;
-                if (existingDetails && existingDetails.classList.contains('course-details-expanded')) {
-                    existingDetails.remove();
-                } else {
-                    const detailsDiv = document.createElement('div');
-                    detailsDiv.className = 'course-details-expanded';
-                    detailsDiv.innerHTML = detailsHTML;
-                    courseItem.after(detailsDiv);
+                // Build detailed view
+                let detailsHTML = `
+                    <h3>
+                        <i class="bi bi-book"></i>
+                        ${course.title} - Course Lessons
+                    </h3>
+                    <div style="display: flex; gap: 2rem; margin-bottom: 1.5rem; padding: 1rem; background: white; border-radius: 0.5rem;">
+                        <div><strong>Category:</strong> ${course.category}</div>
+                        <div><strong>Total Duration:</strong> ${course.duration || course.total_duration}h</div>
+                        <div><strong>Total Lessons:</strong> ${lessons.length}</div>
+                    </div>
+                `;
+                
+                // Sort and display by week
+                const weeks = Object.keys(lessonsByWeek).map(Number).sort((a, b) => a - b);
+                weeks.forEach(week => {
+                    const weekLessons = lessonsByWeek[week].sort((a, b) => a.day - b.day);
+                    detailsHTML += `
+                        <div class="week-section">
+                            <div class="week-title">
+                                <i class="bi bi-calendar-week"></i>
+                                Week ${week}
+                            </div>
+                            <ul class="lesson-list">
+                    `;
+                    
+                    weekLessons.forEach(lesson => {
+                        detailsHTML += `
+                            <li class="lesson-item-display">
+                                <div class="lesson-info-display">
+                                    <span class="lesson-day">Day ${lesson.day}:</span>
+                                    <span class="lesson-title-display">${lesson.lesson_title || 'Untitled Lesson'}</span>
+                                    <span class="lesson-duration">(${lesson.duration || 30} min)</span>
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="editLessonContent('${lesson.id}')" style="margin-left: 1rem;">
+                                    <i class="bi bi-pencil"></i> Edit Content
+                                </button>
+                            </li>
+                        `;
+                    });
+                    
+                    detailsHTML += '</ul></div>';
+                });
+                
+                detailsDiv.innerHTML = detailsHTML;
+                detailsDiv.style.display = 'block';
+                
+                // Rotate chevron down
+                if (chevron) {
+                    chevron.style.transform = 'rotate(180deg)';
+                }
+            } else {
+                // Hide lessons
+                detailsDiv.style.display = 'none';
+                
+                // Rotate chevron back
+                if (chevron) {
+                    chevron.style.transform = 'rotate(0deg)';
                 }
             }
         }
@@ -2997,6 +3466,355 @@ You'll gain hands-on experience with..."></textarea>
             document.getElementById('edit-course-modal').classList.remove('active');
             currentEditingCourse = null;
         }
+
+        // Close edit lesson modal
+        function closeEditLessonModal() {
+            document.getElementById('edit-lesson-modal').classList.remove('active');
+            currentEditingLesson = null;
+        }
+
+        // Edit course metadata (for grouped courses)
+        function editCourseMetadata(courseId) {
+            showAlert('manage-alert', 'Course-level editing coming soon. Use "Edit Content" to edit individual lessons.', 'error');
+        }
+
+        // Edit lesson content
+        function editLessonContent(lessonId) {
+            // Fetch the specific lesson from the API
+            fetch(`/api/learning/courses/${lessonId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const lesson = data.success ? data.course : data;
+                    if (!lesson) {
+                        throw new Error('Lesson not found');
+                    }
+                    
+                    currentEditingLesson = lesson;
+                    
+                    // Clear existing content
+                    document.getElementById('lesson-objectives-list').innerHTML = '';
+                    document.getElementById('lesson-content-sections').innerHTML = '';
+                    document.getElementById('lesson-activities-container').innerHTML = '';
+                    document.getElementById('lesson-case-studies-container').innerHTML = '';
+                    document.getElementById('lesson-resources-container').innerHTML = '';
+                    document.getElementById('lesson-links-container').innerHTML = '';
+                    
+                    // Populate form
+                    document.getElementById('lesson-edit-id').value = lesson.id;
+                    document.getElementById('lesson-edit-title').value = lesson.lesson_title || lesson.title;
+                    document.getElementById('lesson-edit-week').value = lesson.week || 1;
+                    document.getElementById('lesson-edit-day').value = lesson.day || 1;
+                    document.getElementById('lesson-edit-duration').value = lesson.duration || 1;
+                    document.getElementById('lesson-edit-youtube').value = lesson.youtube_url || '';
+                    document.getElementById('lesson-edit-intro-stakes').value = lesson.intro_stakes || '';
+                    document.getElementById('lesson-edit-intro-reflection').value = lesson.intro_reflection || '';
+                    
+                    // Update subtitle
+                    document.getElementById('lesson-modal-subtitle').textContent = `${lesson.title} - Week ${lesson.week}, Day ${lesson.day}`;
+                    
+                    // Parse and populate objectives
+                    const objectives = typeof lesson.objectives_json === 'string' ? 
+                        JSON.parse(lesson.objectives_json || '[]') : (lesson.objectives_json || []);
+                    objectives.forEach(obj => addLessonObjective(obj));
+                    
+                    // Parse and populate sections
+                    const sections = typeof lesson.sections_json === 'string' ? 
+                        JSON.parse(lesson.sections_json || '[]') : (lesson.sections_json || []);
+                    sections.forEach(section => addLessonContentSection(section.title, section.content, section.image));
+                    
+                    // Parse and populate activities
+                    const activities = typeof lesson.activities_json === 'string' ? 
+                        JSON.parse(lesson.activities_json || '[]') : (lesson.activities_json || []);
+                    activities.forEach(activity => addLessonActivity(activity.title, activity.description));
+                    
+                    // Parse and populate case studies
+                    const caseStudies = typeof lesson.case_studies_json === 'string' ? 
+                        JSON.parse(lesson.case_studies_json || '[]') : (lesson.case_studies_json || []);
+                    caseStudies.forEach(cs => addLessonCaseStudy(cs.title, cs.description));
+                    
+                    // Parse and populate resources
+                    const resources = typeof lesson.resources_json === 'string' ? 
+                        JSON.parse(lesson.resources_json || '[]') : (lesson.resources_json || []);
+                    resources.forEach(res => addLessonResource(res.name, res.pdf_data, res.pdf_filename));
+                    
+                    // Parse and populate links
+                    const links = typeof lesson.additional_links_json === 'string' ? 
+                        JSON.parse(lesson.additional_links_json || '[]') : (lesson.additional_links_json || []);
+                    links.forEach(link => addLessonLink(link.title, link.url));
+                    
+                    // Show modal
+                    document.getElementById('edit-lesson-modal').classList.add('active');
+                })
+                .catch(error => {
+                    console.error('Error loading lesson:', error);
+                    showAlert('manage-alert', 'Error loading lesson: ' + error.message, 'error');
+                });
+        }
+
+        // Add lesson objective
+        function addLessonObjective(text = '') {
+            const list = document.getElementById('lesson-objectives-list');
+            if (!list) return;
+            const id = 'lesson-obj-' + Date.now();
+            const div = document.createElement('div');
+            div.className = 'content-card';
+            div.style.display = 'flex';
+            div.style.gap = '0.5rem';
+            div.style.alignItems = 'center';
+            div.innerHTML = `
+                <input type="text" class="input objective-item" value="${text}" placeholder="Enter objective..." style="flex:1;" />
+                <button type="button" class="btn btn-outline btn-sm" onclick="this.parentElement.remove()">
+                    <i class="bi bi-trash"></i>
+                </button>
+            `;
+            list.appendChild(div);
+        }
+
+        // Add lesson content section
+        function addLessonContentSection(title = "", content = "", image = "") {
+            sectionCounter++;
+            const container = document.getElementById('lesson-content-sections');
+            const uniqueId = 'lesson-section-' + sectionCounter;
+            const imageInputId = 'lesson-section-img-' + sectionCounter;
+            const imageDataId = 'lesson-section-data-' + sectionCounter;
+            const imagePreviewId = 'lesson-section-preview-' + sectionCounter;
+            
+            const sectionDiv = document.createElement('div');
+            sectionDiv.className = 'content-card';
+            sectionDiv.innerHTML = `
+                <div class="card-title">
+                    <i class="bi bi-file-text"></i>
+                    <input type="text" class="input section-title" placeholder="Section Title" value="${title}" style="flex: 1;" required>
+                </div>
+                <textarea class="textarea section-content" placeholder="Section content..." rows="4" required>${content}</textarea>
+                <div style="margin-top: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                        <i class="bi bi-image"></i> Section Image (Optional)
+                    </label>
+                    <input type="file" id="${imageInputId}" accept="image/*" onchange="handleSectionImageUpload('${imageInputId}', '${imageDataId}', '${imagePreviewId}')" style="${image ? 'display: none;' : 'display: block;'}">
+                    <input type="hidden" class="section-image" id="${imageDataId}" value="${image}">
+                    <div id="${imagePreviewId}" style="margin-top: 0.5rem; ${image ? 'display: block;' : 'display: none;'}">
+                        <img src="${image}" style="max-width: 200px; border-radius: 8px; border: 1px solid var(--border);">
+                        <button type="button" class="btn btn-outline btn-sm" onclick="clearSectionImageUpload('${imageInputId}', '${imageDataId}', '${imagePreviewId}')" style="margin-left: 0.5rem;">
+                            <i class="bi bi-x"></i> Remove Image
+                        </button>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="this.parentElement.parentElement.remove()">
+                        <i class="bi bi-trash"></i> Remove Section
+                    </button>
+                </div>
+            `;
+            container.appendChild(sectionDiv);
+        }
+
+        // Add lesson activity
+        function addLessonActivity(title = "", description = "") {
+            activityCounter++;
+            const container = document.getElementById('lesson-activities-container');
+            const activityDiv = document.createElement('div');
+            activityDiv.className = 'content-card';
+            activityDiv.innerHTML = `
+                <div class="card-title">
+                    <i class="bi bi-tools"></i>
+                    <input type="text" class="input activity-title" placeholder="Activity Title" value="${title}" style="flex: 1;" required>
+                </div>
+                <textarea class="textarea activity-description" placeholder="Activity description..." rows="3" required>${description}</textarea>
+                <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="this.parentElement.parentElement.remove()">
+                        <i class="bi bi-trash"></i> Remove
+                    </button>
+                </div>
+            `;
+            container.appendChild(activityDiv);
+        }
+
+        // Add lesson case study
+        function addLessonCaseStudy(title = "", description = "") {
+            const container = document.getElementById('lesson-case-studies-container');
+            const caseStudyDiv = document.createElement('div');
+            caseStudyDiv.className = 'content-card';
+            caseStudyDiv.innerHTML = `
+                <div class="card-title">
+                    <i class="bi bi-journal-text"></i>
+                    <input type="text" class="input case-study-title" placeholder="Case Study Title" value="${title}" style="flex: 1;" required>
+                </div>
+                <textarea class="textarea case-study-description" placeholder="Case study scenario..." rows="4" required>${description}</textarea>
+                <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="this.parentElement.parentElement.remove()">
+                        <i class="bi bi-trash"></i> Remove
+                    </button>
+                </div>
+            `;
+            container.appendChild(caseStudyDiv);
+        }
+
+        // Add lesson resource
+        function addLessonResource(name = "", pdfData = "", pdfFilename = "") {
+            const resourceCounter = Date.now();
+            const container = document.getElementById('lesson-resources-container');
+            const pdfInputId = 'lesson-resource-pdf-' + resourceCounter;
+            const pdfDataId = 'lesson-resource-data-' + resourceCounter;
+            const pdfNameId = 'lesson-resource-name-' + resourceCounter;
+            
+            const resourceDiv = document.createElement('div');
+            resourceDiv.className = 'lesson-item';
+            resourceDiv.style.display = 'flex';
+            resourceDiv.style.flexDirection = 'column';
+            resourceDiv.style.gap = '0.5rem';
+            resourceDiv.style.padding = '1rem';
+            resourceDiv.style.border = '1px solid var(--border)';
+            resourceDiv.style.borderRadius = '8px';
+            resourceDiv.style.marginBottom = '1rem';
+            resourceDiv.innerHTML = `
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input type="text" class="input resource-name" placeholder="Resource name" value="${name}" required style="flex: 1;">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="this.parentElement.parentElement.remove()">
+                        <i class="bi bi-trash"></i> Remove
+                    </button>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                        <i class="bi bi-file-pdf"></i> PDF File ${pdfData ? '(Uploaded)' : '(Optional)'}
+                    </label>
+                    <input type="file" id="${pdfInputId}" accept=".pdf,application/pdf" onchange="handleResourcePdfUpload('${pdfInputId}', '${pdfDataId}', '${pdfNameId}')" style="margin-bottom: 0.5rem; ${pdfData ? 'display: none;' : ''}">
+                    <input type="hidden" class="resource-pdf-data" id="${pdfDataId}" value="${pdfData}">
+                    <input type="hidden" class="resource-pdf-filename" id="${pdfNameId}" value="${pdfFilename}">
+                    <div id="${pdfNameId}-display" style="display: ${pdfFilename ? 'block' : 'none'}; padding: 0.5rem; background: var(--success-light, #d4edda); border-radius: 4px; margin-top: 0.5rem;">
+                        <i class="bi bi-file-pdf-fill" style="color: #dc3545;"></i>
+                        <span style="margin-left: 0.5rem; color: var(--success-dark, #155724);">${pdfFilename}</span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(resourceDiv);
+        }
+
+        // Add lesson link
+        function addLessonLink(title = "", url = "") {
+            const container = document.getElementById('lesson-links-container');
+            const linkDiv = document.createElement('div');
+            linkDiv.className = 'lesson-item';
+            linkDiv.style.marginBottom = '1rem';
+            linkDiv.innerHTML = `
+                <input type="text" class="input link-title" placeholder="Link title" value="${title}" required style="flex: 1;">
+                <input type="url" class="input link-url" placeholder="URL" value="${url}" required style="flex: 1;">
+                <div class="lesson-actions">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="this.parentElement.parentElement.remove()">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(linkDiv);
+        }
+
+        // Update lesson content
+        document.getElementById('edit-lesson-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const lessonId = document.getElementById('lesson-edit-id').value;
+            
+            // Get form values
+            const lessonTitle = document.getElementById('lesson-edit-title').value;
+            const week = parseInt(document.getElementById('lesson-edit-week').value);
+            const day = parseInt(document.getElementById('lesson-edit-day').value);
+            const duration = parseInt(document.getElementById('lesson-edit-duration').value);
+            const youtubeUrl = document.getElementById('lesson-edit-youtube').value;
+            const introStakes = document.getElementById('lesson-edit-intro-stakes').value;
+            const introReflection = document.getElementById('lesson-edit-intro-reflection').value;
+            
+            // Get objectives
+            const objectiveElements = document.querySelectorAll('#lesson-objectives-list .objective-item');
+            const objectives = Array.from(objectiveElements).map(el => el.value).filter(v => v.trim());
+            
+            // Get sections
+            const sectionCards = document.querySelectorAll('#lesson-content-sections .content-card');
+            const sections = Array.from(sectionCards).map(card => ({
+                title: card.querySelector('.section-title').value,
+                content: card.querySelector('.section-content').value,
+                image: card.querySelector('.section-image').value || ''
+            }));
+            
+            // Get activities
+            const activityCards = document.querySelectorAll('#lesson-activities-container .content-card');
+            const activities = Array.from(activityCards).map(card => ({
+                title: card.querySelector('.activity-title').value,
+                description: card.querySelector('.activity-description').value
+            }));
+            
+            // Get case studies
+            const caseStudyCards = document.querySelectorAll('#lesson-case-studies-container .content-card');
+            const caseStudies = Array.from(caseStudyCards).map(card => ({
+                title: card.querySelector('.case-study-title').value,
+                description: card.querySelector('.case-study-description').value
+            }));
+            
+            // Get resources
+            const resourceItems = document.querySelectorAll('#lesson-resources-container .lesson-item');
+            const resources = Array.from(resourceItems).map(item => ({
+                name: item.querySelector('.resource-name').value,
+                type: 'PDF',
+                pdf_data: item.querySelector('.resource-pdf-data').value || '',
+                pdf_filename: item.querySelector('.resource-pdf-filename').value || ''
+            }));
+            
+            // Get links
+            const linkItems = document.querySelectorAll('#lesson-links-container .lesson-item');
+            const additionalLinks = Array.from(linkItems).map(item => ({
+                title: item.querySelector('.link-title').value,
+                url: item.querySelector('.link-url').value
+            }));
+            
+            // Create updated lesson object
+            const updatedLesson = {
+                ...currentEditingLesson,
+                lesson_title: lessonTitle,
+                week: week,
+                day: day,
+                duration: duration,
+                youtube_url: youtubeUrl,
+                intro_stakes: introStakes,
+                intro_reflection: introReflection,
+                objectives_json: JSON.stringify(objectives),
+                sections_json: JSON.stringify(sections),
+                activities_json: JSON.stringify(activities),
+                case_studies_json: JSON.stringify(caseStudies),
+                resources_json: JSON.stringify(resources),
+                additional_links_json: JSON.stringify(additionalLinks),
+                updated_at: new Date().toISOString()
+            };
+            
+            // Send update to server
+            fetch(`/api/learning/courses/${lessonId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedLesson)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update lesson');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Lesson updated successfully:', data);
+                
+                // Close modal
+                closeEditLessonModal();
+                
+                // Reload courses
+                loadCourses();
+                
+                // Show success message
+                showAlert('manage-alert', 'Lesson content updated successfully!', 'success');
+            })
+            .catch(error => {
+                console.error('Error updating lesson:', error);
+                showAlert('manage-alert', 'Error updating lesson: ' + error.message, 'error');
+            });
+        });
 
         // Reset form to initial state
         function resetForm() {
