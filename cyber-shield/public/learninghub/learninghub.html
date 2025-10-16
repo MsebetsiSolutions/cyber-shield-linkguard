@@ -10,75 +10,6 @@
     <style>
         /* Base Styles */
         /* Admin Button Styles */
-        .admin-access {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            z-index: 1000;
-        }
-        
-        .admin-btn {
-            background: linear-gradient(135deg, #8b5cf6, #6366f1);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .admin-btn:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
-        }
-        
-        .admin-panel {
-            position: fixed;
-            bottom: 8rem;
-            right: 2rem;
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            z-index: 1000;
-            display: none;
-            min-width: 200px;
-        }
-        
-        .admin-panel.show {
-            display: block;
-        }
-        
-        .admin-option {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            text-decoration: none;
-            color: var(--dark);
-            border-radius: 0.5rem;
-            transition: background 0.2s;
-            cursor: pointer;
-        }
-        
-        .admin-option:hover {
-            background: var(--light-gray);
-        }
-        
-        .admin-header {
-            font-weight: 600;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border);
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -412,7 +343,7 @@
 
         .tab-content {
             display: none;
-            padding: 2rem;
+            padding: 1rem 2rem 2rem 2rem;
         }
 
         .tab-content.active {
@@ -513,7 +444,9 @@
         .course-image {
             width: 100%;
             height: 200px;
-            object-fit: cover;
+            object-fit: contain;
+            background: #f8f9fa;
+            display: block;
         }
 
         .course-content {
@@ -544,6 +477,7 @@
             margin-bottom: 1rem;
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -662,12 +596,23 @@
         }
 
         .video-container {
-            margin: 2rem 0;
+            margin: 1.5rem 0;
             border-radius: 0.75rem;
             overflow: hidden;
-            background: var(--dark);
+            background: #000;
             position: relative;
-            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            width: 100%;
+            max-width: 1200px; /* Maximum width for larger screens */
+            aspect-ratio: 16/9; /* Perfect 16:9 aspect ratio */
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
         .video-placeholder {
@@ -690,7 +635,11 @@
         }
 
         .content-section {
-            margin: 2rem 0;
+            margin: 0 0 2rem 0;
+        }
+        
+        .content-section:not(:first-child) {
+            margin-top: 1.5rem;
         }
 
         .section-title {
@@ -727,7 +676,11 @@
             border: 1px solid var(--border);
             border-radius: 0.75rem;
             padding: 1.5rem;
-            margin: 1.5rem 0;
+            margin: 0 0 1.5rem 0;
+        }
+        
+        .activity-box:not(:first-child) {
+            margin-top: 1.5rem;
         }
 
         .activity-title {
@@ -1157,15 +1110,6 @@
                 padding: 1.5rem;
             }
 
-            .admin-access {
-                bottom: 1rem;
-                right: 1rem;
-            }
-            
-            .admin-panel {
-                bottom: 7rem;
-                right: 1rem;
-            }
         }
     </style>
 </head>
@@ -1654,8 +1598,8 @@
             .lesson-duration { font-size: 0.75rem; color: var(--gray); }
             .content-area { background: white; overflow-y: auto; height: calc(100vh - 70px); }
             .lesson-content { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-            .video-container { background: #000; border-radius: 0.75rem; overflow: hidden; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-            iframe { width: 100%; aspect-ratio: 16/9; border: none; }
+            .video-container { background: #000; border-radius: 0.75rem; overflow: hidden; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative; width: 100%; aspect-ratio: 16/9; }
+            #embedded-course .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
             .lesson-header { margin-bottom: 2rem; }
             .lesson-number-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; padding: 0.375rem 0.875rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 600; margin-bottom: 1rem; }
             .lesson-main-title { font-size: 2rem; font-weight: 700; color: var(--dark); margin-bottom: 0.75rem; }
@@ -1754,7 +1698,12 @@
             <main class="content-area">
                 <div class="lesson-content">
                     <div class="video-container">
-                        <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        <iframe src="" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy" style="display: none;"></iframe>
+                        <div class="video-placeholder" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #64748b, #475569); color: white; text-align: center; padding: 2rem;">
+                            <i class="bi bi-camera-video-off" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.7;"></i>
+                            <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">No Video Available</h3>
+                            <p style="opacity: 0.8; font-size: 0.875rem;">This lesson does not have a video yet.</p>
+                        </div>
                     </div>
                     <div class="lesson-header">
                         <div class="lesson-number-badge"><i class="bi bi-play-circle"></i> Lesson 1.2</div>
@@ -1795,32 +1744,6 @@
         </div>
     </div>
     
-    <!-- Admin Access Button -->
-    <div class="admin-access">
-        <button class="admin-btn" id="adminBtn" title="Admin Access">
-            <i class="bi bi-gear-fill"></i>
-        </button>
-        <div class="admin-panel" id="adminPanel">
-            <div class="admin-header">Admin Panel</div>
-            <div class="admin-option" onclick="navigateToAdmin()">
-                <i class="bi bi-plus-circle"></i>
-                <span>Upload New Course</span>
-            </div>
-            <div class="admin-option" onclick="manageCourses()">
-                <i class="bi bi-pencil-square"></i>
-                <span>Manage Courses</span>
-            </div>
-            <div class="admin-option" onclick="viewAnalytics()">
-                <i class="bi bi-graph-up"></i>
-                <span>View Analytics</span>
-            </div>
-            <div class="admin-option" onclick="closeAdminPanel()">
-                <i class="bi bi-x-circle"></i>
-                <span>Close Panel</span>
-            </div>
-        </div>
-    </div>
-
     <!-- Continue Learning Modal -->
     <div id="continue-learning-modal" class="modal-overlay">
         <div class="modal">
@@ -1914,7 +1837,6 @@
         // Initialize Page
         function init() {
             initUserControls();
-            initAdminPanel();
             loadPublishedCourses();
             updateStats();
             renderInProgressCourses();
@@ -1928,45 +1850,6 @@
             //         openContinueLearningModal();
             //     }
             // }, 1000);
-        }
-
-        // Initialize Admin Panel
-        function initAdminPanel() {
-            const adminBtn = document.getElementById('adminBtn');
-            const adminPanel = document.getElementById('adminPanel');
-
-            if (adminBtn && adminPanel) {
-                adminBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    adminPanel.classList.toggle('show');
-                });
-
-                // Close admin panel when clicking outside
-                document.addEventListener('click', function(e) {
-                    if (!adminBtn.contains(e.target) && !adminPanel.contains(e.target)) {
-                        adminPanel.classList.remove('show');
-                    }
-                });
-            }
-        }
-
-        function closeAdminPanel() {
-            document.getElementById('adminPanel').classList.remove('show');
-        }
-
-        function navigateToAdmin() {
-            // CORRECTED: Redirect to learninghub-admin.html
-            window.location.href = 'learninghub-admin.html';
-        }
-
-        function manageCourses() {
-            alert('Course management feature coming soon!');
-            closeAdminPanel();
-        }
-
-        function viewAnalytics() {
-            alert('Analytics dashboard coming soon!');
-            closeAdminPanel();
         }
 
         // Load published courses from database API
@@ -2338,7 +2221,21 @@
             const container = document.getElementById('in-progress-courses');
             const inProgressCourses = courses.filter(c => userProgress[c.id] > 0 && userProgress[c.id] < 100);
             
+            // Get the "In Progress" tab button and tab content
+            const inProgressButton = document.querySelector('.tab-trigger[onclick*="in-progress"]');
+            const inProgressTab = document.getElementById('tab-in-progress');
+            
             if (inProgressCourses.length === 0) {
+                // Hide the "In Progress" tab button
+                if (inProgressButton) {
+                    inProgressButton.style.display = 'none';
+                }
+                
+                // If currently on "In Progress" tab, switch to "All Courses"
+                if (inProgressTab && inProgressTab.classList.contains('active')) {
+                    switchTabProgrammatically('all-courses');
+                }
+                
                 container.innerHTML = `
                     <div class="no-courses" style="text-align: center; padding: 3rem; color: #6b7280;">
                         <p>No courses in progress. Start learning today!</p>
@@ -2348,6 +2245,11 @@
                     </div>
                 `;
             } else {
+                // Show the "In Progress" tab button
+                if (inProgressButton) {
+                    inProgressButton.style.display = 'inline-block';
+                }
+                
                 container.innerHTML = inProgressCourses.map(createCourseCard).join('');
             }
         }
@@ -2431,7 +2333,7 @@
             renderAllCourses();
         }
 
-        // Switch Tabs
+        // Switch Tabs (called from onclick)
         function switchTab(tabName) {
             // Remove active class from all triggers and contents
             document.querySelectorAll('.tab-trigger').forEach(trigger => {
@@ -2442,8 +2344,39 @@
             });
 
             // Add active class to selected tab
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // Fallback: find the button by tab name
+                const targetButton = document.querySelector(`.tab-trigger[onclick*="${tabName}"]`);
+                if (targetButton) {
+                    targetButton.classList.add('active');
+                }
+            }
             document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        // Switch Tabs Programmatically (without event)
+        function switchTabProgrammatically(tabName) {
+            // Remove active class from all triggers and contents
+            document.querySelectorAll('.tab-trigger').forEach(trigger => {
+                trigger.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Find and activate the target button
+            const targetButton = document.querySelector(`.tab-trigger[onclick*="${tabName}"]`);
+            if (targetButton) {
+                targetButton.classList.add('active');
+            }
+            
+            // Activate the target tab content
+            const targetTab = document.getElementById(`tab-${tabName}`);
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
         }
 
         // View Mode
@@ -2557,11 +2490,12 @@
                     weekNumbers.forEach((weekNum, weekIdx) => {
                         const weekLessons = lessonsByWeek[weekNum];
                         
-                        // Calculate total duration for this week's lessons
-                        const weekDuration = weekLessons.reduce((sum, lesson) => {
-                            const dur = lesson.duration || '0';
-                            const mins = parseInt(dur.toString().replace(/\D/g, '')) || 0;
-                            return sum + mins;
+                        // Calculate total duration for this week's lessons (duration is in hours from database)
+                        const weekDurationHours = weekLessons.reduce((sum, lesson) => {
+                            const dur = lesson.duration || 0;
+                            // If duration is a number, it's already in hours from database
+                            const hours = typeof dur === 'number' ? dur : parseFloat(dur) || 0;
+                            return sum + hours;
                         }, 0);
                         
                         // First week is expanded by default, others collapsed
@@ -2572,7 +2506,7 @@
                                 <div class="week-header" onclick="this.parentElement.classList.toggle('expanded')">
                                     <div class="week-info">
                                         <div class="week-title">Week ${weekNum}</div>
-                                        <div class="week-meta">${weekLessons.length} lesson${weekLessons.length > 1 ? 's' : ''} • ${Math.floor(weekDuration / 60)}h ${weekDuration % 60}m</div>
+                                        <div class="week-meta">${weekLessons.length} lesson${weekLessons.length > 1 ? 's' : ''} • ${weekDurationHours}h</div>
                                     </div>
                                     <i class="bi bi-chevron-down week-icon"></i>
                                 </div>
@@ -2589,12 +2523,16 @@
                             const lessonNumber = `${lesson.week}.${lesson.day}`;
                             const lessonTitle = lesson.lesson_title || `Lesson ${idx + 1}`;
                             
+                            // Format duration from database (in hours)
+                            const durationValue = lesson.duration || 0;
+                            const durationDisplay = typeof durationValue === 'number' ? `${durationValue}h` : durationValue;
+                            
                             lessonsList += `
                                 <div class="lesson-item ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}" onclick="playLesson(${idx})">
                                     <div class="lesson-checkbox">${isCompleted ? '<i class="bi bi-check"></i>' : ''}</div>
                                     <div class="lesson-details">
                                         <div class="lesson-title">${lessonNumber} ${lessonTitle}</div>
-                                        <div class="lesson-duration">${lesson.duration || '30'} min</div>
+                                        <div class="lesson-duration">${durationDisplay}</div>
                                     </div>
                                 </div>
                             `;
@@ -2624,22 +2562,40 @@
                 }
             }
             
-            // Update video player
-            const videoContainer = document.querySelector('#embedded-course .video-container iframe');
-            if (videoContainer && course.youtube_url) {
+            // Update video player - Use first lesson's YouTube URL since videos are lesson-specific
+            const videoIframe = document.querySelector('#embedded-course .video-container iframe');
+            const videoPlaceholder = document.querySelector('#embedded-course .video-container .video-placeholder');
+            
+            // Get the first lesson's YouTube URL (videos are lesson-specific, not course-level)
+            const firstLessonYoutubeUrl = lessons.length > 0 ? (lessons[0].youtube_url || lessons[0].youtubeUrl) : null;
+            
+            console.log('First lesson YouTube URL:', firstLessonYoutubeUrl);
+            
+            if (videoIframe && firstLessonYoutubeUrl) {
                 // Extract YouTube video ID
                 let videoId = '';
-                if (course.youtube_url.includes('youtu.be/')) {
-                    videoId = course.youtube_url.split('youtu.be/')[1].split('?')[0];
-                } else if (course.youtube_url.includes('youtube.com/watch?v=')) {
-                    videoId = course.youtube_url.split('v=')[1].split('&')[0];
-                } else if (course.youtube_url.includes('youtube.com/embed/')) {
-                    videoId = course.youtube_url.split('embed/')[1].split('?')[0];
+                if (firstLessonYoutubeUrl.includes('youtu.be/')) {
+                    videoId = firstLessonYoutubeUrl.split('youtu.be/')[1].split('?')[0];
+                } else if (firstLessonYoutubeUrl.includes('youtube.com/watch?v=')) {
+                    videoId = firstLessonYoutubeUrl.split('v=')[1].split('&')[0];
+                } else if (firstLessonYoutubeUrl.includes('youtube.com/embed/')) {
+                    videoId = firstLessonYoutubeUrl.split('embed/')[1].split('?')[0];
                 }
                 
+                console.log('Extracted video ID:', videoId);
+                
                 if (videoId) {
-                    videoContainer.src = `https://www.youtube.com/embed/${videoId}`;
+                    // Add parameters to prevent infinite loading and enable controls
+                    videoIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
+                    videoIframe.style.display = 'block';
+                    if (videoPlaceholder) videoPlaceholder.style.display = 'none';
+                } else {
+                    videoIframe.style.display = 'none';
+                    if (videoPlaceholder) videoPlaceholder.style.display = 'flex';
                 }
+            } else {
+                if (videoIframe) videoIframe.style.display = 'none';
+                if (videoPlaceholder) videoPlaceholder.style.display = 'flex';
             }
             
             // Update lesson header - Use first lesson's data if available
@@ -2652,11 +2608,19 @@
                 const lessonNum = `${weekNum}.${dayNum}`;
                 const lessonTitle = firstLesson.lesson_title || firstLesson.title || course.title;
                 
+                // Format duration from first lesson or course
+                let durationDisplay = firstLesson.duration || course.duration;
+                if (typeof durationDisplay === 'number') {
+                    durationDisplay = durationDisplay + ' hours';
+                } else if (!durationDisplay) {
+                    durationDisplay = 'N/A';
+                }
+                
                 lessonHeader.innerHTML = `
                     <div class="lesson-number-badge"><i class="bi bi-play-circle"></i> Week ${weekNum}</div>
                     <h1 class="lesson-main-title">${lessonNum} ${lessonTitle}</h1>
                     <div class="lesson-info-bar">
-                        <div class="lesson-info-item"><i class="bi bi-clock"></i><span>${course.duration}</span></div>
+                        <div class="lesson-info-item"><i class="bi bi-clock"></i><span>${durationDisplay}</span></div>
                         <div class="lesson-info-item"><i class="bi bi-person"></i><span>${course.instructor}</span></div>
                         <div class="lesson-info-item"><i class="bi bi-star-fill"></i><span>${course.rating} Rating</span></div>
                     </div>
@@ -2739,20 +2703,42 @@
             
             // Update video player with actual YouTube URL
             const videoIframe = document.querySelector('#embedded-course .video-container iframe');
-            if (videoIframe && lesson.youtube_url) {
+            const videoPlaceholder = document.querySelector('#embedded-course .video-container .video-placeholder');
+            
+            // Check both youtube_url and youtubeUrl (different formats)
+            const lessonYoutubeUrl = lesson.youtube_url || lesson.youtubeUrl;
+            
+            console.log('Lesson YouTube URL:', lessonYoutubeUrl);
+            
+            if (lessonYoutubeUrl) {
                 // Extract YouTube video ID and embed
                 let videoId = '';
-                if (lesson.youtube_url.includes('youtu.be/')) {
-                    videoId = lesson.youtube_url.split('youtu.be/')[1].split('?')[0];
-                } else if (lesson.youtube_url.includes('youtube.com/watch?v=')) {
-                    videoId = lesson.youtube_url.split('v=')[1].split('&')[0];
-                } else if (lesson.youtube_url.includes('youtube.com/embed/')) {
-                    videoId = lesson.youtube_url.split('embed/')[1].split('?')[0];
+                if (lessonYoutubeUrl.includes('youtu.be/')) {
+                    videoId = lessonYoutubeUrl.split('youtu.be/')[1].split('?')[0];
+                } else if (lessonYoutubeUrl.includes('youtube.com/watch?v=')) {
+                    videoId = lessonYoutubeUrl.split('v=')[1].split('&')[0];
+                } else if (lessonYoutubeUrl.includes('youtube.com/embed/')) {
+                    videoId = lessonYoutubeUrl.split('embed/')[1].split('?')[0];
                 }
                 
-                if (videoId) {
-                    videoIframe.src = `https://www.youtube.com/embed/${videoId}`;
+                console.log('Extracted video ID:', videoId);
+                
+                if (videoId && videoIframe) {
+                    // Add parameters to prevent infinite loading and enable proper controls
+                    videoIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
+                    videoIframe.style.display = 'block';
+                    if (videoPlaceholder) videoPlaceholder.style.display = 'none';
+                } else {
+                    if (videoIframe) videoIframe.style.display = 'none';
+                    if (videoPlaceholder) videoPlaceholder.style.display = 'flex';
                 }
+            } else {
+                // No video URL for this lesson
+                if (videoIframe) {
+                    videoIframe.src = '';
+                    videoIframe.style.display = 'none';
+                }
+                if (videoPlaceholder) videoPlaceholder.style.display = 'flex';
             }
             
             // Update lesson title and info under video
@@ -2770,15 +2756,44 @@
             // Update lesson info bar
             const lessonInfoBar = document.querySelector('#embedded-course .lesson-info-bar');
             if (lessonInfoBar) {
+                // Format duration properly - handle both numeric (hours) and string formats
+                let durationDisplay = lesson.duration;
+                if (typeof durationDisplay === 'number') {
+                    durationDisplay = durationDisplay + ' hours';
+                } else if (!durationDisplay) {
+                    durationDisplay = 'N/A';
+                }
+                
                 lessonInfoBar.innerHTML = `
-                    <div class="lesson-info-item"><i class="bi bi-clock"></i><span>${lesson.duration || 30} minutes</span></div>
-                    <div class="lesson-info-item"><i class="bi bi-camera-video"></i><span>${lesson.duration || 30} min video</span></div>
+                    <div class="lesson-info-item"><i class="bi bi-clock"></i><span>${durationDisplay}</span></div>
+                    <div class="lesson-info-item"><i class="bi bi-person"></i><span>${currentCourse.instructor}</span></div>
                     <div class="lesson-info-item"><i class="bi bi-calendar-week"></i><span>Week ${lesson.week}, Day ${lesson.day}</span></div>
                 `;
             }
             
             // NEW: Update content tabs with lesson-specific data
             updateLessonContentTabs(lesson);
+            
+            // Switch to Overview tab to show the updated content
+            const overviewTab = document.getElementById('embedded-tab-0');
+            const contentTab = document.getElementById('embedded-tab-1');
+            const notesTab = document.getElementById('embedded-tab-2');
+            const resourcesTab = document.getElementById('embedded-tab-3');
+            
+            if (overviewTab) overviewTab.classList.add('active');
+            if (contentTab) contentTab.classList.remove('active');
+            if (notesTab) notesTab.classList.remove('active');
+            if (resourcesTab) resourcesTab.classList.remove('active');
+            
+            // Update tab buttons to show Overview as active
+            const tabButtons = document.querySelectorAll('#embedded-course .tab-button');
+            tabButtons.forEach((button, index) => {
+                if (index === 0) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
             
             // Update active lesson in the sidebar list
             document.querySelectorAll('#embedded-course .lesson-item').forEach((item, index) => {
@@ -2807,6 +2822,67 @@
             
             updateStats();
             renderInProgressCourses();
+            
+            // Update navigation buttons
+            updateNavigationButtons(lessonIndex);
+        }
+        
+        // Update navigation buttons state
+        function updateNavigationButtons(currentIndex) {
+            const prevBtn = document.querySelector('.nav-btn-prev');
+            const nextBtn = document.querySelector('.nav-btn-next');
+            
+            if (!currentCourse || !currentCourse.lessons) return;
+            
+            const totalLessons = currentCourse.lessons.length;
+            
+            // Update Previous button
+            if (prevBtn) {
+                if (currentIndex > 0) {
+                    prevBtn.disabled = false;
+                    prevBtn.style.opacity = '1';
+                    prevBtn.style.cursor = 'pointer';
+                    prevBtn.onclick = () => navigateToPreviousLesson(currentIndex);
+                } else {
+                    prevBtn.disabled = true;
+                    prevBtn.style.opacity = '0.5';
+                    prevBtn.style.cursor = 'not-allowed';
+                    prevBtn.onclick = null;
+                }
+            }
+            
+            // Update Next button
+            if (nextBtn) {
+                if (currentIndex < totalLessons - 1) {
+                    nextBtn.disabled = false;
+                    nextBtn.style.opacity = '1';
+                    nextBtn.style.cursor = 'pointer';
+                    nextBtn.onclick = () => navigateToNextLesson(currentIndex);
+                } else {
+                    nextBtn.disabled = true;
+                    nextBtn.style.opacity = '0.5';
+                    nextBtn.style.cursor = 'not-allowed';
+                    nextBtn.onclick = null;
+                }
+            }
+        }
+        
+        // Navigate to previous lesson
+        function navigateToPreviousLesson(currentIndex) {
+            if (currentIndex > 0) {
+                playLesson(currentIndex - 1);
+                // Scroll to top of content
+                document.querySelector('.content-area').scrollTop = 0;
+            }
+        }
+        
+        // Navigate to next lesson
+        function navigateToNextLesson(currentIndex) {
+            if (currentCourse && currentIndex < currentCourse.lessons.length - 1) {
+                playLesson(currentIndex + 1);
+                // Scroll to top of content
+                document.querySelector('.content-area').scrollTop = 0;
+            }
         }
         
         // Update content tabs with lesson-specific data
@@ -2848,31 +2924,31 @@
             if (overviewTab) {
                 let overviewHTML = '';
                 
-                // The Stakes (lesson-specific)
+                // Why This Matters (lesson-specific)
                 if (lesson.intro_stakes) {
                     overviewHTML += `
                         <div class="content-section">
-                            <h2 class="section-title"><i class="bi bi-lightbulb"></i> The Stakes</h2>
+                            <h2 class="section-title"><i class="bi bi-lightbulb"></i> Why This Matters</h2>
                             <div class="section-content">${renderMarkdownContent(lesson.intro_stakes)}</div>
                         </div>
                     `;
                 }
                 
-                // Reflection Activity (lesson-specific)
+                // Learning Objectives (lesson-specific)
                 if (lesson.intro_reflection) {
                     overviewHTML += `
                         <div class="activity-box">
-                            <div class="activity-title"><i class="bi bi-question-circle"></i> Reflection Activity</div>
+                            <div class="activity-title"><i class="bi bi-bullseye"></i> Learning Objectives</div>
                             <div class="activity-content">${renderMarkdownContent(lesson.intro_reflection)}</div>
                         </div>
                     `;
                 }
                 
-                // Learning Objectives (lesson-specific)
+                // What You'll Learn (lesson-specific objectives list)
                 if (objectives.length > 0) {
                     overviewHTML += `
                         <div class="content-section">
-                            <h2 class="section-title"><i class="bi bi-list-check"></i> Learning Objectives</h2>
+                            <h2 class="section-title"><i class="bi bi-list-check"></i> What You'll Learn</h2>
                             <div class="section-content">
                                 <ul>
                                     ${objectives.map(obj => `<li>${obj}</li>`).join('')}
