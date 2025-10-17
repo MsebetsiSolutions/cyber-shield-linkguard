@@ -63,7 +63,6 @@
         <button class="btn sm" id="btnExport"><i class="bi bi-download"></i> Export</button>
         <button class="btn sm ghost" id="btnQuickCsv"><i class="bi bi-filetype-csv"></i> Events 24h CSV</button>
       </div>
-      <small class="muted">Backend: <code>POST /api/reports/export</code> returns a file; <code>/api/reports/kpis</code> returns KPI JSON.</small>
     </div>
   </div>
 </div>
@@ -124,7 +123,6 @@
         <button class="btn sm" id="btnCmpApply"><i class="bi bi-funnel"></i> Apply</button>
         <button class="btn sm ghost" id="btnCmpClear"><i class="bi bi-eraser"></i> Clear</button>
       </div>
-      <small class="muted">Backend: <code>POST /api/compliance/list</code> returns rows like Tkinter: (ID, Policy Name, Status, Framework, Owner, LastAudit, EvidenceURL)</small>
     </div>
   </div>
 
@@ -181,7 +179,6 @@
       <div style="display:flex;gap:8px;margin-top:8px">
         <button class="btn sm" id="btnCreateSchedule"><i class="bi bi-calendar-plus"></i> Create</button>
       </div>
-      <small class="muted">Backend: <code>POST /api/reports/schedule</code> to store & deliver on cadence (email/webhook).</small>
     </div>
 
     <div class="card">
@@ -209,7 +206,7 @@
   let kpiChart = null;
 
   async function loadKpis(){
-    // Backend returns: { incidents7, closed7, mttr, mttr_p95, trend:{labels:[], incidents:[], alerts:[]} }
+    // Backend returns
     const r = await fetch("/api/reports/kpis", {method:"POST"}).catch(()=>null);
     const data = r ? await r.json().catch(()=>({})) : {};
     kpi.inc7.textContent = data.incidents7 ?? "--";
@@ -404,7 +401,7 @@
   });
 
   async function loadSchedules(){
-    // Backend returns: { schedules:[{id,type,cadence,format,recipients,next_run}] }
+    // Backend returns
     const r = await fetch("/api/reports/schedules", {method:"POST"}).catch(()=>null);
     const data = r ? await r.json().catch(()=>({schedules:[]})) : {schedules:[]};
     sch.table.innerHTML = "";
