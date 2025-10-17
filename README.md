@@ -103,6 +103,28 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |      |     ├── routes_reports.py
         |      |     └── routes_settings.py
         |      |
+        │      ├── templates/ 
+        |      |     ├── assets/
+        |      |     |     
+        |      |     ├── exam_dashbaord.html
+        |      |     ├── exam_question.html
+        |      |     ├── exam_results.html
+        |      |     └── exam_reviews.html
+        |      |
+        │      ├── questions/ 
+        |      |     ├── week1_questions.json
+        |      |     ├── week2_questions.json
+        |      |     ├── week3_questions.json
+        |      |     ├── week4_questions.json
+        |      |     ├── week5_questions.json
+        |      |     ├── week6_questions.json
+        |      |     ├── week7_questions.json
+        |      |     ├── week8_questions.json
+        |      |     ├── week9_questions.json
+        |      |     ├── week10_questions.json
+        |      |     ├── week11_questions.json
+        |      |     └── week12_questions.json
+        |      |
         │      └── public/ 
         |            ├── assets/
         |            |
