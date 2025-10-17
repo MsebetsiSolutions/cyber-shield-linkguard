@@ -17,6 +17,10 @@ Cyber Shield LinkGuard is a cross-platform cybersecurity tool designed to protec
 - **Responsive Design** – Works seamlessly on mobile and desktop
 - **Cyber Shield Community** – System assistance and troubleshooting, Reporting bugs and issues, Sharing ideas and suggestions, Community support and discussions
 
+
+---
+
+
 ## Quick Start
 ### 1. Create virtual environment
     ```bash        
@@ -31,10 +35,11 @@ Cyber Shield LinkGuard is a cross-platform cybersecurity tool designed to protec
             python app.py
 
 
-
-
-
 Open http://127.0.0.1:5000 in your browser.
+
+
+---
+
 
 ## Deploy
 Any VPS/Platform-as-a-Service works.
@@ -46,15 +51,20 @@ web: gunicorn -w 2 -b 0.0.0.0:$PORT app:app
 Demo Authentication
 This build includes simple localStorage-based demo authentication (Login/Sign). Do not use for production without proper security enhancements.
 
+
+---
+
+
 ## Project Structure
         cyber-shield-linkguard/
         |
-        ├── cyber-shield-linkguard/
+        ├── cyber-shield/
         |      |
         |      ├── app.py  
         |      ├── Procfile
         |      ├── apt.txt
         |      ├── requirements.txt 
+        |      ├── soc_dashboard.db
         |      ├── .gitignore
         |      ├── .env
         |      |
@@ -67,11 +77,53 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |      |     ├── _pycache_/
         |      |     ├── subscription.py
         |      |     ├── teamCollab.py
+        |      |     ├── learning_hub.py
         |      |     ├── admin.py
+        |      |     ├── enterprise.py
         |      |     ├── scan_results.py
+        |      |     ├── course_upload.py.bak
+        |      |     ├── profile.py
+        |      |     ├── email_phishing.py
         |      |     ├── settings.py
         |      |     ├── chats.py
         |      |     └── authentication.py
+        |      |
+        │      ├── backend/ 
+        |      |     ├── _pycache_/
+        |      |     ├── routes_database.py
+        |      |     ├── routes_monitoring.py
+        |      |     ├── routes_pentesting.py
+        |      |     ├── database.py
+        |      |     ├── monitoring.py
+        |      |     ├── pentesting.py
+        |      |     ├── routes_alerts.py
+        |      |     ├── routes_host.py
+        |      |     ├── routes_intel.py
+        |      |     ├── routes_monitor.py
+        |      |     ├── routes_reports.py
+        |      |     └── routes_settings.py
+        |      |
+        │      ├── templates/ 
+        |      |     ├── assets/
+        |      |     |     
+        |      |     ├── exam_dashbaord.html
+        |      |     ├── exam_question.html
+        |      |     ├── exam_results.html
+        |      |     └── exam_reviews.html
+        |      |
+        │      ├── questions/ 
+        |      |     ├── week1_questions.json
+        |      |     ├── week2_questions.json
+        |      |     ├── week3_questions.json
+        |      |     ├── week4_questions.json
+        |      |     ├── week5_questions.json
+        |      |     ├── week6_questions.json
+        |      |     ├── week7_questions.json
+        |      |     ├── week8_questions.json
+        |      |     ├── week9_questions.json
+        |      |     ├── week10_questions.json
+        |      |     ├── week11_questions.json
+        |      |     └── week12_questions.json
         |      |
         │      └── public/ 
         |            ├── assets/
@@ -108,10 +160,45 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     ├── cyber-awareness.css
         |            |     └── cyber-awareness.js
         |            |
+        |            ├── Modules/
+        |            |     ├── modules.css
+        |            |     ├── modules.js
+        |            |     ├── modules.html
+        |            |     ├── week1.html
+        |            |     ├── week2.html
+        |            |     ├── week6.html
+        |            |     ├── week7.html
+        |            |     ├── week8.html
+        |            |     ├── week9.html
+        |            |     └── week11.html
+        |            |
         |            ├── ScannerDash/        
         |            |     ├── ScannerDash.html
         |            |     ├── ScannerDash.css
         |            |     └── ScannerDash.js
+        |            |
+        |            ├── soc/        
+        |            |     |
+        |            |     ├── assets/
+        |            |     |      ├── css/
+        |            |     |      |    └── style.css
+        |            |     |      |
+        |            |     |      └── js/
+        |            |     |           ├── data/
+        |            |     |           |    └── sample-data.js
+        |            |     |           |
+        |            |     |           ├── monitoring.js
+        |            |     |           └── app.js
+        |            |     |
+        |            |     ├── pages/
+        |            |     |      ├── alerts.html
+        |            |     |      ├── intel.html
+        |            |     |      ├── monitoring.html
+        |            |     |      ├── pentesting.html
+        |            |     |      ├── reports.html
+        |            |     |      └── settings.html
+        |            |     |
+        |            |     └── index.html
         |            |
         |            ├── shareTeamCollab/        
         |            |     ├── shareTeamCollab.html
@@ -153,7 +240,7 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |          ├── wodfbowef.css
         |            |          └── wodfbowef.js
         |            |
-        |            ├── index.html      
+        |            ├── index.html
         |            ├── logg.js
         |            ├── manifest.json
         |            ├── session.js
@@ -161,7 +248,7 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            ├── sitemap.xml
         |            ├── sw.js
         |            └── theme.css
-        |                
+        |
         ├── SECURITY.md
         |
         └── README.md
@@ -169,3 +256,4 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
 
 
 ---
+
