@@ -2759,32 +2759,21 @@
             .then(function(data) {
                 console.log('Success:', data);
                 
-                // Reset form first
-                resetForm();
-                
-                // Show success message
-                const successMessage = `
-                    <div style="text-align: center;">
-                        <i class="bi bi-check-circle-fill" style="font-size: 48px; color: #28a745;"></i>
-                        <h3>Course Saved Successfully!</h3>
-                        <p>Course "<strong>${title}</strong>" has been created.</p>
-                        <p style="color: var(--gray); margin-top: 1rem;">
-                            <i class="bi bi-info-circle"></i> 
-                            Now you can add lessons to this course using the "Upload Lesson" tab.
-                        </p>
-                    </div>
-                `;
-                showAlert('upload-alert', successMessage, 'success');
+                // Show success message FIRST (before resetting form)
+                alert(`✅ Course "${title}" has been created successfully!\n\nYou can now add lessons to this course using the "Upload Lesson" tab.`);
                 
                 // Update UI
                 loadCourses();  // Reload courses list
                 loadCourseTitles();  // Refresh course titles for lesson dropdown
                 updateDashboardStats();
                 
-                // Switch to upload-lesson tab after a short delay to encourage adding lessons
+                // Reset form after showing alert
+                resetForm();
+                
+                // Switch to upload-lesson tab
                 setTimeout(() => {
                     switchTab('upload-lesson');
-                }, 2000);
+                }, 500);
             })
             .catch(function(error) {
                 console.error('Error:', error);
@@ -3692,6 +3681,15 @@
         // Show alert message at the bottom of the page
         function showAlert(containerId, message, type) {
             const alertContainer = document.getElementById(containerId);
+            
+            // Safety check - if element doesn't exist, log error and return
+            if (!alertContainer) {
+                console.error(`Alert container '${containerId}' not found`);
+                console.log('Message was:', message);
+                alert(message); // Fallback to browser alert
+                return;
+            }
+            
             alertContainer.innerHTML = message;  // Use innerHTML to support styled content
             alertContainer.className = `alert alert-${type}`;
             alertContainer.classList.remove('hidden');
