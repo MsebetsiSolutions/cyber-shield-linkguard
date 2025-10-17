@@ -433,6 +433,67 @@ def upload_course():
         traceback.print_exc()
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
+@learning_hub_bp.route('/courses/publish', methods=['POST'])
+def publish_course():
+    """Update all lessons in a course to 'published' status"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        course_title = data.get('title')
+        new_status = data.get('status', 'published')
+        
+        if not course_title:
+            return jsonify({'error': 'Course title is required'}), 400
+        
+        print("=" * 80)
+        print(f"PUBLISH COURSE - Updating status:")
+        print(f"  Course Title: {course_title}")
+        print(f"  New Status: {new_status}")
+        
+        conn = sqlite3.connect('cyber-shield-linkguard.db')
+        cursor = conn.cursor()
+        
+        # Check if course exists
+        cursor.execute('SELECT COUNT(*) FROM course WHERE title = ?', (course_title,))
+        count = cursor.fetchone()[0]
+        
+        if count == 0:
+            conn.close()
+            return jsonify({'error': f'No lessons found for course: {course_title}'}), 404
+        
+        # Update all lessons in the course to published status
+        cursor.execute('''
+            UPDATE course 
+            SET status = ?, updated_at = ?
+            WHERE title = ?
+        ''', (new_status, datetime.now().isoformat(), course_title))
+        
+        updated_count = cursor.rowcount
+        conn.commit()
+        conn.close()
+        
+        print(f"✓ Updated {updated_count} lesson(s) in course '{course_title}' to status: {new_status}")
+        print("=" * 80)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Course published successfully',
+            'updated_count': updated_count,
+            'course_title': course_title,
+            'status': new_status
+        }), 200
+        
+    except sqlite3.Error as e:
+        print(f"Database error in publish_course: {str(e)}")
+        return jsonify({'error': 'Database error occurred'}), 500
+    except Exception as e:
+        print(f"Error in publish_course: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+
 @learning_hub_bp.route('/courses/<course_id>', methods=['GET'])
 def get_course(course_id):
     """Get a single course/lesson by ID"""

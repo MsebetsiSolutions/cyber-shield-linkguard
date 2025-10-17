@@ -243,6 +243,28 @@
             padding: 2rem;
         }
 
+        /* User Greeting */
+        .user-greeting {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 1rem;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-greeting h2 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+
+        .user-greeting p {
+            margin: 0;
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
         .welcome {
             text-align: center;
             margin-bottom: 3rem;
@@ -1126,7 +1148,7 @@
                     <a href="#" onclick="showHomePage()">Home</a>
                     <a href="#" onclick="showMyLearning()">My Learning</a>
                     <a href="#" onclick="switchTab('all-courses')">Browse</a>
-                    <a href="#">Community</a>
+                    <a href="#" style="display: none;">Community</a>
                 </nav>
             </div>
             <div class="header-right">
@@ -1185,10 +1207,10 @@
 
     <!-- Main Content -->
     <main class="main" id="main-content">
-        <!-- Welcome Section -->
-        <div class="welcome">
-            <h2 id="mainWelcomeMessage">Welcome to LearnHub Cybersecurity! 👋</h2>
-            <p>Master cybersecurity with our comprehensive 6-month training program</p>
+        <!-- User Greeting -->
+        <div class="user-greeting" id="userGreeting" style="display: none;">
+            <h2 id="greetingMessage">Welcome back!</h2>
+            <p>Continue your learning journey and achieve your cybersecurity goals</p>
         </div>
 
         <!-- Stats Grid -->
@@ -1615,6 +1637,8 @@
             .content-section { background: white; border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem; }
             .section-title { font-size: 1.25rem; font-weight: 700; color: var(--dark); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
             .section-title i { color: var(--primary); }
+            .section-image-container { margin: 1rem 0; text-align: center; }
+            .section-image { max-width: 100%; height: auto; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
             .section-content { color: var(--dark); line-height: 1.8; }
             .section-content p { margin-bottom: 1rem; }
             .section-content ul { margin-left: 1.5rem; margin-bottom: 1rem; }
@@ -1649,6 +1673,9 @@
             .activity-content code, .case-study-content code { background: rgba(0,0,0,0.1); padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-family: 'Courier New', monospace; font-size: 0.875em; }
             .activity-content ul, .activity-content ol, .case-study-content ul, .case-study-content ol { margin: 0.5rem 0; padding-left: 1.5rem; }
             .activity-content li, .case-study-content li { margin: 0.25rem 0; }
+            .activity-content table, .case-study-content table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+            .activity-content th, .activity-content td, .case-study-content th, .case-study-content td { border: 1px solid var(--border); padding: 0.5rem; text-align: left; }
+            .activity-content th, .case-study-content th { background: rgba(0,0,0,0.1); font-weight: 600; }
             .activity-box { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 4px solid var(--warning); border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.5rem; }
             .activity-title { font-weight: 700; color: #92400e; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
             .activity-content { color: #78350f; line-height: 1.7; }
@@ -2968,10 +2995,17 @@
                 
                 // Sections (lesson-specific)
                 sections.forEach(section => {
+                    const sectionImageHTML = section.image ? `
+                        <div class="section-image-container">
+                            <img src="${section.image}" alt="${section.title}" class="section-image">
+                        </div>
+                    ` : '';
+                    
                     contentHTML += `
                         <div class="content-section">
                             <h2 class="section-title"><i class="bi bi-shield-check"></i> ${section.title}</h2>
                             <div class="section-content">${renderMarkdownContent(section.content)}</div>
+                            ${sectionImageHTML}
                         </div>
                     `;
                 });
@@ -3258,42 +3292,74 @@
         }
 
         function loadUserInfo() {
-            // Check if user is logged in
-            const userData = sessionStorage.getItem('userData') || localStorage.getItem('userData');
-            const welcomeMessage = document.getElementById('welcomeMessage');
-            const mainWelcomeMessage = document.getElementById('mainWelcomeMessage');
-            
-            if (userData) {
-                try {
-                    const user = JSON.parse(userData);
-                    const firstName = user.firstName || user.first_name || 'User';
+            // Fetch user information from API
+            fetch('/api/auth/me', {
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                const welcomeMessage = document.getElementById('welcomeMessage');
+                const greetingMessage = document.getElementById('greetingMessage');
+                const userGreeting = document.getElementById('userGreeting');
+                
+                if (data.authenticated && data.full_name) {
+                    // Extract first name from full name
+                    const firstName = data.full_name.split(' ')[0];
                     
+                    // Update dropdown welcome message
                     if (welcomeMessage) {
                         welcomeMessage.textContent = `Welcome, ${firstName}!`;
                     }
                     
-                    if (mainWelcomeMessage) {
-                        mainWelcomeMessage.textContent = `Welcome back, ${firstName}! 👋`;
+                    // Update main greeting message
+                    if (greetingMessage) {
+                        // Get time-based greeting
+                        const hour = new Date().getHours();
+                        let timeGreeting = 'Good evening';
+                        if (hour < 12) {
+                            timeGreeting = 'Good morning';
+                        } else if (hour < 18) {
+                            timeGreeting = 'Good afternoon';
+                        }
+                        
+                        greetingMessage.textContent = `${timeGreeting}, ${firstName}! 👋`;
                     }
-                } catch (error) {
-                    console.error('Error parsing user data:', error);
-                    // Set default values if parsing fails
+                    
+                    // Show the greeting section
+                    if (userGreeting) {
+                        userGreeting.style.display = 'block';
+                    }
+                } else {
+                    // Fallback for non-authenticated users
                     if (welcomeMessage) {
-                        welcomeMessage.textContent = 'Welcome, User!';
+                        welcomeMessage.textContent = 'Welcome to LearnHub!';
                     }
-                    if (mainWelcomeMessage) {
-                        mainWelcomeMessage.textContent = 'Welcome to LearnHub! 👋';
+                    if (greetingMessage) {
+                        greetingMessage.textContent = 'Welcome to LearnHub! 👋';
+                    }
+                    // Show greeting even for non-authenticated users
+                    if (userGreeting) {
+                        userGreeting.style.display = 'block';
                     }
                 }
-            } else {
-                // Set default values for users without stored data
+            })
+            .catch(error => {
+                console.error('Error loading user info:', error);
+                // Set default values on error
+                const welcomeMessage = document.getElementById('welcomeMessage');
+                const greetingMessage = document.getElementById('greetingMessage');
+                const userGreeting = document.getElementById('userGreeting');
+                
                 if (welcomeMessage) {
                     welcomeMessage.textContent = 'Welcome to LearnHub!';
                 }
-                if (mainWelcomeMessage) {
-                    mainWelcomeMessage.textContent = 'Welcome to LearnHub Cybersecurity! 👋';
+                if (greetingMessage) {
+                    greetingMessage.textContent = 'Welcome to LearnHub! 👋';
                 }
-            }
+                if (userGreeting) {
+                    userGreeting.style.display = 'block';
+                }
+            });
         }
 
         // Close modals on overlay click
