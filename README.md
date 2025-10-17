@@ -160,6 +160,18 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     ├── cyber-awareness.css
         |            |     └── cyber-awareness.js
         |            |
+        |            ├── Modules/
+        |            |     ├── modules.css
+        |            |     ├── modules.js
+        |            |     ├── modules.html
+        |            |     ├── week1.html
+        |            |     ├── week2.html
+        |            |     ├── week6.html
+        |            |     ├── week7.html
+        |            |     ├── week8.html
+        |            |     ├── week9.html
+        |            |     └── week11.html
+        |            |
         |            ├── ScannerDash/        
         |            |     ├── ScannerDash.html
         |            |     ├── ScannerDash.css
