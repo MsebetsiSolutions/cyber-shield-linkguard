@@ -9,6 +9,7 @@ from PIL import Image
 import cv2
 import numpy as np
 import sqlite3
+from routes.exam import exam_bp
 
 
 # Try to import QR code libraries with fallbacks
@@ -82,6 +83,7 @@ app.register_blueprint(team_collab_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(enterprise_bp)
 app.register_blueprint(learning_hub_bp)
+app.register_blueprint(exam_bp)
 
 # registering email phishing blueprint
 app.register_blueprint(email_phishing_bp, url_prefix='/api/phishing')
