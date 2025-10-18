@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Network & Cryptography Security Masterclass</title>
+<style>
+ * {margin: 0; padding: 0; box-sizing: border-box;}
+ body {font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; background: #f5f5f5; color: #333;}
+ .container {max-width: 1200px; margin: 0 auto; padding: 20px;}
+ header {background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative; overflow: hidden;}
+ header h1 {font-size: 2.5em; margin-bottom: 10px; position: relative; z-index: 2;}
+ header p {font-size: 1.1em; opacity: 0.9; position: relative; z-index: 2;}
+ .header-decoration {position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%;}
+ .header-decoration:nth-child(2) {top: auto; bottom: -30px; left: -30px; width: 150px; height: 150px;}
+ nav {background: white; padding: 15px 0; margin-bottom: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-radius: 8px; position: sticky; top: 0; z-index: 100;}
+ nav ul {list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 0 20px;}
+ nav button {background: none; border: none; padding: 10px 20px; cursor: pointer; font-size: 1em; color: #667eea; font-weight: 600; transition: all 0.3s; border-radius: 5px; position: relative; overflow: hidden;}
+ nav button::after {content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 3px; background: #667eea; transition: width 0.3s;}
+ nav button:hover::after {width: 100%;}
+ nav button:hover {background: #f0f0f0; color: #764ba2;}
+ nav button.active {background: #667eea; color: white;}
+ nav button.active::after {width: 100%; background: white;}
+ section {background: white; padding: 30px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.3s, box-shadow 0.3s;}
+ section:hover {transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1);}
+ h2 {color: #667eea; font-size: 1.8em; margin-bottom: 20px; border-bottom: 3px solid #667eea; padding-bottom: 10px;}
+ h3 {color: #764ba2; font-size: 1.4em; margin-top: 25px; margin-bottom: 15px;}
+ h4 {color: #333; font-size: 1.1em; margin-top: 15px; margin-bottom: 10px;}
+ .content-block {background: #f9f9f9; padding: 20px; border-left: 5px solid #667eea; border-radius: 5px; margin-bottom: 20px; transition: transform 0.3s;}
+ .content-block:hover {transform: translateX(5px);}
+ .content-block p {margin-bottom: 15px; line-height: 1.8;}
+ .module-section {display: none; animation: fadeIn 0.5s;}
+ .module-section.active {display: block;}
+ @keyframes fadeIn {from {opacity: 0;} to {opacity: 1;}}
+ .video-container {position: relative; width: 100%; padding-bottom: 56.25%; margin: 20px 0; background: #000; border-radius: 8px; overflow: hidden;}
+ .video-container iframe {position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;}
+ .quiz-container {background: #f0f4ff; padding: 20px; border-radius: 8px; margin-top: 20px; border: 2px solid #667eea;}
+ .quiz-question {background: white; padding: 20px; margin-bottom: 20px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);}
+ .quiz-question h4 {color: #333; margin-bottom: 15px; font-weight: 600;}
+ .quiz-options {display: flex; flex-direction: column; gap: 10px;}
+ .option-label {display: flex; align-items: center; padding: 10px; background: white; border: 2px solid #ddd; border-radius: 5px; cursor: pointer; transition: all 0.3s;}
+ .option-label:hover {background: #f5f5f5; border-color: #667eea;}
+ .option-label input[type="radio"] {margin-right: 10px; cursor: pointer;}
+ .option-label input[type="radio"]:checked + span {font-weight: 600; color: #667eea;}
+ .quiz-results {background: #e8f5e9; padding: 15px; border-radius: 5px; margin-top: 20px; display: none; animation: slideDown 0.3s;}
+ .quiz-results.show {display: block;}
+ .quiz-results.incorrect {background: #ffebee;}
+ .result-text {font-size: 1.1em; font-weight: 600; margin-bottom: 10px;}
+ .result-text.correct {color: #2e7d32;}
+ .result-text.incorrect {color: #c62828;}
+ button {padding: 12px 25px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: 600; transition: all 0.3s; margin-top: 10px; position: relative; overflow: hidden;}
+ button::after {content: ''; position: absolute; top: 50%; left: 50%; width: 5px; height: 5px; background: rgba(255,255,255,0.5); opacity: 0; border-radius: 100%; transform: scale(1, 1) translate(-50%); transform-origin: 50% 50%;}
+ button:focus:not(:active)::after {animation: ripple 1s ease-out;}
+ button:hover {background: #764ba2; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);}
+ button.secondary {background: #999; margin-left: 10px;}
+ button.secondary:hover {background: #666;}
+ @keyframes ripple {0% {transform: scale(0, 0); opacity: 1;} 20% {transform: scale(25, 25); opacity: 1;} 100% {opacity: 0; transform: scale(40, 40);}}
+ @keyframes slideDown {from {transform: translateY(-10px); opacity: 0;} to {transform: translateY(0); opacity: 1;}}
+ .progress-section {background: #f0f4ff; padding: 20px; border-radius: 8px; margin-bottom: 20px;}
+ .progress-bar-container {background: #ddd; border-radius: 10px; height: 25px; overflow: hidden; margin: 10px 0; position: relative;}
+ .progress-bar {height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); width: 0%; transition: width 0.5s; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9em;}
+ .stats {display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;}
+ .stat-card {background: white; padding: 15px; border-radius: 5px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.3s;}
+ .stat-card:hover {transform: translateY(-5px);}
+ .stat-value {font-size: 2em; font-weight: 700; color: #667eea;}
+ .stat-label {color: #666; font-size: 0.9em; margin-top: 5px;}
+ .hidden {display: none;}
+ .success {color: #2e7d32; font-weight: 600;}
+ .error {color: #c62828; font-weight: 600;}
+ .subtopic-divider {border-top: 2px solid #ddd; margin: 40px 0 30px 0; padding-top: 30px;}
+ .certificate-section {background: #fff8e1; padding: 20px; border-radius: 8px; margin-top: 30px; border: 2px dashed #ffc107; text-align: center;}
+ .certificate-section h3 {color: #ff9800;}
+ .flashcard-container {perspective: 1000px; margin: 20px 0;}
+ .flashcard {width: 100%; height: 200px; position: relative; transform-style: preserve-3d; transition: transform 0.6s; cursor: pointer;}
+ .flashcard.flipped {transform: rotateY(180deg);}
+ .flashcard-front, .flashcard-back {position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);}
+ .flashcard-front {background: #667eea; color: white; font-weight: 600; font-size: 1.2em;}
+ .flashcard-back {background: #764ba2; color: white; transform: rotateY(180deg);}
+ .completion-badge {display: inline-block; background: #4caf50; color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.8em; margin-left: 10px; animation: pulse 2s infinite;}
+ @keyframes pulse {0% {box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);} 70% {box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);} 100% {box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);}}
+ .achievement-toast {position: fixed; bottom: 20px; right: 20px; background: #4caf50; color: white; padding: 15px 25px; border-radius: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; display: none; animation: slideInRight 0.5s, slideOutRight 0.5s 2.5s;}
+ @keyframes slideInRight {from {transform: translateX(100%); opacity: 0;} to {transform: translateX(0); opacity: 1;}}
+ @keyframes slideOutRight {from {transform: translateX(0); opacity: 1;} to {transform: translateX(100%); opacity: 0;}}
+ .bookmark {position: absolute; top: 10px; right: 10px; background: #ffc107; color: #333; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2em; transition: all 0.3s;}
+ .bookmark:hover {transform: scale(1.1);}
+ .bookmark.active {background: #ff9800; color: white;}
+ .protocol-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;}
+ .protocol-card {background: #f9f9f9; padding: 20px; border-radius: 8px; border-left: 5px solid #667eea;}
+ .protocol-card h4 {margin-top: 0; color: #667eea;}
+ .attack-warning {background: #ffebee; border-left: 5px solid #f44336; padding: 15px; margin: 20px 0; border-radius: 5px;}
+ .attack-warning h4 {color: #c62828;}
+ .tool-list {display: flex; flex-wrap: wrap; gap: 15px; margin: 20px 0;}
+ .tool-item {background: #e8f5e9; padding: 15px; border-radius: 5px; flex: 1; min-width: 200px;}
+ .tool-item h5 {color: #2e7d32; margin-top: 0;}
+ .mitigation-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;}
+ .mitigation-card {background: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 5px solid #4caf50;}
+ .mitigation-card h4 {margin-top: 0; color: #2e7d32;}
+ .lab-setup {background: #fff8e1; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 5px solid #ff9800;}
+ .lab-setup h4 {color: #ff9800; margin-top: 0;}
+ .step-by-step {background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 5px solid #2196f3;}
+ .step-by-step h4 {color: #1976d2; margin-top: 0;}
+ .ethical-note {background: #e8f5e9; border-left: 5px solid #4caf50; padding: 15px; margin: 20px 0; border-radius: 5px;}
+ .ethical-note h4 {color: #2e7d32; margin-top: 0;}
+ .crypto-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;}
+ .crypto-card {background: #f9f9f9; padding: 20px; border-radius: 8px; border-left: 5px solid #667eea;}
+ .crypto-card h4 {margin-top: 0; color: #667eea;}
+ .best-practice {background: #e8f5e9; border-left: 5px solid #4caf50; padding: 15px; margin: 20px 0; border-radius: 5px;}
+ .best-practice h4 {color: #2e7d32; margin-top: 0;}
+ .warning-note {background: #fff8e1; border-left: 5px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 5px;}
+ .warning-note h4 {color: #ff9800; margin-top: 0;}
+</style>
+</head>
+<body>
+
+<div class="container">
+ <header>
+ <div class="header-decoration"></div>
+ <div class="header-decoration"></div>
+ <h1>🔐 Global Network & Cryptography Security Masterclass</h1>
+ <p>Level: Intermediate → Advanced | Duration: Self-paced learning with interactive quizzes</p>
+ </header>
+
+ <nav>
+ <ul>
+ <li><button class="nav-btn active" onclick="showModule(1)">Module 1: TCP/IP</button></li>
+ <li><button class="nav-btn" onclick="showModule(2)">Module 2: VPNs</button></li>
+ <li><button class="nav-btn" onclick="showModule(3)">Module 3: Crypto</button></li>
+ <li><button class="nav-btn" onclick="showModule('progress')">Progress</button></li>
+ </ul>
+ </nav>
+
+ <!-- PROGRESS SECTION -->
+ <section id="progress" class="module-section">
+ <h2>📊 Your Learning Progress</h2>
+ <div class="progress-section">
+ <h3>Overall Completion</h3>
+ <div class="progress-bar-container">
+ <div id="overallProgress" class="progress-bar">0%</div>
+ </div>
+ <div class="stats">
+ <div class="stat-card">
+ <div class="stat-value" id="xpDisplay">0</div>
+ <div class="stat-label">XP Earned</div>
+ </div>
+ <div class="stat-card">
+ <div class="stat-value" id="quizzesCompleted">0</div>
+ <div class="stat-label">Quizzes Completed</div>
+ </div>
+ <div class="stat-card">
+ <div class="stat-value" id="averageScore">0%</div>
+ <div class="stat-label">Average Score</div>
+ </div>
+ <div class="stat-card">
+ <div class="stat-value" id="modulesProgress">0/3</div>
+ <div class="stat-label">Modules</div>
+ </div>
+ </div>
+ </div>
+ 
+ <div class="certificate-section" id="certificateSection" style="display: none;">
+ <h3>🎉 Congratulations!</h3>
+ <p>You've completed all modules with an average score of 70% or higher.</p>
+ <button onclick="generateCertificate()">Download Certificate</button>
+ </div>
+ </section>
+
+ <!-- MODULE 1 -->
+ <section id="module1" class="module-section active">
+ <button class="bookmark" onclick="toggleBookmark('module1')">🔖</button>
+ <h2>📡 Module 1: TCP/IP Deep Dive & Attack Surface Analysis</h2>
+
+ <!-- SUBTOPIC 1: Master TCP/IP Layers -->
+ <h3>Subtopic 1: Master TCP/IP Layers Relevant to Security</h3>
+
+ <div class="video-container">
+ <iframe src="https://www.youtube.com/embed/2QGgEk20RXM" allowfullscreen loading="lazy"></iframe>
+ </div>
+
+ <div class="content-block">
+ <h4>Understanding the TCP/IP Model</h4>
+ <p>To master TCP/IP layers for cybersecurity, start by understanding the four layers of the TCP/IP model: <strong>Application, Transport, Internet, and Network Access</strong>. Each layer plays a critical role in how data moves across networks.</p>
+
+ <h4>The Application Layer</h4>
+ <p>The Application layer includes protocols like HTTP, DNS, and SMTP, which are often targeted in phishing and malware attacks. Understanding these protocols and their vulnerabilities is essential for detecting and preventing attacks at this level.</p>
+
+ <h4>The Transport Layer</h4>
+ <p>The Transport layer, with TCP and UDP, manages data flow and integrity—knowing how attackers exploit ports and manipulate sessions here is key. This layer is critical for understanding connection establishment, session hijacking, and port-based attacks.</p>
+
+ <h4>The Internet Layer</h4>
+ <p>The Internet layer uses IP for routing, and understanding IP spoofing and packet crafting helps in threat detection. This layer is where many network-level attacks originate, making it vital for defensive strategies.</p>
+
+ <h4>The Network Access Layer</h4>
+ <p>Finally, the Network Access layer deals with physical transmission and MAC addresses, where attacks like ARP spoofing and sniffing occur. Mastery means not just knowing what each layer does, but how attackers exploit them and how defenders monitor, detect, and mitigate those threats.</p>
+
+ <h4>Deepening Your Skills</h4>
+ <p>To deepen your skills, practice packet analysis using tools like <strong>Wireshark</strong>, simulate attacks in lab environments, and study how firewalls, IDS/IPS, and VPNs interact with these layers. Focus on how protocols behave under normal conditions versus during an attack. Learn to read packet headers, identify anomalies, and understand how data encapsulation and de-encapsulation work. This layered knowledge forms the backbone of intrusion detection, forensic analysis, and secure network design.</p>
+ </div>
+
+ <!-- Interactive Flashcard -->
+ <div class="flashcard-container">
+ <div class="flashcard" onclick="this.classList.toggle('flipped')">
+ <div class="flashcard-front">
+ <p>What are the four layers of the TCP/IP model?</p>
+ </div>
+ <div class="flashcard-back">
+ <p>Application, Transport, Internet, and Network Access</p>
+ </div>
+ </div>
+ </div>
+
+ <div class="quiz-container">
+ <h3>✅ Quiz: TCP/IP Layers and Security</h3>
+ <p style="margin-bottom: 20px; color: #666;">Test your understanding of TCP/IP layers and their security implications. Answer all questions to complete the quiz.</p>
+
+ <div class="quiz-question">
+ <h4>1. What protocol operates at the Transport layer and ensures reliable delivery?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q1" value="a">
+ <span>TCP (Transmission Control Protocol)</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q1" value="b">
+ <span>DNS (Domain Name System)</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q1" value="c">
+ <span>IP (Internet Protocol)</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q1" value="d">
+ <span>MAC (Media Access Control)</span>
+ </label>
+ </div>
+ <div id="q1-result" class="quiz-results"></div>
+ </div>
+
+ <!-- Additional quiz questions would go here -->
+ <!-- For brevity, I'm including just one question in this example -->
+
+ <button onclick="submitQuiz('quiz1')">Submit Quiz</button>
+ <button class="secondary" onclick="resetQuiz('quiz1')">Reset Answers</button>
+ <div id="quiz1-score" style="margin-top: 20px; font-size: 1.2em; text-align: center; display: none;"></div>
+ </div>
+
+ <!-- SUBTOPIC 2: Protocol Attack Surfaces & Exploits -->
+ <div class="subtopic-divider"></div>
+ <h3>Subtopic 2: Identify Protocol Attack Surfaces & Exploits</h3>
+
+ <div class="video-container">
+ <iframe src="https://www.youtube.com/embed/8zSoyAmHHc4" allowfullscreen loading="lazy"></iframe>
+ </div>
+
+ <div class="content-block">
+ <h4>Understanding Protocol Attack Surfaces</h4>
+ <p>To identify protocol attack surfaces and exploits, you need to understand how communication protocols—like HTTP, DNS, FTP, SMTP, and even lower-level ones like TCP/IP—can be manipulated by attackers. A protocol attack surface refers to the parts of a protocol that are exposed to users or systems and can be exploited if not properly secured.</p>
+
+ <h4>Common Protocol Vulnerabilities</h4>
+ <div class="protocol-grid">
+ <div class="protocol-card">
+ <h4>HTTP Vulnerabilities</h4>
+ <p>HTTP is vulnerable to injection attacks like XSS (Cross-Site Scripting) and SQL injection, where malicious scripts or commands are injected into web applications.</p>
+ </div>
+ <div class="protocol-card">
+ <h4>DNS Vulnerabilities</h4>
+ <p>DNS can be exploited through cache poisoning or DNS tunneling, where attackers redirect traffic or exfiltrate data through DNS queries.</p>
+ </div>
+ <div class="protocol-card">
+ <h4>FTP Vulnerabilities</h4>
+ <p>FTP transmits credentials in plaintext, making it vulnerable to eavesdropping. It also lacks proper access controls in many implementations.</p>
+ </div>
+ <div class="protocol-card">
+ <h4>SMTP Vulnerabilities</h4>
+ <p>SMTP is often exploited for email spoofing, phishing attacks, and open relay abuse that allows spammers to send unauthorized emails.</p>
+ </div>
+ </div>
+
+ <p>Attackers often target misconfigurations, lack of encryption, or outdated protocol versions to gain unauthorized access or disrupt services.</p>
+
+ <div class="attack-warning">
+ <h4>⚠️ Common Attack Vectors</h4>
+ <p>Protocol attacks typically exploit:</p>
+ <ul>
+ <li>Missing or weak authentication mechanisms</li>
+ <li>Unencrypted data transmission</li>
+ <li>Buffer overflows in protocol implementations</li>
+ <li>Protocol version downgrade attacks</li>
+ <li>Man-in-the-middle attacks on unsecured channels</li>
+ </ul>
+ </div>
+
+ <h4>Mastering Protocol Analysis</h4>
+ <p>Mastering this area involves studying how protocols behave under normal and abnormal conditions. Learn to spot anomalies in packet structures, unexpected commands, or malformed requests.</p>
+
+ <h4>Essential Security Tools</h4>
+ <div class="tool-list">
+ <div class="tool-item">
+ <h5>Wireshark</h5>
+ <p>Network protocol analyzer for deep packet inspection and traffic analysis.</p>
+ </div>
+ <div class="tool-item">
+ <h5>Nmap</h5>
+ <p>Network discovery and security auditing tool for identifying open ports and services.</p>
+ </div>
+ <div class="tool-item">
+ <h5>Metasploit</h5>
+ <p>Penetration testing framework for developing and executing exploit code.</p>
+ </div>
+ </div>
+
+ <p>These tools can help simulate and analyze attacks. You should also understand how exploits evolve—for instance, how attackers use protocol fuzzing to discover zero-day vulnerabilities.</p>
+
+ <h4>Defense Strategy</h4>
+ <p>By mapping out which parts of a protocol are exposed and how they can be abused, you can better design defenses like:</p>
+ <ul>
+ <li><strong>Input validation</strong> - Sanitizing all user inputs to prevent injection attacks</li>
+ <li><strong>Encryption</strong> - Implementing TLS/SSL for data in transit</li>
+ <li><strong>Segmentation</strong> - Isolating network segments to limit attack propagation</li>
+ <li><strong>Protocol hardening</strong> - Disabling unnecessary protocols and services</li>
+ <li><strong>Monitoring</strong> - Implementing IDS/IPS to detect anomalous protocol behavior</li>
+ </ul>
+
+ <p>This comprehensive understanding forms the foundation of effective network security architecture and helps security professionals anticipate and prevent attacks before they can cause damage.</p>
+ </div>
+
+ <div class="quiz-container">
+ <h3>✅ Quiz: Protocol Attack Surfaces & Exploits</h3>
+ <p style="margin-bottom: 20px; color: #666;">Test your understanding of protocol vulnerabilities and attack surfaces. Answer all questions to complete the quiz.</p>
+
+ <div class="quiz-question">
+ <h4>1. What is a protocol attack surface?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q8" value="a">
+ <span>The parts of a protocol that are exposed to users or systems and can be exploited if not properly secured</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q8" value="b">
+ <span>A protective layer added to protocols</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q8" value="c">
+ <span>A type of encryption algorithm</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q8" value="d">
+ <span>A firewall rule set</span>
+ </label>
+ </div>
+ <div id="q8-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>2. How can DNS be exploited by attackers?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q9" value="a">
+ <span>Through cache poisoning or DNS tunneling to redirect traffic or exfiltrate data</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q9" value="b">
+ <span>By modifying TCP sequence numbers</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q9" value="c">
+ <span>By flooding SMTP servers</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q9" value="d">
+ <span>By hijacking MAC addresses</span>
+ </label>
+ </div>
+ <div id="q9-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>3. What type of attack targets the HTTP protocol with malicious scripts?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q10" value="a">
+ <span>XSS (Cross-Site Scripting)</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q10" value="b">
+ <span>SYN flood</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q10" value="c">
+ <span>ARP spoofing</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q10" value="d">
+ <span>DHCP starvation</span>
+ </label>
+ </div>
+ <div id="q10-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>4. Why is encryption important in securing protocol communications?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q11" value="a">
+ <span>It prevents eavesdropping and ensures data confidentiality, protecting against man-in-the-middle attacks</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q11" value="b">
+ <span>It speeds up network transmission</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q11" value="c">
+ <span>It reduces bandwidth usage</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q11" value="d">
+ <span>It eliminates the need for authentication</span>
+ </label>
+ </div>
+ <div id="q11-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>5. What tool can be used to analyze protocol traffic?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q12" value="a">
+ <span>Wireshark</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q12" value="b">
+ <span>Google Chrome</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q12" value="c">
+ <span>Microsoft Word</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q12" value="d">
+ <span>Adobe Photoshop</span>
+ </label>
+ </div>
+ <div id="q12-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>6. How does protocol fuzzing help attackers?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q13" value="a">
+ <span>It sends malformed or random data to discover vulnerabilities and zero-day exploits</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q13" value="b">
+ <span>It encrypts all network traffic</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q13" value="c">
+ <span>It authenticates users on a network</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q13" value="d">
+ <span>It compresses network packets</span>
+ </label>
+ </div>
+ <div id="q13-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>7. What is the risk of using outdated protocol versions?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q14" value="a">
+ <span>They may have known vulnerabilities that attackers can exploit without detection</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q14" value="b">
+ <span>They are too fast and consume too much bandwidth</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q14" value="c">
+ <span>They require more storage space</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q14" value="d">
+ <span>They are incompatible with modern operating systems</span>
+ </label>
+ </div>
+ <div id="q14-result" class="quiz-results"></div>
+ </div>
+
+ <button onclick="submitQuiz('quiz2')">Submit Quiz</button>
+ <button class="secondary" onclick="resetQuiz('quiz2')">Reset Answers</button>
+ <div id="quiz2-score" style="margin-top: 20px; font-size: 1.2em; text-align: center; display: none;"></div>
+ </div>
+ </section>
+
+ <!-- MODULE 2 -->
+ <section id="module2" class="module-section">
+ <button class="bookmark" onclick="toggleBookmark('module2')">🔖</button>
+ <h2>🔒 Module 2: VPN Technologies & Secure Tunneling</h2>
+
+ <!-- SUBTOPIC 1: Harden Network Components -->
+ <h3>Subtopic 1: Harden DHCP, NAT, Wireless, Email Transport and VPNs</h3>
+
+ <div class="video-container">
+ <iframe src="https://www.youtube.com/embed/E5bSumTAHZE" allowfullscreen loading="lazy"></iframe>
+ </div>
+
+ <div class="content-block">
+ <h4>Overview</h4>
+ <p>To harden key network components like DHCP, NAT, wireless, email transport, and VPNs, you need to understand their vulnerabilities and apply layered defenses.</p>
+
+ <h4>DHCP (Dynamic Host Configuration Protocol)</h4>
+ <p>DHCP assigns IP addresses automatically, but it's vulnerable to rogue servers and starvation attacks. Harden it by:</p>
+ <ul>
+ <li>Enabling DHCP snooping on switches to block unauthorized servers.</li>
+ <li>Limiting the number of IP leases to prevent exhaustion.</li>
+ <li>Using static IPs for critical devices.</li>
+ <li>Monitoring DHCP traffic for anomalies.</li>
+ </ul>
+
+ <!-- Additional content would go here -->
+ </div>
+
+ <div class="quiz-container">
+ <h3>✅ Quiz: Hardening Network Components</h3>
+ <p style="margin-bottom: 20px; color: #666;">Test your understanding of DHCP, NAT, wireless, email, and VPN security. Answer all questions to complete the quiz.</p>
+
+ <div class="quiz-question">
+ <h4>1. What is DHCP snooping and why is it important?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q22" value="a">
+ <span>A security feature that blocks unauthorized DHCP servers on the network to prevent rogue server attacks</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q22" value="b">
+ <span>A method to speed up IP address assignment</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q22" value="c">
+ <span>A way to encrypt DHCP traffic</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q22" value="d">
+ <span>A protocol for wireless networks</span>
+ </label>
+ </div>
+ <div id="q22-result" class="quiz-results"></div>
+ </div>
+
+ <!-- Additional quiz questions would go here -->
+
+ <button onclick="submitQuiz('quiz4')">Submit Quiz</button>
+ <button class="secondary" onclick="resetQuiz('quiz4')">Reset Answers</button>
+ <div id="quiz4-score" style="margin-top: 20px; font-size: 1.2em; text-align: center; display: none;"></div>
+ </div>
+
+ <!-- SUBTOPIC 2: Evil Twin WiFi Attacks & Mitigations -->
+ <div class="subtopic-divider"></div>
+ <h3>Subtopic 2: Stimulate Evil Twin WiFi Attacks Ethically & Apply Mitigations</h3>
+
+ <div class="video-container">
+ <iframe src="https://www.youtube.com/embed/dHvlRiHNbxQ" allowfullscreen loading="lazy"></iframe>
+ </div>
+
+ <div class="ethical-note">
+ <h4>⚠️ Important Ethical Considerations</h4>
+ <p>Evil Twin WiFi attacks should only be performed in controlled environments with explicit permission. Unauthorized use of these techniques is illegal and unethical. Always ensure you have proper authorization before conducting any security testing.</p>
+ </div>
+
+ <div class="content-block">
+ <h4>Understanding Evil Twin WiFi Attacks</h4>
+ <p>To ethically simulate an Evil Twin WiFi attack, you create a fake wireless access point that mimics a legitimate one to trick users into connecting. This is done in controlled environments for educational or penetration testing purposes.</p>
+
+ <h4>Lab Setup Requirements</h4>
+ <div class="lab-setup">
+ <h4>Required Equipment & Software</h4>
+ <ul>
+ <li><strong>Wireless adapter</strong> that supports monitor mode and packet injection</li>
+ <li><strong>Kali Linux</strong> or similar penetration testing distribution</li>
+ <li><strong>Tools like Airgeddon</strong> or custom Python scripts</li>
+ <li><strong>Isolated lab environment</strong> to prevent unintended consequences</li>
+ </ul>
+ </div>
+
+ <h4>Attack Simulation Process</h4>
+ <div class="step-by-step">
+ <h4>Step-by-Step Attack Simulation</h4>
+ <ol>
+ <li><strong>Reconnaissance:</strong> Identify target networks and their SSIDs</li>
+ <li><strong>Interface Setup:</strong> Configure wireless adapter in monitor mode</li>
+ <li><strong>AP Creation:</strong> Create fake access point with cloned SSID</li>
+ <li><strong>Broadcast:</strong> Transmit the fake network with stronger signal if possible</li>
+ <li><strong>Captive Portal:</strong> Optionally set up login page to collect credentials</li>
+ <li><strong>Traffic Analysis:</strong> Monitor and analyze captured data</li>
+ </ol>
+ </div>
+
+ <h4>Essential Tools for Evil Twin Simulation</h4>
+ <div class="tool-list">
+ <div class="tool-item">
+ <h5>Airgeddon</h5>
+ <p>Comprehensive wireless security auditing tool with Evil Twin capabilities</p>
+ </div>
+ <div class="tool-item">
+ <h5>Aircrack-ng Suite</h5>
+ <p>Collection of tools for WiFi network security testing</p>
+ </div>
+ <div class="tool-item">
+ <h5>Hostapd</h5>
+ <p>User-space daemon for access point and authentication servers</p>
+ </div>
+ <div class="tool-item">
+ <h5>Dnsmasq</h5>
+ <p>Lightweight DNS forwarder and DHCP server</p>
+ </div>
+ </div>
+
+ <h4>Mitigation Strategies</h4>
+ <p>Mitigation strategies focus on detection and prevention to protect against Evil Twin attacks:</p>
+
+ <div class="mitigation-grid">
+ <div class="mitigation-card">
+ <h4>Encryption & Authentication</h4>
+ <ul>
+ <li>Use WPA3 encryption (or WPA2 with strong passphrases)</li>
+ <li>Disable open networks whenever possible</li>
+ <li>Implement 802.1X authentication for enterprise networks</li>
+ </ul>
+ </div>
+
+ <div class="mitigation-card">
+ <h4>Detection Systems</h4>
+ <ul>
+ <li>Deploy Wireless Intrusion Detection Systems (WIDS)</li>
+ <li>Monitor for rogue access points</li>
+ <li>Use network monitoring tools to detect anomalies</li>
+ </ul>
+ </div>
+
+ <div class="mitigation-card">
+ <h4>User Education</h4>
+ <ul>
+ <li>Train users to verify network names carefully</li>
+ <li>Educate about risks of connecting to unfamiliar Wi-Fi</li>
+ <li>Encourage use of VPNs on public networks</li>
+ </ul>
+ </div>
+
+ <div class="mitigation-card">
+ <h4>Technical Controls</h4>
+ <ul>
+ <li>Implement MAC address filtering</li>
+ <li>Use certificate-based authentication</li>
+ <li>Configure clients to avoid auto-connecting to open networks</li>
+ </ul>
+ </div>
+ </div>
+
+ <h4>Advanced Protection Measures</h4>
+ <ul>
+ <li><strong>VPN Usage:</strong> Always use VPNs to encrypt traffic even on potentially compromised networks</li>
+ <li><strong>Certificate Pinning:</strong> Implement certificate pinning in applications</li>
+ <li><strong>Network Segmentation:</strong> Isolate wireless networks from critical infrastructure</li>
+ <li><strong>Regular Audits:</strong> Conduct periodic wireless security assessments</li>
+ </ul>
+
+ <p>These simulations help security teams understand how attackers exploit wireless trust and prepare defenses accordingly. By understanding both the attack methodology and defense strategies, organizations can better protect their wireless infrastructure from sophisticated attacks.</p>
+ </div>
+
+ <div class="quiz-container">
+ <h3>✅ Quiz: Evil Twin WiFi Attacks & Mitigations</h3>
+ <p style="margin-bottom: 20px; color: #666;">Test your understanding of Evil Twin attacks and defense strategies. Answer all questions to complete the quiz.</p>
+
+ <div class="quiz-question">
+ <h4>1. What is an Evil Twin WiFi attack?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q36" value="a">
+ <span>A fake wireless access point that mimics a legitimate one to trick users into connecting</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q36" value="b">
+ <span>A type of virus that infects WiFi routers</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q36" value="c">
+ <span>A method to speed up WiFi connections</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q36" value="d">
+ <span>A protocol for securing wireless networks</span>
+ </label>
+ </div>
+ <div id="q36-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>2. Which tool can simulate this attack in a lab?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q37" value="a">
+ <span>Airgeddon</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q37" value="b">
+ <span>Microsoft Word</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q37" value="c">
+ <span>Adobe Photoshop</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q37" value="d">
+ <span>Google Chrome</span>
+ </label>
+ </div>
+ <div id="q37-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>3. Why is WPA3 preferred over WPA2?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q38" value="a">
+ <span>It provides stronger security through individualized data encryption and protection against brute-force attacks</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q38" value="b">
+ <span>It's faster than WPA2</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q38" value="c">
+ <span>It requires shorter passwords</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q38" value="d">
+ <span>It's compatible with older devices</span>
+ </label>
+ </div>
+ <div id="q38-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>4. What does a captive portal do in this context?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q39" value="a">
+ <span>It presents a login page to collect credentials or test user behavior when they connect to the fake network</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q39" value="b">
+ <span>It encrypts all wireless traffic</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q39" value="c">
+ <span>It blocks malicious websites</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q39" value="d">
+ <span>It speeds up internet connections</span>
+ </label>
+ </div>
+ <div id="q39-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>5. How can users detect rogue access points?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q40" value="a">
+ <span>By verifying network names carefully, checking for duplicate SSIDs, and using WiFi scanning apps</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q40" value="b">
+ <span>By restarting their devices frequently</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q40" value="c">
+ <span>By using longer WiFi passwords</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q40" value="d">
+ <span>By disabling firewall protection</span>
+ </label>
+ </div>
+ <div id="q40-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>6. What role does WIDS play in wireless security?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q41" value="a">
+ <span>It monitors for rogue access points and detects wireless network attacks in real-time</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q41" value="b">
+ <span>It encrypts all wireless communications</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q41" value="c">
+ <span>It blocks all external network connections</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q41" value="d">
+ <span>It increases WiFi signal strength</span>
+ </label>
+ </div>
+ <div id="q41-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>7. Why is VPN usage recommended on public Wi-Fi?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q42" value="a">
+ <span>It encrypts all traffic, protecting data even if connected to a malicious network like an Evil Twin</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q42" value="b">
+ <span>It makes internet connections faster</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q42" value="c">
+ <span>It reduces mobile data usage</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q42" value="d">
+ <span>It blocks all advertisements</span>
+ </label>
+ </div>
+ <div id="q42-result" class="quiz-results"></div>
+ </div>
+
+ <button onclick="submitQuiz('quiz6')">Submit Quiz</button>
+ <button class="secondary" onclick="resetQuiz('quiz6')">Reset Answers</button>
+ <div id="quiz6-score" style="margin-top: 20px; font-size: 1.2em; text-align: center; display: none;"></div>
+ </div>
+ </section>
+
+ <!-- MODULE 3 -->
+ <section id="module3" class="module-section">
+ <button class="bookmark" onclick="toggleBookmark('module3')">🔖</button>
+ <h2>🔐 Module 3: Advanced Cryptography</h2>
+ 
+ <!-- SUBTOPIC 1: Modern Crypto Stack & Post-Quantum Transition -->
+ <h3>Subtopic 1: Understand Modern Crypto Stack and Post-Quantum Transition Basics</h3>
+ 
+ <div class="video-container">
+ <iframe src="https://www.youtube.com/embed/NmM9HA2MQGI" allowfullscreen loading="lazy"></iframe>
+ </div>
+
+ <div class="content-block">
+ <h4>The Modern Cryptographic Stack</h4>
+ <p>To understand the modern cryptographic stack and the post-quantum transition, you need to grasp how current encryption systems work and why quantum computing threatens them.</p>
+ 
+ <div class="crypto-grid">
+ <div class="crypto-card">
+ <h4>Symmetric Cryptography</h4>
+ <p>Uses the same key for encryption and decryption. Examples include:</p>
+ <ul>
+ <li><strong>AES</strong> (Advanced Encryption Standard)</li>
+ <li>ChaCha20</li>
+ <li>3DES (legacy)</li>
+ </ul>
+ </div>
+ 
+ <div class="crypto-card">
+ <h4>Asymmetric Cryptography</h4>
+ <p>Uses key pairs (public/private). Examples include:</p>
+ <ul>
+ <li><strong>RSA</strong> (Rivest-Shamir-Adleman)</li>
+ <li><strong>ECC</strong> (Elliptic Curve Cryptography)</li>
+ <li>Diffie-Hellman</li>
+ </ul>
+ </div>
+ 
+ <div class="crypto-card">
+ <h4>Hash Functions</h4>
+ <p>Creates fixed-size outputs from variable inputs. Examples include:</p>
+ <ul>
+ <li><strong>SHA-2</strong> (Secure Hash Algorithm 2)</li>
+ <li>SHA-3</li>
+ <li>BLAKE2</li>
+ </ul>
+ </div>
+ </div>
+ 
+ <p>These cryptographic primitives are used in protocols like TLS, VPNs, and digital signatures. Their security relies on mathematical problems that are hard for classical computers—like factoring large primes (RSA) or solving discrete logarithms (ECC).</p>
+ </div>
+ 
+ <div class="attack-warning">
+ <h4>⚠️ The Quantum Computing Threat</h4>
+ <p>Quantum computers can solve these mathematical problems efficiently using algorithms like <strong>Shor's algorithm</strong> (for factoring and discrete logarithms) and <strong>Grover's algorithm</strong> (for searching unsorted databases).</p>
+ <p>This means that once quantum computers reach sufficient scale, current asymmetric algorithms like RSA and ECC could be broken, compromising the security of most encrypted communications on the internet today.</p>
+ </div>
+ 
+ <div class="content-block">
+ <h4>Post-Quantum Cryptography (PQC)</h4>
+ <p>Post-Quantum Cryptography refers to cryptographic algorithms designed to be secure against attacks by both classical and quantum computers. These algorithms are based on mathematical problems that are believed to be hard even for quantum computers to solve.</p>
+ 
+ <h4>Major PQC Approaches</h4>
+ <div class="tool-list">
+ <div class="tool-item">
+ <h5>Lattice-Based</h5>
+ <p>Based on the hardness of problems in lattice theory, like Learning With Errors (LWE). Examples: Kyber, Dilithium.</p>
+ </div>
+ <div class="tool-item">
+ <h5>Hash-Based</h5>
+ <p>Uses cryptographic hash functions to create signatures. Examples: SPHINCS+, XMSS.</p>
+ </div>
+ <div class="tool-item">
+ <h5>Code-Based</h5>
+ <p>Based on error-correcting codes. Examples: Classic McEliece, BIKE.</p>
+ </div>
+ <div class="tool-item">
+ <h5>Multivariate</h5>
+ <p>Based on the difficulty of solving systems of multivariate polynomials. Examples: Rainbow, GeMSS.</p>
+ </div>
+ </div>
+ 
+ <h4>The Transition to PQC</h4>
+ <p>The migration to post-quantum cryptography involves:</p>
+ <ul>
+ <li>Identifying where vulnerable algorithms are currently used</li>
+ <li>Testing PQC alternatives for performance and security</li>
+ <li>Gradually migrating systems while maintaining interoperability</li>
+ <li>Implementing hybrid approaches during the transition period</li>
+ <li>Updating standards and protocols to support PQC algorithms</li>
+ </ul>
+ 
+ <p>This transition is urgent because data encrypted today with classical algorithms may need to remain secure for decades, and quantum computers capable of breaking current encryption could emerge within the next 10-20 years.</p>
+ </div>
+
+ <!-- SUBTOPIC 2: Secure TLS, Certificate Pinning, and GPG -->
+ <div class="subtopic-divider"></div>
+ <h3>Subtopic 2: Implement Secure TLS Certs, Certificate Pinning, GPG</h3>
+
+ <div class="video-container">
+ <iframe src="https://www.youtube.com/embed/2nUc2N9p1MA" allowfullscreen loading="lazy"></iframe>
+ </div>
+
+ <div class="content-block">
+ <h4>Layered Defense Strategy</h4>
+ <p>To implement secure TLS certificates, certificate pinning, and GPG, you're building a layered defense for data integrity, confidentiality, and authenticity across web and communication systems.</p>
+
+ <h4>🔐 TLS Certificates</h4>
+ <p>TLS (Transport Layer Security) certificates encrypt data between clients and servers. To implement them securely:</p>
+
+ <div class="best-practice">
+ <h4>TLS Implementation Best Practices</h4>
+ <ul>
+ <li><strong>Use certificates from trusted Certificate Authorities (CAs)</strong> - Ensure your certificates are issued by reputable CAs</li>
+ <li><strong>Enforce TLS 1.3 or TLS 1.2</strong> - Disable older protocols like SSL and TLS 1.0/1.1 which have known vulnerabilities</li>
+ <li><strong>Regularly rotate certificates</strong> - Monitor expiration dates and renew certificates before they expire</li>
+ <li><strong>Use strong cipher suites</strong> - Enable Perfect Forward Secrecy (PFS) to protect past sessions if private keys are compromised</li>
+ <li><strong>Validate certificates on both ends</strong> - Implement proper certificate validation to prevent spoofing attacks</li>
+ </ul>
+ </div>
+
+ <h4>📌 Certificate Pinning</h4>
+ <p>Certificate pinning binds a specific certificate or public key to your app or service, preventing man-in-the-middle attacks—even if a rogue CA issues a valid cert.</p>
+
+ <div class="step-by-step">
+ <h4>Certificate Pinning Implementation</h4>
+ <ol>
+ <li><strong>Pin the public key or certificate hash</strong> in your application code or configuration</li>
+ <li><strong>Update pins carefully</strong> to avoid breaking connections when certificates rotate</li>
+ <li><strong>Use backup pins</strong> to allow for smooth certificate rotation without service interruption</li>
+ <li><strong>Monitor for SSL decryption conflicts</strong> in enterprise environments that use traffic inspection</li>
+ </ol>
+ </div>
+
+ <div class="warning-note">
+ <h4>⚠️ Pinning Considerations</h4>
+ <p>Improper pinning implementation can cause service outages. Always test pinning configurations thoroughly and have rollback procedures in place.</p>
+ </div>
+
+ <h4>✉️ GPG (GNU Privacy Guard)</h4>
+ <p>GPG secures email and files using asymmetric encryption. To implement:</p>
+
+ <div class="lab-setup">
+ <h4>GPG Implementation Steps</h4>
+ <ol>
+ <li><strong>Generate a key pair</strong> using <code>gpg --gen-key</code> command</li>
+ <li><strong>Share your public key</strong> with contacts or publish it to keyservers</li>
+ <li><strong>Use your private key</strong> to sign messages and decrypt incoming ones</li>
+ <li><strong>Verify signatures</strong> to ensure authenticity and integrity of received messages</li>
+ <li><strong>Rotate keys periodically</strong> and revoke compromised ones immediately</li>
+ </ol>
+ </div>
+
+ <h4>Advanced GPG Features</h4>
+ <div class="tool-list">
+ <div class="tool-item">
+ <h5>Key Management</h5>
+ <p>Manage multiple keys, set expiration dates, and handle key revocation</p>
+ </div>
+ <div class="tool-item">
+ <h5>Subkeys</h5>
+ <p>Use subkeys for daily operations while keeping master keys secure</p>
+ </div>
+ <div class="tool-item">
+ <h5>Web of Trust</h5>
+ <p>Build trust relationships through key signing parties</p>
+ </div>
+ <div class="tool-item">
+ <h5>Smart Cards</h5>
+ <p>Store keys on hardware tokens for enhanced security</p>
+ </div>
+ </div>
+
+ <h4>Integration Strategies</h4>
+ <p>These cryptographic technologies work together to provide comprehensive security:</p>
+ <ul>
+ <li><strong>TLS</strong> protects data in transit over networks</li>
+ <li><strong>Certificate Pinning</strong> adds an extra layer of trust validation</li>
+ <li><strong>GPG</strong> secures data at rest and in email communications</li>
+ <li><strong>Combined approach</strong> creates defense in depth against various attack vectors</li>
+ </ul>
+
+ <p>By implementing these technologies correctly, organizations can significantly enhance their security posture and protect against sophisticated attacks targeting communication channels and data storage.</p>
+ </div>
+
+ <div class="quiz-container">
+ <h3>✅ Quiz: Secure TLS, Certificate Pinning, and GPG</h3>
+ <p style="margin-bottom: 20px; color: #666;">Test your understanding of cryptographic implementations and security practices. Answer all questions to complete the quiz.</p>
+
+ <div class="quiz-question">
+ <h4>1. What protocol version should be enforced for TLS?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q43" value="a">
+ <span>TLS 1.3 or TLS 1.2, disabling older vulnerable versions</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q43" value="b">
+ <span>SSL 3.0 for maximum compatibility</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q43" value="c">
+ <span>TLS 1.0 for legacy support</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q43" value="d">
+ <span>Any version that supports encryption</span>
+ </label>
+ </div>
+ <div id="q43-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>2. What does certificate pinning protect against?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q44" value="a">
+ <span>Man-in-the-middle attacks, even if a rogue CA issues a valid certificate</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q44" value="b">
+ <span>DDoS attacks on web servers</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q44" value="c">
+ <span>SQL injection attacks</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q44" value="d">
+ <span>Physical theft of servers</span>
+ </label>
+ </div>
+ <div id="q44-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>3. How do you generate a GPG key pair?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q45" value="a">
+ <span>Using the command: gpg --gen-key</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q45" value="b">
+ <span>By installing a web browser</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q45" value="c">
+ <span>Through Windows Control Panel</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q45" value="d">
+ <span>By restarting the computer</span>
+ </label>
+ </div>
+ <div id="q45-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>4. Why is Perfect Forward Secrecy important?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q46" value="a">
+ <span>It protects past sessions even if private keys are compromised in the future</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q46" value="b">
+ <span>It makes encryption faster</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q46" value="c">
+ <span>It reduces bandwidth usage</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q46" value="d">
+ <span>It eliminates the need for certificates</span>
+ </label>
+ </div>
+ <div id="q46-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>5. What risks come with improper pinning?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q47" value="a">
+ <span>Service outages and broken connections when certificates rotate</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q47" value="b">
+ <span>Faster encryption speeds</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q47" value="c">
+ <span>Reduced memory usage</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q47" value="d">
+ <span>Automatic certificate generation</span>
+ </label>
+ </div>
+ <div id="q47-result" class="quiz-results"></div>
+ </div>
+
+ <div class="quiz-question">
+ <h4>6. How can GPG verify the authenticity of a message?</h4>
+ <div class="quiz-options">
+ <label class="option-label">
+ <input type="radio" name="q48" value="a">
+ <span>By verifying the digital signature using the sender's public key</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q48" value="b">
+ <span>By checking the message timestamp</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q48" value="c">
+ <span>By comparing file sizes</span>
+ </label>
+ <label class="option-label">
+ <input type="radio" name="q48" value="d">
+ <span>By scanning for viruses</span>
+ </label>
+ </div>
+ <div id="q48-result" class="quiz-results"></div>
+ </div>
+
+ <button onclick="submitQuiz('quiz7')">Submit Quiz</button>
+ <button class="secondary" onclick="resetQuiz('quiz7')">Reset Answers</button>
+ <div id="quiz7-score" style="margin-top: 20px; font-size: 1.2em; text-align: center; display: none;"></div>
+ </div>
+ </section>
+</div>
+
+<div id="achievementToast" class="achievement-toast"></div>
+
+<script>
+// Progress tracking
+let progress = {
+ xp: 0,
+ quizzesCompleted: [],
+ scores: {},
+ answers: {},
+ bookmarks: [],
+ lastViewed: 'module1'
+};
+
+// Load progress from localStorage
+function loadProgress() {
+ const saved = localStorage.getItem('cyberSecurityProgress');
+ if (saved) {
+ progress = JSON.parse(saved);
+ updateProgressDisplay();
+ updateBookmarks();
+ 
+ // Show last viewed module
+ if (progress.lastViewed) {
+  showModule(progress.lastViewed === 'progress' ? 'progress' : parseInt(progress.lastViewed.replace('module', '')));
+ }
+ }
+}
+
+// Save progress to localStorage
+function saveProgress() {
+ localStorage.setItem('cyberSecurityProgress', JSON.stringify(progress));
+ updateProgressDisplay();
+}
+
+// Module navigation
+function showModule(moduleId) {
+ document.querySelectorAll('.module-section').forEach(section => {
+ section.classList.remove('active');
+ });
+ document.querySelectorAll('.nav-btn').forEach(btn => {
+ btn.classList.remove('active');
+ });
+
+ if (moduleId === 'progress') {
+ document.getElementById('progress').classList.add('active');
+ document.querySelector('[onclick="showModule(\'progress\')"]').classList.add('active');
+ progress.lastViewed = 'progress';
+ } else {
+ document.getElementById('module' + moduleId).classList.add('active');
+ document.querySelector('[onclick="showModule(' + moduleId + ')"]').classList.add('active');
+ progress.lastViewed = 'module' + moduleId;
+ }
+ 
+ saveProgress();
+}
+
+// Quiz answers (correct answers)
+const quizAnswers = {
+ quiz1: { q1: 'a', q2: 'a', q3: 'b', q4: 'a', q5: 'b', q6: 'a', q7: 'b' },
+ quiz2: { q8: 'a', q9: 'a', q10: 'a', q11: 'a', q12: 'a', q13: 'a', q14: 'a' },
+ quiz4: { q22: 'a', q23: 'a', q24: 'a', q25: 'a', q26: 'a', q27: 'a', q28: 'a' },
+ quiz6: { q36: 'a', q37: 'a', q38: 'a', q39: 'a', q40: 'a', q41: 'a', q42: 'a' },
+ quiz7: { q43: 'a', q44: 'a', q45: 'a', q46: 'a', q47: 'a', q48: 'a' }
+};
+
+// Submit quiz
+function submitQuiz(quizId) {
+ const answers = quizAnswers[quizId];
+ const questions = Object.keys(answers);
+ let score = 0;
+ let allAnswered = true;
+
+ questions.forEach(q => {
+ const selected = document.querySelector(`input[name="${q}"]:checked`);
+ if (!selected) {
+ allAnswered = false;
+ return;
+ }
+
+ const resultDiv = document.getElementById(q + '-result');
+ resultDiv.classList.add('show');
+
+ if (selected.value === answers[q]) {
+ score++;
+ resultDiv.classList.remove('incorrect');
+ resultDiv.innerHTML = '<div class="result-text correct">✓ Correct!</div>';
+ } else {
+ resultDiv.classList.add('incorrect');
+ resultDiv.innerHTML = '<div class="result-text incorrect">✗ Incorrect. Review the material above.</div>';
+ }
+ });
+
+ if (!allAnswered) {
+ alert('Please answer all questions before submitting.');
+ return;
+ }
+
+ const percentage = Math.round((score / questions.length) * 100);
+ const scoreDiv = document.getElementById(quizId + '-score');
+ scoreDiv.style.display = 'block';
+
+ if (percentage >= 70) {
+ scoreDiv.innerHTML = `<div class="success">🎉 Quiz Complete! Score: ${score}/${questions.length} (${percentage}%)</div>`;
+ scoreDiv.className = 'success';
+
+ if (!progress.quizzesCompleted.includes(quizId)) {
+  progress.quizzesCompleted.push(quizId);
+  progress.xp += score * 10;
+  
+  // Show achievement toast
+  showAchievement(`Quiz Completed! +${score * 10} XP`);
+  
+  // Check if all quizzes are completed
+  checkCertificateEligibility();
+ }
+ } else {
+ scoreDiv.innerHTML = `<div class="error">Score: ${score}/${questions.length} (${percentage}%) - Review and try again!</div>`;
+ scoreDiv.className = 'error';
+ }
+
+ progress.scores[quizId] = percentage;
+ saveProgress();
+}
+
+// Reset quiz
+function resetQuiz(quizId) {
+ const answers = quizAnswers[quizId];
+ const questions = Object.keys(answers);
+
+ questions.forEach(q => {
+ const radios = document.querySelectorAll(`input[name="${q}"]`);
+ radios.forEach(radio => radio.checked = false);
+
+ const resultDiv = document.getElementById(q + '-result');
+ resultDiv.classList.remove('show');
+ resultDiv.classList.remove('incorrect');
+ resultDiv.innerHTML = '';
+ });
+
+ const scoreDiv = document.getElementById(quizId + '-score');
+ scoreDiv.style.display = 'none';
+ scoreDiv.innerHTML = '';
+}
+
+// Update progress display
+function updateProgressDisplay() {
+ document.getElementById('xpDisplay').textContent = progress.xp;
+ document.getElementById('quizzesCompleted').textContent = progress.quizzesCompleted.length;
+
+ const scores = Object.values(progress.scores);
+ const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+ document.getElementById('averageScore').textContent = avgScore + '%';
+
+ const totalQuizzes = 5;
+ const completedModules = Math.min(Math.floor(progress.quizzesCompleted.length / 3), 3);
+ document.getElementById('modulesProgress').textContent = completedModules + '/3';
+
+ const overallProgress = Math.round((progress.quizzesCompleted.length / totalQuizzes) * 100);
+ const progressBar = document.getElementById('overallProgress');
+ progressBar.style.width = overallProgress + '%';
+ progressBar.textContent = overallProgress + '%';
+}
+
+// Bookmark functionality
+function toggleBookmark(moduleId) {
+ const bookmarkBtn = document.querySelector(`#${moduleId} .bookmark`);
+ const index = progress.bookmarks.indexOf(moduleId);
+ 
+ if (index === -1) {
+ progress.bookmarks.push(moduleId);
+ bookmarkBtn.classList.add('active');
+ bookmarkBtn.innerHTML = '🔖';
+ showAchievement('Module Bookmarked!');
+ } else {
+ progress.bookmarks.splice(index, 1);
+ bookmarkBtn.classList.remove('active');
+ bookmarkBtn.innerHTML = '🔖';
+ }
+ 
+ saveProgress();
+}
+
+function updateBookmarks() {
+ progress.bookmarks.forEach(moduleId => {
+ const bookmarkBtn = document.querySelector(`#${moduleId} .bookmark`);
+ if (bookmarkBtn) {
+  bookmarkBtn.classList.add('active');
+  bookmarkBtn.innerHTML = '🔖';
+ }
+ });
+}
+
+// Achievement notifications
+function showAchievement(message) {
+ const toast = document.getElementById('achievementToast');
+ toast.textContent = message;
+ toast.style.display = 'block';
+ 
+ setTimeout(() => {
+ toast.style.display = 'none';
+ }, 3000);
+}
+
+// Certificate functionality
+function checkCertificateEligibility() {
+ const totalQuizzes = 5;
+ const completedQuizzes = progress.quizzesCompleted.length;
+ const scores = Object.values(progress.scores);
+ const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+ 
+ if (completedQuizzes >= totalQuizzes && avgScore >= 70) {
+ document.getElementById('certificateSection').style.display = 'block';
+ showAchievement('Certificate Unlocked!');
+ }
+}
+
+function generateCertificate() {
+ // In a real implementation, this would generate a downloadable certificate
+ alert('Certificate generation would create a PDF certificate with your name and completion details.');
+}
+
+// Initialize
+loadProgress();
+</script>
+
+</body>
+</html>
