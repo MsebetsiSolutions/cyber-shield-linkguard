@@ -82,7 +82,6 @@ def exam_dashboard():
         conn.close()
     except sqlite3.OperationalError as e:
         print(f"Database error: {e}")
-        # Table might not exist yet, try to create it
         init_exam_db()
     
     return render_template('exam_dashboard.html',
