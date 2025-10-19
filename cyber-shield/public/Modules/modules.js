@@ -3,12 +3,12 @@ document.addEventListener("DOMContentLoaded", function () {
   setupEventListeners();
   loadUserProgress();
   setupScrollEffects();
+  setupNavigation();
 });
 
 function initializePage() {
   const currentWeek = getCurrentWeek();
   highlightCurrentWeek(currentWeek);
-
   updateModuleCards();
 
   if (typeof bootstrap !== "undefined") {
@@ -21,13 +21,126 @@ function initializePage() {
   }
 }
 
+function setupNavigation() {
+  // Handle navigation between weeks
+  const weekButtons = document.querySelectorAll(
+    ".week-btn, .module-link, .module-card"
+  );
+
+  weekButtons.forEach((element) => {
+    element.addEventListener("click", function (e) {
+      e.preventDefault();
+      const week =
+        this.getAttribute("data-week") ||
+        this.closest(".module-card")?.getAttribute("data-week");
+      if (week) {
+        loadWeekContent(week);
+      }
+    });
+  });
+}
+
+async function loadWeekContent(week) {
+  try {
+    // Show loading state
+    document.getElementById("content-area").innerHTML = `
+      <div class="d-flex justify-content-center align-items-center" style="height: 400px;">
+        <div class="text-center">
+          <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p>Loading Week ${week} content...</p>
+        </div>
+      </div>
+    `;
+
+    // Update active state in sidebar
+    document.querySelectorAll(".week-btn").forEach((btn) => {
+      btn.classList.remove("active");
+    });
+    document
+      .querySelector(`.week-btn[data-week="${week}"]`)
+      ?.classList.add("active");
+
+    if (week === "modules") {
+      // Reload the dashboard
+      location.reload();
+      return;
+    }
+
+    // Load the week content
+    const response = await fetch(`week${week}.html`);
+    if (!response.ok) {
+      throw new Error("Failed to load content");
+    }
+
+    const html = await response.text();
+    document.getElementById("content-area").innerHTML = html;
+
+    // Update progress
+    updateProgressForWeek(week);
+
+    // Re-initialize any scripts in the loaded content
+    initializeLoadedContent();
+  } catch (error) {
+    console.error("Error loading week content:", error);
+    document.getElementById("content-area").innerHTML = `
+      <div class="alert alert-danger m-4">
+        <h4>Error Loading Content</h4>
+        <p>Failed to load Week ${week} content. Please try again later.</p>
+        <button class="btn btn-primary" onclick="loadWeekContent('modules')">Return to Dashboard</button>
+      </div>
+    `;
+  }
+}
+
+function initializeLoadedContent() {
+  // Re-initialize any interactive elements in the loaded content
+  const videos = document.querySelectorAll(".video-container iframe");
+  videos.forEach((video) => {
+    // Re-initialize video players if needed
+  });
+
+  // Re-attach event listeners for quizzes and interactive elements
+  const quizButtons = document.querySelectorAll(
+    '[onclick*="submitQuiz"], [onclick*="resetQuiz"]'
+  );
+  quizButtons.forEach((button) => {
+    const onclick = button.getAttribute("onclick");
+    if (onclick) {
+      button.onclick = new Function(
+        onclick.replace('onclick="', "").replace('"', "")
+      );
+    }
+  });
+
+  // Re-initialize any other dynamic content
+  if (typeof window.initializeWeekContent === "function") {
+    window.initializeWeekContent();
+  }
+}
+
+function updateProgressForWeek(week) {
+  const progressData = JSON.parse(localStorage.getItem("userProgress")) || {
+    completed: [],
+    inProgress: [],
+    progressPercentage: 0,
+  };
+
+  if (!progressData.inProgress.includes(parseInt(week))) {
+    progressData.inProgress.push(parseInt(week));
+    localStorage.setItem("userProgress", JSON.stringify(progressData));
+    loadUserProgress();
+  }
+}
+
 function setupEventListeners() {
   const weekButtons = document.querySelectorAll(".week-btn");
   weekButtons.forEach((button) => {
     button.addEventListener("click", function (e) {
       e.preventDefault();
       const week = this.getAttribute("data-week");
-      navigateToWeek(week);
+      loadWeekContent(week);
     });
   });
 
@@ -36,7 +149,7 @@ function setupEventListeners() {
     card.addEventListener("click", function (e) {
       if (!e.target.closest(".module-link")) {
         const week = this.getAttribute("data-week");
-        navigateToWeek(week);
+        loadWeekContent(week);
       }
     });
 
@@ -52,7 +165,7 @@ function setupEventListeners() {
     link.addEventListener("click", function (e) {
       e.stopPropagation();
       const week = this.closest(".module-card").getAttribute("data-week");
-      navigateToWeek(week);
+      loadWeekContent(week);
     });
   });
 }
@@ -78,7 +191,7 @@ function setupScrollEffects() {
 
 function getCurrentWeek() {
   const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get("week") || "1";
+  return urlParams.get("week") || "modules";
 }
 
 function highlightCurrentWeek(week) {
@@ -91,11 +204,6 @@ function highlightCurrentWeek(week) {
   if (currentWeekBtn) {
     currentWeekBtn.classList.add("active");
   }
-}
-
-function navigateToWeek(week) {
-  // Removed loading state as requested
-  window.location.href = `week${week}.html`;
 }
 
 function loadUserProgress() {
@@ -171,7 +279,7 @@ function simulateProgressUpdate() {
 
 // Export functions for use
 window.ModulesManager = {
-  navigateToWeek,
+  loadWeekContent,
   loadUserProgress,
   simulateProgressUpdate,
   updateProgressBar,
