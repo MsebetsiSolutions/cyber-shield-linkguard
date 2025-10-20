@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory, session, redirect
 from urllib.parse import urlparse
 import os, time, re, socket, requests, tldextract
+import datetime
 import base64
 from werkzeug.utils import secure_filename
 import hashlib
@@ -68,6 +69,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+YOCO_SECRET_KEY = os.getenv("YOCO_SECRET_KEY")
+
 
 #======================================================
 # -------------------- Flask setup --------------------
@@ -80,6 +83,17 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret-key-change-in-product
 
 # Initialize Flask-Mail 
 init_mail(app)
+
+# --------- Yoco payment environment setup ---------
+
+YOCO_SECRET = os.getenv("YOCO_SECRET_KEY")
+YOCO_WEBHOOK_SECRET = os.getenv("YOCO_WEBHOOK_SECRET")  # optional
+BASE_URL = os.getenv("BASE_URL", "http://localhost:5000")
+
+if not YOCO_SECRET:
+    raise RuntimeError("YOCO_SECRET_KEY not set in environment")
+
+YOCO_CHECKOUTS_URL = "https://payments.yoco.com/api/checkouts"
 
 # registering blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
@@ -295,6 +309,120 @@ def start_session_cleanup_task():
 
 start_session_cleanup_task()
 
+@app.route('/api/payment/process', methods=['POST'])
+def process_payment():
+    try:
+        data = request.get_json()
+        token = data.get('token')
+        amount = data.get('amount')
+        reference = data.get('reference')
+
+        # Ensure the secret is present in the environment
+        yoco_secret = os.getenv('YOCO_SECRET_KEY') or YOCO_SECRET
+        if not yoco_secret:
+            return jsonify({'error': 'Payment configuration missing'}), 500
+
+        response = requests.post(
+            'https://online.yoco.com/v1/charges/',
+            json={
+                'token': token,
+                'currency': 'ZAR',
+                'amountInCents': int(amount),
+                'description': f'Payment for {reference}'
+            },
+            headers={
+                'X-Auth-Secret-Key': yoco_secret
+            }
+        )
+
+        # Forward the Yoco response to client, but also create subscription/payment
+        # records on success. Note: expects authenticated user in session.
+        yoco_data = response.json()
+
+        # Consider charge successful if HTTP OK and Yoco indicates success
+        if response.ok and (yoco_data.get('status') == 'successful' or yoco_data.get('status') == 'completed' or yoco_data.get('approved')):
+            try:
+                # Minimal subscription creation: derive plan_id from posted reference or body
+                plan_id = request.json.get('planId') or request.json.get('plan_id') or 'pro'
+                plan_name = request.json.get('planName') or request.json.get('plan_name') or plan_id
+                plan_code = request.json.get('planCode') or request.json.get('plan_code') or (plan_id.upper() + '-AUTO')
+                price = float(amount) / 100.0 if amount else 0.0
+                team_size = request.json.get('team_size', 1)
+
+                user_id = session.get('user_id')
+                # Only create DB entries for authenticated users
+                if user_id:
+                    conn = get_db_connection()
+                    cursor = conn.cursor()
+
+                    # Deactivate any existing active subscriptions
+                    cursor.execute(
+                        'UPDATE subscriptions SET plan_active = 0 WHERE user_id = ? AND plan_active = 1',
+                        (user_id,)
+                    )
+
+                    # default expiry is 30 days
+                    expiry_date = (datetime.datetime.now() + datetime.timedelta(days=30)).isoformat()
+
+                    cursor.execute('''
+                        INSERT INTO subscriptions (user_id, sub_plan, plan_code, price, date_expiry, plan_active, team_size)
+                        VALUES (?, ?, ?, ?, ?, 1, ?)
+                    ''', (user_id, plan_name, plan_code, price, expiry_date, team_size))
+                    subscription_id = cursor.lastrowid
+
+                    # Save payment record
+                    transaction_id = None
+                    # Try to use Yoco charge id if available
+                    if isinstance(yoco_data, dict):
+                        transaction_id = yoco_data.get('id') or yoco_data.get('transactionId')
+                    if not transaction_id:
+                        transaction_id = f"TX{int(time.time())}"  # fallback
+
+                    card_last_four = None
+                    # attempt to pull card last four if present
+                    if isinstance(yoco_data, dict):
+                        card_info = yoco_data.get('card') or yoco_data.get('payment_method') or {}
+                        if isinstance(card_info, dict):
+                            card_last_four = card_info.get('last4') or card_info.get('last_four')
+
+                    cursor.execute('''
+                        INSERT INTO payments (user_id, subscription_id, amount, currency, payment_method, status, transaction_id, card_last_four)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', (user_id, subscription_id, price, 'ZAR', 'card', 'completed', transaction_id, card_last_four))
+
+                    conn.commit()
+                    conn.close()
+
+                    # Update user's Plan_Mode in the database and session plan_mode (simple mapping)
+                    try:
+                        conn = get_db_connection()
+                        conn.execute('UPDATE users SET Plan_Mode = ? WHERE id = ?', (
+                            {'free': 0, 'pro': 1, 'team': 2, 'enterprise': 3}.get(plan_id, session.get('plan_mode', 0)),
+                            user_id
+                        ))
+                        conn.commit()
+                        conn.close()
+                    except Exception as e:
+                        print(f"Warning: Failed to update users.Plan_Mode: {e}")
+
+                    plan_mode_map = {'free': 0, 'pro': 1, 'team': 2, 'enterprise': 3}
+                    plan_mode = plan_mode_map.get(plan_id, session.get('plan_mode', 0))
+                    session['plan_mode'] = plan_mode
+
+                    # Attach DB ids and plan info to the returned payload for client use
+                    yoco_data['subscription_id'] = subscription_id
+                    yoco_data['transaction_id'] = transaction_id
+                    yoco_data['plan_mode'] = plan_mode
+                    yoco_data['plan_name'] = plan_name
+            except Exception as e:
+                print(f"Error creating subscription/payment records: {e}")
+                # fall through and still return Yoco response
+
+        return jsonify(yoco_data), response.status_code
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 #======================================================
 # ---------------------- Helpers ----------------------
@@ -359,6 +487,98 @@ def unshorten(u: str, max_hops=5):
         return current, len(seen) - 1
     except Exception:
         return u, 0
+
+
+@app.route('/api/payment/webhook', methods=['POST'])
+def yoco_webhook():
+    """Handle YOCO webhooks to update payment/subscription state."""
+    try:
+        payload = request.get_data()
+        headers = request.headers
+
+        webhook_secret = os.getenv('YOCO_WEBHOOK_SECRET') or YOCO_WEBHOOK_SECRET
+        # Verify signature if secret is configured
+        if webhook_secret:
+            sig_header = headers.get('X-Yoco-Signature') or headers.get('X-Signature') or headers.get('X-Hub-Signature')
+            if not sig_header:
+                print('Webhook called without signature header')
+                return jsonify({'error': 'Missing signature header'}), 400
+
+            import hmac, hashlib
+            expected = hmac.new(webhook_secret.encode('utf-8'), payload, hashlib.sha256).hexdigest()
+            # Header may be prefixed with sha256=... or plain
+            if sig_header.startswith('sha256='):
+                sig_val = sig_header.split('=', 1)[1]
+            else:
+                sig_val = sig_header
+
+            if not hmac.compare_digest(sig_val, expected):
+                print('Invalid webhook signature')
+                return jsonify({'error': 'Invalid signature'}), 400
+
+        # Parse JSON payload
+        data = request.get_json(force=True, silent=True) or {}
+        # Yoco usually posts an event type and object; structure may vary.
+        event = data.get('event') or data.get('type') or data.get('event_type')
+        obj = data.get('data') or data.get('object') or data
+
+        # Extract possible identifiers
+        transaction_id = None
+        status = None
+        amount = None
+        if isinstance(obj, dict):
+            transaction_id = obj.get('id') or obj.get('transactionId') or obj.get('chargeId')
+            status = obj.get('status') or obj.get('state')
+            amount = obj.get('amountInCents') or obj.get('amount')
+
+        # Map Yoco statuses to internal statuses
+        internal_status = None
+        if status:
+            if str(status).lower() in ('successful', 'success', 'completed', 'paid', 'approved'):
+                internal_status = 'completed'
+            elif str(status).lower() in ('failed', 'error', 'declined'):
+                internal_status = 'failed'
+            elif str(status).lower() in ('pending', 'processing'):
+                internal_status = 'pending'
+
+        # Update payment row if transaction_id present
+        if transaction_id:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            try:
+                # Find the payment record
+                cursor.execute('SELECT * FROM payments WHERE transaction_id = ?', (transaction_id,))
+                row = cursor.fetchone()
+                if row:
+                    # Update status and amount if present
+                    if internal_status:
+                        cursor.execute('UPDATE payments SET status = ? WHERE transaction_id = ?', (internal_status, transaction_id))
+                    if amount:
+                        try:
+                            amt = float(amount) / 100.0 if int(amount) > 1000 else float(amount)
+                            cursor.execute('UPDATE payments SET amount = ? WHERE transaction_id = ?', (amt, transaction_id))
+                        except Exception:
+                            pass
+                    conn.commit()
+                    # Optionally update subscription status if needed
+                    # If payment completed, ensure subscription is active
+                    if internal_status == 'completed':
+                        cursor.execute('SELECT subscription_id FROM payments WHERE transaction_id = ?', (transaction_id,))
+                        p = cursor.fetchone()
+                        if p and p['subscription_id']:
+                            cursor.execute('UPDATE subscriptions SET plan_active = 1 WHERE sub_id = ?', (p['subscription_id'],))
+                            conn.commit()
+                else:
+                    print('Payment not found for transaction_id', transaction_id)
+            finally:
+                conn.close()
+
+        # Return success
+        return jsonify({'status': 'ok'}), 200
+
+    except Exception as e:
+        print('Webhook handler error:', e)
+        return jsonify({'error': str(e)}), 500
 
 def domain_features(u: str):
     try:
