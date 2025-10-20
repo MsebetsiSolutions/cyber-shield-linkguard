@@ -12,7 +12,7 @@ async function fetchWithSession(path, opts = {}) {
   const response = await fetch(path, {
     ...opts,
     headers,
-    credentials: 'include'  // ensures cookies/session are sent
+    credentials: 'include'  
   });
   return response;
 }
@@ -50,26 +50,25 @@ function updatePlanFeatures(planMode) {
   const features = {
     0: [
       {icon: 'check-circle-fill', text: 'Basic scanning', available: true},
-      {icon: 'check-circle-fill', text: '5 scans per day', available: true},
+      {icon: 'check-circle-fill', text: '1 scans per day', available: true},
       {icon: 'x-circle', text: 'Advanced threat detection', available: false},
       {icon: 'x-circle', text: 'Priority support', available: false}
     ],
     1: [
       {icon: 'check-circle-fill', text: 'Advanced scanning', available: true},
       {icon: 'check-circle-fill', text: 'Unlimited scans', available: true},
-      {icon: 'check-circle-fill', text: 'Advanced threat detection', available: true},
+      {icon: 'check-circle-fill', text: 'Threat detection', available: true},
       {icon: 'x-circle', text: 'Priority support', available: false}
     ],
     2: [
       {icon: 'check-circle-fill', text: 'Advanced scanning', available: true},
       {icon: 'check-circle-fill', text: 'Unlimited scans', available: true},
-      {icon: 'check-circle-fill', text: 'Advanced threat detection', available: true},
+      {icon: 'check-circle-fill', text: 'Threat detection', available: true},
       {icon: 'check-circle-fill', text: 'Team management', available: true}
     ],
     3: [
       {icon: 'check-circle-fill', text: 'All features', available: true},
       {icon: 'check-circle-fill', text: 'Unlimited everything', available: true},
-      {icon: 'check-circle-fill', text: '24/7 priority support', available: true},
       {icon: 'check-circle-fill', text: 'Custom solutions', available: true}
     ]
   };
