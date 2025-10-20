@@ -1,0 +1,1039 @@
+<script type="text/javascript">
+  var gk_isXlsx = false;
+  var gk_xlsxFileLookup = {};
+  var gk_fileData = {};
+  function filledCell(cell) {
+    return cell !== '' && cell != null;
+  }
+  function loadFileData(filename) {
+    if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+      try {
+        var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+        var firstSheetName = workbook.SheetNames[0];
+        var worksheet = workbook.Sheets[firstSheetName];
+
+        // Convert sheet to JSON to filter blank rows
+        var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+        // Filter out blank rows (rows where all cells are empty, null, or undefined)
+        var filteredData = jsonData.filter(row => row.some(filledCell));
+
+        // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+        var headerRowIndex = filteredData.findIndex((row, index) =>
+          row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+        );
+        // Fallback
+        if (headerRowIndex === -1 || headerRowIndex > 25) {
+          headerRowIndex = 0;
+        }
+
+        // Convert filtered JSON back to CSV
+        var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+        csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+        return csv;
+      } catch (e) {
+        console.error(e);
+        return "";
+      }
+    }
+    return gk_fileData[filename] || "";
+  }
+</script>
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Week 8 — Vulnerability Management Workshop (Multi-page)</title>
+  <style>
+    :root {
+      --bg: #0f1724;
+      --card: #0b1220;
+      --accent: #06b6d4;
+      --muted: #9aa6b2;
+      --glass: rgba(255, 255, 255, 0.03)
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      margin: 0;
+      background: linear-gradient(180deg, #071126 0%, #071829 100%);
+      color: #e6eef6
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 20px auto;
+      padding: 18px
+    }
+
+    header {
+      display: flex;
+      gap: 18px;
+      align-items: center
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.6rem
+    }
+
+    p.lead {
+      margin: 6px 0 18px;
+      color: var(--muted)
+    }
+
+    .pager {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-left: auto
+    }
+
+    .pill {
+      background: var(--glass);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: .85rem;
+      color: var(--muted)
+    }
+
+    .page {
+      display: none;
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 6px 18px rgba(2, 6, 23, 0.6);
+      min-height: 70vh
+    }
+
+    .page.active {
+      display: block
+    }
+
+    nav.top-nav {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin: 12px 0
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #06202a;
+      text-decoration: none;
+      font-weight: 600;
+      border: none;
+      cursor: pointer
+    }
+
+    .btn.ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid rgba(255, 255, 255, 0.04)
+    }
+
+    .small {
+      font-size: 0.85rem;
+      color: var(--muted)
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center
+    }
+
+    img.header-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-top: 12px
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 18px;
+      margin-top: 18px
+    }
+
+    aside .card {
+      position: sticky;
+      top: 20px
+    }
+
+    pre {
+      background: #041226;
+      padding: 12px;
+      border-radius: 8px;
+      overflow: auto;
+      font-size: 0.85rem
+    }
+
+    table.small {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    table.small td,
+    table.small th {
+      padding: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    ul {
+      margin: 8px 0 12px 18px
+    }
+
+    .lab {
+      background: linear-gradient(90deg, rgba(6, 182, 212, 0.03), transparent);
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 8px
+    }
+
+    .quiz .q {
+      margin-bottom: 12px
+    }
+
+    .roles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px
+    }
+
+    .role-card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), transparent);
+      padding: 10px;
+      border-radius: 8px
+    }
+
+    footer {
+      margin-top: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 12px
+    }
+
+    .page-number {
+      color: var(--muted)
+    }
+
+    /* Print rules - each .page should start on a new printed page */
+    @media print {
+      body {
+        background: white;
+        color: black
+      }
+
+      .page {
+        box-shadow: none;
+        background: white;
+        border: none
+      }
+
+      .page {
+        display: block !important;
+        page-break-after: always
+      }
+
+      nav,
+      .controls,
+      header,
+      .pager {
+        display: none
+      }
+    }
+
+    /* Responsive */
+    @media (max-width:900px) {
+      .two-col {
+        grid-template-columns: 1fr
+      }
+
+      img.header-img {
+        height: 140px
+      }
+    }
+
+    /* Accordion styles */
+    .accordion .acc-item {
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 8px
+    }
+
+    .acc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+      cursor: pointer
+    }
+
+    .acc-body {
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent);
+      display: none
+    }
+
+    /* Simple form styles for quizzes */
+    .quiz input[type="text"],
+    .quiz textarea,
+    .quiz select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      background: transparent;
+      color: inherit
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Week 8 — Vulnerability Management Workshop</h1>
+        <p class="lead">Theme: “Scan the Present. Secure the Future.” — Interactive, extended & classroom-ready</p>
+      </div>
+      <div class="pager">
+        <div class="pill">Duration: 4 hours</div>
+        <div style="margin-left:12px;text-align:right" class="small">Format: Lecture + Lab + Compliance Simulation</div>
+      </div>
+    </header>
+
+    <nav class="top-nav">
+      <button class="btn" onclick="showPage(0)">Overview</button>
+      <button class="btn" onclick="showPage(1)">Week 8.1 — OpenVAS & IoT</button>
+      <button class="btn" onclick="showPage(2)">Week 8.2 — Risk & Ethical Hacking</button>
+      <button class="btn" onclick="showPage(3)">Week 8.3 — Red vs Blue & Compliance</button>
+      <button class="btn" onclick="showPage(4)">Instructor Toolkit</button>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn ghost" onclick="printAll()">Print All</button>
+        <button class="btn" onclick="downloadHTML()">Download .html</button>
+      </div>
+    </nav>
+
+    <!-- PAGES -->
+    <section id="page-0" class="page active" data-title="Overview">
+      <div class="section-title">
+        <div>
+          <strong>Workshop Overview</strong>
+          <div class="small">By 2025 there will be billions of IoT devices — many unpatched, many critical.</div>
+        </div>
+        <div class="pill">Instructor: Tshepho Nkoe</div>
+      </div>
+
+      <img class="header-img"
+        src="https://images.unsplash.com/photo-1556740772-1a741367b93e?auto=format&fit=crop&w=1200&q=80"
+        alt="Security operations center with analysts monitoring cyber threats" />
+
+      <div style="margin-top:12px">
+        <strong>Learning Objectives</strong>
+        <ul>
+          <li>Understand CVE/CVSS and how vulnerabilities are published.</li>
+          <li>Scan IoT firmware using OpenVAS and score CVEs.</li>
+          <li>Simulate patch cycles with NIST/FSTEC and propose compliant timelines.</li>
+          <li>Design ideas for a regional CVE database and mobile-first scanners.</li>
+        </ul>
+      </div>
+
+      <div class="controls">
+        <div class="page-number">Page 1 of 6</div>
+        <div style="margin-left:auto">
+          <button class="btn" onclick="showPage(1)">Go to Week 8.1</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Week 8.1 -->
+    <section id="page-1" class="page" data-title="Week 8.1 — OpenVAS & IoT">
+      <div class="section-title">
+        <h2>Week 8.1 — OpenVAS & Securing Global IoT</h2>
+        <div class="pill">9:00 — 12:00</div>
+      </div>
+
+      <div class="two-col">
+        <main>
+          <img class="header-img"
+            src="https://images.unsplash.com/photo-1556742044-3c52d6e88c62?auto=format&fit=crop&w=1200&q=80"
+            alt="Cybersecurity professional performing vulnerability scan" />
+          <div style="margin-top:12px">
+            <h3>9:00 — 9:30: CVEs & CVSS (Core Concepts)</h3>
+            <p class="small">Quick quiz and scoring examples — expanded with worked examples and classroom exercises.
+            </p>
+            <div class="lab">
+              <strong>Lecture content (expanded)</strong>
+              <ul>
+                <li><strong>Vulnerability:</strong> A flaw allowing unauthorized access — include threat model examples
+                  (IoT admin port left open, debug endpoints exposed).</li>
+                <li><strong>CVE:</strong> Global ID for known vulnerabilities — explain assignment process and CNA
+                  responsibilities.</li>
+                <li><strong>CVSS v3.1:</strong> Base, Temporal, Environmental metrics explained with examples.</li>
+              </ul>
+              <p><strong>Worked Example — CVSS calculation (simplified):</strong></p>
+              <ol>
+                <li>Attack Vector: Network (AV:N)</li>
+                <li>Attack Complexity: Low (AC:L)</li>
+                <li>Privileges Required: None (PR:N)</li>
+                <li>User Interaction: None (UI:N)</li>
+                <li>Impact: High on Confidentiality, Integrity, Availability</li>
+              </ol>
+              <p class="small">Resulting approximate score: <strong>9.8 (Critical)</strong> — class exercise: recalc
+                with changed Impact values.</p>
+            </div>
+
+            <div class="accordion" style="margin-top:10px">
+              <div class="acc-item">
+                <div class="acc-header" data-target="acc1">
+                  <h3>Quiz: CVE/CVSS Quickfire</h3>
+                  <div class="small">Click to expand</div>
+                </div>
+                <div class="acc-body" id="acc1">
+                  <div class="quiz">
+                    <div class="q"><strong>Q1:</strong> Who manages the global CVE system?</div>
+                    <button class="btn"
+                      onclick="alert('Answer: MITRE Corporation — with multiple CNAs (CVE Numbering Authorities) globally')">Show
+                      Answer</button>
+
+                    <div style="margin-top:8px" class="q"><strong>Q2:</strong> Which CVSS metric would you change if an
+                      exploit required user interaction?</div>
+                    <button class="btn" onclick="alert('Answer: UI — User Interaction metric')">Show Answer</button>
+
+                    <div style="margin-top:8px" class="q"><strong>Short task:</strong> Given the simplified metric set
+                      above, change Impact from High to Low and re-estimate the CVSS roughly.</div>
+                    <textarea rows="3" placeholder="Write your rough recalculated score & reasoning"
+                      id="cvss-task"></textarea>
+                    <div style="margin-top:8px"><button class="btn" onclick="gradeCVSS()">Submit
+                        (auto-feedback)</button></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr style="margin:14px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+
+            <h3>9:30 — 10:30: Hands-On OpenVAS (IoT Scan)</h3>
+            <p class="small">Setup instructions, deeper lab tasks, and scoring rubric.</p>
+
+            <img class="header-img"
+              src="https://images.unsplash.com/photo-1556742044-3c52d6e88c62?auto=format&fit=crop&w=800&q=80"
+              alt="Vulnerability scan in progress on computer screen" />
+
+            <div class="lab">
+              <strong>OpenVAS quick setup (Ubuntu) — step-by-step for classroom</strong>
+              <pre>sudo apt update && sudo apt install -y openvas
+sudo gvm-setup
+sudo gvm-start
+# If using GVM packages, follow distro docs for user & feed updates
+Access GUI: http://localhost:9392 (or VM-IP:9392)
+Default: create admin user during setup</pre>
+
+              <p class="small">Class lab: You will be given an IoT VM image containing 3 devices (router, camera,
+                thermostat). Tasks:</p>
+              <ol>
+                <li>Configure VM networking in NAT or host-only for safe lab.</li>
+                <li>Update OpenVAS feeds before scanning (ensure NVTs up-to-date).</li>
+                <li>Create a target scan for each device and run authenticated and unauthenticated scans.</li>
+                <li>Export findings and map each CVE to a CVSS score (use provided CVSS calculator notebook).</li>
+              </ol>
+
+              <img class="header-img"
+                src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80"
+                alt="IoT devices in a lab setting" />
+
+              <p class="small"><strong>Scoring rubric (for lab deliverable):</strong></p>
+              <ul>
+                <li>Scan configuration: 25%</li>
+                <li>Findings & mapping correct: 35%</li>
+                <li>Mitigation suggestions: 25%</li>
+                <li>Presentation & export: 15%</li>
+              </ul>
+
+              <p class="small"><strong>Example finding:</strong> <em>CVE-2021-41653 — CVSS 9.8 — Mitigation: Upgrade
+                  firmware to 1.0.9+</em></p>
+
+              <p class="small"><strong>Extra lab tasks (advanced):</strong></p>
+              <ul>
+                <li>Try to perform credentialed scan (if lab VM provides credentials) to find more issues.</li>
+                <li>Use RustScan or Masscan for fast discovery prior to a full OpenVAS scan.</li>
+                <li>Create a small bash/python script to parse OpenVAS XML output and summarise top-5 vulns.</li>
+              </ul>
+            </div>
+
+            <h3 style="margin-top:12px">10:45 — 11:30: Global Patch Compliance Simulation</h3>
+            <p class="small">FSTEC, NIST, ENISA — in-depth scenario with deliverables.</p>
+
+            <div class="lab">
+              <strong>Scenario (expanded)</strong>
+              <p>Regional energy company with 3 devices. Your team must produce a 1-page Compliant Patch Plan and a
+                1-slide executive summary.</p>
+              <table class="small">
+                <tr>
+                  <th>Device</th>
+                  <th>CVSS</th>
+                  <th>Type</th>
+                </tr>
+                <tr>
+                  <td>Device A</td>
+                  <td>9.1</td>
+                  <td>Firewall</td>
+                </tr>
+                <tr>
+                  <td>Device B</td>
+                  <td>5.8</td>
+                  <td>HR Web Portal</td>
+                </tr>
+                <tr>
+                  <td>Device C</td>
+                  <td>3.0</td>
+                  <td>Smart Thermostat</td>
+                </tr>
+              </table>
+
+              <p class="small">Tasks (deliverables):</p>
+              <ol>
+                <li>Prioritize devices by criticality and business impact.</li>
+                <li>Build a patch timeline aligned to NIST RA-5 / SI-2 guidance (include who, what, when, rollback
+                  plan).</li>
+                <li>Calculate expected downtime and stakeholder communication plan.</li>
+                <li>Produce a 1-page compliant patch plan (template provided below).</li>
+              </ol>
+
+              <p class="small"><strong>One-page compliant patch plan template (use as starting point):</strong></p>
+              <pre>Title: Compliant Patch Plan — Regional Energy Co.
+Target: Device A (Firewall) — CVE list: [CVE-xxxx-xxxx]
+Priority: Critical (CVSS 9.1)
+Mitigation: Apply vendor firmware vX.Y (test on staging first)
+Timeline: Patch window Day 2–3 after vendor release (72 hours)
+Rollback: Backup config, retain previous firmware image
+Communication: Notify Ops (1h), Exec summary (24h)
+Compliance mapping: NIST SI-2, RA-5 — evidence: scan results, change log
+</pre>
+            </div>
+
+            <h3 style="margin-top:12px">11:30 — 12:00: Future Builders — AfroCVE & “KUBUKA”</h3>
+            <p class="small">Design exercise: mobile-first, low-bandwidth scanner — expanded with tech stack and MVP
+              plan.</p>
+
+            <div class="lab">
+              <strong>KUBUKA — Innovation Blueprint (expanded)</strong>
+              <ul>
+                <li>Local CVE DB: CVE JSON API + SQLite for offline sync.</li>
+                <li>Fast scanning: Rust + RustScan, optional lightweight kernel modules for throughput.</li>
+                <li>Android UI: Flutter for cross-platform with offline-first patterns.</li>
+                <li>Localization plan: Swahili, Zulu, Yoruba, Hindi, Bahasa — fuzzy-match CVE descriptions.</li>
+              </ul>
+
+              <p class="small">Class deliverable: define an MVP (3-week plan), stakeholders, and basic funding model
+                (grant + university partnership).</p>
+            </div>
+
+            <div class="controls">
+              <div class="page-number">Page 2 of 6</div>
+              <div style="margin-left:auto">
+                <button class="btn" onclick="showPage(2)">Go to Week 8.2</button>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        <aside>
+          <div class="card" style="padding:12px;margin-bottom:12px">
+            <strong>Quick Resources</strong>
+            <div class="small" style="margin-top:8px">
+              • CVSS v3.1 (FIRST.org)<br>
+              • OpenVAS / Greenbone docs<br>
+              • RustScan / Masscan guides
+            </div>
+
+            <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0">
+
+            <strong>Role-play cards</strong>
+            <div style="margin-top:8px" class="small">Click to copy a ready card for printouts or slides.</div>
+            <div style="margin-top:8px">
+              <button class="btn" onclick="copyText(roleResearcher)">Copy Researcher Card</button>
+              <button class="btn" style="margin-left:8px" onclick="copyText(roleLegal)">Copy Legal Card</button>
+            </div>
+
+            <div style="margin-top:12px">
+              <button class="btn ghost" onclick="showAccordion('acc1')">Open quiz (CVSS)</button>
+            </div>
+          </div>
+
+          <div class="card" style="padding:12px">
+            <strong>Quick lab checklist</strong>
+            <ul class="small">
+              <li>VM snapshot done</li>
+              <li>Feeds updated</li>
+              <li>Credentials (if any) provided</li>
+              <li>Export template ready</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Week 8.2 -->
+    <section id="page-2" class="page" data-title="Week 8.2 — Risk & Ethical Hacking">
+      <div class="section-title">
+        <h2>Week 8.2 — Risk Management & Ethical Hacking</h2>
+        <div class="pill">9:00 — 12:00</div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:260px">
+            <strong>9:00 — 9:30: Risk Scoring Models</strong>
+            <p class="small">Expanded: mapping legal/regulatory timeframes to technical response.</p>
+
+            <div class="lab">
+              <p class="small">Regulation quick map:</p>
+              <table class="small">
+                <tr>
+                  <td>GDPR</td>
+                  <td>72h</td>
+                  <td>€20M / 4% rev</td>
+                </tr>
+                <tr>
+                  <td>DPDP</td>
+                  <td>72h</td>
+                  <td>₹250 crore</td>
+                </tr>
+                <tr>
+                  <td>LGPD</td>
+                  <td>48h</td>
+                  <td>2% revenue</td>
+                </tr>
+              </table>
+
+              <strong>GDPR Explained in Detail:</strong>
+              <p>GDPR stands for General Data Protection Regulation. It is a comprehensive data protection law that came
+                into effect in the European Union (EU) on May 25, 2018. The primary goal of GDPR is to give individuals
+                (data subjects) more control over their personal data and to unify data protection regulations across
+                the EU and the European Economic Area (EEA). It applies to any organization that processes personal data
+                of EU residents, regardless of where the organization is located.</p>
+              <p>Key aspects of GDPR include:</p>
+              <ul>
+                <li><strong>Personal Data Definition:</strong> Any information relating to an identified or identifiable
+                  natural person, such as names, email addresses, location data, or even IP addresses.</li>
+                <li><strong>Data Breach Notification:</strong> If a data breach occurs that is likely to result in a
+                  risk to the rights and freedoms of individuals (e.g., identity theft or financial loss), the
+                  organization must notify the relevant supervisory authority within 72 hours of becoming aware of the
+                  breach. In some cases, affected individuals must also be notified without undue delay.</li>
+                <li><strong>Fines and Penalties:</strong> Violations can lead to significant fines—up to €20 million or
+                  4% of the company's global annual revenue, whichever is higher. This is designed to ensure companies
+                  take data protection seriously.</li>
+                <li><strong>Rights of Individuals:</strong> GDPR grants rights like the right to access data, right to
+                  rectification, right to erasure ("right to be forgotten"), and right to data portability.</li>
+              </ul>
+              <p>For students: Think of GDPR as a set of rules to protect your personal information online. If a company
+                loses your data (like in a hack), they have to report it quickly—within 72 hours—to the authorities to
+                help prevent harm. This is like telling the teacher immediately if something goes wrong in class, so it
+                can be fixed before it affects everyone. Non-compliance can result in huge fines, similar to a big
+                penalty for breaking school rules.</p>
+
+              <p class="small">Risk scoring python snippet (class use):</p>
+              <pre># Python snippet for risk scoring
+import pandas as pd
+df = pd.read_csv("brics_risk_input.csv")
+df["LGPD_Score"] = df["Impact"] * df["Likelihood"] * 0.8
+# Prioritize assets with scores &gt; 7.0
+</pre>
+
+              <p class="small">Class exercise: build a 5-asset risk matrix and map remediation windows (0-24h, 24-72h,
+                72+h).</p>
+            </div>
+          </div>
+
+          <div style="flex:1;min-width:260px">
+            <strong>10:45 — 11:45: Ethical Hacking Simulation</strong>
+            <p class="small">Scenario: School app exposes student records across 3 countries — roles: Researcher, Legal,
+              Developer.</p>
+
+            <div class="roles" style="margin-top:8px">
+              <div class="role-card"><strong>Researcher</strong>
+                <div class="small">Document PoC, avoid exploitation, notify vendor privately</div>
+              </div>
+              <div class="role-card"><strong>Legal</strong>
+                <div class="small">Map DPDP / LGPD / GDPR obligations, decide on reporting timeline</div>
+              </div>
+              <div class="role-card"><strong>Developer</strong>
+                <div class="small">Create patch, test, and prepare disclosure support</div>
+              </div>
+              <div class="role-card"><strong>Public Statement</strong>
+                <div class="small">"We prioritized student safety by delaying disclosure to allow mitigation."</div>
+              </div>
+            </div>
+
+            <div class="lab" style="margin-top:10px">
+              <strong>Simulation deliverables</strong>
+              <ol>
+                <li>PoC document (non-exploitable) with reproducer steps.</li>
+                <li>Legal memo mapping obligations & recommended timeline.</li>
+                <li>Patch plan & QA checklist for developer team.</li>
+                <li>Public statement draft and stakeholder communication plan.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:10px" class="small">Discussion: "How would a vulnerability scanner embody Ubuntu
+          principles?" Ideas: community severity scoring, local-language reporting.</div>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+
+        <h3>Quizzes & Reflection</h3>
+        <div class="quiz">
+          <div class="q"><strong>Q1:</strong> You found a vulnerability that exposes student emails. GDPR applies.
+            Within how many hours must you notify authorities?</div>
+          <p class="small">(Hint: Refer to the GDPR explanation above. This is the timeframe for notifying the
+            supervisory authority if the breach poses a risk to individuals' rights and freedoms.)</p>
+          <div style="margin-top:6px"><select id="q2-select">
+              <option value="">Select...</option>
+              <option value="24">24 hours</option>
+              <option value="48">48 hours</option>
+              <option value="72">72 hours</option>
+            </select></div>
+          <div style="margin-top:8px"><button class="btn" onclick="checkQ2()">Submit Answer</button></div>
+
+          <div style="margin-top:12px" class="q"><strong>Q2 (Short):</strong> Draft a one-sentence public disclosure
+            that prioritizes victim safety over publicity. (textarea below)</div>
+          <textarea id="q2-text" rows="3" placeholder="Write 1 sentence..."></textarea>
+          <div style="margin-top:8px"><button class="btn" onclick="gradeText()">Submit</button></div>
+        </div>
+
+        <div class="controls">
+          <div class="page-number">Page 3 of 6</div>
+          <div style="margin-left:auto">
+            <button class="btn" onclick="showPage(3)">Go to Week 8.3</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Week 8.3 -->
+    <section id="page-3" class="page" data-title="Week 8.3 — Red vs Blue & Compliance">
+      <div class="section-title">
+        <h2>Week 8.3 — Red Team vs Blue Team & Compliance Auditing (Tenable)</h2>
+        <div class="pill">9:00 — 12:00</div>
+      </div>
+
+      <div style="margin-top:12px">
+        <p class="small">War games for peace — simulate, audit, fortify.</p>
+
+        <img class="header-img"
+          src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80"
+          alt="Cybersecurity professional in hoodie working in dark room (red team)" />
+        <img class="header-img"
+          src="https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=800&q=80"
+          alt="Cybersecurity analyst monitoring network (blue team)" />
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:300px">
+            <strong>09:00 — 09:30: Hat Colors & Roles</strong>
+            <ul class="small">
+              <li>White — Ethical</li>
+              <li>Blue — Defender</li>
+              <li>Purple — Hybrid</li>
+              <li>Black — Malicious</li>
+              <li>Grey — Ambiguous</li>
+            </ul>
+            <img class="header-img"
+              src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80"
+              alt="Cybersecurity professional in hoodie working in dark room (red team)" />
+            <img class="header-img"
+              src="https://images.unsplash.com/photo-1509395176047-4a66953fd231?auto=format&fit=crop&w=800&q=80"
+              alt="Cybersecurity analyst in ambiguous setting (grey hat)" />
+
+            <strong style="display:block;margin-top:8px">09:30 — 10:30: Live Simulation</strong>
+            <p class="small">Red uses Nmap, Metasploit; Blue uses Security Onion, Wireshark. Debrief: map to MITRE
+              ATT&CK.</p>
+
+            <div class="lab">
+              <strong>Live Simulation Playbook (safely)</strong>
+              <ol>
+                <li>Define rules of engagement (ROE) and safe-target list.</li>
+                <li>Red: reconnaissance (Nmap, RustScan), exploit attempt in staging only.</li>
+                <li>Blue: deploy detection (Suricata/Security Onion), perform triage.</li>
+                <li>Debrief: map observed TTPs to MITRE ATT&CK and propose 3 mitigations.</li>
+              </ol>
+            </div>
+          </div>
+
+          <div style="flex:1;min-width:300px">
+            <strong>10:45 — 11:30: Nessus (Tenable) — Compliance Scans</strong>
+            <ol class="small">
+              <li>Register for Nessus Essentials</li>
+              <li>Run host discovery, web app scan, and compliance audit</li>
+              <li>Deliverable: Report 3 critical vulns, violated controls, recommended remediations</li>
+            </ol>
+
+            <div class="lab" style="margin-top:8px">
+              <strong>Nessus lab steps</strong>
+              <ol>
+                <li>Install Nessus on a lab VM (follow Tenable docs).</li>
+                <li>Create a scan policy for CIS benchmarks if doing compliance audit.</li>
+                <li>Run on staging hosts, export PDF report and highlight top-3 findings.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:12px">War Game Scenarios & Rubric</h3>
+        <div class="lab">
+          <p class="small">Scenario A: Corporate network with segmented ICS; Scenario B: University lab network. Each
+            team gets 60 minutes and then 20-minute debrief.</p>
+          <p class="small"><strong>Rubric:</strong> Detection time (30%), containment (30%), remediation plan (20%),
+            communication (20%).</p>
+        </div>
+
+        <h3 style="margin-top:12px">Quiz: Tactics & Controls</h3>
+        <div class="quiz">
+          <div class="q"><strong>Q1:</strong> Which tool is best for network packet capture analysis?</div>
+          <div class="small">Choose: Wireshark / Nmap / Metasploit</div>
+          <div style="margin-top:6px"><select id="q3-select">
+              <option value="">Select...</option>
+              <option value="Wireshark">Wireshark</option>
+              <option value="Nmap">Nmap</option>
+              <option value="Metasploit">Metasploit</option>
+            </select></div>
+          <div style="margin-top:8px"><button class="btn" onclick="checkQ3()">Submit</button></div>
+        </div>
+
+        <div class="controls">
+          <div class="page-number">Page 4 of 6</div>
+          <div style="margin-left:auto">
+            <button class="btn" onclick="showPage(4)">Go to Instructor Toolkit</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Instructor Toolkit -->
+    <section id="page-4" class="page" data-title="Instructor Toolkit">
+      <div class="section-title">
+        <h2>Instructor Toolkit</h2>
+        <div class="pill">Resources & Downloads</div>
+      </div>
+
+      <div style="margin-top:12px" class="two-col">
+        <main>
+          <div class="card" style="padding:12px;margin-bottom:12px">
+            <strong>Pre-class checklist</strong>
+            <ul class="small">
+              <li>Pre-install OpenVAS on VMs and snapshot.</li>
+              <li>Prepare IoT firmware with 2–3 known vulns for demos.</li>
+              <li>Provide credential sets for credentialed scans (in staging only).</li>
+            </ul>
+
+            <hr style="margin:10px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
+
+            <strong>Downloadables (templates)</strong>
+            <ul class="small">
+              <li><button class="btn" onclick="downloadText('patch-plan.txt', patchPlanTemplate)">Download Patch Plan
+                  Template</button></li>
+              <li style="margin-top:8px"><button class="btn"
+                  onclick="downloadText('cvss-notebook.md', cvssNotebook)">Download CVSS Notebook (Markdown)</button>
+              </li>
+            </ul>
+          </div>
+
+          <div class="card" style="padding:12px">
+            <strong>Teaching tips</strong>
+            <ul class="small">
+              <li>Keep ROE explicit and require signed student acknowledgment for live labs.</li>
+              <li>Run scans during off-hours or on isolated networks to avoid accidental exposure.</li>
+              <li>Encourage students to write short executive summaries for non-technical stakeholders.</li>
+            </ul>
+          </div>
+        </main>
+
+        <aside>
+          <div class="card" style="padding:12px">
+            <strong>Quick Links & Resources</strong>
+            <div class="small" style="margin-top:8px">• CVSS v3.1 (FIRST.org)<br>• OpenVAS / Greenbone docs<br>• Tenable
+              Nessus Essentials<br>• TryHackMe CTF suggestions</div>
+
+            <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+
+            <strong>Role-play Cards</strong>
+            <div style="margin-top:8px" class="small">Click a role to copy a ready card to paste into printouts or
+              slides.</div>
+            <div style="margin-top:8px">
+              <button class="btn" onclick="copyText(roleResearcher)">Copy Researcher Card</button>
+              <button class="btn" style="margin-left:8px" onclick="copyText(roleLegal)">Copy Legal Card</button>
+            </div>
+
+            <div style="margin-top:12px">
+              <button class="btn" onclick="downloadHTML()">Download Page</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="controls">
+        <div class="page-number">Page 5 of 6</div>
+        <div style="margin-left:auto">
+          <button class="btn" onclick="showPage(0)">Back to Overview</button>
+        </div>
+      </div>
+
+      <footer style="margin-top:12px;text-align:left" class="card">
+        <strong>Closing Reflection</strong>
+        <p class="small">“In every vulnerability, there’s a story... Let future engineers be builders of secure
+          systems.” — Tshepho Nkoe</p>
+      </footer>
+    </section>
+
+    <!-- Hidden templates / page for assets -->
+    <section id="page-5" class="page" data-title="Appendix (Templates)" style="display:none">
+      <div class="section-title">
+        <h2>Appendix — Templates & Extras</h2>
+        <div class="pill">Appendix</div>
+      </div>
+      <div style="margin-top:12px">
+        <h3>Patch Plan Template</h3>
+        <pre id="patch-plan-template">Title: Compliant Patch Plan — [Org]
+Target: [Device]
+Priority: [Critical/High/Medium/Low]
+CVEs: [List]
+Mitigation: [Steps]
+Timeline: [Dates]
+Rollback: [Steps]
+Communication: [Stakeholders & cadence]
+Compliance mapping: [NIST / ENISA / local regs]</pre>
+
+        <h3 style="margin-top:12px">CVSS Notebook (Markdown)</h3>
+        <pre id="cvss-notebook-template"># CVSS Calculator Notebook
+
+## Instructions
+- Load findings.csv
+- Map metrics (AV, AC, PR, UI, S, C, I, A)
+- Compute base score using formula / library
+</pre>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Simple page navigation
+    const pages = Array.from(document.querySelectorAll('.page'));
+    function showPage(idxOrId) {
+      let page;
+      if (typeof idxOrId === 'number') page = pages[idxOrId];
+      else page = document.getElementById('page-' + idxOrId);
+      if (!page) {
+        // allow pass in index
+        if (typeof idxOrId === 'string' && idxOrId.match(/^page-\d+$/)) page = document.getElementById(idxOrId);
+      }
+      pages.forEach(p => p.classList.remove('active'));
+      if (page) page.classList.add('active');
+      // scroll to top
+      window.scrollTo(0, 0);
+    }
+
+    // Utilities
+    function copyText(text) { navigator.clipboard.writeText(text).then(() => alert('Card copied to clipboard')) }
+
+    const roleResearcher = `Researcher Card:\nGoal: Discover and document vulnerabilities without causing harm.\nTasks:\n- Record PoC steps (no exploit on live data)\n- Notify vendor privately (ISO 29147 Day 0)\n- Suggest mitigation and test fixes.`;
+    const roleLegal = `Legal Card:\nGoal: Map data protection obligations and advise on disclosure.\nTasks:\n- Check DPDP / LGPD / GDPR timelines\n- Recommend safe harbor language\n- Approve public disclosure timeline (Day 30 if unpatched)`;
+
+    function showAccordion(id) { const body = document.getElementById(id); if (!body) return; body.style.display = body.style.display === 'block' ? 'none' : 'block'; }
+
+    // Grading helpers
+    function gradeCVSS() {
+      const text = document.getElementById('cvss-task').value || '';
+      if (text.toLowerCase().includes('low')) alert('Good — lowering impact reduces score. Typical new score ~3.0-4.5 depending on metrics.');
+      else alert('Try describing what metric changed (e.g., Impact Low) and a rough numeric estimate.');
+    }
+
+    function checkQ2() {
+      const val = document.getElementById('q2-select').value;
+      if (val === '72') alert('Correct: GDPR requires notification within 72 hours to supervisory authority in many cases.');
+      else if (val === '48' || val === '24') alert('Not quite — GDPR notification window is 72 hours for supervisory authority. Check local deviations.');
+      else alert('Please choose an option.');
+    }
+
+    function gradeText() {
+      const t = document.getElementById('q2-text').value.trim();
+      if (t.length < 15) alert('Try to write one clear sentence focusing on victim safety and mitigation window.');
+      else alert('Thanks — good concise disclosure. Instructor will review tone.');
+    }
+
+    function checkQ3() {
+      const v = document.getElementById('q3-select').value;
+      if (v === 'Wireshark') alert('Correct — Wireshark is used for packet capture analysis.');
+      else alert('Not correct — Wireshark is ideal for packet capture analysis.');
+    }
+
+    // Print & download
+    function printAll() { window.print(); }
+
+    function downloadHTML() {
+      const html = '<!doctype html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'Week8-vulnerability-management-multipage.html';
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    // Download text assets
+    const patchPlanTemplate = document.getElementById('patch-plan-template').textContent;
+    const cvssNotebook = document.getElementById('cvss-notebook-template').textContent;
+    function downloadText(filename, content) {
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    // expose showPage by index convenience
+    window.showPage = function (i) {
+      // allow string names for major pages
+      if (typeof i === 'number') {
+        pages.forEach(p => p.classList.remove('active'));
+        if (pages[i]) pages[i].classList.add('active');
+      } else if (typeof i === 'string') {
+        // search by data-title
+        const found = pages.find(p => p.dataset.title === i || p.id === i || p.id === 'page-' + i);
+        if (found) { pages.forEach(p => p.classList.remove('active')); found.classList.add('active'); }
+      }
+      window.scrollTo(0, 0);
+    };
+
+    // init
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        const idx = pages.findIndex(p => p.classList.contains('active'));
+        if (idx < pages.length - 1) showPage(idx + 1);
+      } else if (e.key === 'ArrowLeft') {
+        const idx = pages.findIndex(p => p.classList.contains('active'));
+        if (idx > 0) showPage(idx - 1);
+      }
+    });
+  </script>
+</body>
+
+</html>

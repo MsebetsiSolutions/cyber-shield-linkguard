@@ -41,7 +41,7 @@ except ImportError:
             print("No QR code library available - QR scanning disabled")
 
 #importing blueprints
-from routes.authentication import auth_bp
+from routes.authentication import auth_bp, init_mail  
 from routes.subscription import subscription_bp
 from routes.settings import settings_bp
 from routes.scan_results import scan_results_bp
@@ -51,12 +51,18 @@ from routes.teamCollab import team_collab_bp
 from routes.admin import admin_bp
 from routes.enterprise import enterprise_bp
 from routes.learning_hub import learning_hub_bp
-
-# importing email phishing blueprint
 from routes.email_phishing import email_phishing_bp
+from routes.exam import exam_bp
 
-# from routes.phishing_replica import phishing_replica_bp
-
+from backend.routes_alerts import alerts_bp
+from backend.routes_host import host_bp
+from backend.routes_intel import intel_bp
+from backend.routes_monitor import monitor_bp
+from backend.routes_reports import reports_bp
+from backend.routes_settings import settings_bp as backend_settings_bp
+from backend.routes_database import database_bp
+from backend.routes_monitoring import monitoring_bp
+from backend.routes_pentesting import pentesting_bp
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -72,6 +78,9 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret-key-change-in-production")
 
+# Initialize Flask-Mail 
+init_mail(app)
+
 # registering blueprints
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(subscription_bp)
@@ -83,12 +92,19 @@ app.register_blueprint(team_collab_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(enterprise_bp)
 app.register_blueprint(learning_hub_bp)
+app.register_blueprint(email_phishing_bp, url_prefix='/api/phishing')
 app.register_blueprint(exam_bp)
 
-# registering email phishing blueprint
-app.register_blueprint(email_phishing_bp, url_prefix='/api/phishing')
+app.register_blueprint(alerts_bp)
+app.register_blueprint(host_bp)
+app.register_blueprint(intel_bp)
+app.register_blueprint(monitor_bp)
+app.register_blueprint(reports_bp)
+app.register_blueprint(backend_settings_bp, url_prefix='/api/backend', name='backend_settings')
+app.register_blueprint(database_bp, url_prefix='/api/database')
+app.register_blueprint(monitoring_bp, url_prefix='/api/monitoring')
+app.register_blueprint(pentesting_bp, url_prefix='/api/pentesting')
 
-# app.register_blueprint(phishing_replica_bp)
 
 
 VT_API_KEY = os.getenv("VT_API_KEY", "").strip()
@@ -790,6 +806,48 @@ def scan_file_or_qr():
             return jsonify({"error": "Failed to scan file"}), 500
     
     return jsonify({"error": "File type not allowed"}), 400
+
+
+
+# Add this function before your routes
+def initialize_backend_database():
+    """Initialize backend database tables"""
+    try:
+        # This will create the necessary tables when the blueprints are imported
+        from backend.routes_alerts import init_schema as init_alerts
+        from backend.routes_reports import init_schema as init_reports
+        from backend.routes_settings import init_schema as init_settings
+        
+        init_alerts()
+        init_reports()
+        init_settings()
+        print("Backend database initialized successfully")
+    except Exception as e:
+        print(f"Backend database initialization error: {e}")
+
+# Call this function after your blueprint registrations
+initialize_backend_database()
+
+
+
+
+# Add these routes to handle SOC dashboard API calls
+@app.route("/api/reports/kpis", methods=["POST"])
+def reports_kpis_proxy():
+    """Proxy to the reports blueprint KPIs endpoint"""
+    return reports_bp.dispatch_request()
+
+@app.route("/api/alerts/list", methods=["POST"])
+def alerts_list_proxy():
+    """Proxy to the alerts blueprint list endpoint"""
+    return alerts_bp.dispatch_request()
+
+@app.route("/api/reports/export", methods=["POST"])
+def reports_export_proxy():
+    """Proxy to the reports blueprint export endpoint"""
+    return reports_bp.dispatch_request()
+
+
 
 #======================================================
 # ------------------- Scoring Logic -------------------
