@@ -385,7 +385,7 @@ async function handleForgotPassword() {
       return toast(data.error || 'Failed to send reset link'); 
     }
     
-    toast('Password reset link has been sent to your email!');
+    toast('Reset link sent to your email');
     setTimeout(() => {
       closeModal('forgotPasswordModal');
       openModal('loginModal');
@@ -393,8 +393,7 @@ async function handleForgotPassword() {
     }, 2000);
     
   } catch (error) { 
-    console.error('Forgot password error:', error);
-    toast('Network error. Please check your connection.'); 
+    toast('Network error'); 
   } finally { 
     setBusy($('doReset'), false); 
   }

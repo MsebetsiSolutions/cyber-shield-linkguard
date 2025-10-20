@@ -73,4 +73,3 @@ def get_user_profile_stats():
         import traceback
         traceback.print_exc()
         return jsonify({'error': 'Failed to get profile statistics'}), 500
-    
