@@ -52,25 +52,45 @@ function setUserUI(userData){
     if (welcomeMessage) welcomeMessage.textContent = welcomeText;
     if (userNameDisplay) userNameDisplay.textContent = displayName;
     
-    // Remove any previous restrictions from FAQ button
-    const faqButton = document.querySelector('a.cs-btn.btn-secondary[href="../supcom/supcom.html"]');
-    if (faqButton) {
-      // Ensure FAQ button is always enabled for all plan modes
-      faqButton.classList.remove('disabled');
-      faqButton.style.opacity = '1';
-      faqButton.style.pointerEvents = 'auto';
-      faqButton.setAttribute('aria-disabled', 'false');
+    // Enable/disable Contact Support button based on plan_mode
+    const supportButton = document.querySelector('a.cs-btn.btn-secondary[href="../supcom/supcom.html"]');
+    if (supportButton) {
+      if (userData.plan_mode === 0) {
+        // Free plan - disable support
+        supportButton.classList.add('disabled');
+        supportButton.style.opacity = '0.6';
+        supportButton.style.pointerEvents = 'none';
+        supportButton.setAttribute('aria-disabled', 'true');
+      } else {
+        // Paid plans (1, 2, or 3) - enable support
+        supportButton.classList.remove('disabled');
+        supportButton.style.opacity = '1';
+        supportButton.style.pointerEvents = 'auto';
+        supportButton.setAttribute('aria-disabled', 'false');
+      }
     }
     
     console.log('User UI updated:', {
       welcomeText,
       displayName,
       full_name: userData.full_name,
-      plan_mode: userData.plan_mode
+      plan_mode: userData.plan_mode,
+      support_enabled: userData.plan_mode !== 0
     });
   } else { 
     if (welcomeMessage) welcomeMessage.textContent = ''; 
-    if (userNameDisplay) userNameDisplay.textContent = 'User Name';
+    if (userNameDisplay) userNameDisplay.textContent = 'User Name'; // Fallback text
+    
+    // Disable support button if user is not authenticated
+    const supportButton = document.querySelector('a.cs-btn.btn-secondary[href="../supcom/supcom.html"]');
+    if (supportButton) {
+      supportButton.classList.add('disabled');
+      supportButton.style.opacity = '0.6';
+      supportButton.style.pointerEvents = 'none';
+      supportButton.setAttribute('aria-disabled', 'true');
+    }
+    
+    console.log('User not authenticated, using fallback');
   }
 }
 

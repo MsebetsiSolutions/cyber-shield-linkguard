@@ -147,7 +147,7 @@ def api_users():
     users = conn.execute('''
         SELECT u.*, s.sub_plan, s.plan_active 
         FROM users u 
-        LEFT JOIN subscriptions s ON u.id = s.user_id
+        LEFT JOIN subscriptions s ON u.id = s.user_id AND s.plan_active = 1
         ORDER BY u.created_at DESC
     ''').fetchall()
     conn.close()
@@ -204,36 +204,6 @@ def api_teams():
     
     teams_list = [dict(team) for team in teams]
     return jsonify(teams_list)
-
-
-@admin_bp.route('/admin/api/bug-reports')
-@admin_login_required
-def api_bug_reports():
-    conn = get_db_connection()
-    
-    # Get all bug reports from CST table
-    bug_reports = conn.execute('''
-        SELECT c.*, u.email, u.full_name 
-        FROM CST c 
-        LEFT JOIN users u ON c.user_id = u.id 
-        ORDER BY c.id DESC
-    ''').fetchall()
-    
-    # Get statistics
-    total_reports = conn.execute('SELECT COUNT(*) as count FROM CST').fetchone()['count']
-    unique_users = conn.execute('SELECT COUNT(DISTINCT user_id) as count FROM CST WHERE user_id IS NOT NULL').fetchone()['count']
-    
-    conn.close()
-    
-    reports_list = [dict(report) for report in bug_reports]
-    return jsonify({
-        'reports': reports_list,
-        'statistics': {
-            'total_reports': total_reports,
-            'unique_users': unique_users
-        }
-    })
-
 
 @admin_bp.route('/admin/api/audit-logs')
 @admin_login_required
