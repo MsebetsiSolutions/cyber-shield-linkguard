@@ -150,14 +150,33 @@ function displaySelectedPlan() {
 // =============================================================
 // 💳 Yoco Inline Card Form Integration
 // =============================================================
-function initYocoInline() {
+async function initYocoInline() {
   const { selectedPlan, paymentReference } = displaySelectedPlan();
   if (!selectedPlan.id) return;
 
-  // Initialize Yoco SDK
-  const yoco = new window.YocoSDK({
-    publicKey: 'pk_test_ed3c54a6gOol69qa7f45' // ✅ your working public key
-  });
+  // Require Yoco public key from backend (no client-side fallback allowed)
+  let pubKey;
+  try {
+    const cfgRes = await fetchWithSession('/api/config');
+    if (!cfgRes.ok) {
+      console.error('Failed to fetch payment configuration from server');
+      toast('Payment configuration unavailable. Please contact support.');
+      return;
+    }
+    const cfg = await cfgRes.json();
+    pubKey = cfg && cfg.yoco_public_key;
+    if (!pubKey) {
+      console.error('YOCO public key missing in server config');
+      toast('Payment configuration missing. Please contact support.');
+      return;
+    }
+  } catch (e) {
+    console.error('Error fetching payment configuration', e);
+    toast('Payment configuration error. Please try again later.');
+    return;
+  }
+
+  const yoco = new window.YocoSDK({ publicKey: pubKey });
 
   // Mount inline card form
   const inline = yoco.inline({
@@ -251,7 +270,7 @@ function initYocoInline() {
 // =============================================================
 // 🚀 Page Boot
 // =============================================================
-(async function boot() {
+async function boot() {
   console.log('Payment page initializing...');
 
   try {
@@ -261,8 +280,8 @@ function initYocoInline() {
       if (userData.authenticated) {
         setUserUI(userData);
         sessionStorage.setItem('userEmail', userData.email);
-        displaySelectedPlan();
-        initYocoInline(); // ✅ initialize inline Yoco card form
+  displaySelectedPlan();
+  await initYocoInline(); // ✅ initialize inline Yoco card form
         return;
       }
     }
@@ -271,7 +290,10 @@ function initYocoInline() {
     console.error('Auth fetch failed', e);
     window.location.href = '../index.html';
   }
-})();
+}
+
+// start boot
+boot();
 
 // =============================================================
 // 🧹 Security Cleanup
