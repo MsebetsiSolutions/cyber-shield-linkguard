@@ -2,6 +2,7 @@ class LearningHubEnrollment {
   constructor() {
     this.currentUser = null;
     this.enrollmentStatus = {};
+    this.userPlanMode = 0; // Default to free plan
     this.init();
   }
 
@@ -18,7 +19,9 @@ class LearningHubEnrollment {
 
       if (data.authenticated) {
         this.currentUser = data.user;
+        this.userPlanMode = data.user.plan_mode || 0;
         console.log("User authenticated:", this.currentUser);
+        console.log("User Plan Mode:", this.userPlanMode);
       } else {
         window.location.href = "../index.html";
       }
@@ -86,6 +89,13 @@ class LearningHubEnrollment {
     enrollmentModal.show();
   }
 
+  showSubscriptionModal() {
+    const subscriptionModal = new bootstrap.Modal(
+      document.getElementById("subscriptionModal")
+    );
+    subscriptionModal.show();
+  }
+
   async enrollInWeek(week) {
     try {
       console.log(`Attempting to enroll in ${week}...`);
@@ -136,8 +146,6 @@ class LearningHubEnrollment {
       let userMessage = "Failed to enroll. Please try again.";
       if (error.message.includes("logged in")) {
         userMessage = "Please log in to enroll in courses.";
-      } else if (error.message.includes("complete previous")) {
-        userMessage = error.message;
       } else if (error.message.includes("already enrolled")) {
         userMessage = "You are already enrolled in this week.";
       }
@@ -145,6 +153,12 @@ class LearningHubEnrollment {
       this.showToast(userMessage, "error");
       return false;
     }
+  }
+
+  // Check if user has access to advanced weeks based on Plan_Mode
+  hasAccessToAdvancedWeeks() {
+    // Plan_Mode 2 = Team, Plan_Mode 3 = Enterprise
+    return this.userPlanMode === 2 || this.userPlanMode === 3;
   }
 
   updateModuleCards() {
@@ -155,54 +169,110 @@ class LearningHubEnrollment {
       const statusBadge = card.querySelector(".status-badge");
       const moduleLink = card.querySelector(".module-link");
 
-      if (this.enrollmentStatus[`week${week}`] || this.enrollmentStatus[week]) {
-        // User is enrolled - enable the link
-        const enrolledWeek = this.enrollmentStatus[`week${week}`]
-          ? `week${week}`
-          : week;
-        statusBadge.textContent = "Enrolled";
-        statusBadge.className = "status-badge enrolled";
+      // For Week 1 - only check enrollment
+      if (week === "1") {
+        if (this.enrollmentStatus[`week${week}`] || this.enrollmentStatus[week]) {
+          // User is enrolled - enable the link
+          statusBadge.textContent = "Enrolled";
+          statusBadge.className = "status-badge enrolled";
 
-        // Remove disabled class and enable pointer events
-        moduleLink.classList.remove("disabled");
-        moduleLink.style.pointerEvents = "auto";
-        moduleLink.style.cursor = "pointer";
+          // Remove disabled class and enable pointer events
+          moduleLink.classList.remove("disabled");
+          moduleLink.style.pointerEvents = "auto";
+          moduleLink.style.cursor = "pointer";
 
-        // Remove any existing onclick handlers that might prevent navigation
-        moduleLink.removeAttribute("onclick");
-        moduleLink.onclick = null;
+          // Remove any existing onclick handlers that might prevent navigation
+          moduleLink.removeAttribute("onclick");
+          moduleLink.onclick = null;
 
-        // Ensure the link has the correct href
-        if (
-          week !== "modules" &&
-          moduleLink.getAttribute("href") &&
-          moduleLink.getAttribute("href") !== "#"
-        ) {
-          // Link already has a valid href, keep it
-        } else if (week !== "modules") {
-          moduleLink.href = `week${week}.html`;
-        }
-      } else {
-        // User is NOT enrolled
-        statusBadge.textContent = "Not Enrolled";
-        statusBadge.className = "status-badge not-started";
-
-        // Add disabled class and disable pointer events
-        moduleLink.classList.add("disabled");
-        moduleLink.style.pointerEvents = "none";
-        moduleLink.style.cursor = "not-allowed";
-
-        // Set up click handler to show appropriate message
-        moduleLink.onclick = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-
-          if (week === "1") {
-            this.showEnrollmentModal();
+          // Ensure the link has the correct href
+          if (moduleLink.getAttribute("href") && moduleLink.getAttribute("href") !== "#") {
+            // Link already has a valid href, keep it
           } else {
-            this.showToast("Please complete previous weeks first.", "info");
+            moduleLink.href = `week${week}.html`;
           }
-        };
+        } else {
+          // User is NOT enrolled
+          statusBadge.textContent = "Not Enrolled";
+          statusBadge.className = "status-badge not-started";
+
+          // Add disabled class and disable pointer events
+          moduleLink.classList.add("disabled");
+          moduleLink.style.pointerEvents = "none";
+          moduleLink.style.cursor = "not-allowed";
+
+          // Set up click handler to show enrollment modal
+          moduleLink.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.showEnrollmentModal();
+          };
+        }
+      } 
+      // For Week 2-12 - check both enrollment AND plan mode
+      else {
+        const hasAccess = this.hasAccessToAdvancedWeeks();
+        const isEnrolled = this.enrollmentStatus[`week${week}`] || this.enrollmentStatus[week];
+
+        if (hasAccess && isEnrolled) {
+          // User has Team/Enterprise plan AND is enrolled - enable the link
+          statusBadge.textContent = "Enrolled";
+          statusBadge.className = "status-badge enrolled";
+
+          // Remove disabled class and enable pointer events
+          moduleLink.classList.remove("disabled");
+          moduleLink.style.pointerEvents = "auto";
+          moduleLink.style.cursor = "pointer";
+
+          // Remove any existing onclick handlers that might prevent navigation
+          moduleLink.removeAttribute("onclick");
+          moduleLink.onclick = null;
+
+          // Ensure the link has the correct href
+          if (moduleLink.getAttribute("href") && moduleLink.getAttribute("href") !== "#") {
+            // Link already has a valid href, keep it
+          } else {
+            moduleLink.href = `week${week}.html`;
+          }
+        } 
+        else if (hasAccess && !isEnrolled) {
+          // User has Team/Enterprise plan but not enrolled - enable with enrollment prompt
+          statusBadge.textContent = "Available";
+          statusBadge.className = "status-badge in-progress";
+
+          // Remove disabled class and enable pointer events
+          moduleLink.classList.remove("disabled");
+          moduleLink.style.pointerEvents = "auto";
+          moduleLink.style.cursor = "pointer";
+
+          // Set up click handler to enroll and redirect
+          moduleLink.onclick = async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const enrolled = await this.enrollInWeek(`week${week}`);
+            if (enrolled) {
+              window.location.href = `week${week}.html`;
+            }
+          };
+        }
+        else {
+          // User does NOT have Team/Enterprise plan
+          statusBadge.textContent = "Premium";
+          statusBadge.className = "status-badge not-started";
+
+          // Add disabled class and disable pointer events
+          moduleLink.classList.add("disabled");
+          moduleLink.style.pointerEvents = "none";
+          moduleLink.style.cursor = "not-allowed";
+
+          // Set up click handler to show subscription modal
+          moduleLink.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.showSubscriptionModal();
+          };
+        }
       }
     });
   }
@@ -227,6 +297,7 @@ class LearningHubEnrollment {
   }
 
   setupEventListeners() {
+    // Enrollment modal button
     const enrollBtn = document.getElementById("enrollBtn");
     if (enrollBtn) {
       enrollBtn.addEventListener("click", () => {
@@ -234,14 +305,49 @@ class LearningHubEnrollment {
       });
     }
 
+    // Subscription modal button
+    const upgradeBtn = document.getElementById("upgradeBtn");
+    if (upgradeBtn) {
+      upgradeBtn.addEventListener("click", () => {
+        window.location.href = "../Subscription/Subscription.html";
+      });
+    }
+
+    // Sidebar week click handlers
+    const sidebarWeekButtons = document.querySelectorAll('.week-btn[data-week]:not([data-week="modules"])');
+    sidebarWeekButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        const week = button.dataset.week;
+        
+        if (week === "1") {
+          // For Week 1, check enrollment status
+          if (!this.enrollmentStatus.week1) {
+            e.preventDefault();
+            this.showEnrollmentModal();
+          }
+          // If enrolled, allow normal navigation (href will handle it)
+        } else {
+          // For Week 2-12, check plan mode
+          if (!this.hasAccessToAdvancedWeeks()) {
+            e.preventDefault();
+            this.showSubscriptionModal();
+          }
+          // If user has Team/Enterprise plan, allow normal navigation
+        }
+      });
+    });
+
+    // Module card click handlers (keep existing functionality)
     document.addEventListener("click", (e) => {
       const moduleLink = e.target.closest(".module-link");
       if (moduleLink && moduleLink.classList.contains("disabled")) {
         e.preventDefault();
         e.stopPropagation();
         const week = moduleLink.closest(".module-card").dataset.week;
-        if (week !== "week1") {
-          this.showToast("Please complete previous weeks first.", "info");
+        if (week === "1") {
+          this.showEnrollmentModal();
+        } else {
+          this.showSubscriptionModal();
         }
       }
     });
@@ -297,6 +403,8 @@ class LearningHubEnrollment {
   testEnrollment() {
     console.log("Current enrollment status:", this.enrollmentStatus);
     console.log("Current user:", this.currentUser);
+    console.log("User Plan Mode:", this.userPlanMode);
+    console.log("Has access to advanced weeks:", this.hasAccessToAdvancedWeeks());
 
     // Test the enrollment endpoint directly
     fetch("/api/modules/enrollment-status")
@@ -382,6 +490,18 @@ const toastStyles = `
     background: var(--candy-green);
     color: white;
     box-shadow: 0 4px 15px rgba(76, 196, 83, 0.3);
+}
+
+.status-badge.in-progress {
+    background: var(--candy-orange);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 166, 77, 0.3);
+}
+
+.status-badge.not-started {
+    background: var(--candy-red);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 91, 91, 0.3);
 }
 
 .module-link.disabled {
