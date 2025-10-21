@@ -54,6 +54,7 @@ from routes.enterprise import enterprise_bp
 from routes.learning_hub import learning_hub_bp
 from routes.email_phishing import email_phishing_bp
 from routes.exam import exam_bp
+from routes.module import module_bp
 
 from backend.routes_alerts import alerts_bp
 from backend.routes_host import host_bp
@@ -108,6 +109,7 @@ app.register_blueprint(enterprise_bp)
 app.register_blueprint(learning_hub_bp)
 app.register_blueprint(email_phishing_bp, url_prefix='/api/phishing')
 app.register_blueprint(exam_bp)
+app.register_blueprint(module_bp)
 
 app.register_blueprint(alerts_bp)
 app.register_blueprint(host_bp)
