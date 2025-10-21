@@ -245,8 +245,8 @@ if (userDropdownBtn && userDropdown) {
 // Subscription plan codes and prices
 const planCodes = {
   free: { code: "CSLG-FREE-001", price: 0 },
-  pro: { code: "CSLG-PRO-002", price: 75 },
-  team: { code: "CSLG-TEAM-003", price: 200 },
+  pro: { code: "CSLG-PRO-002", price: 350 },
+  team: { code: "CSLG-TEAM-003", price: 500 },
   enterprise: { code: "CSLG-ENT-004", price: 0 },
   increase: { code: "CSLG-INCREASE-001", price: 25 },
 };
