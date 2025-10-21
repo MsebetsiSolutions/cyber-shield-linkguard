@@ -177,6 +177,11 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     ├── ScannerDash.css
         |            |     └── ScannerDash.js
         |            |
+        |            ├── ScannerDashOut/        
+        |            |     ├── ScannerDashOut.html
+        |            |     ├── ScannerDashOut.css
+        |            |     └── ScannerDashOut.js
+        |            |
         |            ├── soc/        
         |            |     |
         |            |     ├── assets/
@@ -241,6 +246,7 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |          └── wodfbowef.js
         |            |
         |            ├── index.html
+        |            ├── create.html
         |            ├── logg.js
         |            ├── manifest.json
         |            ├── session.js

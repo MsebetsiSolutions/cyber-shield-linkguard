@@ -141,50 +141,6 @@ function setupPasswordToggle(toggleBtnId, inputId) {
   });
 }
 
-// Password Strength Meter
-function checkPasswordStrength(password) {
-  let strength = 0;
-  let message = "";
-  let barColor = "";
-  let barWidth = 0;
-
-  if (password.length === 0) {
-    hide($("passwordStrength"));
-    return;
-  }
-
-  show($("passwordStrength"));
-
-  if (password.length > 5) strength++;
-  if (password.length > 8) strength++;
-  if (/[A-Z]/.test(password)) strength++;
-  if (/[0-9]/.test(password)) strength++;
-  if (/[^A-Za-z0-9]/.test(password)) strength++;
-
-  if (password.length < 6) {
-    message = "Too short";
-    barColor = "var(--progress-weak)";
-    barWidth = 25;
-  } else if (strength < 3) {
-    message = "Weak";
-    barColor = "var(--progress-weak)";
-    barWidth = 33;
-  } else if (strength < 5) {
-    message = "Medium";
-    barColor = "var(--progress-medium)";
-    barWidth = 66;
-  } else {
-    message = "Strong";
-    barColor = "var(--progress-strong)";
-    barWidth = 100;
-  }
-
-  $("passwordStrengthBar").style.width = `${barWidth}%`;
-  $("passwordStrengthBar").style.backgroundColor = barColor;
-  $("passwordStrengthText").textContent = message;
-  $("passwordStrengthText").style.color = barColor;
-}
-
 // Email Validation
 function validateEmail(email) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -211,44 +167,6 @@ function validateLoginForm() {
     return false;
   }
 
-  return true;
-}
-
-function validateSignupForm() {
-  const fullName = $("fullName").value.trim();
-  const email = $("suEmail").value.trim().toLowerCase();
-  const password = $("suPass").value;
-  const passwordConfirm = $("suPassConfirm").value;
-
-  if (!fullName) {
-    toast("Please enter your full name");
-    return false;
-  }
-
-  if (!email) {
-    toast("Please enter your email address");
-    return false;
-  }
-
-  if (!validateEmail(email)) {
-    toast("Please enter a valid email address");
-    return false;
-  }
-
-  if (password.length < 6) {
-    show($("passwordError"));
-    $("passwordErrorText").textContent =
-      "Password must be at least 6 characters";
-    return false;
-  }
-
-  if (password !== passwordConfirm) {
-    show($("passwordError"));
-    $("passwordErrorText").textContent = "Passwords do not match";
-    return false;
-  }
-
-  hide($("passwordError"));
   return true;
 }
 
@@ -336,50 +254,6 @@ async function handleLogin() {
   }
 }
 
-// Signup Functionality
-async function handleSignup() {
-  if (!validateSignupForm()) return;
-
-  const fullName = $("fullName").value.trim();
-  const email = $("suEmail").value.trim().toLowerCase();
-  const password = $("suPass").value;
-
-  setBusy($("doSignup"), true, "Creating Account…");
-
-  try {
-    const response = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ full_name: fullName, email, password }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      show($("passwordError"));
-      $("passwordErrorText").textContent =
-        data.error || "Sign up failed. Please try again.";
-      return;
-    }
-
-    toast("Account created successfully! You can now login.");
-
-    setTimeout(() => {
-      closeModal("signupModal");
-      openModal("loginModal");
-      // Clear form
-      $("fullName").value = "";
-      $("suEmail").value = "";
-      $("suPass").value = "";
-      $("suPassConfirm").value = "";
-      hide($("passwordStrength"));
-    }, 2000);
-  } catch (error) {
-    toast("Network error. Please check your connection.");
-  } finally {
-    setBusy($("doSignup"), false);
-  }
-}
-
 // Forgot Password Functionality
 async function handleForgotPassword() {
   if (!validateForgotPasswordForm()) return;
@@ -443,14 +317,19 @@ function setupSimulatorSignup() {
       // Close mobile menu if open
       closeMenu();
 
-      // Open signup modal
-      openModal("signupModal");
+      // Redirect to create.html for signup
+      window.location.href = "create.html";
 
       toast(
         "Ready to upgrade your security! Sign up for team/enterprise features."
       );
     });
   }
+}
+
+// Redirect to create.html for signup
+function redirectToSignup() {
+  window.location.href = "create.html";
 }
 
 // Event Listeners
@@ -482,18 +361,13 @@ function setupEventListeners() {
     closeModal("loginModal")
   );
 
-  // Signup Modal
-  $("desktopSignupBtn").addEventListener("click", () =>
-    openModal("signupModal")
-  );
+  // Signup Buttons - Redirect to create.html
+  $("desktopSignupBtn").addEventListener("click", redirectToSignup);
   $("mobileSignupBtn").addEventListener("click", () => {
-    openModal("signupModal");
+    redirectToSignup();
     closeMenu();
   });
-  $("heroSignupBtn").addEventListener("click", () => openModal("signupModal"));
-  $("closeSignupModal").addEventListener("click", () =>
-    closeModal("signupModal")
-  );
+  $("heroSignupBtn").addEventListener("click", redirectToSignup);
 
   // Forgot Password Modal
   $("forgotPasswordBtn").addEventListener("click", () => {
@@ -508,19 +382,14 @@ function setupEventListeners() {
     openModal("loginModal");
   });
 
-  // Modal Switching
+  // Modal Switching - Redirect to create.html for signup
   $("switchToSignup").addEventListener("click", () => {
     closeModal("loginModal");
-    openModal("signupModal");
-  });
-  $("switchToLogin").addEventListener("click", () => {
-    closeModal("signupModal");
-    openModal("loginModal");
+    redirectToSignup();
   });
 
   // Form Submissions
   $("doLogin").addEventListener("click", handleLogin);
-  $("doSignup").addEventListener("click", handleSignup);
   $("doReset").addEventListener("click", handleForgotPassword);
 
   // Enter key support for forms
@@ -531,39 +400,11 @@ function setupEventListeners() {
     if (e.key === "Enter") handleLogin();
   });
 
-  // Enter key support for signup form
-  const signupInputs = [
-    $("fullName"),
-    $("suEmail"),
-    $("suPass"),
-    $("suPassConfirm"),
-  ];
-  signupInputs.forEach((input) => {
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") handleSignup();
-    });
-  });
-
   // Enter key support for forgot password form
   $("resetEmail").addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       handleForgotPassword();
-    }
-  });
-
-  // Password strength and validation
-  $("suPass").addEventListener("input", function () {
-    checkPasswordStrength(this.value);
-    if (this.value.length >= 6) hide($("passwordError"));
-  });
-
-  $("suPassConfirm").addEventListener("input", () => {
-    if ($("suPass").value !== $("suPassConfirm").value) {
-      show($("passwordError"));
-      $("passwordErrorText").textContent = "Passwords do not match";
-    } else {
-      hide($("passwordError"));
     }
   });
 
@@ -623,12 +464,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Setup password toggles
   setupPasswordToggle("togglePassword", "loginPass");
-  setupPasswordToggle("toggleSignupPassword", "suPass");
-  setupPasswordToggle("toggleSignupPasswordConfirm", "suPassConfirm");
-
-  // Hide error and strength indicators initially
-  hide($("passwordStrength"));
-  hide($("passwordError"));
 
   // Initialize animations
   initAOS();
