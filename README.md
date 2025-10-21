@@ -80,6 +80,7 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |      |     ├── learning_hub.py
         |      |     ├── admin.py
         |      |     ├── enterprise.py
+        |      |     ├── module.py
         |      |     ├── scan_results.py
         |      |     ├── course_upload.py.bak
         |      |     ├── profile.py
@@ -177,6 +178,11 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     ├── ScannerDash.css
         |            |     └── ScannerDash.js
         |            |
+        |            ├── ScannerDashOut/        
+        |            |     ├── ScannerDashOut.html
+        |            |     ├── ScannerDashOut.css
+        |            |     └── ScannerDashOut.js
+        |            |
         |            ├── soc/        
         |            |     |
         |            |     ├── assets/
@@ -241,6 +247,7 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |          └── wodfbowef.js
         |            |
         |            ├── index.html
+        |            ├── create.html
         |            ├── logg.js
         |            ├── manifest.json
         |            ├── session.js
