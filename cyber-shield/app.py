@@ -828,6 +828,17 @@ def combined_url_lookup(u: str):
     
     return results
 
+
+@app.route('/api/config', methods=['GET'])
+def config():
+    """Return non-sensitive public configuration for client-side initialization."""
+    try:
+        yoco_public_key = os.getenv('YOCO_PUBLIC_KEY', '')
+        # Only return the public key (non-secret). Do not expose secrets here.
+        return jsonify({'yoco_public_key': yoco_public_key, 'base_url': BASE_URL}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 def combined_file_lookup(file_hash: str):
     """Combine results from multiple security APIs for files"""
     results = []
