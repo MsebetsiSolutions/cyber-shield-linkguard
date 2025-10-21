@@ -459,4 +459,52 @@ def calculate_enterprise_price():
     except Exception as e:
         print(f"Price calculation error: {e}")
         return jsonify({'error': 'Failed to calculate price'}), 500
+
+
+@subscription_bp.route('/downgrade', methods=['POST'])
+def downgrade_subscription():
+    """Downgrade the authenticated user's subscription to Free."""
+    try:
+        if 'user_id' not in session:
+            return jsonify({'error': 'Authentication required'}), 401
+
+        user_id = session['user_id']
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Deactivate any existing active subscriptions
+        cursor.execute(
+            'UPDATE subscriptions SET plan_active = 0 WHERE user_id = ? AND plan_active = 1',
+            (user_id,)
+        )
+
+        # Create a Free subscription
+        expiry_date = (datetime.datetime.now() + datetime.timedelta(days=30)).isoformat()
+        cursor.execute('''
+            INSERT INTO subscriptions (user_id, sub_plan, plan_code, price, date_expiry, plan_active, team_size, increased)
+            VALUES (?, ?, ?, ?, ?, 1, ?, ?)
+        ''', (user_id, 'Free', 'CSLG-FREE-001', 0.0, expiry_date, 1, None))
+        subscription_id = cursor.lastrowid
+
+        # Insert a payment record for downgrade
+        transaction_id = f"DWN{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+        cursor.execute('''
+            INSERT INTO payments (user_id, subscription_id, amount, currency, payment_method, status, transaction_id, card_last_four)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (user_id, subscription_id, 0.0, 'ZAR', 'system', 'completed', transaction_id, None))
+
+        # Update user's plan mode
+        cursor.execute('UPDATE users SET Plan_Mode = 0 WHERE id = ?', (user_id,))
+
+        conn.commit()
+        conn.close()
+
+        # Update session
+        session['plan_mode'] = 0
+
+        return jsonify({'message': 'Subscription downgraded to Free', 'subscription_id': subscription_id}), 200
+
+    except Exception as e:
+        print(f"Downgrade error: {e}")
+        return jsonify({'error': 'Failed to downgrade subscription'}), 500
     
