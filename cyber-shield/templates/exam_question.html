@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week {{ week }} - Question {{ question_num }} - LinkGuard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png" />
+    <link rel="manifest" href="assets/favicon/site.webmanifest" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png" />
+    <style>
+        :root {
+            --bg-pink: #f6d9e5;
+            --card: #ffffff;
+            --text: #2b2b2b;
+            --muted: #6b7280;
+            --mint: #00ff99;
+            --sky: #00b3ff;
+            --gold: #ffcc00;
+            --candy-red: #ff5b5b;
+            --candy-orange: #ffa64d;
+            --candy-green: #4cc453;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-pink);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .exam-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 3px solid var(--sky);
+        }
+
+        .question-number {
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid var(--gold);
+        }
+
+        .option-label {
+            padding: 15px 20px;
+            margin: 10px 0;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .option-label:hover {
+            border-color: var(--sky);
+            background-color: #f0f8ff;
+            transform: translateX(5px);
+        }
+
+        .option-input:checked+.option-label {
+            border-color: var(--sky);
+            background-color: #e7f3ff;
+            box-shadow: 0 0 0 2px rgba(0, 179, 255, 0.2);
+        }
+
+        .progress-bar {
+            height: 10px;
+            border-radius: 5px;
+            background: var(--mint);
+        }
+
+        .timer {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--text);
+            background: #fff3cd;
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 2px solid var(--gold);
+        }
+
+        .time-warning {
+            color: var(--candy-red) !important;
+            background: #ffe6e6;
+            border-color: var(--candy-red);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--sky), #0099cc);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0099cc, var(--sky));
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="exam-container">
+        <!-- Header Section -->
+        <div class="row align-items-center mb-4">
+            <div class="col-md-8">
+                <h2 class="mb-1">Week {{ week }} Assessment</h2>
+                <div class="question-number">Question {{ question_num }} of {{ total_questions }}</div>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="timer" id="timerDisplay">
+                    <i class="bi bi-clock"></i> <span id="time">60</span> seconds
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress mb-4" style="height: 12px;">
+            <div class="progress-bar" role="progressbar" style="width: {{ (question_num / total_questions * 100) }}%"
+                aria-valuenow="{{ question_num }}" aria-valuemin="0" aria-valuemax="{{ total_questions }}">
+            </div>
+        </div>
+
+        <!-- Question Section -->
+        <div class="question-section">
+            <div class="question-text">{{ question_text }}</div>
+
+            <form method="POST" action="{{ url_for('exam.handle_answer') }}" id="examForm">
+                <div class="options-list">
+                    {% for option in options %}
+                    <div class="form-check mb-3">
+                        <input class="form-check-input option-input" type="radio" name="answer"
+                            id="option{{ loop.index }}" value="{{ loop.index }}" style="display: none;">
+                        <label class="form-check-label option-label w-100 d-block" for="option{{ loop.index }}">
+                            <strong class="text-primary">{{ ['A', 'B', 'C', 'D'][loop.index0] }}.</strong> {{ option }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <input type="hidden" name="question_index" value="{{ question_index }}">
+
+                <div class="text-center mt-5">
+                    <button type="submit" class="btn btn-primary btn-lg px-5" id="submitBtn" disabled>
+                        {% if question_num == total_questions %}
+                        <i class="bi bi-flag-fill"></i> Finish Exam
+                        {% else %}
+                        <i class="bi bi-arrow-right"></i> Next Question
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Timer functionality
+        let timeLeft = 60;
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timeElement = document.getElementById('time');
+        const submitBtn = document.getElementById('submitBtn');
+
+        const timer = setInterval(() => {
+            timeLeft--;
+            timeElement.textContent = timeLeft;
+
+            if (timeLeft <= 10) {
+                timerDisplay.classList.add('time-warning');
+            }
+
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                document.getElementById('examForm').submit();
+            }
+        }, 1000);
+
+        // Enable submit button when an option is selected
+        document.querySelectorAll('.option-input').forEach(radio => {
+            radio.addEventListener('change', function () {
+                submitBtn.disabled = false;
+            });
+        });
+
+        // Auto-select when user clicks on option label
+        document.querySelectorAll('.option-label').forEach(label => {
+            label.addEventListener('click', function () {
+                const radio = this.previousElementSibling;
+                radio.checked = true;
+                submitBtn.disabled = false;
+
+                // Add visual feedback
+                document.querySelectorAll('.option-label').forEach(l => {
+                    l.style.borderColor = '#e9ecef';
+                    l.style.background = 'white';
+                });
+                this.style.borderColor = 'var(--sky)';
+                this.style.background = '#e7f3ff';
+            });
+        });
+
+        // Form submission handler
+        document.getElementById('examForm').addEventListener('submit', function (e) {
+            clearInterval(timer);
+        });
+    </script>
+</body>
+</html>

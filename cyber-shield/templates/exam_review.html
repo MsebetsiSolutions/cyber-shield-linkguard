@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Review - LinkGuard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png" />
+    <link rel="manifest" href="assets/favicon/site.webmanifest" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png" />
+    <style>
+        :root {
+            --bg-pink: #f6d9e5;
+            --card: #ffffff;
+            --text: #2b2b2b;
+            --muted: #6b7280;
+            --mint: #00ff99;
+            --sky: #00b3ff;
+            --gold: #ffcc00;
+            --candy-red: #ff5b5b;
+            --candy-orange: #ffa64d;
+            --candy-green: #4cc453;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-pink);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .review-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--card);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 3px solid var(--gold);
+        }
+
+        .question-review {
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 5px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .question-review:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .correct {
+            border-left-color: var(--candy-green);
+            background: linear-gradient(135deg, #f8fff9, #f0fff4);
+        }
+
+        .incorrect {
+            border-left-color: var(--candy-red);
+            background: linear-gradient(135deg, #fff8f8, #ffe6e6);
+        }
+
+        .answer-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .score-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 0 auto 20px;
+            border: 4px solid white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .passed {
+            background: linear-gradient(135deg, var(--candy-green), #3da844);
+            color: white;
+        }
+
+        .failed {
+            background: linear-gradient(135deg, var(--candy-red), #e04a4a);
+            color: white;
+        }
+
+        .btn-custom {
+            padding: 12px 25px;
+            font-weight: 600;
+            border-radius: 12px;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="review-container">
+        <!-- Header Section -->
+        <div class="score-header">
+            <h1 class="display-5 fw-bold mb-3">Exam Results Review</h1>
+            <p class="lead text-muted">Week {{ week }} Assessment Detailed Analysis</p>
+
+            <div class="score-circle {% if passed %}passed{% else %}failed{% endif %}">
+                {{ score }}%
+            </div>
+
+            <div class="results-summary">
+                <h4 class="mb-2">{{ correct }} out of {{ total }} questions correct</h4>
+                <p class="h5 {% if passed %}text-success{% else %}text-danger{% endif %}">
+                    {% if passed %}✅ You passed! Ready for the next challenge.{% else %}❌ Review and try again.{% endif
+                    %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Questions Review -->
+        <h3 class="mb-4">
+            <i class="bi bi-list-check text-primary"></i>
+            Detailed Answer Review
+        </h3>
+
+        {% for answer in answers %}
+        <div class="question-review {% if answer.is_correct %}correct{% else %}incorrect{% endif %}">
+            <div class="row g-4">
+                <!-- Status and Question -->
+                <div class="col-12">
+                    <div class="d-flex align-items-start">
+                        <div class="me-3">
+                            {% if answer.is_correct %}
+                            <i class="bi bi-check-circle-fill text-success fs-2"></i>
+                            {% else %}
+                            <i class="bi bi-x-circle-fill text-danger fs-2"></i>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="mb-3">Question {{ loop.index }}</h5>
+                            <p class="mb-3 fs-6"><strong>{{ answer.question }}</strong></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Answers Comparison -->
+                <div class="col-md-6">
+                    <div class="p-3 bg-white rounded border">
+                        <div class="answer-label {% if not answer.is_correct %}text-danger{% endif %}">
+                            <i class="bi bi-person-check"></i> Your Answer:
+                        </div>
+                        <div class="fw-semibold mt-2">{{ answer.selected }}</div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="p-3 bg-white rounded border">
+                        <div class="answer-label text-success">
+                            <i class="bi bi-check-all"></i> Correct Answer:
+                        </div>
+                        <div class="fw-semibold mt-2">{{ answer.correct }}</div>
+                    </div>
+                </div>
+
+                <!-- Learning Point -->
+                {% if not answer.is_correct %}
+                <div class="col-12">
+                    <div class="alert alert-warning mt-2">
+                        <i class="bi bi-lightbulb"></i>
+                        <strong>Learning Point:</strong> Review this concept to strengthen your understanding.
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Action Buttons -->
+        <div class="text-center mt-5 pt-4 border-top">
+            <div class="row g-3 justify-content-center">
+                <div class="col-12 col-sm-6 col-md-3">
+                    <a href="{{ url_for('exam.exam_dashboard') }}" class="btn btn-outline-primary btn-custom w-100">
+                        <i class="bi bi-house"></i> Dashboard
+                    </a>
+                </div>
+
+                {% if not passed %}
+                <div class="col-12 col-sm-6 col-md-3">
+                    <a href="{{ url_for('exam.retry_week') }}" class="btn btn-warning btn-custom w-100">
+                        <i class="bi bi-arrow-clockwise"></i> Try Again
+                    </a>
+                </div>
+                {% endif %}
+
+                {% if passed and week < 12 %} <div class="col-12 col-sm-6 col-md-3">
+                    <a href="{{ url_for('exam.next_week') }}" class="btn btn-success btn-custom w-100">
+                        <i class="bi bi-arrow-right"></i> Next Week
+                    </a>
+            </div>
+            {% endif %}
+
+            <div class="col-12 col-sm-6 col-md-3">
+                <a href="{{ url_for('exam.show_all_answers') }}" class="btn btn-info btn-custom w-100">
+                    <i class="bi bi-download"></i> Export Results
+                </a>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
