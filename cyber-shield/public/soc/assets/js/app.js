@@ -1,0 +1,285 @@
+/* assets/js/app.js
+ * Msebetsi SOC Dashboard Pro — SPA router + lazy loader + widgets bootstrap
+ */
+
+(() => {
+  const $ = (sel, p = document) => p.querySelector(sel);
+  const $$ = (sel, p = document) => Array.from(p.querySelectorAll(sel));
+
+  // Map nav data-page -> section id and file path
+  const PAGES = ["overview","monitoring","alerts","intel","reports","settings","pentesting"];
+  const pageToSectionId = (p) => `page-${p}`;
+  const pageToUrl = (p) => `pages/${p}.html`;
+
+  // Cache loaded page HTML so back/forth is instant
+  const cache = new Map();
+
+  // --- Navigation state ---
+  function setActiveNav(page) {
+    $$(".nav .nav-item").forEach(a => a.classList.toggle("active", a.dataset.page === page));
+  }
+
+  function showPage(page) {
+    $$(".page").forEach(sec => sec.classList.remove("show"));
+    const sec = $(`#${pageToSectionId(page)}`);
+    if (sec) sec.classList.add("show");
+  }
+
+  // --- Script hydration for injected HTML ---
+  function hydrateScripts(container) {
+    // Move & execute <script> tags (inline and src)
+    const scripts = Array.from(container.querySelectorAll("script"));
+    scripts.forEach(old => {
+      const s = document.createElement("script");
+      // copy attributes
+      Array.from(old.attributes).forEach(a => s.setAttribute(a.name, a.value));
+      // inline content
+      if (!s.src) s.textContent = old.textContent;
+      // replace & execute
+      old.replaceWith(s);
+    });
+  }
+
+  // --- Load a page fragment into its section (if not already loaded) ---
+  async function ensureLoaded(page) {
+    if (page === "overview") {
+      // Overview is in index.html already
+      return true;
+    }
+    const sec = $(`#${pageToSectionId(page)}`);
+    if (!sec) return false;
+
+    if (cache.has(page)) {
+      // Already loaded once
+      return true;
+    }
+
+    // Show a tiny spinner/placeholder while loading
+    sec.innerHTML = `<div class="card"><div class="card-head"><h3>Loading ${page}…</h3></div>
+      <p class="muted">Fetching <code>${pageToUrl(page)}</code></p></div>`;
+
+    try {
+      const res = await fetch(pageToUrl(page), { credentials: "same-origin" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const html = await res.text();
+
+      // Inject and hydrate scripts
+      sec.innerHTML = html;
+      hydrateScripts(sec);
+
+      cache.set(page, true);
+      return true;
+    } catch (e) {
+      sec.innerHTML = `<div class="card row-bad">
+        <div class="card-head"><h3>Failed to load ${page}</h3></div>
+        <pre>${String(e)}</pre>
+        <p class="muted">Make sure the file exists at <code>${pageToUrl(page)}</code> and your backend route serves /pages/*</p>
+      </div>`;
+      return false;
+    }
+  }
+
+  // --- Router (hash-based) ---
+  async function goto(page) {
+    if (!PAGES.includes(page)) page = "overview";
+    setActiveNav(page);
+    await ensureLoaded(page);
+    showPage(page);
+    // update hash without scrolling
+    if (location.hash.replace(/^#/, "") !== page) {
+      history.pushState({}, "", `#${page}`);
+    }
+  }
+
+  function initRouter() {
+    // Nav clicks
+    $$(".nav .nav-item").forEach(a => {
+      a.addEventListener("click", (e) => {
+        e.preventDefault();
+        const page = a.dataset.page;
+        goto(page);
+      });
+    });
+
+    // On load: pick from hash
+    const initial = (location.hash || "#overview").replace(/^#/, "");
+    goto(initial);
+
+    // Back/forward
+    window.addEventListener("popstate", () => {
+      const p = (location.hash || "#overview").replace(/^#/, "");
+      goto(p);
+    });
+  }
+
+  // --- Sidebar & Theme toggles ---
+  function initChrome() {
+    const sidebarToggle = $("#sidebarToggle");
+    const darkToggle = $("#darkToggle");
+    const sidebar = $(".sidebar");
+
+    sidebarToggle?.addEventListener("click", () => {
+      sidebar.classList.toggle("collapsed");
+    });
+
+    // Very light theme toggler (CSS variables could be swapped here if you add light theme)
+    darkToggle?.addEventListener("click", () => {
+      document.documentElement.classList.toggle("light"); // hook for future
+    });
+  }
+
+  // --- Brand Name Redirect ---
+  function initBrandRedirect() {
+    const brandName = $("#brandName");
+    if (brandName) {
+      brandName.style.cursor = "pointer";
+      brandName.addEventListener("click", () => {
+        // Redirect to enterprise dashboard
+        window.location.href = "../../enterprice/enter-dash/enterprise-dashboard.html";
+      });
+      
+      // Add hover effect
+      brandName.addEventListener("mouseenter", () => {
+        brandName.style.color = "var(--primary)";
+        brandName.style.textDecoration = "underline";
+      });
+      
+      brandName.addEventListener("mouseleave", () => {
+        brandName.style.color = "var(--text)";
+        brandName.style.textDecoration = "none";
+      });
+    }
+  }
+
+  // --- Overview charts/bootstrap (requires Chart.js + sample-data.js) ---
+  function initOverview() {
+    // Safety if Chart.js not loaded
+    if (typeof Chart === "undefined") return;
+
+    // Numbers
+    const activeIncidents = $("#activeIncidents");
+    const avgMttr = $("#avgMttr");
+    const coverage = $("#coverage");
+
+    // Pull live KPIs from backend
+    fetch("/api/reports/kpis", { method: "POST" })
+      .then(r => r.json())
+      .then(k => {
+        activeIncidents.textContent = String(k.incidents7 ?? "--");
+        avgMttr.textContent = k.mttr ?? "--";
+        coverage.textContent = "84%";
+
+        // Charts
+        const labels = (k.trend && k.trend.labels) || [];
+        const alerts = (k.trend && k.trend.alerts) || [];
+        const incidents = (k.trend && k.trend.incidents) || [];
+
+        // Events & Alerts
+        const ctx1 = $("#eventsChart").getContext("2d");
+        new Chart(ctx1, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              { label: "Alerts", data: alerts },
+              { label: "Incidents", data: incidents }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: true } },
+            scales: { x: { display: false } }
+          }
+        });
+
+        // Endpoint Health (demo)
+        const ctx2 = $("#endpointChart").getContext("2d");
+        new Chart(ctx2, {
+          type: "doughnut",
+          data: {
+            labels: ["Healthy", "Degraded", "Unhealthy"],
+            datasets: [{ data: [72, 18, 10] }]
+          },
+          options: { responsive: true }
+        });
+
+        // Network Traffic (demo)
+        const ctx3 = $("#trafficChart").getContext("2d");
+        new Chart(ctx3, {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [{ label: "MB/s", data: labels.map((_, i) => 5 + (alerts[i] || 0) * 0.2) }]
+          },
+          options: { responsive: true, scales: { x: { display: false } } }
+        });
+      })
+      .catch(() => {
+        // fallback demo if KPI endpoint unavailable
+        activeIncidents.textContent = "12";
+        avgMttr.textContent = "3.4h";
+        coverage.textContent = "84%";
+      });
+
+    // Top offenses demo (you can wire to /api/alerts/list if you want)
+    const tbody = $("#offensesTable tbody");
+    if (tbody) {
+      const rows = [
+        ["Suspicious PowerShell", 34, "High", "↑"],
+        ["Malware Detected", 21, "Critical", "→"],
+        ["Lateral Movement", 12, "High", "↓"],
+        ["Exfil Attempt", 7, "Medium", "→"]
+      ];
+      rows.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Toolbar events
+    window.addEventListener("exportEvents", async () => {
+      const res = await fetch("/api/reports/export", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dataset: "events24h", format: "csv" })
+      });
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "events_24h.csv";
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    });
+
+    $("[data-action='exportEvents']")?.addEventListener("click", () => {
+      window.dispatchEvent(new Event("exportEvents"));
+    });
+    $("[data-action='refreshEvents']")?.addEventListener("click", () => {
+      // You can re-hit /api/reports/kpis or /api/alerts/list here
+      location.reload();
+    });
+  }
+
+  // --- Global search (very simple client-side demo) ---
+  function initGlobalSearch() {
+    const input = $("#globalSearch");
+    if (!input) return;
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const q = input.value.trim();
+        if (!q) return;
+        location.hash = "#alerts";
+      }
+    });
+  }
+
+  // --- Boot ---
+  document.addEventListener("DOMContentLoaded", () => {
+    initChrome();
+    initRouter();
+    initBrandRedirect(); 
+    initOverview();
+    initGlobalSearch();
+  });
+})();

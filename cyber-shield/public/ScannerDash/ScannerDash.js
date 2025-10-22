@@ -245,6 +245,9 @@ function setUserUI(userData){
     controlFeaturesDropdown(userData.plan_mode);
     controlCameraButton(userData.plan_mode);
 
+    // Update plan label on the dashboard
+    updatePlanLabel(userData.plan_mode);
+
   } else { 
     welcomeMessage.textContent = ''; 
     userNameDisplay.textContent = 'User Name';
@@ -287,6 +290,26 @@ function controlCameraButton(planMode) {
     cameraBtn.title = 'Upgrade to a paid plan to use camera for QR scanning';
   }
   console.log(`Plan Mode: ${planMode}, Camera Enabled: ${!cameraBtn.disabled}`);
+}
+
+// Update the plan badge label and styling in the header
+function updatePlanLabel(planMode) {
+  const planBadge = document.getElementById('planMode');
+  if (!planBadge) return;
+
+  const planMap = {
+    0: { text: 'FREE', cls: 'free-plan' },
+    1: { text: 'PRO', cls: 'pro-plan' },
+    2: { text: 'TEAM', cls: 'team-plan' },
+    3: { text: 'ENTERPRISE', cls: 'enterprise-plan' }
+  };
+
+  const plan = planMap[planMode] || planMap[0];
+  planBadge.textContent = plan.text;
+
+  // Remove existing plan classes
+  planBadge.classList.remove('free-plan', 'pro-plan', 'team-plan', 'enterprise-plan');
+  planBadge.classList.add(plan.cls);
 }
 
 // Control features dropdown based on plan mode

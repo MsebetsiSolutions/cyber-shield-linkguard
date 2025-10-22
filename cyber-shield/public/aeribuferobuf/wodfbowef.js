@@ -4,10 +4,10 @@ class SecureConsole {
     this.charts = {};
     this.isLoggedIn = false;
     this.sessionTimer = null;
-    this.sessionTime = 300; 
+    this.sessionTime = 300;
     this.failedAttempts = 0;
     this.maxAttempts = 3;
-    this.lockoutTime = 30; 
+    this.lockoutTime = 30;
     this.isLocked = false;
     this.autoRefreshInterval = null;
     this.lastDataRefresh = null;
@@ -26,17 +26,20 @@ class SecureConsole {
     setInterval(() => this.updateSessionInfo(), 1000);
 
     this.setupPasswordToggle();
+    this.setupBugReportPasswordToggle(); // Add this line
     this.setupSecurityMeasures();
     this.initializeScrollSpy();
   }
 
   initializeScrollSpy() {
     // Initialize Bootstrap ScrollSpy
-    const dataSpyList = [].slice.call(document.querySelectorAll('[data-bs-spy="scroll"]'));
+    const dataSpyList = [].slice.call(
+      document.querySelectorAll('[data-bs-spy="scroll"]')
+    );
     dataSpyList.forEach((dataSpyEl) => {
       this.scrollSpy = new bootstrap.ScrollSpy(dataSpyEl, {
-        target: '#analytics-sidebar',
-        offset: 100
+        target: "#analytics-sidebar",
+        offset: 100,
       });
     });
   }
@@ -151,11 +154,11 @@ class SecureConsole {
         if (this.isLoggedIn) {
           const targetTab = link.dataset.tab;
           this.switchTab(targetTab);
-          
+
           // Smooth scroll to the target tab
           const targetElement = document.getElementById(`${targetTab}-tab`);
           if (targetElement) {
-            targetElement.scrollIntoView({ behavior: 'smooth' });
+            targetElement.scrollIntoView({ behavior: "smooth" });
           }
         }
       });
@@ -259,6 +262,14 @@ class SecureConsole {
       updatePlanForm.addEventListener("submit", (e) => {
         e.preventDefault();
         this.updateUserPlan();
+      });
+    }
+
+    const viewBugReportForm = document.getElementById("view-bug-report-form");
+    if (viewBugReportForm) {
+      viewBugReportForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        this.handleBugReportUpdate();
       });
     }
   }
@@ -560,7 +571,9 @@ class SecureConsole {
     this.loadTabData(tabName);
 
     // Reset scroll position for the new tab
-    const scrollableContent = activeTab.querySelector('.dashboard-scrollable-content, .tab-scrollable-content');
+    const scrollableContent = activeTab.querySelector(
+      ".dashboard-scrollable-content, .tab-scrollable-content"
+    );
     if (scrollableContent) {
       scrollableContent.scrollTop = 0;
     }
@@ -602,7 +615,118 @@ class SecureConsole {
       case "settings":
         this.loadSettings();
         break;
+      case "review-bug":
+        this.loadBugReports();
+        break;
     }
+  }
+
+  async loadBugReports() {
+    try {
+      const response = await fetch("/admin/api/bug-reports");
+      if (!response.ok) {
+        throw new Error("Failed to load bug reports");
+      }
+      const data = await response.json();
+
+      // Update statistics
+      this.updateElementText(
+        "total-bug-reports",
+        data.statistics.total_reports?.toLocaleString() || "0"
+      );
+      this.updateElementText(
+        "users-with-reports",
+        data.statistics.unique_users?.toLocaleString() || "0"
+      );
+
+      // Populate table
+      const tbody = document.getElementById("bug-reports-tbody");
+      if (tbody) {
+        tbody.innerHTML = data.reports
+          .map(
+            (report) => `
+                <tr>
+                    <td>${report.id}</td>
+                    <td>${report.user_id || "N/A"}</td>
+                    <td>${
+                      report.email ? this.escapeHtml(report.email) : "No email"
+                    }</td>
+                    <td>${this.escapeHtml(report.heading || "No heading")}</td>
+                    <td title="${this.escapeHtml(report.description || "")}">
+                        ${this.truncateText(report.description, 100)}
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="secureConsole.viewBugReport(${
+                          report.id
+                        }, ${report.user_id || "null"}, '${this.escapeHtml(
+              report.email || ""
+            )}', '${this.escapeHtml(report.heading || "")}', '${this.escapeHtml(
+              report.description || ""
+            )}')">
+                            👁️ View
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="secureConsole.deleteBugReport(${
+                          report.id
+                        })">
+                            🗑️ Delete
+                        </button>
+                    </td>
+                </tr>
+            `
+          )
+          .join("");
+      }
+
+      this.updateLastRefreshTime();
+    } catch (error) {
+      console.error("Error loading bug reports:", error);
+      this.showNotification("Error loading bug reports", "error");
+    }
+  }
+
+  async deleteBugReport(reportId) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this bug report? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/admin/api/delete-bug-report/${reportId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        this.loadBugReports();
+        this.showNotification("Bug report deleted successfully!", "success");
+      } else {
+        this.showNotification("Error deleting bug report", "error");
+      }
+    } catch (error) {
+      console.error("Error deleting bug report:", error);
+      this.showNotification("Error deleting bug report", "error");
+    }
+  }
+
+  viewBugReport(reportId, userId, email, heading, description) {
+    // Populate modal fields
+    document.getElementById("view-bug-report-id").value = reportId;
+    document.getElementById("view-bug-report-display-id").value = reportId;
+    document.getElementById("view-bug-report-email").value =
+      email || "No email";
+    document.getElementById("view-bug-report-heading").value =
+      heading || "No heading";
+    document.getElementById("view-bug-report-description").value =
+      description || "No description";
+    document.getElementById("view-bug-report-password").value = "";
+
+    // Show the modal
+    const viewBugReportModal = new bootstrap.Modal(
+      document.getElementById("view-bug-report-modal")
+    );
+    viewBugReportModal.show();
   }
 
   async loadDashboard() {
@@ -833,6 +957,83 @@ class SecureConsole {
     );
   }
 
+  async handleBugReportUpdate() {
+    const reportId = document.getElementById("view-bug-report-id").value;
+    const password = document.getElementById("view-bug-report-password").value;
+    const email = document.getElementById("view-bug-report-email").value;
+    const heading = document.getElementById("view-bug-report-heading").value;
+    const description = document.getElementById(
+      "view-bug-report-description"
+    ).value;
+
+    if (!password) {
+      this.showNotification("Please enter password to update", "error");
+      return;
+    }
+
+    try {
+      // Show loading state
+      const submitBtn = document.querySelector(
+        '#view-bug-report-form button[type="submit"]'
+      );
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML =
+        '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...';
+      submitBtn.disabled = true;
+
+      const response = await fetch("/admin/api/update-bug-report", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          report_id: parseInt(reportId),
+          user_password: password, 
+          email: email,
+          heading: heading,
+          description: description,
+        }),
+      });
+
+      const result = await response.json();
+
+      // Restore button state
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+
+      if (result.success) {
+        this.showNotification("Bug report updated successfully!", "success");
+
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById("view-bug-report-modal")
+        );
+        if (modal) modal.hide();
+
+        // Refresh the bug reports table
+        this.loadBugReports();
+      } else {
+        this.showNotification(
+          "Error updating bug report: " + result.error,
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error updating bug report:", error);
+      this.showNotification(
+        "Error updating bug report: " + error.message,
+        "error"
+      );
+
+      // Restore button state on error too
+      const submitBtn = document.querySelector(
+        '#view-bug-report-form button[type="submit"]'
+      );
+      submitBtn.innerHTML = "Update Report";
+      submitBtn.disabled = false;
+    }
+  }
+
   async loadRecentActivities(activities = null) {
     try {
       if (!activities) {
@@ -973,7 +1174,7 @@ class SecureConsole {
 
       if (result.success) {
         this.showNotification("User plan updated successfully!", "success");
-        this.loadUsers(); 
+        this.loadUsers();
 
         const updatePlanModal = bootstrap.Modal.getInstance(
           document.getElementById("update-plan-modal")
@@ -1195,6 +1396,25 @@ class SecureConsole {
     } catch (error) {
       console.error("Error deleting user:", error);
       this.showNotification("Error deleting user", "error");
+    }
+  }
+
+  setupBugReportPasswordToggle() {
+    const togglePassword = document.getElementById(
+      "toggle-bug-report-password"
+    );
+    const passwordInput = document.getElementById("view-bug-report-password");
+
+    if (togglePassword && passwordInput) {
+      togglePassword.addEventListener("click", function () {
+        const type =
+          passwordInput.getAttribute("type") === "password"
+            ? "text"
+            : "password";
+        passwordInput.setAttribute("type", type);
+        this.classList.toggle("bi-eye-fill");
+        this.classList.toggle("bi-eye-slash-fill");
+      });
     }
   }
 

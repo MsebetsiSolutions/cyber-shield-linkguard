@@ -147,7 +147,7 @@ def api_users():
     users = conn.execute('''
         SELECT u.*, s.sub_plan, s.plan_active 
         FROM users u 
-        LEFT JOIN subscriptions s ON u.id = s.user_id
+        LEFT JOIN subscriptions s ON u.id = s.user_id AND s.plan_active = 1
         ORDER BY u.created_at DESC
     ''').fetchall()
     conn.close()
