@@ -83,6 +83,54 @@ function initTypewriter() {
   type();
 }
 
+// Cybersmart Slider Functionality
+function initCybersmartSlider() {
+  const slides = document.querySelectorAll('.cybersmart-slide');
+  const indicators = document.querySelectorAll('.indicator');
+  let currentSlide = 0;
+
+  function showSlide(index) {
+    // Hide all slides
+    slides.forEach(slide => slide.classList.remove('active'));
+    indicators.forEach(indicator => indicator.classList.remove('active'));
+    
+    // Show current slide
+    slides[index].classList.add('active');
+    indicators[index].classList.add('active');
+    currentSlide = index;
+  }
+
+  // Add click events to indicators
+  indicators.forEach((indicator, index) => {
+    indicator.addEventListener('click', () => {
+      showSlide(index);
+    });
+  });
+
+  setInterval(() => {
+    const nextSlide = (currentSlide + 1) % slides.length;
+    showSlide(nextSlide);
+  }, 6000);
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          showSlide(0); 
+        }
+      });
+    },
+    {
+      threshold: 0.3,
+    }
+  );
+
+  const cybersmartSection = document.getElementById('cybersmart');
+  if (cybersmartSection) {
+    observer.observe(cybersmartSection);
+  }
+}
+
 // Modal Management
 function openModal(modalId) {
   const modal = $(modalId);
@@ -310,14 +358,11 @@ function setupSimulatorSignup() {
       e.preventDefault();
       e.stopPropagation();
 
-      // Close any open dropdowns
       const dropdown = $("simulatorsDropdown");
       dropdown.classList.remove("active");
 
-      // Close mobile menu if open
       closeMenu();
 
-      // Redirect to create.html for signup
       window.location.href = "create.html";
 
       toast(
@@ -327,12 +372,11 @@ function setupSimulatorSignup() {
   }
 }
 
-// Redirect to create.html for signup
 function redirectToSignup() {
   window.location.href = "create.html";
 }
 
-// Event Listeners
+// Listeners
 function setupEventListeners() {
   // Menu Toggle
   $("hamburger").addEventListener("click", toggleMenu);
@@ -361,7 +405,6 @@ function setupEventListeners() {
     closeModal("loginModal")
   );
 
-  // Signup Buttons - Redirect to create.html
   $("desktopSignupBtn").addEventListener("click", redirectToSignup);
   $("mobileSignupBtn").addEventListener("click", () => {
     redirectToSignup();
@@ -369,7 +412,6 @@ function setupEventListeners() {
   });
   $("heroSignupBtn").addEventListener("click", redirectToSignup);
 
-  // Forgot Password Modal
   $("forgotPasswordBtn").addEventListener("click", () => {
     closeModal("loginModal");
     openModal("forgotPasswordModal");
@@ -382,17 +424,14 @@ function setupEventListeners() {
     openModal("loginModal");
   });
 
-  // Modal Switching - Redirect to create.html for signup
   $("switchToSignup").addEventListener("click", () => {
     closeModal("loginModal");
     redirectToSignup();
   });
 
-  // Form Submissions
   $("doLogin").addEventListener("click", handleLogin);
   $("doReset").addEventListener("click", handleForgotPassword);
 
-  // Enter key support for forms
   $("loginEmail").addEventListener("keydown", (e) => {
     if (e.key === "Enter") handleLogin();
   });
@@ -400,7 +439,6 @@ function setupEventListeners() {
     if (e.key === "Enter") handleLogin();
   });
 
-  // Enter key support for forgot password form
   $("resetEmail").addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -408,7 +446,7 @@ function setupEventListeners() {
     }
   });
 
-  // Close modals on outside click and escape key
+
   document.querySelectorAll(".modal-overlay").forEach((modal) => {
     modal.addEventListener("click", function (e) {
       if (e.target === this) {
@@ -423,7 +461,6 @@ function setupEventListeners() {
     }
   });
 
-  // Smooth scrolling for anchor links
   document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     anchor.addEventListener("click", function (e) {
       e.preventDefault();
@@ -445,33 +482,23 @@ function setupEventListeners() {
     });
   });
 
-  // Mobile dropdown setup
+  // Mobile mode dropdown 
   setupMobileDropdown();
-
-  // Simulator signup button setup
   setupSimulatorSignup();
 }
 
-// Initialize everything
+// everything must start
 document.addEventListener("DOMContentLoaded", function () {
-  // Initialize session first
   if (window.CyberShieldSession) {
     window.CyberShieldSession.initSession();
   }
 
-  // Initialize typewriter effect
   initTypewriter();
-
-  // Setup password toggles
+  initCybersmartSlider();
   setupPasswordToggle("togglePassword", "loginPass");
-
-  // Initialize animations
   initAOS();
-
-  // Setup all event listeners
   setupEventListeners();
 
-  // Debug message if user already logged in
   if (token.access) {
     console.log("User already logged in with access token");
   }
