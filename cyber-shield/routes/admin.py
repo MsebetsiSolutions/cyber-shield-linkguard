@@ -449,6 +449,49 @@ def update_user_plan():
         return jsonify({'error': str(e)}), 500
 
 
+@admin_bp.route('/admin/api/bug-reports')
+@admin_login_required
+def api_bug_reports():
+    """Get all bug reports from CST table"""
+    conn = get_db_connection()
+    
+    try:
+        # Get bug reports from CST table
+        bug_reports = conn.execute('''
+            SELECT c.*, u.email as user_email, u.full_name 
+            FROM CST c 
+            LEFT JOIN users u ON c.user_id = u.id 
+            ORDER BY c.id DESC
+        ''').fetchall()
+        
+        # Get statistics
+        total_reports = conn.execute('SELECT COUNT(*) as count FROM CST').fetchone()['count']
+        unique_users = conn.execute('SELECT COUNT(DISTINCT user_id) as count FROM CST WHERE user_id IS NOT NULL').fetchone()['count']
+        
+        conn.close()
+        
+        reports_list = []
+        for report in bug_reports:
+            report_dict = dict(report)
+            # Ensure all required fields are present
+            if 'email' not in report_dict or not report_dict['email']:
+                report_dict['email'] = report_dict.get('user_email', 'No email provided')
+            reports_list.append(report_dict)
+        
+        return jsonify({
+            'reports': reports_list,
+            'statistics': {
+                'total_reports': total_reports,
+                'unique_users': unique_users
+            }
+        })
+        
+    except Exception as e:
+        print(f"Error fetching bug reports: {e}")
+        conn.close()
+        return jsonify({'error': 'Failed to fetch bug reports'}), 500
+
+
 @admin_bp.route('/admin/api/delete-user', methods=['POST'])
 @admin_login_required
 def delete_user():

@@ -247,13 +247,6 @@ def signup():
         hashed_pw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         hashed_pw_str = hashed_pw.decode('utf-8')
 
-        print(f"Full Name: {full_name}")
-        print(f"Email: {email}")
-        print(f"Original Password Length: {len(password)}")
-        print(f"Hashed Password: {hashed_pw}")
-        print(f"Hashed Password (decoded): {hashed_pw_str}")
-        print(f"Hashed Password Length: {len(hashed_pw_str)}")
-
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
@@ -270,17 +263,20 @@ def signup():
 
             conn.commit()
             user_id = cursor.lastrowid
+            
+            cursor.execute('SELECT id, full_name, email, password, Plan_Mode FROM users WHERE id = ?', (user_id,))
+            user = cursor.fetchone()
+            
             conn.close()
 
-            print(f"User created successfully with ID: {user_id}")
+            session['user_id'] = user['id']
+            session['user_full_name'] = user['full_name']
+            session['user_email'] = user['email']
+            session['plan_mode'] = user['Plan_Mode']
+            session.permanent = True
             
-            # Send registration confirmation email
-            email_sent = send_registration_confirmation_email(email, full_name)
-            if email_sent:
-                print("Registration confirmation email sent successfully!")
-            else:
-                print("Failed to send registration confirmation email, but user account was created.")
-                
+            print(f"User {user['email']} auto-logged in after signup. Session created.")
+            
         except sqlite3.IntegrityError as e:
             print(f"Database integrity error: {e}")
             return jsonify({'error': 'Email already exists or invalid data'}), 409
@@ -294,7 +290,8 @@ def signup():
             'email': email,
             'user_id': user_id,
             'plan_mode': 0,
-            'email_sent': email_sent
+            'authenticated': True,
+            'redirect_to': '/ScannerDash/ScannerDash.html' 
         }), 201 
     
     except Exception as e:
