@@ -68,25 +68,19 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |      ├── .gitignore
         |      ├── .env
         |      |
-        │      ├── venv/
-        |      |     ├── bin/
-        |      |     ├── lin/
-        |      |     └── pyvenv.cfg
-        |      |
         │      ├── routes/ 
         |      |     ├── _pycache_/
         |      |     ├── subscription.py
         |      |     ├── teamCollab.py
-        |      |     ├── learning_hub.py
         |      |     ├── admin.py
         |      |     ├── enterprise.py
         |      |     ├── module.py
         |      |     ├── scan_results.py
-        |      |     ├── course_upload.py.bak
         |      |     ├── profile.py
         |      |     ├── email_phishing.py
         |      |     ├── settings.py
         |      |     ├── chats.py
+        |      |     ├── exam.py
         |      |     └── authentication.py
         |      |
         │      ├── backend/ 
@@ -155,6 +149,13 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     ├── supcom.html
         |            |     ├── supcom.css
         |            |     └── supcom.js
+        |            |
+        |            ├── CyberSmart_Learning_Dashboard/
+        |            |     ├── Grade 1 and 2 cybersecurity course/
+        |            |     ├── Grade 3 & 4 - Cyber Agents/
+        |            |     ├── Grade 5 & 6 - Future Cyber Defenders/
+        |            |     ├── Grade R - My Digital World/
+        |            |     └── index.html
         |            |
         |            ├── cyber-awareness/        
         |            |     ├── cyber-awareness.html
@@ -250,6 +251,7 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            ├── create.html
         |            ├── logg.js
         |            ├── manifest.json
+        |            ├── Nigerian_Fraud.csv
         |            ├── session.js
         |            ├── robots.txt
         |            ├── sitemap.xml
