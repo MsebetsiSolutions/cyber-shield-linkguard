@@ -237,7 +237,7 @@ if (userDropdownBtn && userDropdown) {
       userDropdown.style.display = "none";
     }
   });
-  // Prevent dropdown from closing when clicking inside it
+  
   userDropdown.addEventListener("click", (e) => {
     e.stopPropagation();
   });
@@ -300,6 +300,18 @@ function getPlanPrice(planId, billingPeriod) {
   return plan.monthly || plan.price;
 }
 
+// Get expiry date based on billing period
+function getExpiryDate(billingPeriod) {
+  const now = new Date();
+  if (billingPeriod === 'yearly') {
+    // Add 365 days for yearly plans
+    return new Date(now.setDate(now.getDate() + 365)).toISOString();
+  } else {
+    // Add 30 days for monthly plans
+    return new Date(now.setDate(now.getDate() + 30)).toISOString();
+  }
+}
+
 // Add event listener for the Increase Scans button
 if (manageSubscriptionBtn) {
   manageSubscriptionBtn.addEventListener("click", function () {
@@ -310,7 +322,9 @@ if (manageSubscriptionBtn) {
         name: "Increase Scans",
         price: planCodes.increase.price,
         code: planCodes.increase.code,
-        billingPeriod: 'monthly'
+        billingPeriod: 'monthly',
+        duration: 'week',
+        expiryDate: getExpiryDate('monthly') 
       })
     );
 
@@ -338,6 +352,8 @@ document.querySelectorAll('.plan-card').forEach(card => {
     const billingPeriod = getSelectedBillingPeriod(planId);
     const planPrice = getPlanPrice(planId, billingPeriod);
     const planCode = planCodes[planId].code;
+    const expiryDate = getExpiryDate(billingPeriod);
+    const duration = billingPeriod === 'yearly' ? 'year' : 'month';
     
     localStorage.setItem('selectedPlan', JSON.stringify({
       id: planId,
@@ -345,7 +361,8 @@ document.querySelectorAll('.plan-card').forEach(card => {
       price: planPrice,
       code: planCode,
       billingPeriod: billingPeriod,
-      duration: billingPeriod === 'yearly' ? 'year' : 'month'
+      duration: duration,
+      expiryDate: expiryDate
     }));
     
     console.log('Selected plan:', {
@@ -353,7 +370,8 @@ document.querySelectorAll('.plan-card').forEach(card => {
       planName,
       price: planPrice,
       billingPeriod,
-      duration: billingPeriod === 'yearly' ? 'year' : 'month'
+      duration,
+      expiryDate
     });
     
     try {
