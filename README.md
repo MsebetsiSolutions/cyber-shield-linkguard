@@ -155,6 +155,7 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     ├── Grade 1 and 2 cybersecurity course/
         |            |     ├── Grade 3 & 4 - Cyber Agents/
         |            |     ├── Grade 5 & 6 - Future Cyber Defenders/
+        |            |     ├── Grade 7 - Cyber Defenders/
         |            |     ├── Grade R - My Digital World/
         |            |     └── index.html
         |            |

@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade 7 Cyber Defenders - Advanced Curriculum</title>
+    <style>
+        :root {
+            --bg: #0a0e27;
+            --card: #1a1f3a;
+            --accent1: #00f5ff;
+            --accent2: #7c3aed;
+            --accent3: #f59e0b;
+            --accent4: #ec4899;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --shadow: 0 10px 40px rgba(0,245,255,0.15);
+            --radius: 16px;
+            font-family: "Inter", "Segoe UI", sans-serif;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            margin: 0;
+            padding: 24px;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #2d1b4e 100%);
+            color: var(--text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.6;
+        }
+        
+        header {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 24px;
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,245,255,0.2);
+        }
+        
+        .logo {
+            width: 90px;
+            height: 90px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            box-shadow: 0 0 30px rgba(0,245,255,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 28px;
+            color: white;
+            position: relative;
+        }
+        
+        .logo::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 18px;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: rotate 4s linear infinite;
+        }
+        
+        @keyframes rotate {
+            to { transform: rotate(360deg); }
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            background: linear-gradient(90deg, var(--accent1), var(--accent2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        p.lead {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+        }
+        
+        .module-navigation {
+            display: flex;
+            gap: 12px;
+            margin: 24px 0;
+            flex-wrap: wrap;
+        }
+        
+        .module-btn {
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 2px solid rgba(0,245,255,0.2);
+            background: var(--card);
+            color: var(--text);
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .module-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .module-btn span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .module-btn.active::before {
+            opacity: 1;
+        }
+        
+        .module-btn:hover:not(.active) {
+            border-color: var(--accent1);
+            box-shadow: 0 0 20px rgba(0,245,255,0.3);
+        }
+        
+        .module-content {
+            display: none;
+        }
+        
+        .module-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+        
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,245,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent1), var(--accent2), var(--accent4));
+        }
+        
+        .lesson-title h2 {
+            margin: 12px 0 8px;
+            font-size: 24px;
+            color: var(--accent1);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--accent2), var(--accent4));
+            color: white;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .challenge-banner {
+            background: linear-gradient(135deg, rgba(0,245,255,0.1), rgba(124,58,237,0.1));
+            padding: 24px;
+            border-radius: var(--radius);
+            margin: 24px 0;
+            border: 2px solid rgba(0,245,255,0.3);
+            text-align: center;
+        }
+        
+        .challenge-banner h3 {
+            color: var(--accent1);
+            margin-bottom: 12px;
+            font-size: 22px;
+        }
+        
+        .challenge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .challenge-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid rgba(0,245,255,0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .challenge-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,245,255,0.3);
+            border-color: var(--accent1);
+        }
+        
+        .challenge-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        details {
+            margin-top: 16px;
+        }
+        
+        summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 12px 16px;
+            border-radius: 10px;
+            background: rgba(0,245,255,0.05);
+            font-weight: 600;
+            border: 1px solid rgba(0,245,255,0.2);
+            transition: all 0.3s;
+        }
+        
+        summary:hover {
+            background: rgba(0,245,255,0.1);
+            border-color: var(--accent1);
+        }
+        
+        .activity {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(124,58,237,0.05);
+            border: 1px solid rgba(124,58,237,0.3);
+        }
+        
+        .activity h4 {
+            margin: 0 0 12px;
+            color: var(--accent2);
+            font-size: 18px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            color: white;
+            font-weight: 700;
+            margin: 8px 8px 8px 0;
+            box-shadow: 0 4px 15px rgba(0,245,255,0.3);
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,245,255,0.4);
+        }
+        
+        .btn.alt {
+            background: linear-gradient(135deg, var(--accent3), var(--accent4));
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,245,255,0.2);
+            background: rgba(0,0,0,0.3);
+            color: var(--text);
+            margin: 8px 0;
+            font-family: inherit;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent1);
+            box-shadow: 0 0 0 3px rgba(0,245,255,0.1);
+        }
+        
+        .result-box {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 10px;
+            background: rgba(0,245,255,0.1);
+            border: 1px solid var(--accent1);
+            display: none;
+        }
+        
+        .result-box.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .code-block {
+            background: rgba(0,0,0,0.5);
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent1);
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+        
+        .quiz-options {
+            display: grid;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .quiz-option {
+            padding: 14px;
+            border-radius: 10px;
+            background: rgba(0,245,255,0.05);
+            border: 2px solid rgba(0,245,255,0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quiz-option:hover {
+            border-color: var(--accent1);
+            background: rgba(0,245,255,0.1);
+        }
+        
+        .quiz-option.selected {
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            border-color: var(--accent1);
+        }
+        
+        .progress-tracker {
+            display: flex;
+            justify-content: space-between;
+            margin: 24px 0;
+            position: relative;
+            padding: 0 20px;
+        }
+        
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--card);
+            border: 3px solid rgba(0,245,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+        }
+        
+        .step-circle.completed {
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            border-color: var(--accent1);
+            box-shadow: 0 0 20px rgba(0,245,255,0.5);
+        }
+        
+        .step-circle.active {
+            background: linear-gradient(135deg, var(--accent3), var(--accent4));
+            border-color: var(--accent3);
+            box-shadow: 0 0 20px rgba(245,158,11,0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .step-label {
+            font-size: 13px;
+            text-align: center;
+            color: var(--muted);
+        }
+        
+        .progress-tracker::before {
+            content: '';
+            position: absolute;
+            top: 25px;
+            left: 60px;
+            right: 60px;
+            height: 3px;
+            background: rgba(0,245,255,0.2);
+            z-index: 1;
+        }
+        
+        .scenario-card {
+            background: rgba(0,0,0,0.3);
+            padding: 16px;
+            border-radius: 10px;
+            margin: 12px 0;
+            border-left: 3px solid var(--accent2);
+        }
+        
+        .completion-message {
+            text-align: center;
+            padding: 32px;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent4));
+            border-radius: var(--radius);
+            margin-top: 24px;
+            display: none;
+        }
+        
+        .completion-message.show {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .completion-message h3 {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+        
+        footer {
+            margin-top: 40px;
+            padding: 24px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 14px;
+            border-top: 1px solid rgba(0,245,255,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .challenge-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .module-navigation {
+                flex-direction: column;
+            }
+            
+            .module-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">🛡️</div>
+        <div>
+            <h1>Grade 7 Cyber Defenders – Advanced Training</h1>
+            <p class="lead">Master advanced cybersecurity concepts with hands-on challenges </p>
+        </div>
+    </header>
+
+    <div class="progress-tracker">
+        <div class="progress-step">
+            <div class="step-circle completed">1</div>
+            <div class="step-label">Module 1<br>Privacy & Data</div>
+        </div>
+        <div class="progress-step">
+            <div class="step-circle active">2</div>
+            <div class="step-label">Module 2<br>Phishing & Scams</div>
+        </div>
+        <div class="progress-step">
+            <div class="step-circle">3</div>
+            <div class="step-label">Module 3<br>Encryption</div>
+        </div>
+        <div class="progress-step">
+            <div class="step-circle">4</div>
+            <div class="step-label">Module 4<br>Digital Rights</div>
+        </div>
+    </div>
+
+    <div class="module-navigation">
+        <button class="module-btn active" onclick="showModule(1)"><span>Module 1: Digital Privacy & Data Protection</span></button>
+        <button class="module-btn" onclick="showModule(2)"><span>Module 2: Phishing & Social Engineering</span></button>
+        <button class="module-btn" onclick="showModule(3)"><span>Module 3: Cryptography Basics</span></button>
+        <button class="module-btn" onclick="showModule(4)"><span>Module 4: Digital Rights & Responsibilities</span></button>
+    </div>
+
+    <!-- Module 1 Content -->
+    <div id="module1" class="module-content active">
+        <div class="challenge-banner">
+            <h3>🔐 Module 1 Mission: Privacy Guardian</h3>
+            <p>Learn how companies collect your data and how to protect your digital privacy</p>
+            <div class="challenge-grid">
+                <div class="challenge-card">
+                    <div class="challenge-icon">📊</div>
+                    <div><strong>Data Tracking</strong><br>Audit</div>
+                </div>
+                <div class="challenge-card">
+                    <div class="challenge-icon">🍪</div>
+                    <div><strong>Cookie</strong><br>Analysis</div>
+                </div>
+                <div class="challenge-card">
+                    <div class="challenge-icon">🔒</div>
+                    <div><strong>Privacy</strong><br>Settings</div>
+                </div>
+            </div>
+        </div>
+
+        <section class="card">
+            <div class="lesson-title">
+                <div class="badge">Module 1</div>
+                <h2>Digital Privacy & Data Protection</h2>
+                <p class="small">Understanding how your data is collected, used, and how to protect it</p>
+            </div>
+
+            <details open>
+                <summary>What You'll Master Today</summary>
+                <div style="margin-top:12px">
+                    <ul>
+                        <li>How websites and apps track your online behavior</li>
+                        <li>Understanding cookies, trackers, and targeted advertising</li>
+                        <li>Reading and understanding privacy policies</li>
+                        <li>Setting up proper privacy controls on social media</li>
+                        <li>Understanding data breaches and their consequences</li>
+                    </ul>
+                </div>
+            </details>
+
+            <div class="activity">
+                <h4>Interactive Activity: Privacy Policy Detective</h4>
+                <p>Privacy policies can be confusing. Let's decode what they really mean!</p>
+                
+                <div class="scenario-card">
+                    <p><strong>Privacy Policy Statement:</strong></p>
+                    <p style="font-style: italic; margin: 12px 0;">"We may share your information with third-party partners for marketing purposes and to improve user experience."</p>
+                    <p><strong>What does this really mean?</strong></p>
+                    <select id="privacyQ1">
+                        <option value="">Choose your answer...</option>
+                        <option value="wrong1">They keep your data completely private</option>
+                        <option value="correct">They sell or give your data to other companies</option>
+                        <option value="wrong2">Only you can see your information</option>
+                        <option value="wrong3">Your data is encrypted and safe</option>
+                    </select>
+                    <button class="btn" onclick="checkPrivacy()">Check Answer</button>
+                </div>
+
+                <div id="privacyResult" class="result-box"></div>
+
+                <div style="margin-top: 20px;">
+                    <h4>Data Tracking Experiment</h4>
+                    <p>List 5 apps you use daily and what data they might collect:</p>
+                    <textarea id="dataTracking" rows="6" placeholder="Example: Instagram - collects my photos, location, contacts, browsing habits, likes..."></textarea>
+                    <button class="btn" onclick="analyzeTracking()">Analyze My Data</button>
+                    <div id="trackingResult" class="result-box"></div>
+                </div>
+            </div>
+
+            <div class="activity">
+                <h4>Cookie Consent Challenge</h4>
+                <p>You see this cookie banner on a website. What should you do?</p>
+                <div class="scenario-card">
+                    <p style="text-align: center; margin: 12px 0;">
+                        🍪 <strong>Cookie Notice</strong><br>
+                        "We use cookies to enhance your experience. By clicking Accept, you agree to all cookies."
+                    </p>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn" onclick="cookieChoice('accept')">Accept All</button>
+                        <button class="btn alt" onclick="cookieChoice('customize')">Customize Settings</button>
+                        <button class="btn" onclick="cookieChoice('reject')">Reject All</button>
+                    </div>
+                </div>
+                <div id="cookieResult" class="result-box"></div>
+            </div>
+
+            <div class="activity">
+                <h4>Quiz: Data Protection Knowledge</h4>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="selectQuiz(this, 1, 'A')">
+                        <strong>A)</strong> If a service is free, you're probably paying with your data
+                    </div>
+                    <div class="quiz-option" onclick="selectQuiz(this, 1, 'B')">
+                        <strong>B)</strong> Companies need your permission to collect any data
+                    </div>
+                    <div class="quiz-option" onclick="selectQuiz(this, 1, 'C')">
+                        <strong>C)</strong> Deleting an app removes all data the company collected
+                    </div>
+                    <div class="quiz-option" onclick="selectQuiz(this, 1, 'D')">
+                        <strong>D)</strong> Private browsing mode makes you completely anonymous
+                    </div>
+                </div>
+                <div id="quiz1Result" class="result-box"></div>
+            </div>
+
+            <details style="margin-top: 20px;">
+                <summary>🎯 Extension Project: Privacy Audit</summary>
+                <div style="margin-top:12px">
+                    <p><strong>Complete a privacy audit of your favorite social media platform:</strong></p>
+                    <ol>
+                        <li>Go to the privacy settings</li>
+                        <li>Check what data is being collected</li>
+                        <li>See who can view your posts and information</li>
+                        <li>Review apps that have access to your account</li>
+                        <li>Create a report on what you found and what you changed</li>
+                    </ol>
+                </div>
+            </details>
+
+            <div style="text-align: center; margin-top: 24px;">
+                <button class="btn" onclick="completeModule(1)">Complete Module 1 → Move to Module 2</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Module 2 Content -->
+    <div id="module2" class="module-content">
+        <div class="challenge-banner">
+            <h3>🎣 Module 2 Mission: Anti-Phishing Agent</h3>
+            <p>Master the art of detecting phishing attacks and social engineering tactics</p>
+            <div class="challenge-grid">
+                <div class="challenge-card">
+                    <div class="challenge-icon">📧</div>
+                    <div><strong>Email</strong><br>Analysis</div>
+                </div>
+                <div class="challenge-card">
+                    <div class="challenge-icon">🔗</div>
+                    <div><strong>Link</strong><br>Inspector</div>
+                </div>
+                <div class="challenge-card">
+                    <div class="challenge-icon">🧠</div>
+                    <div><strong>Social Eng.</strong><br>Defense</div>
+                </div>
+            </div>
+        </div>
+
+        <section class="card">
+            <div class="lesson-title">
+                <div class="badge" style="background: linear-gradient(90deg, #f59e0b, #ec4899);">Module 2</div>
+                <h2>Phishing & Social Engineering</h2>
+                <p class="small">Learn to identify and defend against sophisticated online scams</p>
+            </div>
+
+            <details open>
+                <summary>What You'll Master Today</summary>
+                <div style="margin-top:12px">
+                    <ul>
+                        <li>Understanding phishing, spear phishing, and whaling attacks</li>
+                        <li>Analyzing email headers and suspicious links</li>
+                        <li>Recognizing social engineering tactics</li>
+                        <li>Safe practices for responding to suspicious messages</li>
+                        <li>Understanding vishing (voice phishing) and smishing (SMS phishing)</li>
+                    </ul>
+                </div>
+            </details>
+
+            <div class="activity">
+                <h4>🔍 Phishing Email Analysis Lab</h4>
+                <p>Examine this email and identify the red flags:</p>
+                
+                <div class="code-block">
+From: security@paypa1-verification.com<br>
+Subject: URGENT: Your Account Will Be Suspended!<br>
+<br>
+Dear Valued Customer,<br>
+<br>
+We have detected unusual activity on your account. Your account will be PERMANENTLY SUSPENDED in 24 hours unless you verify your identity immediately.<br>
+<br>
+Click here to verify: http://paypal-secure-login.tk/verify<br>
+<br>
+Failure to comply will result in account closure and loss of funds.<br>
+<br>
+Sincerely,<br>
+PayPal Security Team
+                </div>
+
+                <p><strong>How many red flags can you spot?</strong></p>
+                <div style="display: grid; gap: 8px;">
+                    <label><input type="checkbox" id="flag1"> Suspicious sender email address</label>
+                    <label><input type="checkbox" id="flag2"> Creates sense of urgency/fear</label>
+                    <label><input type="checkbox" id="flag3"> Suspicious link URL</label>
+                    <label><input type="checkbox" id="flag4"> Generic greeting ("Dear Customer")</label>
+                    <label><input type="checkbox" id="flag5"> Threats of account closure</label>
+                    <label><input type="checkbox" id="flag6"> Poor grammar or spelling</label>
+                </div>
+                <button class="btn" onclick="checkPhishingFlags()">Check My Analysis</button>
+                <div id="phishingResult" class="result-box"></div>
+            </div>
+
+            <div class="activity">
+                <h4>🔗 Link Safety Inspector</h4>
+                <p>Before clicking any link, you should inspect it. Enter a URL to analyze:</p>
+                <input type="text" id="linkInput" placeholder="Enter a URL (e.g., http://paypal.login-secure.tk)">
+                <button class="btn" onclick="inspectLink()">Inspect This Link</button>
+                <div id="linkResult" class="result-box"></div>
+                
+                <div style="margin-top: 16px;">
+                    <p><strong>Safe Link Checking Tips:</strong></p>
+                    <ul>
+                        <li>Hover over links to see the real URL (don't click!)</li>
+                        <li>Check for misspellings in domain names (paypa1 vs paypal)</li>
+                        <li>Be suspicious of shortened URLs (bit.ly, tinyurl)</li>
+                        <li>Look for HTTPS and legitimate domain extensions</li>
+                        <li>Watch out for extra characters or unusual subdomains</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="activity">
+                <h4>🧠 Social Engineering Scenarios</h4>
+                <p>Read each scenario and decide how you should respond:</p>
+                
+                <div class="scenario-card" id="scenario1">
+                    <p><strong>Scenario 1:</strong> A person claiming to be from your school's IT department calls and asks for your login password to "fix a technical issue."</p>
+                    <div style="margin-top: 12px;">
+                        <button class="btn" onclick="answerScenario(1, 'give')">Give them the password</button>
+                        <button class="btn alt" onclick="answerScenario(1, 'refuse')">Refuse and verify their identity</button>
+                        <button class="btn" onclick="answerScenario(1, 'change')">Give password then change it</button>
+                    </div>
+                    <div id="scenario1Result" class="result-box"></div>
+                </div>
+
+                <div class="scenario-card" id="scenario2">
+                    <p><strong>Scenario 2:</strong> You receive a text message saying you've won a free smartphone. Click this link to claim your prize!</p>
+                    <div style="margin-top: 12px;">
+                        <button class="btn" onclick="answerScenario(2, 'click')">Click the link immediately</button>
+                        <button class="btn alt" onclick="answerScenario(2, 'ignore')">Delete the message</button>
+                        <button class="btn" onclick="answerScenario(2, 'forward')">Forward to friends</button>
+                    </div>
+                    <div id="scenario2Result" class="result-box"></div>
+                </div>
+
+                <div class="scenario-card" id="scenario3">
+                    <p><strong>Scenario 3:</strong> Someone on a gaming platform offers you free in-game currency if you share your login information.</p>
+                    <div style="margin-top: 12px;">
+                        <button class="btn" onclick="answerScenario(3, 'share')">Share your login info</button>
+                        <button class="btn alt" onclick="answerScenario(3, 'report')">Report and block the user</button>
+                        <button class="btn" onclick="answerScenario(3, 'ask')">Ask for more details</button>
+                    </div>
+                    <div id="scenario3Result" class="result-box"></div>
+                </div>
+            </div>
+
+            <details style="margin-top: 20px;">
+                <summary>🎯 Extension Project: Create a Phishing Awareness Poster</summary>
+                <div style="margin-top:12px">
+                    <p><strong>Design a poster that teaches others how to spot phishing attempts:</strong></p>
+                    <ol>
+                        <li>Include at least 5 red flags to look for</li>
+                        <li>Show examples of suspicious vs legitimate emails</li>
+                        <li>Explain what to do if you receive a phishing attempt</li>
+                        <li>Use visuals to make your poster engaging</li>
+                    </ol>
+                </div>
+            </details>
+
+            <div style="text-align: center; margin-top: 24px;">
+                <button class="btn" onclick="completeModule(2)">Complete Module 2 → Move to Module 3</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Module 3 Content -->
+    <div id="module3" class="module-content">
+        <div class="challenge-banner">
+            <h3>🔐 Module 3 Mission: Cryptography Agent</h3>
+            <p>Learn the secrets of encryption and how to protect information with codes</p>
+            <div class="challenge-grid">
+                <div class="challenge-card">
+                    <div class="challenge-icon">🔢</div>
+                    <div><strong>Caesar</strong><br>Cipher</div>
+                </div>
+                <div class="challenge-card">
+                    <div class="challenge-icon">🔑</div>
+                    <div><strong>Public Key</strong><br>Encryption</div>
+                </div>
+                <div class="challenge-card">
+                    <div class="challenge-icon">🔓</div>
+                    <div><strong>Code</strong><br>Breaking</div>
+                </div>
+            </div>
+        </div>
+
+        <section class="card">
+            <div class="lesson-title">
+                <div class="badge" style="background: linear-gradient(90deg, #10b981, #3b82f6);">Module 3</div>
+                <h2>Cryptography Basics</h2>
+                <p class="small">Understanding how encryption protects our digital communications</p>
+            </div>
+
+            <details open>
+                <summary>What You'll Master Today</summary>
+                <div style="margin-top:12px">
+                    <ul>
+                        <li>Understanding symmetric and asymmetric encryption</li>
+                        <li>Learning about historical ciphers and modern encryption</li>
+                        <li>Creating and breaking simple substitution ciphers</li>
+                        <li>Understanding how HTTPS protects web traffic</li>
+                        <li>Learning about digital signatures and certificates</li>
+                    </ul>
+                </div>
+            </details>
+
+            <div class="activity">
+                <h4>🔢 Caesar Cipher Challenge</h4>
+                <p>The Caesar cipher is one of the oldest encryption techniques. Each letter is shifted by a fixed number of positions in the alphabet.</p>
+                
+                <div class="scenario-card">
+                    <p><strong>Encrypt this message with a shift of 3:</strong></p>
+                    <p style="text-align: center; font-size: 18px; margin: 12px 0;">CYBER DEFENDER</p>
+                    <input type="text" id="cipherInput" placeholder="Enter your encrypted message">
+                    <button class="btn" onclick="checkCipher()">Check Encryption</button>
+                    <div id="cipherResult" class="result-box"></div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h4>Decryption Challenge</h4>
+                    <p><strong>Decrypt this message (shift of 3):</strong></p>
+                    <p style="text-align: center; font-size: 18px; margin: 12px 0;">FDEHU GHIHQGHU</p>
+                    <input type="text" id="decryptInput" placeholder="Enter the decrypted message">
+                    <button class="btn" onclick="checkDecryption()">Check Decryption</button>
+                    <div id="decryptResult" class="result-box"></div>
+                </div>
+            </div>
+
+            <div class="activity">
+                <h4>🔑 Public Key Encryption Explained</h4>
+                <p>Public key encryption uses two different keys - one public (for encryption) and one private (for decryption).</p>
+                
+                <div class="scenario-card">
+                    <p><strong>Which of these statements about public key encryption is true?</strong></p>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectQuiz(this, 3, 'A')">
+                            <strong>A)</strong> The same key is used to encrypt and decrypt
+                        </div>
+                        <div class="quiz-option" onclick="selectQuiz(this, 3, 'B')">
+                            <strong>B)</strong> You can share your private key with anyone
+                        </div>
+                        <div class="quiz-option" onclick="selectQuiz(this, 3, 'C')">
+                            <strong>C)</strong> The public key is for encryption, private key for decryption
+                        </div>
+                        <div class="quiz-option" onclick="selectQuiz(this, 3, 'D')">
+                            <strong>D)</strong> Public key encryption is less secure than symmetric encryption
+                        </div>
+                    </div>
+                    <div id="quiz3Result" class="result-box"></div>
+                </div>
+            </div>
+
+            <div class="activity">
+                <h4>🔓 Code Breaking Challenge</h4>
+                <p>Try to break this simple substitution cipher. Each letter has been replaced with another:</p>
+                
+                <div class="code-block">
+A = X
+B = Y
+C = Z
+D = A
+E = B
+F = C
+G = D
+H = E
+I = F
+J = G
+K = H
+L = I
+M = J
+N = K
+O = L
+P = M
+Q = N
+R = O
+S = P
+T = Q
+U = R
+V = S
+W = T
+X = U
+Y = V
+Z = W
+                </div>
+
+                <p><strong>Decrypt this message:</strong></p>
+                <p style="text-align: center; font-size: 18px; margin: 12px 0;">X Y Z A B C</p>
+                <input type="text" id="substitutionInput" placeholder="Enter the decrypted message">
+                <button class="btn" onclick="checkSubstitution()">Check Answer</button>
+                <div id="substitutionResult" class="result-box"></div>
+            </div>
+
+            <details style="margin-top: 20px;">
+                <summary>🎯 Extension Project: Create Your Own Cipher</summary>
+                <div style="margin-top:12px">
+                    <p><strong>Design your own encryption system and challenge a friend to break it:</strong></p>
+                    <ol>
+                        <li>Create a substitution or transposition cipher</li>
+                        <li>Write a key that explains how your cipher works</li>
+                        <li>Encrypt a secret message</li>
+                        <li>Give the encrypted message and key to a friend to decrypt</li>
+                    </ol>
+                </div>
+            </details>
+
+            <div style="text-align: center; margin-top: 24px;">
+                <button class="btn" onclick="completeModule(3)">Complete Module 3 → Move to Module 4</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Module 4 Content -->
+    <div id="module4" class="module-content">
+        <div class="challenge-banner">
+            <h3>⚖️ Module 4 Mission: Digital Rights Advocate</h3>
+            <p>Understand your digital rights and responsibilities as a citizen of the internet</p>
+            <div class="challenge-grid">
+                <div class="challenge-card">
+                    <div class="challenge-icon">📜</div>
+                    <div><strong>Digital</strong><br>Rights</div>
+                </div>
+                <div class="challenge-card">
+                    <div class="challenge-icon">⚖️</div>
+                    <div><strong>Digital</strong><br>Laws</div>
+                </div>
+                <div class="challenge-card">
+                    <div class="challenge-icon">🌐</div>
+                    <div><strong>Global</strong><br>Citizenship</div>
+                </div>
+            </div>
+        </div>
+
+        <section class="card">
+            <div class="lesson-title">
+                <div class="badge" style="background: linear-gradient(90deg, #8b5cf6, #ec4899);">Module 4</div>
+                <h2>Digital Rights & Responsibilities</h2>
+                <p class="small">Understanding your rights and responsibilities in the digital world</p>
+            </div>
+
+            <details open>
+                <summary>What You'll Master Today</summary>
+                <div style="margin-top:12px">
+                    <ul>
+                        <li>Understanding digital rights like privacy, freedom of expression, and access</li>
+                        <li>Learning about digital responsibilities and ethical behavior online</li>
+                        <li>Understanding copyright, fair use, and intellectual property</li>
+                        <li>Learning about cyberbullying laws and prevention</li>
+                        <li>Understanding digital citizenship and global internet governance</li>
+                    </ul>
+                </div>
+            </details>
+
+            <div class="activity">
+                <h4>📜 Digital Rights Matching</h4>
+                <p>Match each digital right with its correct description:</p>
+                
+                <div class="scenario-card">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div>
+                            <p><strong>Rights:</strong></p>
+                            <div class="quiz-option" onclick="selectRight(this, 'privacy')">Right to Privacy</div>
+                            <div class="quiz-option" onclick="selectRight(this, 'expression')">Freedom of Expression</div>
+                            <div class="quiz-option" onclick="selectRight(this, 'access')">Right to Access</div>
+                            <div class="quiz-option" onclick="selectRight(this, 'forget')">Right to be Forgotten</div>
+                        </div>
+                        <div>
+                            <p><strong>Descriptions:</strong></p>
+                            <div class="quiz-option" onclick="selectDescription(this, 'privacy')">Protection from unauthorized data collection and surveillance</div>
+                            <div class="quiz-option" onclick="selectDescription(this, 'expression')">Ability to share opinions and ideas online without censorship</div>
+                            <div class="quiz-option" onclick="selectDescription(this, 'access')">Ability to use the internet and digital technologies</div>
+                            <div class="quiz-option" onclick="selectDescription(this, 'forget')">Request removal of personal information from online platforms</div>
+                        </div>
+                    </div>
+                    <button class="btn" onclick="checkRightsMatching()" style="margin-top: 12px;">Check Matching</button>
+                    <div id="rightsResult" class="result-box"></div>
+                </div>
+            </div>
+
+            <div class="activity">
+                <h4>⚖️ Digital Responsibility Scenarios</h4>
+                <p>What would you do in these situations that test digital responsibility?</p>
+                
+                <div class="scenario-card" id="responsibility1">
+                    <p><strong>Scenario 1:</strong> You find a funny meme that uses a photo of a classmate without their permission. Some students are sharing it and making fun of them.</p>
+                    <div style="margin-top: 12px;">
+                        <button class="btn" onclick="answerResponsibility(1, 'share')">Share it with more friends</button>
+                        <button class="btn alt" onclick="answerResponsibility(1, 'report')">Report it and tell an adult</button>
+                        <button class="btn" onclick="answerResponsibility(1, 'ignore')">Ignore it and do nothing</button>
+                    </div>
+                    <div id="responsibility1Result" class="result-box"></div>
+                </div>
+
+                <div class="scenario-card" id="responsibility2">
+                    <p><strong>Scenario 2:</strong> You need images for a school project and find the perfect ones on a website, but they're copyrighted.</p>
+                    <div style="margin-top: 12px;">
+                        <button class="btn" onclick="answerResponsibility(2, 'use')">Use them anyway for your project</button>
+                        <button class="btn alt" onclick="answerResponsibility(2, 'find')">Find royalty-free or Creative Commons images</button>
+                        <button class="btn" onclick="answerResponsibility(2, 'copy')">Copy them but change the colors</button>
+                    </div>
+                    <div id="responsibility2Result" class="result-box"></div>
+                </div>
+
+                <div class="scenario-card" id="responsibility3">
+                    <p><strong>Scenario 3:</strong> You discover a security vulnerability in a website that could let someone access user data.</p>
+                    <div style="margin-top: 12px;">
+                        <button class="btn" onclick="answerResponsibility(3, 'exploit')">Use it to see what you can access</button>
+                        <button class="btn alt" onclick="answerResponsibility(3, 'report')">Responsibly report it to the website owners</button>
+                        <button class="btn" onclick="answerResponsibility(3, 'ignore')">Ignore it and hope no one finds it</button>
+                    </div>
+                    <div id="responsibility3Result" class="result-box"></div>
+                </div>
+            </div>
+
+            <div class="activity">
+                <h4>🌐 Global Digital Citizenship</h4>
+                <p>The internet connects people across the world. What does it mean to be a good digital citizen globally?</p>
+                
+                <div class="scenario-card">
+                    <p><strong>Which of these is NOT a characteristic of a good digital citizen?</strong></p>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectQuiz(this, 4, 'A')">
+                            <strong>A)</strong> Respects cultural differences and diverse perspectives
+                        </div>
+                        <div class="quiz-option" onclick="selectQuiz(this, 4, 'B')">
+                            <strong>B)</strong> Shares information without verifying its accuracy
+                        </div>
+                        <div class="quiz-option" onclick="selectQuiz(this, 4, 'C')">
+                            <strong>C)</strong> Protects personal and others' private information
+                        </div>
+                        <div class="quiz-option" onclick="selectQuiz(this, 4, 'D')">
+                            <strong>D)</strong> Uses technology in ways that don't harm others
+                        </div>
+                    </div>
+                    <div id="quiz4Result" class="result-box"></div>
+                </div>
+            </div>
+
+            <details style="margin-top: 20px;">
+                <summary>🎯 Extension Project: Digital Citizenship Pledge</summary>
+                <div style="margin-top:12px">
+                    <p><strong>Create a Digital Citizenship Pledge that outlines your commitment to being a responsible digital citizen:</strong></p>
+                    <ol>
+                        <li>Include at least 5 promises about how you'll behave online</li>
+                        <li>Address privacy, respect, safety, and ethical behavior</li>
+                        <li>Design it to be shared with classmates or family</li>
+                        <li>Include ways you'll help others be better digital citizens</li>
+                    </ol>
+                </div>
+            </details>
+
+            <div style="text-align: center; margin-top: 24px;">
+                <button class="btn" onclick="completeModule(4)">Complete Module 4 → View Certificate</button>
+            </div>
+        </section>
+    </div>
+
+    <div id="completionMessage" class="completion-message">
+        <h3>🎉 Congratulations, Cyber Defender!</h3>
+        <p>You've completed all four modules of the Advanced Cybersecurity Training.</p>
+        <p>You're now equipped with knowledge to protect yourself and others online!</p>
+        <button class="btn" onclick="resetProgress()" style="margin-top: 16px;">Start Over</button>
+    </div>
+
+    <footer>
+        <p>Grade 7 Cyber Defenders Advanced Training © 2025 | Designed by Msebetsi Solutions PTY LTD </p>
+    </footer>
+
+    <script>
+        // Module navigation functionality
+        function showModule(moduleNumber) {
+            // Hide all module contents
+            document.querySelectorAll('.module-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.module-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected module content
+            document.getElementById('module' + moduleNumber).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // Update progress tracker
+            updateProgressTracker(moduleNumber);
+        }
+
+        function updateProgressTracker(currentModule) {
+            const steps = document.querySelectorAll('.step-circle');
+            
+            steps.forEach((step, index) => {
+                step.classList.remove('completed', 'active');
+                
+                if (index + 1 < currentModule) {
+                    step.classList.add('completed');
+                } else if (index + 1 === currentModule) {
+                    step.classList.add('active');
+                }
+            });
+        }
+
+        // Module completion functionality
+        function completeModule(moduleNumber) {
+            if (moduleNumber < 4) {
+                showModule(moduleNumber + 1);
+            } else {
+                // Show completion message for final module
+                document.getElementById('completionMessage').classList.add('show');
+                document.querySelector('footer').style.marginTop = '0';
+            }
+        }
+
+        function resetProgress() {
+            document.getElementById('completionMessage').classList.remove('show');
+            showModule(1);
+            document.querySelector('footer').style.marginTop = '40px';
+        }
+
+        // Interactive activities for Module 1
+        function checkPrivacy() {
+            const select = document.getElementById('privacyQ1');
+            const result = document.getElementById('privacyResult');
+            
+            if (select.value === 'correct') {
+                result.innerHTML = '<p style="color: var(--accent1);">✅ Correct! This means the company can share your data with other companies, often for advertising purposes.</p>';
+            } else if (select.value) {
+                result.innerHTML = '<p style="color: var(--accent4);">❌ Not quite. This statement typically means the company can share your data with other companies.</p>';
+            } else {
+                result.innerHTML = '<p style="color: var(--accent3);">Please select an answer.</p>';
+            }
+            
+            result.classList.add('show');
+        }
+
+        function analyzeTracking() {
+            const textarea = document.getElementById('dataTracking');
+            const result = document.getElementById('trackingResult');
+            
+            if (textarea.value.trim().length > 0) {
+                result.innerHTML = `
+                    <p style="color: var(--accent1);">✅ Great analysis! Here's what you discovered:</p>
+                    <ul>
+                        <li>Most apps collect more data than you might realize</li>
+                        <li>Location, contacts, and browsing history are commonly tracked</li>
+                        <li>This data is used for personalized ads and recommendations</li>
+                    </ul>
+                    <p><strong>Tip:</strong> Regularly review app permissions in your device settings!</p>
+                `;
+            } else {
+                result.innerHTML = '<p style="color: var(--accent3);">Please list some apps and the data they might collect.</p>';
+            }
+            
+            result.classList.add('show');
+        }
+
+        function cookieChoice(choice) {
+            const result = document.getElementById('cookieResult');
+            
+            if (choice === 'customize') {
+                result.innerHTML = '<p style="color: var(--accent1);">✅ Smart choice! Always customize cookie settings to only allow necessary cookies. This protects your privacy while still allowing the website to function.</p>';
+            } else if (choice === 'reject') {
+                result.innerHTML = '<p style="color: var(--accent3);">⚠️ This might break some website functionality. Consider customizing instead to allow essential cookies only.</p>';
+            } else {
+                result.innerHTML = '<p style="color: var(--accent4);">❌ Not recommended! Accepting all cookies allows extensive tracking of your online behavior.</p>';
+            }
+            
+            result.classList.add('show');
+        }
+
+        // Interactive activities for Module 2
+        function checkPhishingFlags() {
+            const flags = [
+                document.getElementById('flag1'),
+                document.getElementById('flag2'),
+                document.getElementById('flag3'),
+                document.getElementById('flag4'),
+                document.getElementById('flag5'),
+                document.getElementById('flag6')
+            ];
+            
+            const result = document.getElementById('phishingResult');
+            let correctFlags = 0;
+            let totalFlags = 0;
+            
+            // Check which flags should be selected
+            const correctSelections = [true, true, true, true, true, false]; // Last one is false (no poor grammar in this example)
+            
+            flags.forEach((flag, index) => {
+                if (correctSelections[index]) totalFlags++;
+                if (flag.checked === correctSelections[index] && correctSelections[index]) {
+                    correctFlags++;
+                }
+            });
+            
+            if (correctFlags === totalFlags) {
+                result.innerHTML = '<p style="color: var(--accent1);">✅ Excellent! You spotted all the red flags. This email has multiple signs of being a phishing attempt.</p>';
+            } else {
+                result.innerHTML = `<p style="color: var(--accent3);">You found ${correctFlags} out of ${totalFlags} red flags. Look for: suspicious sender, urgency, threats, generic greeting, and suspicious links.</p>`;
+            }
+            
+            result.classList.add('show');
+        }
+
+        function inspectLink() {
+            const linkInput = document.getElementById('linkInput');
+            const result = document.getElementById('linkResult');
+            
+            if (!linkInput.value) {
+                result.innerHTML = '<p style="color: var(--accent3);">Please enter a URL to analyze.</p>';
+                result.classList.add('show');
+                return;
+            }
+            
+            const url = linkInput.value.toLowerCase();
+            let analysis = '';
+            let riskLevel = 'low';
+            
+            if (url.includes('paypa1') || url.includes('paypaI')) {
+                analysis += '❌ <strong>Misspelled domain:</strong> "paypa1" instead of "paypal" is a common trick.<br>';
+                riskLevel = 'high';
+            }
+            
+            if (url.includes('.tk') || url.includes('.ml') || url.includes('.ga')) {
+                analysis += '❌ <strong>Suspicious domain extension:</strong> .tk, .ml, and .ga are free domains often used by scammers.<br>';
+                riskLevel = 'high';
+            }
+            
+            if (!url.startsWith('https://')) {
+                analysis += '⚠️ <strong>No HTTPS:</strong> Legitimate sites usually use HTTPS for security.<br>';
+                if (riskLevel !== 'high') riskLevel = 'medium';
+            }
+            
+            if (url.includes('secure-login') || url.includes('verify-account')) {
+                analysis += '⚠️ <strong>Suspicious subdomain:</strong> Scammers often use words like "secure" or "verify" to seem legitimate.<br>';
+                if (riskLevel !== 'high') riskLevel = 'medium';
+            }
+            
+            if (analysis === '') {
+                analysis = '✅ This URL looks safe based on the basic checks. Remember to always be cautious with links from unknown sources.';
+            } else {
+                analysis = '<p><strong>Analysis Results:</strong></p>' + analysis;
+            }
+            
+            result.innerHTML = analysis;
+            result.classList.add('show');
+        }
+
+        function answerScenario(scenarioNum, choice) {
+            const result = document.getElementById(`scenario${scenarioNum}Result`);
+            
+            const correctAnswers = {
+                1: 'refuse',
+                2: 'ignore',
+                3: 'report'
+            };
+            
+            const explanations = {
+                1: {
+                    'give': '❌ Never give your password to anyone, even if they claim to be from IT. Legitimate IT staff will never ask for your password.',
+                    'refuse': '✅ Correct! Always verify the identity of anyone asking for sensitive information. Contact the IT department directly using a known phone number or email.',
+                    'change': '❌ Even if you change it later, giving out your password puts your account at immediate risk.'
+                },
+                2: {
+                    'click': '❌ Dangerous! This is a common scam. Never click links in unsolicited messages.',
+                    'ignore': '✅ Correct! Delete suspicious messages offering free prizes. If it seems too good to be true, it probably is.',
+                    'forward': '❌ Forwarding scams to friends helps spread them and puts others at risk.'
+                },
+                3: {
+                    'share': '❌ Never share login information! This is a common scam to steal accounts.',
+                    'report': '✅ Correct! Report suspicious users offering "free" items for login information. This helps protect others.',
+                    'ask': '❌ Engaging with scammers can put you at risk. Better to report and block them.'
+                }
+            };
+            
+            result.innerHTML = explanations[scenarioNum][choice];
+            result.classList.add('show');
+        }
+
+        // Quiz functionality
+        function selectQuiz(element, quizNum, answer) {
+            // Remove selected class from all options in this quiz
+            const parent = element.parentElement;
+            parent.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            element.classList.add('selected');
+            
+            // Check answer
+            const result = document.getElementById(`quiz${quizNum}Result`);
+            const correctAnswers = {
+                1: 'A',
+                3: 'C',
+                4: 'B'
+            };
+            
+            if (answer === correctAnswers[quizNum]) {
+                result.innerHTML = `<p style="color: var(--accent1);">✅ Correct! ${getQuizExplanation(quizNum, answer)}</p>`;
+            } else {
+                result.innerHTML = `<p style="color: var(--accent4);">❌ Not quite. ${getQuizExplanation(quizNum, correctAnswers[quizNum])}</p>`;
+            }
+            
+            result.classList.add('show');
+        }
+
+        function getQuizExplanation(quizNum, answer) {
+            const explanations = {
+                1: {
+                    'A': 'Free services often make money by collecting and selling user data.',
+                    'B': 'Many apps collect data without explicit permission in their terms of service.',
+                    'C': 'Companies often keep data even after you delete an app.',
+                    'D': 'Private browsing only prevents saving history locally; websites can still track you.'
+                },
+                3: {
+                    'A': 'That describes symmetric encryption, not public key encryption.',
+                    'B': 'Your private key should never be shared with anyone.',
+                    'C': 'Correct! Public keys encrypt, private keys decrypt in asymmetric encryption.',
+                    'D': 'Public key encryption is actually more secure for certain applications.'
+                },
+                4: {
+                    'A': 'Respecting cultural differences is important for global digital citizenship.',
+                    'B': 'Correct! Good digital citizens verify information before sharing it.',
+                    'C': 'Protecting private information is a key responsibility.',
+                    'D': 'Avoiding harm to others is fundamental to digital citizenship.'
+                }
+            };
+            
+            return explanations[quizNum][answer];
+        }
+
+        // Module 3 activities
+        function checkCipher() {
+            const input = document.getElementById('cipherInput').value.toUpperCase();
+            const result = document.getElementById('cipherResult');
+            
+            if (input === 'FDEHU GHIHQGHU') {
+                result.innerHTML = '<p style="color: var(--accent1);">✅ Correct! "CYBER DEFENDER" encrypted with a shift of 3 becomes "FDEHU GHIHQGHU".</p>';
+            } else if (input) {
+                result.innerHTML = '<p style="color: var(--accent4);">❌ Not quite. Remember: C→F, Y→B, B→E, E→H, R→U, etc.</p>';
+            } else {
+                result.innerHTML = '<p style="color: var(--accent3);">Please enter your encrypted message.</p>';
+            }
+            
+            result.classList.add('show');
+        }
+
+        function checkDecryption() {
+            const input = document.getElementById('decryptInput').value.toUpperCase();
+            const result = document.getElementById('decryptResult');
+            
+            if (input === 'CYBER DEFENDER') {
+                result.innerHTML = '<p style="color: var(--accent1);">✅ Correct! "FDEHU GHIHQGHU" decrypted with a shift of 3 becomes "CYBER DEFENDER".</p>';
+            } else if (input) {
+                result.innerHTML = '<p style="color: var(--accent4);">❌ Not quite. Remember: F→C, D→A, E→B, H→E, U→R, etc.</p>';
+            } else {
+                result.innerHTML = '<p style="color: var(--accent3);">Please enter the decrypted message.</p>';
+            }
+            
+            result.classList.add('show');
+        }
+
+        function checkSubstitution() {
+            const input = document.getElementById('substitutionInput').value.toUpperCase();
+            const result = document.getElementById('substitutionResult');
+            
+            if (input === 'A B C D E F') {
+                result.innerHTML = '<p style="color: var(--accent1);">✅ Correct! The message "X Y Z A B C" decrypts to "A B C D E F" using this substitution cipher.</p>';
+            } else if (input) {
+                result.innerHTML = '<p style="color: var(--accent4);">❌ Not quite. Check the substitution key again: X=A, Y=B, Z=C, A=D, B=E, C=F.</p>';
+            } else {
+                result.innerHTML = '<p style="color: var(--accent3);">Please enter the decrypted message.</p>';
+            }
+            
+            result.classList.add('show');
+        }
+
+        // Module 4 activities
+        let selectedRight = null;
+        let selectedDescription = null;
+
+        function selectRight(element, right) {
+            // Remove selected class from all rights
+            document.querySelectorAll('.scenario-card .quiz-option').forEach(opt => {
+                if (opt.parentElement.parentElement.children[0].contains(opt)) {
+                    opt.classList.remove('selected');
+                }
+            });
+            
+            // Add selected class to clicked right
+            element.classList.add('selected');
+            selectedRight = right;
+        }
+
+        function selectDescription(element, description) {
+            // Remove selected class from all descriptions
+            document.querySelectorAll('.scenario-card .quiz-option').forEach(opt => {
+                if (opt.parentElement.parentElement.children[1].contains(opt)) {
+                    opt.classList.remove('selected');
+                }
+            });
+            
+            // Add selected class to clicked description
+            element.classList.add('selected');
+            selectedDescription = description;
+        }
+
+        function checkRightsMatching() {
+            const result = document.getElementById('rightsResult');
+            
+            if (!selectedRight || !selectedDescription) {
+                result.innerHTML = '<p style="color: var(--accent3);">Please select one right and one description to match.</p>';
+            } else if (selectedRight === selectedDescription) {
+                result.innerHTML = '<p style="color: var(--accent1);">✅ Correct match! You correctly connected the digital right with its description.</p>';
+            } else {
+                result.innerHTML = '<p style="color: var(--accent4);">❌ These don\'t match. Try again!</p>';
+            }
+            
+            result.classList.add('show');
+        }
+
+        function answerResponsibility(scenarioNum, choice) {
+            const result = document.getElementById(`responsibility${scenarioNum}Result`);
+            
+            const correctAnswers = {
+                1: 'report',
+                2: 'find',
+                3: 'report'
+            };
+            
+            const explanations = {
+                1: {
+                    'share': '❌ Sharing the meme would contribute to cyberbullying and could seriously hurt your classmate.',
+                    'report': '✅ Correct! Cyberbullying is never okay. Reporting it helps protect your classmate and creates a safer environment for everyone.',
+                    'ignore': '❌ While not actively harmful, ignoring cyberbullying allows it to continue. Taking action helps stop it.'
+                },
+                2: {
+                    'use': '❌ Using copyrighted images without permission violates intellectual property laws.',
+                    'find': '✅ Correct! Using royalty-free or Creative Commons images respects creators\' rights while still getting great content for your project.',
+                    'copy': '❌ Modifying copyrighted images doesn\'t make them legal to use without permission.'
+                },
+                3: {
+                    'exploit': '❌ Exploiting security vulnerabilities is illegal and unethical, even if you\'re just curious.',
+                    'report': '✅ Correct! Responsible disclosure helps companies fix security issues before malicious actors can exploit them.',
+                    'ignore': '❌ Ignoring security vulnerabilities leaves users at risk. Responsible reporting helps protect everyone.'
+                }
+            };
+            
+            result.innerHTML = explanations[scenarioNum][choice];
+            result.classList.add('show');
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgressTracker(1);
+        });
+    </script>
+</body>
+</html>
