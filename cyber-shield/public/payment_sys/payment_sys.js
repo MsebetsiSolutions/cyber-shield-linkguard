@@ -101,7 +101,7 @@ async function handleLogout() {
   sessionStorage.clear();
   localStorage.removeItem('selectedPlan');
   toast('Signed out successfully');
-  setTimeout(() => (window.location.href = '../index.html'), 1000);
+  setTimeout(() => (window.location.href = '../'), 1000);
 }
 
 if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
@@ -281,14 +281,14 @@ async function boot() {
         setUserUI(userData);
         sessionStorage.setItem('userEmail', userData.email);
   displaySelectedPlan();
-  await initYocoInline(); // ✅ initialize inline Yoco card form
+  await initYocoInline(); 
         return;
       }
     }
-    window.location.href = '../index.html';
+    window.location.href = '../';
   } catch (e) {
     console.error('Auth fetch failed', e);
-    window.location.href = '../index.html';
+    window.location.href = '../';
   }
 }
 

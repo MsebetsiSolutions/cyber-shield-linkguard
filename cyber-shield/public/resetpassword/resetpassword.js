@@ -240,7 +240,7 @@ $("doReset").addEventListener("click", async () => {
 
     // Redirect to home page after success
     setTimeout(() => {
-      window.location.href = "../index.html";
+      window.location.href = "../";
     }, 2000);
   } catch (error) {
     console.error("Reset password error:", error);
@@ -316,7 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
     $("doReset").disabled = true;
     
     setTimeout(() => {
-      window.location.href = "../index.html";
+      window.location.href = "../";
     }, 3000);
     return;
   }

@@ -198,8 +198,8 @@ class SecureConsole {
         this.isLoggedIn = false;
         const sessionId = window.CyberShieldSession?.getCurrentSessionId();
         const redirectUrl = sessionId
-          ? `../index.html?session=${sessionId}`
-          : "../index.html";
+          ? `../?session=${sessionId}`
+          : "../";
         window.location.href = redirectUrl;
       });
     }

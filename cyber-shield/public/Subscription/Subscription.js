@@ -209,7 +209,7 @@ async function handleLogout() {
   toast("Signed out successfully");
 
   setTimeout(() => {
-    window.location.href = "../index.html";
+    window.location.href = "../";
   }, 1000);
 }
 
@@ -363,16 +363,16 @@ document.querySelectorAll('.plan-card').forEach(card => {
         return;
       } else {
         console.log("User not authenticated, redirecting to login");
-        window.location.href = "../index.html";
+        window.location.href = "../";
         return;
       }
     } else {
       console.log("Auth check failed, redirecting to login");
-      window.location.href = "../index.html";
+      window.location.href = "../";
       return;
     }
   } catch (error) {
     console.error("Error initializing subscription page:", error);
-    window.location.href = "../index.html";
+    window.location.href = "../";
   }
 })();
