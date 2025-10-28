@@ -184,7 +184,7 @@ async function loadProfile() {
             <p>Redirecting to login page...</p>
           </div>
         `;
-        setTimeout(() => window.location.href = "../index.html", 1500);
+        setTimeout(() => window.location.href = "../", 1500);
       }
     } else if (res.status === 401) {
       $("profileCard").innerHTML = `
@@ -194,7 +194,7 @@ async function loadProfile() {
           <p>Redirecting to login page...</p>
         </div>
       `;
-      setTimeout(() => window.location.href = "../index.html", 1500);
+      setTimeout(() => window.location.href = "../", 1500);
     } else {
       const err = await res.json();
       $("profileCard").innerHTML = `

@@ -371,7 +371,7 @@ async function handleLogout() {
     
     // Redirect to login page without session ID
     setTimeout(() => {
-        window.location.href = '../index.html';
+        window.location.href = '../';
     }, 1000);
 }
 
@@ -658,17 +658,17 @@ async function checkAuthenticationWithSession() {
                 return userData;
             } else {
                 console.log('User not authenticated via Flask session, redirecting to index');
-                window.location.href = '../index.html';
+                window.location.href = '../';
                 return false;
             }
         } else {
             console.log('Auth check failed, redirecting to index');
-            window.location.href = '../index.html';
+            window.location.href = '../';
             return false;
         }
     } catch(e) {
         console.error('Authentication check failed:', e);
-        window.location.href = '../index.html';
+        window.location.href = '../';
         return false;
     }
 }
@@ -1452,7 +1452,7 @@ document.addEventListener('DOMContentLoaded', function() {
         sessionStorage.removeItem('cyberShieldSession');
         sessionStorage.removeItem('userData');
         sessionStorage.removeItem('plan_mode');
-        window.location.href = '../index.html';
+        window.location.href = '../';
     }
 })();
 
@@ -1466,7 +1466,7 @@ document.addEventListener('visibilitychange', function() {
                 if (!isValid) {
                     console.log('Session invalid on page visibility, redirecting...');
                     sessionStorage.removeItem('cyberShieldSession');
-                    window.location.href = '../index.html';
+                    window.location.href = '../';
                 }
             });
         }

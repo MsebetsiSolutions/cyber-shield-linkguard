@@ -119,7 +119,7 @@ async function handleLogout() {
     
     // Redirect to login page
     setTimeout(() => {
-        window.location.href = '../index.html';
+        window.location.href = '../';
     }, 1000);
 }
 
@@ -1789,13 +1789,13 @@ function initBackgroundCheck() {
       } else {
         console.log('User not authenticated, redirecting to login');
         sessionStorage.removeItem('plan_mode');
-        window.location.href = '../index.html';
+        window.location.href = '../';
         return;
       }
     } else {
       console.log('Auth check failed, redirecting to login');
       sessionStorage.removeItem('plan_mode');
-      window.location.href = '../index.html';
+      window.location.href = '../';
       return;
     }
   } catch(e) {

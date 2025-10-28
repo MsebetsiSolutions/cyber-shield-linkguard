@@ -81,7 +81,7 @@ function handleLogout() {
   setUserUI(null); 
   toast('Signed out');
   setTimeout(() => {
-    window.location.href = '../../index.html';
+    window.location.href = '../../';
   }, 1000);
 }
 

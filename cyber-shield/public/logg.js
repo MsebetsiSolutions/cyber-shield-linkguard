@@ -131,6 +131,24 @@ function initCybersmartSlider() {
   }
 }
 
+// Background Text Animation
+function initBackgroundTextAnimation() {
+  const backgroundContainer = document.querySelector('.background-container');
+  if (backgroundContainer && window.getComputedStyle(backgroundContainer).display !== 'none') {
+    const text = "Scan every link, file, and QR code with LinkGuard, your AI-powered security companion. Instantly detect phishing, malware, and hidden threats before they reach you. With privacy-first design and real-time protection, LinkGuard keeps your digital world safe, giving you the confidence to browse, share, and click freely. Also with an integrated learning hub, available from grade R.";
+
+    backgroundContainer.innerHTML = '';
+
+    for (let i = 0; i < 5; i++) {
+      const textElement = document.createElement('div');
+      textElement.className = 'background-text';
+      textElement.textContent = text;
+      textElement.style.animationDelay = `${i * 5}s`;
+      backgroundContainer.appendChild(textElement);
+    }
+  }
+}
+
 // Modal Management
 function openModal(modalId) {
   const modal = $(modalId);
@@ -475,14 +493,12 @@ function setupEventListeners() {
     });
   });
 
-  // Prevent form submission on enter in forms
   document.querySelectorAll("form").forEach((form) => {
     form.addEventListener("submit", (e) => {
       e.preventDefault();
     });
   });
 
-  // Mobile mode dropdown 
   setupMobileDropdown();
   setupSimulatorSignup();
 }
@@ -495,6 +511,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   initTypewriter();
   initCybersmartSlider();
+  initBackgroundTextAnimation(); 
   setupPasswordToggle("togglePassword", "loginPass");
   initAOS();
   setupEventListeners();
