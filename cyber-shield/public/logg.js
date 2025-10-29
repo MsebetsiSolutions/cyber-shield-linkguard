@@ -520,3 +520,4 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("User already logged in with access token");
   }
 });
+
