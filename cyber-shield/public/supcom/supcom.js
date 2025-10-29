@@ -1212,7 +1212,7 @@ document.addEventListener("DOMContentLoaded", function () {
         welcomeForm.style.display = "flex";
         updateMemberCount();
       } else {
-        window.location.href = "/index.html";
+        window.location.href = "/";
       }
     } catch (error) {
       console.error("Error initializing page:", error);

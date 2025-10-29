@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
     currentChannel: null,
     currentDMUser: null,
     conversations: new Map(),
-    unreadMessages: new Map() // Track unread messages
+    unreadMessages: new Map(), // Track unread messages
   };
 
   // Elements
@@ -16,7 +16,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const dashboardContent = document.getElementById("dashboard-content");
   const channelChat = document.getElementById("channel-chat");
   const dmChat = document.getElementById("dm-chat");
-  const teamManagementContent = document.getElementById("team-management-content");
+  const teamManagementContent = document.getElementById(
+    "team-management-content"
+  );
   const membersSidebar = document.getElementById("members-sidebar");
 
   // Initialize the application
@@ -28,12 +30,15 @@ document.addEventListener("DOMContentLoaded", function () {
       await loadUserTeams();
       setupEventListeners();
       updateDashboardStats();
-      
+
       // Start polling for new messages (every 30 seconds)
       setInterval(pollForNewMessages, 30000);
     } catch (error) {
       console.error("Initialization error:", error);
-      showNotification("Error initializing application. Please refresh the page.", "error");
+      showNotification(
+        "Error initializing application. Please refresh the page.",
+        "error"
+      );
     }
   }
 
@@ -41,57 +46,71 @@ document.addEventListener("DOMContentLoaded", function () {
   async function fetchUserInfo() {
     try {
       console.log("Fetching user info...");
-      
+
       // Add a small delay to ensure the page is fully loaded
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      const response = await fetch('/api/auth/me', {
-        method: 'GET',
-        credentials: 'include', // Ensure cookies are sent
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const response = await fetch("/api/auth/me", {
+        method: "GET",
+        credentials: "include", // Ensure cookies are sent
         headers: {
-          'Content-Type': 'application/json',
-        }
+          "Content-Type": "application/json",
+        },
       });
-      
+
       if (response.status === 401) {
-        console.log('User not authenticated, redirecting to login');
-        window.location.href = '../index.html';
+        console.log("User not authenticated, redirecting to login");
+        window.location.href = "../";
         return;
       }
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const userData = await response.json();
-      
+
       if (userData.authenticated) {
         currentState.user = userData.user;
-        
+
         // Display user's initials in the avatar
         const initials = getInitials(userData.user.full_name);
-        document.getElementById('user-avatar').textContent = initials;
-        
+        document.getElementById("user-avatar").textContent = initials;
+
         // Update dropdown info
-        document.getElementById('dropdown-user-name').textContent = userData.user.full_name;
-        document.getElementById('dropdown-user-email').textContent = userData.user.email;
-        
+        document.getElementById("dropdown-user-name").textContent =
+          userData.user.full_name;
+        document.getElementById("dropdown-user-email").textContent =
+          userData.user.email;
+
         console.log("User info loaded successfully");
       } else {
-        console.log('User not authenticated, redirecting to login');
-        window.location.href = '../index.html';
+        console.log("User not authenticated, redirecting to login");
+        window.location.href = "../";
       }
     } catch (error) {
-      console.error('Error fetching user info:', error);
-      
+      console.error("Error fetching user info:", error);
+
       // More specific error handling
-      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-        showNotification('Network error. Please check your internet connection and try again.', 'error');
-      } else if (error.message.includes('HTTP error')) {
-        showNotification('Server error. Please try again in a few moments.', 'error');
+      if (
+        error.name === "TypeError" &&
+        error.message.includes("Failed to fetch")
+      ) {
+        showNotification(
+          "Network error. Please check your internet connection and try again.",
+          "error"
+        );
+      } else if (error.message.includes("HTTP error")) {
+        showNotification(
+          "Server error. Please try again in a few moments.",
+          "error"
+        );
       } else {
         // Don't redirect immediately for network errors
-        showNotification('Unable to verify authentication. Please check your connection.', 'warning');
+        showNotification(
+          "Unable to verify authentication. Please check your connection.",
+          "warning"
+        );
       }
     }
   }
@@ -99,16 +118,16 @@ document.addEventListener("DOMContentLoaded", function () {
   // Load user's teams and channels with retry logic
   async function loadUserTeams() {
     let retries = 3;
-    
+
     while (retries > 0) {
       try {
         const response = await fetch("/api/user/teams", {
-          credentials: 'include'
+          credentials: "include",
         });
-        
+
         if (!response.ok) {
           if (response.status === 401) {
-            window.location.href = '../index.html';
+            window.location.href = "../";
             return;
           }
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -121,17 +140,20 @@ document.addEventListener("DOMContentLoaded", function () {
         updateTeamsUI();
         updateChannelsList();
         updateDMsList();
-        
+
         return; // Success, exit the retry loop
       } catch (error) {
         retries--;
         console.error(`Error loading teams (${retries} retries left):`, error);
-        
+
         if (retries === 0) {
-          showNotification("Error loading teams. Please refresh the page.", "error");
+          showNotification(
+            "Error loading teams. Please refresh the page.",
+            "error"
+          );
         } else {
           // Wait before retrying
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       }
     }
@@ -140,13 +162,13 @@ document.addEventListener("DOMContentLoaded", function () {
   // Poll for new messages
   async function pollForNewMessages() {
     if (!currentState.user) return;
-    
+
     try {
       // Check for new messages in current channel
       if (currentState.currentChannel) {
         await loadChannelMessages(currentState.currentChannel.id, true);
       }
-      
+
       // Check for new direct messages
       if (currentState.currentDMUser) {
         await loadDirectMessages(currentState.currentDMUser.id, true);
@@ -249,11 +271,11 @@ document.addEventListener("DOMContentLoaded", function () {
     document
       .getElementById("channel-members-toggle")
       .addEventListener("click", toggleMembersSidebar);
-      
+
     // Logout functionality
-    const logoutBtn = document.querySelector('.logout');
+    const logoutBtn = document.querySelector(".logout");
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', function(e) {
+      logoutBtn.addEventListener("click", function (e) {
         e.preventDefault();
         logoutUser();
       });
@@ -276,44 +298,44 @@ document.addEventListener("DOMContentLoaded", function () {
   // Logout user
   async function logoutUser() {
     try {
-        // Get current session ID before clearing
-        const currentSessionId = window.CyberShieldSession?.getCurrentSessionId();
-        
-        // Call server logout to invalidate sessions
-        const logoutResponse = await fetch('/api/auth/logout', {
-            method: 'POST',
-            credentials: 'include'
-        });
-        
-        if (logoutResponse.ok) {
-            console.log('Logout successful');
-            
-            // Invalidate server-side sessions
-            if (currentSessionId) {
-                await fetch('/api/session/invalidate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({})
-                });
-            }
+      // Get current session ID before clearing
+      const currentSessionId = window.CyberShieldSession?.getCurrentSessionId();
+
+      // Call server logout to invalidate sessions
+      const logoutResponse = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (logoutResponse.ok) {
+        console.log("Logout successful");
+
+        // Invalidate server-side sessions
+        if (currentSessionId) {
+          await fetch("/api/session/invalidate", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({}),
+          });
         }
+      }
     } catch (error) {
-        console.log('Logout failed, proceeding with client');
+      console.log("Logout failed, proceeding with client");
     }
-    
+
     // Clear client-side data
     currentState.user = null;
-    
+
     // Clear session storage
-    sessionStorage.removeItem('cyberShieldSession');
-    sessionStorage.removeItem('userData');
-    sessionStorage.removeItem('plan_mode');
-    
+    sessionStorage.removeItem("cyberShieldSession");
+    sessionStorage.removeItem("userData");
+    sessionStorage.removeItem("plan_mode");
+
     // Redirect to login page without session ID
-    window.location.href = '../index.html';
-}
+    window.location.href = "../";
+  }
 
   // Tab switching functionality
   function switchTab(tabName) {
@@ -418,36 +440,35 @@ document.addEventListener("DOMContentLoaded", function () {
 
   async function createTeam(e) {
     e.preventDefault();
-    
+
     const formData = new FormData(e.target);
     const teamData = {
-        name: formData.get('name'),
-        description: formData.get('description')
+      name: formData.get("name"),
+      description: formData.get("description"),
     };
 
     try {
-        const response = await fetch('/api/teams', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(teamData)
-        });
+      const response = await fetch("/api/teams", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(teamData),
+      });
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error);
-        }
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error);
+      }
 
-        const result = await response.json();
-        showNotification('Team created successfully!', 'success');
-        document.getElementById('create-team-modal').style.display = 'none'; 
-        e.target.reset();
-        
-        // Reload teams
-        await loadUserTeams();
-        switchTab('team-management');
-        
+      const result = await response.json();
+      showNotification("Team created successfully!", "success");
+      document.getElementById("create-team-modal").style.display = "none";
+      e.target.reset();
+
+      // Reload teams
+      await loadUserTeams();
+      switchTab("team-management");
     } catch (error) {
-        showNotification(error.message, 'error');
+      showNotification(error.message, "error");
     }
   }
 
@@ -713,12 +734,12 @@ document.addEventListener("DOMContentLoaded", function () {
   async function loadChannelMessages(channelId, isPolling = false) {
     try {
       const response = await fetch(`/api/messages/channel/${channelId}`, {
-        credentials: 'include'
+        credentials: "include",
       });
-      
+
       if (!response.ok) {
         if (response.status === 401) {
-          window.location.href = '../index.html';
+          window.location.href = "../";
           return;
         }
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -726,7 +747,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const data = await response.json();
       displayChannelMessages(data.messages);
-      
+
       // Update unread count badge if polling
       if (isPolling && !isChannelActive()) {
         updateChannelBadge(channelId, data.messages.length);
@@ -742,12 +763,12 @@ document.addEventListener("DOMContentLoaded", function () {
   async function loadDirectMessages(userId, isPolling = false) {
     try {
       const response = await fetch(`/api/messages/direct/${userId}`, {
-        credentials: 'include'
+        credentials: "include",
       });
-      
+
       if (!response.ok) {
         if (response.status === 401) {
-          window.location.href = '../index.html';
+          window.location.href = "../";
           return;
         }
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -755,10 +776,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const data = await response.json();
       displayDirectMessages(data.messages);
-      
-      // Update unread count badge if polling (for DMs, you might want a different approach)
+
       if (isPolling && !isDMActive()) {
-        // You could implement DM badge updates here
       }
     } catch (error) {
       console.error("Error loading DM messages:", error);
@@ -770,31 +789,39 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Check if channel is currently active (visible)
   function isChannelActive() {
-    return channelChat.classList.contains('active') && 
-           document.querySelector('[data-tab="channels"]').classList.contains('active');
+    return (
+      channelChat.classList.contains("active") &&
+      document
+        .querySelector('[data-tab="channels"]')
+        .classList.contains("active")
+    );
   }
 
   // Check if DM is currently active (visible)
   function isDMActive() {
-    return dmChat.classList.contains('active') && 
-           document.querySelector('[data-tab="direct-messages"]').classList.contains('active');
+    return (
+      dmChat.classList.contains("active") &&
+      document
+        .querySelector('[data-tab="direct-messages"]')
+        .classList.contains("active")
+    );
   }
 
   // Update channel badge with unread count
   function updateChannelBadge(channelId, messageCount) {
-    const channelItem = document.querySelector(`[data-channel-id="${channelId}"]`);
+    const channelItem = document.querySelector(
+      `[data-channel-id="${channelId}"]`
+    );
     if (channelItem) {
-      // Remove existing badge
-      const existingBadge = channelItem.querySelector('.unread-badge');
+      const existingBadge = channelItem.querySelector(".unread-badge");
       if (existingBadge) {
         existingBadge.remove();
       }
-      
-      // Add new badge if there are unread messages
+
       if (messageCount > 0) {
-        const badge = document.createElement('span');
-        badge.className = 'unread-badge badge bg-danger';
-        badge.textContent = messageCount > 99 ? '99+' : messageCount;
+        const badge = document.createElement("span");
+        badge.className = "unread-badge badge bg-danger";
+        badge.textContent = messageCount > 99 ? "99+" : messageCount;
         channelItem.appendChild(badge);
       }
     }
@@ -946,7 +973,6 @@ document.addEventListener("DOMContentLoaded", function () {
       )
       .join("");
 
-    // Add click listeners
     container.querySelectorAll(".channel-item").forEach((item) => {
       item.addEventListener("click", function () {
         const channelId = parseInt(this.getAttribute("data-channel-id"));
@@ -957,7 +983,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function updateDMsList() {
-    // This would typically load from recent conversations
     const container = document.getElementById("dm-list");
     container.innerHTML =
       '<li class="dm-item">Click + to start a conversation</li>';
@@ -974,7 +999,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("stat-channels").textContent =
       currentState.channels.length;
     document.getElementById("stat-members").textContent = totalMembers;
-    document.getElementById("stat-messages").textContent = "0"; // Would need message count API
+    document.getElementById("stat-messages").textContent = "0";
   }
 
   function showChannel(channelId) {
@@ -989,16 +1014,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Show channel chat
     switchTab("channels");
-
-    // Load messages
     loadChannelMessages(channelId);
-
-    // Load members (simplified - would need API endpoint)
     updateChannelMembers(channel);
   }
 
   function updateChannelMembers(channel) {
-    // Simplified - in real app, you'd fetch channel members
     const membersContainer = document.getElementById("members-list");
     const team = currentState.teams.find((t) =>
       t.channels.some((c) => c.id === channel.id)
@@ -1056,11 +1076,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function showNotification(message, type = "info") {
     // Create Bootstrap toast notification
-    const toastContainer = document.getElementById('toast-container') || createToastContainer();
-    
-    const toastId = 'toast-' + Date.now();
+    const toastContainer =
+      document.getElementById("toast-container") || createToastContainer();
+
+    const toastId = "toast-" + Date.now();
     const toastHtml = `
-      <div id="${toastId}" class="toast align-items-center text-bg-${type === 'error' ? 'danger' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'primary'} border-0" role="alert">
+      <div id="${toastId}" class="toast align-items-center text-bg-${
+      type === "error"
+        ? "danger"
+        : type === "success"
+        ? "success"
+        : type === "warning"
+        ? "warning"
+        : "primary"
+    } border-0" role="alert">
         <div class="d-flex">
           <div class="toast-body">
             ${message}
@@ -1069,26 +1098,23 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
       </div>
     `;
-    
+
     toastContainer.innerHTML += toastHtml;
-    
+
     const toastElement = document.getElementById(toastId);
-    
-    // Use Bootstrap Toast if available, otherwise fallback to basic notification
-    if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+
+    if (typeof bootstrap !== "undefined" && bootstrap.Toast) {
       const toast = new bootstrap.Toast(toastElement, {
         autohide: true,
-        delay: 5000
+        delay: 5000,
       });
       toast.show();
-      
-      // Remove toast from DOM after it's hidden
-      toastElement.addEventListener('hidden.bs.toast', () => {
+
+      toastElement.addEventListener("hidden.bs.toast", () => {
         toastElement.remove();
       });
     } else {
-      // Fallback: basic notification without Bootstrap
-      toastElement.style.display = 'block';
+      toastElement.style.display = "block";
       setTimeout(() => {
         if (toastElement.parentElement) {
           toastElement.remove();
@@ -1098,22 +1124,20 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function createToastContainer() {
-    const container = document.createElement('div');
-    container.id = 'toast-container';
-    container.className = 'toast-container position-fixed top-0 end-0 p-3';
-    container.style.zIndex = '9999';
+    const container = document.createElement("div");
+    container.id = "toast-container";
+    container.className = "toast-container position-fixed top-0 end-0 p-3";
+    container.style.zIndex = "9999";
     document.body.appendChild(container);
     return container;
   }
 
   function setupModalEvents() {
-    // Close modals when clicking X
     document.querySelectorAll(".close, .btn-secondary").forEach((btn) => {
       btn.addEventListener("click", function () {
         const modal = this.closest(".modal");
         if (modal) {
-          // Try Bootstrap modal first
-          if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          if (typeof bootstrap !== "undefined" && bootstrap.Modal) {
             const bsModal = bootstrap.Modal.getInstance(modal);
             if (bsModal) {
               bsModal.hide();
@@ -1121,7 +1145,6 @@ document.addEventListener("DOMContentLoaded", function () {
               modal.style.display = "none";
             }
           } else {
-            // Fallback
             modal.style.display = "none";
           }
         }
@@ -1129,17 +1152,15 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Close modals when clicking outside
-    document.querySelectorAll('.modal').forEach(modal => {
-      modal.addEventListener('click', function(e) {
+    document.querySelectorAll(".modal").forEach((modal) => {
+      modal.addEventListener("click", function (e) {
         if (e.target === this) {
-          // Try Bootstrap modal first
-          if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          if (typeof bootstrap !== "undefined" && bootstrap.Modal) {
             const bsModal = bootstrap.Modal.getInstance(this);
             if (bsModal) {
               bsModal.hide();
             }
           } else {
-            // Fallback
             this.style.display = "none";
           }
         }
@@ -1161,7 +1182,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   window.removeMember = function (memberId) {
     if (confirm("Are you sure you want to remove this member?")) {
-      // This would call the remove member API
       showNotification("Member removal feature coming soon!", "info");
     }
   };

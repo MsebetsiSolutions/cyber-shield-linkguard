@@ -134,7 +134,7 @@ async function handleLogout() {
     toast('Signed out successfully');
     
     setTimeout(() => {
-        window.location.href = '../index.html';
+        window.location.href = '../';
     }, 1000);
 }
 
@@ -200,7 +200,7 @@ async function loadUserData() {
       return userData;
     } else if (response.status === 401) {
       // Not authenticated, redirect to login
-      window.location.href = '../index.html';
+      window.location.href = '../';
       return null;
     } else {
       const error = await response.json();
@@ -349,7 +349,7 @@ if ($('confirmDelete')) {
       if (response.ok) {
         toast('Account deleted successfully');
         setTimeout(() => {
-          window.location.href = '../index.html';
+          window.location.href = '../';
         }, 1500);
       } else {
         const error = await response.json();
@@ -371,12 +371,12 @@ if ($('confirmDelete')) {
     const userInfo = await loadUserData();
     
     if (!userInfo || !userInfo.authenticated) {
-      window.location.href = '../index.html';
+      window.location.href = '../';
       return;
     }
   } catch (error) {
     console.error('Error checking authentication:', error);
-    window.location.href = '../index.html';
+    window.location.href = '../';
   }
 })();
 

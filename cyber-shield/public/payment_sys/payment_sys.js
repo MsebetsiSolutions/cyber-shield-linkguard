@@ -1,7 +1,3 @@
-// =============================================================
-// ✅ LearnHub / CyberShield Payment System with Yoco Inline Integration
-// =============================================================
-
 const $ = id => document.getElementById(id);
 const show = el => el && el.classList.remove('hidden');
 const hide = el => el && el.classList.add('hidden');
@@ -14,9 +10,7 @@ const toast = (msg, ms = 2000) => {
   setTimeout(() => t.classList.remove('show'), ms);
 };
 
-// =============================================================
-// 🧩 Security Utilities
-// =============================================================
+// Security Utilities
 function sanitizeInput(input) {
   const div = document.createElement('div');
   div.textContent = input;
@@ -28,9 +22,7 @@ function validateEmail(email) {
   return emailRegex.test(email);
 }
 
-// =============================================================
-// 💳 Payment Reference Generator
-// =============================================================
+// Payment Reference Generator
 function generatePaymentReference(planCode) {
   const timestamp = Date.now().toString(36).toUpperCase();
   const random = Math.random().toString(36).substring(2, 5).toUpperCase();
@@ -38,9 +30,7 @@ function generatePaymentReference(planCode) {
   return `${planCode}-${timestamp}-${random}`;
 }
 
-// =============================================================
-// 🌐 Fetch Helper with Session
-// =============================================================
+// Fetch Helper with Session
 async function fetchWithSession(path, opts = {}) {
   const headers = { 'Content-Type': 'application/json', ...opts.headers };
   try {
@@ -56,9 +46,7 @@ async function fetchWithSession(path, opts = {}) {
   }
 }
 
-// =============================================================
-// 👤 User UI Setup
-// =============================================================
+// User UI Setup
 const welcomeMessage = $('welcomeMessage');
 const userNameDisplay = $('userNameDisplay');
 const logoutBtn = $('logout');
@@ -77,9 +65,7 @@ function setUserUI(userData) {
   }
 }
 
-// =============================================================
-// 🚪 Logout Logic
-// =============================================================
+// Logout Logic
 async function handleLogout() {
   try {
     const currentSessionId = window.CyberShieldSession?.getCurrentSessionId();
@@ -101,7 +87,7 @@ async function handleLogout() {
   sessionStorage.clear();
   localStorage.removeItem('selectedPlan');
   toast('Signed out successfully');
-  setTimeout(() => (window.location.href = '../index.html'), 1000);
+  setTimeout(() => (window.location.href = '../'), 1000);
 }
 
 if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
@@ -119,9 +105,7 @@ if (userDropdownBtn && userDropdown) {
   userDropdown.addEventListener('click', e => e.stopPropagation());
 }
 
-// =============================================================
-// 🧾 Display Selected Plan
-// =============================================================
+// Display Selected Plan
 function displaySelectedPlan() {
   const selectedPlan = JSON.parse(localStorage.getItem('selectedPlan') || '{}');
   if (!selectedPlan.id) {
@@ -133,8 +117,17 @@ function displaySelectedPlan() {
   }
 
   if ($('planNameDisplay')) $('planNameDisplay').textContent = selectedPlan.name;
+  
+  let priceDisplay = `R${selectedPlan.price}`;
+  if (selectedPlan.billingPeriod === 'yearly') {
+    priceDisplay += ' / year';
+  } else {
+    priceDisplay += ' / month';
+  }
+  
   if ($('planPriceDisplay'))
-    $('planPriceDisplay').textContent = `R${selectedPlan.price} / month`;
+    $('planPriceDisplay').textContent = priceDisplay;
+    
   if ($('planCodeDisplay')) $('planCodeDisplay').textContent = selectedPlan.code;
 
   const paymentReference = generatePaymentReference(selectedPlan.code);
@@ -147,14 +140,11 @@ function displaySelectedPlan() {
   return { selectedPlan, paymentReference };
 }
 
-// =============================================================
-// 💳 Yoco Inline Card Form Integration
-// =============================================================
+// Yoco Inline Card Form Integration
 async function initYocoInline() {
   const { selectedPlan, paymentReference } = displaySelectedPlan();
   if (!selectedPlan.id) return;
 
-  // Require Yoco public key from backend (no client-side fallback allowed)
   let pubKey;
   try {
     const cfgRes = await fetchWithSession('/api/config');
@@ -178,7 +168,6 @@ async function initYocoInline() {
 
   const yoco = new window.YocoSDK({ publicKey: pubKey });
 
-  // Mount inline card form
   const inline = yoco.inline({
     layout: 'basic',
     amountInCents: selectedPlan.price * 100,
@@ -210,48 +199,43 @@ async function initYocoInline() {
         } else {
           console.log('Token created:', response.id);
 
-          // Send token to backend for charge
           try {
-            const res = await fetchWithSession('/api/payment/process', {
+            const res = await fetchWithSession('/api/subscription/process-payment', {
               method: 'POST',
               body: JSON.stringify({
-                token: response.id,
-                planId: selectedPlan.id,
-                reference: paymentReference,
-                amount: selectedPlan.price * 100
+                plan_data: {
+                  plan_id: selectedPlan.id,
+                  plan_name: selectedPlan.name,
+                  plan_code: selectedPlan.code,
+                  price: selectedPlan.price,
+                  billing_period: selectedPlan.billingPeriod,
+                  duration: selectedPlan.duration
+                },
+                payment_data: {
+                  token: response.id,
+                  reference: paymentReference
+                }
               })
             });
 
             const data = await res.json();
-            if (data.status === 'successful' || res.ok) {
+            if (res.ok) {
               resultMessage.textContent = 'Payment successful!';
               toast('Payment successful! Redirecting to Scanner Dash...');
-              // Persist plan info locally immediately if server returned it
+              
               if (data.plan_mode !== undefined) {
-                try {
-                  sessionStorage.setItem('plan_mode', data.plan_mode);
-                  if (data.plan_name) sessionStorage.setItem('plan_name', data.plan_name);
-                } catch (e) {
-                  console.warn('Failed to set plan in sessionStorage', e);
-                }
+                sessionStorage.setItem('plan_mode', data.plan_mode);
               }
-              // Refresh user session/server-side info to ensure plan_mode is current
-              try {
-                const refresh = await fetchWithSession('/api/auth/me');
-                if (refresh.ok) {
-                  // Wait a brief moment for session to persist and then redirect
-                  await new Promise(r => setTimeout(r, 500));
-                }
-              } catch (e) {
-                console.warn('Failed to refresh user session before redirect', e);
-              }
+              
+              localStorage.removeItem('selectedPlan');
+              
               setTimeout(
                 () => (window.location.href = '../ScannerDash/ScannerDash.html'),
                 1500
               );
             } else {
               resultMessage.textContent =
-                data.displayMessage || 'Payment failed.';
+                data.error || 'Payment failed. Please try again.';
             }
           } catch (err) {
             resultMessage.textContent = 'Network error during payment.';
@@ -267,9 +251,7 @@ async function initYocoInline() {
   });
 }
 
-// =============================================================
-// 🚀 Page Boot
-// =============================================================
+// Page Boot
 async function boot() {
   console.log('Payment page initializing...');
 
@@ -280,24 +262,21 @@ async function boot() {
       if (userData.authenticated) {
         setUserUI(userData);
         sessionStorage.setItem('userEmail', userData.email);
-  displaySelectedPlan();
-  await initYocoInline(); // ✅ initialize inline Yoco card form
+        displaySelectedPlan();
+        await initYocoInline(); 
         return;
       }
     }
-    window.location.href = '../index.html';
+    window.location.href = '../';
   } catch (e) {
     console.error('Auth fetch failed', e);
-    window.location.href = '../index.html';
+    window.location.href = '../';
   }
 }
 
-// start boot
 boot();
 
-// =============================================================
-// 🧹 Security Cleanup
-// =============================================================
+// Security Cleanup
 window.addEventListener('beforeunload', function () {
   sessionStorage.removeItem('paymentReference');
 });

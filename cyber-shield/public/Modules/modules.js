@@ -23,11 +23,11 @@ class LearningHubEnrollment {
         console.log("User authenticated:", this.currentUser);
         console.log("User Plan Mode:", this.userPlanMode);
       } else {
-        window.location.href = "../index.html";
+        window.location.href = "../";
       }
     } catch (error) {
       console.error("Authentication check failed:", error);
-      window.location.href = "../index.html";
+      window.location.href = "../";
     }
   }
 

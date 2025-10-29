@@ -88,7 +88,7 @@ init_mail(app)
 
 YOCO_SECRET = os.getenv("YOCO_SECRET_KEY")
 YOCO_WEBHOOK_SECRET = os.getenv("YOCO_WEBHOOK_SECRET")  # optional
-BASE_URL = os.getenv("BASE_URL", "http://localhost:5000")
+BASE_URL = os.getenv("BASE_URL", "http://www.linkguard.co.za")
 
 if not YOCO_SECRET:
     raise RuntimeError("YOCO_SECRET_KEY not set in environment")

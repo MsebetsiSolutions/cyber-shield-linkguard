@@ -121,7 +121,7 @@ async function handleLogout() {
     toast('Signed out successfully');
     
     setTimeout(() => {
-        window.location.href = '../index.html';
+        window.location.href = '../';
     }, 1000);
 }
 logoutBtn.addEventListener('click', handleLogout);
@@ -221,19 +221,19 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
           console.log('User not authenticated, redirecting to login');
           // Redirect to login page if not authenticated
-          window.location.href = '../index.html';
+          window.location.href = '../';
           return;
         }
       } else {
         console.log('Auth check failed, redirecting to login');
         // Redirect to login page if request failed
-        window.location.href = '../index.html';
+        window.location.href = '../';
         return;
       }
     } catch(e) {
       console.error('Failed to fetch user info', e);
       // Redirect to login page on error
-      window.location.href = '../index.html';
+      window.location.href = '../';
       return;
     }
   })();

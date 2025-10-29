@@ -71,6 +71,16 @@ def validate_cvv(cvv):
     """Validate CVV code."""
     return cvv.isdigit() and len(cvv) in [3, 4]
 
+def calculate_expiry_date(billing_period, duration=None):
+    """Calculate expiry date based on billing period and duration."""
+    if billing_period == 'yearly' or duration == 'year':
+        return (datetime.datetime.now() + datetime.timedelta(days=365)).isoformat()
+    elif billing_period == 'monthly' or duration == 'month':
+        return (datetime.datetime.now() + datetime.timedelta(days=30)).isoformat()
+    else:
+        # Default to monthly
+        return (datetime.datetime.now() + datetime.timedelta(days=30)).isoformat()
+
 # ======================================================
 # ---------------------- API -------------------------
 # ======================================================
@@ -92,6 +102,8 @@ def create_subscription():
         plan_code = data.get('plan_code')
         price = data.get('price')
         team_size = data.get('team_size', 1)
+        billing_period = data.get('billing_period', 'monthly')
+        duration = data.get('duration', 'month')
         
         # Payment details (for recording)
         payment_method = data.get('payment_method', 'card')
@@ -107,10 +119,12 @@ def create_subscription():
         except ValueError:
             return jsonify({'error': 'Invalid price format'}), 400
         
+        # Calculate expiry date based on billing period
+        expiry_date = calculate_expiry_date(billing_period, duration)
+        
         # Handle different plan types
         if plan_id == 'increase':
             plan_mode = 0  # Keep user's plan_mode at 0 for increase plan
-            expiry_date = (datetime.datetime.now() + datetime.timedelta(days=7)).isoformat()
             increased = 'yes'
         else:
             # Regular plan handling
@@ -121,7 +135,6 @@ def create_subscription():
                 'enterprise': 3
             }
             plan_mode = plan_mode_map.get(plan_id, 0)
-            expiry_date = (datetime.datetime.now() + datetime.timedelta(days=30)).isoformat()
             increased = None
         
         user_id = session['user_id']
@@ -146,9 +159,9 @@ def create_subscription():
             
             # Insert new subscription
             cursor.execute('''
-                INSERT INTO subscriptions (user_id, sub_plan, plan_code, price, date_expiry, plan_active, team_size, increased)
-                VALUES (?, ?, ?, ?, ?, 1, ?, ?)
-            ''', (user_id, plan_name, plan_code, price, expiry_date, team_size, increased))
+                INSERT INTO subscriptions (user_id, sub_plan, plan_code, price, date_expiry, plan_active, team_size, increased, billing_period, duration)
+                VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
+            ''', (user_id, plan_name, plan_code, price, expiry_date, team_size, increased, billing_period, duration))
             
             subscription_id = cursor.lastrowid
             
@@ -170,7 +183,9 @@ def create_subscription():
                 'subscription_id': subscription_id,
                 'transaction_id': transaction_id,
                 'plan_mode': plan_mode,
-                'expiry_date': expiry_date
+                'expiry_date': expiry_date,
+                'billing_period': billing_period,
+                'duration': duration
             }), 201
             
         except sqlite3.Error as e:
@@ -221,10 +236,15 @@ def process_payment():
         plan_code = plan_data['plan_code']
         price = float(plan_data['price'])
         team_size = plan_data.get('team_size', 1)
+        billing_period = plan_data.get('billing_period', 'monthly')
+        duration = plan_data.get('duration', 'month')
         
         user_id = session['user_id']
         transaction_id = generate_transaction_id()
         card_last_four = card_number[-4:]
+        
+        # Calculate expiry date based on billing period
+        expiry_date_db = calculate_expiry_date(billing_period, duration)
         
         try:
             conn = get_db_connection()
@@ -233,7 +253,6 @@ def process_payment():
             # Handle plan mode
             if plan_id == 'increase':
                 plan_mode = 0
-                expiry_date = (datetime.datetime.now() + datetime.timedelta(days=7)).isoformat()
                 increased = 'yes'
             else:
                 plan_mode_map = {
@@ -243,7 +262,6 @@ def process_payment():
                     'enterprise': 3
                 }
                 plan_mode = plan_mode_map.get(plan_id, 0)
-                expiry_date = (datetime.datetime.now() + datetime.timedelta(days=30)).isoformat()
                 increased = None
             
             # Update user plan mode if not increase plan
@@ -261,9 +279,9 @@ def process_payment():
             
             # Insert new subscription
             cursor.execute('''
-                INSERT INTO subscriptions (user_id, sub_plan, plan_code, price, date_expiry, plan_active, team_size, increased)
-                VALUES (?, ?, ?, ?, ?, 1, ?, ?)
-            ''', (user_id, plan_name, plan_code, price, expiry_date, team_size, increased))
+                INSERT INTO subscriptions (user_id, sub_plan, plan_code, price, date_expiry, plan_active, team_size, increased, billing_period, duration)
+                VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
+            ''', (user_id, plan_name, plan_code, price, expiry_date_db, team_size, increased, billing_period, duration))
             
             subscription_id = cursor.lastrowid
             
@@ -285,7 +303,9 @@ def process_payment():
                 'subscription_id': subscription_id,
                 'transaction_id': transaction_id,
                 'plan_mode': plan_mode,
-                'expiry_date': expiry_date
+                'expiry_date': expiry_date_db,
+                'billing_period': billing_period,
+                'duration': duration
             }), 201
             
         except sqlite3.Error as e:
@@ -481,9 +501,9 @@ def downgrade_subscription():
         # Create a Free subscription
         expiry_date = (datetime.datetime.now() + datetime.timedelta(days=30)).isoformat()
         cursor.execute('''
-            INSERT INTO subscriptions (user_id, sub_plan, plan_code, price, date_expiry, plan_active, team_size, increased)
-            VALUES (?, ?, ?, ?, ?, 1, ?, ?)
-        ''', (user_id, 'Free', 'CSLG-FREE-001', 0.0, expiry_date, 1, None))
+            INSERT INTO subscriptions (user_id, sub_plan, plan_code, price, date_expiry, plan_active, team_size, increased, billing_period, duration)
+            VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
+        ''', (user_id, 'Free', 'CSLG-FREE-001', 0.0, expiry_date, 1, None, 'monthly', 'month'))
         subscription_id = cursor.lastrowid
 
         # Insert a payment record for downgrade
@@ -507,4 +527,3 @@ def downgrade_subscription():
     except Exception as e:
         print(f"Downgrade error: {e}")
         return jsonify({'error': 'Failed to downgrade subscription'}), 500
-    

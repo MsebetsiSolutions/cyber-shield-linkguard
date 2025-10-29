@@ -106,17 +106,17 @@ async function checkAuthenticationWithSession() {
                 return userData;
             } else {
                 console.log('User not authenticated via Flask session, redirecting to index');
-                window.location.href = '../index.html';
+                window.location.href = '../';
                 return false;
             }
         } else {
             console.log('Auth check failed, redirecting to index');
-            window.location.href = '../index.html';
+            window.location.href = '../';
             return false;
         }
     } catch(e) {
         console.error('Authentication check failed:', e);
-        window.location.href = '../index.html';
+        window.location.href = '../';
         return false;
     }
 }
@@ -179,7 +179,7 @@ async function handleLogout() {
     
     // Redirect to login page without session ID
     setTimeout(() => {
-        window.location.href = '../index.html';
+        window.location.href = '../';
     }, 1000);
 }
 
@@ -1696,7 +1696,7 @@ function initDetectionPhishingReplica() {
         sessionStorage.removeItem('cyberShieldSession');
         sessionStorage.removeItem('userData');
         sessionStorage.removeItem('plan_mode');
-        window.location.href = '../index.html';
+        window.location.href = '../';
     }
 })();
 
@@ -1711,7 +1711,7 @@ document.addEventListener('visibilitychange', function() {
                 if (!isValid) {
                     console.log('Session invalid on page visibility, redirecting...');
                     sessionStorage.removeItem('cyberShieldSession');
-                    window.location.href = '../index.html';
+                    window.location.href = '../';
                 }
             });
         }
@@ -1724,7 +1724,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeEmailDatabase();
 });
 
-// CSV Email Database Functionality - Updated for Auto-loading Nigerian CSV
+// CSV Email Database Functionality
 function initializeEmailDatabase() {
     const regionSelect = document.getElementById('regionSelect');
     const emailViewerSection = document.getElementById('emailViewerSection');

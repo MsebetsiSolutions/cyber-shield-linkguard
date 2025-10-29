@@ -7,6 +7,7 @@ const toast = (msg, ms = 2000) => {
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), ms);
 };
+
 // Session-based fetch function
 async function fetchWithSession(path, opts = {}) {
   const headers = {
@@ -209,7 +210,7 @@ async function handleLogout() {
   toast("Signed out successfully");
 
   setTimeout(() => {
-    window.location.href = "../index.html";
+    window.location.href = "../";
   }, 1000);
 }
 
@@ -236,25 +237,84 @@ if (userDropdownBtn && userDropdown) {
       userDropdown.style.display = "none";
     }
   });
-  // Prevent dropdown from closing when clicking inside it
+  
   userDropdown.addEventListener("click", (e) => {
     e.stopPropagation();
   });
 }
 
-// Subscription plan codes and prices
+// Subscription plan codes and prices with billing periods
 const planCodes = {
-  free: { code: "CSLG-FREE-001", price: 0 },
-  pro: { code: "CSLG-PRO-002", price: 350 },
-  team: { code: "CSLG-TEAM-003", price: 500 },
-  enterprise: { code: "CSLG-ENT-004", price: 0 },
-  increase: { code: "CSLG-INCREASE-001", price: 25 },
+  free: { 
+    code: "CSLG-FREE-001", 
+    price: 0,
+    monthly: 0,
+    yearly: 0
+  },
+  pro: { 
+    code: "CSLG-PRO-002", 
+    price: 350,
+    monthly: 350,
+    yearly: 3780
+  },
+  team: { 
+    code: "CSLG-TEAM-003", 
+    price: 500,
+    monthly: 500,
+    yearly: 5400
+  },
+  enterprise: { 
+    code: "CSLG-ENT-004", 
+    price: 0,
+    monthly: 0,
+    yearly: 0
+  },
+  increase: { 
+    code: "CSLG-INCREASE-001", 
+    price: 25,
+    monthly: 25,
+    yearly: 25
+  },
 };
+
+// Get selected billing period for a plan
+function getSelectedBillingPeriod(planId) {
+  if (planId === 'pro') {
+    const selectedOption = document.querySelector('input[name="proTierOptions"]:checked');
+    return selectedOption ? selectedOption.value : 'monthly';
+  } else if (planId === 'team') {
+    const selectedOption = document.querySelector('input[name="teamTierOptions"]:checked');
+    return selectedOption ? selectedOption.value : 'monthly';
+  }
+  return 'monthly'; 
+}
+
+// Get price based on plan and billing period
+function getPlanPrice(planId, billingPeriod) {
+  const plan = planCodes[planId];
+  if (!plan) return 0;
+  
+  if (billingPeriod === 'yearly' && plan.yearly !== undefined) {
+    return plan.yearly;
+  }
+  return plan.monthly || plan.price;
+}
+
+// Get expiry date based on billing period
+function getExpiryDate(billingPeriod) {
+  const now = new Date();
+  if (billingPeriod === 'yearly') {
+    // Add 365 days for yearly plans
+    return new Date(now.setDate(now.getDate() + 365)).toISOString();
+  } else {
+    // Add 30 days for monthly plans
+    return new Date(now.setDate(now.getDate() + 30)).toISOString();
+  }
+}
 
 // Add event listener for the Increase Scans button
 if (manageSubscriptionBtn) {
   manageSubscriptionBtn.addEventListener("click", function () {
-    // Store selected plan details for the Increase Scans option
     localStorage.setItem(
       "selectedPlan",
       JSON.stringify({
@@ -262,17 +322,23 @@ if (manageSubscriptionBtn) {
         name: "Increase Scans",
         price: planCodes.increase.price,
         code: planCodes.increase.code,
+        billingPeriod: 'monthly',
+        duration: 'week',
+        expiryDate: getExpiryDate('monthly') 
       })
     );
 
-    // Redirect to payment page
     window.location.href = "../payment_sys/payment_sys.html";
   });
 }
 
 // Plan selection functionality
 document.querySelectorAll('.plan-card').forEach(card => {
-  card.addEventListener('click', function () {
+  card.addEventListener('click', function (e) {
+    if (e.target.type === 'radio' || e.target.tagName === 'LABEL') {
+      return;
+    }
+
     const planId = this.dataset.planId;
     const userPlanMode = parseInt(sessionStorage.getItem('plan_mode') || '0');
     const planModeMap = { free: 0, pro: 1, team: 2, enterprise: 3 };
@@ -283,17 +349,30 @@ document.querySelectorAll('.plan-card').forEach(card => {
     }
     
     const planName = this.querySelector('h4').textContent;
-    const planPrice = planCodes[planId].price;
+    const billingPeriod = getSelectedBillingPeriod(planId);
+    const planPrice = getPlanPrice(planId, billingPeriod);
     const planCode = planCodes[planId].code;
+    const expiryDate = getExpiryDate(billingPeriod);
+    const duration = billingPeriod === 'yearly' ? 'year' : 'month';
     
     localStorage.setItem('selectedPlan', JSON.stringify({
       id: planId,
       name: planName,
       price: planPrice,
-      code: planCode
+      code: planCode,
+      billingPeriod: billingPeriod,
+      duration: duration,
+      expiryDate: expiryDate
     }));
     
-    console.log('Selected plan:', planId, 'Redirecting to payment page...');
+    console.log('Selected plan:', {
+      planId,
+      planName,
+      price: planPrice,
+      billingPeriod,
+      duration,
+      expiryDate
+    });
     
     try {
       if (planId === 'enterprise') {
@@ -363,16 +442,16 @@ document.querySelectorAll('.plan-card').forEach(card => {
         return;
       } else {
         console.log("User not authenticated, redirecting to login");
-        window.location.href = "../index.html";
+        window.location.href = "../";
         return;
       }
     } else {
       console.log("Auth check failed, redirecting to login");
-      window.location.href = "../index.html";
+      window.location.href = "../";
       return;
     }
   } catch (error) {
     console.error("Error initializing subscription page:", error);
-    window.location.href = "../index.html";
+    window.location.href = "../";
   }
 })();
