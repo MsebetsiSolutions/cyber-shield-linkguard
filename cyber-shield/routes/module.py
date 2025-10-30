@@ -11,7 +11,6 @@ def get_db_connection():
 
 @module_bp.route('/enroll', methods=['POST'])
 def enroll_user():
-    """Enroll user in a module/week"""
     try:
         if 'user_id' not in session:
             return jsonify({'error': 'User not logged in'}), 401
@@ -22,21 +21,30 @@ def enroll_user():
         if not data:
             return jsonify({'error': 'No data provided'}), 400
         
-        week = data.get('week', '').strip()
+        week = data.get('week', '').strip().lower() 
         
         if not week:
             return jsonify({'error': 'Week number is required'}), 400
         
-        if not week.startswith('week') or not week[4:].isdigit():
+        week_num = None
+        if week.startswith('week'):
+            if not week[4:].isdigit():
+                return jsonify({'error': 'Invalid week format. Use format: week1, week2, etc.'}), 400
+            week_num = int(week[4:])
+            week = f"week{week_num}" 
+        elif week.isdigit():
+            week_num = int(week)
+            week = f"week{week_num}"  
+        else:
             return jsonify({'error': 'Invalid week format. Use format: week1, week2, etc.'}), 400
         
-        week_num = int(week[4:])
         if week_num < 1 or week_num > 12:
             return jsonify({'error': 'Week number must be between 1 and 12'}), 400
         
         conn = get_db_connection()
         cursor = conn.cursor()
         
+        # Check for existing enrollment with normalized week format
         cursor.execute('''
             SELECT id FROM Modules_Enrolled 
             WHERE user_id = ? AND week = ?
@@ -52,6 +60,7 @@ def enroll_user():
                 'week': week
             }), 200
         
+        # Check previous week completion (wek 2-12)
         if week_num > 1:
             previous_week = f'week{week_num - 1}'
             cursor.execute('''
@@ -66,7 +75,7 @@ def enroll_user():
                     'error': f'Please complete {previous_week} before enrolling in {week}'
                 }), 400
         
-        # Enroll user in the week
+        # Enroll user
         cursor.execute('''
             INSERT INTO Modules_Enrolled (user_id, week, enrolled_date)
             VALUES (?, ?, ?)
@@ -89,14 +98,9 @@ def enroll_user():
         print(f"Database integrity error in enroll_user: {e}")
         if 'conn' in locals():
             conn.close()
-        return jsonify({'error': 'Enrollment already exists or database constraint violation'}), 409
-    except sqlite3.Error as e:
-        print(f"Database error in enroll_user: {e}")
-        if 'conn' in locals():
-            conn.close()
-        return jsonify({'error': 'Database error occurred'}), 500
+        return jsonify({'error': 'Enrollment already exists'}), 409
     except Exception as e:
-        print(f"Unexpected error in enroll_user: {e}")
+        print(f"Error in enroll_user: {e}")
         if 'conn' in locals():
             conn.close()
         return jsonify({'error': 'Failed to enroll user'}), 500

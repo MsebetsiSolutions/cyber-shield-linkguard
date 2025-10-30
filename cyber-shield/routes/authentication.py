@@ -10,9 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Get base URL from environment variable, default to localhost for development
 BASE_URL = os.getenv('BASE_URL', 'https://www.linkguard.co.za')
-
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
 # Initialize Flask-Mail
