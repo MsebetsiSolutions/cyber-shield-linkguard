@@ -220,30 +220,6 @@ async function checkUserPlan() {
   return 0; 
 }
 
-// User dropdown functionality
-function initUserDropdown() {
-  const userDropdownBtn = $('userDropdownBtn');
-  const userDropdown = $('userDropdown');
-
-  // Toggle desktop dropdown
-  userDropdownBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
-  });
-
-  // Close dropdowns when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-      userDropdown.style.display = 'none';
-    }
-  });
-
-  // Prevent dropdown from closing 
-  userDropdown.addEventListener('click', (e) => {
-    e.stopPropagation();
-  });
-}
-
 // Phishing simulation functionality
 // Function to display generated phishing email
 function displayGeneratedEmail(emailData) {
@@ -1038,8 +1014,6 @@ function showTrainingAlert(clickedText) {
   document.body.appendChild(warningModal);
 }
 
-// exportEmailAsTrainingMaterial removed: was unused in this file. Keep training exports in a dedicated utilities module if needed.
-
 // Email Editor Functions
 function openEmailEditor() {
   const modal = $('emailEditorModal');
@@ -1675,8 +1649,6 @@ function initDetectionPhishingReplica() {
         const userData = await checkAuthenticationWithSession();
         
         if (userData) {
-            initUserDropdown();
-            
             const planMode = await checkUserPlan();
             
             setUserUI({...userData, plan_mode: planMode}); 

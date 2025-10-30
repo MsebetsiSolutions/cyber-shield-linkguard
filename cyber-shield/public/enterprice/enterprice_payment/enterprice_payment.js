@@ -34,8 +34,6 @@ async function fetchWithSession(path, opts={}) {
 const welcomeMessage = $('welcomeMessage');
 const userNameDisplay = $('userNameDisplay');
 const logoutBtn = $('logout'); 
-const userDropdownBtn = $('userDropdownBtn');
-const userDropdown = $('userDropdown');
 
 function setUserUI(userData){ 
   console.log('Setting user UI with data:', userData); 
@@ -87,23 +85,6 @@ function handleLogout() {
 
 if (logoutBtn) {
   logoutBtn.addEventListener('click', handleLogout);
-}
-
-if (userDropdownBtn && userDropdown) {
-  userDropdownBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-      userDropdown.style.display = 'none';
-    }
-  });
-
-  userDropdown.addEventListener('click', (e) => {
-    e.stopPropagation();
-  });
 }
 
 // Display selected plan info
