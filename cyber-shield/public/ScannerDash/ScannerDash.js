@@ -1084,24 +1084,6 @@ function handleFileResult(j, file) {
   }
 }
 
-const userDropdownBtn = $('userDropdownBtn');
-const userDropdown = $('userDropdown');
-
-userDropdownBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
-});
-
-document.addEventListener('click', (e) => {
-  if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-    userDropdown.style.display = 'none';
-  }
-});
-
-userDropdown.addEventListener('click', (e) => {
-  e.stopPropagation();
-});
-
 function updatePlanBadge(planMode) {
   const planBadge = document.getElementById('planMode');
   if (!planBadge) return;
