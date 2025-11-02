@@ -72,7 +72,7 @@ function controlIncreaseScansButton(planMode) {
   }
 }
 
-// Update current plan display based on plan_mode
+// current plan display based on plan_mode
 function updateCurrentPlanDisplay(planMode) {
   const planMap = {
     0: { name: "Free Tier", badgeId: "freeBadge" },
@@ -108,7 +108,7 @@ function updateCurrentPlanDisplay(planMode) {
   }
 }
 
-// Update plan badge in header
+// plan badge in header
 function updatePlanBadge(planMode) {
   const planBadge = document.getElementById("planMode");
   if (!planBadge) return;
@@ -129,14 +129,13 @@ function updatePlanBadge(planMode) {
   planBadge.textContent = plan.text;
 }
 
-// Update scan counter UI based on plan mode
+// scan counter UI based on plan mode
 function updateScanCounterUI(planMode) {
   const scanCounter = $("scanCounter");
   if (planMode === 1 || planMode === 2 || planMode === 3) {
     hide(scanCounter);
   } else {
     show(scanCounter);
-    // Update scan count display
     const today = new Date().toDateString();
     const lastScanDate = localStorage.getItem("lastScanDate");
     let remainingScans = 1;
@@ -218,32 +217,6 @@ if (logoutBtn) {
   logoutBtn.addEventListener("click", handleLogout);
 }
 
-const userDropdownBtn = $("userDropdownBtn");
-const userDropdown = $("userDropdown");
-
-// Toggle desktop dropdown
-if (userDropdownBtn && userDropdown) {
-  userDropdownBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    userDropdown.style.display =
-      userDropdown.style.display === "block" ? "none" : "block";
-  });
-  // Close dropdowns when clicking outside
-  document.addEventListener("click", (e) => {
-    if (
-      !userDropdownBtn.contains(e.target) &&
-      !userDropdown.contains(e.target)
-    ) {
-      userDropdown.style.display = "none";
-    }
-  });
-  
-  userDropdown.addEventListener("click", (e) => {
-    e.stopPropagation();
-  });
-}
-
-// Subscription plan codes and prices with billing periods
 const planCodes = {
   free: { 
     code: "CSLG-FREE-001", 
@@ -304,10 +277,8 @@ function getPlanPrice(planId, billingPeriod) {
 function getExpiryDate(billingPeriod) {
   const now = new Date();
   if (billingPeriod === 'yearly') {
-    // Add 365 days for yearly plans
     return new Date(now.setDate(now.getDate() + 365)).toISOString();
   } else {
-    // Add 30 days for monthly plans
     return new Date(now.setDate(now.getDate() + 30)).toISOString();
   }
 }

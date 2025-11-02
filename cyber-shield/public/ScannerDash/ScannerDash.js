@@ -24,31 +24,15 @@ let statsChart2 = null;
 // Camera variables
 let cameraStream = null;
 let cameraModal = null;
-let currentFacingMode = 'environment'; // 'environment' for rear camera, 'user' for front
+let currentFacingMode = 'environment';
 let qrScanningActive = false;
 
-// Features dropdown functionality
-function initFeaturesDropdown() {
-  const featuresDropdownBtn = $('featuresDropdownBtn');
-  const featuresDropdown = $('featuresDropdown');
-  
-  if (!featuresDropdownBtn || !featuresDropdown) return;
-  
-  featuresDropdownBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    featuresDropdown.classList.toggle('show');
-  });
-  
-  document.addEventListener('click', (e) => {
-    if (!featuresDropdownBtn.contains(e.target) && !featuresDropdown.contains(e.target)) {
-      featuresDropdown.classList.remove('show');
-    }
-  });
-  
-  featuresDropdown.addEventListener('click', (e) => {
-    e.stopPropagation();
-  });
-}
+const FEATURE_ACCESS = {
+  0: ['feature-learning-hub', 'feature-cybersmart-kids'],
+  1: ['feature-learning-hub', 'feature-cybersmart-kids', 'feature-stats', 'feature-cyber-awareness'],
+  2: ['feature-learning-hub', 'feature-cybersmart-kids', 'feature-stats', 'feature-cyber-awareness', 'feature-team-workspace', 'feature-background-check', 'feature-cybersecurity-exams'],
+  3: ['feature-learning-hub', 'feature-cybersmart-kids', 'feature-stats', 'feature-cyber-awareness', 'feature-background-check', 'feature-cybersecurity-exams', 'feature-enterprise']
+};
 
 // Initialize Chart.js
 function initChart() {
@@ -240,13 +224,11 @@ function setUserUI(userData){
       full_name: userData.full_name
     });
 
-    // Control button states based on plan_mode
+    // button states based on pla_mode
     controlScanButtons(userData.plan_mode);
-    controlFeaturesDropdown(userData.plan_mode);
     controlCameraButton(userData.plan_mode);
-
-    // Update plan label on the dashboard
     updatePlanLabel(userData.plan_mode);
+    updateFeatureAccess(userData.plan_mode);
 
   } else { 
     welcomeMessage.textContent = ''; 
@@ -254,9 +236,32 @@ function setUserUI(userData){
     console.log('User not authenticated, using fallback');
 
     controlScanButtons(0); 
-    controlFeaturesDropdown(0);
     controlCameraButton(0);
+    updateFeatureAccess(0);
   }
+}
+
+// Update feature access based on plan mode
+function updateFeatureAccess(planMode) {
+  console.log(`Updating feature access for plan mode: ${planMode}`);
+  
+  const featureElements = document.querySelectorAll('[data-plan-required]');
+  
+  featureElements.forEach(feature => {
+    feature.classList.add('hidden');
+  });
+  
+  const allowedFeatures = FEATURE_ACCESS[planMode] || FEATURE_ACCESS[0];
+  
+  allowedFeatures.forEach(featureId => {
+    const featureElement = document.getElementById(featureId);
+    if (featureElement) {
+      featureElement.classList.remove('hidden');
+      featureElement.classList.remove('locked');
+    }
+  });
+  
+  console.log(`Allowed features for plan ${planMode}:`, allowedFeatures);
 }
 
 // Function to control scan button states (File and QR)
@@ -275,11 +280,11 @@ function controlScanButtons(planMode) {
   console.log(`Plan Mode: ${planMode}, File/QR Scan Enabled: ${!fileScanBtn.disabled}`);
 }
 
-// Control camera button based on plan mode - UPDATED FOR NEW ROUND BUTTON
+// Control camera button based on plan mode
 function controlCameraButton(planMode) {
   const isPaidPlan = planMode === 1 || planMode === 2 || planMode === 3;
 
-  // Camera button is now ALWAYS VISIBLE for all users
+  // Camera button VISIBLE
   show(cameraBtn);
 
   if (isPaidPlan) {
@@ -292,7 +297,7 @@ function controlCameraButton(planMode) {
   console.log(`Plan Mode: ${planMode}, Camera Enabled: ${!cameraBtn.disabled}`);
 }
 
-// Update the plan badge label and styling in the header
+// plan badge label
 function updatePlanLabel(planMode) {
   const planBadge = document.getElementById('planMode');
   if (!planBadge) return;
@@ -307,31 +312,8 @@ function updatePlanLabel(planMode) {
   const plan = planMap[planMode] || planMap[0];
   planBadge.textContent = plan.text;
 
-  // Remove existing plan classes
   planBadge.classList.remove('free-plan', 'pro-plan', 'team-plan', 'enterprise-plan');
   planBadge.classList.add(plan.cls);
-}
-
-// Control features dropdown based on plan mode
-function controlFeaturesDropdown(planMode) {
-  const statsButton = $('statsButton');
-  const twButton = $('twButton');
-  const twEnterprise = $('twEnterprise');
-  const twReputation = $('twReputation');
-  const upgradeMessage = $('upgradeMessage');
-
-  // Show/hide features based on plan mode
-  if (planMode >= 1) show(statsButton); else hide(statsButton);
-  if (planMode >= 2) show(twButton); else hide(twButton);
-  if (planMode >= 3) show(twEnterprise); else hide(twEnterprise);
-  if (planMode >= 2) show(twReputation); else hide(twReputation);
-
-  // Show upgrade message if no features are available
-  if (planMode === 0) {
-    show(upgradeMessage);
-  } else {
-    hide(upgradeMessage);
-  }
 }
 
 // Logout functionality
@@ -369,7 +351,6 @@ async function handleLogout() {
     
     toast('Signed out successfully');
     
-    // Redirect to login page without session ID
     setTimeout(() => {
         window.location.href = '../';
     }, 1000);
@@ -385,8 +366,6 @@ const previewImage = $('previewImage');
 const previewPlaceholder = $('previewPlaceholder');
 const previewFileName = $('previewFileName');
 const clearPreview = $('clearPreview');
-
-// Image file types for preview
 const imageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp', 'image/webp'];
 
 fileInput.addEventListener('change', function() {
@@ -394,11 +373,9 @@ fileInput.addEventListener('change', function() {
     const file = this.files[0];
     fileLabelText.textContent = file.name;
     
-    // Show preview
     show(filePreview);
     
     if (imageTypes.includes(file.type)) {
-      // It's an image - show image preview
       const reader = new FileReader();
       reader.onload = function(e) {
         previewImage.src = e.target.result;
@@ -407,7 +384,6 @@ fileInput.addEventListener('change', function() {
       };
       reader.readAsDataURL(file);
     } else {
-      // It's a document - show placeholder
       hide(previewImage);
       show(previewPlaceholder);
       previewFileName.textContent = file.name;
@@ -432,12 +408,10 @@ function initCameraButton() {
   cameraModal = new bootstrap.Modal($('cameraModal'));
   const switchCameraBtn = $('switchCameraBtn');
   
-  // Camera button click handler - UPDATED FOR NEW ROUND BUTTON
   cameraBtn.addEventListener('click', function() {
     if (this.disabled) {
       toast('Upgrade to a paid plan to use camera for QR scanning');
       
-      // Optionally redirect to subscription page
       setTimeout(() => {
         window.location.href = '../Subscription/Subscription.html';
       }, 1500);
@@ -446,14 +420,12 @@ function initCameraButton() {
     openCameraModal();
   });
   
-  // Switch camera button
   switchCameraBtn.addEventListener('click', function() {
     currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
     stopCamera();
     startCamera();
   });
   
-  // Handle modal close
   $('cameraModal').addEventListener('hidden.bs.modal', function() {
     stopCamera();
     qrScanningActive = false;
@@ -485,7 +457,6 @@ async function startCamera() {
     cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
     video.srcObject = cameraStream;
     
-    // Wait for video to be ready
     video.onloadedmetadata = () => {
       video.play();
       startQRScanning();
@@ -545,7 +516,6 @@ function startQRScanning() {
     const code = jsQR(imageData.data, imageData.width, imageData.height);
     
     if (code) {
-      // QR code found!
       handleQRCodeDetected(code.data);
       return;
     }
@@ -556,13 +526,12 @@ function startQRScanning() {
   scanQRCode();
 }
 
-// Handle detected QR code
+// detected QR code
 function handleQRCodeDetected(qrData) {
   console.log('QR Code detected:', qrData);
   stopCamera();
   cameraModal.hide();
   
-  // Process the QR code data
   processQRCodeResult(qrData);
 }
 
@@ -573,13 +542,10 @@ async function processQRCodeResult(qrData) {
   toast('QR code detected! Processing...');
   
   try {
-    // Check if it's a URL
     if (isValidUrl(qrData)) {
-      // It's a URL, scan it
       urlInput.value = qrData;
       await runScanUrl(qrData);
     } else {
-      // It's plain text, show in results
       hide($('emptyState'));
       hide($('resultUrl'));
       hide($('resultFile'));
@@ -673,7 +639,7 @@ async function checkAuthenticationWithSession() {
     }
 }
 
-// Initialize results display
+// results display
 function initResults() {
   hide($('resultUrl'));
   hide($('resultFile'));
@@ -800,7 +766,6 @@ async function runScanUrl(url){
     
     setBadge($('badgeUrl'), j.verdict.band);
     
-    // Process combined API results for URL
     if (j.signals && j.signals.api_results) {
         let totalMalicious = 0;
         let totalSuspicious = 0;
@@ -879,7 +844,6 @@ urlInput.addEventListener('keydown', e => {
   } 
 });
 
-// Combined File/QR Scan functionality
 fileScanBtn.addEventListener('click', () => {
   const f = fileInput.files && fileInput.files[0]; 
   if(!f) return toast('Choose a file first'); 
@@ -895,12 +859,10 @@ async function runScanFileOrQR(file){
     const fd = new FormData(); 
     fd.append('file', file);
     
-    // Check if file is an image (potential QR code)
     const isImage = file.type.startsWith('image/');
     let endpoint = '/api/scan_file';
     
     if (isImage) {
-      // Try QR code scanning first for images
       try {
         const qrResponse = await fetchWithSession('/api/scan_qr', { 
           method: 'POST',
@@ -910,7 +872,6 @@ async function runScanFileOrQR(file){
         if (qrResponse.ok) {
           const qrData = await qrResponse.json();
           
-          // If QR code was successfully decoded, use QR results
           if (qrData.decoded) {
             return handleQRResult(qrData, file);
           }
@@ -920,7 +881,6 @@ async function runScanFileOrQR(file){
       }
     }
     
-    // If not an image or QR scan failed, do regular file scan
     const r = await fetchWithSession(endpoint, { 
       method: 'POST',
       body: fd 
@@ -1108,7 +1068,6 @@ function handleFileResult(j, file) {
       }
   }
   
-  // Save scan result to database
   const scanData = {
     scan_type: 'file',
     content: file.name,
@@ -1124,34 +1083,6 @@ function handleFileResult(j, file) {
     bsCollapse.hide();
   }
 }
-
-// User dropdown functionality
-const userDropdownBtn = $('userDropdownBtn');
-const userDropdown = $('userDropdown');
-
-// Toggle desktop dropdown
-userDropdownBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
-});
-
-// Close dropdowns when clicking outside
-document.addEventListener('click', (e) => {
-  if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-    userDropdown.style.display = 'none';
-  }
-  
-  const featuresDropdown = $('featuresDropdown');
-  const featuresDropdownBtn = $('featuresDropdownBtn');
-  if (!featuresDropdownBtn.contains(e.target) && !featuresDropdown.contains(e.target)) {
-    featuresDropdown.classList.remove('show');
-  }
-});
-
-// Prevent dropdown from closing 
-userDropdown.addEventListener('click', (e) => {
-  e.stopPropagation();
-});
 
 function updatePlanBadge(planMode) {
   const planBadge = document.getElementById('planMode');
@@ -1191,7 +1122,7 @@ async function checkUserPlan() {
   return 0; 
 }
 
-// Initialize stats charts
+// stats charts
 function initStatsCharts() {
   if (statsChart1) {
     statsChart1.destroy();
@@ -1200,7 +1131,6 @@ function initStatsCharts() {
     statsChart2.destroy();
   }
   
-  // Scan Type Chart
   const typeCtx = document.getElementById('scanTypeChart').getContext('2d');
   statsChart1 = new Chart(typeCtx, {
     type: 'doughnut',
@@ -1331,7 +1261,7 @@ function displayStats(statsData) {
     statsChart2.update();
   }
   
-  // Update recent scans table
+  // recent scans table
   const recentScansTable = document.getElementById('recentScansTable');
   recentScansTable.innerHTML = '';
   
@@ -1354,7 +1284,6 @@ function displayStats(statsData) {
         contentDisplay = contentDisplay.substring(0, 30) + '...';
       }
       
-      // Format threat level with appropriate badge
       let threatBadge = '';
       if (scan.threat_level) {
         const threatClass = scan.threat_level === 'malicious' ? 'badge-DANGER' : 
@@ -1388,7 +1317,6 @@ function downloadStatsReport() {
   toast('Preparing your download...');
   
   setTimeout(() => {
-    // Simulate download
     const a = document.createElement('a');
     a.href = 'data:text/plain;charset=utf-8,Scan Report - Generated on ' + new Date().toLocaleDateString();
     a.download = 'scan-report-' + new Date().toISOString().split('T')[0] + '.txt';
@@ -1432,7 +1360,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const userData = await checkAuthenticationWithSession();
         
         if (userData) {
-            initFeaturesDropdown();            
             initChart();
             initCameraButton();
             

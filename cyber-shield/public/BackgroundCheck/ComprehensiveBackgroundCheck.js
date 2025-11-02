@@ -123,31 +123,6 @@ async function handleLogout() {
     }, 1000);
 }
 
-// User dropdown functionality
-function setupUserDropdown() {
-  const userDropdownBtn = $('userDropdownBtn');
-  const userDropdown = $('userDropdown');
-
-  if (userDropdownBtn && userDropdown) {
-    userDropdownBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
-    });
-
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-        userDropdown.style.display = 'none';
-      }
-    });
-
-    // Prevent dropdown from closing when clicking inside it
-    userDropdown.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
-  }
-}
-
 // Update the plan badge based on user's plan mode
 function updatePlanBadge(planMode) {
   const planBadge = document.getElementById('planMode');
@@ -1776,8 +1751,6 @@ function initBackgroundCheck() {
           return;
         }
         
-        setupUserDropdown();
-        
         if (logoutBtn) {
           logoutBtn.addEventListener('click', handleLogout);
         }
@@ -1807,8 +1780,6 @@ function initBackgroundCheck() {
       try {
         const userData = JSON.parse(storedUserData);
         setUserUI(userData);
-        
-        setupUserDropdown();
         
         if (logoutBtn) {
           logoutBtn.addEventListener('click', handleLogout);

@@ -2,7 +2,7 @@ class LearningHubEnrollment {
   constructor() {
     this.currentUser = null;
     this.enrollmentStatus = {};
-    this.userPlanMode = 0; // Default to free plan
+    this.userPlanMode = 0; 
     this.init();
   }
 
@@ -49,10 +49,8 @@ class LearningHubEnrollment {
       const data = await response.json();
       console.log("Enrollment status data:", data);
 
-      // Ensure enrollment_status is properly set
       this.enrollmentStatus = data.enrollment_status || {};
 
-      // Also check if we have enrolled_weeks array for additional validation
       if (data.enrolled_weeks && Array.isArray(data.enrolled_weeks)) {
         data.enrolled_weeks.forEach((week) => {
           this.enrollmentStatus[week.week] = true;
@@ -64,7 +62,6 @@ class LearningHubEnrollment {
       this.updateModuleCards();
       this.updateProgressDisplay();
 
-      // Show enrollment modal only if user is not enrolled in week1
       if (!this.enrollmentStatus.week1) {
         console.log("User not enrolled in week1, showing modal");
         setTimeout(() => {
@@ -114,7 +111,6 @@ class LearningHubEnrollment {
       if (response.ok && data.enrolled) {
         this.showToast(`Successfully enrolled in ${week}!`, "success");
 
-        // Close modal if it's open
         const enrollmentModal = bootstrap.Modal.getInstance(
           document.getElementById("enrollmentModal")
         );
@@ -122,7 +118,6 @@ class LearningHubEnrollment {
           enrollmentModal.hide();
         }
 
-        // Update enrollment status
         this.enrollmentStatus[week] = true;
         this.updateModuleCards();
         this.updateProgressDisplay();
@@ -131,7 +126,6 @@ class LearningHubEnrollment {
       } else {
         const errorMessage = data.error || "Enrollment failed";
 
-        // Handle specific error cases
         if (errorMessage.includes("already enrolled")) {
           this.enrollmentStatus[week] = true;
           this.updateModuleCards();
@@ -155,9 +149,7 @@ class LearningHubEnrollment {
     }
   }
 
-  // Check if user has access to advanced weeks based on Plan_Mode
   hasAccessToAdvancedWeeks() {
-    // Plan_Mode 2 = Team, Plan_Mode 3 = Enterprise
     return this.userPlanMode === 2 || this.userPlanMode === 3;
   }
 
@@ -169,39 +161,28 @@ class LearningHubEnrollment {
       const statusBadge = card.querySelector(".status-badge");
       const moduleLink = card.querySelector(".module-link");
 
-      // For Week 1 - only check enrollment
       if (week === "1") {
         if (this.enrollmentStatus[`week${week}`] || this.enrollmentStatus[week]) {
-          // User is enrolled - enable the link
           statusBadge.textContent = "Enrolled";
           statusBadge.className = "status-badge enrolled";
 
-          // Remove disabled class and enable pointer events
           moduleLink.classList.remove("disabled");
           moduleLink.style.pointerEvents = "auto";
           moduleLink.style.cursor = "pointer";
-
-          // Remove any existing onclick handlers that might prevent navigation
           moduleLink.removeAttribute("onclick");
           moduleLink.onclick = null;
 
-          // Ensure the link has the correct href
           if (moduleLink.getAttribute("href") && moduleLink.getAttribute("href") !== "#") {
-            // Link already has a valid href, keep it
           } else {
             moduleLink.href = `week${week}.html`;
           }
         } else {
-          // User is NOT enrolled
           statusBadge.textContent = "Not Enrolled";
           statusBadge.className = "status-badge not-started";
 
-          // Add disabled class and disable pointer events
           moduleLink.classList.add("disabled");
           moduleLink.style.pointerEvents = "none";
           moduleLink.style.cursor = "not-allowed";
-
-          // Set up click handler to show enrollment modal
           moduleLink.onclick = (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -209,43 +190,32 @@ class LearningHubEnrollment {
           };
         }
       } 
-      // For Week 2-12 - check both enrollment AND plan mode
       else {
         const hasAccess = this.hasAccessToAdvancedWeeks();
         const isEnrolled = this.enrollmentStatus[`week${week}`] || this.enrollmentStatus[week];
 
         if (hasAccess && isEnrolled) {
-          // User has Team/Enterprise plan AND is enrolled - enable the link
           statusBadge.textContent = "Enrolled";
           statusBadge.className = "status-badge enrolled";
 
-          // Remove disabled class and enable pointer events
           moduleLink.classList.remove("disabled");
           moduleLink.style.pointerEvents = "auto";
           moduleLink.style.cursor = "pointer";
-
-          // Remove any existing onclick handlers that might prevent navigation
           moduleLink.removeAttribute("onclick");
           moduleLink.onclick = null;
 
-          // Ensure the link has the correct href
           if (moduleLink.getAttribute("href") && moduleLink.getAttribute("href") !== "#") {
-            // Link already has a valid href, keep it
           } else {
             moduleLink.href = `week${week}.html`;
           }
         } 
         else if (hasAccess && !isEnrolled) {
-          // User has Team/Enterprise plan but not enrolled - enable with enrollment prompt
           statusBadge.textContent = "Available";
           statusBadge.className = "status-badge in-progress";
 
-          // Remove disabled class and enable pointer events
           moduleLink.classList.remove("disabled");
           moduleLink.style.pointerEvents = "auto";
           moduleLink.style.cursor = "pointer";
-
-          // Set up click handler to enroll and redirect
           moduleLink.onclick = async (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -257,16 +227,12 @@ class LearningHubEnrollment {
           };
         }
         else {
-          // User does NOT have Team/Enterprise plan
           statusBadge.textContent = "Premium";
           statusBadge.className = "status-badge not-started";
 
-          // Add disabled class and disable pointer events
           moduleLink.classList.add("disabled");
           moduleLink.style.pointerEvents = "none";
           moduleLink.style.cursor = "not-allowed";
-
-          // Set up click handler to show subscription modal
           moduleLink.onclick = (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -297,7 +263,6 @@ class LearningHubEnrollment {
   }
 
   setupEventListeners() {
-    // Enrollment modal button
     const enrollBtn = document.getElementById("enrollBtn");
     if (enrollBtn) {
       enrollBtn.addEventListener("click", () => {
@@ -320,24 +285,19 @@ class LearningHubEnrollment {
         const week = button.dataset.week;
         
         if (week === "1") {
-          // For Week 1, check enrollment status
           if (!this.enrollmentStatus.week1) {
             e.preventDefault();
             this.showEnrollmentModal();
           }
-          // If enrolled, allow normal navigation (href will handle it)
         } else {
-          // For Week 2-12, check plan mode
           if (!this.hasAccessToAdvancedWeeks()) {
             e.preventDefault();
             this.showSubscriptionModal();
           }
-          // If user has Team/Enterprise plan, allow normal navigation
         }
       });
     });
 
-    // Module card click handlers (keep existing functionality)
     document.addEventListener("click", (e) => {
       const moduleLink = e.target.closest(".module-link");
       if (moduleLink && moduleLink.classList.contains("disabled")) {
@@ -354,7 +314,6 @@ class LearningHubEnrollment {
   }
 
   showToast(message, type = "info") {
-    // Remove existing toast
     const existingToast = document.getElementById("toast");
     if (existingToast) {
       existingToast.remove();
@@ -373,12 +332,10 @@ class LearningHubEnrollment {
 
     document.body.appendChild(toast);
 
-    // Show toast
     setTimeout(() => {
       toast.classList.add("show");
     }, 100);
 
-    // Hide toast after 3 seconds
     setTimeout(() => {
       toast.classList.remove("show");
       setTimeout(() => {
@@ -406,7 +363,6 @@ class LearningHubEnrollment {
     console.log("User Plan Mode:", this.userPlanMode);
     console.log("Has access to advanced weeks:", this.hasAccessToAdvancedWeeks());
 
-    // Test the enrollment endpoint directly
     fetch("/api/modules/enrollment-status")
       .then((response) => {
         console.log(
@@ -519,19 +475,15 @@ const toastStyles = `
 }
 `;
 
-// Inject toast styles
 const styleSheet = document.createElement("style");
 styleSheet.textContent = toastStyles;
 document.head.appendChild(styleSheet);
 
-// Initialize the enrollment system when DOM is loaded
 let learningHub;
+
 document.addEventListener("DOMContentLoaded", () => {
   learningHub = new LearningHubEnrollment();
   window.learningHub = learningHub;
-
-  // Add debug method to window
-  window.testEnrollment = () => {
-    learningHub.testEnrollment();
+  window.testEnrollment = () => { learningHub.testEnrollment();
   };
 });

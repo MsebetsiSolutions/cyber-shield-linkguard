@@ -126,28 +126,6 @@ async function handleLogout() {
 }
 logoutBtn.addEventListener('click', handleLogout);
 
-// User dropdown functionality
-const userDropdownBtn = $('userDropdownBtn');
-const userDropdown = $('userDropdown');
-
-// Toggle desktop dropdown
-userDropdownBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
-});
-
-// Close dropdowns when clicking outside
-document.addEventListener('click', (e) => {
-  if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-    userDropdown.style.display = 'none';
-  }
-});
-
-// Prevent dropdown from closing when clicking inside it
-userDropdown.addEventListener('click', (e) => {
-  e.stopPropagation();
-});
-
 // Simple animation observer for elements
 document.addEventListener('DOMContentLoaded', function() {
   // Add intersection observer for animated items
