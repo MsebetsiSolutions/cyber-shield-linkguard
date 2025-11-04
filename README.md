@@ -146,6 +146,10 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     ├── profile.css
         |            |     └── profile.js
         |            |
+        |            ├── email-templates/        
+        |            |     ├── microsoft-template.html
+        |            |     └── reset-password.html
+        |            |
         |            ├── supcom/        
         |            |     ├── supcom.html
         |            |     ├── supcom.css
