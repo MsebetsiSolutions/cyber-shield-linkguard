@@ -227,6 +227,36 @@ def try_taxii_pull(server: str, collection_id: str, username: Optional[str], pas
     except Exception as e:
         return [], str(e)
 
+
+def list_taxii_collections(server: str, username: Optional[str], password: Optional[str]) -> Tuple[List[Dict[str, str]], Optional[str]]:
+    """
+    Return a list of collections available on a TAXII 2.1 server.
+    Each item: {"id": ..., "title": ..., "url": ...}
+    """
+    try:
+        from taxii2client.v21 import Server  # type: ignore
+    except Exception as e:
+        return [], "taxii2-client not installed. Add to requirements to enable TAXII features."
+
+    try:
+        if username and password:
+            srv = Server(server, user=username, password=password, verify=True)
+        else:
+            srv = Server(server, verify=True)
+
+        out: List[Dict[str, str]] = []
+        for api_root in srv.api_roots:
+            for col in api_root.collections:
+                out.append({
+                    "id": getattr(col, "id", ""),
+                    "title": getattr(col, "title", ""),
+                    "url": getattr(col, "url", ""),
+                    "api_root": getattr(api_root, "url", ""),
+                })
+        return out, None
+    except Exception as e:
+        return [], str(e)
+
 def parse_stix_objects(objs: List[Dict[str, Any]]) -> Dict[str, List[str]]:
     """Extract common IOCs from a STIX bundle."""
     ips: List[str] = []
@@ -360,6 +390,27 @@ def ti_taxii_pull():
     iocs = parse_stix_objects(objs)
     mitre = extract_tactics(json.dumps(objs))
     return jsonify({"objects": len(objs), "iocs": iocs, "mitre": mitre})
+
+
+@intel_bp.post("/api/ti/taxii/list")
+def ti_taxii_list():
+    """
+    List collections from a TAXII 2.1 server.
+    Body: { "server": "https://...", "username": null, "password": null }
+    """
+    b = request.get_json(silent=True) or {}
+    server = (b.get("server") or "").strip()
+    username = b.get("username")
+    password = b.get("password")
+
+    if not server:
+        return jsonify({"error": "server is required"}), 400
+
+    cols, err = list_taxii_collections(server, username, password)
+    if err:
+        # Surface a friendly error message for the UI
+        return jsonify({"error": err}), 501
+    return jsonify({"collections": cols, "count": len(cols)})
 
 
 # --------------------------- Routes: MITRE Map ----------------------------- #

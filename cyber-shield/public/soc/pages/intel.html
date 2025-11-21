@@ -12,23 +12,37 @@
   <!-- SOURCE & NORMALIZATION -->
   <div class="grid two">
     <div class="card">
-      <h3>IOC Paste</h3>
-      <textarea id="ioc" placeholder="Paste raw IOCs, one per line or mixed text"></textarea>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="btn sm" id="parseIoc"><i class="bi bi-magic"></i> Normalize</button>
-        <button class="btn sm ghost" id="btnClear"><i class="bi bi-eraser"></i> Clear</button>
+      <h3>1. Ingest IOCs</h3>
+      <p class="muted">Paste raw IOCs (IPs, domains, URLs, hashes). They are normalized automatically.</p>
+      <textarea id="ioc" placeholder="Paste your threat data here... (e.g., 192.168.1.1, malicious.com, http://bad.com/evil.exe)"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+        <button class="btn sm" id="btnPasteNormalize">📥 Paste & Normalize</button>
+        <button class="btn sm ghost" id="btnClearAll">🗑️ Clear All</button>
+        <a href="#" id="samplePaste" style="margin-left:8px; font-size:0.9em">e.g., Paste a log file, email headers, or a report here</a>
       </div>
-      <pre id="iocOut"></pre>
+
+      <div class="results-box" style="margin-top:12px">
+        <h4 id="normCount">Normalized Indicators (0 Found)</h4>
+        <table class="table compact" id="normTable">
+          <thead><tr><th>Type</th><th>Value</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-top:12px">
+        <button class="btn primary" id="btnProceedEnrich" disabled>Proceed to Enrichment →</button>
+      </div>
     </div>
 
     <div class="card">
-      <h3>TAXII / STIX Feeds</h3>
+      <h3>2. Pull from TAXII Feed</h3>
+      <p class="muted">Connect to a TAXII 2.1 server, list collections, then pull objects.</p>
       <label>Server URL</label>
-      <input id="taxiiUrl" placeholder="https://cti.example.org/taxii2">
+      <input id="taxiiUrl" placeholder="https://cti.example.org/taxii/">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
         <div>
-          <label>Collection ID</label>
-          <input id="taxiiCollection" placeholder="e.g., 95ecc380-afe9-11e4-9b6c-751b66dd541e">
+          <label>Collection</label>
+          <select id="taxiiCollection"><option>-- First, click "List Collections" --</option></select>
         </div>
         <div>
           <label>Range (days)</label>
@@ -36,9 +50,10 @@
         </div>
       </div>
       <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="btn sm" id="btnListCollections"><i class="bi bi-collection"></i> List Collections</button>
-        <button class="btn sm" id="btnPullTaxii"><i class="bi bi-download"></i> Pull Objects</button>
+        <button class="btn sm" id="btnListCollections">🔍 Test & List Collections</button>
+        <button class="btn sm" id="btnPullTaxii">⬇️ Pull Indicators</button>
       </div>
+      <div id="taxiiAlert" style="margin-top:8px"></div>
       <pre id="taxiiOut"></pre>
     </div>
   </div>
@@ -60,7 +75,7 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
         <div>
           <label>Confidence (0–100)</label>
-          <input id="conf" type="number" min="0" max="100" value="80">
+          <input id="conf" type="number" title="Confidence" min="0" max="100" value="80">
         </div>
         <div>
           <label>TLP</label>
@@ -127,7 +142,7 @@
       </div>
       <div>
         <label>Trigger Threshold (Risk ≥)</label>
-        <input id="whThreshold" type="number" min="0" max="100" value="80">
+        <input id="whThreshold" type="number" title="Trigger" min="0" max="100" value="80">
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:8px">
@@ -153,11 +168,16 @@
 
   const el = {
     ioc: $("#ioc"),
-    iocOut: $("#iocOut"),
+    normTable: $("#normTable tbody"),
+    normCount: $("#normCount"),
+    btnPasteNormalize: $("#btnPasteNormalize"),
+    btnClearAll: $("#btnClearAll"),
+    btnProceedEnrich: $("#btnProceedEnrich"),
     taxiiUrl: $("#taxiiUrl"),
     taxiiCol: $("#taxiiCollection"),
     taxiiDays: $("#taxiiDays"),
     taxiiOut: $("#taxiiOut"),
+    taxiiAlert: $("#taxiiAlert"),
     conf: $("#conf"),
     tlp: $("#tlp"),
     table: $("#tiTable tbody"),
@@ -168,72 +188,128 @@
   };
 
   // =========================
-  // NORMALIZATION
+  // NORMALIZATION (server-backed, real-time)
   // =========================
-  $("#parseIoc").addEventListener("click", ()=>{
-    const text = el.ioc.value || "";
-    const ips = [...text.matchAll(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g)].map(m=>m[0]);
-    const domains = [...text.matchAll(/\b[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z]{2,})+\b/gi)].map(m=>m[0]);
-    const urls = [...text.matchAll(/https?:\/\/[^\s"']+/gi)].map(m=>m[0]);
-    const hashes = [...text.matchAll(/\b[a-f0-9]{32}\b|\b[a-f0-9]{40}\b|\b[a-f0-9]{64}\b/gi)].map(m=>m[0]);
-    state.normalized = {
-      ips: [...new Set(ips)],
-      domains: [...new Set(domains)],
-      urls: [...new Set(urls)],
-      hashes: [...new Set(hashes)]
-    };
-    el.iocOut.textContent = JSON.stringify(state.normalized, null, 2);
+  function debounce(fn, wait){ let t; return (...a)=>{ clearTimeout(t); t = setTimeout(()=>fn(...a), wait); }; }
+
+  async function callParse(text){
+    try{
+      const r = await fetch('/api/ti/parse', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text}) });
+      if (!r.ok){ const txt = await r.text(); throw new Error(txt||('HTTP '+r.status)); }
+      const j = await r.json().catch(()=>({}));
+      // ensure structure
+      state.normalized = {
+        ips: j.ips||[], domains: j.domains||[], urls: j.urls||[], hashes: j.hashes||[]
+      };
+      renderNormTable();
+      return j;
+    }catch(e){
+      console.error('Parse error', e);
+      // fallback: keep using client-side naive parse
+      return { error: String(e) };
+    }
+  }
+
+  const debouncedParse = debounce(async ()=>{
+    await callParse(el.ioc.value || "");
+  }, 350);
+
+  // wire textarea for real-time normalization
+  el.ioc.addEventListener('input', ()=>{
+    debouncedParse();
   });
 
-  $("#btnClear").addEventListener("click", ()=>{
-    el.ioc.value = ""; el.iocOut.textContent = ""; el.taxiiOut.textContent="";
+  // Paste & Normalize button: try clipboard first
+  el.btnPasteNormalize.addEventListener('click', async ()=>{
+    let text = el.ioc.value || '';
+    try{ if (navigator.clipboard){ const c = await navigator.clipboard.readText(); if (c) text = c; } }catch(e){}
+    el.ioc.value = text;
+    await callParse(text);
+  });
+
+  // Clear All
+  el.btnClearAll.addEventListener('click', ()=>{
+    el.ioc.value = '';
     state.normalized = {ips:[],domains:[],urls:[],hashes:[]};
     state.results = [];
-    renderResults();
+    renderNormTable(); renderResults();
+  });
+
+  // Render normalized table
+  function renderNormTable(){
+    const kinds = ['ips','domains','urls','hashes'];
+    const rows = [];
+    kinds.forEach(k=> {
+      (state.normalized[k]||[]).forEach(v=> rows.push({type:k, value:v}));
+    });
+    el.normTable.innerHTML = '';
+    rows.forEach(r=>{
+      const tr = document.createElement('tr');
+      const emoji = r.type==='ips'? '🟢 IP' : r.type==='domains'? '🟡 Domain' : r.type==='urls'? '🔴 URL' : '🔵 Hash';
+      tr.innerHTML = `<td>${emoji}</td><td>${r.value}</td><td>New</td><td><button class="btn sm ghost norm-remove">🗑️</button></td>`;
+      tr.querySelector('.norm-remove').addEventListener('click', ()=>{ removeNormalized(r.type, r.value); });
+      el.normTable.appendChild(tr);
+    });
+    el.normCount.textContent = `Normalized Indicators (${rows.length} Found)`;
+    el.btnProceedEnrich.disabled = rows.length===0;
+  }
+
+  function removeNormalized(kind, val){
+    state.normalized[kind] = (state.normalized[kind]||[]).filter(x=> x!==val);
+    renderNormTable();
+  }
+
+  // Proceed to Enrichment scrolls to enrichment card
+  el.btnProceedEnrich.addEventListener('click', ()=>{
+    const target = document.querySelector('#btnEnrich');
+    if (target) target.scrollIntoView({behavior:'smooth', block:'center'});
   });
 
   // =========================
-  // TAXII / STIX
+  // TAXII / STIX (improved UX)
   // =========================
   $("#btnListCollections").addEventListener("click", async ()=>{
-    const body = { url: el.taxiiUrl.value.trim() };
-    const r = await fetch("/api/ti/taxii/list", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
-    el.taxiiOut.textContent = await r.text();
+    el.taxiiAlert.textContent = '';
+    const server = (el.taxiiUrl.value||'').trim();
+    if (!server){ el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ Please enter a TAXII server URL.</div>`; return; }
+    el.taxiiOut.textContent = 'Listing collections...';
+    try{
+      const r = await fetch('/api/ti/taxii/list', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({server}) });
+      const j = await r.json().catch(()=>({error:'invalid json'}));
+      if (!r.ok || j.error){ el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ ${j.error||('HTTP '+r.status)}</div>`; el.taxiiOut.textContent = j.error||JSON.stringify(j,null,2); return; }
+      el.taxiiOut.textContent = `Found ${j.count} collections`;
+      // populate select
+      const sel = el.taxiiCol;
+      sel.innerHTML = '';
+      (j.collections||[]).forEach(c=>{
+        const opt = document.createElement('option');
+        opt.value = c.id || c.url || c.title;
+        opt.textContent = (c.title||c.id) + ` (${c.id})`;
+        sel.appendChild(opt);
+      });
+    }catch(e){ el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ ${String(e)}</div>`; el.taxiiOut.textContent = String(e); }
   });
 
   $("#btnPullTaxii").addEventListener("click", async ()=>{
-    const days = Math.max(1, parseInt(el.taxiiDays.value||"7",10));
-    const since = new Date(Date.now() - days*24*3600*1000).toISOString();
-    const body = { url: el.taxiiUrl.value.trim(), collection: el.taxiiCol.value.trim(), added_after: since };
-    const r = await fetch("/api/ti/taxii/pull", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
-    const txt = await r.text();
-    el.taxiiOut.textContent = txt;
-
-    // Optional: auto-extract indicators from returned STIX objects if backend returns them
-    try {
-      const data = JSON.parse(txt);
-      // If backend returns parsed indicators, merge them:
-      if (data && data.indicators) {
-        mergeIndicators(data.indicators);
+    el.taxiiAlert.textContent = '';
+    const server = (el.taxiiUrl.value||'').trim();
+    const collection_id = (el.taxiiCol.value||'').trim();
+    if (!server || !collection_id){ el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ Server and collection required.</div>`; return; }
+    el.taxiiOut.textContent = 'Pulling objects (this may take a moment)...';
+    try{
+      const r = await fetch('/api/ti/taxii/pull', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({server, collection_id}) });
+      const j = await r.json().catch(()=>({error: 'invalid json'}));
+      if (!r.ok || j.error){ el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ ${j.error||('HTTP '+r.status)}</div>`; el.taxiiOut.textContent = j.error||JSON.stringify(j,null,2); return; }
+      el.taxiiOut.textContent = `Pulled ${j.objects||0} objects.`;
+      if (j.iocs){
+        // merge
+        ['ips','domains','urls','hashes'].forEach(k=>{
+          (j.iocs[k]||[]).forEach(v=>{ if (!state.normalized[k].includes(v)) state.normalized[k].push(v); });
+        });
+        renderNormTable();
       }
-    } catch(e){}
+    }catch(e){ el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ ${String(e)}</div>`; el.taxiiOut.textContent = String(e); }
   });
-
-  function mergeIndicators(items){
-    // items can be array of {indicator, type}
-    items.forEach(it=>{
-      const t = (it.type||"").toLowerCase();
-      if (t.includes("ip")) addNorm("ips", it.indicator);
-      else if (t.includes("domain")) addNorm("domains", it.indicator);
-      else if (t.includes("url")) addNorm("urls", it.indicator);
-      else if (t.includes("hash")) addNorm("hashes", it.indicator);
-    });
-    el.iocOut.textContent = JSON.stringify(state.normalized, null, 2);
-  }
-  function addNorm(kind, val){
-    if (!val) return;
-    if (!state.normalized[kind].includes(val)) state.normalized[kind].push(val);
-  }
 
   // =========================
   // ENRICHMENT & SCORING
