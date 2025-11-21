@@ -11,6 +11,9 @@ from typing import Any, Dict, List, Optional, Tuple
 import requests
 from flask import Blueprint, request, jsonify, Response
 
+import uuid
+from datetime import datetime
+
 intel_bp = Blueprint("intel", __name__)
 
 # --------------------------- Config & Helpers ------------------------------ #
@@ -102,6 +105,158 @@ def http_get_json(url: str, headers: Dict[str, str], params: Dict[str, Any] | No
         return None, f"{url} -> HTTP {r.status_code}"
     except requests.RequestException as e:
         return None, str(e)
+    
+
+@intel_bp.post("/api/ti/mapping/attack")
+def ti_mapping_attack():
+    """
+    Map indicators to MITRE ATT&CK techniques (simplified version).
+    Frontend expects: { results: [{indicator, techniques:[], tactics:[]}, ...] }
+    """
+    b = request.get_json(silent=True) or {}
+    indicators = b.get("indicators", [])
+    
+    # Simplified mapping - in production, you'd use actual ATT&CK intelligence
+    mapped_results = []
+    for indicator in indicators:
+        ind_value = indicator.get("indicator", "")
+        ind_type = indicator.get("type", "")
+        
+        # Simple heuristic mapping based on indicator type and content
+        techniques = []
+        tactics = []
+        
+        if ind_type == "ipv4-addr":
+            techniques = ["T1071.001"]  # Application Layer Protocol: Web Protocols
+            tactics = ["TA0011", "TA0010"]  # Command and Control, Exfiltration
+        elif ind_type == "domain-name" and any(x in ind_value.lower() for x in ["mail", "smtp"]):
+            techniques = ["T1566.001"]  # Phishing: Spearphishing Attachment
+            tactics = ["TA0001"]  # Initial Access
+        elif ind_type == "url" and any(x in ind_value.lower() for x in ["exe", "zip", "download"]):
+            techniques = ["T1105"]  # Ingress Tool Transfer
+            tactics = ["TA0002"]  # Execution
+        
+        mapped_results.append({
+            "indicator": ind_value,
+            "techniques": techniques,
+            "tactics": tactics
+        })
+    
+    return jsonify({"results": mapped_results})
+
+@intel_bp.post("/api/siem/forward")
+def siem_forward():
+    """
+    Forward indicators to SIEM (alternative to /api/ti/push).
+    Uses the same logic as ti_push but with different expected input format.
+    """
+    b = request.get_json(silent=True) or {}
+    indicators = b.get("indicators", [])
+    
+    # Convert frontend format to iocs format
+    iocs = {"ips": [], "domains": [], "urls": [], "hashes": []}
+    for ind in indicators:
+        indicator = ind.get("indicator", "")
+        ind_type = ind.get("type", "")
+        
+        if ind_type == "ipv4-addr":
+            iocs["ips"].append(indicator)
+        elif ind_type == "domain-name":
+            iocs["domains"].append(indicator)
+        elif ind_type == "url":
+            iocs["urls"].append(indicator)
+        elif "hash" in ind_type:
+            iocs["hashes"].append(indicator)
+    
+    # Use existing ti_push logic
+    source = "ti"
+    sourcetype = "msebetsi:ti"
+    hec_url = get_secret("splunk_hec_url") or ""
+    hec_token = get_secret("splunk_hec_token") or ""
+    
+    if not hec_url or not hec_token:
+        return jsonify({"error": "Missing HEC url/token"}), 400
+
+    headers = {
+        "Authorization": f"Splunk {hec_token}",
+        "Content-Type": "application/json",
+        "User-Agent": UA,
+    }
+
+    event = {
+        "event": {"type": "ioc_batch", "iocs": iocs},
+        "source": source,
+        "sourcetype": sourcetype,
+    }
+    
+    try:
+        r = requests.post(hec_url + "/services/collector", headers=headers, 
+                         data=json.dumps(event), timeout=TIMEOUT, verify=True)
+        return Response(r.text, status=r.status_code, 
+                       mimetype="application/json" if "json" in (r.headers.get("content-type", "")) else "text/plain")
+    except requests.RequestException as e:
+        return jsonify({"error": str(e)}), 502
+
+@intel_bp.post("/api/webhooks/relay")
+def webhooks_relay():
+    """
+    Relay webhook notifications for high-risk IOCs.
+    Body: { "webhooks": [{url, threshold}], "items": [indicator_data] }
+    """
+    b = request.get_json(silent=True) or {}
+    webhooks = b.get("webhooks", [])
+    items = b.get("items", [])
+    
+    results = []
+    for wh in webhooks:
+        url = wh.get("url", "").strip()
+        threshold = wh.get("threshold", 80)
+        
+        if not url:
+            continue
+            
+        # Filter items by threshold
+        high_risk_items = [item for item in items if item.get("risk", 0) >= threshold]
+        
+        if not high_risk_items:
+            continue
+            
+        payload = {
+            "text": f"🚨 Msebetsi SOC Alert: {len(high_risk_items)} high-risk IOCs detected",
+            "attachments": [
+                {
+                    "title": "High Risk Indicators",
+                    "fields": [
+                        {
+                            "title": item.get("indicator", "Unknown"),
+                            "value": f"Risk: {item.get('risk', 0)} | Type: {item.get('type', 'Unknown')}",
+                            "short": True
+                        }
+                        for item in high_risk_items[:10]  # Limit to first 10
+                    ],
+                    "color": "danger" if any(item.get("risk", 0) >= 90 for item in high_risk_items) else "warning"
+                }
+            ]
+        }
+        
+        headers = {"Content-Type": "application/json", "User-Agent": UA}
+        try:
+            r = requests.post(url, headers=headers, data=json.dumps(payload), 
+                             timeout=TIMEOUT, verify=True)
+            results.append({
+                "url": url,
+                "status": r.status_code,
+                "success": 200 <= r.status_code < 300
+            })
+        except requests.RequestException as e:
+            results.append({
+                "url": url,
+                "status": "error",
+                "error": str(e)
+            })
+    
+    return jsonify({"results": results})
+
 
 # --------------------------- Enrichment Providers -------------------------- #
 

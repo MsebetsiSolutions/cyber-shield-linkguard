@@ -2,29 +2,40 @@
   <div class="card-head">
     <h3>Threat Intelligence</h3>
     <div class="actions">
-      <button class="btn sm ghost" id="btnLoadProfile" title="Load profile"><i class="bi bi-cloud-download"></i></button>
+      <button class="btn sm ghost" id="btnLoadProfile" title="Load profile"><i
+          class="bi bi-cloud-download"></i></button>
       <button class="btn sm ghost" id="btnSaveProfile" title="Save profile"><i class="bi bi-save"></i></button>
     </div>
   </div>
 
-  <p class="muted">Paste IOCs, pull TAXII feeds, enrich via top APIs, map to MITRE ATT&CK, then export or push to SIEM & webhooks.</p>
+  <p class="muted">Paste IOCs, pull TAXII feeds, enrich via top APIs, map to MITRE ATT&CK, then export or push to SIEM &
+    webhooks.</p>
 
   <!-- SOURCE & NORMALIZATION -->
   <div class="grid two">
     <div class="card">
       <h3>1. Ingest IOCs</h3>
       <p class="muted">Paste raw IOCs (IPs, domains, URLs, hashes). They are normalized automatically.</p>
-      <textarea id="ioc" placeholder="Paste your threat data here... (e.g., 192.168.1.1, malicious.com, http://bad.com/evil.exe)"></textarea>
+      <textarea id="ioc"
+        placeholder="Paste your threat data here... (e.g., 192.168.1.1, malicious.com, http://bad.com/evil.exe)"></textarea>
       <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
         <button class="btn sm" id="btnPasteNormalize">📥 Paste & Normalize</button>
         <button class="btn sm ghost" id="btnClearAll">🗑️ Clear All</button>
-        <a href="#" id="samplePaste" style="margin-left:8px; font-size:0.9em">e.g., Paste a log file, email headers, or a report here</a>
+        <a href="#" id="samplePaste" style="margin-left:8px; font-size:0.9em">e.g., Paste a log file, email headers, or
+          a report here</a>
       </div>
 
       <div class="results-box" style="margin-top:12px">
         <h4 id="normCount">Normalized Indicators (0 Found)</h4>
         <table class="table compact" id="normTable">
-          <thead><tr><th>Type</th><th>Value</th><th>Status</th><th>Action</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Value</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
           <tbody></tbody>
         </table>
       </div>
@@ -42,7 +53,9 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
         <div>
           <label>Collection</label>
-          <select id="taxiiCollection"><option>-- First, click "List Collections" --</option></select>
+          <select id="taxiiCollection">
+            <option>-- First, click "List Collections" --</option>
+          </select>
         </div>
         <div>
           <label>Range (days)</label>
@@ -75,7 +88,7 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
         <div>
           <label>Confidence (0–100)</label>
-          <input id="conf" type="number" title="Confidence" min="0" max="100" value="80">
+          <input id="conf" type="number" min="0" max="100" value="80">
         </div>
         <div>
           <label>TLP</label>
@@ -96,7 +109,8 @@
 
     <div class="card">
       <h3>MITRE ATT&CK Mapping</h3>
-      <p class="muted">Auto-tag indicators with Techniques/Tactics based on enrichment signals, behaviors, and intel notes.</p>
+      <p class="muted">Auto-tag indicators with Techniques/Tactics based on enrichment signals, behaviors, and intel
+        notes.</p>
       <div style="display:flex;gap:8px">
         <button class="btn sm" id="btnMapAttack"><i class="bi bi-diagram-3"></i> Map ATT&CK</button>
         <button class="btn sm ghost" id="btnHeatmap"><i class="bi bi-grid-3x3-gap"></i> Build Heatmap CSV</button>
@@ -119,7 +133,14 @@
     <table class="table compact" id="tiTable">
       <thead>
         <tr>
-          <th>Indicator</th><th>Type</th><th>Risk</th><th>First Seen</th><th>Last Seen</th><th>Sources</th><th>ATT&CK</th><th>TLP</th>
+          <th>Indicator</th>
+          <th>Type</th>
+          <th>Risk</th>
+          <th>First Seen</th>
+          <th>Last Seen</th>
+          <th>Sources</th>
+          <th>ATT&CK</th>
+          <th>TLP</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -142,7 +163,7 @@
       </div>
       <div>
         <label>Trigger Threshold (Risk ≥)</label>
-        <input id="whThreshold" type="number" title="Trigger" min="0" max="100" value="80">
+        <input id="whThreshold" type="number" min="0" max="100" value="80">
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:8px">
@@ -154,472 +175,532 @@
 </div>
 
 <script>
-(function(){
-  const $ = (s,p=document)=>p.querySelector(s);
-  const qsa = (s,p=document)=>[...p.querySelectorAll(s)];
+  (function () {
+    const $ = (s, p = document) => p.querySelector(s);
+    const qsa = (s, p = document) => [...p.querySelectorAll(s)];
 
-  const state = {
-    normalized: { ips:[], domains:[], urls:[], hashes:[] },
-    results: [],   // [{indicator,type,risk,first_seen,last_seen,sources:[],techniques:[],tactics:[],tlp}]
-    webhooks: [],  // [{url, threshold}]
-    tlp: 'TLP:GREEN',
-    conf: 80
-  };
+    const state = {
+      normalized: { ips: [], domains: [], urls: [], hashes: [] },
+      results: [],   // [{indicator,type,risk,first_seen,last_seen,sources:[],techniques:[],tactics:[],tlp}]
+      webhooks: [],  // [{url, threshold}]
+      tlp: 'TLP:GREEN',
+      conf: 80
+    };
 
-  const el = {
-    ioc: $("#ioc"),
-    normTable: $("#normTable tbody"),
-    normCount: $("#normCount"),
-    btnPasteNormalize: $("#btnPasteNormalize"),
-    btnClearAll: $("#btnClearAll"),
-    btnProceedEnrich: $("#btnProceedEnrich"),
-    taxiiUrl: $("#taxiiUrl"),
-    taxiiCol: $("#taxiiCollection"),
-    taxiiDays: $("#taxiiDays"),
-    taxiiOut: $("#taxiiOut"),
-    taxiiAlert: $("#taxiiAlert"),
-    conf: $("#conf"),
-    tlp: $("#tlp"),
-    table: $("#tiTable tbody"),
-    attackOut: $("#attackOut"),
-    whUrl: $("#whUrl"),
-    whThreshold: $("#whThreshold"),
-    whList: $("#whList"),
-  };
+    const el = {
+      ioc: $("#ioc"),
+      normTable: $("#normTable tbody"),
+      normCount: $("#normCount"),
+      btnPasteNormalize: $("#btnPasteNormalize"),
+      btnClearAll: $("#btnClearAll"),
+      btnProceedEnrich: $("#btnProceedEnrich"),
+      taxiiUrl: $("#taxiiUrl"),
+      taxiiCol: $("#taxiiCollection"),
+      taxiiDays: $("#taxiiDays"),
+      taxiiOut: $("#taxiiOut"),
+      taxiiAlert: $("#taxiiAlert"),
+      conf: $("#conf"),
+      tlp: $("#tlp"),
+      table: $("#tiTable tbody"),
+      attackOut: $("#attackOut"),
+      whUrl: $("#whUrl"),
+      whThreshold: $("#whThreshold"),
+      whList: $("#whList"),
+    };
 
-  // =========================
-  // NORMALIZATION (server-backed, real-time)
-  // =========================
-  function debounce(fn, wait){ let t; return (...a)=>{ clearTimeout(t); t = setTimeout(()=>fn(...a), wait); }; }
+    // =========================
+    // NORMALIZATION (server-backed, real-time)
+    // =========================
+    function debounce(fn, wait) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); }; }
 
-  async function callParse(text){
-    try{
-      const r = await fetch('/api/ti/parse', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text}) });
-      if (!r.ok){ const txt = await r.text(); throw new Error(txt||('HTTP '+r.status)); }
-      const j = await r.json().catch(()=>({}));
-      // ensure structure
-      state.normalized = {
-        ips: j.ips||[], domains: j.domains||[], urls: j.urls||[], hashes: j.hashes||[]
-      };
-      renderNormTable();
-      return j;
-    }catch(e){
-      console.error('Parse error', e);
-      // fallback: keep using client-side naive parse
-      return { error: String(e) };
-    }
-  }
-
-  const debouncedParse = debounce(async ()=>{
-    await callParse(el.ioc.value || "");
-  }, 350);
-
-  // wire textarea for real-time normalization
-  el.ioc.addEventListener('input', ()=>{
-    debouncedParse();
-  });
-
-  // Paste & Normalize button: try clipboard first
-  el.btnPasteNormalize.addEventListener('click', async ()=>{
-    let text = el.ioc.value || '';
-    try{ if (navigator.clipboard){ const c = await navigator.clipboard.readText(); if (c) text = c; } }catch(e){}
-    el.ioc.value = text;
-    await callParse(text);
-  });
-
-  // Clear All
-  el.btnClearAll.addEventListener('click', ()=>{
-    el.ioc.value = '';
-    state.normalized = {ips:[],domains:[],urls:[],hashes:[]};
-    state.results = [];
-    renderNormTable(); renderResults();
-  });
-
-  // Render normalized table
-  function renderNormTable(){
-    const kinds = ['ips','domains','urls','hashes'];
-    const rows = [];
-    kinds.forEach(k=> {
-      (state.normalized[k]||[]).forEach(v=> rows.push({type:k, value:v}));
-    });
-    el.normTable.innerHTML = '';
-    rows.forEach(r=>{
-      const tr = document.createElement('tr');
-      const emoji = r.type==='ips'? '🟢 IP' : r.type==='domains'? '🟡 Domain' : r.type==='urls'? '🔴 URL' : '🔵 Hash';
-      tr.innerHTML = `<td>${emoji}</td><td>${r.value}</td><td>New</td><td><button class="btn sm ghost norm-remove">🗑️</button></td>`;
-      tr.querySelector('.norm-remove').addEventListener('click', ()=>{ removeNormalized(r.type, r.value); });
-      el.normTable.appendChild(tr);
-    });
-    el.normCount.textContent = `Normalized Indicators (${rows.length} Found)`;
-    el.btnProceedEnrich.disabled = rows.length===0;
-  }
-
-  function removeNormalized(kind, val){
-    state.normalized[kind] = (state.normalized[kind]||[]).filter(x=> x!==val);
-    renderNormTable();
-  }
-
-  // Proceed to Enrichment scrolls to enrichment card
-  el.btnProceedEnrich.addEventListener('click', ()=>{
-    const target = document.querySelector('#btnEnrich');
-    if (target) target.scrollIntoView({behavior:'smooth', block:'center'});
-  });
-
-  // =========================
-  // TAXII / STIX (improved UX)
-  // =========================
-  $("#btnListCollections").addEventListener("click", async ()=>{
-    el.taxiiAlert.textContent = '';
-    const server = (el.taxiiUrl.value||'').trim();
-    if (!server){ el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ Please enter a TAXII server URL.</div>`; return; }
-    el.taxiiOut.textContent = 'Listing collections...';
-    try{
-      const r = await fetch('/api/ti/taxii/list', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({server}) });
-      const j = await r.json().catch(()=>({error:'invalid json'}));
-      if (!r.ok || j.error){ el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ ${j.error||('HTTP '+r.status)}</div>`; el.taxiiOut.textContent = j.error||JSON.stringify(j,null,2); return; }
-      el.taxiiOut.textContent = `Found ${j.count} collections`;
-      // populate select
-      const sel = el.taxiiCol;
-      sel.innerHTML = '';
-      (j.collections||[]).forEach(c=>{
-        const opt = document.createElement('option');
-        opt.value = c.id || c.url || c.title;
-        opt.textContent = (c.title||c.id) + ` (${c.id})`;
-        sel.appendChild(opt);
-      });
-    }catch(e){ el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ ${String(e)}</div>`; el.taxiiOut.textContent = String(e); }
-  });
-
-  $("#btnPullTaxii").addEventListener("click", async ()=>{
-    el.taxiiAlert.textContent = '';
-    const server = (el.taxiiUrl.value||'').trim();
-    const collection_id = (el.taxiiCol.value||'').trim();
-    if (!server || !collection_id){ el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ Server and collection required.</div>`; return; }
-    el.taxiiOut.textContent = 'Pulling objects (this may take a moment)...';
-    try{
-      const r = await fetch('/api/ti/taxii/pull', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({server, collection_id}) });
-      const j = await r.json().catch(()=>({error: 'invalid json'}));
-      if (!r.ok || j.error){ el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ ${j.error||('HTTP '+r.status)}</div>`; el.taxiiOut.textContent = j.error||JSON.stringify(j,null,2); return; }
-      el.taxiiOut.textContent = `Pulled ${j.objects||0} objects.`;
-      if (j.iocs){
-        // merge
-        ['ips','domains','urls','hashes'].forEach(k=>{
-          (j.iocs[k]||[]).forEach(v=>{ if (!state.normalized[k].includes(v)) state.normalized[k].push(v); });
-        });
+    async function callParse(text) {
+      try {
+        const r = await fetch('/api/ti/parse', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+        if (!r.ok) { const txt = await r.text(); throw new Error(txt || ('HTTP ' + r.status)); }
+        const j = await r.json().catch(() => ({}));
+        // ensure structure
+        state.normalized = {
+          ips: j.ips || [], domains: j.domains || [], urls: j.urls || [], hashes: j.hashes || []
+        };
         renderNormTable();
+        return j;
+      } catch (e) {
+        console.error('Parse error', e);
+        // fallback: keep using client-side naive parse
+        return { error: String(e) };
       }
-    }catch(e){ el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ ${String(e)}</div>`; el.taxiiOut.textContent = String(e); }
-  });
+    }
 
-  // =========================
-  // ENRICHMENT & SCORING
-  // =========================
-  $("#btnEnrich").addEventListener("click", async ()=>{
-    const providers = qsa(".enr:checked").map(x=>x.value);
-    state.tlp = el.tlp.value;
-    state.conf = clamp(parseInt(el.conf.value||"80",10), 0, 100);
+    const debouncedParse = debounce(async () => {
+      await callParse(el.ioc.value || "");
+    }, 350);
 
-    const body = {
-      iocs: state.normalized, providers, tlp: state.tlp, confidence: state.conf
-    };
-    const r = await fetch("/api/ti/enrich", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
-    const data = await r.json().catch(()=> ({}));
-
-    // expected: { results: [{indicator,type,risk,first_seen,last_seen,sources:[],tags:[],details:{}, tlp, confidence}], deduped_count, took_ms }
-    state.results = dedupeAndScore(data.results || []);
-    renderResults();
-    autoWebhooks(state.results);
-  });
-
-  $("#btnScore").addEventListener("click", ()=>{
-    // If enrichment is not available, produce a baseline scoring from heuristics.
-    const now = new Date().toISOString();
-    const base = listAllIndicators().map(it => ({
-      indicator: it.value,
-      type: it.type,
-      risk: heuristicRisk(it),
-      first_seen: now, last_seen: now,
-      sources: ["local"],
-      techniques: [], tactics: [],
-      tlp: el.tlp.value, confidence: clamp(parseInt(el.conf.value||"80",10),0,100)
-    }));
-    state.results = dedupeAndScore(base);
-    renderResults();
-  });
-
-  // =========================
-  // MITRE ATT&CK MAPPING
-  // =========================
-  $("#btnMapAttack").addEventListener("click", async ()=>{
-    const r = await fetch("/api/ti/mapping/attack", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ indicators: state.results })
+    // wire textarea for real-time normalization
+    el.ioc.addEventListener('input', () => {
+      debouncedParse();
     });
-    const mapped = await r.json().catch(()=> ({}));
-    // expected: { results: [{indicator, techniques:[], tactics:[]}, ...] }
-    // merge back:
-    const byInd = Object.fromEntries((mapped.results||[]).map(x=>[x.indicator,x]));
-    state.results = state.results.map(row=>{
-      const m = byInd[row.indicator];
-      if (m){ row.techniques = m.techniques||[]; row.tactics = m.tactics||[]; }
-      return row;
+
+    // Paste & Normalize button: try clipboard first
+    el.btnPasteNormalize.addEventListener('click', async () => {
+      let text = el.ioc.value || '';
+      try { if (navigator.clipboard) { const c = await navigator.clipboard.readText(); if (c) text = c; } } catch (e) { }
+      el.ioc.value = text;
+      await callParse(text);
     });
-    el.attackOut.textContent = JSON.stringify({techniques_coverage: coverageStats(state.results)}, null, 2);
-    renderResults();
-  });
 
-  $("#btnHeatmap").addEventListener("click", ()=>{
-    // Create ATT&CK heatmap CSV (Technique,Count)
-    const freq = {};
-    state.results.forEach(r => (r.techniques||[]).forEach(t => { freq[t] = (freq[t]||0)+1; }));
-    const rows = [["Technique","Count"], ...Object.entries(freq)];
-    const csv = rows.map(x=>x.join(",")).join("\n");
-    download("attack_heatmap.csv", csv, "text/csv");
-  });
-
-  // =========================
-  // EXPORTS & SIEM
-  // =========================
-  $("#btnExportSTIX").addEventListener("click", ()=>{
-    const bundle = buildStixBundle(state.results, el.tlp.value, clamp(parseInt(el.conf.value||"80",10),0,100));
-    download("ti_bundle.json", JSON.stringify(bundle, null, 2), "application/json");
-  });
-
-  $("#btnExportCSV").addEventListener("click", ()=>{
-    const rows = [["Indicator","Type","Risk","First Seen","Last Seen","Sources","Techniques","Tactics","TLP"]];
-    state.results.forEach(r=>{
-      rows.push([r.indicator,r.type,r.risk,r.first_seen,r.last_seen,(r.sources||[]).join("|"),(r.techniques||[]).join("|"),(r.tactics||[]).join("|"),r.tlp||""]);
+    // Clear All
+    el.btnClearAll.addEventListener('click', () => {
+      el.ioc.value = '';
+      state.normalized = { ips: [], domains: [], urls: [], hashes: [] };
+      state.results = [];
+      renderNormTable(); renderResults();
     });
-    const csv = rows.map(x=>x.join(",")).join("\n");
-    download("ti_results.csv", csv, "text/csv");
-  });
 
-  $("#btnPushSIEM").addEventListener("click", async ()=>{
-    // Push to Splunk/ELK/QRadar via backend (HEC / Ingest Node / EFR)
-    const r = await fetch("/api/siem/forward", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ indicators: state.results })
-    });
-    const txt = await r.text();
-    alert("SIEM forward: " + (r.ok ? "OK" : "Failed") + " — " + txt);
-  });
-
-  // =========================
-  // WEBHOOKS
-  // =========================
-  loadHooks();
-  $("#btnAddWebhook").addEventListener("click", ()=>{
-    const url = ($("#whUrl").value||"").trim();
-    const threshold = clamp(parseInt($("#whThreshold").value||"80",10),0,100);
-    if (!url) return;
-    state.webhooks.push({url, threshold});
-    saveHooks(); renderHooks();
-  });
-  $("#btnClearWebhooks").addEventListener("click", ()=>{
-    state.webhooks = []; saveHooks(); renderHooks();
-  });
-  $("#btnTestWebhook").addEventListener("click", async ()=>{
-    const sample = {
-      event: "test",
-      ts: new Date().toISOString(),
-      indicator: "test.example.com",
-      type: "domain-name",
-      risk: 90,
-      tlp: el.tlp.value
-    };
-    await relayWebhooks([sample]);
-    alert("Webhook test sent (check receivers).");
-  });
-
-  function autoWebhooks(rows){
-    const high = rows.filter(r=> r.risk >= Math.min(...state.webhooks.map(w=>w.threshold||80), 80));
-    if (!high.length) return;
-    relayWebhooks(high);
-  }
-  async function relayWebhooks(items){
-    if (!state.webhooks.length) return;
-    // Prefer server-side relay:
-    await fetch("/api/webhooks/relay", {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ webhooks: state.webhooks, items })
-    }).catch(()=>{});
-  }
-  function saveHooks(){ localStorage.setItem("ti_webhooks", JSON.stringify(state.webhooks)); }
-  function loadHooks(){
-    try { state.webhooks = JSON.parse(localStorage.getItem("ti_webhooks")||"[]") } catch(e){ state.webhooks=[]; }
-    renderHooks();
-  }
-  function renderHooks(){
-    el.whList.innerHTML = "";
-    state.webhooks.forEach((w,i)=>{
-      const li = document.createElement("li");
-      li.textContent = `${w.url} (risk ≥ ${w.threshold})`;
-      el.whList.appendChild(li);
-    });
-  }
-
-  // =========================
-  // PROFILES
-  // =========================
-  $("#btnSaveProfile").addEventListener("click", ()=>{
-    const providers = qsa(".enr:checked").map(x=>x.value);
-    const profile = {
-      tlp: el.tlp.value,
-      conf: clamp(parseInt(el.conf.value||"80",10),0,100),
-      providers,
-      taxiiUrl: el.taxiiUrl.value,
-      taxiiCollection: el.taxiiCol.value,
-      taxiiDays: el.taxiiDays.value,
-      webhooks: state.webhooks
-    };
-    localStorage.setItem("ti_profile", JSON.stringify(profile));
-  });
-  $("#btnLoadProfile").addEventListener("click", ()=>{
-    try{
-      const p = JSON.parse(localStorage.getItem("ti_profile")||"{}");
-      if (p.tlp) el.tlp.value = p.tlp;
-      if (p.conf!=null) el.conf.value = p.conf;
-      qsa(".enr").forEach(x=> x.checked = (p.providers||[]).includes(x.value));
-      if (p.taxiiUrl) el.taxiiUrl.value = p.taxiiUrl;
-      if (p.taxiiCollection) el.taxiiCol.value = p.taxiiCollection;
-      if (p.taxiiDays) el.taxiiDays.value = p.taxiiDays;
-      state.webhooks = p.webhooks || []; renderHooks();
-    }catch(e){}
-  });
-
-  // =========================
-  // RENDER & UTILS
-  // =========================
-  function renderResults(){
-    el.table.innerHTML = "";
-    state.results.forEach(r=>{
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${r.indicator}</td>
-        <td>${r.type||""}</td>
-        <td><span class="badge ${badge(r.risk)}">${r.risk}</span></td>
-        <td>${r.first_seen||""}</td>
-        <td>${r.last_seen||""}</td>
-        <td>${(r.sources||[]).join("|")}</td>
-        <td>${(r.techniques||[]).join("|")}</td>
-        <td>${r.tlp||""}</td>
-      `;
-      el.table.appendChild(tr);
-    });
-  }
-
-  function listAllIndicators(){
-    const out = [];
-    state.normalized.ips.forEach(v=> out.push({type:"ipv4-addr", value:v}));
-    state.normalized.domains.forEach(v=> out.push({type:"domain-name", value:v}));
-    state.normalized.urls.forEach(v=> out.push({type:"url", value:v}));
-    state.normalized.hashes.forEach(v=> out.push({type:"file:hash", value:v}));
-    return out;
-  }
-
-  function heuristicRisk(it){
-    const v = (it.value||"").toLowerCase();
-    let score = 10;
-    if (it.type==="ipv4-addr") score += 10;
-    if (it.type==="domain-name" && v.endsWith(".ru") || v.endsWith(".cn")) score += 5; // example heuristic — replace with real intel
-    if (it.type==="url" && /login|admin|wp-|php|panel/.test(v)) score += 10;
-    if (it.type==="file:hash") score += 15;
-    return clamp(score,0,100);
-  }
-
-  function dedupeAndScore(rows){
-    const seen = new Map();
-    rows.forEach(r=>{
-      const key = (r.indicator||"").toLowerCase();
-      if (!key) return;
-      if (!seen.has(key)) seen.set(key, r);
-      else {
-        // merge sources & max risk, keep earliest first_seen and latest last_seen
-        const prev = seen.get(key);
-        prev.sources = Array.from(new Set([...(prev.sources||[]), ...(r.sources||[])]));
-        prev.risk = Math.max(prev.risk||0, r.risk||0);
-        prev.first_seen = minISO(prev.first_seen, r.first_seen);
-        prev.last_seen = maxISO(prev.last_seen, r.last_seen);
-        prev.techniques = Array.from(new Set([...(prev.techniques||[]), ...(r.techniques||[])]));
-        prev.tactics = Array.from(new Set([...(prev.tactics||[]), ...(r.tactics||[])]));
-        prev.tlp = r.tlp || prev.tlp;
-      }
-    });
-    return [...seen.values()].sort((a,b)=> (b.risk||0)-(a.risk||0));
-  }
-
-  function minISO(a,b){ if(!a) return b; if(!b) return a; return (new Date(a) < new Date(b)) ? a : b; }
-  function maxISO(a,b){ if(!a) return b; if(!b) return a; return (new Date(a) > new Date(b)) ? a : b; }
-  function badge(r){ return r>=85?'bad': (r>=60?'warn':'ok'); }
-  function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
-
-  function coverageStats(rows){
-    const t = {};
-    rows.forEach(r=> (r.techniques||[]).forEach(x=> t[x]=(t[x]||0)+1 ));
-    return t;
-  }
-
-  function buildStixBundle(rows, tlp, confidence){
-    const bundle = { type:"bundle", id:"bundle--"+cryptoRandom(), spec_version:"2.1", objects:[] };
-    const now = new Date().toISOString();
-    rows.forEach(r=>{
-      const indId = "indicator--"+cryptoRandom();
-      const patt = patternFor(r);
-      bundle.objects.push({
-        type:"indicator",
-        id: indId,
-        created: now, modified: now,
-        name: r.indicator,
-        pattern_type:"stix",
-        pattern: patt,
-        confidence: confidence,
-        labels: ["msebetsi-ti"],
-        created_by_ref: "identity--msebetsi-"+cryptoRandom().slice(0,8),
-        object_marking_refs: [ markingIdFor(tlp) ]
+    // Render normalized table
+    function renderNormTable() {
+      const kinds = ['ips', 'domains', 'urls', 'hashes'];
+      const rows = [];
+      kinds.forEach(k => {
+        (state.normalized[k] || []).forEach(v => rows.push({ type: k, value: v }));
       });
-      if ((r.techniques||[]).length){
-        r.techniques.forEach(tech=>{
-          bundle.objects.push({
-            type: "relationship",
-            id: "relationship--"+cryptoRandom(),
-            relationship_type: "indicates",
-            source_ref: indId,
-            target_ref: "attack-pattern--"+tech, // backend should use real ATT&CK IDs here
-            created: now, modified: now
+      el.normTable.innerHTML = '';
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        const emoji = r.type === 'ips' ? '🟢 IP' : r.type === 'domains' ? '🟡 Domain' : r.type === 'urls' ? '🔴 URL' : '🔵 Hash';
+        tr.innerHTML = `<td>${emoji}</td><td>${r.value}</td><td>New</td><td><button class="btn sm ghost norm-remove">🗑️</button></td>`;
+        tr.querySelector('.norm-remove').addEventListener('click', () => { removeNormalized(r.type, r.value); });
+        el.normTable.appendChild(tr);
+      });
+      el.normCount.textContent = `Normalized Indicators (${rows.length} Found)`;
+      el.btnProceedEnrich.disabled = rows.length === 0;
+    }
+
+    function removeNormalized(kind, val) {
+      state.normalized[kind] = (state.normalized[kind] || []).filter(x => x !== val);
+      renderNormTable();
+    }
+
+    // Proceed to Enrichment scrolls to enrichment card
+    el.btnProceedEnrich.addEventListener('click', () => {
+      const target = document.querySelector('#btnEnrich');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    // =========================
+    // TAXII / STIX (improved UX)
+    // =========================
+    $("#btnListCollections").addEventListener("click", async () => {
+      el.taxiiAlert.textContent = '';
+      const server = (el.taxiiUrl.value || '').trim();
+      if (!server) { el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ Please enter a TAXII server URL.</div>`; return; }
+      el.taxiiOut.textContent = 'Listing collections...';
+      try {
+        const r = await fetch('/api/ti/taxii/list', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ server }) });
+        const j = await r.json().catch(() => ({ error: 'invalid json' }));
+        if (!r.ok || j.error) { el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ ${j.error || ('HTTP ' + r.status)}</div>`; el.taxiiOut.textContent = j.error || JSON.stringify(j, null, 2); return; }
+        el.taxiiOut.textContent = `Found ${j.count} collections`;
+        // populate select
+        const sel = el.taxiiCol;
+        sel.innerHTML = '';
+        (j.collections || []).forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id || c.url || c.title;
+          opt.textContent = (c.title || c.id) + ` (${c.id})`;
+          sel.appendChild(opt);
+        });
+      } catch (e) { el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ ${String(e)}</div>`; el.taxiiOut.textContent = String(e); }
+    });
+
+    $("#btnPullTaxii").addEventListener("click", async () => {
+      el.taxiiAlert.textContent = '';
+      const server = (el.taxiiUrl.value || '').trim();
+      const collection_id = (el.taxiiCol.value || '').trim();
+      if (!server || !collection_id) { el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ Server and collection required.</div>`; return; }
+      el.taxiiOut.textContent = 'Pulling objects (this may take a moment)...';
+      try {
+        const r = await fetch('/api/ti/taxii/pull', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ server, collection_id }) });
+        const j = await r.json().catch(() => ({ error: 'invalid json' }));
+        if (!r.ok || j.error) { el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ ${j.error || ('HTTP ' + r.status)}</div>`; el.taxiiOut.textContent = j.error || JSON.stringify(j, null, 2); return; }
+        el.taxiiOut.textContent = `Pulled ${j.objects || 0} objects.`;
+        if (j.iocs) {
+          // merge
+          ['ips', 'domains', 'urls', 'hashes'].forEach(k => {
+            (j.iocs[k] || []).forEach(v => { if (!state.normalized[k].includes(v)) state.normalized[k].push(v); });
+          });
+          renderNormTable();
+        }
+      } catch (e) { el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ ${String(e)}</div>`; el.taxiiOut.textContent = String(e); }
+    });
+
+    // =========================
+    // ENRICHMENT & SCORING
+    // =========================
+    $("#btnEnrich").addEventListener("click", async () => {
+      const providers = qsa(".enr:checked").map(x => x.value);
+      state.tlp = el.tlp.value;
+      state.conf = clamp(parseInt(el.conf.value || "80", 10), 0, 100);
+
+      const body = {
+        ...state.normalized,
+        providers
+      };
+
+      try {
+        const r = await fetch("/api/ti/enrich", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        const data = await r.json();
+
+        if (!r.ok) {
+          throw new Error(data.error || `HTTP ${r.status}`);
+        }
+
+        // Transform backend response to frontend format
+        state.results = transformEnrichmentResults(data, state.normalized);
+        renderResults();
+        autoWebhooks(state.results);
+
+      } catch (error) {
+        console.error('Enrichment error:', error);
+        alert(`Enrichment failed: ${error.message}`);
+      }
+    });
+
+    $("#btnScore").addEventListener("click", () => {
+      // If enrichment is not available, produce a baseline scoring from heuristics.
+      const now = new Date().toISOString();
+      const base = listAllIndicators().map(it => ({
+        indicator: it.value,
+        type: it.type,
+        risk: heuristicRisk(it),
+        first_seen: now, last_seen: now,
+        sources: ["local"],
+        techniques: [], tactics: [],
+        tlp: el.tlp.value, confidence: clamp(parseInt(el.conf.value || "80", 10), 0, 100)
+      }));
+      state.results = dedupeAndScore(base);
+      renderResults();
+    });
+
+    // =========================
+    // MITRE ATT&CK MAPPING
+    // =========================
+    $("#btnMapAttack").addEventListener("click", async () => {
+      const r = await fetch("/api/ti/mapping/attack", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ indicators: state.results })
+      });
+      const mapped = await r.json().catch(() => ({}));
+      // expected: { results: [{indicator, techniques:[], tactics:[]}, ...] }
+      // merge back:
+      const byInd = Object.fromEntries((mapped.results || []).map(x => [x.indicator, x]));
+      state.results = state.results.map(row => {
+        const m = byInd[row.indicator];
+        if (m) { row.techniques = m.techniques || []; row.tactics = m.tactics || []; }
+        return row;
+      });
+      el.attackOut.textContent = JSON.stringify({ techniques_coverage: coverageStats(state.results) }, null, 2);
+      renderResults();
+    });
+
+    $("#btnHeatmap").addEventListener("click", () => {
+      // Create ATT&CK heatmap CSV (Technique,Count)
+      const freq = {};
+      state.results.forEach(r => (r.techniques || []).forEach(t => { freq[t] = (freq[t] || 0) + 1; }));
+      const rows = [["Technique", "Count"], ...Object.entries(freq)];
+      const csv = rows.map(x => x.join(",")).join("\n");
+      download("attack_heatmap.csv", csv, "text/csv");
+    });
+
+    // =========================
+    // EXPORTS & SIEM
+    // =========================
+    $("#btnExportSTIX").addEventListener("click", () => {
+      const bundle = buildStixBundle(state.results, el.tlp.value, clamp(parseInt(el.conf.value || "80", 10), 0, 100));
+      download("ti_bundle.json", JSON.stringify(bundle, null, 2), "application/json");
+    });
+
+    $("#btnExportCSV").addEventListener("click", () => {
+      const rows = [["Indicator", "Type", "Risk", "First Seen", "Last Seen", "Sources", "Techniques", "Tactics", "TLP"]];
+      state.results.forEach(r => {
+        rows.push([r.indicator, r.type, r.risk, r.first_seen, r.last_seen, (r.sources || []).join("|"), (r.techniques || []).join("|"), (r.tactics || []).join("|"), r.tlp || ""]);
+      });
+      const csv = rows.map(x => x.join(",")).join("\n");
+      download("ti_results.csv", csv, "text/csv");
+    });
+
+    $("#btnPushSIEM").addEventListener("click", async () => {
+      // Push to Splunk/ELK/QRadar via backend (HEC / Ingest Node / EFR)
+      const r = await fetch("/api/siem/forward", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ indicators: state.results })
+      });
+      const txt = await r.text();
+      alert("SIEM forward: " + (r.ok ? "OK" : "Failed") + " — " + txt);
+    });
+
+    // =========================
+    // WEBHOOKS
+    // =========================
+    loadHooks();
+    $("#btnAddWebhook").addEventListener("click", () => {
+      const url = ($("#whUrl").value || "").trim();
+      const threshold = clamp(parseInt($("#whThreshold").value || "80", 10), 0, 100);
+      if (!url) return;
+      state.webhooks.push({ url, threshold });
+      saveHooks(); renderHooks();
+    });
+    $("#btnClearWebhooks").addEventListener("click", () => {
+      state.webhooks = []; saveHooks(); renderHooks();
+    });
+    $("#btnTestWebhook").addEventListener("click", async () => {
+      const sample = {
+        event: "test",
+        ts: new Date().toISOString(),
+        indicator: "test.example.com",
+        type: "domain-name",
+        risk: 90,
+        tlp: el.tlp.value
+      };
+      await relayWebhooks([sample]);
+      alert("Webhook test sent (check receivers).");
+    });
+
+    function autoWebhooks(rows) {
+      const high = rows.filter(r => r.risk >= Math.min(...state.webhooks.map(w => w.threshold || 80), 80));
+      if (!high.length) return;
+      relayWebhooks(high);
+    }
+    async function relayWebhooks(items) {
+      if (!state.webhooks.length) return;
+      // Prefer server-side relay:
+      await fetch("/api/webhooks/relay", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ webhooks: state.webhooks, items })
+      }).catch(() => { });
+    }
+    function saveHooks() { localStorage.setItem("ti_webhooks", JSON.stringify(state.webhooks)); }
+    function loadHooks() {
+      try { state.webhooks = JSON.parse(localStorage.getItem("ti_webhooks") || "[]") } catch (e) { state.webhooks = []; }
+      renderHooks();
+    }
+    function renderHooks() {
+      el.whList.innerHTML = "";
+      state.webhooks.forEach((w, i) => {
+        const li = document.createElement("li");
+        li.textContent = `${w.url} (risk ≥ ${w.threshold})`;
+        el.whList.appendChild(li);
+      });
+    }
+
+    function transformEnrichmentResults(backendData, normalizedIocs) {
+      const results = [];
+      const now = new Date().toISOString();
+
+      // Process each IOC type
+      Object.keys(normalizedIocs).forEach(type => {
+        normalizedIocs[type].forEach(ioc => {
+          let risk = 10; // base risk
+          let sources = [];
+
+          // Check each provider for this IOC
+          backendData.results.forEach(providerResult => {
+            const provider = providerResult.provider;
+            const iocKey = `${type.slice(0, -1)}:${ioc}`; // ips -> ip:1.2.3.4
+
+            if (providerResult.results && providerResult.results[iocKey]) {
+              sources.push(provider);
+              // Simple risk scoring based on provider findings
+              if (provider === 'virustotal') risk += 30;
+              if (provider === 'abuseipdb') risk += 20;
+              if (provider === 'otx') risk += 15;
+            }
+          });
+
+          results.push({
+            indicator: ioc,
+            type: type === 'ips' ? 'ipv4-addr' :
+              type === 'domains' ? 'domain-name' :
+                type === 'urls' ? 'url' : 'file:hash',
+            risk: clamp(risk, 0, 100),
+            first_seen: now,
+            last_seen: now,
+            sources: sources,
+            techniques: [],
+            tactics: [],
+            tlp: state.tlp,
+            confidence: state.conf
           });
         });
-      }
+      });
+
+      return results;
+    }
+
+    // =========================
+    // PROFILES
+    // =========================
+    $("#btnSaveProfile").addEventListener("click", () => {
+      const providers = qsa(".enr:checked").map(x => x.value);
+      const profile = {
+        tlp: el.tlp.value,
+        conf: clamp(parseInt(el.conf.value || "80", 10), 0, 100),
+        providers,
+        taxiiUrl: el.taxiiUrl.value,
+        taxiiCollection: el.taxiiCol.value,
+        taxiiDays: el.taxiiDays.value,
+        webhooks: state.webhooks
+      };
+      localStorage.setItem("ti_profile", JSON.stringify(profile));
     });
-    // Marking definition
-    bundle.objects.push({
-      type:"marking-definition",
-      id: markingIdFor(tlp),
-      definition_type:"tlp",
-      definition:{ tlp: tlp.split(":")[1].toLowerCase() }
+    $("#btnLoadProfile").addEventListener("click", () => {
+      try {
+        const p = JSON.parse(localStorage.getItem("ti_profile") || "{}");
+        if (p.tlp) el.tlp.value = p.tlp;
+        if (p.conf != null) el.conf.value = p.conf;
+        qsa(".enr").forEach(x => x.checked = (p.providers || []).includes(x.value));
+        if (p.taxiiUrl) el.taxiiUrl.value = p.taxiiUrl;
+        if (p.taxiiCollection) el.taxiiCol.value = p.taxiiCollection;
+        if (p.taxiiDays) el.taxiiDays.value = p.taxiiDays;
+        state.webhooks = p.webhooks || []; renderHooks();
+      } catch (e) { }
     });
-    return bundle;
-  }
 
-  function patternFor(r){
-    // Minimal STIX patterns — you can expand per type
-    if (r.type==="ipv4-addr") return `[ipv4-addr:value = '${r.indicator}']`;
-    if (r.type==="domain-name") return `[domain-name:value = '${r.indicator}']`;
-    if (r.type==="url") return `[url:value = '${r.indicator}']`;
-    if (r.type==="file:hash") return `[file:hashes.'SHA-256' = '${r.indicator}']`;
-    return `[x-msebetsi:value = '${r.indicator}']`;
-  }
-  function markingIdFor(tlp){ return "marking-definition--" + tlp.replace(/[^a-z0-9]/gi,'').toLowerCase(); }
-  function cryptoRandom(){ return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c=>{ const r = crypto.getRandomValues(new Uint8Array(1))[0]&15; const v = c==="x"? r : (r&0x3|0x8); return v.toString(16); }); }
+    // =========================
+    // RENDER & UTILS
+    // =========================
+    function renderResults() {
+      el.table.innerHTML = "";
+      state.results.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+        <td>${r.indicator}</td>
+        <td>${r.type || ""}</td>
+        <td><span class="badge ${badge(r.risk)}">${r.risk}</span></td>
+        <td>${r.first_seen || ""}</td>
+        <td>${r.last_seen || ""}</td>
+        <td>${(r.sources || []).join("|")}</td>
+        <td>${(r.techniques || []).join("|")}</td>
+        <td>${r.tlp || ""}</td>
+      `;
+        el.table.appendChild(tr);
+      });
+    }
 
-  function download(name, content, type="text/plain"){
-    const blob = new Blob([content], {type});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = name; a.click();
-    setTimeout(()=>URL.revokeObjectURL(url), 600);
-  }
+    function listAllIndicators() {
+      const out = [];
+      state.normalized.ips.forEach(v => out.push({ type: "ipv4-addr", value: v }));
+      state.normalized.domains.forEach(v => out.push({ type: "domain-name", value: v }));
+      state.normalized.urls.forEach(v => out.push({ type: "url", value: v }));
+      state.normalized.hashes.forEach(v => out.push({ type: "file:hash", value: v }));
+      return out;
+    }
 
-})();
+    function heuristicRisk(it) {
+      const v = (it.value || "").toLowerCase();
+      let score = 10;
+      if (it.type === "ipv4-addr") score += 10;
+      if (it.type === "domain-name" && v.endsWith(".ru") || v.endsWith(".cn")) score += 5; // example heuristic — replace with real intel
+      if (it.type === "url" && /login|admin|wp-|php|panel/.test(v)) score += 10;
+      if (it.type === "file:hash") score += 15;
+      return clamp(score, 0, 100);
+    }
+
+    function dedupeAndScore(rows) {
+      const seen = new Map();
+      rows.forEach(r => {
+        const key = (r.indicator || "").toLowerCase();
+        if (!key) return;
+        if (!seen.has(key)) seen.set(key, r);
+        else {
+          // merge sources & max risk, keep earliest first_seen and latest last_seen
+          const prev = seen.get(key);
+          prev.sources = Array.from(new Set([...(prev.sources || []), ...(r.sources || [])]));
+          prev.risk = Math.max(prev.risk || 0, r.risk || 0);
+          prev.first_seen = minISO(prev.first_seen, r.first_seen);
+          prev.last_seen = maxISO(prev.last_seen, r.last_seen);
+          prev.techniques = Array.from(new Set([...(prev.techniques || []), ...(r.techniques || [])]));
+          prev.tactics = Array.from(new Set([...(prev.tactics || []), ...(r.tactics || [])]));
+          prev.tlp = r.tlp || prev.tlp;
+        }
+      });
+      return [...seen.values()].sort((a, b) => (b.risk || 0) - (a.risk || 0));
+    }
+
+    function minISO(a, b) { if (!a) return b; if (!b) return a; return (new Date(a) < new Date(b)) ? a : b; }
+    function maxISO(a, b) { if (!a) return b; if (!b) return a; return (new Date(a) > new Date(b)) ? a : b; }
+    function badge(r) { return r >= 85 ? 'bad' : (r >= 60 ? 'warn' : 'ok'); }
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+    function coverageStats(rows) {
+      const t = {};
+      rows.forEach(r => (r.techniques || []).forEach(x => t[x] = (t[x] || 0) + 1));
+      return t;
+    }
+
+    function buildStixBundle(rows, tlp, confidence) {
+      const bundle = { type: "bundle", id: "bundle--" + cryptoRandom(), spec_version: "2.1", objects: [] };
+      const now = new Date().toISOString();
+      rows.forEach(r => {
+        const indId = "indicator--" + cryptoRandom();
+        const patt = patternFor(r);
+        bundle.objects.push({
+          type: "indicator",
+          id: indId,
+          created: now, modified: now,
+          name: r.indicator,
+          pattern_type: "stix",
+          pattern: patt,
+          confidence: confidence,
+          labels: ["msebetsi-ti"],
+          created_by_ref: "identity--msebetsi-" + cryptoRandom().slice(0, 8),
+          object_marking_refs: [markingIdFor(tlp)]
+        });
+        if ((r.techniques || []).length) {
+          r.techniques.forEach(tech => {
+            bundle.objects.push({
+              type: "relationship",
+              id: "relationship--" + cryptoRandom(),
+              relationship_type: "indicates",
+              source_ref: indId,
+              target_ref: "attack-pattern--" + tech, // backend should use real ATT&CK IDs here
+              created: now, modified: now
+            });
+          });
+        }
+      });
+      // Marking definition
+      bundle.objects.push({
+        type: "marking-definition",
+        id: markingIdFor(tlp),
+        definition_type: "tlp",
+        definition: { tlp: tlp.split(":")[1].toLowerCase() }
+      });
+      return bundle;
+    }
+
+    function patternFor(r) {
+      // Minimal STIX patterns — you can expand per type
+      if (r.type === "ipv4-addr") return `[ipv4-addr:value = '${r.indicator}']`;
+      if (r.type === "domain-name") return `[domain-name:value = '${r.indicator}']`;
+      if (r.type === "url") return `[url:value = '${r.indicator}']`;
+      if (r.type === "file:hash") return `[file:hashes.'SHA-256' = '${r.indicator}']`;
+      return `[x-msebetsi:value = '${r.indicator}']`;
+    }
+    function markingIdFor(tlp) { return "marking-definition--" + tlp.replace(/[^a-z0-9]/gi, '').toLowerCase(); }
+    function cryptoRandom() { return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => { const r = crypto.getRandomValues(new Uint8Array(1))[0] & 15; const v = c === "x" ? r : (r & 0x3 | 0x8); return v.toString(16); }); }
+
+    function download(name, content, type = "text/plain") {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = name; a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 600);
+    }
+
+  })();
 </script>
