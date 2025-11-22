@@ -1,4 +1,16 @@
-<div class="card">
+  <div class="card">
+    <style>
+      /* Small local styles to improve visuals */
+      .selected-row{ background: linear-gradient(90deg, rgba(230,247,255,0.6), rgba(255,255,255,0)); }
+      #topToast > .card{ box-shadow: 0 6px 18px rgba(20,30,40,0.12); }
+      #whitelistContainer .card{ padding:8px; display:flex; justify-content:space-between; align-items:center }
+      #whitelistContainer .card b{ font-size:0.95rem }
+      [data-panel="enrichment"] pre{ background:#fbfdff; color:#0b1720; padding:10px; border-radius:6px; max-height:360px; overflow:auto; border:1px solid #e6eef6 }
+    </style>
+    <!-- vis-timeline (timeline) and cytoscape (entity graph) -->
+    <link href="https://unpkg.com/vis-timeline@7.7.0/styles/vis-timeline-graph2d.min.css" rel="stylesheet" />
+    <script src="https://unpkg.com/vis-timeline@7.7.0/standalone/umd/vis-timeline-graph2d.min.js"></script>
+    <script src="https://unpkg.com/cytoscape@3.24.0/dist/cytoscape.min.js"></script>
   <div class="card-head">
     <h3>Alerts</h3>
     <div class="actions">
@@ -8,6 +20,16 @@
     </div>
   </div>
   <p class="muted">Triage inbox. Assign owners, set status, map to MITRE ATT&CK, launch playbooks, merge/suppress noise, and create tickets.</p>
+  <!-- TABS -->
+  <div style="margin:10px 0">
+    <div class="tabs" id="alertsTabs" style="display:flex;gap:8px">
+      <button class="btn sm ghost tab active" data-tab="overview">Overview</button>
+      <button class="btn sm ghost tab" data-tab="risk">Risk Scoring</button>
+      <button class="btn sm ghost tab" data-tab="enrichment">Enrichment</button>
+      <button class="btn sm ghost tab" data-tab="grouping">Correlation</button>
+      <button class="btn sm ghost tab" data-tab="whitelist">Whitelist</button>
+    </div>
+  </div>
 
   <!-- FILTERS -->
   <div class="card" style="margin-bottom:12px">
@@ -50,6 +72,9 @@
     <div style="display:flex;gap:8px;margin-top:10px">
       <button class="btn sm" id="btnApplyFilters"><i class="bi bi-funnel"></i> Apply</button>
       <button class="btn sm ghost" id="btnClearFilters"><i class="bi bi-eraser"></i> Clear</button>
+      <button class="btn sm ghost" id="btnScanSaPhish"><i class="bi bi-shield-exclamation"></i> Scan SA Phishing</button>
+          <button class="btn sm ghost" id="dMarkFP"><i class="bi bi-x-circle"></i> Mark FP</button>
+          <button class="btn sm ghost" id="dWhitelist"><i class="bi bi-archive"></i> Whitelist Match</button>
       <label style="display:flex;align-items:center;gap:6px;margin-left:auto">
         <input id="liveStream" type="checkbox"> Live stream
       </label>
@@ -71,7 +96,9 @@
   </div>
 
   <!-- TABLE -->
-  <table class="table compact" id="alertsTbl">
+  <div id="tabPanels">
+    <div data-panel="overview">
+      <table class="table compact" id="alertsTbl">
     <thead>
       <tr>
         <th><input type="checkbox" id="selAll"></th>
@@ -81,13 +108,62 @@
         <th>Status</th>
         <th>Owner</th>
         <th>Risk</th>
+        <th>SA</th>
         <th>SLA</th>
         <th>ATT&CK</th>
         <th>Tags</th>
       </tr>
     </thead>
     <tbody></tbody>
-  </table>
+      </table>
+    </div>
+
+    <div data-panel="risk" style="display:none">
+      <div class="card" style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <p style="margin:0">Risk Scoring prototype: compute a 0–100 risk score per alert.</p>
+          <button class="btn sm" id="btnComputeRisk">Compute Risk</button>
+          <button class="btn sm ghost" id="btnClearRisk">Clear Risk</button>
+        </div>
+      </div>
+      <table class="table compact" id="riskTbl">
+        <thead>
+          <tr><th>ID</th><th>Title</th><th>Severity</th><th>Risk</th><th>Reason</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div data-panel="enrichment" style="display:none">
+      <div id="enrichmentPanel">
+        <div class="muted" id="enrichmentHint">Select an alert in Overview or open an alert to view enrichment here.</div>
+        <div style="margin-top:8px"><button class="btn sm" id="btnShowFirstEnrichment">Show enrichment for first alert</button></div>
+        <pre id="enrichmentContent" style="display:none">Loading...</pre>
+      </div>
+    </div>
+
+    <div data-panel="grouping" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <button class="btn sm" id="btnRefreshGroups">Refresh Groups</button>
+        <button class="btn sm" id="btnCreateIncidentFromSel">Create Incident from Selection</button>
+        <button class="btn sm ghost" id="btnClearGroups">Clear</button>
+      </div>
+      <div id="groupsContainer"></div>
+    </div>
+
+    <div data-panel="whitelist" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <button class="btn sm" id="btnWhitelistRefresh">Refresh</button>
+        <input id="whitelistInput" placeholder="ip, domain, hash or keyword" style="flex:1;padding:6px;border-radius:4px;border:1px solid #ddd">
+        <button class="btn sm" id="btnWhitelistAdd">Add</button>
+        <button class="btn sm ghost" id="btnApplyWhitelist">Apply Whitelist (re-scan)</button>
+      </div>
+      <div id="whitelistContainer"></div>
+    </div>
+  </div>
+
+  <!-- Top toast notifications -->
+  <div id="topToast" style="position:fixed;left:50%;transform:translateX(-50%);top:12px;z-index:9999;display:none"></div>
 
   <!-- DETAILS DRAWER -->
   <div id="drawer" class="card" style="margin-top:12px;display:none">
@@ -111,10 +187,22 @@
         <p><b>ATT&CK:</b> <span id="dAttack"></span></p>
         <p><b>Artifacts:</b></p>
         <pre id="dArtifacts"></pre>
+        <p><b>Enrichment:</b></p>
+        <div id="dEnrichment" style="font-family:monospace;white-space:pre-wrap;max-height:160px;overflow:auto;background:#f8f9fb;border-radius:4px;padding:8px">Loading...</div>
+        <div style="margin-top:8px">
+          <div><b>Incident Timeline</b></div>
+          <div id="incidentTimeline" style="background:#fff;border:1px solid #eee;border-radius:6px;padding:8px;margin-top:6px;min-height:80px"></div>
+        </div>
+        <div style="margin-top:8px">
+          <div><b>Entity Graph</b></div>
+          <div id="entityGraph" style="width:100%;height:220px;border:1px solid #eee;border-radius:6px;margin-top:6px;background:#fff"></div>
+        </div>
         <div style="display:flex;gap:8px;margin-top:8px">
           <button class="btn sm" id="dContain"><i class="bi bi-shield-lock"></i> Contain</button>
           <button class="btn sm" id="dResolve"><i class="bi bi-check2-circle"></i> Resolve</button>
           <button class="btn sm ghost" id="dRunPlaybook"><i class="bi bi-cpu"></i> Playbook</button>
+          <button class="btn sm ghost" id="dMarkFP"><i class="bi bi-slash-circle"></i> Mark False Positive</button>
+          <button class="btn sm ghost" id="dWhitelist"><i class="bi bi-bookmark-plus"></i> Add to Whitelist</button>
         </div>
       </div>
     </div>
@@ -133,12 +221,106 @@
     rows: [],          // alerts currently loaded
     filters: { q:"", sev:"", status:"", owner:"", technique:"" },
     live: false,
-    ws: null
+    ws: null,
+    activeTab: 'overview'
   };
 
   // =======================
   // ELEMENTS
   // =======================
+
+  // Enrichment panel helpers
+  function loadEnrichmentPanel(){
+    const hint = document.getElementById('enrichmentHint');
+    const pre = document.getElementById('enrichmentContent');
+    const firstId = state.selectedId || (state.rows && state.rows.length ? state.rows[0].id : null);
+    if (!firstId){ hint.textContent = 'No alerts available. Click Refresh to load alerts.'; pre.style.display='none'; return; }
+    hint.textContent = 'Showing enrichment for alert: ' + firstId;
+    showEnrichmentForId(firstId);
+  }
+
+  async function showEnrichmentForId(id){
+    const hint = document.getElementById('enrichmentHint');
+    const pre = document.getElementById('enrichmentContent');
+    hint.textContent = 'Loading enrichment for ' + id + '...'; pre.style.display='none';
+    const r = await fetch('/api/alerts/enrich', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id }) }).catch(()=>null);
+    if (!r){ hint.textContent = 'Enrichment unavailable'; return; }
+    const data = await r.json().catch(()=>null);
+    if (!data){ hint.textContent = 'No enrichment returned'; return; }
+    pre.textContent = JSON.stringify(data, null, 2); pre.style.display='block'; hint.textContent = 'Enrichment for ' + id;
+    // store last enrichment
+    state.lastEnrichment = data.enrichment || data || null;
+  }
+
+  // button for showing first enrichment
+  document.getElementById('btnShowFirstEnrichment')?.addEventListener('click', ()=>{
+    const id = state.selectedId || (state.rows && state.rows.length ? state.rows[0].id : null);
+    if (!id) return alert('No alert available');
+    showEnrichmentForId(id);
+  });
+
+  // ================
+  // Diagrams: Timeline + Entity Graph
+  // ================
+  function renderIncidentTimeline(a, enrichment){
+    const container = document.getElementById('incidentTimeline');
+    if (!container) return;
+    if (typeof vis === 'undefined'){
+      container.innerHTML = '<div class="muted">Timeline library not loaded. Check network or vendor files.</div>';
+      return;
+    }
+    // derive timestamps
+    const first = a.first_seen || (a.first_seen = (enrichment && enrichment.first_seen) || null);
+    const last = a.last_seen || (a.last_seen = (enrichment && enrichment.last_seen) || null);
+    const now = new Date().toISOString().slice(0,10);
+    const start = (first && first.split('T')[0]) || now;
+    const end = (last && last.split('T')[0]) || start;
+    // prepare vis items
+    const items = new vis.DataSet([
+      { id: 'fs', content: 'First Seen', start: start },
+      { id: 'ls', content: 'Last Seen', start: end }
+    ]);
+    // destroy previous timeline if exists
+    try{ if (state.timeline && state.timeline.destroy) state.timeline.destroy(); }catch(e){}
+    const opts = { showCurrentTime: false, zoomable:true, moveable:false, selectable:true, height: '120px' };
+    try{ state.timeline = new vis.Timeline(container, items, opts); }catch(e){ container.innerHTML = '<div class="muted">Timeline unavailable</div>'; }
+  }
+
+  function renderEntityGraph(a, enrichment){
+    const container = document.getElementById('entityGraph');
+    if (!container) return;
+    if (typeof cytoscape === 'undefined'){
+      container.innerHTML = '<div class="muted">Graph library not loaded. Check network or vendor files.</div>';
+      return;
+    }
+    // build nodes and edges from alert artifacts and entities
+    const elements = [];
+    const mainId = 'alert-'+a.id;
+    elements.push({ data: { id: mainId, label: 'Alert '+String(a.id), type: 'alert' } });
+    const arts = (a.artifacts && a.artifacts.slice()) || ((enrichment && enrichment.artifacts) || []);
+    let idx = 1;
+    arts.forEach(it=>{
+      const v = (typeof it === 'object') ? (it.value || JSON.stringify(it)) : String(it);
+      const nid = 'n'+(idx++);
+      elements.push({ data: { id: nid, label: v, type: 'artifact' } });
+      elements.push({ data: { source: mainId, target: nid } });
+    });
+    const ents = a.entities || (enrichment && enrichment.entities) || {};
+    Object.keys(ents).forEach((k,i)=>{
+      const val = ents[k]; if (!val) return;
+      const nid = 'ent-'+i+'-'+k;
+      elements.push({ data: { id: nid, label: k+': '+String(val), type: 'entity' } });
+      elements.push({ data: { source: mainId, target: nid } });
+    });
+    // destroy previous cy instance
+    try{ if (state.cy && state.cy.destroy) state.cy.destroy(); }catch(e){}
+    state.cy = cytoscape({ container: container, elements: elements, style: [
+      { selector: 'node[type="alert"]', style:{ 'background-color':'#ffcc00','label':'data(label)','width':'36','height':'36','text-valign':'center' } },
+      { selector: 'node[type="artifact"]', style:{ 'background-color':'#cfefff','label':'data(label)','width':'28','height':'28','text-wrap':'wrap','font-size':'10' } },
+      { selector: 'node[type="entity"]', style:{ 'background-color':'#ffdede','label':'data(label)','width':'28','height':'28','text-wrap':'wrap','font-size':'10' } },
+      { selector: 'edge', style:{ 'width':2,'line-color':'#ccc','target-arrow-shape':'none' } }
+    ], layout: { name: 'cose', animate: true } });
+  }
   const el = {
     tbody: $("#alertsTbl tbody"),
     selAll: $("#selAll"),
@@ -186,6 +368,7 @@
   // INIT
   // =======================
   loadAlerts(); // initial
+  initTabs();
   wireEvents();
 
   // =======================
@@ -207,9 +390,164 @@
       body: JSON.stringify(body)
     }).catch(()=>null);
     if (!r) { render([]); return; }
-    const data = await r.json().catch(()=>({alerts:[]}));
-    state.rows = data.alerts || [];
+    const data = await r.json().catch(()=>({}));
+    // backend returns { items: [...] } but older frontend expects { alerts: [...] }
+    state.rows = data.alerts || data.items || [];
     render(state.rows);
+  }
+
+  // =======================
+  // TABS
+  // =======================
+  function initTabs(){
+    qsa('.tab').forEach(btn=> btn.addEventListener('click', ()=>{
+      qsa('.tab').forEach(b=> b.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      state.activeTab = tab;
+      qsa('[data-panel]').forEach(p=> p.style.display = p.dataset.panel===tab ? '' : 'none');
+      // refresh view when switching
+      if (tab === 'risk') renderRiskTable();
+      if (tab === 'grouping') loadGroups();
+      if (tab === 'whitelist') loadWhitelist();
+      if (tab === 'enrichment') loadEnrichmentPanel();
+    }));
+    // wire risk buttons
+    const br = document.getElementById('btnComputeRisk');
+    if (br) br.addEventListener('click', computeRisk);
+    const bc = document.getElementById('btnClearRisk');
+    if (bc) bc.addEventListener('click', ()=>{ state.rows = state.rows.map(r=>{ r.risk=null; return r; }); render(state.rows); renderRiskTable(); });
+    // grouping buttons
+    const brg = document.getElementById('btnRefreshGroups');
+    if (brg) brg.addEventListener('click', loadGroups);
+    const bci = document.getElementById('btnCreateIncidentFromSel');
+    if (bci) bci.addEventListener('click', ()=> createIncidentFromSelected());
+    const bcg = document.getElementById('btnClearGroups');
+    if (bcg) bcg.addEventListener('click', ()=> { document.getElementById('groupsContainer').innerHTML = ''; });
+  }
+
+  async function loadGroups(){
+    const body = { query: state.filters.q, severity: state.filters.sev, status: state.filters.status, owner: state.filters.owner };
+    const r = await fetch('/api/alerts/group', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }).catch(()=>null);
+    if (!r) return alert('Failed to load groups');
+    const data = await r.json().catch(()=>({groups:[]}));
+    renderGroups(data.groups || []);
+  }
+
+  function renderGroups(groups){
+    const cont = document.getElementById('groupsContainer');
+    cont.innerHTML = '';
+    if (!groups.length) { cont.innerHTML = '<div class="muted">No groups found.</div>'; return; }
+    groups.forEach(g=>{
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.style.marginBottom = '8px';
+      div.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <b>${esc(g.title)}</b> <span class="muted">(${g.count} alerts)</span>
+            <div class="muted">Severity: ${esc(g.severity || '')} ${g.first_ip? '• IP: '+esc(g.first_ip): ''}</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn sm" data-action="view" data-members='${JSON.stringify(g.members)}'>View</button>
+            <button class="btn sm" data-action="filter" data-incident='${g.incident_id}'>Filter</button>
+            <button class="btn sm ghost" data-action="merge" data-members='${JSON.stringify(g.members)}'>Create Incident</button>
+          </div>
+        </div>
+      `;
+      cont.appendChild(div);
+    });
+
+    // wire group buttons
+    cont.querySelectorAll('button[data-action="view"]').forEach(b=> b.addEventListener('click', (e)=>{
+      const members = JSON.parse(b.dataset.members||'[]');
+      openGroupMembers(members);
+    }));
+    cont.querySelectorAll('button[data-action="filter"]').forEach(b=> b.addEventListener('click', (e)=>{
+      const incident = b.dataset.incident;
+      filterByIncident(incident);
+    }));
+    cont.querySelectorAll('button[data-action="merge"]').forEach(b=> b.addEventListener('click', (e)=>{
+      const members = JSON.parse(b.dataset.members||'[]');
+      mergeSelected(members);
+    }));
+  }
+
+  function openGroupMembers(members){
+    // ensure alerts loaded then open drawer for first member and list others
+    const sample = state.rows.find(r=> String(r.id) === String(members[0]));
+    if (sample) openDrawer(sample);
+    // show list in enrichment area for quick view
+    const elg = document.getElementById('dEnrichment');
+    if (elg) elg.textContent = 'Group members:\n' + members.map(id=> '- '+id+'').join('\n');
+  }
+
+  async function mergeSelected(ids){
+    if (!ids || !ids.length) return alert('No alerts to merge');
+    if (!confirm('Create incident for '+ids.length+' alerts?')) return;
+    const r = await fetch('/api/alerts/merge', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ids }) }).catch(()=>null);
+    if (!r) return alert('Merge failed');
+    const data = await r.json().catch(()=>({}));
+    if (data.ok) { alert('Incident created: '+data.incident_id); loadAlerts().then(()=> filterByIncident(data.incident_id)); loadGroups(); }
+  }
+
+  async function filterByIncident(incident_id){
+    // reload alerts then filter client-side for incident tag
+    await loadAlerts();
+    const tag = 'incident:'+incident_id;
+    state.rows = state.rows.filter(r=> (r.tags||[]).includes(tag));
+    render(state.rows);
+    // switch to overview tab so user sees filtered list
+    document.querySelectorAll('.tab').forEach(b=> b.classList.remove('active'));
+    const ov = document.querySelector('.tab[data-tab="overview"]'); if (ov) ov.classList.add('active');
+    qsa('[data-panel]').forEach(p=> p.style.display = p.dataset.panel==='overview' ? '' : 'none');
+    // ensure at least one alert is selected so drawer actions work immediately
+    try{
+      const first = state.rows && state.rows.length ? state.rows[0] : null;
+      // clear master select
+      const selAll = document.getElementById('selAll'); if (selAll) selAll.checked = false;
+      if (first){
+        // re-rendered table; find the row element and check the checkbox
+        const tr = document.querySelector(`#alertsTbl tbody tr[data-id='${first.id}']`);
+        if (tr){
+          const cb = tr.querySelector('.rowSel'); if (cb) cb.checked = true;
+          // open drawer for the first alert so user can take actions immediately
+          openDrawer(first);
+        }
+      }
+    }catch(e){ console.warn('filterByIncident: auto-select failed', e); }
+  }
+
+  async function computeRisk(){
+    // call backend scoring endpoint (mock)
+    const body = {
+      query: state.filters.q,
+      severity: state.filters.sev,
+      status: state.filters.status,
+      owner: state.filters.owner,
+      technique: state.filters.technique,
+      limit: 500
+    };
+    const r = await fetch('/api/alerts/score', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }).catch(()=>null);
+    if (!r) return alert('Risk scoring failed');
+    const data = await r.json().catch(()=>({items:[]}));
+    const items = data.items || data.alerts || [];
+    // merge computed risk into state.rows
+    const byId = Object.fromEntries(items.map(x=>[String(x.id), x]));
+    state.rows = state.rows.map(row=> ({ ...row, ...(byId[String(row.id)]||{}) }));
+    render(state.rows);
+    renderRiskTable();
+  }
+
+  function renderRiskTable(){
+    const tbody = document.querySelector('#riskTbl tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    state.rows.forEach(a=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${esc(a.id)}</td><td>${esc(a.title)}</td><td>${esc(a.severity)}</td><td><span class="badge ${riskBadge(a.risk)}">${a.risk==null?'-':a.risk}</span></td><td>${esc(a.risk_reason||'')}</td>`;
+      tbody.appendChild(tr);
+    });
   }
 
   function render(rows){
@@ -224,11 +562,19 @@
         <td>${sevBadge(a.severity)}</td>
         <td>${statusPill(a.status)}</td>
         <td>${ownerCell(a.owner)}</td>
+        <td>${(a.tags||[]).includes('sa_phishing')?'<span class="badge bad">SA</span>':''}</td>
         <td><span class="badge ${riskBadge(a.risk)}">${a.risk||0}</span></td>
+        <td>${saBadge(a)}</td>
         <td>${slaCell(a.sla_minutes)}</td>
         <td>${(a.techniques||[]).join("|")}</td>
         <td>${(a.tags||[]).join("|")}</td>
       `;
+      // reflect current selection
+      if (state.selectedId && String(state.selectedId) === String(a.id)){
+        tr.classList.add('selected-row');
+        // ensure checkbox shown as checked for single selection
+        setTimeout(()=>{ const cb = tr.querySelector('.rowSel'); if (cb) cb.checked = true; }, 0);
+      }
       el.tbody.appendChild(tr);
     });
   }
@@ -248,6 +594,10 @@
               `<span class="badge ok">${Math.round(mins/60)}h</span>`;
     return t;
   }
+  function saBadge(a){
+    const is = (a.tags||[]).includes('sa_phishing') || (a.enrichment && a.enrichment.meta && a.enrichment.meta.sa_phishing);
+    return is ? `<span class="badge bad">SA</span>` : `<span class="badge ok">-</span>`;
+  }
 
   // =======================
   // EVENTS
@@ -266,6 +616,19 @@
       el.freetext.value = ""; el.fSev.value=""; el.fStatus.value=""; el.fOwner.value=""; el.fTechnique.value="";
       state.filters = {q:"",sev:"",status:"",owner:"",technique:""};
       loadAlerts();
+    });
+    // SA phishing scan
+    const saBtn = document.getElementById('btnScanSaPhish');
+    if (saBtn) saBtn.addEventListener('click', async ()=>{
+      if (!confirm('Scan current filtered alerts for South African phishing indicators?')) return;
+      saBtn.disabled = true;
+      const body = { query: state.filters.q, severity: state.filters.sev, status: state.filters.status, owner: state.filters.owner };
+      const r = await fetch('/api/alerts/scan_sa_phishing', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }).catch(()=>null);
+      saBtn.disabled = false;
+      if (!r) return alert('SA phishing scan failed');
+      const data = await r.json().catch(()=>({}));
+      alert(`Scanned: ${data.total_scanned||0} — Matched: ${data.matched||0}`);
+      await loadAlerts();
     });
 
     // Refresh / Export
@@ -291,8 +654,31 @@
         e.preventDefault();
         const id = open.closest("tr").dataset.id;
         const row = state.rows.find(r=> String(r.id) === String(id));
-        if (row) openDrawer(row);
+        if (row){
+          // mark selected
+          state.selectedId = String(row.id);
+          // update row highlight
+          qsa('#alertsTbl tbody tr').forEach(tr=> tr.classList.remove('selected-row'));
+          const trEl = document.querySelector(`#alertsTbl tbody tr[data-id='${row.id}']`);
+          if (trEl) trEl.classList.add('selected-row');
+          openDrawer(row);
+        }
       }
+    });
+
+    // checkbox selection handling (delegated)
+    el.tbody.addEventListener('change', (e)=>{
+      const cb = e.target.closest('.rowSel');
+      if (!cb) return;
+      // gather checked ids
+      const checked = qsa('.rowSel', el.tbody).filter(x=>x.checked).map(x=> x.closest('tr').dataset.id);
+      if (checked.length===0){ state.selectedId = null; qsa('#alertsTbl tbody tr').forEach(tr=> tr.classList.remove('selected-row')); return; }
+      const first = checked[0]; state.selectedId = String(first);
+      qsa('#alertsTbl tbody tr').forEach(tr=> tr.classList.remove('selected-row'));
+      const trEl = document.querySelector(`#alertsTbl tbody tr[data-id='${first}']`);
+      if (trEl) trEl.classList.add('selected-row');
+      // if exactly one selected, open drawer for convenience
+      if (checked.length===1){ const row = state.rows.find(r=> String(r.id)===String(first)); if (row) openDrawer(row); }
     });
 
     // Drawer actions
@@ -300,6 +686,37 @@
     el.dContain.addEventListener("click", ()=> updateOne({status:"Containment"}));
     el.dResolve.addEventListener("click", ()=> updateOne({status:"Resolved"}));
     el.dRunPlaybook.addEventListener("click", ()=> runPlaybook(prompt("Playbook ID (e.g., isolate_endpoint)")));
+    // drawer quick actions
+    const dMark = document.getElementById('dMarkFP');
+    if (dMark) dMark.addEventListener('click', async ()=>{
+      const id = el.dId.textContent;
+      if (!id) return;
+      if (!confirm('Mark alert '+id+' as False Positive?')) return;
+      await fetch('/api/alerts/update', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: parseInt(id,10), status: 'Closed', tags: ['false_positive'] }) });
+      await loadAlerts();
+      el.drawer.style.display='none';
+    });
+
+    const dWhitelistBtn = document.getElementById('dWhitelist');
+    if (dWhitelistBtn) dWhitelistBtn.addEventListener('click', async ()=>{
+      const id = el.dId.textContent;
+      if (!id) return;
+      // pick an artifact to whitelist
+      const artText = prompt('Enter artifact value to whitelist (ip, domain, hash). Leave blank to use first artifact:', '');
+      let value = artText;
+      if (!value){
+        const row = state.rows.find(r=> String(r.id) === String(id));
+        const first = (row && row.artifacts && row.artifacts[0]) ? row.artifacts[0].value : '';
+        value = prompt('Whitelist this value (edit if needed):', first || '') || '';
+      }
+      if (!value) return;
+      const r = await fetch('/api/alerts/whitelist', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ value }) }).catch(()=>null);
+      if (!r) return alert('Whitelist request failed');
+      alert('Whitelisted: '+value);
+      // re-scan current alert
+      await fetch('/api/alerts/scan_sa_phishing', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({}) }).catch(()=>null);
+      await loadAlerts();
+    });
 
     // Bulk actions
     el.bulkAssign.addEventListener("click", ()=> bulkUpdate({owner: prompt("Assign to (e.g., Analyst A)")||""}));
@@ -329,7 +746,120 @@
     el.dAttack.textContent = (a.techniques||[]).join("|");
     el.dArtifacts.textContent = JSON.stringify(a.artifacts||[], null, 2);
     el.drawer.style.display = "block";
+    // clear enrichment area and store placeholder
+    el.dEnrichment.textContent = 'Loading...';
+    state.lastEnrichment = null;
+    // fetch enrichment for this alert (mock backend)
+    fetch('/api/alerts/enrich', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ id: a.id })
+    }).then(r=> r.json()).then(data=>{
+      if (!data) { el.dEnrichment.textContent = 'No enrichment'; return; }
+      // pretty-print enrichment
+      el.dEnrichment.textContent = JSON.stringify(data, null, 2);
+      state.lastEnrichment = data.enrichment || data || null;
+      try{
+        // render incident timeline and entity graph
+        renderIncidentTimeline(a, data);
+        renderEntityGraph(a, data);
+      }catch(e){ console.warn('diagram render failed', e); }
+    }).catch(()=>{ el.dEnrichment.textContent = 'Enrichment unavailable'; });
   }
+
+  // drawer quick actions
+  (function wireDrawerActions(){
+    const mark = document.getElementById('dMarkFP');
+    const wl = document.getElementById('dWhitelist');
+    if (mark) mark.addEventListener('click', async ()=>{
+      const id = el.dId.textContent; if (!id) return;
+      if (!confirm('Mark alert '+id+' as SA-phishing false positive?')) return;
+      const r = await fetch('/api/alerts/mark_fp', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: parseInt(id,10) }) }).catch(()=>null);
+      if (!r) return alert('Failed');
+      const data = await r.json().catch(()=>({}));
+      alert('Marked FP: ' + (data.ok? 'OK':'Failed'));
+      await loadAlerts();
+      el.drawer.style.display = 'none';
+    });
+    if (wl) wl.addEventListener('click', async ()=>{
+      const id = el.dId.textContent; if (!id) return;
+      // suggest a value to whitelist: prefer first SA match from enrichment
+      let suggested = '';
+      if (state.lastEnrichment && state.lastEnrichment.meta && state.lastEnrichment.meta.sa_phishing_matches && state.lastEnrichment.meta.sa_phishing_matches.length){
+        suggested = state.lastEnrichment.meta.sa_phishing_matches[0];
+      } else {
+        // fallback: ask user
+        suggested = prompt('Enter value to whitelist (keyword, domain, ip):');
+      }
+      if (!suggested) return;
+      const r = await fetch('/api/alerts/whitelist', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ value: suggested }) }).catch(()=>null);
+      if (!r) return alert('Failed to add to whitelist');
+      const data = await r.json().catch(()=>({}));
+      alert('Whitelist updated');
+      await loadAlerts();
+    });
+  })();
+  
+    // =======================
+    // WHITELIST HELPERS
+    // =======================
+    function notify(msg, type='info'){
+      const ct = document.getElementById('topToast');
+      if (!ct) return;
+      ct.style.display = '';
+      ct.innerHTML = `<div class="card" style="padding:8px 12px;border-radius:6px;background:${type==='error'? '#ffd6d6': (type==='success'? '#d6ffd9':'#eef6ff')};color:#222">${msg}</div>`;
+      setTimeout(()=>{ ct.style.display = 'none'; ct.innerHTML = ''; }, 3500);
+    }
+
+    async function loadWhitelist(){
+      const r = await fetch('/api/alerts/whitelist').catch(()=>null);
+      if (!r) { notify('Failed to load whitelist','error'); return; }
+      const data = await r.json().catch(()=>({entries:[]}));
+      renderWhitelist(data.entries || data || []);
+    }
+
+    function renderWhitelist(list){
+      const cont = document.getElementById('whitelistContainer');
+      if (!cont) return;
+      cont.innerHTML = '';
+      if (!list || !list.length) { cont.innerHTML = '<div class="muted">No whitelist entries.</div>'; return; }
+      list.forEach((v,i)=>{
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.style.marginBottom = '6px';
+        div.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><div><b>${esc(v)}</b></div><div><button class="btn sm ghost" data-idx="${i}" data-val="${esc(v)}">Remove</button></div></div>`;
+        cont.appendChild(div);
+      });
+      // wire remove
+      cont.querySelectorAll('button[data-val]').forEach(b=> b.addEventListener('click', async ()=>{
+        const val = b.dataset.val;
+        if (!confirm('Remove whitelist entry: '+val+'?')) return;
+        const rr = await fetch('/api/alerts/whitelist', { method:'DELETE', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ value: val }) }).catch(()=>null);
+        if (!rr) return notify('Failed to remove','error');
+        notify('Removed '+val,'success');
+        loadWhitelist();
+      }));
+    }
+
+    document.getElementById('btnWhitelistRefresh')?.addEventListener('click', ()=> loadWhitelist());
+    document.getElementById('btnWhitelistAdd')?.addEventListener('click', async ()=>{
+      const v = document.getElementById('whitelistInput').value.trim();
+      if (!v) return notify('Enter a value to whitelist','error');
+      const r = await fetch('/api/alerts/whitelist', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ value: v }) }).catch(()=>null);
+      if (!r) return notify('Failed to add','error');
+      notify('Added '+v,'success');
+      document.getElementById('whitelistInput').value = '';
+      loadWhitelist();
+    });
+
+    document.getElementById('btnApplyWhitelist')?.addEventListener('click', async ()=>{
+      if (!confirm('Apply whitelist and re-scan current alerts?')) return;
+      const b = { query: state.filters.q, severity: state.filters.sev, status: state.filters.status, owner: state.filters.owner };
+      const r = await fetch('/api/alerts/scan_sa_phishing', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(b) }).catch(()=>null);
+      if (!r) { notify('Re-scan failed','error'); return; }
+      const data = await r.json().catch(()=>({}));
+      notify('Re-scan complete: '+(data.matched||0)+' matched','success');
+      await loadAlerts();
+    });
   async function updateOne(fields){
     const id = el.dId.textContent;
     if (!id) return;
