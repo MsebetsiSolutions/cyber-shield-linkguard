@@ -367,47 +367,28 @@ def try_taxii_pull(server: str, collection_id: str, username: Optional[str], pas
         # optional dependency
         from taxii2client.v21 import Server, Collection  # type: ignore
     except Exception as e:
-        return [], "taxii2-client not installed. Add 'taxii2-client' to requirements.txt to enable TAXII pull."
+        return [], "taxii2-client not installed. Add to requirements to enable TAXII pull."
 
     try:
-        auth = None
         if username and password:
-            auth = (username, password)
-            
-        # Create server connection
-        srv = Server(server, auth=auth, verify=True, timeout=TIMEOUT[0])
-        
-        # Get all collections
-        collections = []
+            srv = Server(server, user=username, password=password, verify=True, timeout=TIMEOUT)
+        else:
+            srv = Server(server, verify=True, timeout=TIMEOUT)
+        # naive approach: search all API Roots -> Collections, pick by id
         for api_root in srv.api_roots:
             for col in api_root.collections:
-                collections.append(col)
-        
-        # Find the requested collection
-        target_collection = None
-        for col in collections:
-            if getattr(col, "id", "") == collection_id:
-                target_collection = col
-                break
-                
-        if not target_collection:
-            return [], f"Collection '{collection_id}' not found on server. Available collections: {[getattr(c, 'id', '') for c in collections]}"
-        
-        # Pull objects from the collection
-        collection = Collection(target_collection.url, auth=auth, verify=True)
-        bundle = collection.get_objects()
-        objs = bundle.get("objects", []) if isinstance(bundle, dict) else []
-        
-        return objs, None
-        
+                if getattr(col, "id", "") == collection_id or getattr(col, "title", "") == collection_id:
+                    c = Collection(col.url)
+                    bundle = c.get_objects()
+                    objs = bundle.get("objects", []) if isinstance(bundle, dict) else []
+                    return objs, None
+        return [], f"Collection {collection_id} not found on server."
     except Exception as e:
         error_msg = str(e)
         if "timeout" in error_msg.lower() or "timed out" in error_msg.lower():
             return [], f"Connection timeout to TAXII server: {server}"
         elif "connection" in error_msg.lower():
             return [], f"Connection error to TAXII server: {server}"
-        elif "401" in error_msg or "403" in error_msg:
-            return [], f"Authentication failed for TAXII server. Check username/password."
         else:
             return [], f"TAXII server error: {error_msg}"
 
@@ -420,14 +401,13 @@ def list_taxii_collections(server: str, username: Optional[str], password: Optio
     try:
         from taxii2client.v21 import Server  # type: ignore
     except Exception as e:
-        return [], "taxii2-client not installed. Add 'taxii2-client' to requirements.txt to enable TAXII features."
+        return [], "taxii2-client not installed. Add to requirements to enable TAXII features."
 
     try:
-        auth = None
         if username and password:
-            auth = (username, password)
-            
-        srv = Server(server, auth=auth, verify=True, timeout=TIMEOUT[0])
+            srv = Server(server, user=username, password=password, verify=True, timeout=TIMEOUT)
+        else:
+            srv = Server(server, verify=True, timeout=TIMEOUT)
 
         out: List[Dict[str, str]] = []
         for api_root in srv.api_roots:
@@ -437,7 +417,6 @@ def list_taxii_collections(server: str, username: Optional[str], password: Optio
                     "title": getattr(col, "title", ""),
                     "url": getattr(col, "url", ""),
                     "api_root": getattr(api_root, "url", ""),
-                    "description": getattr(col, "description", ""),
                 })
         return out, None
     except Exception as e:
@@ -446,8 +425,6 @@ def list_taxii_collections(server: str, username: Optional[str], password: Optio
             return [], f"Connection timeout to TAXII server: {server}"
         elif "connection" in error_msg.lower():
             return [], f"Connection error to TAXII server: {server}"
-        elif "401" in error_msg or "403" in error_msg:
-            return [], f"Authentication failed for TAXII server. Check username/password."
         else:
             return [], f"TAXII server error: {error_msg}"
 
@@ -581,7 +558,6 @@ def ti_taxii_pull():
     objs, err = try_taxii_pull(server, collection_id, username, password)
     if err:
         return jsonify({"error": err}), 501  # Not Implemented (until lib installed)
-    
     iocs = parse_stix_objects(objs)
     mitre = extract_tactics(json.dumps(objs))
     
@@ -590,7 +566,7 @@ def ti_taxii_pull():
     for obj in objs:
         obj_type = obj.get("type", "unknown")
         obj_id = obj.get("id", "")
-        obj_name = obj.get("name", obj.get("value", obj_id))
+        obj_name = obj.get("name", obj.get("value", "N/A"))
         obj_desc = obj.get("description", "No description")
         
         formatted_objects.append({

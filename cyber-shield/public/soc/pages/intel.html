@@ -53,7 +53,6 @@
       <div class="taxii-presets">
         <div class="taxii-preset-btn active" data-url="https://cti-taxii.mitre.org/taxii/" data-collection="95ecc380-afe9-11e4-9b6c-751b66dd541e">MITRE ATT&CK</div>
         <div class="taxii-preset-btn" data-url="https://otx.alienvault.com/taxii/" data-collection="user_AlienVault">AlienVault OTX</div>
-        <div class="taxii-preset-btn" data-url="https://limo.anomali.com/api/v1/taxii2/feeds/" data-collection="107">Anomali Limo</div>
       </div>
       
       <label>Server URL</label>
@@ -67,18 +66,6 @@
         <div>
           <label>Range (days)</label>
           <input id="taxiiDays" type="number" value="7" min="1">
-        </div>
-      </div>
-
-      <!-- Authentication (optional) -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <div>
-          <label>Username (optional)</label>
-          <input id="taxiiUsername" placeholder="Username">
-        </div>
-        <div>
-          <label>Password (optional)</label>
-          <input id="taxiiPassword" type="password" placeholder="Password">
         </div>
       </div>
       
@@ -104,12 +91,6 @@
       </div>
       
       <div id="taxiiAlert" style="margin-top:8px"></div>
-
-      <!-- Collections List -->
-      <div id="collectionsList" style="display: none; margin-top: 12px;">
-        <h4>Available Collections</h4>
-        <div id="collectionsContainer" class="collections-container"></div>
-      </div>
     </div>
   </div>
 
@@ -386,39 +367,6 @@
     color: var(--primary);
   }
 
-  /* Collections Styles */
-  .collections-container {
-    display: grid;
-    gap: 8px;
-    max-height: 200px;
-    overflow-y: auto;
-  }
-
-  .collection-item {
-    background: var(--dark-light);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .collection-item:hover {
-    border-color: var(--primary);
-    background: var(--accent-1);
-  }
-
-  .collection-item .title {
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-
-  .collection-item .id {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-family: monospace;
-  }
-
   /* Heatmap Styles */
   .heatmap-container {
     display: grid;
@@ -509,14 +457,10 @@
       taxiiUrl: $("#taxiiUrl"),
       taxiiCol: $("#taxiiCollection"),
       taxiiDays: $("#taxiiDays"),
-      taxiiUsername: $("#taxiiUsername"),
-      taxiiPassword: $("#taxiiPassword"),
       taxiiAlert: $("#taxiiAlert"),
       taxiiResults: $("#taxiiResults"),
       taxiiTable: $("#taxiiTable tbody"),
       taxiiObjectCount: $("#taxiiObjectCount"),
-      collectionsList: $("#collectionsList"),
-      collectionsContainer: $("#collectionsContainer"),
       conf: $("#conf"),
       tlp: $("#tlp"),
       table: $("#tiTable tbody"),
@@ -641,18 +585,10 @@
       el.taxiiAlert.innerHTML = `<div class="alert alert-info">🔍 Listing collections...</div>`;
       
       try {
-        const payload = { server };
-        
-        // Add authentication if provided
-        const username = (el.taxiiUsername.value || '').trim();
-        const password = (el.taxiiPassword.value || '').trim();
-        if (username) payload.username = username;
-        if (password) payload.password = password;
-        
         const r = await fetch('/api/ti/taxii/list', { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify(payload) 
+          body: JSON.stringify({ server }) 
         });
         const j = await r.json().catch(() => ({ error: 'Invalid server response' }));
         
@@ -663,20 +599,12 @@
               'Connection Timeout', 
               `Unable to connect to TAXII server: ${server}. The server may be unreachable or taking too long to respond. Please check the server URL and try again.`
             );
-          } else if (j.error && j.error.includes('taxii2-client not installed')) {
-            showError(
-              'Feature Not Available',
-              'TAXII client library is not installed. Please contact your administrator to enable TAXII features.'
-            );
           } else {
             showError('TAXII Error', j.error || `Server returned HTTP ${r.status}`);
           }
           el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ Connection failed</div>`; 
           return; 
         }
-        
-        // Display collections
-        displayCollections(j.collections || []);
         
         el.taxiiAlert.innerHTML = `<div class="alert alert-success">✅ Found ${j.count} collections</div>`;
         showSuccess('Collections Found', `Found ${j.count} collections on the TAXII server.`);
@@ -691,38 +619,6 @@
       }
     });
 
-    function displayCollections(collections) {
-      if (collections.length === 0) {
-        el.collectionsContainer.innerHTML = '<div class="alert alert-info">No collections found on this server.</div>';
-        el.collectionsList.style.display = 'block';
-        return;
-      }
-      
-      let html = '';
-      collections.forEach(col => {
-        html += `
-          <div class="collection-item" data-id="${col.id}" data-title="${col.title || col.id}">
-            <div class="title">${col.title || 'Untitled Collection'}</div>
-            <div class="id">ID: ${col.id}</div>
-            ${col.description ? `<div class="description">${col.description}</div>` : ''}
-          </div>
-        `;
-      });
-      
-      el.collectionsContainer.innerHTML = html;
-      el.collectionsList.style.display = 'block';
-      
-      // Add click handlers to collection items
-      qsa('.collection-item').forEach(item => {
-        item.addEventListener('click', function() {
-          const collectionId = this.dataset.id;
-          const collectionTitle = this.dataset.title;
-          el.taxiiCol.value = collectionId;
-          showSuccess('Collection Selected', `Selected collection: ${collectionTitle}`);
-        });
-      });
-    }
-
     $("#btnPullTaxii").addEventListener("click", async () => {
       el.taxiiAlert.textContent = '';
       const server = (el.taxiiUrl.value || '').trim();
@@ -735,21 +631,10 @@
       el.taxiiAlert.innerHTML = `<div class="alert alert-info">⬇️ Pulling objects (this may take a moment)...</div>`;
       
       try {
-        const payload = { 
-          server, 
-          collection_id 
-        };
-        
-        // Add authentication if provided
-        const username = (el.taxiiUsername.value || '').trim();
-        const password = (el.taxiiPassword.value || '').trim();
-        if (username) payload.username = username;
-        if (password) payload.password = password;
-        
         const r = await fetch('/api/ti/taxii/pull', { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload) 
+          body: JSON.stringify({ server, collection_id }) 
         });
         const j = await r.json().catch(() => ({ error: 'Invalid server response' }));
         
@@ -764,11 +649,6 @@
             showError(
               'Feature Not Available',
               'TAXII client library is not installed. Please contact your administrator to enable TAXII features.'
-            );
-          } else if (j.error && j.error.includes('not found')) {
-            showError(
-              'Collection Not Found',
-              `Collection "${collection_id}" was not found on the server. Please check the Collection ID and try again.`
             );
           } else {
             showError('TAXII Error', j.error || `Server returned HTTP ${r.status}`);
@@ -841,16 +721,13 @@
         'threat-actor': '👤',
         'campaign': '📅',
         'identity': '🆔',
-        'vulnerability': '💥',
-        'report': '📄',
-        'intrusion-set': '🎭'
+        'vulnerability': '💥'
       };
       return icons[type] || '📄';
     }
 
     function hideTaxiiResults() {
       el.taxiiResults.style.display = 'none';
-      el.collectionsList.style.display = 'none';
     }
 
     // =========================
