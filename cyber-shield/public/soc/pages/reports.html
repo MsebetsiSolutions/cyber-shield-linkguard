@@ -1,3 +1,5 @@
+<!-- public/soc/pages/reports.html -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <div class="card">
   <div class="card-head">
     <h3>Reports & Exports</h3>
@@ -24,176 +26,266 @@
           <div class="stat-foot">P95: <span id="kpiMttrP95">--</span></div>
         </div>
       </div>
-      <canvas id="kpiTrend" height="120" style="margin-top:8px"></canvas>
+      <canvas id="kpiTrend" height="120" class="chart-margin"></canvas>
     </div>
 
-    <!-- QUICK EXPORTS -->
-    <div class="card">
-      <h3>Quick Exports</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div>
-          <label>Dataset</label>
-          <select id="expDataset">
-            <option value="events24h">Events (last 24h)</option>
-            <option value="alerts7d">Alerts (last 7d)</option>
-            <option value="incidents30d">Incidents (last 30d)</option>
-            <option value="intel7d">Threat Intel (last 7d)</option>
-            <option value="compliance">Compliance Controls</option>
-          </select>
-        </div>
-        <div>
-          <label>Format</label>
-          <select id="expFormat">
-            <option value="csv">CSV</option>
-            <option value="json">JSON</option>
-          </select>
+    <div class="card exec-dashboard">
+      <div class="card-head">
+        <h3>Executive Dashboard</h3>
+        <div class="actions">
+          <button class="btn sm ghost" id="btnExportDashboard"><i class="bi bi-download"></i> Export</button>
+          <button class="btn sm ghost" id="btnShareDashboard"><i class="bi bi-share"></i> Share</button>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <div>
-          <label>From</label>
-          <input id="expFrom" type="date">
+      <div class="grid three">
+        <div class="card">
+          <div class="stat-label">Risk Score</div>
+          <div class="stat-value" id="riskScore">--</div>
         </div>
-        <div>
-          <label>To</label>
-          <input id="expTo" type="date">
+        <div class="card">
+          <div class="stat-label">Top Threat Type</div>
+          <div class="stat-value" id="topThreat">--</div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Compliance Score</div>
+          <div class="stat-value" id="complianceScore">--%</div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="btn sm" id="btnExport"><i class="bi bi-download"></i> Export</button>
-        <button class="btn sm ghost" id="btnQuickCsv"><i class="bi bi-filetype-csv"></i> Events 24h CSV</button>
+    </div>
+  </div>
+
+  <!-- EXPORTS -->
+  <div class="card export-section">
+    <h3>Quick Exports & Templates</h3>
+    <div class="grid-two">
+      <div>
+        <label for="expDataset">Dataset</label>
+        <select id="expDataset" title="Select dataset to export">
+          <option value="events24h">Events (last 24h)</option>
+          <option value="alerts7d">Alerts (last 7d)</option>
+          <option value="incidents30d">Incidents (last 30d)</option>
+          <option value="intel7d">Threat Intel (last 7d)</option>
+          <option value="compliance">Compliance Controls</option>
+        </select>
+      </div>
+      <div>
+        <label for="expFormat">Format</label>
+        <select id="expFormat" title="Select export format">
+          <option value="csv">CSV</option>
+          <option value="json">JSON</option>
+          <option value="pdf">PDF Report</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="grid-two datetime-section">
+      <div>
+        <label for="expFrom">From</label>
+        <input id="expFrom" type="datetime-local" title="Start date and time">
+      </div>
+      <div>
+        <label for="expTo">To</label>
+        <input id="expTo" type="datetime-local" title="End date and time">
+      </div>
+    </div>
+    
+    <div class="button-section">
+      <button class="btn sm" id="btnExport"><i class="bi bi-download"></i> Export</button>
+      <button class="btn sm ghost" id="btnQuickCsv"><i class="bi bi-filetype-csv"></i> Quick CSV</button>
+      <button class="btn sm ghost" id="btnPreview"><i class="bi bi-eye"></i> Preview</button>
+    </div>
+  </div>
+
+  <!-- ADVANCED ANALYTICS -->
+  <div class="card analytics-section">
+    <div class="card-head">
+      <h3>Advanced Analytics</h3>
+      <div class="actions">
+        <button class="btn sm ghost" id="btnRunAnalytics"><i class="bi bi-graph-up"></i> Run Analysis</button>
+      </div>
+    </div>
+    
+    <div class="grid two">
+      <div class="card">
+        <h3>Correlation Analysis</h3>
+        <div class="analysis-controls">
+          <label for="analyticsType">Analysis Type</label>
+          <select id="analyticsType" title="Select analysis type">
+            <option value="threat_correlation">Threat Correlation</option>
+            <option value="anomaly_detection">Anomaly Detection</option>
+            <option value="trend_forecast">Trend Forecasting</option>
+            <option value="compliance_gap">Compliance Gap Analysis</option>
+          </select>
+        </div>
+        <button class="btn sm full" id="btnGenerateInsights">
+          <i class="bi bi-magic"></i> Generate Insights
+        </button>
+      </div>
+      
+      <div class="card">
+        <h3>AI-Powered Insights</h3>
+        <div id="aiInsights" class="insights-box">
+          Run analysis to get AI-powered security insights and recommendations...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLIANCE -->
+  <div class="card compliance-section">
+    <div class="card-head">
+      <h3>Compliance</h3>
+      <div class="actions">
+        <button class="btn sm ghost" id="btnComplianceRefresh"><i class="bi bi-arrow-repeat"></i> Refresh</button>
+        <button class="btn sm ghost" id="btnComplianceCsv"><i class="bi bi-download"></i> CSV</button>
+      </div>
+    </div>
+    <p class="muted">Track policy/control status across frameworks (ISO 27001, NIST 800-53, SOC 2, CIS, GDPR).</p>
+    
+    <div class="grid two">
+      <div class="card">
+        <h3>Controls Overview</h3>
+        <div class="grid-two">
+          <div>
+            <div class="stat-label">Total Controls</div>
+            <div class="stat-value" id="cmpTotal">--</div>
+          </div>
+          <div>
+            <div class="stat-label">Compliant</div>
+            <div class="stat-value" id="cmpCompliant">--</div>
+            <div class="stat-foot">Exceptions: <span id="cmpException">--</span></div>
+          </div>
+        </div>
+        <canvas id="cmpChart" height="120" class="chart-margin"></canvas>
+      </div>
+
+      <div class="card">
+        <h3>Compliance Assessment</h3>
+        <p class="muted" style="font-size: 12px; margin-top: 4px;">Answer questions to assess your compliance posture</p>
+        
+        <div class="assessment-controls" style="margin-top: 12px;">
+          <div style="margin-bottom: 8px;">
+            <label for="cmpFramework" style="display: block; margin-bottom: 4px;">Select Framework</label>
+            <select id="cmpFramework" title="Select compliance framework" style="width: 100%;">
+              <option value="">-- Choose Framework --</option>
+              <option value="ISO27001">ISO 27001 (Information Security)</option>
+              <option value="NIST800-53">NIST 800-53 (Security Controls)</option>
+              <option value="SOC2">SOC 2 (Service Organization)</option>
+              <option value="CIS">CIS Controls (Critical Security Controls)</option>
+              <option value="GDPR">GDPR (Data Protection)</option>
+            </select>
+          </div>
+          
+          <div id="questionsContainer" style="display: none; margin-top: 12px; border-top: 1px solid rgba(212,175,55,.2); padding-top: 12px;">
+            <h4 style="margin: 0 0 12px 0; font-size: 13px; color: #f8fafc;">Assessment Questions</h4>
+            <div id="questionsList"></div>
+            <div class="button-section" style="margin-top: 12px;">
+              <button class="btn sm" id="btnSubmitAssessment"><i class="bi bi-check-circle"></i> Submit Assessment</button>
+              <button class="btn sm ghost" id="btnClearAssessment"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <table class="table compact" id="cmpTable" style="margin-top: 12px;">
+      <thead>
+        <tr>
+          <th>ID</th><th>Policy / Control</th><th>Status</th><th>Framework</th><th>Owner</th><th>Last Audit</th><th>Evidence</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- SCHEDULER -->
+  <div class="card scheduler-section">
+    <div class="card-head">
+      <h3>Schedule Reports</h3>
+    </div>
+    <div class="grid two">
+      <div class="card">
+        <h3>Create Schedule</h3>
+        <div class="grid-two">
+          <div>
+            <label for="schType">Report Type</label>
+            <select id="schType" title="Select report type">
+              <option value="exec_summary">Executive Summary</option>
+              <option value="weekly_kpi">Weekly KPI</option>
+              <option value="monthly_kpi">Monthly KPI</option>
+              <option value="compliance_snapshot">Compliance Snapshot</option>
+            </select>
+          </div>
+          <div>
+            <label for="schCadence">Cadence</label>
+            <select id="schCadence" title="Select report cadence">
+              <option value="Weekly">Weekly</option>
+              <option value="Monthly">Monthly</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-two" style="margin-top: 8px;">
+          <div>
+            <label for="schRecipients">Recipients (comma separated)</label>
+            <input id="schRecipients" type="text" placeholder="seclead@corp.com, ciso@corp.com" title="Email addresses">
+          </div>
+          <div>
+            <label for="schFormat">Format</label>
+            <select id="schFormat" title="Report format">
+              <option value="PDF">PDF</option>
+              <option value="CSV">CSV</option>
+              <option value="JSON">JSON</option>
+            </select>
+          </div>
+        </div>
+        <div class="button-section">
+          <button class="btn sm" id="btnCreateSchedule"><i class="bi bi-calendar-plus"></i> Create</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Existing Schedules</h3>
+        <table class="table compact" id="schTable">
+          <thead><tr><th>ID</th><th>Type</th><th>Cadence</th><th>Format</th><th>Recipients</th><th>Next Run</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
       </div>
     </div>
   </div>
 </div>
 
-<!-- COMPLIANCE -->
-<div class="card" style="margin-top:12px">
-  <div class="card-head">
-    <h3>Compliance</h3>
-    <div class="actions">
-      <button class="btn sm ghost" id="btnComplianceRefresh"><i class="bi bi-arrow-repeat"></i> Refresh</button>
-      <button class="btn sm ghost" id="btnComplianceCsv"><i class="bi bi-download"></i> CSV</button>
-    </div>
-  </div>
-  <p class="muted">Track policy/control status across frameworks (ISO 27001, NIST 800-53, SOC 2, CIS, GDPR). Import from your DB and attach evidence.</p>
-  <div class="grid two">
-    <div class="card">
-      <h3>Controls Overview</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div>
-          <div class="stat-label">Total Controls</div>
-          <div class="stat-value" id="cmpTotal">--</div>
-        </div>
-        <div>
-          <div class="stat-label">Compliant</div>
-          <div class="stat-value" id="cmpCompliant">--</div>
-          <div class="stat-foot">Exceptions: <span id="cmpException">--</span></div>
-        </div>
-      </div>
-      <canvas id="cmpChart" height="120" style="margin-top:8px"></canvas>
-    </div>
-
-    <div class="card">
-      <h3>Filters</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div>
-          <label>Framework</label>
-          <select id="cmpFramework">
-            <option value="">All</option>
-            <option>ISO27001</option>
-            <option>NIST800-53</option>
-            <option>SOC2</option>
-            <option>CIS</option>
-            <option>GDPR</option>
-          </select>
-        </div>
-        <div>
-          <label>Status</label>
-          <select id="cmpStatus">
-            <option value="">Any</option>
-            <option>Compliant</option>
-            <option>Partial</option>
-            <option>Non-Compliant</option>
-            <option>Exception</option>
-          </select>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="btn sm" id="btnCmpApply"><i class="bi bi-funnel"></i> Apply</button>
-        <button class="btn sm ghost" id="btnCmpClear"><i class="bi bi-eraser"></i> Clear</button>
-      </div>
-    </div>
-  </div>
-
-  <table class="table compact" id="cmpTable" style="margin-top:8px">
-    <thead>
-      <tr>
-        <th>ID</th><th>Policy / Control</th><th>Status</th><th>Framework</th><th>Owner</th><th>Last Audit</th><th>Evidence</th><th>Actions</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-
-<!-- SCHEDULER -->
-<div class="card" style="margin-top:12px">
-  <div class="card-head">
-    <h3>Schedule Reports</h3>
-  </div>
-  <div class="grid two">
-    <div class="card">
-      <h3>Create Schedule</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div>
-          <label>Report Type</label>
-          <select id="schType">
-            <option value="exec_summary">Executive Summary</option>
-            <option value="weekly_kpi">Weekly KPI</option>
-            <option value="monthly_kpi">Monthly KPI</option>
-            <option value="compliance_snapshot">Compliance Snapshot</option>
-          </select>
-        </div>
-        <div>
-          <label>Cadence</label>
-          <select id="schCadence">
-            <option>Weekly</option>
-            <option>Monthly</option>
-          </select>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <div>
-          <label>Recipients (comma emails)</label>
-          <input id="schRecipients" placeholder="seclead@corp.com, ciso@corp.com">
-        </div>
-        <div>
-          <label>Format</label>
-          <select id="schFormat">
-            <option>PDF</option>
-            <option>CSV</option>
-            <option>JSON</option>
-          </select>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="btn sm" id="btnCreateSchedule"><i class="bi bi-calendar-plus"></i> Create</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3>Existing Schedules</h3>
-      <table class="table compact" id="schTable">
-        <thead><tr><th>ID</th><th>Type</th><th>Cadence</th><th>Format</th><th>Recipients</th><th>Next Run</th><th></th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-</div>
+<style>
+.chart-margin { margin-top: 8px; }
+.button-margin { margin-top: 8px; }
+.assessment-controls { margin-top: 12px; }
+.exec-dashboard { margin-top: 12px; }
+.export-section { margin-top: 12px; }
+.analytics-section { margin-top: 12px; }
+.compliance-section { margin-top: 12px; }
+.scheduler-section { margin-top: 12px; }
+.grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.datetime-section { margin-top: 8px; }
+.analysis-controls { margin-bottom: 8px; }
+.insights-box { 
+  background: #1e293b; 
+  padding: 12px; 
+  border-radius: 4px; 
+  min-height: 100px; 
+  color: #94a3b8;
+  font-size: 14px;
+}
+.button-section { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+</style>
 
 <script>
 (function(){
   const $ = (s,p=document)=>p.querySelector(s);
+
+  // ======== Helper Functions ========
+  function statusBadge(st){
+    const c = st==="Compliant" ? "ok" : st==="Partial" ? "warn" : st==="Exception" ? "warn" : "bad";
+    return `<span class="badge ${c}">${st}</span>`;
+  }
 
   // ======== KPI ========
   const kpi = {
@@ -206,37 +298,51 @@
   let kpiChart = null;
 
   async function loadKpis(){
-    // Backend returns
-    const r = await fetch("/api/reports/kpis", {method:"POST"}).catch(()=>null);
-    const data = r ? await r.json().catch(()=>({})) : {};
-    kpi.inc7.textContent = data.incidents7 ?? "--";
-    kpi.closed7.textContent = data.closed7 ?? "--";
-    kpi.mttr.textContent = data.mttr ?? "--";
-    kpi.mttrP95.textContent = data.mttr_p95 ?? "--";
-    renderKpiTrend(data.trend||{labels:[], incidents:[], alerts:[]});
+    try {
+      const r = await fetch("/api/reports/kpis", {method:"POST"});
+      const data = await r.json();
+      kpi.inc7.textContent = data.incidents7 ?? "--";
+      kpi.closed7.textContent = data.closed7 ?? "--";
+      kpi.mttr.textContent = data.mttr ?? "--";
+      kpi.mttrP95.textContent = data.mttr_p95 ?? "--";
+      renderKpiTrend(data.trend||{labels:[], incidents:[], alerts:[]});
+    } catch (error) {
+      console.error("Failed to load KPIs:", error);
+      kpi.inc7.textContent = "Error";
+      kpi.closed7.textContent = "Error";
+      kpi.mttr.textContent = "Error";
+      kpi.mttrP95.textContent = "Error";
+    }
   }
+  
   function renderKpiTrend(t){
-    if (!kpi.chartEl) return;
+    if (!kpi.chartEl || typeof Chart === "undefined") return;
     if (kpiChart) kpiChart.destroy();
-    const ctx = kpi.chartEl.getContext("2d");
-    kpiChart = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: t.labels || [],
-        datasets: [
-          { label: "Incidents", data: t.incidents||[], tension:.35, fill:false },
-          { label: "Alerts", data: t.alerts||[], tension:.35, fill:false }
-        ]
-      },
-      options: {
-        responsive:true,
-        plugins:{ legend:{ labels:{ color:"#f8fafc" }}},
-        scales:{
-          x:{ ticks:{ color:"#cbd5e1" }, grid:{ color:"rgba(255,255,255,.06)" } },
-          y:{ ticks:{ color:"#cbd5e1" }, grid:{ color:"rgba(255,255,255,.06)" } }
+    try {
+      const ctx = kpi.chartEl.getContext("2d");
+      if (!ctx) return;
+      kpiChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: t.labels || [],
+          datasets: [
+            { label: "Incidents", data: t.incidents||[], tension:.35, fill:false, borderColor:"#ef4444", backgroundColor:"rgba(239,68,68,.1)" },
+            { label: "Alerts", data: t.alerts||[], tension:.35, fill:false, borderColor:"#f59e0b", backgroundColor:"rgba(245,158,11,.1)" }
+          ]
+        },
+        options: {
+          responsive:true,
+          maintainAspectRatio:true,
+          plugins:{ legend:{ labels:{ color:"#f8fafc" }}},
+          scales:{
+            x:{ ticks:{ color:"#cbd5e1" }, grid:{ color:"rgba(255,255,255,.06)" } },
+            y:{ ticks:{ color:"#cbd5e1" }, grid:{ color:"rgba(255,255,255,.06)" } }
+          }
         }
-      }
-    });
+      });
+    } catch(e) {
+      console.warn("Chart render failed:", e);
+    }
   }
 
   // ======== Exports ========
@@ -256,53 +362,393 @@
       from: exp.from.value || null,
       to: exp.to.value || null
     };
-    const r = await fetch("/api/reports/export", {
+    try {
+      const r = await fetch("/api/reports/export", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify(body)
+      });
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const ext = exp.format.value === "csv" ? "csv" : "json";
+      a.href = url; a.download = `${body.dataset}.${ext}`; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),600);
+    } catch (error) {
+      alert("Export failed: " + error.message);
+    }
+  });
+
+  if (exp.quickCsv) exp.quickCsv.addEventListener("click", ()=>{
+    // Quick CSV export for events
+    const body = {
+      dataset: "events24h",
+      format: "csv"
+    };
+    fetch("/api/reports/export", {
       method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify(body)
+    })
+    .then(r => r.blob())
+    .then(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "quick_export.csv"; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),600);
     });
-    const blob = await r.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    const ext = exp.format.value === "csv" ? "csv" : "json";
-    a.href = url; a.download = `${body.dataset}.${ext}`; a.click();
-    setTimeout(()=>URL.revokeObjectURL(url),600);
   });
 
-  // maintain quick CSV behavior for events 24h
-  exp.quickCsv.addEventListener("click", ()=>{
-    window.dispatchEvent(new Event("exportEvents"));
+  const btnExportDashboard = $("#btnExportDashboard");
+  if (btnExportDashboard) btnExportDashboard.addEventListener("click", ()=>{
+    alert("Dashboard export: Generate PDF snapshot");
   });
 
-  // ======== Print / PDF (browser print to PDF) ========
-  $("#btnPrint").addEventListener("click", ()=> window.print());
+  const btnShareDashboard = $("#btnShareDashboard");
+  if (btnShareDashboard) btnShareDashboard.addEventListener("click", ()=>{
+    alert("Share dashboard via email or link");
+  });
+
+  const btnPrint = $("#btnPrint");
+  if (btnPrint) btnPrint.addEventListener("click", ()=> window.print());
+
+  const btnRunAnalytics = $("#btnRunAnalytics");
+  if (btnRunAnalytics) btnRunAnalytics.addEventListener("click", async ()=>{
+    try {
+      const response = await fetch("/api/analytics/threat-correlation", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({time_range: "7d"})
+      });
+      const data = await response.json();
+      alert(`Analytics complete: ${data.analysis}`);
+    } catch (error) {
+      alert("Analytics failed: " + error.message);
+    }
+  });
+
+  const btnGenerateInsights = $("#btnGenerateInsights");
+  if (btnGenerateInsights) btnGenerateInsights.addEventListener("click", async ()=>{
+    const aiInsights = $("#aiInsights");
+    if (aiInsights) {
+      aiInsights.textContent = "Analyzing data with AI...";
+      try {
+        const response = await fetch("/api/reports/ai-analysis", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({type: "threat_correlation"})
+        });
+        const data = await response.json();
+        aiInsights.textContent = data.llm_analysis.analysis || "Analysis complete. Review recommendations.";
+      } catch (error) {
+        aiInsights.textContent = "AI analysis failed. Using fallback insights... Monitor high-severity incidents trending upward. Recommend increasing SOC staffing during peak hours.";
+      }
+    }
+  });
 
   // ======== Compliance ========
   const cmp = {
     total: $("#cmpTotal"),
     compliant: $("#cmpCompliant"),
     exception: $("#cmpException"),
-    framework: $("#cmpFramework"),
-    status: $("#cmpStatus"),
     table: $("#cmpTable tbody")
   };
-  let cmpChart = null;
+
+  // ======== Compliance Questions Database ========
+  const complianceQuestions = {
+    ISO27001: [
+      { question: "Do you have a documented Information Security Policy?", id: "q1" },
+      { question: "Is there a designated Information Security Officer (ISO)?", id: "q2" },
+      { question: "Are security roles and responsibilities clearly defined?", id: "q3" },
+      { question: "Do you conduct regular risk assessments (at least annually)?", id: "q4" },
+      { question: "Are all IT assets inventoried and documented?", id: "q5" },
+      { question: "Is access control based on the principle of least privilege?", id: "q6" },
+      { question: "Do you implement multi-factor authentication (MFA)?", id: "q7" },
+      { question: "Are security awareness trainings conducted for all staff?", id: "q8" }
+    ],
+    "NIST800-53": [
+      { question: "Are access controls implemented for all systems (AC)?", id: "q1" },
+      { question: "Do you have an audit and accountability program (AU)?", id: "q2" },
+      { question: "Is there a security awareness and training program (AT)?", id: "q3" },
+      { question: "Do you conduct Configuration Management (CM)?", id: "q4" },
+      { question: "Are Identification and Authentication controls in place (IA)?", id: "q5" },
+      { question: "Do you have Incident Response procedures documented (IR)?", id: "q6" },
+      { question: "Is System and Communications Protection implemented (SC)?", id: "q7" },
+      { question: "Do you have Contingency Planning and Disaster Recovery (CP)?", id: "q8" }
+    ],
+    SOC2: [
+      { question: "Do you have a documented security policy and procedures?", id: "q1" },
+      { question: "Are there documented change management procedures?", id: "q2" },
+      { question: "Do you perform background checks on personnel with system access?", id: "q3" },
+      { question: "Is user access monitored and logged?", id: "q4" },
+      { question: "Do you have encryption in place for data in transit and at rest?", id: "q5" },
+      { question: "Are there procedures for handling security incidents?", id: "q6" },
+      { question: "Is there a disaster recovery and business continuity plan?", id: "q7" },
+      { question: "Do you conduct regular security assessments and audits?", id: "q8" }
+    ],
+    CIS: [
+      { question: "Do you have an inventory of all hardware assets?", id: "q1" },
+      { question: "Do you have an inventory of all software assets?", id: "q2" },
+      { question: "Are security tools actively managed and monitored?", id: "q3" },
+      { question: "Do you have controlled access to administrative privileges?", id: "q4" },
+      { question: "Is secure configuration management implemented?", id: "q5" },
+      { question: "Do you have an active incident response process?", id: "q6" },
+      { question: "Are there anti-malware and anti-virus protections in place?", id: "q7" },
+      { question: "Do you monitor and control network ports and protocols?", id: "q8" }
+    ],
+    GDPR: [
+      { question: "Do you have Data Processing Agreements (DPA) with all processors?", id: "q1" },
+      { question: "Is there a Data Protection Officer (DPO) appointed?", id: "q2" },
+      { question: "Do you maintain a record of processing activities (ROPA)?", id: "q3" },
+      { question: "Can you respond to data subject access requests (DSAR) within 30 days?", id: "q4" },
+      { question: "Do you implement privacy by design in new systems?", id: "q5" },
+      { question: "Is there a process for handling personal data breaches?", id: "q6" },
+      { question: "Do you conduct Data Protection Impact Assessments (DPIA)?", id: "q7" },
+      { question: "Is data retention and deletion documented and enforced?", id: "q8" }
+    ]
+  };
+
+  // ======== Compliance Recommendations ========
+  const complianceRecommendations = {
+    ISO27001: {
+      critical: [
+        "Establish and document a comprehensive Information Security Policy covering all aspects of IS management",
+        "Designate a qualified Information Security Officer with appropriate authority and resources",
+        "Conduct annual risk assessments and maintain a risk register with mitigation strategies",
+        "Implement MFA across all systems, prioritizing administrative and privileged accounts"
+      ],
+      important: [
+        "Create a complete IT asset inventory with tracking and maintenance procedures",
+        "Establish role-based access control (RBAC) aligned with organizational structure",
+        "Conduct quarterly security awareness training covering phishing, password security, and incident reporting",
+        "Implement encryption for sensitive data both at rest and in transit"
+      ],
+      maintain: [
+        "Regular audit of access controls and user permissions",
+        "Keep security policies updated based on emerging threats and regulatory changes",
+        "Document and review all security incidents for continuous improvement"
+      ]
+    },
+    "NIST800-53": {
+      critical: [
+        "Implement comprehensive Access Control (AC) policies covering authentication, authorization, and access logs",
+        "Establish Audit and Accountability (AU) program with detailed logging and monitoring",
+        "Deploy Identity and Authentication (IA) controls including MFA and strong password policies",
+        "Document Incident Response (IR) procedures with defined roles and communication protocols"
+      ],
+      important: [
+        "Implement System and Communications Protection (SC) including encryption and network segmentation",
+        "Develop Contingency Planning (CP) with tested backup and recovery procedures",
+        "Conduct mandatory security awareness and training (AT) programs quarterly",
+        "Establish Configuration Management (CM) baseline for all systems"
+      ],
+      maintain: [
+        "Regular review and update of all control implementations",
+        "Annual testing of incident response and contingency plans",
+        "Continuous monitoring of system logs and security events"
+      ]
+    },
+    SOC2: {
+      critical: [
+        "Document and implement comprehensive security policies and procedures",
+        "Establish formal change management process with testing and approval workflows",
+        "Implement multi-factor authentication and strong access controls",
+        "Deploy encryption for data in transit (TLS/SSL) and at rest (AES-256 or equivalent)"
+      ],
+      important: [
+        "Conduct background checks for all personnel with system access",
+        "Implement comprehensive logging and monitoring of user access and system changes",
+        "Establish incident response procedures with documented escalation paths",
+        "Develop and regularly test disaster recovery and business continuity plans"
+      ],
+      maintain: [
+        "Conduct annual third-party SOC 2 Type II audits",
+        "Regular security assessments and penetration testing",
+        "Ongoing staff training on security policies and procedures"
+      ]
+    },
+    CIS: {
+      critical: [
+        "Maintain complete and accurate inventory of all hardware assets with detailed tracking",
+        "Maintain complete software inventory including unlicensed and unauthorized software detection",
+        "Implement continuous monitoring of all security tools and configurations",
+        "Control and restrict administrative/privileged account access"
+      ],
+      important: [
+        "Establish baseline secure configurations for all systems and enforce compliance",
+        "Implement endpoint protection (anti-malware, anti-virus) across all devices",
+        "Monitor and control network access by managing ports, protocols, and services",
+        "Establish formal incident response process with defined procedures and responsibilities"
+      ],
+      maintain: [
+        "Regular review and updates of CIS Controls implementation",
+        "Quarterly security testing and vulnerability assessments",
+        "Continuous asset and configuration management"
+      ]
+    },
+    GDPR: {
+      critical: [
+        "Appoint a Data Protection Officer (DPO) if processing large-scale personal data",
+        "Establish Data Processing Agreements (DPA) with all data processors and vendors",
+        "Implement Privacy by Design principles in all new systems and processes",
+        "Establish data breach notification procedures with documentation requirements"
+      ],
+      important: [
+        "Maintain Records of Processing Activities (ROPA) for all data processing activities",
+        "Conduct Data Protection Impact Assessments (DPIA) for high-risk processing",
+        "Implement procedures to respond to Data Subject Access Requests within 30 days",
+        "Establish and enforce data retention and deletion policies"
+      ],
+      maintain: [
+        "Regular review of consent mechanisms and privacy notices",
+        "Annual DPIA reviews for ongoing processing activities",
+        "Quarterly training on GDPR obligations for all data handlers",
+        "Ongoing monitoring of data transfers and third-party compliance"
+      ]
+    }
+  };
+
+  // ======== Compliance Assessment Handler ========
+  const cmpFrameworkSelect = $("#cmpFramework");
+  const questionsContainer = $("#questionsContainer");
+  const questionsList = $("#questionsList");
+  const btnSubmitAssessment = $("#btnSubmitAssessment");
+  const btnClearAssessment = $("#btnClearAssessment");
+
+  if (cmpFrameworkSelect) {
+    cmpFrameworkSelect.addEventListener("change", (e) => {
+      const framework = e.target.value;
+      if (!framework) {
+        questionsContainer.style.display = "none";
+        return;
+      }
+      
+      const questions = complianceQuestions[framework] || [];
+      questionsList.innerHTML = questions.map((q, i) => `
+        <div style="margin-bottom: 16px; padding: 12px; background: rgba(0,0,0,.3); border-radius: 4px; border-left: 3px solid #d4af37;">
+          <p style="margin: 0 0 10px 0; color: #f8fafc; font-size: 13px; font-weight: 500;">${q.question}</p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; padding: 6px; border-radius: 3px; background: rgba(34,139,34,.1);">
+              <input type="radio" name="q${i}" value="yes" style="cursor: pointer; width: 14px; height: 14px;">
+              <span>Yes</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; padding: 6px; border-radius: 3px; background: rgba(255,140,0,.1);">
+              <input type="radio" name="q${i}" value="partial" style="cursor: pointer; width: 14px; height: 14px;">
+              <span>Partial</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; padding: 6px; border-radius: 3px; background: rgba(178,34,34,.1);">
+              <input type="radio" name="q${i}" value="no" style="cursor: pointer; width: 14px; height: 14px;">
+              <span>No</span>
+            </label>
+          </div>
+        </div>
+      `).join("");
+      
+      questionsContainer.style.display = "block";
+    });
+  }
+
+  if (btnSubmitAssessment) {
+    btnSubmitAssessment.addEventListener("click", async () => {
+      const framework = cmpFrameworkSelect.value;
+      if (!framework) {
+        alert("Please select a framework first");
+        return;
+      }
+
+      const questions = complianceQuestions[framework] || [];
+      const answers = {};
+      let yesCount = 0, partialCount = 0, noCount = 0;
+
+      questions.forEach((q, i) => {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        if (selected) {
+          answers[i] = selected.value;
+          if (selected.value === "yes") yesCount++;
+          else if (selected.value === "partial") partialCount++;
+          else noCount++;
+        }
+      });
+
+      const complianceScore = Math.round((yesCount / questions.length) * 100);
+      const recommendations = complianceRecommendations[framework] || {};
+      
+      let resultsHtml = `
+        <div style="padding: 16px; background: rgba(0,0,0,.2); border-radius: 4px; margin-top: 12px;">
+          <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #d4af37;">${framework} Assessment Results</h3>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+            <div style="background: rgba(34,139,34,.15); padding: 12px; border-radius: 4px; text-align: center;">
+              <div style="font-size: 14px; color: #cbd5e1; margin-bottom: 4px;">Compliant</div>
+              <div style="font-size: 24px; font-weight: bold; color: #22bb22;">${yesCount}/${questions.length}</div>
+            </div>
+            <div style="background: rgba(255,140,0,.15); padding: 12px; border-radius: 4px; text-align: center;">
+              <div style="font-size: 14px; color: #cbd5e1; margin-bottom: 4px;">In Progress</div>
+              <div style="font-size: 24px; font-weight: bold; color: #ff8c00;">${partialCount}/${questions.length}</div>
+            </div>
+            <div style="background: rgba(178,34,34,.15); padding: 12px; border-radius: 4px; text-align: center;">
+              <div style="font-size: 14px; color: #cbd5e1; margin-bottom: 4px;">Non-Compliant</div>
+              <div style="font-size: 24px; font-weight: bold; color: #b22222;">${noCount}/${questions.length}</div>
+            </div>
+          </div>
+
+          <div style="background: ${complianceScore >= 80 ? 'rgba(34,139,34,.15)' : complianceScore >= 60 ? 'rgba(255,140,0,.15)' : 'rgba(178,34,34,.15)'}; padding: 12px; border-radius: 4px; margin-bottom: 16px; text-align: center; border: 2px solid ${complianceScore >= 80 ? '#22bb22' : complianceScore >= 60 ? '#ff8c00' : '#b22222'};">
+            <div style="font-size: 14px; color: #cbd5e1; margin-bottom: 8px;">Compliance Score</div>
+            <div style="font-size: 32px; font-weight: bold; color: ${complianceScore >= 80 ? '#22bb22' : complianceScore >= 60 ? '#ff8c00' : '#b22222'};">${complianceScore}%</div>
+          </div>
+
+          <div style="margin-top: 16px;">
+            <h4 style="margin: 0 0 8px 0; color: #d4af37; font-size: 13px;">🔴 Critical Actions Required</h4>
+            <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #cbd5e1; line-height: 1.6;">
+              ${recommendations.critical ? recommendations.critical.map(r => `<li style="margin-bottom: 6px;">${r}</li>`).join('') : '<li>No critical actions identified</li>'}
+            </ul>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <h4 style="margin: 0 0 8px 0; color: #d4af37; font-size: 13px;">🟡 Important Improvements</h4>
+            <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #cbd5e1; line-height: 1.6;">
+              ${recommendations.important ? recommendations.important.map(r => `<li style="margin-bottom: 6px;">${r}</li>`).join('') : '<li>No improvements needed</li>'}
+            </ul>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <h4 style="margin: 0 0 8px 0; color: #d4af37; font-size: 13px;">🟢 Maintain & Enhance</h4>
+            <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #cbd5e1; line-height: 1.6;">
+              ${recommendations.maintain ? recommendations.maintain.map(r => `<li style="margin-bottom: 6px;">${r}</li>`).join('') : '<li>Keep current practices</li>'}
+            </ul>
+          </div>
+        </div>
+      `;
+      
+      // Show results in a new section
+      const resultsDiv = document.createElement("div");
+      resultsDiv.id = "assessmentResults";
+      resultsDiv.innerHTML = resultsHtml;
+      questionsContainer.parentElement.appendChild(resultsDiv);
+    });
+  }
+
+  if (btnClearAssessment) {
+    btnClearAssessment.addEventListener("click", () => {
+      document.querySelectorAll("input[type='radio']").forEach(r => r.checked = false);
+      const results = document.getElementById("assessmentResults");
+      if (results) results.remove();
+    });
+  }
 
   async function loadCompliance(){
-    const body = {
-      framework: cmp.framework.value || null,
-      status: cmp.status.value || null
-    };
-    // Expected rows: [{id, name, status, framework, owner, last_audit, evidence}]
-    const r = await fetch("/api/compliance/list", {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify(body)
-    }).catch(()=>null);
-    const data = r ? await r.json().catch(()=>({rows:[]})) : {rows:[]};
-    renderCompliance(data.rows||[]);
+    try {
+      const body = {};
+      const r = await fetch("/api/compliance/list", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify(body)
+      });
+      const data = await r.json();
+      renderCompliance(data.rows||[]);
+    } catch (error) {
+      console.error("Failed to load compliance data:", error);
+    }
   }
 
   function renderCompliance(rows){
-    // counters
     const total = rows.length;
     const counts = { "Compliant":0, "Partial":0, "Non-Compliant":0, "Exception":0 };
     rows.forEach(x=> counts[x.status] = (counts[x.status]||0)+1);
@@ -310,7 +756,6 @@
     cmp.compliant.textContent = counts["Compliant"]||0;
     cmp.exception.textContent = counts["Exception"]||0;
 
-    // table
     cmp.table.innerHTML = "";
     rows.forEach(r=>{
       const tr = document.createElement("tr");
@@ -330,51 +775,57 @@
       cmp.table.appendChild(tr);
     });
 
-    // chart
-    const ctx = $("#cmpChart").getContext("2d");
-    if (cmpChart) cmpChart.destroy();
-    cmpChart = new Chart(ctx, {
-      type: "doughnut",
-      data: {
-        labels: Object.keys(counts),
-        datasets: [{ data: Object.values(counts) }]
-      },
-      options: { plugins:{ legend:{ labels:{ color:"#f8fafc" }}}}
-    });
-  }
-
-  function statusBadge(st){
-    const c = st==="Compliant" ? "ok" : st==="Partial" ? "warn" : st==="Exception" ? "warn" : "bad";
-    return `<span class="badge ${c}">${st}</span>`;
+    const cmpChartEl = $("#cmpChart");
+    if (!cmpChartEl || typeof Chart === "undefined") return;
+    const ctx = cmpChartEl.getContext("2d");
+    if (!ctx) return;
+    if (window.cmpChart) window.cmpChart.destroy();
+    try {
+      window.cmpChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: Object.keys(counts),
+          datasets: [{
+            data: Object.values(counts),
+            backgroundColor: ["#10b981", "#f59e0b", "#ef4444", "#8b5cf6"]
+          }]
+        },
+        options: { responsive:true, plugins:{ legend:{ labels:{ color:"#f8fafc" }}}}
+      });
+    } catch(e) {
+      console.warn("Compliance chart error:", e);
+    }
   }
 
   $("#btnComplianceRefresh").addEventListener("click", loadCompliance);
   $("#btnComplianceCsv").addEventListener("click", async ()=>{
-    const r = await fetch("/api/compliance/export", {method:"POST"});
-    const blob = await r.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href=url; a.download="compliance.csv"; a.click();
-    setTimeout(()=>URL.revokeObjectURL(url),600);
+    try {
+      const r = await fetch("/api/compliance/export", {method:"POST"});
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href=url; a.download="compliance.csv"; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),600);
+    } catch (error) {
+      alert("Export failed: " + error.message);
+    }
   });
 
-  $("#btnCmpApply").addEventListener("click", loadCompliance);
-  $("#btnCmpClear").addEventListener("click", ()=>{
-    $("#cmpFramework").value=""; $("#cmpStatus").value=""; loadCompliance();
-  });
-
-  // Row actions: mark exception / resolve (updates status)
   $("#cmpTable").addEventListener("click", async (e)=>{
     const btn = e.target.closest("button[data-act]");
     if (!btn) return;
     const id = btn.getAttribute("data-id");
-    const act = btn.getAttribute("data-act"); // exception | resolve
+    const act = btn.getAttribute("data-act");
     const newStatus = act==="exception" ? "Exception" : "Compliant";
-    await fetch("/api/compliance/update", {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ id, status: newStatus })
-    });
-    loadCompliance();
+    try {
+      await fetch("/api/compliance/update", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ id, status: newStatus })
+      });
+      loadCompliance();
+    } catch (error) {
+      alert("Update failed: " + error.message);
+    }
   });
 
   // ======== Scheduler ========
@@ -393,45 +844,68 @@
       recipients: (sch.recipients.value||"").split(",").map(x=>x.trim()).filter(Boolean),
       format: sch.format.value
     };
-    await fetch("/api/reports/schedule", {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify(body)
-    });
-    loadSchedules();
+    try {
+      await fetch("/api/reports/schedule", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify(body)
+      });
+      loadSchedules();
+      alert("Schedule created successfully!");
+    } catch (error) {
+      alert("Failed to create schedule: " + error.message);
+    }
   });
 
   async function loadSchedules(){
-    // Backend returns
-    const r = await fetch("/api/reports/schedules", {method:"POST"}).catch(()=>null);
-    const data = r ? await r.json().catch(()=>({schedules:[]})) : {schedules:[]};
-    sch.table.innerHTML = "";
-    (data.schedules||[]).forEach(s=>{
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${s.id}</td><td>${s.type}</td><td>${s.cadence}</td>
-        <td>${s.format}</td><td>${(s.recipients||[]).join(", ")}</td>
-        <td>${s.next_run||""}</td>
-        <td><button class="btn sm ghost" data-cancel="${s.id}"><i class="bi bi-x"></i></button></td>
-      `;
-      sch.table.appendChild(tr);
-    });
+    try {
+      const r = await fetch("/api/reports/schedules", {method:"POST"});
+      const data = await r.json();
+      sch.table.innerHTML = "";
+      (data.schedules||[]).forEach(s=>{
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${s.id}</td><td>${s.type}</td><td>${s.cadence}</td>
+          <td>${s.format}</td><td>${(s.recipients||[]).join(", ")}</td>
+          <td>${s.next_run||""}</td>
+          <td><button class="btn sm ghost" data-cancel="${s.id}"><i class="bi bi-x"></i></button></td>
+        `;
+        sch.table.appendChild(tr);
+      });
+    } catch (error) {
+      console.error("Failed to load schedules:", error);
+    }
   }
 
   $("#schTable").addEventListener("click", async (e)=>{
     const btn = e.target.closest("button[data-cancel]");
     if (!btn) return;
     const id = btn.getAttribute("data-cancel");
-    await fetch("/api/reports/schedule/cancel", {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ id })
-    });
-    loadSchedules();
+    try {
+      await fetch("/api/reports/schedule/cancel", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ id })
+      });
+      loadSchedules();
+      alert("Schedule cancelled successfully!");
+    } catch (error) {
+      alert("Failed to cancel schedule: " + error.message);
+    }
   });
 
   // ======== Page init ========
+  console.log("Reports page loaded. Initializing...");
+  
   $("#btnRefreshKpi").addEventListener("click", loadKpis);
   loadKpis();
   loadCompliance();
   loadSchedules();
+  
+  // Set default dates for export
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  exp.from.value = sevenDaysAgo.toISOString().slice(0, 16);
+  exp.to.value = now.toISOString().slice(0, 16);
+  
+  console.log("Reports page initialization complete");
 })();
 </script>
