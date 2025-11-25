@@ -65,6 +65,8 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |      ├── apt.txt
         |      ├── cyber-shield-linkguard.db
         |      ├── requirements.txt 
+        |      ├── alerts_share_unzipped.tar
+        |      ├── alerts_share.tar.gz
         |      ├── soc_dashboard.db
         |      ├── .gitignore
         |      ├── .env

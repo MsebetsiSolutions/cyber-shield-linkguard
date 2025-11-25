@@ -103,8 +103,12 @@ def http_get_json(url: str, headers: Dict[str, str], params: Dict[str, Any] | No
             except Exception as e:
                 return None, f"JSON decode failed for {url}: {e}"
         return None, f"{url} -> HTTP {r.status_code}"
-    except requests.RequestException as e:
-        return None, str(e)
+    except requests.exceptions.Timeout:
+        return None, f"Connection timeout to {url}"
+    except requests.exceptions.ConnectionError:
+        return None, f"Connection error to {url}"
+    except requests.exceptions.RequestException as e:
+        return None, f"Request failed: {str(e)}"
     
 
 @intel_bp.post("/api/ti/mapping/attack")
@@ -363,24 +367,49 @@ def try_taxii_pull(server: str, collection_id: str, username: Optional[str], pas
         # optional dependency
         from taxii2client.v21 import Server, Collection  # type: ignore
     except Exception as e:
-        return [], "taxii2-client not installed. Add to requirements to enable TAXII pull."
+        return [], "taxii2-client not installed. Add 'taxii2-client' to requirements.txt to enable TAXII pull."
 
     try:
+        auth = None
         if username and password:
-            srv = Server(server, user=username, password=password, verify=True)
-        else:
-            srv = Server(server, verify=True)
-        # naive approach: search all API Roots -> Collections, pick by id
+            auth = (username, password)
+            
+        # Create server connection
+        srv = Server(server, auth=auth, verify=True, timeout=TIMEOUT[0])
+        
+        # Get all collections
+        collections = []
         for api_root in srv.api_roots:
             for col in api_root.collections:
-                if getattr(col, "id", "") == collection_id or getattr(col, "title", "") == collection_id:
-                    c = Collection(col.url)
-                    bundle = c.get_objects()
-                    objs = bundle.get("objects", []) if isinstance(bundle, dict) else []
-                    return objs, None
-        return [], f"Collection {collection_id} not found on server."
+                collections.append(col)
+        
+        # Find the requested collection
+        target_collection = None
+        for col in collections:
+            if getattr(col, "id", "") == collection_id:
+                target_collection = col
+                break
+                
+        if not target_collection:
+            return [], f"Collection '{collection_id}' not found on server. Available collections: {[getattr(c, 'id', '') for c in collections]}"
+        
+        # Pull objects from the collection
+        collection = Collection(target_collection.url, auth=auth, verify=True)
+        bundle = collection.get_objects()
+        objs = bundle.get("objects", []) if isinstance(bundle, dict) else []
+        
+        return objs, None
+        
     except Exception as e:
-        return [], str(e)
+        error_msg = str(e)
+        if "timeout" in error_msg.lower() or "timed out" in error_msg.lower():
+            return [], f"Connection timeout to TAXII server: {server}"
+        elif "connection" in error_msg.lower():
+            return [], f"Connection error to TAXII server: {server}"
+        elif "401" in error_msg or "403" in error_msg:
+            return [], f"Authentication failed for TAXII server. Check username/password."
+        else:
+            return [], f"TAXII server error: {error_msg}"
 
 
 def list_taxii_collections(server: str, username: Optional[str], password: Optional[str]) -> Tuple[List[Dict[str, str]], Optional[str]]:
@@ -391,13 +420,14 @@ def list_taxii_collections(server: str, username: Optional[str], password: Optio
     try:
         from taxii2client.v21 import Server  # type: ignore
     except Exception as e:
-        return [], "taxii2-client not installed. Add to requirements to enable TAXII features."
+        return [], "taxii2-client not installed. Add 'taxii2-client' to requirements.txt to enable TAXII features."
 
     try:
+        auth = None
         if username and password:
-            srv = Server(server, user=username, password=password, verify=True)
-        else:
-            srv = Server(server, verify=True)
+            auth = (username, password)
+            
+        srv = Server(server, auth=auth, verify=True, timeout=TIMEOUT[0])
 
         out: List[Dict[str, str]] = []
         for api_root in srv.api_roots:
@@ -407,10 +437,19 @@ def list_taxii_collections(server: str, username: Optional[str], password: Optio
                     "title": getattr(col, "title", ""),
                     "url": getattr(col, "url", ""),
                     "api_root": getattr(api_root, "url", ""),
+                    "description": getattr(col, "description", ""),
                 })
         return out, None
     except Exception as e:
-        return [], str(e)
+        error_msg = str(e)
+        if "timeout" in error_msg.lower() or "timed out" in error_msg.lower():
+            return [], f"Connection timeout to TAXII server: {server}"
+        elif "connection" in error_msg.lower():
+            return [], f"Connection error to TAXII server: {server}"
+        elif "401" in error_msg or "403" in error_msg:
+            return [], f"Authentication failed for TAXII server. Check username/password."
+        else:
+            return [], f"TAXII server error: {error_msg}"
 
 def parse_stix_objects(objs: List[Dict[str, Any]]) -> Dict[str, List[str]]:
     """Extract common IOCs from a STIX bundle."""
@@ -542,9 +581,33 @@ def ti_taxii_pull():
     objs, err = try_taxii_pull(server, collection_id, username, password)
     if err:
         return jsonify({"error": err}), 501  # Not Implemented (until lib installed)
+    
     iocs = parse_stix_objects(objs)
     mitre = extract_tactics(json.dumps(objs))
-    return jsonify({"objects": len(objs), "iocs": iocs, "mitre": mitre})
+    
+    # Format for frontend table display
+    formatted_objects = []
+    for obj in objs:
+        obj_type = obj.get("type", "unknown")
+        obj_id = obj.get("id", "")
+        obj_name = obj.get("name", obj.get("value", obj_id))
+        obj_desc = obj.get("description", "No description")
+        
+        formatted_objects.append({
+            "id": obj_id,
+            "type": obj_type,
+            "name": obj_name,
+            "description": obj_desc,
+            "created": obj.get("created", ""),
+            "modified": obj.get("modified", "")
+        })
+    
+    return jsonify({
+        "objects": len(objs), 
+        "iocs": iocs, 
+        "mitre": mitre,
+        "formatted_objects": formatted_objects
+    })
 
 
 @intel_bp.post("/api/ti/taxii/list")
@@ -668,3 +731,103 @@ def ti_normalize():
     }
     return jsonify(merged)
 
+
+# --------------------------- New Routes for Enhanced Features --------------- #
+
+@intel_bp.post("/api/ti/stix/graph")
+def ti_stix_graph():
+    """
+    Generate STIX relationship graph data for visualization.
+    Body: { "objects": [stix_objects] }
+    """
+    b = request.get_json(silent=True) or {}
+    stix_objects = b.get("objects", [])
+    
+    # Generate graph elements for Cytoscape
+    elements = generate_stix_graph_elements(stix_objects)
+    
+    return jsonify({
+        "elements": elements,
+        "node_count": len([e for e in elements if e.get("group") == "nodes"]),
+        "edge_count": len([e for e in elements if e.get("group") == "edges"])
+    })
+
+def generate_stix_graph_elements(stix_objects):
+    """Generate Cytoscape elements from STIX objects."""
+    elements = []
+    node_colors = {
+        'indicator': '#d4af37',
+        'malware': '#228b22', 
+        'attack-pattern': '#b22222',
+        'threat-actor': '#ff8c00',
+        'campaign': '#8b4513',
+        'identity': '#6a5acd',
+        'vulnerability': '#ff1493'
+    }
+    
+    # Add nodes
+    for obj in stix_objects:
+        obj_type = obj.get("type", "unknown")
+        obj_id = obj.get("id", "")
+        obj_name = obj.get("name", obj.get("value", "Unknown"))
+        
+        elements.append({
+            "data": {
+                "id": obj_id,
+                "label": obj_name[:20] + "..." if len(obj_name) > 20 else obj_name,
+                "type": obj_type,
+                "description": obj.get("description", "No description"),
+                "color": node_colors.get(obj_type, '#666666')
+            },
+            "group": "nodes"
+        })
+    
+    # Add relationships (simplified - in real implementation, parse relationships)
+    edge_id = 0
+    for i, source in enumerate(stix_objects):
+        for j, target in enumerate(stix_objects):
+            if i != j and should_create_relationship(source, target):
+                elements.append({
+                    "data": {
+                        "id": f"edge-{edge_id}",
+                        "source": source.get("id"),
+                        "target": target.get("id"),
+                        "label": infer_relationship(source, target)
+                    },
+                    "group": "edges"
+                })
+                edge_id += 1
+    
+    return elements
+
+def should_create_relationship(source, target):
+    """Determine if a relationship should be created between two STIX objects."""
+    source_type = source.get("type")
+    target_type = target.get("type")
+    
+    # Define relationship rules
+    relationship_rules = {
+        'threat-actor': ['malware', 'campaign'],
+        'malware': ['attack-pattern', 'indicator'],
+        'campaign': ['malware', 'attack-pattern'],
+        'attack-pattern': ['indicator']
+    }
+    
+    return target_type in relationship_rules.get(source_type, [])
+
+def infer_relationship(source, target):
+    """Infer relationship type between STIX objects."""
+    source_type = source.get("type")
+    target_type = target.get("type")
+    
+    relationship_map = {
+        ('threat-actor', 'malware'): 'uses',
+        ('threat-actor', 'campaign'): 'attributed-to',
+        ('malware', 'attack-pattern'): 'uses', 
+        ('malware', 'indicator'): 'indicates',
+        ('campaign', 'malware'): 'uses',
+        ('campaign', 'attack-pattern'): 'employs',
+        ('attack-pattern', 'indicator'): 'detected-by'
+    }
+    
+    return relationship_map.get((source_type, target_type), 'related-to')

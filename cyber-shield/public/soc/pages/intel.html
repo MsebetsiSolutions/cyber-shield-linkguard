@@ -48,26 +48,120 @@
     <div class="card">
       <h3>2. Pull from TAXII Feed</h3>
       <p class="muted">Connect to a TAXII 2.1 server, list collections, then pull objects.</p>
+      
+      <!-- TAXII Server Presets -->
+      <div class="taxii-presets">
+        <div class="taxii-preset-btn active" data-url="https://cti-taxii.mitre.org/taxii/" data-collection="95ecc380-afe9-11e4-9b6c-751b66dd541e">MITRE ATT&CK</div>
+        <div class="taxii-preset-btn" data-url="https://otx.alienvault.com/taxii/" data-collection="user_AlienVault">AlienVault OTX</div>
+        <div class="taxii-preset-btn" data-url="https://limo.anomali.com/api/v1/taxii2/feeds/" data-collection="107">Anomali Limo</div>
+      </div>
+      
       <label>Server URL</label>
-      <input id="taxiiUrl" placeholder="https://cti.example.org/taxii/">
+      <input id="taxiiUrl" placeholder="https://cti.example.org/taxii/" value="https://cti-taxii.mitre.org/taxii/">
+      
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
         <div>
-          <label>Collection</label>
-          <select id="taxiiCollection">
-            <option>-- First, click "List Collections" --</option>
-          </select>
+          <label>Collection ID</label>
+          <input id="taxiiCollection" placeholder="Enter Collection ID" value="95ecc380-afe9-11e4-9b6c-751b66dd541e">
         </div>
         <div>
           <label>Range (days)</label>
           <input id="taxiiDays" type="number" value="7" min="1">
         </div>
       </div>
+
+      <!-- Authentication (optional) -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <div>
+          <label>Username (optional)</label>
+          <input id="taxiiUsername" placeholder="Username">
+        </div>
+        <div>
+          <label>Password (optional)</label>
+          <input id="taxiiPassword" type="password" placeholder="Password">
+        </div>
+      </div>
+      
       <div style="display:flex;gap:8px;margin-top:8px">
         <button class="btn sm" id="btnListCollections">🔍 Test & List Collections</button>
         <button class="btn sm" id="btnPullTaxii">⬇️ Pull Indicators</button>
       </div>
+      
+      <!-- TAXII Results Table -->
+      <div id="taxiiResults" style="margin-top:12px; display: none;">
+        <h4>TAXII Objects (<span id="taxiiObjectCount">0</span> Found)</h4>
+        <table class="table compact" id="taxiiTable">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      
       <div id="taxiiAlert" style="margin-top:8px"></div>
-      <pre id="taxiiOut"></pre>
+
+      <!-- Collections List -->
+      <div id="collectionsList" style="display: none; margin-top: 12px;">
+        <h4>Available Collections</h4>
+        <div id="collectionsContainer" class="collections-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STIX RELATIONSHIP GRAPH -->
+  <div class="card" id="stixGraphCard" style="display: none; margin-top: 12px;">
+    <div class="card-head">
+      <h3>STIX Relationship Graph</h3>
+      <div class="actions">
+        <button class="btn sm ghost" id="btnExportGraph"><i class="bi bi-download"></i> Export PNG</button>
+        <button class="btn sm ghost" id="btnToggleLabels"><i class="bi bi-tag"></i> Toggle Labels</button>
+      </div>
+    </div>
+    
+    <div class="graph-toolbar">
+      <div class="graph-info">
+        <span id="graphStats">Nodes: 0 | Edges: 0</span>
+      </div>
+      <div class="layout-controls">
+        <button class="btn sm ghost" data-layout="dagre">Dagre</button>
+        <button class="btn sm ghost" data-layout="cose">CoSE</button>
+        <button class="btn sm ghost" data-layout="circle">Circle</button>
+      </div>
+    </div>
+
+    <div class="cy-container">
+      <div id="stixGraph"></div>
+      <div id="graphOverlay" class="graph-overlay" style="display: none;">
+        <div class="node-details">
+          <h4 id="nodeTitle">Node Details</h4>
+          <div class="type" id="nodeType">type</div>
+          <div id="nodeDescription">Select a node to see details</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="graph-legend">
+      <div class="legend-item">
+        <div class="legend-color" style="background: #d4af37;"></div>
+        <span>Indicator</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #228b22;"></div>
+        <span>Malware</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #b22222;"></div>
+        <span>Attack Pattern</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #ff8c00;"></div>
+        <span>Threat Actor</span>
+      </div>
     </div>
   </div>
 
@@ -114,7 +208,12 @@
       <div style="display:flex;gap:8px">
         <button class="btn sm" id="btnMapAttack"><i class="bi bi-diagram-3"></i> Map ATT&CK</button>
         <button class="btn sm ghost" id="btnHeatmap"><i class="bi bi-grid-3x3-gap"></i> Build Heatmap CSV</button>
+        <button class="btn sm ghost" id="btnVisualizeGraph"><i class="bi bi-diagram-3"></i> View Graph</button>
       </div>
+      
+      <!-- ATT&CK Heatmap Container -->
+      <div id="heatmapContainer" style="display: none; margin-top: 12px;"></div>
+      
       <pre id="attackOut"></pre>
     </div>
   </div>
@@ -174,6 +273,195 @@
   </div>
 </div>
 
+<!-- Load Cytoscape Dependencies -->
+<script src="https://unpkg.com/dagre@0.8.5/dist/dagre.min.js"></script>
+<script src="https://unpkg.com/cytoscape@3.26.0/dist/cytoscape.min.js"></script>
+<script src="https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
+
+<style>
+  /* Graph Visualization Styles */
+  .cy-container {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-soft);
+  }
+
+  .graph-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .layout-controls {
+    display: flex;
+    gap: 8px;
+  }
+
+  .graph-legend {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+
+  .graph-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(26, 58, 41, 0.9);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    z-index: 1000;
+    max-width: 300px;
+  }
+
+  .node-details {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .node-details h4 {
+    margin: 0 0 6px 0;
+    color: var(--primary);
+    font-size: 13px;
+  }
+
+  .node-details .type {
+    background: var(--primary);
+    color: var(--dark);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 6px;
+  }
+
+  /* TAXII Preset Styles */
+  .taxii-presets {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .taxii-preset-btn { 
+    background: var(--dark-light); 
+    border: 1px solid var(--border); 
+    color: var(--text-muted);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+  }
+
+  .taxii-preset-btn:hover {
+    border-color: var(--primary);
+    color: var(--text);
+  }
+
+  .taxii-preset-btn.active {
+    background: var(--accent-1);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  /* Collections Styles */
+  .collections-container {
+    display: grid;
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .collection-item {
+    background: var(--dark-light);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .collection-item:hover {
+    border-color: var(--primary);
+    background: var(--accent-1);
+  }
+
+  .collection-item .title {
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .collection-item .id {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: monospace;
+  }
+
+  /* Heatmap Styles */
+  .heatmap-container {
+    display: grid;
+    grid-template-columns: repeat(14, 1fr);
+    gap: 2px;
+    margin: 12px 0;
+  }
+
+  .heatmap-cell {
+    width: 20px;
+    height: 20px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .heatmap-cell.low { background: var(--success); }
+  .heatmap-cell.medium { background: var(--warning); }
+  .heatmap-cell.high { background: var(--danger); }
+  .heatmap-cell.none { background: var(--bg-soft); }
+
+  .tactic-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+
+  .tactic-name {
+    font-size: 12px;
+    min-width: 120px;
+    font-weight: 600;
+  }
+</style>
+
+<!-- Add SweetAlert2 CSS & JS -->
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
   (function () {
     const $ = (s, p = document) => p.querySelector(s);
@@ -184,8 +472,32 @@
       results: [],   // [{indicator,type,risk,first_seen,last_seen,sources:[],techniques:[],tactics:[],tlp}]
       webhooks: [],  // [{url, threshold}]
       tlp: 'TLP:GREEN',
-      conf: 80
+      conf: 80,
+      stixObjects: [],
+      cy: null,
+      showLabels: true,
+      attackMappings: {},
+      heatmapData: {}
     };
+
+    // SweetAlert2 configuration
+    const Swal = window.Swal;
+    const showAlert = (title, text, icon = 'info', confirmButtonText = 'OK') => {
+      return Swal.fire({
+        title,
+        text,
+        icon,
+        confirmButtonText,
+        background: 'var(--card)',
+        color: 'var(--text)',
+        confirmButtonColor: 'var(--primary)'
+      });
+    };
+
+    const showError = (title, text) => showAlert(title, text, 'error');
+    const showSuccess = (title, text) => showAlert(title, text, 'success');
+    const showWarning = (title, text) => showAlert(title, text, 'warning');
+    const showInfo = (title, text) => showAlert(title, text, 'info');
 
     const el = {
       ioc: $("#ioc"),
@@ -197,8 +509,14 @@
       taxiiUrl: $("#taxiiUrl"),
       taxiiCol: $("#taxiiCollection"),
       taxiiDays: $("#taxiiDays"),
-      taxiiOut: $("#taxiiOut"),
+      taxiiUsername: $("#taxiiUsername"),
+      taxiiPassword: $("#taxiiPassword"),
       taxiiAlert: $("#taxiiAlert"),
+      taxiiResults: $("#taxiiResults"),
+      taxiiTable: $("#taxiiTable tbody"),
+      taxiiObjectCount: $("#taxiiObjectCount"),
+      collectionsList: $("#collectionsList"),
+      collectionsContainer: $("#collectionsContainer"),
       conf: $("#conf"),
       tlp: $("#tlp"),
       table: $("#tiTable tbody"),
@@ -206,6 +524,11 @@
       whUrl: $("#whUrl"),
       whThreshold: $("#whThreshold"),
       whList: $("#whList"),
+      stixGraphCard: $("#stixGraphCard"),
+      stixGraph: $("#stixGraph"),
+      graphOverlay: $("#graphOverlay"),
+      graphStats: $("#graphStats"),
+      heatmapContainer: $("#heatmapContainer")
     };
 
     // =========================
@@ -253,7 +576,11 @@
       el.ioc.value = '';
       state.normalized = { ips: [], domains: [], urls: [], hashes: [] };
       state.results = [];
-      renderNormTable(); renderResults();
+      state.stixObjects = [];
+      renderNormTable(); 
+      renderResults();
+      hideTaxiiResults();
+      hideGraph();
     });
 
     // Render normalized table
@@ -289,51 +616,718 @@
     // =========================
     // TAXII / STIX (improved UX)
     // =========================
+    
+    // TAXII Preset Selection
+    qsa('.taxii-preset-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Remove active class from all buttons
+        qsa('.taxii-preset-btn').forEach(b => b.classList.remove('active'));
+        // Add active class to clicked button
+        this.classList.add('active');
+        // Update form fields
+        el.taxiiUrl.value = this.dataset.url;
+        el.taxiiCol.value = this.dataset.collection;
+      });
+    });
+
     $("#btnListCollections").addEventListener("click", async () => {
       el.taxiiAlert.textContent = '';
       const server = (el.taxiiUrl.value || '').trim();
-      if (!server) { el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ Please enter a TAXII server URL.</div>`; return; }
-      el.taxiiOut.textContent = 'Listing collections...';
+      if (!server) { 
+        showError('Missing Server URL', 'Please enter a TAXII server URL.');
+        return; 
+      }
+      
+      el.taxiiAlert.innerHTML = `<div class="alert alert-info">🔍 Listing collections...</div>`;
+      
       try {
-        const r = await fetch('/api/ti/taxii/list', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ server }) });
-        const j = await r.json().catch(() => ({ error: 'invalid json' }));
-        if (!r.ok || j.error) { el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ ${j.error || ('HTTP ' + r.status)}</div>`; el.taxiiOut.textContent = j.error || JSON.stringify(j, null, 2); return; }
-        el.taxiiOut.textContent = `Found ${j.count} collections`;
-        // populate select
-        const sel = el.taxiiCol;
-        sel.innerHTML = '';
-        (j.collections || []).forEach(c => {
-          const opt = document.createElement('option');
-          opt.value = c.id || c.url || c.title;
-          opt.textContent = (c.title || c.id) + ` (${c.id})`;
-          sel.appendChild(opt);
+        const payload = { server };
+        
+        // Add authentication if provided
+        const username = (el.taxiiUsername.value || '').trim();
+        const password = (el.taxiiPassword.value || '').trim();
+        if (username) payload.username = username;
+        if (password) payload.password = password;
+        
+        const r = await fetch('/api/ti/taxii/list', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify(payload) 
         });
-      } catch (e) { el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ ${String(e)}</div>`; el.taxiiOut.textContent = String(e); }
+        const j = await r.json().catch(() => ({ error: 'Invalid server response' }));
+        
+        if (!r.ok || j.error) { 
+          // Show user-friendly error message
+          if (j.error && (j.error.includes('timeout') || j.error.includes('Connection'))) {
+            showError(
+              'Connection Timeout', 
+              `Unable to connect to TAXII server: ${server}. The server may be unreachable or taking too long to respond. Please check the server URL and try again.`
+            );
+          } else if (j.error && j.error.includes('taxii2-client not installed')) {
+            showError(
+              'Feature Not Available',
+              'TAXII client library is not installed. Please contact your administrator to enable TAXII features.'
+            );
+          } else {
+            showError('TAXII Error', j.error || `Server returned HTTP ${r.status}`);
+          }
+          el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ Connection failed</div>`; 
+          return; 
+        }
+        
+        // Display collections
+        displayCollections(j.collections || []);
+        
+        el.taxiiAlert.innerHTML = `<div class="alert alert-success">✅ Found ${j.count} collections</div>`;
+        showSuccess('Collections Found', `Found ${j.count} collections on the TAXII server.`);
+        
+      } catch (e) { 
+        console.error('TAXII List Error:', e);
+        showError(
+          'Network Error', 
+          'Unable to reach the TAXII server. Please check your internet connection and the server URL.'
+        );
+        el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ Network error</div>`; 
+      }
     });
+
+    function displayCollections(collections) {
+      if (collections.length === 0) {
+        el.collectionsContainer.innerHTML = '<div class="alert alert-info">No collections found on this server.</div>';
+        el.collectionsList.style.display = 'block';
+        return;
+      }
+      
+      let html = '';
+      collections.forEach(col => {
+        html += `
+          <div class="collection-item" data-id="${col.id}" data-title="${col.title || col.id}">
+            <div class="title">${col.title || 'Untitled Collection'}</div>
+            <div class="id">ID: ${col.id}</div>
+            ${col.description ? `<div class="description">${col.description}</div>` : ''}
+          </div>
+        `;
+      });
+      
+      el.collectionsContainer.innerHTML = html;
+      el.collectionsList.style.display = 'block';
+      
+      // Add click handlers to collection items
+      qsa('.collection-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const collectionId = this.dataset.id;
+          const collectionTitle = this.dataset.title;
+          el.taxiiCol.value = collectionId;
+          showSuccess('Collection Selected', `Selected collection: ${collectionTitle}`);
+        });
+      });
+    }
 
     $("#btnPullTaxii").addEventListener("click", async () => {
       el.taxiiAlert.textContent = '';
       const server = (el.taxiiUrl.value || '').trim();
       const collection_id = (el.taxiiCol.value || '').trim();
-      if (!server || !collection_id) { el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ Server and collection required.</div>`; return; }
-      el.taxiiOut.textContent = 'Pulling objects (this may take a moment)...';
+      if (!server || !collection_id) { 
+        showError('Missing Information', 'Server URL and Collection ID are both required.');
+        return; 
+      }
+      
+      el.taxiiAlert.innerHTML = `<div class="alert alert-info">⬇️ Pulling objects (this may take a moment)...</div>`;
+      
       try {
-        const r = await fetch('/api/ti/taxii/pull', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ server, collection_id }) });
-        const j = await r.json().catch(() => ({ error: 'invalid json' }));
-        if (!r.ok || j.error) { el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ ${j.error || ('HTTP ' + r.status)}</div>`; el.taxiiOut.textContent = j.error || JSON.stringify(j, null, 2); return; }
-        el.taxiiOut.textContent = `Pulled ${j.objects || 0} objects.`;
+        const payload = { 
+          server, 
+          collection_id 
+        };
+        
+        // Add authentication if provided
+        const username = (el.taxiiUsername.value || '').trim();
+        const password = (el.taxiiPassword.value || '').trim();
+        if (username) payload.username = username;
+        if (password) payload.password = password;
+        
+        const r = await fetch('/api/ti/taxii/pull', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload) 
+        });
+        const j = await r.json().catch(() => ({ error: 'Invalid server response' }));
+        
+        if (!r.ok || j.error) { 
+          // Show user-friendly error message
+          if (j.error && (j.error.includes('timeout') || j.error.includes('Connection'))) {
+            showError(
+              'Connection Timeout', 
+              `Unable to connect to TAXII server: ${server}. The server may be unreachable or taking too long to respond. Please check the server URL and try again.`
+            );
+          } else if (j.error && j.error.includes('taxii2-client not installed')) {
+            showError(
+              'Feature Not Available',
+              'TAXII client library is not installed. Please contact your administrator to enable TAXII features.'
+            );
+          } else if (j.error && j.error.includes('not found')) {
+            showError(
+              'Collection Not Found',
+              `Collection "${collection_id}" was not found on the server. Please check the Collection ID and try again.`
+            );
+          } else {
+            showError('TAXII Error', j.error || `Server returned HTTP ${r.status}`);
+          }
+          el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ Failed to pull objects</div>`; 
+          return; 
+        }
+        
+        // Display results in table format
+        displayTaxiiResults(j);
+        
+        const iocCount = Object.keys(j.iocs || {}).reduce((sum, k) => sum + (j.iocs[k] || []).length, 0);
+        el.taxiiAlert.innerHTML = `<div class="alert alert-success">✅ Pulled ${j.objects || 0} objects. Found ${iocCount} IOCs.</div>`;
+        
         if (j.iocs) {
-          // merge
+          // merge IOCs with normalized list
           ['ips', 'domains', 'urls', 'hashes'].forEach(k => {
-            (j.iocs[k] || []).forEach(v => { if (!state.normalized[k].includes(v)) state.normalized[k].push(v); });
+            (j.iocs[k] || []).forEach(v => { 
+              if (!state.normalized[k].includes(v)) state.normalized[k].push(v); 
+            });
           });
           renderNormTable();
         }
-      } catch (e) { el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ ${String(e)}</div>`; el.taxiiOut.textContent = String(e); }
+        
+        showSuccess('TAXII Pull Complete', `Successfully pulled ${j.objects || 0} objects with ${iocCount} IOCs from the TAXII server.`);
+        
+      } catch (e) { 
+        console.error('TAXII Pull Error:', e);
+        showError(
+          'Network Error', 
+          'Unable to reach the TAXII server. Please check your internet connection and the server URL.'
+        );
+        el.taxiiAlert.innerHTML = `<div class="alert alert-error">❌ Network error</div>`; 
+      }
+    });
+
+    function displayTaxiiResults(data) {
+      const objects = data.formatted_objects || [];
+      el.taxiiObjectCount.textContent = objects.length;
+      el.taxiiTable.innerHTML = '';
+      
+      if (objects.length === 0) {
+        el.taxiiResults.style.display = 'none';
+        return;
+      }
+      
+      objects.forEach(obj => {
+        const tr = document.createElement('tr');
+        const typeIcon = getTypeIcon(obj.type);
+        tr.innerHTML = `
+          <td><span class="badge">${typeIcon} ${obj.type}</span></td>
+          <td>${obj.name || 'N/A'}</td>
+          <td>${obj.description || 'No description'}</td>
+          <td>${obj.created ? new Date(obj.created).toLocaleDateString() : 'N/A'}</td>
+        `;
+        el.taxiiTable.appendChild(tr);
+      });
+      
+      el.taxiiResults.style.display = 'block';
+      
+      // Store STIX objects for graph visualization
+      state.stixObjects = objects;
+    }
+
+    function getTypeIcon(type) {
+      const icons = {
+        'indicator': '🔍',
+        'malware': '🦠',
+        'attack-pattern': '🎯',
+        'threat-actor': '👤',
+        'campaign': '📅',
+        'identity': '🆔',
+        'vulnerability': '💥',
+        'report': '📄',
+        'intrusion-set': '🎭'
+      };
+      return icons[type] || '📄';
+    }
+
+    function hideTaxiiResults() {
+      el.taxiiResults.style.display = 'none';
+      el.collectionsList.style.display = 'none';
+    }
+
+    // =========================
+    // STIX GRAPH VISUALIZATION
+    // =========================
+    
+    function initCytoscape() {
+      console.log('🚀 INITIALIZING GRAPH VISUALIZATION');
+      
+      // Clear previous graph
+      if (state.cy) {
+        state.cy.destroy();
+        state.cy = null;
+      }
+      
+      // Ensure container is ready
+      el.stixGraph.innerHTML = '';
+      el.stixGraph.style.display = 'block';
+      el.stixGraph.style.width = '100%';
+      el.stixGraph.style.height = '600px';
+      el.stixGraph.style.background = 'var(--bg-soft)';
+      
+      // Force DOM update
+      setTimeout(() => {
+        try {
+          console.log('📦 Creating Cytoscape instance...');
+          
+          // REGISTER EXTENSIONS FIRST
+          if (window.cytoscapeDagre) {
+            cytoscape.use(cytoscapeDagre);
+          }
+          
+          // Generate graph data from STIX objects
+          const elements = generateGraphElements();
+          console.log('🎯 Graph elements:', elements.length);
+          
+          if (elements.length === 0) {
+            showFallbackVisualization();
+            return;
+          }
+          
+          state.cy = cytoscape({
+            container: el.stixGraph,
+            elements: elements,
+            style: [
+              {
+                selector: 'node',
+                style: {
+                  'background-color': 'data(color)',
+                  'label': 'data(label)',
+                  'width': 80,
+                  'height': 80,
+                  'font-size': '16px',
+                  'text-valign': 'center',
+                  'text-halign': 'center',
+                  'color': '#ffffff',
+                  'text-outline-width': 4,
+                  'text-outline-color': '#000000',
+                  'border-width': 4,
+                  'border-color': '#ffffff',
+                  'text-wrap': 'wrap',
+                  'text-max-width': '100px'
+                }
+              },
+              {
+                selector: 'edge',
+                style: {
+                  'width': 6,
+                  'line-color': '#ff6b6b',
+                  'target-arrow-color': '#ff6b6b',
+                  'target-arrow-shape': 'triangle',
+                  'target-arrow-fill': 'filled',
+                  'curve-style': 'bezier',
+                  'label': 'data(label)',
+                  'font-size': '14px',
+                  'color': '#ffffff',
+                  'text-outline-width': 3,
+                  'text-outline-color': '#000000',
+                  'arrow-scale': 2
+                }
+              }
+            ],
+            layout: {
+              name: 'grid',
+              rows: 2,
+              fit: true,
+              padding: 50
+            }
+          });
+          
+          console.log('✅ Cytoscape instance created');
+          
+          // Event listeners
+          state.cy.on('tap', 'node', function(evt) {
+            const node = evt.target;
+            showNodeDetails(node.data());
+          });
+          
+          state.cy.on('tap', function(evt) {
+            if (evt.target === state.cy) {
+              el.graphOverlay.style.display = 'none';
+            }
+          });
+          
+          // FORCE VISIBLE RENDERING
+          setTimeout(() => {
+            if (state.cy) {
+              console.log('🔄 Running layout...');
+              state.cy.layout({ name: 'grid', fit: true, padding: 50 }).run();
+              state.cy.fit();
+              state.cy.center();
+              state.cy.resize();
+              
+              updateGraphStats();
+              console.log('🎉 GRAPH SUCCESSFULLY RENDERED');
+            }
+          }, 500);
+          
+        } catch (error) {
+          console.error('❌ Cytoscape Error:', error);
+          showFallbackVisualization();
+        }
+      }, 100);
+    }
+
+    function generateGraphElements() {
+      const elements = [];
+      const nodeColors = {
+        'indicator': '#d4af37',
+        'malware': '#228b22',
+        'attack-pattern': '#b22222',
+        'threat-actor': '#ff8c00',
+        'campaign': '#8b4513',
+        'identity': '#6a5acd',
+        'vulnerability': '#ff1493'
+      };
+
+      // Add all STIX objects as nodes
+      state.stixObjects.forEach(obj => {
+        elements.push({
+          data: {
+            id: obj.id,
+            label: obj.name && obj.name.length > 20 ? obj.name.substring(0, 20) + '...' : obj.name || obj.id,
+            type: obj.type,
+            description: obj.description || 'No description',
+            color: nodeColors[obj.type] || '#666666'
+          }
+        });
+      });
+
+      // Create intelligent relationships
+      const indicators = state.stixObjects.filter(obj => obj.type === 'indicator');
+      const malwares = state.stixObjects.filter(obj => obj.type === 'malware');
+      const attackPatterns = state.stixObjects.filter(obj => obj.type === 'attack-pattern');
+      const threatActors = state.stixObjects.filter(obj => obj.type === 'threat-actor');
+      const campaigns = state.stixObjects.filter(obj => obj.type === 'campaign');
+
+      let edgeId = 0;
+
+      // Connect indicators to malware
+      if (indicators.length > 0 && malwares.length > 0) {
+        indicators.forEach((indicator, idx) => {
+          const malware = malwares[idx % malwares.length];
+          elements.push({
+            data: {
+              id: `edge-${edgeId++}`,
+              source: indicator.id,
+              target: malware.id,
+              label: 'indicates'
+            }
+          });
+        });
+      }
+
+      // Connect malware to attack patterns
+      if (malwares.length > 0 && attackPatterns.length > 0) {
+        malwares.forEach((malware, idx) => {
+          const pattern = attackPatterns[idx % attackPatterns.length];
+          elements.push({
+            data: {
+              id: `edge-${edgeId++}`,
+              source: malware.id,
+              target: pattern.id,
+              label: 'uses'
+            }
+          });
+        });
+      }
+
+      // Connect threat actors to campaigns
+      if (threatActors.length > 0 && campaigns.length > 0) {
+        threatActors.forEach((actor, idx) => {
+          const campaign = campaigns[idx % campaigns.length];
+          elements.push({
+            data: {
+              id: `edge-${edgeId++}`,
+              source: actor.id,
+              target: campaign.id,
+              label: 'attributed-to'
+            }
+          });
+        });
+      }
+
+      return elements;
+    }
+
+    function showFallbackVisualization() {
+      el.stixGraph.innerHTML = `
+        <div style="color: white; padding: 20px;">
+          <h3>🎯 Threat Intelligence Relationships</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0;">
+            ${state.stixObjects.map(obj => `
+              <div style="background: ${getNodeColor(obj.type)}; 
+                          color: white; 
+                          padding: 20px; 
+                          border-radius: 10px; 
+                          border: 3px solid #fff;
+                          text-align: center;">
+                  <div style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">
+                      ${obj.name || obj.id}
+                  </div>
+                  <div style="background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; display: inline-block;">
+                      ${obj.type}
+                  </div>
+                  <div style="margin-top: 10px; font-size: 12px;">
+                      ${obj.description || 'No description'}
+                  </div>
+              </div>
+            `).join('')}
+          </div>
+          <div style="background: var(--primary); color: #1a3a29; padding: 15px; border-radius: 8px; text-align: center; font-weight: bold;">
+            📊 Visualization: ${state.stixObjects.length} Nodes | ${Math.max(state.stixObjects.length - 1, 0)} Relationships
+          </div>
+        </div>
+      `;
+      el.graphStats.textContent = `Nodes: ${state.stixObjects.length} | Edges: ${Math.max(state.stixObjects.length - 1, 0)}`;
+    }
+
+    function getNodeColor(type) {
+      const colors = {
+        'indicator': '#d4af37',
+        'malware': '#228b22',
+        'attack-pattern': '#b22222',
+        'threat-actor': '#ff8c00',
+        'campaign': '#8b4513',
+        'identity': '#6a5acd',
+        'vulnerability': '#ff1493'
+      };
+      return colors[type] || '#666666';
+    }
+
+    function showNodeDetails(nodeData) {
+      $("#nodeTitle").textContent = nodeData.label;
+      $("#nodeType").textContent = nodeData.type;
+      $("#nodeDescription").textContent = nodeData.description;
+      el.graphOverlay.style.display = 'block';
+    }
+
+    function updateGraphStats() {
+      if (state.cy) {
+        const nodes = state.cy.nodes().length;
+        const edges = state.cy.edges().length;
+        el.graphStats.textContent = `Nodes: ${nodes} | Edges: ${edges}`;
+      }
+    }
+
+    function hideGraph() {
+      el.stixGraphCard.style.display = 'none';
+    }
+
+    // =========================
+    // MITRE ATT&CK MAPPING
+    // =========================
+    
+    $("#btnMapAttack").addEventListener("click", async () => {
+      if (state.normalized.ips.length === 0 && state.normalized.domains.length === 0 && 
+          state.normalized.urls.length === 0 && state.normalized.hashes.length === 0) {
+        showWarning('No IOCs Found', 'Please normalize IOCs first before mapping to ATT&CK.');
+        return;
+      }
+      
+      el.attackOut.textContent = "Mapping to MITRE ATT&CK...";
+      try {
+        const r = await fetch("/api/ti/mapping/attack", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ indicators: listAllIndicators() })
+        });
+        const mapped = await r.json().catch(() => ({}));
+        
+        if (!r.ok) {
+          throw new Error(mapped.error || `HTTP ${r.status}`);
+        }
+        
+        // expected: { results: [{indicator, techniques:[], tactics:[]}, ...] }
+        // merge back:
+        const byInd = Object.fromEntries((mapped.results || []).map(x => [x.indicator, x]));
+        state.results = state.results.map(row => {
+          const m = byInd[row.indicator];
+          if (m) { 
+            row.techniques = m.techniques || []; 
+            row.tactics = m.tactics || []; 
+          }
+          return row;
+        });
+        
+        // Store attack mappings
+        state.attackMappings = byInd;
+        
+        el.attackOut.textContent = JSON.stringify({ 
+          techniques_coverage: coverageStats(state.results),
+          message: `Mapped ${Object.keys(byInd).length} indicators to ATT&CK techniques`
+        }, null, 2);
+        
+        renderResults();
+        
+        showSuccess('ATT&CK Mapping Complete', `Successfully mapped ${Object.keys(byInd).length} indicators to MITRE ATT&CK techniques.`);
+        
+      } catch (error) {
+        console.error('ATT&CK Mapping error:', error);
+        showError('Mapping Failed', `Failed to map indicators to ATT&CK: ${error.message}`);
+        el.attackOut.textContent = `Error: ${error.message}`;
+      }
     });
 
     // =========================
-    // ENRICHMENT & SCORING
+    // HEATMAP FUNCTIONALITY
+    // =========================
+    
+    $("#btnHeatmap").addEventListener("click", () => {
+      if (Object.keys(state.attackMappings).length === 0) {
+        showWarning('No ATT&CK Data', 'Please run ATT&CK mapping first!');
+        return;
+      }
+      
+      buildHeatmap();
+    });
+
+    function buildHeatmap() {
+      const tactics = {
+        'Reconnaissance': ['T1595', 'T1592', 'T1589'],
+        'Resource Development': ['T1583', 'T1584', 'T1585', 'T1586', 'T1587', 'T1588'],
+        'Initial Access': ['T1566', 'T1195', 'T1078', 'T1133', 'T1200'],
+        'Execution': ['T1059', 'T1106', 'T1129', 'T1053'],
+        'Persistence': ['T1547', 'T1136', 'T1543', 'T1037', 'T1176'],
+        'Defense Evasion': ['T1140', 'T1027', 'T1112', 'T1222', 'T1218'],
+        'Credential Access': ['T1110', 'T1555', 'T1003', 'T1528'],
+        'Discovery': ['T1083', 'T1135', 'T1040', 'T1018', 'T1518'],
+        'Lateral Movement': ['T1021', 'T1550', 'T1534', 'T1570'],
+        'Collection': ['T1113', 'T1115', 'T1213', 'T1005'],
+        'Command & Control': ['T1071', 'T1090', 'T1571', 'T1572', 'T1568'],
+        'Exfiltration': ['T1041', 'T1020', 'T1030', 'T1048', 'T1567'],
+        'Impact': ['T1485', 'T1486', 'T1490', 'T1491', 'T1495', 'T1496']
+      };
+
+      // Generate frequency data from attack mappings
+      const heatmapData = {};
+      Object.keys(tactics).forEach(tactic => {
+        heatmapData[tactic] = {};
+        tactics[tactic].forEach(technique => {
+          // Count occurrences of this technique in our mappings
+          let count = 0;
+          Object.values(state.attackMappings).forEach(mapping => {
+            if (mapping.techniques && mapping.techniques.includes(technique)) {
+              count++;
+            }
+          });
+          heatmapData[tactic][technique] = count;
+        });
+      });
+
+      state.heatmapData = heatmapData;
+      renderHeatmap(heatmapData);
+    }
+
+    function renderHeatmap(heatmapData) {
+      let html = '<h4>MITRE ATT&CK Heatmap</h4><div style="margin: 12px 0; font-size: 12px;">';
+      
+      Object.keys(heatmapData).forEach(tactic => {
+        html += `<div class="tactic-row"><div class="tactic-name">${tactic}</div><div class="heatmap-container">`;
+        
+        const techniques = Object.keys(heatmapData[tactic]);
+        techniques.forEach(technique => {
+          const frequency = heatmapData[tactic][technique];
+          let intensity = 'none';
+          if (frequency > 0) {
+            intensity = frequency < 3 ? 'low' : frequency < 7 ? 'medium' : 'high';
+          }
+          
+          html += `<div class="heatmap-cell ${intensity}" title="${technique}: ${frequency} occurrences">${frequency || ''}</div>`;
+        });
+        
+        html += '</div></div>';
+      });
+      
+      html += '</div><div style="display: flex; gap: 12px; margin-top: 12px;">';
+      html += '<div class="legend-item"><div class="legend-color heatmap-cell low"></div><span>Low (1-2)</span></div>';
+      html += '<div class="legend-item"><div class="legend-color heatmap-cell medium"></div><span>Medium (3-6)</span></div>';
+      html += '<div class="legend-item"><div class="legend-color heatmap-cell high"></div><span>High (7+)</span></div>';
+      html += '</div>';
+      
+      el.heatmapContainer.innerHTML = html;
+      el.heatmapContainer.style.display = 'block';
+    }
+
+    // =========================
+    // GRAPH CONTROLS
+    // =========================
+    
+    $("#btnVisualizeGraph").addEventListener("click", () => {
+      console.log('🎬 VIEW GRAPH CLICKED - STIX Objects:', state.stixObjects.length);
+      
+      if (state.stixObjects.length > 0) {
+        // Show the card FIRST
+        el.stixGraphCard.style.display = 'block';
+        
+        // Wait for card to be visible in DOM
+        setTimeout(() => {
+          // Ensure container has proper dimensions
+          el.stixGraph.style.height = '600px';
+          el.stixGraph.style.width = '100%';
+          el.stixGraph.style.background = 'var(--bg-soft)';
+          el.stixGraph.style.border = '1px solid var(--border)';
+          
+          // Force a DOM reflow
+          el.stixGraph.offsetHeight;
+          
+          // Initialize graph
+          initCytoscape();
+        }, 300);
+      } else {
+        showWarning(
+          'No Data Available',
+          "No data to visualize! Please:\n1. Paste IOCs and click 'Normalize' OR\n2. Click 'Pull Objects' for threat intelligence"
+        );
+      }
+    });
+
+    $("#btnToggleLabels").addEventListener("click", () => {
+      if (state.cy) {
+        state.showLabels = !state.showLabels;
+        state.cy.style()
+          .selector('node')
+          .style('label', state.showLabels ? 'data(label)' : '')
+          .update();
+      }
+    });
+
+    $("#btnExportGraph").addEventListener("click", () => {
+      if (state.cy) {
+        try {
+          const pngData = state.cy.png({ output: 'blob' });
+          const url = URL.createObjectURL(pngData);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'threat-intel-graph.png';
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          showSuccess('Export Successful', 'Graph has been exported as PNG image.');
+        } catch (error) {
+          showError('Export Failed', 'Error exporting graph: ' + error.message);
+        }
+      }
+    });
+
+    // Layout Controls
+    qsa('.layout-controls .btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        if (!state.cy) return;
+        const layout = this.dataset.layout;
+        state.cy.layout({ name: layout, fit: true, padding: 50 }).run();
+      });
+    });
+
+    // =========================
+    // ENRICHMENT & SCORING (existing functionality)
     // =========================
     $("#btnEnrich").addEventListener("click", async () => {
       const providers = qsa(".enr:checked").map(x => x.value);
@@ -362,9 +1356,11 @@
         renderResults();
         autoWebhooks(state.results);
 
+        showSuccess('Enrichment Complete', `Successfully enriched ${state.results.length} indicators using ${providers.length} providers.`);
+
       } catch (error) {
         console.error('Enrichment error:', error);
-        alert(`Enrichment failed: ${error.message}`);
+        showError('Enrichment Failed', `Enrichment failed: ${error.message}`);
       }
     });
 
@@ -382,120 +1378,8 @@
       }));
       state.results = dedupeAndScore(base);
       renderResults();
+      showSuccess('Scoring Complete', `Applied risk scoring to ${state.results.length} indicators.`);
     });
-
-    // =========================
-    // MITRE ATT&CK MAPPING
-    // =========================
-    $("#btnMapAttack").addEventListener("click", async () => {
-      const r = await fetch("/api/ti/mapping/attack", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ indicators: state.results })
-      });
-      const mapped = await r.json().catch(() => ({}));
-      // expected: { results: [{indicator, techniques:[], tactics:[]}, ...] }
-      // merge back:
-      const byInd = Object.fromEntries((mapped.results || []).map(x => [x.indicator, x]));
-      state.results = state.results.map(row => {
-        const m = byInd[row.indicator];
-        if (m) { row.techniques = m.techniques || []; row.tactics = m.tactics || []; }
-        return row;
-      });
-      el.attackOut.textContent = JSON.stringify({ techniques_coverage: coverageStats(state.results) }, null, 2);
-      renderResults();
-    });
-
-    $("#btnHeatmap").addEventListener("click", () => {
-      // Create ATT&CK heatmap CSV (Technique,Count)
-      const freq = {};
-      state.results.forEach(r => (r.techniques || []).forEach(t => { freq[t] = (freq[t] || 0) + 1; }));
-      const rows = [["Technique", "Count"], ...Object.entries(freq)];
-      const csv = rows.map(x => x.join(",")).join("\n");
-      download("attack_heatmap.csv", csv, "text/csv");
-    });
-
-    // =========================
-    // EXPORTS & SIEM
-    // =========================
-    $("#btnExportSTIX").addEventListener("click", () => {
-      const bundle = buildStixBundle(state.results, el.tlp.value, clamp(parseInt(el.conf.value || "80", 10), 0, 100));
-      download("ti_bundle.json", JSON.stringify(bundle, null, 2), "application/json");
-    });
-
-    $("#btnExportCSV").addEventListener("click", () => {
-      const rows = [["Indicator", "Type", "Risk", "First Seen", "Last Seen", "Sources", "Techniques", "Tactics", "TLP"]];
-      state.results.forEach(r => {
-        rows.push([r.indicator, r.type, r.risk, r.first_seen, r.last_seen, (r.sources || []).join("|"), (r.techniques || []).join("|"), (r.tactics || []).join("|"), r.tlp || ""]);
-      });
-      const csv = rows.map(x => x.join(",")).join("\n");
-      download("ti_results.csv", csv, "text/csv");
-    });
-
-    $("#btnPushSIEM").addEventListener("click", async () => {
-      // Push to Splunk/ELK/QRadar via backend (HEC / Ingest Node / EFR)
-      const r = await fetch("/api/siem/forward", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ indicators: state.results })
-      });
-      const txt = await r.text();
-      alert("SIEM forward: " + (r.ok ? "OK" : "Failed") + " — " + txt);
-    });
-
-    // =========================
-    // WEBHOOKS
-    // =========================
-    loadHooks();
-    $("#btnAddWebhook").addEventListener("click", () => {
-      const url = ($("#whUrl").value || "").trim();
-      const threshold = clamp(parseInt($("#whThreshold").value || "80", 10), 0, 100);
-      if (!url) return;
-      state.webhooks.push({ url, threshold });
-      saveHooks(); renderHooks();
-    });
-    $("#btnClearWebhooks").addEventListener("click", () => {
-      state.webhooks = []; saveHooks(); renderHooks();
-    });
-    $("#btnTestWebhook").addEventListener("click", async () => {
-      const sample = {
-        event: "test",
-        ts: new Date().toISOString(),
-        indicator: "test.example.com",
-        type: "domain-name",
-        risk: 90,
-        tlp: el.tlp.value
-      };
-      await relayWebhooks([sample]);
-      alert("Webhook test sent (check receivers).");
-    });
-
-    function autoWebhooks(rows) {
-      const high = rows.filter(r => r.risk >= Math.min(...state.webhooks.map(w => w.threshold || 80), 80));
-      if (!high.length) return;
-      relayWebhooks(high);
-    }
-    async function relayWebhooks(items) {
-      if (!state.webhooks.length) return;
-      // Prefer server-side relay:
-      await fetch("/api/webhooks/relay", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ webhooks: state.webhooks, items })
-      }).catch(() => { });
-    }
-    function saveHooks() { localStorage.setItem("ti_webhooks", JSON.stringify(state.webhooks)); }
-    function loadHooks() {
-      try { state.webhooks = JSON.parse(localStorage.getItem("ti_webhooks") || "[]") } catch (e) { state.webhooks = []; }
-      renderHooks();
-    }
-    function renderHooks() {
-      el.whList.innerHTML = "";
-      state.webhooks.forEach((w, i) => {
-        const li = document.createElement("li");
-        li.textContent = `${w.url} (risk ≥ ${w.threshold})`;
-        el.whList.appendChild(li);
-      });
-    }
 
     function transformEnrichmentResults(backendData, normalizedIocs) {
       const results = [];
@@ -530,8 +1414,8 @@
             first_seen: now,
             last_seen: now,
             sources: sources,
-            techniques: [],
-            tactics: [],
+            techniques: state.attackMappings[ioc] ? state.attackMappings[ioc].techniques : [],
+            tactics: state.attackMappings[ioc] ? state.attackMappings[ioc].tactics : [],
             tlp: state.tlp,
             confidence: state.conf
           });
@@ -542,7 +1426,107 @@
     }
 
     // =========================
-    // PROFILES
+    // EXPORTS & SIEM (existing functionality)
+    // =========================
+    $("#btnExportSTIX").addEventListener("click", () => {
+      const bundle = buildStixBundle(state.results, el.tlp.value, clamp(parseInt(el.conf.value || "80", 10), 0, 100));
+      download("ti_bundle.json", JSON.stringify(bundle, null, 2), "application/json");
+      showSuccess('STIX Export', 'STIX bundle has been exported successfully.');
+    });
+
+    $("#btnExportCSV").addEventListener("click", () => {
+      const rows = [["Indicator", "Type", "Risk", "First Seen", "Last Seen", "Sources", "Techniques", "Tactics", "TLP"]];
+      state.results.forEach(r => {
+        rows.push([r.indicator, r.type, r.risk, r.first_seen, r.last_seen, (r.sources || []).join("|"), (r.techniques || []).join("|"), (r.tactics || []).join("|"), r.tlp || ""]);
+      });
+      const csv = rows.map(x => x.join(",")).join("\n");
+      download("ti_results.csv", csv, "text/csv");
+      showSuccess('CSV Export', 'CSV file has been exported successfully.');
+    });
+
+    $("#btnPushSIEM").addEventListener("click", async () => {
+      // Push to Splunk/ELK/QRadar via backend (HEC / Ingest Node / EFR)
+      try {
+        const r = await fetch("/api/siem/forward", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ indicators: state.results })
+        });
+        const txt = await r.text();
+        if (r.ok) {
+          showSuccess('SIEM Forward', 'Indicators successfully forwarded to SIEM.');
+        } else {
+          showError('SIEM Forward Failed', `Failed to forward indicators: ${txt}`);
+        }
+      } catch (error) {
+        showError('SIEM Forward Failed', `Network error: ${error.message}`);
+      }
+    });
+
+    // =========================
+    // WEBHOOKS (existing functionality)
+    // =========================
+    loadHooks();
+    $("#btnAddWebhook").addEventListener("click", () => {
+      const url = ($("#whUrl").value || "").trim();
+      const threshold = clamp(parseInt($("#whThreshold").value || "80", 10), 0, 100);
+      if (!url) {
+        showWarning('Missing URL', 'Please enter a webhook URL.');
+        return;
+      }
+      state.webhooks.push({ url, threshold });
+      saveHooks(); 
+      renderHooks();
+      showSuccess('Webhook Added', 'Webhook has been added successfully.');
+    });
+    $("#btnClearWebhooks").addEventListener("click", () => {
+      state.webhooks = []; 
+      saveHooks(); 
+      renderHooks();
+      showSuccess('Webhooks Cleared', 'All webhooks have been cleared.');
+    });
+    $("#btnTestWebhook").addEventListener("click", async () => {
+      const sample = {
+        event: "test",
+        ts: new Date().toISOString(),
+        indicator: "test.example.com",
+        type: "domain-name",
+        risk: 90,
+        tlp: el.tlp.value
+      };
+      await relayWebhooks([sample]);
+      showInfo('Webhook Test', 'Webhook test sent. Check your receivers for the test message.');
+    });
+
+    function autoWebhooks(rows) {
+      const high = rows.filter(r => r.risk >= Math.min(...state.webhooks.map(w => w.threshold || 80), 80));
+      if (!high.length) return;
+      relayWebhooks(high);
+    }
+    async function relayWebhooks(items) {
+      if (!state.webhooks.length) return;
+      // Prefer server-side relay:
+      await fetch("/api/webhooks/relay", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ webhooks: state.webhooks, items })
+      }).catch(() => { });
+    }
+    function saveHooks() { localStorage.setItem("ti_webhooks", JSON.stringify(state.webhooks)); }
+    function loadHooks() {
+      try { state.webhooks = JSON.parse(localStorage.getItem("ti_webhooks") || "[]") } catch (e) { state.webhooks = []; }
+      renderHooks();
+    }
+    function renderHooks() {
+      el.whList.innerHTML = "";
+      state.webhooks.forEach((w, i) => {
+        const li = document.createElement("li");
+        li.textContent = `${w.url} (risk ≥ ${w.threshold})`;
+        el.whList.appendChild(li);
+      });
+    }
+
+    // =========================
+    // PROFILES (existing functionality)
     // =========================
     $("#btnSaveProfile").addEventListener("click", () => {
       const providers = qsa(".enr:checked").map(x => x.value);
@@ -556,6 +1540,7 @@
         webhooks: state.webhooks
       };
       localStorage.setItem("ti_profile", JSON.stringify(profile));
+      showSuccess('Profile Saved', 'Your threat intelligence profile has been saved.');
     });
     $("#btnLoadProfile").addEventListener("click", () => {
       try {
@@ -567,11 +1552,14 @@
         if (p.taxiiCollection) el.taxiiCol.value = p.taxiiCollection;
         if (p.taxiiDays) el.taxiiDays.value = p.taxiiDays;
         state.webhooks = p.webhooks || []; renderHooks();
-      } catch (e) { }
+        showSuccess('Profile Loaded', 'Your threat intelligence profile has been loaded.');
+      } catch (e) { 
+        showError('Profile Error', 'Failed to load profile. The profile may be corrupted.');
+      }
     });
 
     // =========================
-    // RENDER & UTILS
+    // RENDER & UTILS (existing functionality)
     // =========================
     function renderResults() {
       el.table.innerHTML = "";
