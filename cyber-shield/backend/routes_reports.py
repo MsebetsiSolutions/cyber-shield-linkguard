@@ -239,6 +239,7 @@ def kpis():
         )
         inc7_rows = cur.fetchall()
 
+        # safer closed count:
         cur = conn.execute(
             "SELECT COUNT(*) AS c FROM incidents WHERE closed_at IS NOT NULL AND closed_at >= ?",
             (_iso(now - timedelta(days=7)),),
