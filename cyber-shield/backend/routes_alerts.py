@@ -12,9 +12,14 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from flask import Blueprint, request, jsonify, Response, current_app
 
+import os
+
+WHITELIST_PATH = os.path.join(os.path.dirname(__file__), '..', 'sa_whitelist.json')
+
 alerts_bp = Blueprint("alerts", __name__)
 
 DB_PATH = "soc_dashboard.db"  # keep it at project root; change if needed
+WHITELIST_PATH = "sa_whitelist.json"
 
 
 # --------------------------- DB Utilities ---------------------------------- #
@@ -56,6 +61,20 @@ def init_schema() -> None:
         conn.execute("CREATE INDEX IF NOT EXISTS idx_alerts_status ON alerts(status)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_alerts_owner ON alerts(owner)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_alerts_sev ON alerts(severity)")
+
+        # incidents table for grouped alerts (simple prototype)
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS incidents (
+                id INTEGER PRIMARY KEY,
+                title TEXT NOT NULL,
+                severity TEXT,
+                created_at TEXT NOT NULL,
+                members TEXT DEFAULT '[]',    -- JSON array of alert ids
+                meta TEXT DEFAULT '{}'         -- JSON object
+            )
+            """
+        )
 
     seed_if_empty()
 
@@ -155,6 +174,44 @@ def _row_to_obj(r: sqlite3.Row) -> Dict[str, Any]:
         "source": r["source"],
         "description": r["description"] or "",
     }
+
+
+def load_whitelist() -> List[str]:
+    try:
+        p = os.path.abspath(WHITELIST_PATH)
+        if not os.path.exists(p):
+            return []
+        with open(p, 'r', encoding='utf-8') as f:
+            return json.load(f) or []
+    except Exception:
+        return []
+
+
+def save_whitelist(items: List[str]) -> None:
+    p = os.path.abspath(WHITELIST_PATH)
+    try:
+        with open(p, 'w', encoding='utf-8') as f:
+            json.dump(items, f, indent=2)
+    except Exception:
+        pass
+
+
+def load_whitelist() -> List[str]:
+    try:
+        with open(WHITELIST_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            if isinstance(data, list):
+                return data
+    except FileNotFoundError:
+        return []
+    except Exception:
+        return []
+    return []
+
+
+def save_whitelist(items: List[str]) -> None:
+    with open(WHITELIST_PATH, "w", encoding="utf-8") as f:
+        json.dump(items, f, indent=2)
 
 
 def _apply_filters_sql(body: Dict[str, Any]) -> Tuple[str, List[Any]]:
@@ -457,6 +514,306 @@ def export_alerts():
         mimetype="text/csv",
         headers={"Content-Disposition": "attachment; filename=alerts.csv"},
     )
+
+
+@alerts_bp.post("/api/alerts/score")
+def score_alerts():
+    """
+    Return alerts with a mock risk score (0-100) based on severity, tags, mitre, and recent repeats.
+    Body uses same filters as /api/alerts/list
+    """
+    body = request.get_json(silent=True) or {}
+    where_sql, params = _apply_filters_sql(body)
+
+    with db() as conn:
+        cur = conn.execute(f"SELECT * FROM alerts {where_sql} ORDER BY created_at DESC", params)
+        rows = cur.fetchall()
+
+        items: List[Dict[str, Any]] = []
+        now = datetime.utcnow()
+        cutoff = (now - timedelta(hours=24)).isoformat() + "Z"
+
+        # base severity mapping
+        base = {"Low": 20, "Medium": 50, "High": 75, "Critical": 90}
+
+        for r in rows:
+            obj = _row_to_obj(r)
+            sev = obj.get("severity") or "Medium"
+            score = int(base.get(sev, 50))
+
+            # add for mitre techniques
+            mitre_len = len(obj.get("mitre") or [])
+            score += mitre_len * 5
+
+            # tags weight
+            tags_len = len(obj.get("tags") or [])
+            score += tags_len * 3
+
+            # repeated similar alerts in last 24 hours (same title)
+            cur2 = conn.execute("SELECT COUNT(*) AS c FROM alerts WHERE title = ? AND created_at >= ?", (obj.get("title"), cutoff))
+            repeats = int(cur2.fetchone()["c"] or 0)
+            score += min(20, repeats * 4)
+
+            # cap
+            score = max(0, min(100, score))
+
+            obj["risk"] = score
+            obj["risk_reason"] = f"base={base.get(sev,50)} mitre={mitre_len} tags={tags_len} repeats={repeats}"
+            items.append(obj)
+
+    return jsonify({"total": len(items), "items": items})
+
+
+@alerts_bp.post("/api/alerts/enrich")
+def enrich_alert():
+    """
+    Return mock enrichment data for an alert id.
+    Body: { "id": 1001 }
+    Response: { id, artifacts: [...], enrichment: { ips: [...], hashes: [...], meta: {...} } }
+    """
+    b = request.get_json(silent=True) or {}
+    aid = int(b.get("id") or 0)
+    if not aid:
+        return jsonify({"error": "Missing id"}), 400
+
+    with db() as conn:
+        cur = conn.execute("SELECT * FROM alerts WHERE id = ?", (aid,))
+        r = cur.fetchone()
+        if not r:
+            return jsonify({"error": "Not found"}), 404
+        alert = _row_to_obj(r)
+
+        # Build mock enrichment
+        enrichment: Dict[str, Any] = {"ips": [], "hashes": [], "meta": {}}
+
+        for art in alert.get("artifacts", []):
+            if art.get("type") == "ip":
+                ip = art.get("value")
+                enrichment["ips"].append({
+                    "ip": ip,
+                    "geo": {"country": "ZA", "city": "Johannesburg"},
+                    "isp": "MockISP Ltd",
+                    "reputation_score": 78,
+                    "threat_category": "scanning"
+                })
+            elif art.get("type") == "hash":
+                h = art.get("value")
+                enrichment["hashes"].append({
+                    "hash": h,
+                    "malware_verdict": "suspicious",
+                    "vendors": [{"name": "MockAV", "verdict": "malicious"}],
+                    "first_seen": (datetime.utcnow() - timedelta(days=30)).isoformat() + "Z"
+                })
+
+        # Add some meta enrichment (TI lookups, phishing detection hint)
+        enrichment["meta"]["ti_sources_checked"] = ["mock-ti-feed"]
+        enrichment["meta"]["phishing_likelihood"] = 12
+        enrichment["meta"]["notes"] = "This is mock enrichment for demo purposes. Replace with real lookups."
+
+        # SA phishing detection (simple keyword-based heuristic)
+        sa_keywords = ["sars","fnb","absa","capitec","standard bank","nsfas","cipc","sassa","south african revenue","tax office"]
+        text_blob = "\n".join([alert.get("title",""), alert.get("description","")]).lower()
+        sa_hits = [k for k in sa_keywords if k in text_blob]
+        # also scan artifacts (emails/domains)
+        for art in alert.get("artifacts", []):
+            v = (art.get("value") or "").lower()
+            for k in sa_keywords:
+                if k in v:
+                    if k not in sa_hits:
+                        sa_hits.append(k)
+
+        # apply whitelist: remove any matches that are whitelisted
+        wl = [x.lower() for x in load_whitelist()]
+        filtered_hits = [h for h in sa_hits if h.lower() not in wl]
+        enrichment["meta"]["sa_phishing"] = bool(filtered_hits)
+        enrichment["meta"]["sa_phishing_matches"] = filtered_hits
+
+    return jsonify({"id": aid, "artifacts": alert.get("artifacts"), "enrichment": enrichment})
+
+
+@alerts_bp.post("/api/alerts/group")
+def group_alerts():
+    """
+    Return simple grouping of alerts into candidate incidents.
+    Body: same filters as /api/alerts/list plus optional "hours" window (default 48)
+    """
+    b = request.get_json(silent=True) or {}
+    hours = int(b.get("hours", 48))
+    where_sql, params = _apply_filters_sql(b)
+
+    with db() as conn:
+        cur = conn.execute(f"SELECT * FROM alerts {where_sql} ORDER BY created_at DESC", params)
+        rows = cur.fetchall()
+
+        groups: Dict[str, Dict[str, Any]] = {}
+        sev_rank = {"Low": 1, "Medium": 2, "High": 3, "Critical": 4}
+
+        for r in rows:
+            obj = _row_to_obj(r)
+            # build grouping key: title + first ip artifact (if any)
+            first_ip = None
+            for art in obj.get("artifacts", []):
+                if art.get("type") == "ip":
+                    first_ip = art.get("value")
+                    break
+            key = f"{obj.get('title','')}//{first_ip or ''}"
+
+            g = groups.get(key)
+            if not g:
+                g = {"title": obj.get("title"), "members": [], "count": 0, "severity": obj.get("severity"), "first_ip": first_ip, "created_at": obj.get("created_at")}
+                groups[key] = g
+
+            g["members"].append(obj["id"])
+            g["count"] = len(g["members"])
+            # pick highest severity
+            if sev_rank.get(obj.get("severity"), 0) > sev_rank.get(g.get("severity"), 0):
+                g["severity"] = obj.get("severity")
+
+        results = []
+        for idx, (k, v) in enumerate(groups.items(), start=1):
+            results.append({"incident_id": idx, "title": v["title"], "severity": v["severity"], "count": v["count"], "members": v["members"], "first_ip": v.get("first_ip"), "created_at": v.get("created_at")})
+
+    return jsonify({"total": len(results), "groups": results})
+
+
+@alerts_bp.post("/api/alerts/merge")
+def merge_alerts():
+    """
+    Create an incident from alert ids and tag/update alerts.
+    Body: { "ids": [1000,1001], "title": "Optional title" }
+    """
+    b = request.get_json(silent=True) or {}
+    ids = b.get("ids") or []
+    if not ids or not isinstance(ids, list):
+        return jsonify({"error": "ids required"}), 400
+
+    title = (b.get("title") or "")
+    now = _now_iso()
+
+    with db() as conn:
+        # compute severity as highest among members
+        cur = conn.execute(f"SELECT * FROM alerts WHERE id IN ({','.join('?'*len(ids))})", ids)
+        rows = [ _row_to_obj(r) for r in cur.fetchall() ]
+        if not rows:
+            return jsonify({"error": "No alerts found"}), 404
+
+        sev_rank = {"Low": 1, "Medium": 2, "High": 3, "Critical": 4}
+        highest = "Medium"
+        for r in rows:
+            if sev_rank.get(r.get("severity"),0) > sev_rank.get(highest,0):
+                highest = r.get("severity")
+
+        if not title:
+            title = f"Incident: {rows[0].get('title')} (group)"
+
+        # create a lightweight incident id (timestamp-based) and tag alerts; do not assume incidents table schema
+        incident_id = int(datetime.utcnow().timestamp())
+
+        # update member alerts (set status to Containment and add incident tag)
+        for aid in ids:
+            cur = conn.execute("SELECT tags FROM alerts WHERE id = ?", (aid,))
+            row = cur.fetchone()
+            tags = json.loads(row["tags"] or "[]") if row else []
+            tags.append(f"incident:{incident_id}")
+            conn.execute("UPDATE alerts SET status = ?, tags = ?, updated_at = ? WHERE id = ?",
+                         ("Containment", json.dumps(tags), now, aid))
+
+    return jsonify({"ok": True, "incident_id": incident_id, "title": title, "members": ids})
+
+
+@alerts_bp.post('/api/alerts/scan_sa_phishing')
+def scan_sa_phishing():
+    """
+    Scan alerts for South African phishing indicators and tag them.
+    Body: { "query":..., "severity":..., "limit": 500 }
+    Response: { total_scanned, matched, matched_ids: [...] }
+    """
+    b = request.get_json(silent=True) or {}
+    where_sql, params = _apply_filters_sql(b)
+    limit = int(b.get('limit', 500))
+
+    sa_keywords = ["sars","fnb","absa","capitec","standard bank","nsfas","cipc","sassa","south african revenue","tax office"]
+
+    matched_ids: List[int] = []
+    scanned = 0
+    with db() as conn:
+        cur = conn.execute(f"SELECT * FROM alerts {where_sql} ORDER BY created_at DESC LIMIT ?", params + [limit])
+        rows = cur.fetchall()
+        wl = [x.lower() for x in load_whitelist()]
+        for r in rows:
+            scanned += 1
+            obj = _row_to_obj(r)
+            text_blob = "\n".join([obj.get('title',''), obj.get('description','')]).lower()
+            hits = [k for k in sa_keywords if k in text_blob]
+            for art in obj.get('artifacts', []):
+                v = (art.get('value') or '').lower()
+                for k in sa_keywords:
+                    if k in v and k not in hits:
+                        hits.append(k)
+            # apply whitelist: remove whitelisted keywords from hits
+            filtered = [h for h in hits if h.lower() not in wl]
+            if filtered:
+                # tag alert (idempotent)
+                cur2 = conn.execute("SELECT tags FROM alerts WHERE id = ?", (obj['id'],))
+                row = cur2.fetchone()
+                tags = json.loads(row['tags'] or '[]') if row else []
+                if 'sa_phishing' not in tags:
+                    tags.append('sa_phishing')
+                conn.execute("UPDATE alerts SET tags = ?, updated_at = ? WHERE id = ?", (json.dumps(tags), _now_iso(), obj['id']))
+                matched_ids.append(obj['id'])
+
+    return jsonify({"total_scanned": scanned, "matched": len(matched_ids), "matched_ids": matched_ids})
+
+
+@alerts_bp.route('/api/alerts/whitelist', methods=['GET', 'POST', 'DELETE'])
+def manage_whitelist():
+    """Get/Add/Delete whitelist entries.
+    GET -> return list
+    POST { "value": "string" } -> add
+    DELETE { "value": "string" } -> remove
+    """
+    items = load_whitelist()
+    if request.method == 'GET':
+        return jsonify({"whitelist": items})
+
+    b = request.get_json(silent=True) or {}
+    val = (b.get('value') or '').strip()
+    if not val:
+        return jsonify({"error": "value required"}), 400
+
+    if request.method == 'POST':
+        if val not in items:
+            items.append(val)
+            save_whitelist(items)
+        return jsonify({'ok': True, 'whitelist': items})
+
+    if request.method == 'DELETE':
+        if val in items:
+            items = [x for x in items if x != val]
+            save_whitelist(items)
+        return jsonify({'ok': True, 'whitelist': items})
+
+
+@alerts_bp.post('/api/alerts/mark_fp')
+def mark_false_positive():
+    """Mark an alert as false positive for SA phishing by removing the `sa_phishing` tag.
+    Body: { "id": 1001 }
+    """
+    b = request.get_json(silent=True) or {}
+    aid = int(b.get('id') or 0)
+    if not aid:
+        return jsonify({'error': 'Missing id'}), 400
+
+    with db() as conn:
+        cur = conn.execute('SELECT tags FROM alerts WHERE id = ?', (aid,))
+        row = cur.fetchone()
+        if not row:
+            return jsonify({'error': 'Not found'}), 404
+        tags = json.loads(row['tags'] or '[]')
+        new_tags = [t for t in tags if t != 'sa_phishing']
+        conn.execute('UPDATE alerts SET tags = ?, updated_at = ? WHERE id = ?', (json.dumps(new_tags), _now_iso(), aid))
+
+    return jsonify({'ok': True, 'id': aid, 'removed': 'sa_phishing' in tags})
 
 
 @alerts_bp.post("/api/alerts/playbook")

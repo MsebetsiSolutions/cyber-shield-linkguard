@@ -58,11 +58,10 @@ from routes.module import module_bp
 from backend.routes_alerts import alerts_bp
 from backend.routes_host import host_bp
 from backend.routes_intel import intel_bp
-from backend.routes_monitor import monitor_bp
 from backend.routes_reports import reports_bp
 from backend.routes_settings import settings_bp as backend_settings_bp
 from backend.routes_database import database_bp
-from backend.routes_monitoring import monitoring_bp
+from monitoring import monitor_bp
 from backend.routes_pentesting import pentesting_bp
 
 from dotenv import load_dotenv
@@ -112,11 +111,10 @@ app.register_blueprint(module_bp)
 app.register_blueprint(alerts_bp)
 app.register_blueprint(host_bp)
 app.register_blueprint(intel_bp)
-app.register_blueprint(monitor_bp)
 app.register_blueprint(reports_bp)
 app.register_blueprint(backend_settings_bp, url_prefix='/api/backend', name='backend_settings')
 app.register_blueprint(database_bp, url_prefix='/api/database')
-app.register_blueprint(monitoring_bp, url_prefix='/api/monitoring')
+app.register_blueprint(monitor_bp, url_prefix='/api/monitoring')
 app.register_blueprint(pentesting_bp, url_prefix='/api/pentesting')
 
 

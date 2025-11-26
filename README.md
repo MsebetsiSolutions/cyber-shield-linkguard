@@ -65,6 +65,15 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |      ├── apt.txt
         |      ├── cyber-shield-linkguard.db
         |      ├── requirements.txt 
+        |      ├── agent_id.txt.py
+        |      ├── agent.py
+        |      ├── check_alerts.py
+        |      ├── generate_alerts_direct.py
+        |      ├── generate_suspicious_packets.py
+        |      ├── monitoring.py
+        |      ├── scaoy_ids.py
+        |      ├── scapy_rules.txt
+        |      ├── snort_agent.py
         |      ├── soc_dashboard.db
         |      ├── .gitignore
         |      ├── .env
@@ -87,15 +96,13 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         │      ├── backend/ 
         |      |     ├── _pycache_/
         |      |     ├── routes_database.py
-        |      |     ├── routes_monitoring.py
         |      |     ├── routes_pentesting.py
+        |      |     ├── llm_service.py
         |      |     ├── database.py
-        |      |     ├── monitoring.py
         |      |     ├── pentesting.py
         |      |     ├── routes_alerts.py
         |      |     ├── routes_host.py
         |      |     ├── routes_intel.py
-        |      |     ├── routes_monitor.py
         |      |     ├── routes_reports.py
         |      |     └── routes_settings.py
         |      |

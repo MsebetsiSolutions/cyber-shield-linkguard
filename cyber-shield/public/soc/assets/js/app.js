@@ -151,7 +151,7 @@
     }
   }
 
-  // --- Overview charts/bootstrap (requires Chart.js + sample-data.js) ---
+  // --- Overview charts/bootstrap (uses Chart.js and backend endpoints) ---
   function initOverview() {
     // Safety if Chart.js not loaded
     if (typeof Chart === "undefined") return;
