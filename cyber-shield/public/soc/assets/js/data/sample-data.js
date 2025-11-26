@@ -1,0 +1,1 @@
+// Mock sample data removed. Monitoring should fetch real telemetry from backend endpoints.

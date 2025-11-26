@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kindness Kingdom - Cyber Explorers</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicon/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/favicon/apple-touch-icon.png" />
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background-color: #0a0020;
+      color: #ffffff;
+      overflow-x: hidden;
+      line-height: 1.6;
+      position: relative;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+    }
+
+    /* Spark Animation */
+    .spark {
+      position: fixed;
+      width: 3px;
+      height: 3px;
+      background: #ff00ff;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 100;
+      animation: sparkMove 3s linear forwards;
+      box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+    }
+
+    @keyframes sparkMove {
+      0% {
+        transform: translate(0, 0);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(var(--tx), var(--ty));
+        opacity: 0;
+      }
+    }
+
+    /* Navigation */
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(10, 0, 32, 0.9);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(255, 0, 255, 0.2);
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #ff00ff;
+      text-decoration: none;
+      text-shadow: 0 0 5px #ff00ff;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+    }
+
+    .nav-links li {
+      margin-left: 2rem;
+    }
+
+    .nav-links a {
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+      position: relative;
+    }
+
+    .nav-links a:hover {
+      color: #ff00ff;
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 100px 20px 50px;
+    }
+
+    .panel {
+      background: rgba(15, 5, 40, 0.8);
+      border-radius: 15px;
+      padding: 3rem;
+      border: 1px solid rgba(255, 0, 255, 0.3);
+      box-shadow: 0 0 20px rgba(255, 0, 122, 0.3), 0 0 30px rgba(255, 0, 255, 0.2);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(255, 0, 122, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(255, 100, 255, 0.1) 0%, transparent 50%);
+      z-index: -1;
+    }
+
+    h1 {
+      color: #ff00ff;
+      text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff88ff;
+      margin-bottom: 1.5rem;
+      font-size: 2.5rem;
+      text-align: center;
+    }
+
+    h2 {
+      color: #ff88ff;
+      text-shadow: 0 0 5px #ff88ff;
+      margin-bottom: 1rem;
+      font-size: 2rem;
+    }
+
+    h3 {
+      color: #ff00ff;
+      margin-bottom: 0.5rem;
+      font-size: 1.5rem;
+    }
+
+    p {
+      color: #e0e0ff;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+
+    /* Lesson Content Styles */
+    .lesson-content {
+      margin-bottom: 3rem;
+    }
+
+    .concept-box {
+      background: rgba(20, 10, 45, 0.8);
+      padding: 2rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 0, 255, 0.2);
+      margin: 1.5rem 0;
+    }
+
+    .activity {
+      background: rgba(30, 15, 60, 0.8);
+      border-left: 4px solid #ff00ff;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .activity h4 {
+      color: #ff00ff;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-shadow: 0 0 5px #ff00ff;
+    }
+
+    .example {
+      background: rgba(255, 200, 0, 0.1);
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      border-left: 4px solid #ffcc00;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 1rem;
+    }
+
+    li {
+      color: #e0e0ff;
+      margin-bottom: 0.8rem;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+
+    li::before {
+      content: '❤️';
+      position: absolute;
+      left: 0;
+    }
+
+    /* Game Styles */
+    .game-section {
+      margin-top: 3rem;
+    }
+
+    .kindness-meter {
+      background: rgba(20, 10, 45, 0.8);
+      padding: 2rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 0, 255, 0.2);
+      margin: 2rem 0;
+      text-align: center;
+    }
+
+    .meter-container {
+      height: 30px;
+      background: #333;
+      border-radius: 15px;
+      overflow: hidden;
+      margin: 1rem 0;
+      position: relative;
+    }
+
+    .meter-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ff00ff, #ff88ff, #ffffff);
+      transition: width 0.5s;
+    }
+
+    .meter-hearts {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.2rem;
+      color: #fff;
+    }
+
+    .scenario-game {
+      margin: 2rem 0;
+    }
+
+    .scenario {
+      background: rgba(20, 10, 45, 0.8);
+      padding: 2rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 0, 255, 0.2);
+      margin-bottom: 2rem;
+    }
+
+    .scenario-text {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      color: #e0e0ff;
+    }
+
+    .character {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .character-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #ff00ff, #ff88ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .option {
+      padding: 1.5rem;
+      background: rgba(100, 0, 200, 0.3);
+      border: 2px solid rgba(255, 0, 255, 0.3);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .option:hover {
+      transform: scale(1.05);
+      border-color: #ff00ff;
+    }
+
+    .option.correct {
+      background: rgba(0, 200, 100, 0.3);
+      border-color: #00ff00;
+    }
+
+    .option.incorrect {
+      background: rgba(200, 0, 0, 0.3);
+      border-color: #ff0000;
+    }
+
+    .message-builder {
+      background: rgba(20, 10, 45, 0.8);
+      padding: 2rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 0, 255, 0.2);
+      margin: 2rem 0;
+    }
+
+    .message-parts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .message-part {
+      padding: 0.8rem 1.2rem;
+      background: rgba(100, 0, 200, 0.3);
+      border: 1px solid rgba(255, 0, 255, 0.3);
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .message-part:hover {
+      background: rgba(100, 0, 200, 0.5);
+      border-color: #ff00ff;
+    }
+
+    .message-part.selected {
+      background: rgba(0, 200, 100, 0.3);
+      border-color: #00ff00;
+    }
+
+    .message-output {
+      font-size: 1.5rem;
+      color: #ff88ff;
+      margin: 1rem 0;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 5px;
+      min-height: 80px;
+      border: 2px dashed #ff00ff;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-block;
+      padding: 0.8rem 1.8rem;
+      color: #0a0020;
+      background: #ff00ff;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      font-family: 'Orbitron', sans-serif;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px #ff00ff, 0 0 20px rgba(255, 0, 122, 0.5);
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 0.5rem;
+    }
+
+    .btn:hover {
+      color: #ffffff;
+      background: #00ffff;
+      box-shadow: 0 0 20px #00ffff, 0 0 30px rgba(255, 0, 255, 0.5);
+      transform: translateY(-3px);
+    }
+
+    .feedback {
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .feedback.correct {
+      background: rgba(0, 255, 0, 0.2);
+      color: #00ff00;
+      border: 1px solid #00ff00;
+    }
+
+    .feedback.incorrect {
+      background: rgba(255, 0, 0, 0.2);
+      color: #ff0000;
+      border: 1px solid #ff0000;
+    }
+
+    /* Footer */
+    footer {
+      background: rgba(5, 0, 20, 0.9);
+      padding: 3rem 0;
+      text-align: center;
+      border-top: 1px solid rgba(255, 0, 255, 0.2);
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      list-style: none;
+      margin: 1.5rem 0;
+    }
+
+    .footer-links li {
+      margin: 0 1rem;
+    }
+
+    .footer-links a {
+      color: #ff00ff;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .footer-links a:hover {
+      color: #00ffff;
+    }
+
+    .copyright {
+      color: #a0a0ff;
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-links {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="What is the Internet.html" class="logo">Cyber Explorers</a>
+      <ul class="nav-links">
+        <li><a href="What is the Internet.html">Home</a></li>
+        <li><a href="Being Kind Online.html">Being Kind Online</a></li>
+        <li><a href="Creating a Fort Knox Password.html">Creating a Fort Knox Password</a></li>
+        <li><a href="Spot the Tricky People & Messages.html">Spot the Tricky People & Messages</a></li>
+        <li><a href="tricky-messages-lesson.html">Tricky Messages</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="panel">
+      <h1>❤️ Being Kind Online</h1>
+
+      <!-- Lesson Content -->
+      <div class="lesson-content">
+        <div class="concept-box">
+          <h2>The Digital Golden Rule</h2>
+          <p>How do you feel when someone shares a toy with you? Or says, "I like your drawing!"? It feels great!</p>
+          <p>Now, how do you feel if someone says something mean or won't let you play? It doesn't feel good at all.</p>
+          <p>The internet is not just a bunch of screens—it's a place full of real people with real feelings. The same
+            rules of kindness apply here! <strong>Always treat others online the way you would want to be
+              treated.</strong> This is what it means to be a good <strong>Digital Citizen</strong>.</p>
+        </div>
+
+        <div class="activity">
+          <h4>🚫 What is Cyberbullying?</h4>
+          <p>Sometimes, people use phones, tablets, or games to be mean to others on purpose. This is called
+            <strong>cyberbullying</strong>.
+          </p>
+          <p>It can look like:</p>
+          <ul>
+            <li>Sending a mean message</li>
+            <li>Leaving someone out of an online game on purpose</li>
+            <li>Saying something unkind about someone's post or picture</li>
+          </ul>
+        </div>
+
+        <div class="activity">
+          <h4>🛡️ What Can You Do?</h4>
+          <p>If you see or experience something unkind online, remember your superpower plan: <strong>Stop, Block, and
+              Tell!</strong></p>
+          <div class="example">
+            <p><strong>1. STOP</strong> - Don't answer mean messages. Don't write something mean back.</p>
+            <p><strong>2. BLOCK</strong> - Most games and apps have a "block" button. This is like building a magic wall
+              so that person can't send you any more messages. Ask a parent to help you find it.</p>
+            <p><strong>3. TELL</strong> - This is the most important step! <strong>Always tell a trusted
+                adult</strong>—like your mom, dad, grandma, grandpa, or teacher—what happened. They can help you.</p>
+          </div>
+        </div>
+
+        <div class="activity">
+          <h4>🌟 Let's Practice!</h4>
+          <p><strong>Activity: Kindness Champion!</strong></p>
+          <p>Read the situations below. Is the person being a <strong>Kindness Champion</strong> or do they need to
+            <strong>Stop, Block, and Tell</strong>?
+          </p>
+          <div class="example">
+            <p><strong>Alex</strong> is playing a game and a player he doesn't know sends a message asking for his
+              password.</p>
+            <p><em>Answer: Stop, Block, and Tell! Passwords are private!</em></p>
+          </div>
+          <div class="example">
+            <p><strong>Maya</strong> sees a new player in her game who seems lost. She sends a message that says, "Hi!
+              Need help?"</p>
+            <p><em>Answer: Kindness Champion!</em></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Game -->
+      <div class="game-section">
+        <h2>🎮 Kindness Kingdom Game</h2>
+        <p>Now let's practice being kind online with our interactive game!</p>
+
+        <!-- Kindness Meter -->
+        <div class="kindness-meter">
+          <h3>Your Kindness Level</h3>
+          <div class="meter-container">
+            <div class="meter-fill" id="kindnessMeter"></div>
+            <div class="meter-hearts" id="kindnessHearts">❤️ 0/5</div>
+          </div>
+          <p>Complete challenges to fill your kindness meter!</p>
+        </div>
+
+        <!-- Scenario Game -->
+        <div class="scenario-game">
+          <div class="scenario">
+            <h3>Scenario 1: The New Player</h3>
+            <div class="character">
+              <div class="character-avatar">👦</div>
+              <div>
+                <h4>Alex</h4>
+                <p>You're playing your favorite online game when you see a new player who seems lost.</p>
+              </div>
+            </div>
+
+            <div class="scenario-text">
+              The new player keeps walking into walls and doesn't seem to know how to play. Other players are making fun
+              of them in the chat.
+            </div>
+
+            <h4>What should you do?</h4>
+            <div class="options-grid">
+              <div class="option" onclick="checkScenarioAnswer(this, 'correct', 1)">
+                Send a friendly message: "Hi! Need some help? I can show you how to play!"
+              </div>
+              <div class="option" onclick="checkScenarioAnswer(this, 'incorrect', 1)">
+                Join the other players and make fun of them too
+              </div>
+              <div class="option" onclick="checkScenarioAnswer(this, 'incorrect', 1)">
+                Ignore them and keep playing your game
+              </div>
+              <div class="option" onclick="checkScenarioAnswer(this, 'correct', 1)">
+                Report the players who are being mean and offer help
+              </div>
+            </div>
+
+            <div id="scenario1Feedback"></div>
+          </div>
+
+          <div class="scenario">
+            <h3>Scenario 2: The Mean Message</h3>
+            <div class="character">
+              <div class="character-avatar">👧</div>
+              <div>
+                <h4>Maya</h4>
+                <p>You receive a mean message from someone in your game.</p>
+              </div>
+            </div>
+
+            <div class="scenario-text">
+              The message says: "You're terrible at this game! You should just quit!" It makes you feel sad and angry.
+            </div>
+
+            <h4>What's the best thing to do?</h4>
+            <div class="options-grid">
+              <div class="option" onclick="checkScenarioAnswer(this, 'incorrect', 2)">
+                Write an even meaner message back to them
+              </div>
+              <div class="option" onclick="checkScenarioAnswer(this, 'correct', 2)">
+                Use the "block" feature so they can't send more messages
+              </div>
+              <div class="option" onclick="checkScenarioAnswer(this, 'correct', 2)">
+                Tell a parent or teacher about the message
+              </div>
+              <div class="option" onclick="checkScenarioAnswer(this, 'incorrect', 2)">
+                Share the message with all your friends to get back at them
+              </div>
+            </div>
+
+            <div id="scenario2Feedback"></div>
+          </div>
+        </div>
+
+        <!-- Message Builder -->
+        <div class="message-builder">
+          <h3>💌 Build a Kind Message</h3>
+          <p>Create a friendly message to send to someone online!</p>
+
+          <div class="message-parts">
+            <div class="message-part" onclick="selectMessagePart(this, 'Hi')">Hi</div>
+            <div class="message-part" onclick="selectMessagePart(this, 'Hello')">Hello</div>
+            <div class="message-part" onclick="selectMessagePart(this, 'Hey')">Hey</div>
+            <div class="message-part" onclick="selectMessagePart(this, 'friend')">friend</div>
+            <div class="message-part" onclick="selectMessagePart(this, 'pal')">pal</div>
+            <div class="message-part" onclick="selectMessagePart(this, '!')">!</div>
+            <div class="message-part" onclick="selectMessagePart(this, 'Great job')">Great job</div>
+            <div class="message-part" onclick="selectMessagePart(this, 'Awesome')">Awesome</div>
+            <div class="message-part" onclick="selectMessagePart(this, 'Amazing')">Amazing</div>
+            <div class="message-part" onclick="selectMessagePart(this, 'work')">work</div>
+            <div class="message-part" onclick="selectMessagePart(this, 'playing')">playing</div>
+            <div class="message-part" onclick="selectMessagePart(this, 'drawing')">drawing</div>
+            <div class="message-part" onclick="selectMessagePart(this, '! 😊')">! 😊</div>
+            <div class="message-part" onclick="selectMessagePart(this, '! 🎉')">! 🎉</div>
+            <div class="message-part" onclick="selectMessagePart(this, '! 🌟')">! 🌟</div>
+          </div>
+
+          <div class="message-output" id="messageOutput">
+            Your kind message will appear here...
+          </div>
+
+          <button class="btn" onclick="sendKindMessage()">Send Kind Message</button>
+          <button class="btn" onclick="clearMessage()">Clear Message</button>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+          <button class="btn" onclick="completeGame()">Complete Kindness Kingdom</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <a href="index.html" class="logo">Cyber Explorers</a>
+      <ul class="footer-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="password-game.html">Password Game</a></li>
+        <li><a href="kindness-game.html">Kindness Game</a></li>
+      </ul>
+      <p class="copyright">© 2025 Cyber Safety & Smart Thinking Curriculum | Designed for Grades 1-2</p>
+    </div>
+  </footer>
+
+  <script>
+    // Game variables
+    let kindnessScore = 0;
+    let selectedMessageParts = [];
+
+    // Create spark effects
+    function createSpark() {
+      const spark = document.createElement('div');
+      spark.className = 'spark';
+
+      const startX = Math.random() * window.innerWidth;
+      const startY = Math.random() * window.innerHeight;
+      const tx = (Math.random() - 0.5) * 200;
+      const ty = (Math.random() - 0.5) * 200;
+
+      spark.style.left = startX + 'px';
+      spark.style.top = startY + 'px';
+      spark.style.setProperty('--tx', tx + 'px');
+      spark.style.setProperty('--ty', ty + 'px');
+
+      document.body.appendChild(spark);
+
+      setTimeout(() => {
+        spark.remove();
+      }, 3000);
+    }
+
+    function createSparks() {
+      for (let i = 0; i < 3; i++) {
+        setTimeout(createSpark, i * 200);
+      }
+    }
+
+    setInterval(createSparks, 1500);
+
+    // Scenario game functions
+    function checkScenarioAnswer(element, type, scenarioNum) {
+      const feedback = document.getElementById(`scenario${scenarioNum}Feedback`);
+
+      // Disable all options in this scenario
+      const scenario = element.closest('.scenario');
+      scenario.querySelectorAll('.option').forEach(opt => {
+        opt.style.pointerEvents = 'none';
+      });
+
+      if (type === 'correct') {
+        element.classList.add('correct');
+        feedback.innerHTML = '<div class="feedback correct">🎉 Great choice! You showed kindness and good digital citizenship!</div>';
+        increaseKindnessScore();
+        createSparks();
+      } else {
+        element.classList.add('incorrect');
+        feedback.innerHTML = '<div class="feedback incorrect">🤔 Let\'s think about this again. Remember the Stop, Block, Tell rule!</div>';
+      }
+    }
+
+    function increaseKindnessScore() {
+      kindnessScore += 1;
+      updateKindnessMeter();
+
+      if (kindnessScore >= 5) {
+        document.querySelector('.meter-hearts').innerHTML = '❤️ 5/5 - Kindness Master!';
+      }
+    }
+
+    function updateKindnessMeter() {
+      const meter = document.getElementById('kindnessMeter');
+      const hearts = document.getElementById('kindnessHearts');
+
+      const percentage = (kindnessScore / 5) * 100;
+      meter.style.width = percentage + '%';
+      hearts.textContent = `❤️ ${kindnessScore}/5`;
+    }
+
+    // Message builder functions
+    function selectMessagePart(element, text) {
+      if (!element.classList.contains('selected')) {
+        element.classList.add('selected');
+        selectedMessageParts.push(text);
+      } else {
+        element.classList.remove('selected');
+        selectedMessageParts = selectedMessageParts.filter(part => part !== text);
+      }
+
+      updateMessageOutput();
+    }
+
+    function updateMessageOutput() {
+      const output = document.getElementById('messageOutput');
+
+      if (selectedMessageParts.length > 0) {
+        output.textContent = selectedMessageParts.join(' ');
+      } else {
+        output.textContent = 'Your kind message will appear here...';
+      }
+    }
+
+    function sendKindMessage() {
+      if (selectedMessageParts.length === 0) {
+        alert('Please select some message parts first!');
+        return;
+      }
+
+      const message = selectedMessageParts.join(' ');
+      alert(`💌 Your kind message: "${message}" has been sent! Spread kindness everywhere!`);
+      increaseKindnessScore();
+      createSparks();
+      clearMessage();
+    }
+
+    function clearMessage() {
+      selectedMessageParts = [];
+      document.querySelectorAll('.message-part').forEach(part => {
+        part.classList.remove('selected');
+      });
+      updateMessageOutput();
+    }
+
+    function completeGame() {
+      if (kindnessScore >= 3) {
+        alert('🎉 Congratulations! You\'ve completed Kindness Kingdom! You\'re an amazing digital citizen!');
+        createSparks();
+      } else {
+        alert('💪 Keep going! Complete more scenarios to become a Kindness Master!');
+      }
+    }
+
+    // Initialize kindness meter
+    window.onload = updateKindnessMeter;
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../../session.js"></script>
+  <p style="text-align:center; margin-top:30px;"><a href="../index.html"
+      style="background:#ff8c42;color:white;padding:10px 20px;border-radius:10px;text-decoration:none;">⬅ Back to
+      Dashboard</a></p>
+</body>
+
+</html>
