@@ -71,7 +71,7 @@
       
       <div style="display:flex;gap:8px;margin-top:8px">
         <button class="btn sm" id="btnListCollections">🔍 Test & List Collections</button>
-        <button class="btn sm" id="btnPullTaxii">⬇️ Pull Indicators</button>
+        <button class="btn sm" id="btnPullTaxii">⬇️ Pull Objects</button>
       </div>
       
       <!-- TAXII Results Table -->
@@ -188,7 +188,7 @@
         notes.</p>
       <div style="display:flex;gap:8px">
         <button class="btn sm" id="btnMapAttack"><i class="bi bi-diagram-3"></i> Map ATT&CK</button>
-        <button class="btn sm ghost" id="btnHeatmap"><i class="bi bi-grid-3x3-gap"></i> Build Heatmap CSV</button>
+        <button class="btn sm ghost" id="btnHeatmap"><i class="bi bi-grid-3x3-gap"></i> Build Heatmap</button>
         <button class="btn sm ghost" id="btnVisualizeGraph"><i class="bi bi-diagram-3"></i> View Graph</button>
       </div>
       
@@ -485,7 +485,6 @@
         const r = await fetch('/api/ti/parse', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
         if (!r.ok) { const txt = await r.text(); throw new Error(txt || ('HTTP ' + r.status)); }
         const j = await r.json().catch(() => ({}));
-        // ensure structure
         state.normalized = {
           ips: j.ips || [], domains: j.domains || [], urls: j.urls || [], hashes: j.hashes || []
         };
@@ -493,7 +492,6 @@
         return j;
       } catch (e) {
         console.error('Parse error', e);
-        // fallback: keep using client-side naive parse
         return { error: String(e) };
       }
     }
@@ -564,11 +562,8 @@
     // TAXII Preset Selection
     qsa('.taxii-preset-btn').forEach(btn => {
       btn.addEventListener('click', function() {
-        // Remove active class from all buttons
         qsa('.taxii-preset-btn').forEach(b => b.classList.remove('active'));
-        // Add active class to clicked button
         this.classList.add('active');
-        // Update form fields
         el.taxiiUrl.value = this.dataset.url;
         el.taxiiCol.value = this.dataset.collection;
       });
@@ -593,7 +588,6 @@
         const j = await r.json().catch(() => ({ error: 'Invalid server response' }));
         
         if (!r.ok || j.error) { 
-          // Show user-friendly error message
           if (j.error && (j.error.includes('timeout') || j.error.includes('Connection'))) {
             showError(
               'Connection Timeout', 
@@ -639,7 +633,6 @@
         const j = await r.json().catch(() => ({ error: 'Invalid server response' }));
         
         if (!r.ok || j.error) { 
-          // Show user-friendly error message
           if (j.error && (j.error.includes('timeout') || j.error.includes('Connection'))) {
             showError(
               'Connection Timeout', 
@@ -1023,8 +1016,6 @@
           throw new Error(mapped.error || `HTTP ${r.status}`);
         }
         
-        // expected: { results: [{indicator, techniques:[], tactics:[]}, ...] }
-        // merge back:
         const byInd = Object.fromEntries((mapped.results || []).map(x => [x.indicator, x]));
         state.results = state.results.map(row => {
           const m = byInd[row.indicator];
@@ -1058,51 +1049,35 @@
     // HEATMAP FUNCTIONALITY
     // =========================
     
-    $("#btnHeatmap").addEventListener("click", () => {
+    $("#btnHeatmap").addEventListener("click", async () => {
       if (Object.keys(state.attackMappings).length === 0) {
         showWarning('No ATT&CK Data', 'Please run ATT&CK mapping first!');
         return;
       }
       
-      buildHeatmap();
-    });
-
-    function buildHeatmap() {
-      const tactics = {
-        'Reconnaissance': ['T1595', 'T1592', 'T1589'],
-        'Resource Development': ['T1583', 'T1584', 'T1585', 'T1586', 'T1587', 'T1588'],
-        'Initial Access': ['T1566', 'T1195', 'T1078', 'T1133', 'T1200'],
-        'Execution': ['T1059', 'T1106', 'T1129', 'T1053'],
-        'Persistence': ['T1547', 'T1136', 'T1543', 'T1037', 'T1176'],
-        'Defense Evasion': ['T1140', 'T1027', 'T1112', 'T1222', 'T1218'],
-        'Credential Access': ['T1110', 'T1555', 'T1003', 'T1528'],
-        'Discovery': ['T1083', 'T1135', 'T1040', 'T1018', 'T1518'],
-        'Lateral Movement': ['T1021', 'T1550', 'T1534', 'T1570'],
-        'Collection': ['T1113', 'T1115', 'T1213', 'T1005'],
-        'Command & Control': ['T1071', 'T1090', 'T1571', 'T1572', 'T1568'],
-        'Exfiltration': ['T1041', 'T1020', 'T1030', 'T1048', 'T1567'],
-        'Impact': ['T1485', 'T1486', 'T1490', 'T1491', 'T1495', 'T1496']
-      };
-
-      // Generate frequency data from attack mappings
-      const heatmapData = {};
-      Object.keys(tactics).forEach(tactic => {
-        heatmapData[tactic] = {};
-        tactics[tactic].forEach(technique => {
-          // Count occurrences of this technique in our mappings
-          let count = 0;
-          Object.values(state.attackMappings).forEach(mapping => {
-            if (mapping.techniques && mapping.techniques.includes(technique)) {
-              count++;
-            }
-          });
-          heatmapData[tactic][technique] = count;
+      el.attackOut.textContent = "Building ATT&CK heatmap...";
+      
+      try {
+        const r = await fetch("/api/ti/heatmap", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mappings: state.attackMappings })
         });
-      });
-
-      state.heatmapData = heatmapData;
-      renderHeatmap(heatmapData);
-    }
+        const heatmapData = await r.json().catch(() => ({}));
+        
+        if (!r.ok) {
+          throw new Error(heatmapData.error || `HTTP ${r.status}`);
+        }
+        
+        renderHeatmap(heatmapData.heatmap || {});
+        el.attackOut.textContent = `Heatmap generated for ${heatmapData.total_indicators} indicators with ${heatmapData.total_techniques} techniques`;
+        
+      } catch (error) {
+        console.error('Heatmap error:', error);
+        showError('Heatmap Failed', `Failed to generate heatmap: ${error.message}`);
+        el.attackOut.textContent = `Error: ${error.message}`;
+      }
+    });
 
     function renderHeatmap(heatmapData) {
       let html = '<h4>MITRE ATT&CK Heatmap</h4><div style="margin: 12px 0; font-size: 12px;">';
@@ -1138,7 +1113,7 @@
     // GRAPH CONTROLS
     // =========================
     
-    $("#btnVisualizeGraph").addEventListener("click", () => {
+    $("#btnVisualizeGraph").addEventListener("click", async () => {
       console.log('🎬 VIEW GRAPH CLICKED - STIX Objects:', state.stixObjects.length);
       
       if (state.stixObjects.length > 0) {
@@ -1146,7 +1121,7 @@
         el.stixGraphCard.style.display = 'block';
         
         // Wait for card to be visible in DOM
-        setTimeout(() => {
+        setTimeout(async () => {
           // Ensure container has proper dimensions
           el.stixGraph.style.height = '600px';
           el.stixGraph.style.width = '100%';
@@ -1156,8 +1131,28 @@
           // Force a DOM reflow
           el.stixGraph.offsetHeight;
           
-          // Initialize graph
-          initCytoscape();
+          try {
+            // Generate graph data via backend
+            const r = await fetch("/api/ti/stix/graph", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ objects: state.stixObjects })
+            });
+            
+            const graphData = await r.json().catch(() => ({}));
+            
+            if (r.ok && graphData.elements) {
+              // Initialize graph with backend-generated elements
+              initCytoscapeWithElements(graphData.elements);
+            } else {
+              // Fallback to client-side generation
+              initCytoscape();
+            }
+          } catch (error) {
+            console.error('Graph generation error:', error);
+            // Fallback to client-side generation
+            initCytoscape();
+          }
         }, 300);
       } else {
         showWarning(
@@ -1166,6 +1161,110 @@
         );
       }
     });
+
+    function initCytoscapeWithElements(elements) {
+      console.log('🎯 Initializing Cytoscape with', elements.length, 'elements');
+      
+      // Clear previous graph
+      if (state.cy) {
+        state.cy.destroy();
+        state.cy = null;
+      }
+      
+      // Ensure container is ready
+      el.stixGraph.innerHTML = '';
+      el.stixGraph.style.display = 'block';
+      el.stixGraph.style.width = '100%';
+      el.stixGraph.style.height = '600px';
+      el.stixGraph.style.background = 'var(--bg-soft)';
+      
+      setTimeout(() => {
+        try {
+          // REGISTER EXTENSIONS FIRST
+          if (window.cytoscapeDagre) {
+            cytoscape.use(cytoscapeDagre);
+          }
+          
+          state.cy = cytoscape({
+            container: el.stixGraph,
+            elements: elements,
+            style: [
+              {
+                selector: 'node',
+                style: {
+                  'background-color': 'data(color)',
+                  'label': 'data(label)',
+                  'width': 80,
+                  'height': 80,
+                  'font-size': '16px',
+                  'text-valign': 'center',
+                  'text-halign': 'center',
+                  'color': '#ffffff',
+                  'text-outline-width': 4,
+                  'text-outline-color': '#000000',
+                  'border-width': 4,
+                  'border-color': '#ffffff',
+                  'text-wrap': 'wrap',
+                  'text-max-width': '100px'
+                }
+              },
+              {
+                selector: 'edge',
+                style: {
+                  'width': 6,
+                  'line-color': '#ff6b6b',
+                  'target-arrow-color': '#ff6b6b',
+                  'target-arrow-shape': 'triangle',
+                  'target-arrow-fill': 'filled',
+                  'curve-style': 'bezier',
+                  'label': 'data(label)',
+                  'font-size': '14px',
+                  'color': '#ffffff',
+                  'text-outline-width': 3,
+                  'text-outline-color': '#000000',
+                  'arrow-scale': 2
+                }
+              }
+            ],
+            layout: {
+              name: 'grid',
+              rows: 2,
+              fit: true,
+              padding: 50
+            }
+          });
+          
+          // Event listeners
+          state.cy.on('tap', 'node', function(evt) {
+            const node = evt.target;
+            showNodeDetails(node.data());
+          });
+          
+          state.cy.on('tap', function(evt) {
+            if (evt.target === state.cy) {
+              el.graphOverlay.style.display = 'none';
+            }
+          });
+          
+          // FORCE VISIBLE RENDERING
+          setTimeout(() => {
+            if (state.cy) {
+              state.cy.layout({ name: 'grid', fit: true, padding: 50 }).run();
+              state.cy.fit();
+              state.cy.center();
+              state.cy.resize();
+              
+              updateGraphStats();
+              console.log('🎉 GRAPH SUCCESSFULLY RENDERED');
+            }
+          }, 500);
+          
+        } catch (error) {
+          console.error('❌ Cytoscape Error:', error);
+          showFallbackVisualization();
+        }
+      }, 100);
+    }
 
     $("#btnToggleLabels").addEventListener("click", () => {
       if (state.cy) {
@@ -1204,7 +1303,7 @@
     });
 
     // =========================
-    // ENRICHMENT & SCORING (existing functionality)
+    // ENRICHMENT & SCORING
     // =========================
     $("#btnEnrich").addEventListener("click", async () => {
       const providers = qsa(".enr:checked").map(x => x.value);
@@ -1271,7 +1370,7 @@
           // Check each provider for this IOC
           backendData.results.forEach(providerResult => {
             const provider = providerResult.provider;
-            const iocKey = `${type.slice(0, -1)}:${ioc}`; // ips -> ip:1.2.3.4
+            const iocKey = `${type.slice(0, -1)}:${ioc}`;
 
             if (providerResult.results && providerResult.results[iocKey]) {
               sources.push(provider);
@@ -1303,7 +1402,7 @@
     }
 
     // =========================
-    // EXPORTS & SIEM (existing functionality)
+    // EXPORTS & SIEM
     // =========================
     $("#btnExportSTIX").addEventListener("click", () => {
       const bundle = buildStixBundle(state.results, el.tlp.value, clamp(parseInt(el.conf.value || "80", 10), 0, 100));
@@ -1322,7 +1421,7 @@
     });
 
     $("#btnPushSIEM").addEventListener("click", async () => {
-      // Push to Splunk/ELK/QRadar via backend (HEC / Ingest Node / EFR)
+      // Push to Splunk/ELK/QRadar via backend
       try {
         const r = await fetch("/api/siem/forward", {
           method: "POST",
@@ -1341,7 +1440,7 @@
     });
 
     // =========================
-    // WEBHOOKS (existing functionality)
+    // WEBHOOKS
     // =========================
     loadHooks();
     $("#btnAddWebhook").addEventListener("click", () => {
@@ -1382,7 +1481,6 @@
     }
     async function relayWebhooks(items) {
       if (!state.webhooks.length) return;
-      // Prefer server-side relay:
       await fetch("/api/webhooks/relay", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ webhooks: state.webhooks, items })
@@ -1403,7 +1501,7 @@
     }
 
     // =========================
-    // PROFILES (existing functionality)
+    // PROFILES
     // =========================
     $("#btnSaveProfile").addEventListener("click", () => {
       const providers = qsa(".enr:checked").map(x => x.value);
@@ -1436,7 +1534,7 @@
     });
 
     // =========================
-    // RENDER & UTILS (existing functionality)
+    // RENDER & UTILS
     // =========================
     function renderResults() {
       el.table.innerHTML = "";
@@ -1469,7 +1567,7 @@
       const v = (it.value || "").toLowerCase();
       let score = 10;
       if (it.type === "ipv4-addr") score += 10;
-      if (it.type === "domain-name" && v.endsWith(".ru") || v.endsWith(".cn")) score += 5; // example heuristic — replace with real intel
+      if (it.type === "domain-name" && v.endsWith(".ru") || v.endsWith(".cn")) score += 5;
       if (it.type === "url" && /login|admin|wp-|php|panel/.test(v)) score += 10;
       if (it.type === "file:hash") score += 15;
       return clamp(score, 0, 100);
@@ -1482,7 +1580,6 @@
         if (!key) return;
         if (!seen.has(key)) seen.set(key, r);
         else {
-          // merge sources & max risk, keep earliest first_seen and latest last_seen
           const prev = seen.get(key);
           prev.sources = Array.from(new Set([...(prev.sources || []), ...(r.sources || [])]));
           prev.risk = Math.max(prev.risk || 0, r.risk || 0);
@@ -1532,13 +1629,12 @@
               id: "relationship--" + cryptoRandom(),
               relationship_type: "indicates",
               source_ref: indId,
-              target_ref: "attack-pattern--" + tech, // backend should use real ATT&CK IDs here
+              target_ref: "attack-pattern--" + tech,
               created: now, modified: now
             });
           });
         }
       });
-      // Marking definition
       bundle.objects.push({
         type: "marking-definition",
         id: markingIdFor(tlp),
@@ -1549,7 +1645,6 @@
     }
 
     function patternFor(r) {
-      // Minimal STIX patterns — you can expand per type
       if (r.type === "ipv4-addr") return `[ipv4-addr:value = '${r.indicator}']`;
       if (r.type === "domain-name") return `[domain-name:value = '${r.indicator}']`;
       if (r.type === "url") return `[url:value = '${r.indicator}']`;
