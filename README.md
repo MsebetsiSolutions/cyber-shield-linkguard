@@ -68,8 +68,6 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |      ├── agent_id.txt.py
         |      ├── agent.py
         |      ├── check_alerts.py
-        |      ├── generate_alerts_direct.py
-        |      ├── generate_suspicious_packets.py
         |      ├── monitoring.py
         |      ├── scaoy_ids.py
         |      ├── scapy_rules.txt
@@ -95,6 +93,10 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |      |
         │      ├── backend/ 
         |      |     ├── _pycache_/
+        |      |     ├── backend/
+        |      |     |      └── routes_pentesting.py
+        |      |     |
+        |      |     ├── backend.py
         |      |     ├── routes_database.py
         |      |     ├── routes_pentesting.py
         |      |     ├── llm_service.py
@@ -105,10 +107,18 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |      |     ├── routes_intel.py
         |      |     ├── routes_reports.py
         |      |     └── routes_settings.py
+        |      |     ├── real_tools.py
+        |      |     ├── routes_subdomains.py
+        |      |     └── whois.py
+        |      |
+        │      ├── payloads/ 
+        |      |     ├── command-injection/
+        |      |     ├── sql-injection/
+        |      |     └── xss/
         |      |
         │      ├── templates/ 
         |      |     ├── assets/
-        |      |     |     
+        |      |     |
         |      |     ├── exam_dashbaord.html
         |      |     ├── exam_question.html
         |      |     ├── exam_results.html
@@ -218,6 +228,21 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     |      ├── reports.html
         |            |     |      └── settings.html
         |            |     |
+        |            |     ├── app.js
+        |            |     ├── backend.py
+        |            |     ├── checklist.html
+        |            |     ├── checklist.js
+        |            |     ├── exploitation.html
+        |            |     ├── exploitation.js
+        |            |     ├── pre-engagement.html
+        |            |     ├── pre-engagement.js
+        |            |     ├── reconnaissance.js
+        |            |     ├── reporting.html
+        |            |     ├── reporting.js
+        |            |     ├── scanning.html
+        |            |     ├── scanning.js
+        |            |     ├── script.js
+        |            |     ├── style.css
         |            |     └── index.html
         |            |
         |            ├── shareTeamCollab/        

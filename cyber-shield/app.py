@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory, session, redirect
+from flask import Flask, request, jsonify, send_from_directory, session, redirect, Blueprint
 from urllib.parse import urlparse
 import os, time, re, socket, requests, tldextract
 import datetime
@@ -10,8 +10,12 @@ from PIL import Image
 import cv2
 import numpy as np
 import sqlite3
-from routes.exam import exam_bp
+from flask_socketio import SocketIO, emit
 
+from functools import lru_cache
+import ssl, whois 
+import sys
+from ipwhois import IPWhois
 
 # Try to import QR code libraries with fallbacks
 QR_AVAILABLE = False
@@ -63,6 +67,10 @@ from backend.routes_settings import settings_bp as backend_settings_bp
 from backend.routes_database import database_bp
 from monitoring import monitor_bp
 from backend.routes_pentesting import pentesting_bp
+
+
+from backend.whois import whois_bp
+from backend.routes_subdomains import subdomains_bp
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -117,6 +125,10 @@ app.register_blueprint(database_bp, url_prefix='/api/database')
 app.register_blueprint(monitor_bp, url_prefix='/api/monitoring')
 app.register_blueprint(pentesting_bp, url_prefix='/api/pentesting')
 
+
+# backend_bp = Blueprint('backend_bp', __name__)
+app.register_blueprint(whois_bp, url_prefix='/backend')
+app.register_blueprint(subdomains_bp, url_prefix='/backend')
 
 
 VT_API_KEY = os.getenv("VT_API_KEY", "").strip()

@@ -1,0 +1,128 @@
+// ==========================
+// Pre-Engagement Logic
+// ==========================
+document.addEventListener("DOMContentLoaded", () => {
+
+  // Load + Restore saved RoE
+  const savedRoE = JSON.parse(localStorage.getItem("pentestRoE") || "{}");
+  for (let key in savedRoE) {
+    const el = document.getElementById(key);
+    if (el) el.value = savedRoE[key];
+  }
+
+  // Load + Restore saved Scope
+  const savedScope = JSON.parse(localStorage.getItem("pentestScope") || "{}");
+  for (let key in savedScope) {
+    const el = document.getElementById(key);
+    if (el) {
+      if (el.type === "checkbox") el.checked = savedScope[key];
+      else el.value = savedScope[key];
+    }
+  }
+
+  // Load + Restore Authorization
+  const savedAuth = JSON.parse(localStorage.getItem("pentestAuth") || "{}");
+  for (let key in savedAuth) {
+    const el = document.getElementById(key);
+    if (el) {
+      if (el.type === "checkbox") el.checked = savedAuth[key];
+      else el.value = savedAuth[key];
+    }
+  }
+
+  // Load + Restore Compliance
+  const savedCompliance = JSON.parse(localStorage.getItem("pentestCompliance") || "{}");
+  for (let key in savedCompliance) {
+    const el = document.getElementById(key);
+    if (el && el.type === "checkbox") el.checked = savedCompliance[key];
+  }
+
+  // -------------------------
+  // SAVE RoE
+  // -------------------------
+  document.getElementById("roeForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const data = {
+      projectName: projectName.value,
+      clientOrg: clientOrg.value,
+      primaryContact: primaryContact.value,
+      contactEmail: contactEmail.value,
+      startDate: startDate.value,
+      endDate: endDate.value,
+      testingType: testingType.value
+    };
+
+    localStorage.setItem("pentestRoE", JSON.stringify(data));
+    PentestApp.saveConfig({ projectName: projectName.value });
+
+    alert("✓ Rules of Engagement saved!");
+  });
+
+  // -------------------------
+  // SAVE Scope
+  // -------------------------
+  document.getElementById("scopeForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const data = {
+      inScopeTargets: inScopeTargets.value,
+      outScopeTargets: outScopeTargets.value,
+      allowNetwork: allowNetwork.checked,
+      allowWeb: allowWeb.checked,
+      allowWireless: allowWireless.checked,
+      allowSocial: allowSocial.checked,
+      allowPhysical: allowPhysical.checked
+    };
+
+    localStorage.setItem("pentestScope", JSON.stringify(data));
+
+    const targets = inScopeTargets.value.split("\n").filter(t => t.trim());
+    if (targets[0]) PentestApp.saveConfig({ target: targets[0] });
+
+    alert("✓ Scope saved!");
+  });
+
+  // -------------------------
+  // SAVE Authorization
+  // -------------------------
+  document.getElementById("authForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    if (!authWritten.checked || !authNDA.checked || !authLiability.checked) {
+      alert("⚠️ You must check ALL authorization boxes!");
+      return;
+    }
+
+    const data = {
+      authWritten: authWritten.checked,
+      authNDA: authNDA.checked,
+      authLiability: authLiability.checked,
+      authRef: authRef.value,
+      authBy: authBy.value
+    };
+
+    localStorage.setItem("pentestAuth", JSON.stringify(data));
+
+    PentestApp.saveConfig({ authorized: true });
+
+    alert("✓ Authorization saved!");
+  });
+
+  // -------------------------
+  // SAVE Compliance
+  // -------------------------
+  document.getElementById("btnSaveCompliance").addEventListener("click", () => {
+    const ids = [
+      "compPCIDSS","compHIPAA","compGDPR","compISO27001",
+      "compNIST","compOWASP","compSOC2","compFISMA"
+    ];
+
+    const data = {};
+    ids.forEach(id => data[id] = document.getElementById(id).checked);
+
+    localStorage.setItem("pentestCompliance", JSON.stringify(data));
+    alert("✓ Compliance saved!");
+  });
+
+});
