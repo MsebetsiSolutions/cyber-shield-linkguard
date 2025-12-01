@@ -7,15 +7,16 @@ from werkzeug.utils import secure_filename
 import hashlib
 import tempfile
 from PIL import Image
+import threading
 import cv2
 import numpy as np
 import sqlite3
 from flask_socketio import SocketIO, emit
-
 from functools import lru_cache
 import ssl, whois 
 import sys
 from ipwhois import IPWhois
+import time
 
 # Try to import QR code libraries with fallbacks
 QR_AVAILABLE = False
@@ -1487,6 +1488,66 @@ def static_proxy(path):
 @app.route("/health")
 def health():
     return jsonify({"ok": True})
+
+
+
+#======================================================
+# --------- Start Agent Process on Server Start -------
+#======================================================
+
+def start_agent_process():
+    """Start the monitoring agent as a separate process"""
+    import subprocess
+    import sys
+    import atexit
+    import signal
+    
+    try:
+        agent_path = os.path.join(os.path.dirname(__file__), 'agent.py')
+        
+        if not os.path.exists(agent_path):
+            print(f"Agent file not found at {agent_path}")
+            return None
+        
+        agent_env = os.environ.copy()
+        
+        port = int(os.getenv("PORT", "5000"))
+        agent_env["MONITOR_SERVER"] = f"http://127.0.0.1:{port}"
+        
+        print(f"Starting monitoring agent from {agent_path}...")
+        
+        agent_process = subprocess.Popen(
+            [sys.executable, agent_path],
+            env=agent_env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        
+        def cleanup_agent():
+            """Cleanup function to terminate agent when Flask exits"""
+            if agent_process and agent_process.poll() is None:
+                print("Stopping monitoring agent...")
+                agent_process.terminate()
+                try:
+                    agent_process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    agent_process.kill()
+        
+        atexit.register(cleanup_agent)
+        signal.signal(signal.SIGTERM, lambda sig, frame: cleanup_agent())
+        
+        print(f"Monitoring agent started with PID: {agent_process.pid}")
+        return agent_process
+        
+    except Exception as e:
+        print(f"Failed to start agent: {e}")
+        return None
+
+agent_process = None
+if os.getenv("START_AGENT", "true").lower() == "true":
+    agent_process = start_agent_process()
+
 
 #======================================================
 # ----------------------- Entry -----------------------

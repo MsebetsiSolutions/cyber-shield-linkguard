@@ -23,7 +23,7 @@ except Exception as e:
     print('Install requirements: pip install requests psutil')
     sys.exit(1)
 
-SERVER = os.environ.get('MONITOR_SERVER', 'https://linkguard.co.za')
+SERVER = os.environ.get('MONITOR_SERVER', 'http://127.0.0.1:5000')
 TOKEN = os.environ.get('MONITOR_TOKEN', '')
 INTERVAL = int(os.environ.get('MONITOR_INTERVAL', '5'))
 ID_FILE = os.path.join(os.path.dirname(__file__), 'agent_id.txt')
