@@ -23,7 +23,14 @@ except Exception as e:
     print('Install requirements: pip install requests psutil')
     sys.exit(1)
 
-SERVER = os.environ.get('MONITOR_SERVER', 'http://127.0.0.1:5000')
+# Auto-detect server URL based on environment
+if os.environ.get('PRODUCTION', '').lower() == 'true':
+    SERVER = 'https://www.linkguard.co.za'
+    print("Running in PRODUCTION mode")
+else:
+    SERVER = os.environ.get('MONITOR_SERVER', 'http://127.0.0.1:5000')
+    print("Running in DEVELOPMENT mode")
+
 TOKEN = os.environ.get('MONITOR_TOKEN', '')
 INTERVAL = int(os.environ.get('MONITOR_INTERVAL', '5'))
 ID_FILE = os.path.join(os.path.dirname(__file__), 'agent_id.txt')
@@ -31,6 +38,8 @@ ID_FILE = os.path.join(os.path.dirname(__file__), 'agent_id.txt')
 HEADERS = {'Content-Type': 'application/json'}
 if TOKEN:
     HEADERS['Authorization'] = f'Bearer {TOKEN}'
+
+print(f"Agent connecting to server: {SERVER}")
 
 
 def load_or_create_agent_id():
@@ -53,12 +62,12 @@ def register(agent_id):
     url = SERVER.rstrip('/') + '/api/monitoring/agent/register'
     payload = {
         'agent_id': agent_id,
-        'hostname': os.environ.get('COMPUTERNAME') or os.uname().nodename,
+        'hostname': socket.gethostname(),
         # advertise how often this agent reports metrics (seconds)
         'metrics_interval': INTERVAL
     }
     try:
-        r = requests.post(url, json=payload, headers=HEADERS, timeout=5)
+        r = requests.post(url, json=payload, headers=HEADERS, timeout=10, verify=True)
         print('register ->', r.status_code, r.text)
         return r.ok
     except Exception as e:
@@ -82,7 +91,7 @@ def send_metrics(agent_id):
         'metrics_interval': INTERVAL
     }
     try:
-        r = requests.post(url, json=payload, headers=HEADERS, timeout=5)
+        r = requests.post(url, json=payload, headers=HEADERS, timeout=10, verify=True)
         if not r.ok:
             print('metrics post failed:', r.status_code, r.text)
     except Exception as e:
@@ -120,10 +129,9 @@ def capture_and_upload_pcap(duration=20, max_packets=None, iface=None, agent_id=
             files = {'pcap': fh}
             # include agent_id as form field so server can associate the upload
             data = {'agent_id': agent_id} if agent_id else {}
-            # remove content-type header so requests sets proper multipart boundary
             hdrs = {k: v for k, v in HEADERS.items() if k.lower() != 'content-type'}
             try:
-                r = requests.post(url, files=files, data=data, headers=hdrs, timeout=30)
+                r = requests.post(url, files=files, data=data, headers=hdrs, timeout=30, verify=True)
                 print('pcap upload ->', r.status_code, r.text)
                 return r.ok
             except Exception as e:
@@ -141,7 +149,7 @@ def poll_commands(agent_id):
     """Poll server for commands and execute them. Currently supports 'capture' command."""
     try:
         url = SERVER.rstrip('/') + f"/api/monitoring/agent/commands?agent_id={agent_id}"
-        r = requests.get(url, headers=HEADERS, timeout=5)
+        r = requests.get(url, headers=HEADERS, timeout=10, verify=True)
         if not r.ok:
             return
         j = r.json()
@@ -164,6 +172,7 @@ def poll_commands(agent_id):
 def main():
     agent_id = load_or_create_agent_id()
     print('Agent id:', agent_id)
+    print('Server URL:', SERVER)
     ok = register(agent_id)
     if not ok:
         print('Register failed or server not reachable; will continue sending metrics.')

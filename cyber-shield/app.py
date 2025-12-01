@@ -1511,10 +1511,21 @@ def start_agent_process():
         
         agent_env = os.environ.copy()
         
-        port = int(os.getenv("PORT", "5000"))
-        agent_env["MONITOR_SERVER"] = f"http://127.0.0.1:{port}"
+        # Check if we're in production (Render or similar)
+        is_production = os.environ.get('RENDER') or os.environ.get('DYNO') or os.environ.get('PRODUCTION')
+        
+        if is_production:
+            # Production URL
+            agent_env["MONITOR_SERVER"] = "https://www.linkguard.co.za"
+            agent_env["PRODUCTION"] = "true" 
+        else:
+            # Local development
+            port = int(os.getenv("PORT", "5000"))
+            agent_env["MONITOR_SERVER"] = f"http://127.0.0.1:{port}"
+            agent_env["PRODUCTION"] = "false"
         
         print(f"Starting monitoring agent from {agent_path}...")
+        print(f"Agent will connect to: {agent_env['MONITOR_SERVER']}")
         
         agent_process = subprocess.Popen(
             [sys.executable, agent_path],
@@ -1545,7 +1556,7 @@ def start_agent_process():
         return None
 
 agent_process = None
-if os.getenv("START_AGENT", "true").lower() == "true":
+if os.getenv("START_AGENT", "true").lower() == "true" and not os.environ.get('RENDER'):
     agent_process = start_agent_process()
 
 

@@ -458,10 +458,13 @@ def _start_scapy_process(python_path=None, script_path=None, iface=None, rules=N
     if dry_run:
         cmd += ['--dry-run']
     try:
-        # Merge env if provided
         proc_env = os.environ.copy()
         if isinstance(env, dict):
             proc_env.update(env)
+        
+        if os.environ.get('RENDER') or os.environ.get('PRODUCTION'):
+            proc_env['PRODUCTION'] = 'true'
+        
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     except Exception as e:
         return False, str(e)
