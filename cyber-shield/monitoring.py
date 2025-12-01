@@ -385,7 +385,7 @@ def start_sniffer():
     except Exception:
         pass
     # always include loopback
-    addrs.add('127.0.0.1')
+    addrs.add('linkguard.co.za')
     addrs.add('::1')
     _LOCAL_ADDRS = addrs
     _SNIFFER_RUNNING = True
@@ -764,9 +764,9 @@ def quick_scan():
 
     # Create alerts for suspicious open ports (unusual ports and uncommon open ports)
     try:
-        requester = request.remote_addr or '127.0.0.1'
+        requester = request.remote_addr or 'linkguard.co.za'
     except Exception:
-        requester = '127.0.0.1'
+        requester = 'linkguard.co.za'
 
     unusual_ports = [4444, 5555, 6666, 7777, 8888, 9999, 31337]
     common_set = set(COMMON_PORTS)
