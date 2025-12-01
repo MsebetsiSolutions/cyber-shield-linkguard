@@ -124,9 +124,6 @@ app.register_blueprint(backend_settings_bp, url_prefix='/api/backend', name='bac
 app.register_blueprint(database_bp, url_prefix='/api/database')
 app.register_blueprint(monitor_bp, url_prefix='/api/monitoring')
 app.register_blueprint(pentesting_bp, url_prefix='/api/pentesting')
-
-
-# backend_bp = Blueprint('backend_bp', __name__)
 app.register_blueprint(whois_bp, url_prefix='/backend')
 app.register_blueprint(subdomains_bp, url_prefix='/backend')
 
@@ -155,6 +152,61 @@ RISK_BANDS = [
     (21, 59, "WARN"),
     (60, 100, "DANGER"),
 ]
+
+
+# backend/routes_subdomains.py
+from flask import Blueprint, request, jsonify
+import requests
+
+subdomains_bp = Blueprint("subdomains_bp", __name__)
+
+@subdomains_bp.route("/api/subdomains", methods=["POST"])
+def get_subdomains():
+    data = request.get_json() or {}
+    domain = data.get("domain", "").strip()
+    if not domain:
+        return jsonify({"error": "No domain provided"}), 400
+
+    try:
+        # Use crt.sh to find subdomains
+        url = f"https://crt.sh/?q=%25.{domain}&output=json"
+        resp = requests.get(url, timeout=20)
+        resp.raise_for_status()
+        results = resp.json()
+        subdomains = set()
+        for entry in results:
+            name = entry.get("name_value")
+            if name:
+                # crt.sh sometimes returns multiple names in one entry
+                for sub in name.split("\n"):
+                    subdomains.add(sub.strip())
+        return jsonify({"success": True, "subdomains": sorted(subdomains)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+        # New route: List payloads for a vulnerability type
+@app.route('/api/payloads/<vuln_type>', methods=['GET'])
+def get_payload_list(vuln_type):
+    payload_dir = os.path.join('payloads', vuln_type.lower().replace(' ', '-'))  # Normalize type (e.g., "SQL Injection" -> "sql-injection")
+    if not os.path.exists(payload_dir):
+        return jsonify({"error": "No payloads found for this type"}), 404
+    
+    files = [f for f in os.listdir(payload_dir) if f.endswith(('.txt', '.py'))]  # Only allow .txt or .py
+    return jsonify({"payloads": files})
+
+# New route: Get content of a specific payload file
+@app.route('/api/payloads/<vuln_type>/<filename>', methods=['GET'])
+def get_payload_content(vuln_type, filename):
+    payload_dir = os.path.join('payloads', vuln_type.lower().replace(' ', '-'))
+    file_path = os.path.join(payload_dir, secure_filename(filename))  # Secure to prevent path traversal
+    if not os.path.exists(file_path):
+        return jsonify({"error": "Payload not found"}), 404
+    
+    with open(file_path, 'r') as f:
+        content = f.read()
+    return jsonify({"content": content})
+
 
 # file types for upload
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx', 'exe', 'zip'}
