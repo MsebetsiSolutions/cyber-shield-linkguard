@@ -5,9 +5,11 @@ browser-based anti-phishing PWA by Msebetsi Solutions.
 ---
 
 ## Overview
+
 Cyber Shield LinkGuard is a cross-platform cybersecurity tool designed to protect users from malicious links, infected files, and unsafe QR codes. The project integrates with VirusTotal for threat intelligence and provides a lightweight web application that works on both desktop and mobile devices.
 
 ## Key Features
+
 - **URL Security Check** – Detect and analyze suspicious URLs using the VirusTotal API
 - **File Scanning** – Upload and verify files against malware signatures
 - **QR Code Scanner** – Identify and flag malicious QR codes
@@ -17,31 +19,28 @@ Cyber Shield LinkGuard is a cross-platform cybersecurity tool designed to protec
 - **Responsive Design** – Works seamlessly on mobile and desktop
 - **Cyber Shield Community** – System assistance and troubleshooting, Reporting bugs and issues, Sharing ideas and suggestions, Community support and discussions
 
-
 ---
-
 
 ## Quick Start
+
 ### 1. Create virtual environment
-    ```bash        
-            python3 -m venv .venv && source .venv/bin/activate
+
+        python3 -m venv .venv && source .venv/bin/activate
 
 ### 2. Install dependencies
-    ```bash
+
             pip install -r requirements.txt
- 
+
 ### 3. Run application
-    ```bash
+
             python app.py
 
-
-Open http://127.0.0.1:5000 in your browser.
-
+            Open http://127.0.0.1:5000 in your browser.
 
 ---
 
-
 ## Deploy
+
 Any VPS/Platform-as-a-Service works.
 
 For platforms using Procfile:
@@ -51,11 +50,10 @@ web: gunicorn -w 2 -b 0.0.0.0:$PORT app:app
 Demo Authentication
 This build includes simple localStorage-based demo authentication (Login/Sign). Do not use for production without proper security enhancements.
 
-
 ---
 
-
 ## Project Structure
+
         cyber-shield-linkguard/
         |
         ├── cyber-shield/
@@ -70,8 +68,10 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |      ├── check_alerts.py
         |      ├── monitoring.py
         |      ├── scaoy_ids.py
+        |      ├── agent.py
         |      ├── scapy_rules.txt
         |      ├── snort_agent.py
+        |      ├── suricata_agent.py
         |      ├── soc_dashboard.db
         |      ├── .gitignore
         |      ├── .env
@@ -109,6 +109,7 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |      |     └── routes_settings.py
         |      |     ├── real_tools.py
         |      |     ├── routes_subdomains.py
+        |      |     ├── routes_suricata.py
         |      |     └── whois.py
         |      |
         │      ├── payloads/ 
@@ -214,9 +215,6 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     |      |    └── style.css
         |            |     |      |
         |            |     |      └── js/
-        |            |     |           ├── data/
-        |            |     |           |    └── sample-data.js
-        |            |     |           |
         |            |     |           ├── monitoring.js
         |            |     |           └── app.js
         |            |     |
@@ -300,7 +298,4 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |
         └── README.md
 
-
-
 ---
-
