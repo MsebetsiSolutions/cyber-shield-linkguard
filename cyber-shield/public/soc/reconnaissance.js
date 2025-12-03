@@ -1,0 +1,319 @@
+// =======================
+// reconnaissance.js
+// =======================
+document.addEventListener('DOMContentLoaded', () => {
+  const reconTarget = document.getElementById('reconTarget');
+  const reconResults = document.getElementById('reconResults');
+  const reconOutput = document.getElementById('reconOutput');
+  const reconFindings = document.getElementById('reconFindings');
+  const promptInput = document.getElementById('promptInput');
+  const askBtn = document.getElementById('askBtn');
+  const chatDiv = document.getElementById('chatDiv');
+  const targetInput = document.getElementById('targetInput');
+
+  // Load saved target
+  const config = PentestApp.loadConfig();
+  if (config.target) reconTarget.value = config.target;
+
+  // =========================
+  // Helpers
+  // =========================
+  function showOutput(content, type = 'info') {
+    reconOutput.style.display = 'block';
+    const timestamp = new Date().toLocaleTimeString();
+    const line = `<div class="${type}"><span class="timestamp">[${timestamp}]</span> ${content}</div>`;
+    reconOutput.innerHTML += line;
+    reconOutput.scrollTop = reconOutput.scrollHeight;
+  }
+
+  function addFinding(type, data, source) {
+    const row = reconFindings.insertRow(0);
+    if (reconFindings.rows.length === 2 && reconFindings.rows[1].cells[0].colSpan === 4) {
+      reconFindings.deleteRow(1);
+    }
+    row.innerHTML = `
+      <td>${new Date().toLocaleTimeString()}</td>
+      <td><span class="badge bg-info">${type}</span></td>
+      <td>${data}</td>
+      <td>${source}</td>
+    `;
+  }
+
+  function gatherFindings() {
+    const rows = document.querySelectorAll('#reconFindings tr');
+    const data = [];
+    rows.forEach(r => {
+      const cols = r.querySelectorAll('td');
+      if (cols.length === 4) {
+        data.push({
+          timestamp: cols[0].innerText.trim(),
+          type: cols[1].innerText.trim(),
+          value: cols[2].innerText.trim(),
+          source: cols[3].innerText.trim()
+        });
+      }
+    });
+    return data;
+  }
+
+  function scrollChat() {
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+  }
+
+  function addMessage(sender, text) {
+    const bubble = document.createElement('div');
+    bubble.className = `mb-2 ${sender === 'user' ? 'text-end' : ''}`;
+    const span = document.createElement('span');
+    span.className = sender === 'user' ? 'badge bg-primary' : 'badge bg-success';
+    span.textContent = text;
+    bubble.appendChild(span);
+    chatDiv.appendChild(bubble);
+    scrollChat();
+  }
+
+  // =========================
+  // DNS Lookup (JS only)
+  // =========================
+  document.getElementById('btnDNS').addEventListener('click', async () => {
+    const target = reconTarget.value.trim();
+    if (!target) return alert('Please enter a target domain or IP');
+    reconResults.innerHTML = '<div class="spinner-border text-primary"></div> Performing DNS lookup...';
+    reconOutput.innerHTML = '';
+    showOutput(`Starting DNS lookup for ${target}...`);
+    try {
+      const data = await APIUtils.dnsLookup(target);
+      if (data && data.Answer) {
+        showOutput('DNS resolution successful', 'success');
+        let html = '<div class="result-box success"><h6>DNS Records Found</h6><ul>';
+        data.Answer.forEach(record => {
+          html += `<li><strong>${record.name}</strong> → ${record.data} (TTL: ${record.TTL})</li>`;
+          showOutput(`${record.name} → ${record.data}`, 'info');
+          addFinding('DNS Record', `${record.name} → ${record.data}`, 'Google DNS API');
+        });
+        html += '</ul></div>';
+        reconResults.innerHTML = html;
+        PentestApp.logActivity('Reconnaissance', 'DNS Lookup', target);
+      } else {
+        showOutput('No DNS records found', 'warning');
+        reconResults.innerHTML = '<div class="alert alert-warning">No DNS records found</div>';
+      }
+    } catch (error) {
+      showOutput(`Error: ${error.message}`, 'error');
+      reconResults.innerHTML = `<div class="alert alert-danger">DNS lookup failed: ${error.message}</div>`;
+    }
+  });
+
+  // =========================
+  // WHOIS Lookup (Flask backend)
+  // =========================
+  document.getElementById('btnWHOIS').addEventListener('click', async () => {
+    const target = reconTarget.value.trim();
+    if (!target) return alert('Enter a domain');
+    reconResults.innerHTML = '<div class="spinner-border text-primary"></div> Retrieving WHOIS...';
+    reconOutput.innerHTML = '';
+    showOutput(`Starting WHOIS lookup for ${target}...`);
+    try {
+      const result = await APIUtils.whoisLookup(target);
+      if (result.error || !result.success) {
+        reconResults.innerHTML = `<div class="alert alert-danger">${result.error || 'WHOIS failed'}</div>`;
+        showOutput(`WHOIS failed: ${result.error || 'Unknown error'}`, 'error');
+      } else {
+        reconResults.innerHTML = `
+          <div class="result-box">
+            <h6>WHOIS Result</h6>
+            <pre>${result.result}</pre>
+          </div>
+        `;
+        addFinding("WHOIS", "Record Retrieved", "Backend WHOIS API");
+        showOutput("WHOIS lookup completed", "success");
+      }
+    } catch (err) {
+      reconResults.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+      showOutput(`WHOIS failed: ${err.message}`, 'error');
+    }
+  });
+
+  // =========================
+  // GeoIP Lookup (JS only)
+  // =========================
+  document.getElementById('btnGeoIP').addEventListener('click', async () => {
+    const target = reconTarget.value.trim();
+    if (!target) return alert('Please enter a target IP address');
+    reconResults.innerHTML = '<div class="spinner-border text-primary"></div> Getting geolocation data...';
+    reconOutput.innerHTML = '';
+    showOutput(`Starting GeoIP lookup for ${target}...`);
+    try {
+      const data = await APIUtils.getGeoLocation(target);
+      if (data && !data.error) {
+        showOutput('GeoIP lookup successful', 'success');
+        const html = `
+          <div class="result-box success">
+            <h6>Geolocation Information</h6>
+            <table class="table table-sm">
+              <tr><th>IP</th><td>${data.ip}</td></tr>
+              <tr><th>Country</th><td>${data.country_name}</td></tr>
+              <tr><th>Region</th><td>${data.region}</td></tr>
+              <tr><th>City</th><td>${data.city}</td></tr>
+              <tr><th>ISP</th><td>${data.org}</td></tr>
+            </table>
+          </div>
+        `;
+        reconResults.innerHTML = html;
+        addFinding('GeoIP', `${data.city}`, `${data.country_name}`, 'ipapi.co');
+        PentestApp.logActivity('Reconnaissance', 'GeoIP Lookup', target);
+      }
+    } catch (error) {
+      showOutput(error.message, 'error');
+      reconResults.innerHTML = `<div class="alert alert-danger">GeoIP lookup failed: ${error.message}</div>`;
+    }
+  });
+
+  // =========================
+  // HTTP Headers
+  // =========================
+  document.getElementById('btnHeaders').addEventListener('click', async () => {
+    let url = reconTarget.value.trim();
+    if (!url) return alert('Please enter a URL');
+    if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+    reconResults.innerHTML = '<div class="spinner-border text-primary"></div> Fetching HTTP headers...';
+    reconOutput.innerHTML = '';
+    showOutput(`Checking HTTP headers for ${url}...`);
+    try {
+      const headers = await APIUtils.checkHeaders(url);
+      showOutput(`HTTP headers retrieved`, 'success');
+      let html = '<div class="result-box"><h6>HTTP Response Headers</h6><table class="table table-sm">';
+      for (const [key, value] of Object.entries(headers)) {
+        html += `<tr><th>${key}</th><td>${value}</td></tr>`;
+        addFinding('HTTP Header', `${key}: ${value}`, url);
+      }
+      html += '</table></div>';
+      reconResults.innerHTML = html;
+      PentestApp.logActivity('Reconnaissance', 'Header Check', url);
+    } catch (error) {
+      showOutput(error.message, 'error');
+      reconResults.innerHTML = `<div class="alert alert-warning">Unable to fetch headers (CORS)</div>`;
+    }
+  });
+
+  // =========================
+  // SSL Check (JS only)
+  // =========================
+  document.getElementById('btnSSL').addEventListener('click', async () => {
+    let url = reconTarget.value.trim();
+    if (!url) return alert('Please enter a URL');
+    if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+    reconResults.innerHTML = '<div class="spinner-border text-primary"></div> Checking SSL/TLS...';
+    reconOutput.innerHTML = '';
+    showOutput(`Checking SSL/TLS for ${url}...`);
+    try {
+      const data = await APIUtils.checkSSL(url);
+      const html = `
+        <div class="result-box ${data.secure ? 'success' : 'danger'}">
+          <h6>SSL/TLS Status</h6>
+          <p><strong>Protocol:</strong> ${data.secure ? 'HTTPS ✓' : 'HTTP (Insecure)'}</p>
+        </div>
+      `;
+      reconResults.innerHTML = html;
+      addFinding('SSL Check', data.secure ? 'HTTPS Enabled' : 'HTTP Only', url);
+    } catch (error) {
+      showOutput(error.message, 'error');
+      reconResults.innerHTML = `<div class="alert alert-danger">SSL check failed: ${error.message}</div>`;
+    }
+  });
+
+  // =========================
+  // Subdomain enumeration placeholder
+  // =========================
+  document.getElementById('btnSubdomains').addEventListener('click', () => {
+    const target = reconTarget.value.trim();
+    if (!target) return alert('Enter a domain');
+    reconOutput.innerHTML = '';
+    showOutput(`Subdomain scan for ${target} started...`);
+    reconResults.innerHTML = `
+      <div class="alert alert-info">
+        <h6>Subdomain Enumeration</h6>
+        <p>Use tools like Sublist3r, Amass, DNSDumpster, crt.sh</p>
+      </div>
+    `;
+  });
+
+  // =========================
+  // External Links
+  // =========================
+  document.getElementById('linkShodan').addEventListener('click', e => {
+    e.preventDefault();
+    const target = reconTarget.value.trim();
+    window.open(target ? `https://www.shodan.io/search?query=${target}` : `https://www.shodan.io/`);
+  });
+  document.getElementById('linkCensys').addEventListener('click', e => {
+    e.preventDefault();
+    window.open('https://search.censys.io/');
+  });
+  document.getElementById('linkDNSDumpster').addEventListener('click', e => {
+    e.preventDefault();
+    window.open('https://dnsdumpster.com/');
+  });
+  document.getElementById('linkSecurityTrails').addEventListener('click', e => {
+    e.preventDefault();
+    const target = reconTarget.value.trim();
+    window.open(target ? `https://securitytrails.com/domain/${target}/dns` : 'https://securitytrails.com/');
+  });
+
+  // =========================
+  // AI Chat
+  // =========================
+  askBtn.addEventListener('click', () => sendPrompt());
+  promptInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendPrompt(); });
+
+  async function sendPrompt() {
+    const prompt = promptInput.value.trim();
+    if (!prompt) return;
+    addMessage('user', prompt);
+    promptInput.value = '';
+    askBtn.disabled = true;
+    const findings = gatherFindings();
+    const payload = {
+      target: targetInput.value.trim(),
+      prompt,
+      findings
+    };
+    try {
+      const resp = await fetch('/api/ai/recon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let aiBuffer = '';
+      const aiBubble = document.createElement('div');
+      aiBubble.className = 'mb-2';
+      const aiSpan = document.createElement('span');
+      aiSpan.className = 'badge bg-success';
+      aiBubble.appendChild(aiSpan);
+      chatDiv.appendChild(aiBubble);
+      scrollChat();
+      while (true) {
+        const {done, value} = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, {stream: true});
+        const lines = chunk.split('\n').filter(l => l.trim());
+        for (const line of lines) {
+          try {
+            const json = JSON.parse(line);
+            const part = json?.message?.content ?? '';
+            aiBuffer += part;
+            aiSpan.textContent = aiBuffer;
+            scrollChat();
+          } catch (_) { }
+        }
+      }
+    } catch (err) {
+      addMessage('ai', `Error: ${err.message}`);
+    } finally {
+      askBtn.disabled = false;
+    }
+  }
+
+}); // END DOMContentLoaded

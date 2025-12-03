@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Shield LinkGuard — Enterprise Dashboard</title>
+    <link rel="stylesheet" href="enterprise-dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon/favicon-32x32Enterprice.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicon/favicon-16x16Enterprise.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../../assets/favicon/apple-touch-iconEnt.png" />
+</head>
+
+<body>
+    <div class="african-background"></div>
+
+    <div class="app">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo">
+                    <img src="../../../assets/CYBER_SHIELD_LINKGUARD2.png" alt="Cyber Shield LinkGuard"
+                        class="brand-logo" id="logo-button">
+                </div>
+                <div class="muted">Enterprise Dashboard</div>
+                <div class="company-name" id="company-name-display"></div>
+            </div>
+            <nav class="nav">
+                <a class="nav-item active" data-section="overview">
+                    <i class="fas fa-chart-line"></i> Overview
+                </a>
+                <a class="nav-item" data-section="scanner">
+                    <i class="fas fa-search"></i> Security Scanner
+                </a>
+                <a class="nav-item" data-section="reports">
+                    <i class="fas fa-file-alt"></i> Threat Reports
+                </a>
+                <a class="nav-item" data-section="reputation">
+                    <i class="fas fa-shield-alt"></i> Brand Reputation
+                </a>
+                <a class="nav-item" id="soc-dash-button">
+                    <i class="fas fa-desktop"></i> SOC Dash
+                </a>
+                <a class="nav-item" data-section="support">
+                    <i class="fas fa-headset"></i> Priority Support
+                </a>
+                <a class="nav-item" data-section="settings">
+                    <i class="fas fa-cogs"></i> Settings
+                </a>
+            </nav>
+
+            <div class="status">
+                <div class="pill">Enterprise Plan</div>
+            </div>
+        </aside>
+
+        <main class="main">
+            <div class="section-content overview-section active">
+                <div class="section-header">
+                    <h1>Enterprise Security Overview</h1>
+                    <p>Comprehensive threat protection for your organization</p>
+                </div>
+                <div class="quick-actions">
+                    <div class="action-card" id="quick-scan">
+                        <i class="fas fa-search"></i>
+                        <h3>Quick Scan</h3>
+                        <p>Scan URLs, files, or QR codes</p>
+                    </div>
+                    <div class="action-card" id="team-management">
+                        <i class="fas fa-users-cog"></i>
+                        <h3>Team Management</h3>
+                        <p>Manage users & workspaces</p>
+                    </div>
+                    <div class="action-card" id="reports-view">
+                        <i class="fas fa-chart-bar"></i>
+                        <h3>View Reports</h3>
+                        <p>Threat analysis & insights</p>
+                    </div>
+                    <div class="action-card" id="brand-check">
+                        <i class="fas fa-shield-alt"></i>
+                        <h3>Brand Check</h3>
+                        <p>Reputation monitoring</p>
+                    </div>
+                </div>
+                <div class="stats-dashboard">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="total-scans">0</div>
+                            <div class="stat-label">Scans Today</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon threat">
+                            <i class="fas fa-bug"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="threats-found">0</div>
+                            <div class="stat-label">Threats Blocked</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon user">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="active-users">0</div>
+                            <div class="stat-label">Active Users</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon workspace">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="workspaces">0</div>
+                            <div class="stat-label">Workspaces</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="activity-section">
+                    <h2>Recent Threat Activity</h2>
+                    <div class="activity-list" id="recent-threats">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scanner Section -->
+            <div class="section-content scanner-section">
+                <div class="section-header">
+                    <h1>Advanced Security Scanner</h1>
+                    <p>Unlimited scans with comprehensive threat detection</p>
+                </div>
+                <div class="scanner-interface">
+                    <div class="scan-options">
+                        <div class="scan-option active" data-type="url">
+                            <i class="fas fa-link"></i>
+                            <span>URL Scan</span>
+                        </div>
+                        <div class="scan-option" data-type="file">
+                            <i class="fas fa-file-upload"></i>
+                            <span>File Scan</span>
+                        </div>
+                        <div class="scan-option" data-type="qr">
+                            <i class="fas fa-qrcode"></i>
+                            <span>QR Scan</span>
+                        </div>
+                    </div>
+                    <div class="scan-input-area">
+                        <div class="url-scan active">
+                            <input type="text" id="url-input" placeholder="Enter URL to scan...">
+                            <button id="scan-url-btn" class="scan-button">
+                                <i class="fas fa-search"></i> Scan URL
+                            </button>
+                        </div>
+                        <div class="file-scan">
+                            <div class="file-upload-area">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Drag & drop files or click to browse</p>
+                                <label for="file-input" class="file-input-label">Choose files to upload</label>
+                                <input type="file" id="file-input" multiple title="Choose files to upload" placeholder="Choose files to upload" aria-label="Choose files to upload">
+                            </div>
+                        </div>
+                        <div class="qr-scan">
+                            <div class="qr-upload-area">
+                                <i class="fas fa-camera"></i>
+                                <label for="qr-input">Upload QR code image</label>
+                                <input type="file" id="qr-input" accept="image/*" title="Upload a QR code image file" placeholder="Select an image file" aria-label="Upload QR code image">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="scan-results" id="scan-results">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Threat Reports Section -->
+            <div class="section-content reports-section">
+                <div class="section-header">
+                    <h1>Threat Reports & Analytics</h1>
+                    <p>Detailed threat analysis and custom branded reports</p>
+                </div>
+                <div class="reports-interface">
+                    <div class="reports-controls">
+                        <div class="control-group">
+                            <label>Report Type:</label>
+                            <select id="report-type" aria-label="Select report type">
+                                <option value="daily">Daily Summary</option>
+                                <option value="weekly">Weekly Analysis</option>
+                                <option value="monthly">Monthly Overview</option>
+                                <option value="custom">Custom Period</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Date Range:</label>
+                            <input type="date" id="report-start">
+                            <input type="date" id="report-end">
+                        </div>
+                        <div class="control-group">
+                            <label>Format:</label>
+                            <select id="report-format" aria-label="select formart type">
+                                <option value="pdf">PDF</option>
+                                <option value="excel">Excel</option>
+                                <option value="csv">CSV</option>
+                            </select>
+                        </div>
+                        <button class="generate-report-btn" id="generate-report">
+                            <i class="fas fa-file-export"></i> Generate Report
+                        </button>
+                    </div>
+                    <div class="reports-preview">
+                        <h3>Report Preview</h3>
+                        <div class="preview-placeholder">
+                            <i class="fas fa-file-pdf"></i>
+                            <p>Generate a report to see preview</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Brand Reputation Section -->
+            <div class="section-content reputation-section">
+                <div class="section-header">
+                    <h1>Brand Reputation Monitoring</h1>
+                    <p>Monitor your brand's online presence and security</p>
+                </div>
+                <div class="reputation-interface">
+                    <div class="reputation-check">
+                        <h3>Check Domain Reputation</h3>
+                        <div class="check-controls">
+                            <input type="text" id="domain-input" placeholder="Enter domain (e.g., yourcompany.com)">
+                            <button class="check-btn" id="check-reputation">
+                                <i class="fas fa-search"></i> Check Reputation
+                            </button>
+                        </div>
+                    </div>
+                    <div class="reputation-results" id="reputation-results">
+                        <div class="results-placeholder">
+                            <i class="fas fa-shield-alt"></i>
+                            <p>Enter a domain to check reputation</p>
+                        </div>
+                    </div>
+                    <div class="monitoring-settings">
+                        <h3>Continuous Monitoring</h3>
+                        <div class="monitoring-controls">
+                            <div class="toggle-group">
+                                <label>Enable 24/7 Monitoring</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="monitoring-toggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="alert-settings">
+                                <label>Alert Threshold:</label>
+                                <select id="alert-threshold" aria-label="select Threshold">
+                                    <option value="low">Low (Major threats only)</option>
+                                    <option value="medium" selected>Medium (Suspicious activity)</option>
+                                    <option value="high">High (All detections)</option>
+                                </select>
+                            </div>
+                            <button class="save-settings-btn" id="save-monitoring">
+                                <i class="fas fa-save"></i> Save Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Priority Support Section -->
+            <div class="section-content support-section">
+                <div class="section-header">
+                    <h1>Priority Support Center</h1>
+                    <p>24/7 dedicated support for enterprise customers</p>
+                </div>
+                <div class="support-interface">
+                    <div class="support-options">
+                        <div class="support-card">
+                            <i class="fas fa-phone"></i>
+                            <h3>Phone Support</h3>
+                            <p>24/7 dedicated hotline</p>
+                            <button class="support-btn" id="call-support">
+                                <i class="fas fa-phone"></i> Call Now
+                            </button>
+                        </div>
+                        <div class="support-card">
+                            <i class="fas fa-comments"></i>
+                            <h3>Live Chat</h3>
+                            <p>Instant messaging support</p>
+                            <button class="support-btn" id="start-chat">
+                                <i class="fas fa-comment"></i> Start Chat
+                            </button>
+                        </div>
+                        <div class="support-card">
+                            <i class="fas fa-ticket-alt"></i>
+                            <h3>Ticket System</h3>
+                            <p>Priority ticket handling</p>
+                            <button class="support-btn" id="create-ticket">
+                                <i class="fas fa-plus"></i> New Ticket
+                            </button>
+                        </div>
+                    </div>
+                    <div class="ticket-creation" id="ticket-creation" style="display: none;">
+                        <h3>Create Support Ticket</h3>
+                        <div class="ticket-form">
+                            <div class="form-group">
+                                <label>Subject:</label>
+                                <input type="text" id="ticket-subject" placeholder="Brief description of issue">
+                            </div>
+                            <div class="form-group">
+                                <label>Priority:</label>
+                                <select id="ticket-priority">
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="critical">Critical</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Description:</label>
+                                <textarea id="ticket-description"
+                                    placeholder="Detailed description of the issue"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button class="cancel-btn" id="cancel-ticket">Cancel</button>
+                                <button class="submit-btn" id="submit-ticket">Submit Ticket</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div class="section-content settings-section">
+                <div class="section-header">
+                    <h1>Enterprise Settings</h1>
+                    <p>Configure your enterprise security platform</p>
+                </div>
+                <div class="settings-interface">
+                    <div class="settings-tabs">
+                        <button class="tab-btn active" data-tab="security">Security</button>
+                        <button class="tab-btn" data-tab="notifications">Notifications</button>
+                        <button class="tab-btn" data-tab="api">API Settings</button>
+                        <button class="tab-btn" data-tab="branding">Branding</button>
+                    </div>
+                    <div class="settings-content">
+                        <div class="tab-content active" id="security-tab">
+                            <h3>Security Policies</h3>
+                            <div class="setting-group">
+                                <label>Automatic Threat Quarantine</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label>Real-time Scanning</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label>Block High-Risk Files</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="tab-content" id="notifications-tab">
+                            <h3>Notification Settings</h3>
+                            <div class="setting-group">
+                                <label>Email Alerts</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label>SMS Notifications</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-group">
+                                <label>Push Notifications</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="tab-content" id="api-tab">
+                            <h3>API Configuration</h3>
+                            <div class="setting-group">
+                                <label>API Rate Limit</label>
+                                <select aria-label="select api rate">
+                                    <option>100 requests/hour</option>
+                                    <option>500 requests/hour</option>
+                                    <option selected>1000 requests/hour</option>
+                                    <option>Unlimited</option>
+                                </select>
+                            </div>
+                            <div class="setting-group">
+                                <label>API Key</label>
+                                <div class="api-key-display">
+                                    <span>••••••••••••••••</span>
+                                    <button class="copy-btn">Copy</button>
+                                    <button class="regenerate-btn">Regenerate</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-content" id="branding-tab">
+                            <h3>Custom Branding</h3>
+                            <div class="setting-group">
+                                <label>Company Logo</label>
+                                <input type="file" accept="image/*">
+                            </div>
+                            <div class="setting-group">
+                                <label>Brand Color</label>
+                                <input type="color" value="#d4af37" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-actions">
+                        <button class="save-settings-btn">Save Settings</button>
+                        <button class="reset-settings-btn">Reset to Defaults</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="exit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fas fa-sign-out-alt"></i>
+                <h3>Leave Enterprise Dashboard?</h3>
+            </div>
+            <p>Are you sure you want to return to the main scanner?</p>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="cancel-exit">Cancel</button>
+                <button class="btn-primary" id="confirm-exit">Yes, Leave</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="construction-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fas fa-tools"></i>
+                <h3>Feature Under Construction</h3>
+            </div>
+            <p id="construction-message">This feature is currently being developed and will be available soon.</p>
+            <div class="modal-actions">
+                <button class="btn-primary" id="close-construction">OK</button>
+            </div>
+        </div>
+    </div>
+    <script src="../../session.js"></script>
+    <script src="enterprise-dashboard.js"></script>
+</body>
+
+</html>

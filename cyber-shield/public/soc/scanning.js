@@ -1,0 +1,276 @@
+// Scanning Page Logic
+document.addEventListener('DOMContentLoaded', () => {
+  const scanTarget = document.getElementById('scanTarget');
+  const scanType = document.getElementById('scanType');
+  const portRange = document.getElementById('portRange');
+  const aggressiveScan = document.getElementById('aggressiveScan');
+  const scanOutput = document.getElementById('scanOutput');
+  const portsTable = document.getElementById('portsTable');
+  const vulnTable = document.getElementById('vulnTable');
+  const btnStartScan = document.getElementById('btnStartScan');
+  const btnStopScan = document.getElementById('btnStopScan');
+
+  // Load saved target
+  const config = PentestApp.loadConfig();
+  if (config.target) {
+    scanTarget.value = config.target;
+  }
+
+  let scanRunning = false;
+
+  // Helper to add output
+  function addOutput(message, type = 'info') {
+    const timestamp = new Date().toLocaleTimeString();
+    const line = `<div class="${type}"><span class="timestamp">[${timestamp}]</span> ${message}</div>`;
+    scanOutput.innerHTML += line;
+    scanOutput.scrollTop = scanOutput.scrollHeight;
+  }
+
+  // Clear output
+  document.getElementById('btnClearOutput').addEventListener('click', () => {
+    scanOutput.innerHTML = '';
+  });
+
+  // Simulate port scanning
+  async function performPortScan(target, ports) {
+    addOutput(`Starting port scan on ${target}`, 'info');
+    addOutput(`Scanning port range: ${ports}`, 'info');
+
+    // Since browsers can't actually perform port scans, we'll simulate with realistic data
+    // In a real implementation, this would call a backend service
+
+    // Demo: Using scanme.nmap.org known open ports
+    const commonPorts = [
+      { port: 22, protocol: 'TCP', service: 'SSH', version: 'OpenSSH 7.4', state: 'open' },
+      { port: 80, protocol: 'TCP', service: 'HTTP', version: 'Apache httpd 2.4.7', state: 'open' },
+      { port: 443, protocol: 'TCP', service: 'HTTPS', version: 'Apache httpd 2.4.7', state: 'open' },
+      { port: 3306, protocol: 'TCP', service: 'MySQL', version: 'MySQL 5.7.30', state: 'closed' },
+      { port: 8080, protocol: 'TCP', service: 'HTTP-Proxy', version: 'Squid 3.5.20', state: 'filtered' },
+      { port: 9929, protocol: 'TCP', service: 'nping-echo', version: 'Nping echo', state: 'open' }
+    ];
+
+    // Clear existing table
+    if (portsTable.rows.length > 0 && portsTable.rows[0].cells[0].colSpan === 5) {
+      portsTable.innerHTML = '';
+    }
+
+    // Simulate scanning delay
+    for (const portInfo of commonPorts) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      if (!scanRunning) {
+        addOutput('Scan stopped by user', 'warning');
+        return;
+      }
+
+      addOutput(`Scanning port ${portInfo.port}/${portInfo.protocol}...`, 'info');
+
+      if (portInfo.state === 'open') {
+        addOutput(`Port ${portInfo.port} is ${portInfo.state} - ${portInfo.service}`, 'success');
+        
+        const row = portsTable.insertRow();
+        row.innerHTML = `
+          <td><strong>${portInfo.port}</strong></td>
+          <td>${portInfo.protocol}</td>
+          <td>${portInfo.service}</td>
+          <td><code>${portInfo.version}</code></td>
+          <td><span class="badge bg-success">${portInfo.state}</span></td>
+        `;
+      } else if (portInfo.state === 'filtered') {
+        addOutput(`Port ${portInfo.port} is ${portInfo.state} (firewall?)`, 'warning');
+      }
+    }
+
+    addOutput('Port scan completed', 'success');
+    return commonPorts;
+  }
+
+  // Simulate vulnerability scanning
+  async function performVulnScan(target, openPorts) {
+    addOutput('Starting vulnerability scan...', 'info');
+
+    // Simulated vulnerabilities based on detected services
+    const vulns = [
+      { 
+        severity: 'Critical', 
+        cve: 'CVE-2021-44228', 
+        description: 'Log4Shell RCE vulnerability',
+        cvss: '10.0',
+        port: 8080,
+        bgClass: 'vuln-critical'
+      },
+      { 
+        severity: 'High', 
+        cve: 'CVE-2014-0160', 
+        description: 'Heartbleed SSL/TLS vulnerability',
+        cvss: '7.5',
+        port: 443,
+        bgClass: 'vuln-high'
+      },
+      { 
+        severity: 'Medium', 
+        cve: 'CVE-2019-9193', 
+        description: 'PostgreSQL privilege escalation',
+        cvss: '6.5',
+        port: 5432,
+        bgClass: 'vuln-medium'
+      },
+      { 
+        severity: 'Low', 
+        cve: 'N/A', 
+        description: 'Banner disclosure reveals server version',
+        cvss: '2.0',
+        port: 80,
+        bgClass: 'vuln-low'
+      }
+    ];
+
+    // Clear existing table
+    if (vulnTable.rows.length > 0 && vulnTable.rows[0].cells[0].colSpan === 5) {
+      vulnTable.innerHTML = '';
+    }
+
+    for (const vuln of vulns) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      if (!scanRunning) return;
+
+      addOutput(`[${vuln.severity}] ${vuln.description}`, 'error');
+      
+      const row = vulnTable.insertRow();
+      row.className = vuln.bgClass;
+      row.innerHTML = `
+        <td><span class="badge bg-${vuln.severity === 'Critical' ? 'danger' : vuln.severity === 'High' ? 'warning' : vuln.severity === 'Medium' ? 'info' : 'secondary'}">${vuln.severity}</span></td>
+        <td><code>${vuln.cve}</code></td>
+        <td>${vuln.description}</td>
+        <td><strong>${vuln.cvss}</strong></td>
+        <td>${vuln.port}</td>
+      `;
+
+      // Add to findings
+      PentestApp.addFinding({
+        type: 'Vulnerability',
+        severity: vuln.severity,
+        description: vuln.description,
+        cve: vuln.cve,
+        cvss: vuln.cvss,
+        port: vuln.port,
+        target: target
+      });
+    }
+
+    addOutput('Vulnerability scan completed', 'success');
+  }
+
+  // Simulate web application scan
+  async function performWebScan(target) {
+    addOutput('Starting web application scan...', 'info');
+
+    const webVulns = [
+      'Testing for SQL injection...',
+      'Testing for XSS vulnerabilities...',
+      'Checking CSRF protections...',
+      'Analyzing security headers...',
+      'Testing authentication mechanisms...',
+      'Checking for directory traversal...',
+      'Testing file upload restrictions...'
+    ];
+
+    for (const test of webVulns) {
+      await new Promise(resolve => setTimeout(resolve, 800));
+      if (!scanRunning) return;
+      addOutput(test, 'info');
+    }
+
+    addOutput('Web application scan completed', 'success');
+    addOutput('Recommendation: Use OWASP ZAP or Burp Suite for comprehensive web testing', 'warning');
+  }
+
+  // Start scan
+  btnStartScan.addEventListener('click', async () => {
+    const target = scanTarget.value.trim();
+    if (!target) {
+      alert('Please enter a target host or IP');
+      return;
+    }
+
+    // Check authorization
+    if (!config.authorized) {
+      const authorized = confirm('⚠️ WARNING: Ensure you have written authorization to scan this target.\n\nUnauthorized scanning is illegal and unethical.\n\nDo you confirm you have proper authorization?');
+      if (!authorized) {
+        addOutput('Scan cancelled - authorization not confirmed', 'error');
+        return;
+      }
+    }
+
+    // Request permission for aggressive scans
+    if (aggressiveScan.checked) {
+      const allowed = await PentestApp.requestPermission(
+        'Aggressive Scanning',
+        'Aggressive scans may trigger intrusion detection systems and could disrupt services. Ensure you have explicit permission for aggressive testing.'
+      );
+      
+      if (!allowed) {
+        addOutput('Aggressive scan denied', 'warning');
+        aggressiveScan.checked = false;
+      }
+    }
+
+    scanRunning = true;
+    btnStartScan.disabled = true;
+    btnStopScan.disabled = false;
+    scanOutput.innerHTML = '';
+
+    addOutput('='.repeat(60), 'info');
+    addOutput(`Pentest Scan Started - Target: ${target}`, 'success');
+    addOutput(`Scan Type: ${scanType.value}`, 'info');
+    addOutput(`Timestamp: ${new Date().toISOString()}`, 'info');
+    addOutput('='.repeat(60), 'info');
+
+    try {
+      const type = scanType.value;
+
+      if (type === 'quick' || type === 'full') {
+        const openPorts = await performPortScan(target, portRange.value);
+        if (scanRunning && type === 'full') {
+          await performVulnScan(target, openPorts);
+        }
+      } else if (type === 'web') {
+        await performWebScan(target);
+      } else if (type === 'vuln') {
+        await performVulnScan(target, []);
+      }
+
+      if (scanRunning) {
+        addOutput('='.repeat(60), 'info');
+        addOutput('All scans completed successfully', 'success');
+        addOutput('='.repeat(60), 'info');
+        
+        PentestApp.logActivity('Scanning', `${scanType.value} scan completed`, target);
+        PentestApp.updateStats({ scans: PentestApp.stats.scans + 1 });
+      }
+
+    } catch (error) {
+      addOutput(`Error during scan: ${error.message}`, 'error');
+    } finally {
+      scanRunning = false;
+      btnStartScan.disabled = false;
+      btnStopScan.disabled = true;
+    }
+  });
+
+  // Stop scan
+  btnStopScan.addEventListener('click', () => {
+    scanRunning = false;
+    btnStopScan.disabled = true;
+    btnStartScan.disabled = false;
+    addOutput('Scan stopped by user', 'warning');
+  });
+
+  // Browser limitation warning
+  addOutput('NOTE: Browser-based scanning has limitations. For comprehensive testing:', 'warning');
+  addOutput('• Use Nmap for port scanning: nmap -sV -sC target', 'info');
+  addOutput('• Use Nessus/OpenVAS for vulnerability scanning', 'info');
+  addOutput('• Use Burp Suite/ZAP for web application testing', 'info');
+  addOutput('• Always obtain written authorization before scanning', 'warning');
+});
