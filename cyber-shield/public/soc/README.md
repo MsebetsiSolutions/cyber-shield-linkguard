@@ -92,6 +92,8 @@ Download the source package *suricata-7.0.13.tar.gz* from *https://suricata.io/d
 
         Get-NetAdapter | Format-Table -AutoSize
 
+        Get-NetIPAddress -AddressFamily IPv4 | Format-Table InterfaceAlias,IPAddress
+
 - Linux: Run *ip link show*
 
 - macOS: Run *ifconfig*
