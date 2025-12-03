@@ -992,6 +992,158 @@
     _snifferPacketInterval = setInterval(() => fetchSnifferPackets(200), 1000);
   }
 
+  // --- Suricata Monitoring Functions ---
+async function fetchSuricataStats() {
+  try {
+    const response = await fetch('/api/monitoring/suricata/stats');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to fetch Suricata stats:', error);
+    return null;
+  }
+}
+
+async function fetchSuricataAlerts(limit = 20) {
+  try {
+    const response = await fetch(`/api/monitoring/suricata/alerts?limit=${limit}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to fetch Suricata alerts:', error);
+    return { alerts: [], total: 0 };
+  }
+}
+
+function updateSuricataUI(stats, alerts) {
+  // Update status
+  const statusEl = document.getElementById('suricataStatus');
+  if (statusEl) {
+    statusEl.textContent = stats ? 
+      `Status: Connected (${stats.total_alerts || 0} alerts)` : 
+      'Status: Not connected';
+  }
+  
+  // Update totals
+  if (stats) {
+    const totalEl = document.getElementById('suricataTotalAlerts');
+    const lastHourEl = document.getElementById('suricataLastHour');
+    
+    if (totalEl) totalEl.textContent = stats.total_alerts || 0;
+    if (lastHourEl) {
+      const lastHourCount = stats.hourly_alerts?.reduce((sum, item) => sum + (item.count || 0), 0) || 0;
+      lastHourEl.textContent = lastHourCount;
+    }
+    
+    // Update top sources
+    const topSourcesEl = document.getElementById('topSources');
+    if (topSourcesEl && stats.top_sources) {
+      topSourcesEl.innerHTML = stats.top_sources
+        .map(item => `<li>${item.ip || 'Unknown'}: ${item.count}</li>`)
+        .join('') || '<li>None</li>';
+    }
+    
+    // Update top destinations
+    const topDestinationsEl = document.getElementById('topDestinations');
+    if (topDestinationsEl && stats.top_destinations) {
+      topDestinationsEl.innerHTML = stats.top_destinations
+        .map(item => `<li>${item.ip || 'Unknown'}: ${item.count}</li>`)
+        .join('') || '<li>None</li>';
+    }
+  }
+  
+  // Update alerts table
+  const alertsBody = document.getElementById('suricataAlertsBody');
+  if (alertsBody) {
+    if (!alerts || !alerts.alerts || alerts.alerts.length === 0) {
+      alertsBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px">No alerts yet</td></tr>';
+      return;
+    }
+    
+    alertsBody.innerHTML = alerts.alerts.map(alert => {
+      const alertData = alert.alert || {};
+      const time = alert.timestamp ? new Date(alert.timestamp).toLocaleTimeString() : '';
+      const signature = alertData.signature || 'Unknown';
+      const severity = alertData.severity || 3;
+      const severityText = severity === 1 ? 'Critical' : 
+                          severity === 2 ? 'High' : 
+                          severity === 3 ? 'Medium' : 'Low';
+      const severityClass = severity === 1 ? 'badge bad' :
+                           severity === 2 ? 'badge warn' :
+                           severity === 3 ? 'badge' : 'badge muted';
+      
+      return `
+        <tr>
+          <td style="font-size:0.9em">${time}</td>
+          <td style="font-size:0.9em">${signature.substring(0, 50)}${signature.length > 50 ? '...' : ''}</td>
+          <td><span class="${severityClass}">${severityText}</span></td>
+          <td style="font-size:0.9em">${alert.src_ip || ''}:${alert.src_port || ''}</td>
+          <td style="font-size:0.9em">${alert.dest_ip || ''}:${alert.dest_port || ''}</td>
+          <td style="font-size:0.9em">${alert.proto || ''}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+}
+
+async function refreshSuricataData() {
+  const stats = await fetchSuricataStats();
+  const alerts = await fetchSuricataAlerts(10);
+  updateSuricataUI(stats, alerts);
+}
+
+// Initialize Suricata monitoring
+function initSuricataMonitoring() {
+  const startBtn = document.getElementById('btnSuricataStart');
+  const stopBtn = document.getElementById('btnSuricataStop');
+  const refreshBtn = document.getElementById('btnSuricataRefresh');
+  
+  if (startBtn) {
+    startBtn.addEventListener('click', async () => {
+      try {
+        const response = await fetch('/api/monitoring/suricata/start', {
+          method: 'POST'
+        });
+        const result = await response.json();
+        alert(result.message || 'Suricata monitoring started');
+        refreshSuricataData();
+      } catch (error) {
+        alert('Failed to start Suricata monitoring: ' + error.message);
+      }
+    });
+  }
+  
+  if (stopBtn) {
+    stopBtn.addEventListener('click', async () => {
+      try {
+        const response = await fetch('/api/monitoring/suricata/stop', {
+          method: 'POST'
+        });
+        const result = await response.json();
+        alert(result.message || 'Suricata monitoring stopped');
+        refreshSuricataData();
+      } catch (error) {
+        alert('Failed to stop Suricata monitoring: ' + error.message);
+      }
+    });
+  }
+  
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', refreshSuricataData);
+  }
+  
+  // Initial refresh
+  refreshSuricataData();
+  
+  // Auto-refresh every 30 seconds
+  setInterval(refreshSuricataData, 30000);
+}
+
+// Initialize when monitoring page is loaded
+if (document.getElementById('suricataStatus')) {
+  initSuricataMonitoring();
+}
+
   function stopSnifferPacketPolling() {
     if (_snifferPacketInterval) clearInterval(_snifferPacketInterval);
     _snifferPacketInterval = null;

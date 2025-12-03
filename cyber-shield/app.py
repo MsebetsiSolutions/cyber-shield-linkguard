@@ -72,6 +72,7 @@ from backend.routes_pentesting import pentesting_bp
 
 from backend.whois import whois_bp
 from backend.routes_subdomains import subdomains_bp
+from backend.routes_suricata import suricata_bp
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -128,6 +129,7 @@ app.register_blueprint(pentesting_bp, url_prefix='/api/pentesting')
 app.register_blueprint(whois_bp, url_prefix='/backend')
 app.register_blueprint(subdomains_bp, url_prefix='/backend')
 
+app.register_blueprint(suricata_bp, url_prefix='/api/monitoring/suricata')
 
 VT_API_KEY = os.getenv("VT_API_KEY", "").strip()
 DYMO_API_KEY = os.getenv("DYMO_API_KEY", "").strip()
