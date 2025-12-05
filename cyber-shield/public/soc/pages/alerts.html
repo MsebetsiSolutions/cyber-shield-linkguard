@@ -6,11 +6,37 @@
       #whitelistContainer .card{ padding:8px; display:flex; justify-content:space-between; align-items:center }
       #whitelistContainer .card b{ font-size:0.95rem }
       [data-panel="enrichment"] pre{ background:#fbfdff; color:#0b1720; padding:10px; border-radius:6px; max-height:360px; overflow:auto; border:1px solid #e6eef6 }
+      .tabs-container{ margin:10px 0 }
+      .tabs{ display:flex; gap:8px }
+      .card-mb{ margin-bottom:12px }
+      .search-container{ margin-top:6px }
+      .filter-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; align-items:end }
+      .button-row{ display:flex; gap:8px; margin-top:10px }
+      .live-stream-label{ display:flex; align-items:center; gap:6px; margin-left:auto }
+      .bulk-actions{ display:flex; gap:8px; flex-wrap:wrap }
+      .panel-hidden{ display:none }
+      .risk-panel-flex{ display:flex; align-items:center; gap:8px }
+      .risk-panel-text{ margin:0 }
+      .enrichment-button-row{ margin-top:8px }
+      .enrichment-content{ display:none }
+      .grouping-header{ display:flex; align-items:center; gap:8px; margin-bottom:10px }
+      .whitelist-header{ display:flex; align-items:center; gap:8px; margin-bottom:10px }
+      .whitelist-input{ flex:1; padding:6px; border-radius:4px; border:1px solid #ddd }
+      #topToast{ position:fixed; left:50%; transform:translateX(-50%); top:12px; z-index:9999; display:none }
+      .drawer-container{ margin-top:12px; display:none }
+      .enrichment-display{ font-family:monospace; white-space:pre-wrap; max-height:160px; overflow:auto; background:#f8f9fb; border-radius:4px; padding:8px }
+      .enrichment-button-group{ margin-top:8px }
+      .timeline-container{ background:#fff; border:1px solid #eee; border-radius:6px; padding:8px; margin-top:6px; min-height:80px }
+      .entity-graph-container{ width:100%; height:220px; border:1px solid #eee; border-radius:6px; margin-top:6px; background:#fff }
+      .drawer-button-group{ display:flex; gap:8px; margin-top:8px }
     </style>
     <!-- vis-timeline (timeline) and cytoscape (entity graph) -->
     <link href="https://unpkg.com/vis-timeline@7.7.0/styles/vis-timeline-graph2d.min.css" rel="stylesheet" />
     <script src="https://unpkg.com/vis-timeline@7.7.0/standalone/umd/vis-timeline-graph2d.min.js"></script>
     <script src="https://unpkg.com/cytoscape@3.24.0/dist/cytoscape.min.js"></script>
+    <!-- SweetAlert2 for modal dialogs -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
   <div class="card-head">
     <h3>Alerts</h3>
     <div class="actions">
@@ -21,8 +47,8 @@
   </div>
   <p class="muted">Triage inbox. Assign owners, set status, map to MITRE ATT&CK, launch playbooks, merge/suppress noise, and create tickets.</p>
   <!-- TABS -->
-  <div style="margin:10px 0">
-    <div class="tabs" id="alertsTabs" style="display:flex;gap:8px">
+  <div class="tabs-container">
+    <div class="tabs" id="alertsTabs">
       <button class="btn sm ghost tab active" data-tab="overview">Overview</button>
       <button class="btn sm ghost tab" data-tab="risk">Risk Scoring</button>
       <button class="btn sm ghost tab" data-tab="enrichment">Enrichment</button>
@@ -32,33 +58,47 @@
   </div>
 
   <!-- FILTERS -->
-  <div class="card" style="margin-bottom:12px">
+  <div class="card card-mb">
     <div class="grid two">
       <div>
         <label>Search</label>
-        <div class="search" style="margin-top:6px">
+        <div class="search search-container">
           <i class="bi bi-search"></i>
           <input id="freetext" type="text" placeholder="Rule, host, user, IP, description">
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:end">
+      <div class="filter-grid">
+        <div>
+          <label>Sensor</label>
+          <input id="fSensor" placeholder="e.g., sensor-1" title="Filter by sensor name">
+        </div>
+        <div>
+          <label>Source IP</label>
+          <input id="fSrcIp" placeholder="e.g., 192.168.1.10" title="Filter by source IP">
+        </div>
+        <div>
+          <label>Dest IP</label>
+          <input id="fDstIp" placeholder="e.g., 10.0.1.50" title="Filter by destination IP">
+        </div>
         <div>
           <label>Severity</label>
-          <select id="fSev">
+          <select id="fSev" title="Filter by severity level">
             <option value="">All</option>
             <option>Low</option><option>Medium</option><option>High</option><option>Critical</option>
           </select>
         </div>
+      </div>
+      <div class="filter-grid">
         <div>
           <label>Status</label>
-          <select id="fStatus">
+          <select id="fStatus" title="Filter by alert status">
             <option value="">All</option>
             <option>New</option><option>In Progress</option><option>Containment</option><option>Resolved</option><option>Closed</option>
           </select>
         </div>
         <div>
           <label>Owner</label>
-          <select id="fOwner">
+          <select id="fOwner" title="Filter by alert owner">
             <option value="">Any</option>
             <option>Analyst A</option><option>Analyst B</option><option>Analyst C</option>
           </select>
@@ -69,21 +109,21 @@
         </div>
       </div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:10px">
+    <div class="button-row">
       <button class="btn sm" id="btnApplyFilters"><i class="bi bi-funnel"></i> Apply</button>
       <button class="btn sm ghost" id="btnClearFilters"><i class="bi bi-eraser"></i> Clear</button>
       <button class="btn sm ghost" id="btnScanSaPhish"><i class="bi bi-shield-exclamation"></i> Scan SA Phishing</button>
-          <button class="btn sm ghost" id="dMarkFP"><i class="bi bi-x-circle"></i> Mark FP</button>
-          <button class="btn sm ghost" id="dWhitelist"><i class="bi bi-archive"></i> Whitelist Match</button>
-      <label style="display:flex;align-items:center;gap:6px;margin-left:auto">
-        <input id="liveStream" type="checkbox"> Live stream
+          <button class="btn sm ghost" id="filterMarkFP"><i class="bi bi-x-circle"></i> Mark FP</button>
+          <button class="btn sm ghost" id="filterWhitelist"><i class="bi bi-archive"></i> Whitelist Match</button>
+      <label class="live-stream-label">
+        <input id="liveStream" type="checkbox" title="Enable live streaming of alerts"> Live stream
       </label>
     </div>
   </div>
 
   <!-- BULK ACTIONS -->
-  <div class="card" style="margin-bottom:12px">
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
+  <div class="card card-mb">
+    <div class="bulk-actions">
       <button class="btn sm" id="bulkAssign"><i class="bi bi-person-check"></i> Assign</button>
       <button class="btn sm" id="bulkStatus"><i class="bi bi-clipboard-check"></i> Set Status</button>
       <button class="btn sm" id="bulkTags"><i class="bi bi-tags"></i> Tags</button>
@@ -92,6 +132,9 @@
       <button class="btn sm ghost" id="bulkSuppress"><i class="bi bi-bell-slash"></i> Suppress</button>
       <button class="btn sm ghost" id="bulkTicket"><i class="bi bi-ticket-perforated"></i> Create Ticket</button>
       <button class="btn sm ghost" id="bulkMapAttack"><i class="bi bi-diagram-3"></i> Map ATT&CK</button>
+      <button class="btn sm ghost" id="bulkClassify"><i class="bi bi-shield-check"></i> Classify (IOC/IOA)</button>
+      <button class="btn sm ghost" id="bulkIODEF"><i class="bi bi-file-earmark-code"></i> Generate IODEF</button>
+      <button class="btn sm ghost" id="bulkOpenCTI"><i class="bi bi-cloud-upload"></i> Send to Advanced TI</button>
     </div>
   </div>
 
@@ -101,27 +144,27 @@
       <table class="table compact" id="alertsTbl">
     <thead>
       <tr>
-        <th><input type="checkbox" id="selAll"></th>
+        <th><input type="checkbox" id="selAll" title="Select all alerts"></th>
         <th>ID</th>
-        <th>Title</th>
+        <th>Timestamp</th>
+        <th>Sensor</th>
+        <th>Src → Dst</th>
+        <th>Signature</th>
         <th>Severity</th>
         <th>Status</th>
         <th>Owner</th>
-        <th>Risk</th>
-        <th>SA</th>
-        <th>SLA</th>
         <th>ATT&CK</th>
-        <th>Tags</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody></tbody>
       </table>
     </div>
 
-    <div data-panel="risk" style="display:none">
-      <div class="card" style="margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <p style="margin:0">Risk Scoring prototype: compute a 0–100 risk score per alert.</p>
+    <div data-panel="risk" class="panel-hidden">
+      <div class="card card-mb">
+        <div class="risk-panel-flex">
+          <p class="risk-panel-text">Risk Scoring prototype: compute a 0–100 risk score per alert.</p>
           <button class="btn sm" id="btnComputeRisk">Compute Risk</button>
           <button class="btn sm ghost" id="btnClearRisk">Clear Risk</button>
         </div>
@@ -134,16 +177,16 @@
       </table>
     </div>
 
-    <div data-panel="enrichment" style="display:none">
+    <div data-panel="enrichment" class="panel-hidden">
       <div id="enrichmentPanel">
         <div class="muted" id="enrichmentHint">Select an alert in Overview or open an alert to view enrichment here.</div>
-        <div style="margin-top:8px"><button class="btn sm" id="btnShowFirstEnrichment">Show enrichment for first alert</button></div>
-        <pre id="enrichmentContent" style="display:none">Loading...</pre>
+        <div class="enrichment-button-row"><button class="btn sm" id="btnShowFirstEnrichment">Show enrichment for first alert</button></div>
+        <pre id="enrichmentContent" class="enrichment-content">Loading...</pre>
       </div>
     </div>
 
-    <div data-panel="grouping" style="display:none">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+    <div data-panel="grouping" class="panel-hidden">
+      <div class="grouping-header">
         <button class="btn sm" id="btnRefreshGroups">Refresh Groups</button>
         <button class="btn sm" id="btnCreateIncidentFromSel">Create Incident from Selection</button>
         <button class="btn sm ghost" id="btnClearGroups">Clear</button>
@@ -151,10 +194,10 @@
       <div id="groupsContainer"></div>
     </div>
 
-    <div data-panel="whitelist" style="display:none">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+    <div data-panel="whitelist" class="panel-hidden">
+      <div class="whitelist-header">
         <button class="btn sm" id="btnWhitelistRefresh">Refresh</button>
-        <input id="whitelistInput" placeholder="ip, domain, hash or keyword" style="flex:1;padding:6px;border-radius:4px;border:1px solid #ddd">
+        <input id="whitelistInput" placeholder="ip, domain, hash or keyword" class="whitelist-input" title="Enter value to whitelist">
         <button class="btn sm" id="btnWhitelistAdd">Add</button>
         <button class="btn sm ghost" id="btnApplyWhitelist">Apply Whitelist (re-scan)</button>
       </div>
@@ -163,10 +206,10 @@
   </div>
 
   <!-- Top toast notifications -->
-  <div id="topToast" style="position:fixed;left:50%;transform:translateX(-50%);top:12px;z-index:9999;display:none"></div>
+  <div id="topToast"></div>
 
   <!-- DETAILS DRAWER -->
-  <div id="drawer" class="card" style="margin-top:12px;display:none">
+  <div id="drawer" class="card drawer-container">
     <div class="card-head">
       <h3 id="dTitle">Alert Details</h3>
       <div class="actions">
@@ -176,9 +219,12 @@
     <div class="grid two">
       <div>
         <p><b>ID:</b> <span id="dId"></span></p>
+        <p><b>Timestamp:</b> <span id="dTimestamp"></span></p>
+        <p><b>Sensor:</b> <span id="dSensor"></span></p>
+        <p><b>Source IP:</b> <span id="dSrcIp"></span> → <b>Dest IP:</b> <span id="dDstIp"></span></p>
+        <p><b>Signature:</b> <span id="dSignature"></span></p>
         <p><b>Severity:</b> <span id="dSev"></span> • <b>Status:</b> <span id="dStatus"></span> • <b>Owner:</b> <span id="dOwner"></span></p>
         <p><b>First Seen:</b> <span id="dFirst"></span> • <b>Last Seen:</b> <span id="dLast"></span></p>
-        <p><b>Rule:</b> <span id="dRule"></span></p>
         <p><b>Description:</b></p>
         <pre id="dDesc"></pre>
       </div>
@@ -188,21 +234,21 @@
         <p><b>Artifacts:</b></p>
         <pre id="dArtifacts"></pre>
         <p><b>Enrichment:</b></p>
-        <div id="dEnrichment" style="font-family:monospace;white-space:pre-wrap;max-height:160px;overflow:auto;background:#f8f9fb;border-radius:4px;padding:8px">Loading...</div>
-        <div style="margin-top:8px">
+        <div id="dEnrichment" class="enrichment-display">Loading...</div>
+        <div class="enrichment-button-row">
           <div><b>Incident Timeline</b></div>
-          <div id="incidentTimeline" style="background:#fff;border:1px solid #eee;border-radius:6px;padding:8px;margin-top:6px;min-height:80px"></div>
+          <div id="incidentTimeline" class="timeline-container"></div>
         </div>
-        <div style="margin-top:8px">
+        <div class="enrichment-button-row">
           <div><b>Entity Graph</b></div>
-          <div id="entityGraph" style="width:100%;height:220px;border:1px solid #eee;border-radius:6px;margin-top:6px;background:#fff"></div>
+          <div id="entityGraph" class="entity-graph-container"></div>
         </div>
-        <div style="display:flex;gap:8px;margin-top:8px">
+        <div class="drawer-button-group">
           <button class="btn sm" id="dContain"><i class="bi bi-shield-lock"></i> Contain</button>
           <button class="btn sm" id="dResolve"><i class="bi bi-check2-circle"></i> Resolve</button>
           <button class="btn sm ghost" id="dRunPlaybook"><i class="bi bi-cpu"></i> Playbook</button>
-          <button class="btn sm ghost" id="dMarkFP"><i class="bi bi-slash-circle"></i> Mark False Positive</button>
-          <button class="btn sm ghost" id="dWhitelist"><i class="bi bi-bookmark-plus"></i> Add to Whitelist</button>
+          <button class="btn sm ghost" id="btnDrawerMarkFP"><i class="bi bi-slash-circle"></i> Mark False Positive</button>
+          <button class="btn sm ghost" id="btnDrawerWhitelist"><i class="bi bi-bookmark-plus"></i> Add to Whitelist</button>
         </div>
       </div>
     </div>
@@ -219,22 +265,11 @@
   // =======================
   const state = {
     rows: [],          // alerts currently loaded
-    filters: { q:"", sev:"", status:"", owner:"", technique:"" },
+    filters: { q:"", sev:"", status:"", owner:"", technique:"", sensor:"", src_ip:"", dst_ip:"" },
     live: false,
     ws: null,
     activeTab: 'overview'
   };
-
-  // ... (Existing code)
-
-socket.on('new_alert', (alert) => {
-  state.rows.unshift(alert);  // Prepend new alert
-  state.rows = state.rows.slice(0, 500);  // Limit to 500
-  render(state.rows);
-  alert('New Alert: ' + alert.title);  // Notify user
-});
-
-// ... (Keep rest)
 
   // =======================
   // ELEMENTS
@@ -336,6 +371,9 @@ socket.on('new_alert', (alert) => {
     tbody: $("#alertsTbl tbody"),
     selAll: $("#selAll"),
     freetext: $("#freetext"),
+    fSensor: $("#fSensor"),
+    fSrcIp: $("#fSrcIp"),
+    fDstIp: $("#fDstIp"),
     fSev: $("#fSev"),
     fStatus: $("#fStatus"),
     fOwner: $("#fOwner"),
@@ -360,12 +398,16 @@ socket.on('new_alert', (alert) => {
     dClose: $("#dClose"),
     dTitle: $("#dTitle"),
     dId: $("#dId"),
+    dTimestamp: $("#dTimestamp"),
+    dSensor: $("#dSensor"),
+    dSrcIp: $("#dSrcIp"),
+    dDstIp: $("#dDstIp"),
+    dSignature: $("#dSignature"),
     dSev: $("#dSev"),
     dStatus: $("#dStatus"),
     dOwner: $("#dOwner"),
     dFirst: $("#dFirst"),
     dLast: $("#dLast"),
-    dRule: $("#dRule"),
     dDesc: $("#dDesc"),
     dEntities: $("#dEntities"),
     dAttack: $("#dAttack"),
@@ -566,19 +608,23 @@ socket.on('new_alert', (alert) => {
     rows.forEach(a=>{
       const tr = document.createElement("tr");
       tr.dataset.id = a.id;
+      const timestamp = a.timestamp || a.created_at || '';
+      const sensor = a.sensor || '—';
+      const srcIp = a.src_ip || '—';
+      const dstIp = a.dst_ip || '—';
+      const signature = a.signature || a.title || '—';
       tr.innerHTML = `
         <td><input type="checkbox" class="rowSel"></td>
         <td><a href="#" class="open">${esc(a.id)}</a></td>
-        <td>${esc(a.title)}</td>
+        <td>${esc(timestamp.split('T')[0])} ${esc(timestamp.split('T')[1]?.substring(0,8) || '')}</td>
+        <td><a href="#" class="filter-sensor" data-sensor="${esc(sensor)}" title="Filter by this sensor">${esc(sensor)}</a></td>
+        <td><a href="#" class="filter-src" data-ip="${esc(srcIp)}" title="Filter by source IP">${esc(srcIp)}</a> → <a href="#" class="filter-dst" data-ip="${esc(dstIp)}" title="Filter by dest IP">${esc(dstIp)}</a></td>
+        <td>${esc(signature)}</td>
         <td>${sevBadge(a.severity)}</td>
         <td>${statusPill(a.status)}</td>
         <td>${ownerCell(a.owner)}</td>
-        <td>${(a.tags||[]).includes('sa_phishing')?'<span class="badge bad">SA</span>':''}</td>
-        <td><span class="badge ${riskBadge(a.risk)}">${a.risk||0}</span></td>
-        <td>${saBadge(a)}</td>
-        <td>${slaCell(a.sla_minutes)}</td>
         <td>${(a.techniques||[]).join("|")}</td>
-        <td>${(a.tags||[]).join("|")}</td>
+        <td><button class="btn sm ghost open" title="View details"><i class="bi bi-eye"></i></button></td>
       `;
       // reflect current selection
       if (state.selectedId && String(state.selectedId) === String(a.id)){
@@ -617,6 +663,9 @@ socket.on('new_alert', (alert) => {
     // Filters
     el.btnApply.addEventListener("click", ()=>{
       state.filters.q = el.freetext.value.trim();
+      state.filters.sensor = el.fSensor.value.trim();
+      state.filters.src_ip = el.fSrcIp.value.trim();
+      state.filters.dst_ip = el.fDstIp.value.trim();
       state.filters.sev = el.fSev.value;
       state.filters.status = el.fStatus.value;
       state.filters.owner = el.fOwner.value;
@@ -624,8 +673,8 @@ socket.on('new_alert', (alert) => {
       loadAlerts();
     });
     el.btnClear.addEventListener("click", ()=>{
-      el.freetext.value = ""; el.fSev.value=""; el.fStatus.value=""; el.fOwner.value=""; el.fTechnique.value="";
-      state.filters = {q:"",sev:"",status:"",owner:"",technique:""};
+      el.freetext.value = ""; el.fSensor.value=""; el.fSrcIp.value=""; el.fDstIp.value=""; el.fSev.value=""; el.fStatus.value=""; el.fOwner.value=""; el.fTechnique.value="";
+      state.filters = {q:"",sev:"",status:"",owner:"",technique:"",sensor:"",src_ip:"",dst_ip:""};
       loadAlerts();
     });
     // SA phishing scan
@@ -674,6 +723,49 @@ socket.on('new_alert', (alert) => {
           if (trEl) trEl.classList.add('selected-row');
           openDrawer(row);
         }
+        return;
+      }
+      
+      // Handle sensor filter click
+      const filterSensor = e.target.closest(".filter-sensor");
+      if (filterSensor){
+        e.preventDefault();
+        const sensor = filterSensor.dataset.sensor;
+        if (sensor && sensor !== '—'){
+          el.fSensor.value = sensor;
+          state.filters.sensor = sensor;
+          loadAlerts();
+          showToast(`Filtering by sensor: ${sensor}`);
+        }
+        return;
+      }
+      
+      // Handle source IP filter click
+      const filterSrc = e.target.closest(".filter-src");
+      if (filterSrc){
+        e.preventDefault();
+        const ip = filterSrc.dataset.ip;
+        if (ip && ip !== '—'){
+          el.fSrcIp.value = ip;
+          state.filters.src_ip = ip;
+          loadAlerts();
+          showToast(`Filtering by source IP: ${ip}`);
+        }
+        return;
+      }
+      
+      // Handle dest IP filter click
+      const filterDst = e.target.closest(".filter-dst");
+      if (filterDst){
+        e.preventDefault();
+        const ip = filterDst.dataset.ip;
+        if (ip && ip !== '—'){
+          el.fDstIp.value = ip;
+          state.filters.dst_ip = ip;
+          loadAlerts();
+          showToast(`Filtering by dest IP: ${ip}`);
+        }
+        return;
       }
     });
 
@@ -698,7 +790,7 @@ socket.on('new_alert', (alert) => {
     el.dResolve.addEventListener("click", ()=> updateOne({status:"Resolved"}));
     el.dRunPlaybook.addEventListener("click", ()=> runPlaybook(prompt("Playbook ID (e.g., isolate_endpoint)")));
     // drawer quick actions
-    const dMark = document.getElementById('dMarkFP');
+    const dMark = document.getElementById('btnDrawerMarkFP');
     if (dMark) dMark.addEventListener('click', async ()=>{
       const id = el.dId.textContent;
       if (!id) return;
@@ -708,7 +800,7 @@ socket.on('new_alert', (alert) => {
       el.drawer.style.display='none';
     });
 
-    const dWhitelistBtn = document.getElementById('dWhitelist');
+    const dWhitelistBtn = document.getElementById('btnDrawerWhitelist');
     if (dWhitelistBtn) dWhitelistBtn.addEventListener('click', async ()=>{
       const id = el.dId.textContent;
       if (!id) return;
@@ -746,12 +838,16 @@ socket.on('new_alert', (alert) => {
   function openDrawer(a){
     el.dTitle.textContent = a.title || "Alert";
     el.dId.textContent = a.id || "";
+    el.dTimestamp.textContent = a.timestamp || a.created_at || "";
+    el.dSensor.textContent = a.sensor || "—";
+    el.dSrcIp.textContent = a.src_ip || "—";
+    el.dDstIp.textContent = a.dst_ip || "—";
+    el.dSignature.textContent = a.signature || a.title || "—";
     el.dSev.textContent = a.severity || "";
     el.dStatus.textContent = a.status || "";
     el.dOwner.textContent = a.owner || "—";
     el.dFirst.textContent = a.first_seen || "";
     el.dLast.textContent = a.last_seen || "";
-    el.dRule.textContent = a.rule || "";
     el.dDesc.textContent = a.description || "";
     el.dEntities.textContent = JSON.stringify(a.entities||{}, null, 2);
     el.dAttack.textContent = (a.techniques||[]).join("|");
@@ -777,10 +873,10 @@ socket.on('new_alert', (alert) => {
     }).catch(()=>{ el.dEnrichment.textContent = 'Enrichment unavailable'; });
   }
 
-  // drawer quick actions
-  (function wireDrawerActions(){
-    const mark = document.getElementById('dMarkFP');
-    const wl = document.getElementById('dWhitelist');
+  // Filter buttons quick actions
+  (function wireFilterActions(){
+    const mark = document.getElementById('filterMarkFP');
+    const wl = document.getElementById('filterWhitelist');
     if (mark) mark.addEventListener('click', async ()=>{
       const id = el.dId.textContent; if (!id) return;
       if (!confirm('Mark alert '+id+' as SA-phishing false positive?')) return;
@@ -811,7 +907,7 @@ socket.on('new_alert', (alert) => {
   })();
   
     // =======================
-    // WHITELIST HELPERS
+    // TOAST HELPERS
     // =======================
     function notify(msg, type='info'){
       const ct = document.getElementById('topToast');
@@ -820,6 +916,13 @@ socket.on('new_alert', (alert) => {
       ct.innerHTML = `<div class="card" style="padding:8px 12px;border-radius:6px;background:${type==='error'? '#ffd6d6': (type==='success'? '#d6ffd9':'#eef6ff')};color:#222">${msg}</div>`;
       setTimeout(()=>{ ct.style.display = 'none'; ct.innerHTML = ''; }, 3500);
     }
+    
+    // Alias for filter feedback
+    function showToast(msg, type='info'){ notify(msg, type); }
+    
+    // =======================
+    // WHITELIST HELPERS
+    // =======================
 
     async function loadWhitelist(){
       const r = await fetch('/api/alerts/whitelist').catch(()=>null);
@@ -984,17 +1087,6 @@ socket.on('new_alert', (alert) => {
     setTimeout(()=>URL.revokeObjectURL(url), 600);
   }
 
-  fetch("/api/monitoring/alerts/recent")
-  .then(res => res.json())
-  .then(data => {
-    const list = document.getElementById("alertsList");
-    list.innerHTML = "";
-    data.alerts.forEach(a => {
-      list.innerHTML += `<li>${a.icon} ${a.title} - ${a.severity}</li>`;
-    });
-  });
-
-
   // =======================
   // LIVE STREAM (WebSocket)
   // =======================
@@ -1023,6 +1115,307 @@ socket.on('new_alert', (alert) => {
 
   // UTILS
   function esc(s){ return (s==null?"":String(s)).replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+
+  // ======================= NEW: IOC/IOA Classification Functions =======================
+  
+  async function classifySelected(){
+    const ids = selectedIds();
+    if (!ids.length) return alert('Select alerts to classify');
+    
+    const results = [];
+    for (const id of ids) {
+      try {
+        const r = await fetch('/api/alerts/classify', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ id: parseInt(id, 10) })
+        });
+        if (r.ok) {
+          const data = await r.json();
+          results.push(data);
+        }
+      } catch(e) {
+        console.error('Classification error:', e);
+      }
+    }
+    
+    // Display results
+    if (results.length > 0) {
+      displayClassificationResults(results);
+    }
+    
+    await loadAlerts(); // Refresh to show updated data
+  }
+  
+  function displayClassificationResults(results) {
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';
+    modal.className = 'modal-overlay';
+    
+    const content = document.createElement('div');
+    content.style.cssText = 'background:var(--card);border-radius:8px;padding:24px;max-width:900px;max-height:80vh;overflow:auto;position:relative';
+    
+    let html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">';
+    html += '<h3 style="margin:0">IOC/IOA Classification Results</h3>';
+    html += '<button class="btn sm ghost" onclick="this.closest(\'.modal-overlay\').remove()"><i class="bi bi-x-lg"></i> Close</button>';
+    html += '</div>';
+    
+    results.forEach(result => {
+      const cls = result.classification;
+      const iocCount = Object.values(cls.iocs || {}).flat().length;
+      const ioaCount = (cls.ioas || []).length;
+      
+      html += '<div style="border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:16px;background:var(--card-bg)">';
+      
+      // Header
+      html += `<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px">`;
+      html += `<div><h4 style="margin:0;color:var(--primary)">Alert #${result.alert_id}</h4>`;
+      html += `<span style="font-size:12px;color:var(--text-muted)">${cls.alert_type.replace(/_/g, ' ').toUpperCase()}</span></div>`;
+      html += `<div style="text-align:right">`;
+      html += `<span style="display:inline-block;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:600;background:${cls.adjusted_severity === 'critical' ? '#dc2626' : cls.adjusted_severity === 'high' ? '#ea580c' : cls.adjusted_severity === 'medium' ? '#f59e0b' : '#10b981'};color:white">${cls.adjusted_severity.toUpperCase()}</span>`;
+      html += `<div style="font-size:11px;color:var(--text-muted);margin-top:4px">Confidence: ${Math.round(cls.confidence * 100)}%</div>`;
+      html += `</div></div>`;
+      
+      // IOCs Section
+      html += '<div style="margin-bottom:12px">';
+      html += `<div style="font-weight:600;margin-bottom:8px;color:#3b82f6"><i class="bi bi-shield-exclamation"></i> Indicators of Compromise (IOCs): ${iocCount}</div>`;
+      if (iocCount > 0) {
+        html += '<div style="background:rgba(59,130,246,0.1);border-left:3px solid #3b82f6;padding:8px;border-radius:4px;font-size:13px">';
+        
+        Object.entries(cls.iocs || {}).forEach(([type, values]) => {
+          if (values && values.length > 0) {
+            html += `<div style="margin-bottom:4px"><strong>${type.toUpperCase()}:</strong> `;
+            html += values.slice(0, 5).map(v => `<code style="background:rgba(0,0,0,0.1);padding:2px 6px;border-radius:3px;margin-right:4px">${esc(v)}</code>`).join('');
+            if (values.length > 5) html += `<span style="color:var(--text-muted)">+${values.length - 5} more</span>`;
+            html += '</div>';
+          }
+        });
+        html += '</div>';
+      } else {
+        html += '<div style="color:var(--text-muted);font-size:12px;padding:8px">No IOCs detected</div>';
+      }
+      html += '</div>';
+      
+      // IOAs Section
+      html += '<div style="margin-bottom:12px">';
+      html += `<div style="font-weight:600;margin-bottom:8px;color:#ef4444"><i class="bi bi-bullseye"></i> Indicators of Attack (IOAs): ${ioaCount}</div>`;
+      if (ioaCount > 0) {
+        html += '<div style="background:rgba(239,68,68,0.1);border-left:3px solid #ef4444;padding:8px;border-radius:4px;font-size:13px">';
+        (cls.ioas || []).forEach(ioa => {
+          html += `<div style="margin-bottom:4px">`;
+          html += `<span style="display:inline-block;background:rgba(239,68,68,0.2);padding:2px 8px;border-radius:3px;font-weight:600;margin-right:8px">${esc(ioa.type)}</span>`;
+          html += `<span style="color:var(--text)">${esc(ioa.description)}</span>`;
+          html += `</div>`;
+        });
+        html += '</div>';
+      } else {
+        html += '<div style="color:var(--text-muted);font-size:12px;padding:8px">No IOAs detected</div>';
+      }
+      html += '</div>';
+      
+      // MITRE ATT&CK
+      if (cls.mitre_mapping && cls.mitre_mapping.length > 0) {
+        html += '<div>';
+        html += '<div style="font-weight:600;margin-bottom:8px;color:#10b981"><i class="bi bi-diagram-3"></i> MITRE ATT&CK Techniques</div>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+        cls.mitre_mapping.forEach(m => {
+          html += `<span style="background:rgba(16,185,129,0.1);color:#10b981;padding:4px 10px;border-radius:4px;font-size:12px;border:1px solid rgba(16,185,129,0.3)">`;
+          html += `<strong>${m.technique_id}</strong> ${m.technique ? '- ' + esc(m.technique) : ''}`;
+          html += `</span>`;
+        });
+        html += '</div></div>';
+      }
+      
+      html += '</div>';
+    });
+    
+    content.innerHTML = html;
+    modal.appendChild(content);
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    document.body.appendChild(modal);
+  }
+  
+  async function generateIODEFForSelected(){
+    const ids = selectedIds();
+    if (!ids.length) return alert('Select alerts to generate IODEF reports');
+    
+    if (!confirm(`Generate IODEF XML reports for ${ids.length} alert(s)?`)) return;
+    
+    let success = 0;
+    let failed = 0;
+    const failedIds = [];
+    const savedFiles = [];
+    
+    // Show progress indicator
+    const progressMsg = `Processing ${ids.length} alert(s)...`;
+    console.log(progressMsg);
+    
+    try {
+      // Process each alert individually to ensure all are handled
+      for (const id of ids) {
+        try {
+          console.log(`Generating IODEF for alert ${id}...`);
+          
+          const r = await fetch('/api/alerts/generate_iodef', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ id: parseInt(id, 10), save_to_file: true })
+          });
+          
+          if (r.ok) {
+            const data = await r.json();
+            console.log(`IODEF response for alert ${id}:`, data);
+            
+            if (data.success && data.saved_to) {
+              success++;
+              savedFiles.push(data.saved_to);
+              console.log(`✓ Success for alert ${id}: ${data.saved_to}`);
+            } else {
+              failed++;
+              failedIds.push(id);
+              console.error(`✗ Failed for alert ${id}: No file saved`);
+            }
+          } else {
+            failed++;
+            failedIds.push(id);
+            const errorText = await r.text();
+            console.error(`✗ HTTP error for alert ${id} (${r.status}):`, errorText);
+          }
+        } catch(e) {
+          failed++;
+          failedIds.push(id);
+          console.error(`✗ Exception for alert ${id}:`, e);
+        }
+      }
+      
+      console.log(`IODEF generation complete: ${success} success, ${failed} failed`);
+      
+      // Show detailed success message with link to reports page
+      if (success > 0) {
+        const fileList = savedFiles.length <= 3 ? `\n\nGenerated files:\n• ${savedFiles.join('\n• ')}` : '';
+        const message = `✅ Successfully generated ${success} IODEF report(s)!${fileList}\n\n` +
+                       `📁 Files saved to iodef_reports/ directory\n` +
+                       `📊 View all reports on the Reports page\n\n` +
+                       (failed > 0 ? `⚠️ ${failed} report(s) failed (alert IDs: ${failedIds.join(', ')})` : 'All reports generated successfully!');
+        
+        alert(message);
+        
+        // Show navigation option
+        if (confirm('Would you like to go to the Reports page now?')) {
+          window.location.href = '/soc/pages/reports.html';
+        }
+      } else {
+        alert(`❌ Failed to generate IODEF reports.\n\n` +
+              `Failed alert IDs: ${failedIds.join(', ')}\n\n` +
+              `Check the browser console for detailed error information.`);
+      }
+      
+      await loadAlerts();
+    } catch(e) {
+      console.error('IODEF generation exception:', e);
+      alert(`❌ IODEF generation error: ${e.message}\n\nCheck the browser console for details.`);
+    }
+  }
+  
+  async function sendToOpenCTI(){
+    const ids = selectedIds();
+    if (!ids.length) {
+      showToast('⚠️ Please select alerts to send to Advanced Threat Intelligence', 'warning');
+      return;
+    }
+    
+    // Show confirmation dialog
+    const result = await Swal.fire({
+      title: 'Send to Advanced Threat Intelligence?',
+      html: `
+        <p>You are about to send <strong>${ids.length} alert(s)</strong> to the <strong>Advanced Threat Intelligence</strong> platform.</p>
+        <p style="margin-top: 10px; color: #64748b;">
+          <i class="bi bi-info-circle"></i> Results will appear on the <strong>Threat Intel</strong> page under the <strong>Advanced Threat Intelligence</strong> section.
+        </p>
+      `,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: '✓ Send to Advanced TI',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#3b82f6',
+      cancelButtonColor: '#94a3b8'
+    });
+    
+    if (!result.isConfirmed) return;
+    
+    // Show loading indicator
+    Swal.fire({
+      title: 'Submitting to Advanced TI...',
+      html: `Processing ${ids.length} alert(s)...`,
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    
+    try {
+      const r = await fetch('/api/opencti/alerts/bulk-submit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ alert_ids: ids.map(id => parseInt(id, 10)) })
+      });
+      
+      if (!r.ok) {
+        throw new Error(`HTTP ${r.status}`);
+      }
+      
+      const data = await r.json();
+      
+      // Show success message
+      await Swal.fire({
+        title: 'Success!',
+        html: `
+          <p><strong>${data.success_count}</strong> alert(s) successfully sent to Advanced Threat Intelligence</p>
+          ${data.fail_count > 0 ? `<p style="color: #ef4444;"><strong>${data.fail_count}</strong> alert(s) failed</p>` : ''}
+          <hr style="margin: 15px 0; border: none; border-top: 1px solid #e2e8f0;">
+          <p style="color: #64748b;">
+            <i class="bi bi-arrow-right-circle"></i> View submissions on the <strong>Threat Intel</strong> page under <strong>Advanced Threat Intelligence</strong>
+          </p>
+        `,
+        icon: data.success_count > 0 ? 'success' : 'warning',
+        confirmButtonText: 'Go to Threat Intel',
+        showCancelButton: true,
+        cancelButtonText: 'Stay Here',
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#94a3b8'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Navigate to Threat Intel page
+          window.location.href = '/pages/intel.html';
+        }
+      });
+      
+      // Show details in console
+      console.log('Advanced TI submission results:', data.results);
+      
+      await loadAlerts();
+      
+    } catch(e) {
+      console.error('Advanced TI error:', e);
+      Swal.fire({
+        title: 'Submission Failed',
+        html: `
+          <p>Failed to submit alerts to Advanced Threat Intelligence</p>
+          <p style="color: #64748b; font-size: 0.9em; margin-top: 10px;">Error: ${e.message}</p>
+        `,
+        icon: 'error',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#ef4444'
+      });
+    }
+  }
+  
+  // Wire new bulk action buttons
+  document.getElementById('bulkClassify')?.addEventListener('click', classifySelected);
+  document.getElementById('bulkIODEF')?.addEventListener('click', generateIODEFForSelected);
+  document.getElementById('bulkOpenCTI')?.addEventListener('click', sendToOpenCTI);
+  
+  // ======================= END NEW FUNCTIONS =======================
 
 })();
 </script>

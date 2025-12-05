@@ -1,9 +1,5 @@
-<<<<<<< HEAD
 from flask import Flask, request, jsonify, send_from_directory, session, redirect
 from flask_socketio import SocketIO, emit
-=======
-from flask import Flask, request, jsonify, send_from_directory, session, redirect, Blueprint
->>>>>>> e6ebe9fdeea5e4eec72e0f4e19caea45b6aed0ae
 from urllib.parse import urlparse
 import os, time, re, socket, requests, tldextract
 import datetime
@@ -18,7 +14,6 @@ import cv2
 from flask import Blueprint, jsonify
 import numpy as np
 import sqlite3
-<<<<<<< HEAD
 from datetime import datetime, timedelta
 from flask_cors import CORS
 from routes.exam import exam_bp
@@ -29,22 +24,23 @@ from flask import Flask
 import requests, socket, ssl, whois 
 import sys
 import os
-from ipwhois import IPWhois
 from flask import Flask, request, Response, jsonify
-
-=======
-from flask_socketio import SocketIO, emit
-from functools import lru_cache
-import ssl, whois 
-import sys
 from ipwhois import IPWhois
 import time
->>>>>>> e6ebe9fdeea5e4eec72e0f4e19caea45b6aed0ae
 
 
 # Load .env FIRST
 from dotenv import load_dotenv
 load_dotenv()
+
+
+# Set UTF-8 encoding for Windows console
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
+
 
 # Try to import QR code libraries...
 # (your QR code block)
@@ -71,10 +67,7 @@ from backend.routes_intel import intel_bp
 from backend.routes_reports import reports_bp
 from backend.routes_settings import settings_bp as backend_settings_bp
 from backend.routes_database import database_bp
-<<<<<<< HEAD
-=======
 from monitoring import monitor_bp
->>>>>>> e6ebe9fdeea5e4eec72e0f4e19caea45b6aed0ae
 from backend.routes_pentesting import pentesting_bp
 from backend.whois import whois_bp
 from backend.routes_subdomains import subdomains_bp
@@ -104,16 +97,12 @@ socketio = SocketIO(app, cors_allowed_origin="*")
 YOCO_SECRET = os.getenv("YOCO_SECRET_KEY")
 # ... rest of Yoco setup
 
-<<<<<<< HEAD
-=======
-
 from backend.whois import whois_bp
 from backend.routes_subdomains import subdomains_bp
 from backend.routes_suricata import suricata_bp
 
 from dotenv import load_dotenv
 load_dotenv()
->>>>>>> e6ebe9fdeea5e4eec72e0f4e19caea45b6aed0ae
 
 
 YOCO_SECRET_KEY = os.getenv("YOCO_SECRET_KEY")
@@ -163,20 +152,12 @@ app.register_blueprint(module_bp)
 app.register_blueprint(alerts_bp)
 app.register_blueprint(host_bp)
 app.register_blueprint(intel_bp)
-<<<<<<< HEAD
 app.register_blueprint(monitor_bp, url_prefix='/api/monitoring')  # ← Fixed
 app.register_blueprint(reports_bp)
 app.register_blueprint(backend_settings_bp, url_prefix='/api/backend', name='backend_settings')
 app.register_blueprint(database_bp, url_prefix='/api/database')
-app.register_blueprint(pentesting_bp, url_prefix='/api/pentesting')
 backend_bp = Blueprint('backend_bp', __name__)
-=======
-app.register_blueprint(reports_bp)
-app.register_blueprint(backend_settings_bp, url_prefix='/api/backend', name='backend_settings')
-app.register_blueprint(database_bp, url_prefix='/api/database')
-app.register_blueprint(monitor_bp, url_prefix='/api/monitoring')
 app.register_blueprint(pentesting_bp, url_prefix='/api/pentesting')
->>>>>>> e6ebe9fdeea5e4eec72e0f4e19caea45b6aed0ae
 app.register_blueprint(whois_bp, url_prefix='/backend')
 app.register_blueprint(subdomains_bp, url_prefix='/backend')
 
@@ -221,14 +202,6 @@ RISK_BANDS = [
     (60, 100, "DANGER"),
 ]
 
-
-<<<<<<< HEAD
-
-
-
-
-=======
->>>>>>> e6ebe9fdeea5e4eec72e0f4e19caea45b6aed0ae
 # backend/routes_subdomains.py
 from flask import Blueprint, request, jsonify
 import requests
@@ -1524,7 +1497,6 @@ def static_proxy(path):
 def health():
     return jsonify({"ok": True})
 
-<<<<<<< HEAD
 # ==================== OVERVIEW ROUTES ====================
 @app.route('/api/overview/stats')
 @requires_auth  # NEW: Require auth
@@ -1593,167 +1565,6 @@ def background_emitter():
         socketio.emit('host_update', host_update, namespace='/ws')
 
 threading.Thread(target=background_emitter, daemon=True).start()
-=======
-
-
-#======================================================
-# ---------------- Agent on Server --------------------
-#======================================================
-
-def start_agent_process():
-    """Start the monitoring agent as a separate process"""
-    import subprocess
-    import sys
-    import atexit
-    import signal
-    
-    try:
-        agent_path = os.path.join(os.path.dirname(__file__), 'agent.py')
-        
-        if not os.path.exists(agent_path):
-            print(f"Agent file not found at {agent_path}")
-            return None
-        
-        agent_env = os.environ.copy()
-        
-        # Check if we're in production (Render or similar)
-        is_production = os.environ.get('RENDER') or os.environ.get('DYNO') or os.environ.get('PRODUCTION')
-        
-        if is_production:
-            # Production URL
-            agent_env["MONITOR_SERVER"] = "https://www.linkguard.co.za"
-            agent_env["PRODUCTION"] = "true" 
-        else:
-            # Local development
-            port = int(os.getenv("PORT", "5000"))
-            agent_env["MONITOR_SERVER"] = f"http://127.0.0.1:{port}"
-            agent_env["PRODUCTION"] = "false"
-        
-        print(f"Starting monitoring agent from {agent_path}...")
-        print(f"Agent will connect to: {agent_env['MONITOR_SERVER']}")
-        
-        agent_process = subprocess.Popen(
-            [sys.executable, agent_path],
-            env=agent_env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        
-        def cleanup_agent():
-            """Cleanup function to terminate agent when Flask exits"""
-            if agent_process and agent_process.poll() is None:
-                print("Stopping monitoring agent...")
-                agent_process.terminate()
-                try:
-                    agent_process.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    agent_process.kill()
-        
-        atexit.register(cleanup_agent)
-        signal.signal(signal.SIGTERM, lambda sig, frame: cleanup_agent())
-        
-        print(f"Monitoring agent started with PID: {agent_process.pid}")
-        return agent_process
-        
-    except Exception as e:
-        print(f"Failed to start agent: {e}")
-        return None
-
-agent_process = None
-if os.getenv("START_AGENT", "true").lower() == "true" and not os.environ.get('RENDER'):
-    agent_process = start_agent_process()
-
-
-#======================================================
-# ---------------  Suricata Agent  --------------------
-#======================================================
-
-def start_suricata_agent():
-    """Start the Suricata EVE forwarder as a separate process"""
-    import subprocess
-    import sys
-    import atexit
-    import signal
-    
-    try:
-        suricata_agent_path = os.path.join(os.path.dirname(__file__), 'suricata_agent.py')
-        
-        if not os.path.exists(suricata_agent_path):
-            print(f"Suricata agent file not found at {suricata_agent_path}")
-            return None
-        
-        agent_env = os.environ.copy()
-        
-        # Check if we're in production (Render or similar)
-        is_production = os.environ.get('RENDER') or os.environ.get('DYNO') or os.environ.get('PRODUCTION')
-        
-        if is_production:
-            # Production URL
-            agent_env["MONITOR_SERVER"] = "https://www.linkguard.co.za"
-            target_url = "https://www.linkguard.co.za"
-            agent_env["PRODUCTION"] = "true" 
-        else:
-            # Local development
-            port = int(os.getenv("PORT", "5000"))
-            agent_env["MONITOR_SERVER"] = f"http://127.0.0.1:{port}"
-            target_url = f"http://127.0.0.1:{port}"
-            agent_env["PRODUCTION"] = "false"
-        
-        print(f"Starting Suricata agent from {suricata_agent_path}...")
-        print(f"Suricata agent will forward to: {target_url}")
-        
-        # Start the suricata_agent.py with the target URL
-        suricata_process = subprocess.Popen(
-            [sys.executable, suricata_agent_path, "--target", target_url],
-            env=agent_env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        
-        def cleanup_suricata_agent():
-            """Cleanup function to terminate Suricata agent when Flask exits"""
-            if suricata_process and suricata_process.poll() is None:
-                print("Stopping Suricata agent...")
-                suricata_process.terminate()
-                try:
-                    suricata_process.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    suricata_process.kill()
-        
-        atexit.register(cleanup_suricata_agent)
-        signal.signal(signal.SIGTERM, lambda sig, frame: cleanup_suricata_agent())
-        
-        print(f"Suricata agent started with PID: {suricata_process.pid}")
-        
-        # Start a thread to monitor the agent's output
-        import threading
-        def monitor_agent_output():
-            while True:
-                if suricata_process.poll() is not None:
-                    break
-                line = suricata_process.stdout.readline()
-                if line:
-                    print(f"[Suricata Agent] {line.strip()}")
-                line = suricata_process.stderr.readline()
-                if line:
-                    print(f"[Suricata Agent ERROR] {line.strip()}")
-        
-        output_thread = threading.Thread(target=monitor_agent_output, daemon=True)
-        output_thread.start()
-        
-        return suricata_process
-        
-    except Exception as e:
-        print(f"Failed to start Suricata agent: {e}")
-        return None
-
-# Start Suricata agent if enabled
-suricata_agent_process = None
-if os.getenv("START_SURICATA_AGENT", "true").lower() == "true":
-    suricata_agent_process = start_suricata_agent()
->>>>>>> e6ebe9fdeea5e4eec72e0f4e19caea45b6aed0ae
 
 #======================================================
 # ----------------------- Entry -----------------------
