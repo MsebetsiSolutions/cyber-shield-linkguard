@@ -16,7 +16,7 @@ const toast = (msg, ms=2000) => {
   setTimeout(() => t.classList.remove('show'), ms); 
 };
 
-// Session-based fetch function
+// Session-based function
 async function fetchWithSession(path, opts={}) {
   const headers = {
     'Content-Type': 'application/json',
@@ -52,17 +52,14 @@ function setUserUI(userData){
     if (welcomeMessage) welcomeMessage.textContent = welcomeText;
     if (userNameDisplay) userNameDisplay.textContent = displayName;
     
-    // Enable/disable Contact Support button based on plan_mode
     const supportButton = document.querySelector('a.cs-btn.btn-secondary[href="../supcom/supcom.html"]');
     if (supportButton) {
       if (userData.plan_mode === 0) {
-        // Free plan - disable support
         supportButton.classList.add('disabled');
         supportButton.style.opacity = '0.6';
         supportButton.style.pointerEvents = 'none';
         supportButton.setAttribute('aria-disabled', 'true');
       } else {
-        // Paid plans (1, 2, or 3) - enable support
         supportButton.classList.remove('disabled');
         supportButton.style.opacity = '1';
         supportButton.style.pointerEvents = 'auto';
@@ -79,9 +76,8 @@ function setUserUI(userData){
     });
   } else { 
     if (welcomeMessage) welcomeMessage.textContent = ''; 
-    if (userNameDisplay) userNameDisplay.textContent = 'User Name'; // Fallback text
+    if (userNameDisplay) userNameDisplay.textContent = 'User Name'; 
     
-    // Disable support button if user is not authenticated
     const supportButton = document.querySelector('a.cs-btn.btn-secondary[href="../supcom/supcom.html"]');
     if (supportButton) {
       supportButton.classList.add('disabled');
@@ -97,10 +93,7 @@ function setUserUI(userData){
 // Logout functionality
 async function handleLogout() {
     try {
-        // Get current session ID before clearing
-        const currentSessionId = window.CyberShieldSession?.getCurrentSessionId();
-        
-        // Call server logout to invalidate sessions
+        const currentSessionId = window.CyberShieldSession?.getCurrentSessionId();        
         const logoutResponse = await fetchWithSession('/api/auth/logout', {
             method: 'POST'
         });
@@ -108,7 +101,6 @@ async function handleLogout() {
         if (logoutResponse.ok) {
             console.log('Logout successful');
             
-            // Invalidate server-side sessions
             if (currentSessionId) {
                 await fetch('/api/session/invalidate', {
                     method: 'POST',
@@ -123,10 +115,8 @@ async function handleLogout() {
         console.log('Logout failed, proceeding with client');
     }
     
-    // Clear client-side data
     setUserUI(null);
     
-    // Clear session storage
     sessionStorage.removeItem('cyberShieldSession');
     sessionStorage.removeItem('userData');
     sessionStorage.removeItem('plan_mode');
@@ -142,39 +132,13 @@ if (logoutBtn) {
   logoutBtn.addEventListener('click', handleLogout);
 }
 
-// User dropdown functionality
-const userDropdownBtn = $('userDropdownBtn');
-const userDropdown = $('userDropdown');
-
-// Toggle desktop dropdown
-if (userDropdownBtn && userDropdown) {
-  userDropdownBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
-  });
-
-  // Close dropdowns when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-      userDropdown.style.display = 'none';
-    }
-  });
-
-  // Prevent dropdown from closing when clicking inside it
-  userDropdown.addEventListener('click', (e) => {
-    e.stopPropagation();
-  });
-}
-
-// Simple email validation
 const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
-// Simple phone validation (international format)
 const isValidPhone = (phone) => {
-  if (!phone) return true; // Phone is optional
+  if (!phone) return true; 
   const phoneRegex = /^\+?[1-9]\d{1,14}$/;
   return phoneRegex.test(phone);
 };
@@ -187,10 +151,8 @@ async function loadUserData() {
     if (response.ok) {
       const userData = await response.json();
       
-      // Set user UI (top right corner)
       setUserUI(userData);
       
-      // If we're on the settings page, populate the form fields
       if ($('userName') && $('userEmail') && $('userPhone')) {
         $('userName').value = userData.full_name || '';
         $('userEmail').value = userData.email || '';
@@ -199,7 +161,6 @@ async function loadUserData() {
       
       return userData;
     } else if (response.status === 401) {
-      // Not authenticated, redirect to login
       window.location.href = '../';
       return null;
     } else {
@@ -214,7 +175,6 @@ async function loadUserData() {
   }
 }
 
-// Update profile: this sent data to the backend to update user profile
 if ($('profileForm')) {
   $('profileForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -223,7 +183,6 @@ if ($('profileForm')) {
     const email = $('userEmail').value.trim().toLowerCase();
     const phone_number = $('userPhone').value.trim();
     
-    // Validation
     if (!full_name) {
       return toast('Full name is required');
     }
@@ -244,7 +203,6 @@ if ($('profileForm')) {
   setBusy(updateButton, true, 'Saving...');
     
     try {
-      // This endpoint needs to be implemented in your backend
       const response = await fetchWithSession('/api/user/profile', {
         method: 'PUT',
         body: JSON.stringify({ full_name, email, phone_number })
@@ -254,7 +212,6 @@ if ($('profileForm')) {
         const result = await response.json();
         toast('Profile updated successfully');
         
-        // Update session data with new values
         if (result.user) {
           setUserUI(result.user);
         }
@@ -271,7 +228,7 @@ if ($('profileForm')) {
   });
 }
 
-// Update password (this will need to be implemented in your backend)
+// Update password
 if ($('passwordForm')) {
   $('passwordForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -306,7 +263,6 @@ if ($('passwordForm')) {
     setBusy(updateButton, true, 'Updating...');
     
     try {
-      // This endpoint needs to be implemented in your backend
       const response = await fetchWithSession('/api/user/password', {
         method: 'PUT',
         body: JSON.stringify({ currentPassword, newPassword })
@@ -328,7 +284,7 @@ if ($('passwordForm')) {
   });
 }
 
-// Delete account (this will need to be implemented in your backend)
+// Delete account 
 if ($('confirmDelete')) {
   $('confirmDelete').addEventListener('click', async () => {
     const password = $('deletePassword').value;
@@ -340,7 +296,6 @@ if ($('confirmDelete')) {
     setBusy($('confirmDelete'), true, 'Deleting...');
     
     try {
-      // This endpoint needs to be implemented in your backend
       const response = await fetchWithSession('/api/user/account', {
         method: 'DELETE',
         body: JSON.stringify({ password })
@@ -366,7 +321,6 @@ if ($('confirmDelete')) {
 
 // Initialize
 (async function init() {
-  // Check if user is authenticated and load user data
   try {
     const userInfo = await loadUserData();
     
@@ -380,7 +334,6 @@ if ($('confirmDelete')) {
   }
 })();
 
-// Add event listener to clear error message when user starts typing in password fields
 if ($('passwordError')) {
   ['currentPassword', 'newPassword', 'confirmPassword'].forEach(id => {
     if ($(id)) {

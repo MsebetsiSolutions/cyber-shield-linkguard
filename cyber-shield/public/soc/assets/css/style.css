@@ -49,7 +49,8 @@ body {
   background: var(--bg);
   color: var(--text);
   display: grid;
-  grid-template-columns: 280px 1fr;
+  /* Sidebar is position:fixed; don't reserve a grid column for it — let .main use margin-left to offset */
+  grid-template-columns: 1fr;
   grid-template-rows: auto 1fr;
   line-height: 1.4;
 }
@@ -62,14 +63,17 @@ body {
 
 /* SIDEBAR */
 .sidebar {
-  grid-row: 1 / span 2;
+  /* Keep sidebar visible while the page scrolls: fix it to the viewport */
   background: var(--dark-light);
   border-right: 1px solid var(--border);
   padding: 16px;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  width: 280px;
   height: 100vh;
   overflow-y: auto;
+  z-index: 1000;
 }
 .brand {
   display: flex; align-items: center; gap: 10px;
@@ -135,15 +139,35 @@ body {
 .btn.sm { padding: 6px 10px; font-size: 12px; }
 
 /* LAYOUT */
-.main { display: grid; grid-template-rows: auto 1fr auto; min-height: 100vh; }
+.main { 
+  display: grid; 
+  grid-template-rows: auto 1fr auto; 
+  min-height: 100vh; 
+  margin-left: 280px; 
+  transition: margin-left 0.18s ease; 
+  width: calc(100% - 280px);
+}
+
 .topbar {
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 16px; border-bottom: 1px solid var(--border);
   background: var(--dark-light);
 }
-.topbar .left { display: flex; align-items: center; gap: 10px; }
-.topbar h1 { font-size: 18px; margin: 0; font-weight: 700; color: var(--text); }
-.topbar .right { display: flex; align-items: center; gap: 12px; }
+
+.topbar .left { display: flex; 
+  align-items: center; 
+  gap: 10px; 
+}
+
+.topbar h1 { font-size: 18px; 
+  margin: 0; font-weight: 700; 
+  color: var(--text); 
+}
+
+.topbar .right { display: flex; 
+  align-items: center; 
+  gap: 12px; 
+}
 
 .search {
   display: flex; align-items: center; gap: 8px;
@@ -167,15 +191,27 @@ body {
 .user .role { color: var(--text-muted); font-size: 11px; }
 
 /* PAGE & GRID */
-.page { display: none; padding: 16px; }
-.page.show { display: block; }
+.page { 
+  display: none; 
+  padding: 16px; 
+  /* Ensure pages take the full available width (helpful when sidebar is fixed) */
+  width: 100%;
+  max-width: none;
+}
+
+.page.show { 
+  display: block;
+
+}
 
 .grid { display: grid; gap: 12px; }
 .grid.two { grid-template-columns: 1fr 1fr; }
 .grid.three { grid-template-columns: 1fr 1fr 1fr; }
-@media (max-width: 1100px) {
+  @media (max-width: 1100px) {
   .grid.two, .grid.three { grid-template-columns: 1fr; }
-  body { grid-template-columns: 72px 1fr; }
+  /* Keep grid single-column on small screens; use .main margin to account for collapsed sidebar */
+  body { grid-template-columns: 1fr; }
+  .main { margin-left: 72px; width: 100%; }
   .brand-name { display:none; }
   .nav-item span{display:none;}
   .search input { width: 140px; }
@@ -262,6 +298,9 @@ canvas { background: transparent; border-radius: 6px; }
 .sidebar.collapsed .nav-item { justify-content: center; }
 .sidebar.collapsed .nav-item i { margin-right: 0; }
 .sidebar.collapsed .nav-item span { display: none; }
+
+/* When sidebar is collapsed, reduce the main content offset. Assumes .main follows .sidebar in DOM */
+.sidebar.collapsed + .main { margin-left: 72px; width: 100%; }
 
 /* KPI STAT CARDS */
 .stat { display: grid; gap: 4px; }

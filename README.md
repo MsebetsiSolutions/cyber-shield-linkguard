@@ -5,9 +5,11 @@ browser-based anti-phishing PWA by Msebetsi Solutions.
 ---
 
 ## Overview
+
 Cyber Shield LinkGuard is a cross-platform cybersecurity tool designed to protect users from malicious links, infected files, and unsafe QR codes. The project integrates with VirusTotal for threat intelligence and provides a lightweight web application that works on both desktop and mobile devices.
 
 ## Key Features
+
 - **URL Security Check** – Detect and analyze suspicious URLs using the VirusTotal API
 - **File Scanning** – Upload and verify files against malware signatures
 - **QR Code Scanner** – Identify and flag malicious QR codes
@@ -17,31 +19,28 @@ Cyber Shield LinkGuard is a cross-platform cybersecurity tool designed to protec
 - **Responsive Design** – Works seamlessly on mobile and desktop
 - **Cyber Shield Community** – System assistance and troubleshooting, Reporting bugs and issues, Sharing ideas and suggestions, Community support and discussions
 
-
 ---
-
 
 ## Quick Start
+
 ### 1. Create virtual environment
-    ```bash        
-            python3 -m venv .venv && source .venv/bin/activate
+
+        python3 -m venv .venv && source .venv/bin/activate
 
 ### 2. Install dependencies
-    ```bash
+
             pip install -r requirements.txt
- 
+
 ### 3. Run application
-    ```bash
+
             python app.py
 
-
-Open http://127.0.0.1:5000 in your browser.
-
+            Open http://127.0.0.1:5000 in your browser.
 
 ---
 
-
 ## Deploy
+
 Any VPS/Platform-as-a-Service works.
 
 For platforms using Procfile:
@@ -51,11 +50,10 @@ web: gunicorn -w 2 -b 0.0.0.0:$PORT app:app
 Demo Authentication
 This build includes simple localStorage-based demo authentication (Login/Sign). Do not use for production without proper security enhancements.
 
-
 ---
 
-
 ## Project Structure
+
         cyber-shield-linkguard/
         |
         ├── cyber-shield/
@@ -65,6 +63,15 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |      ├── apt.txt
         |      ├── cyber-shield-linkguard.db
         |      ├── requirements.txt 
+        |      ├── agent_id.txt.py
+        |      ├── agent.py
+        |      ├── check_alerts.py
+        |      ├── monitoring.py
+        |      ├── scaoy_ids.py
+        |      ├── agent.py
+        |      ├── scapy_rules.txt
+        |      ├── snort_agent.py
+        |      ├── suricata_agent.py
         |      ├── soc_dashboard.db
         |      ├── .gitignore
         |      ├── .env
@@ -86,22 +93,33 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |      |
         │      ├── backend/ 
         |      |     ├── _pycache_/
+        |      |     ├── backend/
+        |      |     |      └── routes_pentesting.py
+        |      |     |
+        |      |     ├── backend.py
         |      |     ├── routes_database.py
-        |      |     ├── routes_monitoring.py
         |      |     ├── routes_pentesting.py
+        |      |     ├── llm_service.py
         |      |     ├── database.py
-        |      |     ├── monitoring.py
         |      |     ├── pentesting.py
         |      |     ├── routes_alerts.py
         |      |     ├── routes_host.py
         |      |     ├── routes_intel.py
-        |      |     ├── routes_monitor.py
         |      |     ├── routes_reports.py
         |      |     └── routes_settings.py
+        |      |     ├── real_tools.py
+        |      |     ├── routes_subdomains.py
+        |      |     ├── routes_suricata.py
+        |      |     └── whois.py
+        |      |
+        │      ├── payloads/ 
+        |      |     ├── command-injection/
+        |      |     ├── sql-injection/
+        |      |     └── xss/
         |      |
         │      ├── templates/ 
         |      |     ├── assets/
-        |      |     |     
+        |      |     |
         |      |     ├── exam_dashbaord.html
         |      |     ├── exam_question.html
         |      |     ├── exam_results.html
@@ -145,6 +163,10 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     ├── profile.html
         |            |     ├── profile.css
         |            |     └── profile.js
+        |            |
+        |            ├── email-templates/        
+        |            |     ├── microsoft-template.html
+        |            |     └── reset-password.html
         |            |
         |            ├── supcom/        
         |            |     ├── supcom.html
@@ -193,9 +215,6 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     |      |    └── style.css
         |            |     |      |
         |            |     |      └── js/
-        |            |     |           ├── data/
-        |            |     |           |    └── sample-data.js
-        |            |     |           |
         |            |     |           ├── monitoring.js
         |            |     |           └── app.js
         |            |     |
@@ -207,6 +226,21 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |            |     |      ├── reports.html
         |            |     |      └── settings.html
         |            |     |
+        |            |     ├── app.js
+        |            |     ├── backend.py
+        |            |     ├── checklist.html
+        |            |     ├── checklist.js
+        |            |     ├── exploitation.html
+        |            |     ├── exploitation.js
+        |            |     ├── pre-engagement.html
+        |            |     ├── pre-engagement.js
+        |            |     ├── reconnaissance.js
+        |            |     ├── reporting.html
+        |            |     ├── reporting.js
+        |            |     ├── scanning.html
+        |            |     ├── scanning.js
+        |            |     ├── script.js
+        |            |     ├── style.css
         |            |     └── index.html
         |            |
         |            ├── shareTeamCollab/        
@@ -264,7 +298,4 @@ This build includes simple localStorage-based demo authentication (Login/Sign). 
         |
         └── README.md
 
-
-
 ---
-

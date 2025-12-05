@@ -50,8 +50,6 @@ async function fetchWithSession(path, opts = {}) {
 const welcomeMessage = $('welcomeMessage');
 const userNameDisplay = $('userNameDisplay');
 const logoutBtn = $('logout');
-const userDropdownBtn = $('userDropdownBtn');
-const userDropdown = $('userDropdown');
 
 function setUserUI(userData) {
   if (userData && userData.authenticated) {
@@ -91,19 +89,6 @@ async function handleLogout() {
 }
 
 if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
-
-if (userDropdownBtn && userDropdown) {
-  userDropdownBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    userDropdown.style.display =
-      userDropdown.style.display === 'block' ? 'none' : 'block';
-  });
-  document.addEventListener('click', e => {
-    if (!userDropdownBtn.contains(e.target) && !userDropdown.contains(e.target))
-      userDropdown.style.display = 'none';
-  });
-  userDropdown.addEventListener('click', e => e.stopPropagation());
-}
 
 // Display Selected Plan
 function displaySelectedPlan() {
