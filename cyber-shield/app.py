@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify, send_from_directory, session, redirect, Blueprint
+from flask import Flask, request, jsonify, send_from_directory, session, redirect
+from flask_socketio import SocketIO, emit
 from urllib.parse import urlparse
 import os, time, re, socket, requests, tldextract
 import datetime
@@ -6,48 +7,46 @@ import base64
 from werkzeug.utils import secure_filename
 import hashlib
 import tempfile
+import random
 from PIL import Image
 import threading
 import cv2
+from flask import Blueprint, jsonify
 import numpy as np
 import sqlite3
-from flask_socketio import SocketIO, emit
+from datetime import datetime, timedelta
+from flask_cors import CORS
+from routes.exam import exam_bp
 from functools import lru_cache
-import ssl, whois 
+import threading
+import hmac
+from flask import Flask
+import requests, socket, ssl, whois 
 import sys
+import os
+from flask import Flask, request, Response, jsonify
 from ipwhois import IPWhois
 import time
 
-# Try to import QR code libraries with fallbacks
-QR_AVAILABLE = False
-QR_LIB = None
 
-try:
-    from pyzbar.pyzbar import decode as pyzbar_decode
-    QR_LIB = "pyzbar"
-    QR_AVAILABLE = True
-    print("Using pyzbar for QR code scanning")
-except ImportError:
-    try:
-        from qreader import QReader
-        QR_LIB = "qreader"
-        QR_AVAILABLE = True
-        print("Using qreader for QR code scanning")
-    except ImportError:
-        try:
-            # Fallback: using OpenCV's built-in QR code detector
-            import cv2
-            if hasattr(cv2, 'QRCodeDetector'):
-                QR_LIB = "opencv"
-                QR_AVAILABLE = True
-                print("Using OpenCV for QR code scanning")
-            else:
-                print("No QR code library available - QR scanning disabled")
-        except ImportError:
-            print("No QR code library available - QR scanning disabled")
+# Load .env FIRST
+from dotenv import load_dotenv
+load_dotenv()
 
-#importing blueprints
-from routes.authentication import auth_bp, init_mail  
+
+# Set UTF-8 encoding for Windows console
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
+
+
+# Try to import QR code libraries...
+# (your QR code block)
+
+# importing blueprints
+from routes.authentication import auth_bp, init_mail
 from routes.subscription import subscription_bp
 from routes.settings import settings_bp
 from routes.scan_results import scan_results_bp
@@ -60,6 +59,8 @@ from routes.email_phishing import email_phishing_bp
 from routes.exam import exam_bp
 from routes.module import module_bp
 
+  
+
 from backend.routes_alerts import alerts_bp
 from backend.routes_host import host_bp
 from backend.routes_intel import intel_bp
@@ -68,7 +69,33 @@ from backend.routes_settings import settings_bp as backend_settings_bp
 from backend.routes_database import database_bp
 from monitoring import monitor_bp
 from backend.routes_pentesting import pentesting_bp
+from backend.whois import whois_bp
+from backend.routes_subdomains import subdomains_bp
 
+
+
+
+
+
+# ======================================================
+# -------------------- Flask setup --------------------
+# ======================================================
+
+app = Flask(__name__, static_url_path="", static_folder="public")
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
+# ----------------------------
+# Ollama AI backend
+OLLAMA_URL = "http://localhost:11434/api/chat"   # Make sure Ollama is running on this port
+
+
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret-key-change-in-production")
+
+init_mail(app)
+socketio = SocketIO(app, cors_allowed_origin="*")
+
+YOCO_SECRET = os.getenv("YOCO_SECRET_KEY")
+# ... rest of Yoco setup
 
 from backend.whois import whois_bp
 from backend.routes_subdomains import subdomains_bp
@@ -81,17 +108,15 @@ load_dotenv()
 YOCO_SECRET_KEY = os.getenv("YOCO_SECRET_KEY")
 
 
-#======================================================
-# -------------------- Flask setup --------------------
-#======================================================
-
-app = Flask(__name__, static_url_path="", static_folder="public")
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+#backend_bp = Blueprint('backend_bp', __name__)
 
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret-key-change-in-production")
 
-# Initialize Flask-Mail 
+# Initialize Flask-Mail
 init_mail(app)
+
+# NEW: SocketIO setup
+socketio = SocketIO(app, cors_allowed_origins="*")  # Allow CORS for dev; restrict in prod
 
 # --------- Yoco payment environment setup ---------
 
@@ -104,7 +129,13 @@ if not YOCO_SECRET:
 
 YOCO_CHECKOUTS_URL = "https://payments.yoco.com/api/checkouts"
 
-# registering blueprints
+# Register blueprints
+
+
+
+
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "public", "soc"))
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(subscription_bp)
 app.register_blueprint(settings_bp)
@@ -121,15 +152,27 @@ app.register_blueprint(module_bp)
 app.register_blueprint(alerts_bp)
 app.register_blueprint(host_bp)
 app.register_blueprint(intel_bp)
+app.register_blueprint(monitor_bp, url_prefix='/api/monitoring')  # ← Fixed
 app.register_blueprint(reports_bp)
 app.register_blueprint(backend_settings_bp, url_prefix='/api/backend', name='backend_settings')
 app.register_blueprint(database_bp, url_prefix='/api/database')
-app.register_blueprint(monitor_bp, url_prefix='/api/monitoring')
+backend_bp = Blueprint('backend_bp', __name__)
 app.register_blueprint(pentesting_bp, url_prefix='/api/pentesting')
 app.register_blueprint(whois_bp, url_prefix='/backend')
 app.register_blueprint(subdomains_bp, url_prefix='/backend')
 
 app.register_blueprint(suricata_bp, url_prefix='/api/monitoring/suricata')
+
+
+
+
+# NEW: Auth decorator for routes
+def requires_auth(f):
+    def wrapped(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({"error": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+    return wrapped
 
 VT_API_KEY = os.getenv("VT_API_KEY", "").strip()
 DYMO_API_KEY = os.getenv("DYMO_API_KEY", "").strip()
@@ -140,6 +183,9 @@ _ip_bucket = {}
 #======================================================
 # -------------- Heuristics & constants ---------------
 #======================================================
+
+
+
 
 UA = {"User-Agent": "CyberShield-LinkGuard/1.0 (+https://msebetsi.co.za)"}
 
@@ -155,7 +201,6 @@ RISK_BANDS = [
     (21, 59, "WARN"),
     (60, 100, "DANGER"),
 ]
-
 
 # backend/routes_subdomains.py
 from flask import Blueprint, request, jsonify
@@ -226,28 +271,22 @@ def validate_session(session_id):
     if 'user_id' in session:
         if session_id in user_sessions:
             session_data = user_sessions[session_id]
-
             session_data['last_activity'] = time.time()
             return session_data
         else:
-            
             return create_session(session_id, session.get('user_id'))
-    
     
     if session_id in user_sessions:
         session_data = user_sessions[session_id]
-
         if (time.time() - session_data['created'] < 1800 and 
             session_data.get('active', True)):
             session_data['last_activity'] = time.time()
             return session_data
         else:
-            # Session expired, remove it
             if session_id in user_sessions:
                 del user_sessions[session_id]
     
     return None
-
 
 def create_session(session_id, user_id=None):
     """Create a new session"""
@@ -258,6 +297,8 @@ def create_session(session_id, user_id=None):
         'message_count': 0,
         'active': True  
     }
+
+
     
     # Track this session for the user
     if user_id:
@@ -267,20 +308,16 @@ def create_session(session_id, user_id=None):
     
     return user_sessions[session_id]
 
-
 def invalidate_user_sessions(user_id):
     """Immediately invalidate all sessions for a user (on logout)"""
     if user_id in active_sessions:
         for session_id in active_sessions[user_id]:
             if session_id in user_sessions:
-
                 user_sessions[session_id]['active'] = False
-
                 user_sessions[session_id]['cleanup_time'] = time.time() + 60
         
         del active_sessions[user_id]
     return True
-
 
 def cleanup_expired_sessions():
     """Clean up expired and inactive sessions"""
@@ -302,12 +339,10 @@ def cleanup_expired_sessions():
         
         del user_sessions[session_id]
 
-
 @app.route('/api/session/invalidate', methods=['POST'])
 def invalidate_session_endpoint():
     """Invalidate all sessions for the current user"""
     try:
-
         user_id = session.get('user_id')
         if not user_id:
             return jsonify({'error': 'No user session found'}), 400
@@ -318,10 +353,6 @@ def invalidate_session_endpoint():
     except Exception as e:
         print(f"Session invalidation error: {e}")
         return jsonify({'error': 'Failed to invalidate sessions'}), 500
-
-
-
-
 
 @app.route('/api/session/validate', methods=['POST'])
 def validate_session_endpoint():
@@ -336,9 +367,6 @@ def validate_session_endpoint():
         'user_id': session_data.get('user_id') if session_data else None,
         'message_count': session_data.get('message_count', 0) if session_data else 0
     })
-
-
-
 
 @app.route('/api/session/create', methods=['POST'])
 def create_session_endpoint():
@@ -356,7 +384,6 @@ def create_session_endpoint():
         'user_id': user_id
     })
 
-
 def start_session_cleanup_task():
     """Start background session cleanup (runs every 5 minutes)"""
     def cleanup_task():
@@ -368,7 +395,6 @@ def start_session_cleanup_task():
                 print(f"Session cleanup error: {e}")
                 time.sleep(60)  # Wait 1 minute on error
     
-    import threading
     cleanup_thread = threading.Thread(target=cleanup_task, daemon=True)
     cleanup_thread.start()
 
@@ -427,7 +453,7 @@ def process_payment():
                     )
 
                     # default expiry is 30 days
-                    expiry_date = (datetime.datetime.now() + datetime.timedelta(days=30)).isoformat()
+                    expiry_date = (datetime.now() + timedelta(days=30)).isoformat()
 
                     cursor.execute('''
                         INSERT INTO subscriptions (user_id, sub_plan, plan_code, price, date_expiry, plan_active, team_size)
@@ -487,7 +513,6 @@ def process_payment():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 #======================================================
 # ---------------------- Helpers ----------------------
@@ -553,7 +578,6 @@ def unshorten(u: str, max_hops=5):
     except Exception:
         return u, 0
 
-
 @app.route('/api/payment/webhook', methods=['POST'])
 def yoco_webhook():
     """Handle YOCO webhooks to update payment/subscription state."""
@@ -569,7 +593,6 @@ def yoco_webhook():
                 print('Webhook called without signature header')
                 return jsonify({'error': 'Missing signature header'}), 400
 
-            import hmac, hashlib
             expected = hmac.new(webhook_secret.encode('utf-8'), payload, hashlib.sha256).hexdigest()
             # Header may be prefixed with sha256=... or plain
             if sig_header.startswith('sha256='):
@@ -707,7 +730,6 @@ def vt_lookup(u: str):
         return {"enabled": False, "error": "API key not configured"}
     
     try:
-        # First try to get existing report
         url_id = base64_urlsafe(u)
         rep = requests.get(
             f"https://www.virustotal.com/api/v3/urls/{url_id}",
@@ -893,7 +915,6 @@ def combined_url_lookup(u: str):
     
     return results
 
-
 @app.route('/api/config', methods=['GET'])
 def config():
     """Return non-sensitive public configuration for client-side initialization."""
@@ -992,10 +1013,8 @@ def simple_qr_scan_fallback(image_path):
         for contour in contours:
             approx = cv2.approxPolyDP(contour, 0.02 * cv2.arcLength(contour, True), True)
             if len(approx) == 4: 
-
                 x, y, w, h = cv2.boundingRect(contour)
                 if w > 50 and h > 50:  
-
                     roi = gray[y:y+h, x:x+w]
                     return "QR Code detected but decoding unavailable", "qr_detected"
         
@@ -1004,7 +1023,6 @@ def simple_qr_scan_fallback(image_path):
     except Exception as e:
         print(f"Simple QR fallback error: {e}")
         return None, "error"
-
 
 @app.route("/api/scan_file_or_qr", methods=["POST"])
 def scan_file_or_qr():
@@ -1103,8 +1121,6 @@ def scan_file_or_qr():
     
     return jsonify({"error": "File type not allowed"}), 400
 
-
-
 # Add this function before your routes
 def initialize_backend_database():
     """Initialize backend database tables"""
@@ -1124,9 +1140,6 @@ def initialize_backend_database():
 # Call this function after your blueprint registrations
 initialize_backend_database()
 
-
-
-
 # Add these routes to handle SOC dashboard API calls
 @app.route("/api/reports/kpis", methods=["POST"])
 def reports_kpis_proxy():
@@ -1142,8 +1155,6 @@ def alerts_list_proxy():
 def reports_export_proxy():
     """Proxy to the reports blueprint export endpoint"""
     return reports_bp.dispatch_request()
-
-
 
 #======================================================
 # ------------------- Scoring Logic -------------------
@@ -1251,8 +1262,6 @@ def score_combined(api_results: list, signals: dict) -> dict:
     band = next(b for lo, hi, b in RISK_BANDS if lo <= s <= hi)
     return {"score": s, "band": band, "reasons": reasons}
 
-
-
 def score_file_combined(api_results: list) -> dict:
     """Score files based on combined API results"""
     s = 0
@@ -1344,7 +1353,6 @@ def scan():
         print(f"URL scan error: {e}")
         return jsonify({"error": "Failed to scan URL"}), 500
 
-
 @app.route("/api/scan_file", methods=["POST"])
 def scan_file():
     ip = request.headers.get("X-Forwarded-For", request.remote_addr)
@@ -1389,7 +1397,6 @@ def scan_file():
             return jsonify({"error": "Failed to scan file"}), 500
     
     return jsonify({"error": "File type not allowed"}), 400
-
 
 @app.route("/api/scan_qr", methods=["POST"])
 def scan_qr():
@@ -1472,7 +1479,6 @@ def scan_qr():
         print(f"QR scan error: {e}")
         return jsonify({"error": f"Failed to scan QR code: {str(e)}"}), 500
 
-
 #======================================================
 # ----------------- Static / Health -------------------
 #======================================================
@@ -1491,169 +1497,77 @@ def static_proxy(path):
 def health():
     return jsonify({"ok": True})
 
-
-
-#======================================================
-# ---------------- Agent on Server --------------------
-#======================================================
-
-def start_agent_process():
-    """Start the monitoring agent as a separate process"""
-    import subprocess
-    import sys
-    import atexit
-    import signal
-    
+# ==================== OVERVIEW ROUTES ====================
+@app.route('/api/overview/stats')
+@requires_auth  # NEW: Require auth
+@lru_cache(maxsize=32)  # NEW: Cache for performance
+def get_overview_stats():
+    """Get overview statistics from the SOC database"""
     try:
-        agent_path = os.path.join(os.path.dirname(__file__), 'agent.py')
-        
-        if not os.path.exists(agent_path):
-            print(f"Agent file not found at {agent_path}")
-            return None
-        
-        agent_env = os.environ.copy()
-        
-        # Check if we're in production (Render or similar)
-        is_production = os.environ.get('RENDER') or os.environ.get('DYNO') or os.environ.get('PRODUCTION')
-        
-        if is_production:
-            # Production URL
-            agent_env["MONITOR_SERVER"] = "https://www.linkguard.co.za"
-            agent_env["PRODUCTION"] = "true" 
-        else:
-            # Local development
-            port = int(os.getenv("PORT", "5000"))
-            agent_env["MONITOR_SERVER"] = f"http://127.0.0.1:{port}"
-            agent_env["PRODUCTION"] = "false"
-        
-        print(f"Starting monitoring agent from {agent_path}...")
-        print(f"Agent will connect to: {agent_env['MONITOR_SERVER']}")
-        
-        agent_process = subprocess.Popen(
-            [sys.executable, agent_path],
-            env=agent_env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        
-        def cleanup_agent():
-            """Cleanup function to terminate agent when Flask exits"""
-            if agent_process and agent_process.poll() is None:
-                print("Stopping monitoring agent...")
-                agent_process.terminate()
-                try:
-                    agent_process.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    agent_process.kill()
-        
-        atexit.register(cleanup_agent)
-        signal.signal(signal.SIGTERM, lambda sig, frame: cleanup_agent())
-        
-        print(f"Monitoring agent started with PID: {agent_process.pid}")
-        return agent_process
-        
+        conn = sqlite3.connect('soc_dashboard.db')
+        cursor = conn.cursor()
+
+        # Active incidents
+        cursor.execute("""
+            SELECT COUNT(*) FROM alerts
+            WHERE created_at >= datetime('now', '-1 day')
+            AND status IN ('open', 'investigating', 'new')
+        """)
+        active_incidents = cursor.fetchone()[0] or 0
+
+        # MTTR
+        cursor.execute("""
+            SELECT AVG(JULIANDAY(resolved_at) - JULIANDAY(created_at)) * 24 
+            FROM incidents 
+            WHERE resolved_at IS NOT NULL
+            AND created_at >= datetime('now', '-7 days')
+        """)
+        mttr_result = cursor.fetchone()[0]
+        mttr_hours = round(mttr_result or 0, 2)
+
+        # NEW: Detection coverage (example query; adjust to your DB)
+        cursor.execute("SELECT COUNT(DISTINCT technique) FROM mitre_mappings")  # Assume table exists
+        coverage = cursor.fetchone()[0] or 0
+
+        conn.close()
+
+        stats = {
+            "active_incidents": active_incidents,
+            "avg_mttr": f"{mttr_hours}h",
+            "coverage": f"{coverage}%"
+        }
+
+        # NEW: Emit to socket for real-time update
+        socketio.emit('overview_update', stats)
+
+        return jsonify(stats)
     except Exception as e:
-        print(f"Failed to start agent: {e}")
-        return None
+        return jsonify({"error": str(e)}), 500
 
-agent_process = None
-if os.getenv("START_AGENT", "true").lower() == "true" and not os.environ.get('RENDER'):
-    agent_process = start_agent_process()
+# NEW: WebSocket handlers
+@socketio.on('connect', namespace='/ws')
+def ws_connect():
+    emit('connected', {'msg': 'WebSocket connected'})
 
+@socketio.on('disconnect', namespace='/ws')
+def ws_disconnect():
+    print('Client disconnected')
 
-#======================================================
-# ---------------  Suricata Agent  --------------------
-#======================================================
+# NEW: Background thread for simulated real-time updates (e.g., every 10s emit fake alert/host update for testing)
+def background_emitter():
+    while True:
+        time.sleep(10)
+        # Simulate new alert
+        new_alert = {"id": random.randint(1000, 9999), "title": "Simulated Alert", "severity": "High"}
+        socketio.emit('new_alert', new_alert, namespace='/ws')
+        # Simulate host update
+        host_update = {"hostname": "sim-host", "status": "healthy"}
+        socketio.emit('host_update', host_update, namespace='/ws')
 
-def start_suricata_agent():
-    """Start the Suricata EVE forwarder as a separate process"""
-    import subprocess
-    import sys
-    import atexit
-    import signal
-    
-    try:
-        suricata_agent_path = os.path.join(os.path.dirname(__file__), 'suricata_agent.py')
-        
-        if not os.path.exists(suricata_agent_path):
-            print(f"Suricata agent file not found at {suricata_agent_path}")
-            return None
-        
-        agent_env = os.environ.copy()
-        
-        # Check if we're in production (Render or similar)
-        is_production = os.environ.get('RENDER') or os.environ.get('DYNO') or os.environ.get('PRODUCTION')
-        
-        if is_production:
-            # Production URL
-            agent_env["MONITOR_SERVER"] = "https://www.linkguard.co.za"
-            target_url = "https://www.linkguard.co.za"
-            agent_env["PRODUCTION"] = "true" 
-        else:
-            # Local development
-            port = int(os.getenv("PORT", "5000"))
-            agent_env["MONITOR_SERVER"] = f"http://127.0.0.1:{port}"
-            target_url = f"http://127.0.0.1:{port}"
-            agent_env["PRODUCTION"] = "false"
-        
-        print(f"Starting Suricata agent from {suricata_agent_path}...")
-        print(f"Suricata agent will forward to: {target_url}")
-        
-        # Start the suricata_agent.py with the target URL
-        suricata_process = subprocess.Popen(
-            [sys.executable, suricata_agent_path, "--target", target_url],
-            env=agent_env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        
-        def cleanup_suricata_agent():
-            """Cleanup function to terminate Suricata agent when Flask exits"""
-            if suricata_process and suricata_process.poll() is None:
-                print("Stopping Suricata agent...")
-                suricata_process.terminate()
-                try:
-                    suricata_process.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    suricata_process.kill()
-        
-        atexit.register(cleanup_suricata_agent)
-        signal.signal(signal.SIGTERM, lambda sig, frame: cleanup_suricata_agent())
-        
-        print(f"Suricata agent started with PID: {suricata_process.pid}")
-        
-        # Start a thread to monitor the agent's output
-        import threading
-        def monitor_agent_output():
-            while True:
-                if suricata_process.poll() is not None:
-                    break
-                line = suricata_process.stdout.readline()
-                if line:
-                    print(f"[Suricata Agent] {line.strip()}")
-                line = suricata_process.stderr.readline()
-                if line:
-                    print(f"[Suricata Agent ERROR] {line.strip()}")
-        
-        output_thread = threading.Thread(target=monitor_agent_output, daemon=True)
-        output_thread.start()
-        
-        return suricata_process
-        
-    except Exception as e:
-        print(f"Failed to start Suricata agent: {e}")
-        return None
-
-# Start Suricata agent if enabled
-suricata_agent_process = None
-if os.getenv("START_SURICATA_AGENT", "true").lower() == "true":
-    suricata_agent_process = start_suricata_agent()
+threading.Thread(target=background_emitter, daemon=True).start()
 
 #======================================================
 # ----------------------- Entry -----------------------
 #======================================================
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", "5000"))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    socketio.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "5000")), debug=True)  # NEW: Run with SocketIO

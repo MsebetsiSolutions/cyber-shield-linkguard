@@ -1,0 +1,24 @@
+// Sample data generators for charts & tables
+window.SOC_DATA = (function(){
+  const now = Date.now();
+  const hours = Array.from({length: 24}, (_, i) => new Date(now - (23-i)*3600*1000));
+  const events = hours.map(()=> Math.floor(200 + Math.random()*400));
+  const alerts = hours.map(()=> Math.floor(5 + Math.random()*20));
+  const endpointHealth = [78, 12, 6, 4]; // healthy, warning, degraded, offline
+  const traffic = hours.map(()=> Math.floor(50 + Math.random()*150)); // MB/s
+  const offenses = [
+    {name:'Suspicious PowerShell', count: 37, sev: 'High', trend: '+8%'},
+    {name:'Excessive Auth Failures', count: 24, sev: 'Medium', trend: '+3%'},
+    {name:'Outbound DNS Tunneling', count: 12, sev: 'High', trend: '-4%'},
+    {name:'Malware Signature Match', count: 9, sev: 'Critical', trend: '+12%'},
+    {name:'Impossible Travel', count: 7, sev: 'Medium', trend: '+1%'}
+  ];
+
+  const kpis = {
+    activeIncidents: Math.floor(3 + Math.random()*6),
+    avgMttr: (2 + Math.random()*3).toFixed(1) + 'h',
+    coverage: (82 + Math.random()*10).toFixed(0) + '%'
+  };
+
+  return { hours, events, alerts, endpointHealth, traffic, offenses, kpis };
+})();
