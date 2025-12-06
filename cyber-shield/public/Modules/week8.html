@@ -1,43 +1,3 @@
-<script type="text/javascript">
-  var gk_isXlsx = false;
-  var gk_xlsxFileLookup = {};
-  var gk_fileData = {};
-  function filledCell(cell) {
-    return cell !== '' && cell != null;
-  }
-  function loadFileData(filename) {
-    if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-      try {
-        var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-        var firstSheetName = workbook.SheetNames[0];
-        var worksheet = workbook.Sheets[firstSheetName];
-
-        // Convert sheet to JSON to filter blank rows
-        var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-        // Filter out blank rows (rows where all cells are empty, null, or undefined)
-        var filteredData = jsonData.filter(row => row.some(filledCell));
-
-        // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-        var headerRowIndex = filteredData.findIndex((row, index) =>
-          row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-        );
-        // Fallback
-        if (headerRowIndex === -1 || headerRowIndex > 25) {
-          headerRowIndex = 0;
-        }
-
-        // Convert filtered JSON back to CSV
-        var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-        csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-        return csv;
-      } catch (e) {
-        console.error(e);
-        return "";
-      }
-    }
-    return gk_fileData[filename] || "";
-  }
-</script>
 <!doctype html>
 <html lang="en">
 
@@ -47,11 +7,11 @@
   <title>Week 8 — Vulnerability Management Workshop (Multi-page)</title>
   <style>
     :root {
-      --bg: #0f1724;
-      --card: #0b1220;
-      --accent: #06b6d4;
-      --muted: #9aa6b2;
-      --glass: rgba(255, 255, 255, 0.03)
+      --bg: #ffffff;
+      --card: #f8f9fa;
+      --accent: #0066cc;
+      --muted: #6c757d;
+      --glass: rgba(0, 0, 0, 0.03)
     }
 
     html,
@@ -62,8 +22,8 @@
     body {
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
       margin: 0;
-      background: linear-gradient(180deg, #071126 0%, #071829 100%);
-      color: #e6eef6
+      background: linear-gradient(180deg, #f0f2f5 0%, #ffffff 100%);
+      color: #212529
     }
 
     .container {
@@ -80,7 +40,8 @@
 
     h1 {
       margin: 0;
-      font-size: 1.6rem
+      font-size: 1.6rem;
+      color: #212529;
     }
 
     p.lead {
@@ -100,7 +61,8 @@
       padding: 6px 10px;
       border-radius: 999px;
       font-size: .85rem;
-      color: var(--muted)
+      color: var(--muted);
+      border: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .page {
@@ -108,8 +70,9 @@
       background: var(--card);
       border-radius: 12px;
       padding: 20px;
-      box-shadow: 0 6px 18px rgba(2, 6, 23, 0.6);
-      min-height: 70vh
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      min-height: 70vh;
+      border: 1px solid rgba(0, 0, 0, 0.05);
     }
 
     .page.active {
@@ -128,17 +91,18 @@
       padding: 8px 12px;
       border-radius: 8px;
       background: var(--accent);
-      color: #06202a;
+      color: white;
       text-decoration: none;
       font-weight: 600;
       border: none;
-      cursor: pointer
+      cursor: pointer;
+      border: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .btn.ghost {
       background: transparent;
       color: var(--muted);
-      border: 1px solid rgba(255, 255, 255, 0.04)
+      border: 1px solid rgba(0, 0, 0, 0.1)
     }
 
     .small {
@@ -157,7 +121,8 @@
       height: 200px;
       object-fit: cover;
       border-radius: 8px;
-      margin-top: 12px
+      margin-top: 12px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .two-col {
@@ -173,11 +138,13 @@
     }
 
     pre {
-      background: #041226;
+      background: #e9ecef;
       padding: 12px;
       border-radius: 8px;
       overflow: auto;
-      font-size: 0.85rem
+      font-size: 0.85rem;
+      color: #212529;
+      border: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     table.small {
@@ -188,7 +155,12 @@
     table.small td,
     table.small th {
       padding: 6px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    table.small th {
+      background: rgba(0, 102, 204, 0.1);
+      color: #212529;
     }
 
     ul {
@@ -196,10 +168,11 @@
     }
 
     .lab {
-      background: linear-gradient(90deg, rgba(6, 182, 212, 0.03), transparent);
+      background: linear-gradient(90deg, rgba(0, 102, 204, 0.05), transparent);
       padding: 12px;
       border-radius: 8px;
-      margin-top: 8px
+      margin-top: 8px;
+      border-left: 3px solid var(--accent);
     }
 
     .quiz .q {
@@ -213,9 +186,11 @@
     }
 
     .role-card {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), transparent);
+      background: white;
       padding: 10px;
-      border-radius: 8px
+      border-radius: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      color: #212529;
     }
 
     footer {
@@ -277,7 +252,8 @@
     .accordion .acc-item {
       border-radius: 8px;
       overflow: hidden;
-      margin-bottom: 8px
+      margin-bottom: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
     }
 
     .acc-header {
@@ -285,13 +261,14 @@
       justify-content: space-between;
       align-items: center;
       padding: 12px;
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
-      cursor: pointer
+      background: rgba(0, 0, 0, 0.02);
+      cursor: pointer;
+      color: #212529;
     }
 
     .acc-body {
       padding: 12px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent);
+      background: white;
       display: none
     }
 
@@ -303,9 +280,27 @@
       padding: 8px;
       margin-top: 6px;
       border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      background: transparent;
-      color: inherit
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      background: white;
+      color: #212529
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      margin-bottom: 12px;
+    }
+
+    hr {
+      margin: 14px 0;
+      border: none;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    strong, h2, h3, h4 {
+      color: #212529;
     }
   </style>
 </head>
@@ -315,7 +310,7 @@
     <header>
       <div>
         <h1>Week 8 — Vulnerability Management Workshop</h1>
-        <p class="lead">Theme: “Scan the Present. Secure the Future.” — Interactive, extended & classroom-ready</p>
+        <p class="lead">Theme: "Scan the Present. Secure the Future." — Interactive, extended & classroom-ready</p>
       </div>
       <div class="pager">
         <div class="pill">Duration: 4 hours</div>
@@ -428,7 +423,7 @@
               </div>
             </div>
 
-            <hr style="margin:14px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+            <hr>
 
             <h3>9:30 — 10:30: Hands-On OpenVAS (IoT Scan)</h3>
             <p class="small">Setup instructions, deeper lab tasks, and scoring rubric.</p>
@@ -529,7 +524,7 @@ Compliance mapping: NIST SI-2, RA-5 — evidence: scan results, change log
 </pre>
             </div>
 
-            <h3 style="margin-top:12px">11:30 — 12:00: Future Builders — AfroCVE & “KUBUKA”</h3>
+            <h3 style="margin-top:12px">11:30 — 12:00: Future Builders — AfroCVE & "KUBUKA"</h3>
             <p class="small">Design exercise: mobile-first, low-bandwidth scanner — expanded with tech stack and MVP
               plan.</p>
 
@@ -564,7 +559,7 @@ Compliance mapping: NIST SI-2, RA-5 — evidence: scan results, change log
               • RustScan / Masscan guides
             </div>
 
-            <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0">
+            <hr>
 
             <strong>Role-play cards</strong>
             <div style="margin-top:8px" class="small">Click to copy a ready card for printouts or slides.</div>
@@ -655,7 +650,7 @@ Compliance mapping: NIST SI-2, RA-5 — evidence: scan results, change log
 import pandas as pd
 df = pd.read_csv("brics_risk_input.csv")
 df["LGPD_Score"] = df["Impact"] * df["Likelihood"] * 0.8
-# Prioritize assets with scores &gt; 7.0
+# Prioritize assets with scores > 7.0
 </pre>
 
               <p class="small">Class exercise: build a 5-asset risk matrix and map remediation windows (0-24h, 24-72h,
@@ -698,7 +693,7 @@ df["LGPD_Score"] = df["Impact"] * df["Likelihood"] * 0.8
         <div style="margin-top:10px" class="small">Discussion: "How would a vulnerability scanner embody Ubuntu
           principles?" Ideas: community severity scoring, local-language reporting.</div>
 
-        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+        <hr>
 
         <h3>Quizzes & Reflection</h3>
         <div class="quiz">
@@ -844,7 +839,7 @@ df["LGPD_Score"] = df["Impact"] * df["Likelihood"] * 0.8
               <li>Provide credential sets for credentialed scans (in staging only).</li>
             </ul>
 
-            <hr style="margin:10px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
+            <hr />
 
             <strong>Downloadables (templates)</strong>
             <ul class="small">
@@ -872,7 +867,7 @@ df["LGPD_Score"] = df["Impact"] * df["Likelihood"] * 0.8
             <div class="small" style="margin-top:8px">• CVSS v3.1 (FIRST.org)<br>• OpenVAS / Greenbone docs<br>• Tenable
               Nessus Essentials<br>• TryHackMe CTF suggestions</div>
 
-            <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+            <hr>
 
             <strong>Role-play Cards</strong>
             <div style="margin-top:8px" class="small">Click a role to copy a ready card to paste into printouts or
@@ -898,8 +893,8 @@ df["LGPD_Score"] = df["Impact"] * df["Likelihood"] * 0.8
 
       <footer style="margin-top:12px;text-align:left" class="card">
         <strong>Closing Reflection</strong>
-        <p class="small">“In every vulnerability, there’s a story... Let future engineers be builders of secure
-          systems.” — Tshepho Nkoe</p>
+        <p class="small">"In every vulnerability, there's a story... Let future engineers be builders of secure
+          systems." — Tshepho Nkoe</p>
       </footer>
     </section>
 
@@ -996,8 +991,23 @@ Compliance mapping: [NIST / ENISA / local regs]</pre>
     }
 
     // Download text assets
-    const patchPlanTemplate = document.getElementById('patch-plan-template').textContent;
-    const cvssNotebook = document.getElementById('cvss-notebook-template').textContent;
+    const patchPlanTemplate = `Title: Compliant Patch Plan — [Org]
+Target: [Device]
+Priority: [Critical/High/Medium/Low]
+CVEs: [List]
+Mitigation: [Steps]
+Timeline: [Dates]
+Rollback: [Steps]
+Communication: [Stakeholders & cadence]
+Compliance mapping: [NIST / ENISA / local regs]`;
+
+    const cvssNotebook = `# CVSS Calculator Notebook
+
+## Instructions
+- Load findings.csv
+- Map metrics (AV, AC, PR, UI, S, C, I, A)
+- Compute base score using formula / library`;
+
     function downloadText(filename, content) {
       const blob = new Blob([content], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
