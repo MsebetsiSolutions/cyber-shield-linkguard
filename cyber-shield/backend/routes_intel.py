@@ -530,3 +530,65 @@ def infer_relationship(source, target):
     }
     
     return relationship_map.get((source_type, target_type), 'related-to')
+
+
+@intel_bp.get("/api/ti/opencti/submissions")
+def ti_opencti_submissions():
+    """
+    Get recent OpenCTI submissions from alerts.
+    
+    Returns: List of alerts that have been submitted to OpenCTI with their STIX data
+    """
+    from backend.database import db
+    from backend.routes_alerts import _row_to_obj
+    from backend.ioc_detector import AlertClassifier
+    from backend.opencti_integration import get_opencti_client
+    
+    classifier = AlertClassifier()
+    client = get_opencti_client()
+    
+    submissions = []
+    
+    with db() as conn:
+        # Get alerts tagged with opencti_submitted
+        cur = conn.execute("""
+            SELECT * FROM alerts 
+            WHERE tags LIKE '%opencti_submitted%'
+            ORDER BY updated_at DESC
+            LIMIT 50
+        """)
+        rows = cur.fetchall()
+        
+        for row in rows:
+            alert_data = _row_to_obj(row)
+            classification = classifier.classify_alert(alert_data)
+            
+            # Create STIX bundle for display
+            bundle = client.create_stix_bundle(alert_data, classification)
+            
+            # Extract key information
+            incidents = [obj for obj in bundle['objects'] if obj.get('type') == 'incident']
+            indicators = [obj for obj in bundle['objects'] if obj.get('type') == 'indicator']
+            attack_patterns = [obj for obj in bundle['objects'] if obj.get('type') == 'attack-pattern']
+            
+            submissions.append({
+                'alert_id': alert_data.get('id'),
+                'title': alert_data.get('title', 'Unknown'),
+                'severity': alert_data.get('severity', 'Unknown'),
+                'timestamp': alert_data.get('timestamp', alert_data.get('created_at', '')),
+                'submitted_at': alert_data.get('updated_at', ''),
+                'incident_count': len(incidents),
+                'indicator_count': len(indicators),
+                'attack_pattern_count': len(attack_patterns),
+                'iocs': classification.get('iocs', {}),
+                'mitre_techniques': [ap.get('name', '') for ap in attack_patterns],
+                'stix_bundle': bundle,
+                'opencti_status': 'submitted' if 'opencti_submitted' in json.loads(alert_data.get('tags', '[]')) else 'pending'
+            })
+    
+    return jsonify({
+        'submissions': submissions,
+        'total': len(submissions),
+        'opencti_enabled': client.enabled,
+        'opencti_connected': client.test_connection()[0] if client.enabled else False
+    })

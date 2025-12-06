@@ -18,14 +18,14 @@
       <p class="muted">Paste raw IOCs (IPs, domains, URLs, hashes). They are normalized automatically.</p>
       <textarea id="ioc"
         placeholder="Paste your threat data here... (e.g., 192.168.1.1, malicious.com, http://bad.com/evil.exe)"></textarea>
-      <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+      <div class="flex-gap-8-mt-8 flex-center">
         <button class="btn sm" id="btnPasteNormalize">📥 Paste & Normalize</button>
         <button class="btn sm ghost" id="btnClearAll">🗑️ Clear All</button>
-        <a href="#" id="samplePaste" style="margin-left:8px; font-size:0.9em">e.g., Paste a log file, email headers, or
+        <a href="#" id="samplePaste" class="ml-8 fs-09">e.g., Paste a log file, email headers, or
           a report here</a>
       </div>
 
-      <div class="results-box" style="margin-top:12px">
+      <div class="results-box mt-12">
         <h4 id="normCount">Normalized Indicators (0 Found)</h4>
         <table class="table compact" id="normTable">
           <thead>
@@ -40,7 +40,7 @@
         </table>
       </div>
 
-      <div style="display:flex;justify-content:flex-end;margin-top:12px">
+      <div class="flex-end mt-12">
         <button class="btn primary" id="btnProceedEnrich" disabled>Proceed to Enrichment →</button>
       </div>
     </div>
@@ -58,24 +58,24 @@
       <label>Server URL</label>
       <input id="taxiiUrl" placeholder="https://cti.example.org/taxii/" value="https://cti-taxii.mitre.org/taxii/">
       
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+      <div class="grid-2-gap-8-mt-8">
         <div>
           <label>Collection ID</label>
           <input id="taxiiCollection" placeholder="Enter Collection ID" value="95ecc380-afe9-11e4-9b6c-751b66dd541e">
         </div>
         <div>
           <label>Range (days)</label>
-          <input id="taxiiDays" type="number" value="7" min="1">
+          <input id="taxiiDays" type="number" value="7" min="1" title="Number of days to pull data">
         </div>
       </div>
       
-      <div style="display:flex;gap:8px;margin-top:8px">
+      <div class="flex-gap-8-mt-8">
         <button class="btn sm" id="btnListCollections">🔍 Test & List Collections</button>
         <button class="btn sm" id="btnPullTaxii">⬇️ Pull Objects</button>
       </div>
       
       <!-- TAXII Results Table -->
-      <div id="taxiiResults" style="margin-top:12px; display: none;">
+      <div id="taxiiResults" class="mt-12 hidden">
         <h4>TAXII Objects (<span id="taxiiObjectCount">0</span> Found)</h4>
         <table class="table compact" id="taxiiTable">
           <thead>
@@ -90,12 +90,12 @@
         </table>
       </div>
       
-      <div id="taxiiAlert" style="margin-top:8px"></div>
+      <div id="taxiiAlert" class="mt-8"></div>
     </div>
   </div>
 
   <!-- STIX RELATIONSHIP GRAPH -->
-  <div class="card" id="stixGraphCard" style="display: none; margin-top: 12px;">
+  <div class="card mt-12 hidden" id="stixGraphCard">
     <div class="card-head">
       <h3>STIX Relationship Graph</h3>
       <div class="actions">
@@ -117,7 +117,7 @@
 
     <div class="cy-container">
       <div id="stixGraph"></div>
-      <div id="graphOverlay" class="graph-overlay" style="display: none;">
+      <div id="graphOverlay" class="graph-overlay hidden">
         <div class="node-details">
           <h4 id="nodeTitle">Node Details</h4>
           <div class="type" id="nodeType">type</div>
@@ -128,19 +128,19 @@
 
     <div class="graph-legend">
       <div class="legend-item">
-        <div class="legend-color" style="background: #d4af37;"></div>
+        <div class="legend-color indicator"></div>
         <span>Indicator</span>
       </div>
       <div class="legend-item">
-        <div class="legend-color" style="background: #228b22;"></div>
+        <div class="legend-color malware"></div>
         <span>Malware</span>
       </div>
       <div class="legend-item">
-        <div class="legend-color" style="background: #b22222;"></div>
+        <div class="legend-color attack-pattern"></div>
         <span>Attack Pattern</span>
       </div>
       <div class="legend-item">
-        <div class="legend-color" style="background: #ff8c00;"></div>
+        <div class="legend-color threat-actor"></div>
         <span>Threat Actor</span>
       </div>
     </div>
@@ -151,7 +151,7 @@
     <div class="card">
       <h3>Enrichment Engines</h3>
       <p class="muted">Select sources to enrich normalized IOCs. (Backend fans out to providers.)</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+      <div class="grid-2-gap-6">
         <label><input class="enr" type="checkbox" value="virustotal" checked> VirusTotal</label>
         <label><input class="enr" type="checkbox" value="otx" checked> AlienVault OTX</label>
         <label><input class="enr" type="checkbox" value="urlscan" checked> urlscan.io</label>
@@ -160,14 +160,14 @@
         <label><input class="enr" type="checkbox" value="shodan" checked> Shodan</label>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+      <div class="grid-2-gap-8-mt-8">
         <div>
           <label>Confidence (0–100)</label>
-          <input id="conf" type="number" min="0" max="100" value="80">
+          <input id="conf" type="number" min="0" max="100" value="80" title="Confidence score">
         </div>
         <div>
           <label>TLP</label>
-          <select id="tlp">
+          <select id="tlp" title="Traffic Light Protocol">
             <option value="TLP:CLEAR">TLP:CLEAR</option>
             <option value="TLP:GREEN" selected>TLP:GREEN</option>
             <option value="TLP:AMBER">TLP:AMBER</option>
@@ -176,7 +176,7 @@
         </div>
       </div>
 
-      <div style="display:flex;gap:8px;margin-top:8px">
+      <div class="flex-gap-8-mt-8">
         <button class="btn sm" id="btnEnrich"><i class="bi bi-lightning-charge"></i> Enrich</button>
         <button class="btn sm ghost" id="btnScore"><i class="bi bi-graph-up"></i> Score Only</button>
       </div>
@@ -186,21 +186,21 @@
       <h3>MITRE ATT&CK Mapping</h3>
       <p class="muted">Auto-tag indicators with Techniques/Tactics based on enrichment signals, behaviors, and intel
         notes.</p>
-      <div style="display:flex;gap:8px">
+      <div class="flex-gap-8">
         <button class="btn sm" id="btnMapAttack"><i class="bi bi-diagram-3"></i> Map ATT&CK</button>
         <button class="btn sm ghost" id="btnHeatmap"><i class="bi bi-grid-3x3-gap"></i> Build Heatmap</button>
         <button class="btn sm ghost" id="btnVisualizeGraph"><i class="bi bi-diagram-3"></i> View Graph</button>
       </div>
       
       <!-- ATT&CK Heatmap Container -->
-      <div id="heatmapContainer" style="display: none; margin-top: 12px;"></div>
+      <div id="heatmapContainer" class="mt-12 hidden"></div>
       
       <pre id="attackOut"></pre>
     </div>
   </div>
 
   <!-- RESULTS -->
-  <div class="card" style="margin-top:12px">
+  <div class="card mt-12">
     <div class="card-head">
       <h3>Results (Unified)</h3>
       <div class="actions">
@@ -227,8 +227,44 @@
     </table>
   </div>
 
+  <!-- ADVANCED THREAT INTELLIGENCE -->
+  <div class="card mt-12">
+    <div class="card-head">
+      <h3>🛡️ Advanced Threat Intelligence</h3>
+      <div class="actions">
+        <button class="btn sm ghost" id="btnRefreshOpenCTI"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+        <button class="btn sm ghost" id="btnViewOpenCTI" title="View in OpenCTI"><i class="bi bi-box-arrow-up-right"></i> View Platform</button>
+      </div>
+    </div>
+    <p class="muted">Alerts submitted to Advanced Threat Intelligence with STIX bundles, IOC extraction, indicators, and MITRE ATT&CK mappings.</p>
+    
+    <div id="openctiStatus" class="mb-12"></div>
+    
+    <table class="table compact" id="openctiTable">
+      <thead>
+        <tr>
+          <th>Alert ID</th>
+          <th>Title</th>
+          <th>Severity</th>
+          <th>Submitted</th>
+          <th>Incidents</th>
+          <th>Indicators</th>
+          <th>ATT&CK</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    
+    <div id="openctiEmpty" class="hidden opencti-empty">
+      <i class="bi bi-inbox"></i>
+      <p>No alerts submitted to Advanced Threat Intelligence yet.</p>
+      <p><strong>Go to Alerts page → Select alerts → Click "Send to Advanced TI"</strong></p>
+    </div>
+  </div>
+
   <!-- WEBHOOKS -->
-  <div class="card" style="margin-top:12px">
+  <div class="card mt-12">
     <div class="card-head">
       <h3>Webhooks</h3>
       <div class="actions">
@@ -236,21 +272,21 @@
       </div>
     </div>
     <p class="muted">Notify downstream systems when new high-risk IOCs are observed or updated.</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="grid-2-gap-8">
       <div>
         <label>Slack/Teams/Generic URL</label>
         <input id="whUrl" placeholder="https://hooks.slack.com/services/...">
       </div>
       <div>
         <label>Trigger Threshold (Risk ≥)</label>
-        <input id="whThreshold" type="number" min="0" max="100" value="80">
+        <input id="whThreshold" type="number" min="0" max="100" value="80" title="Minimum risk score to trigger webhook">
       </div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:8px">
+    <div class="flex-gap-8-mt-8">
       <button class="btn sm" id="btnAddWebhook"><i class="bi bi-plus-circle"></i> Add</button>
       <button class="btn sm ghost" id="btnClearWebhooks"><i class="bi bi-trash3"></i> Clear</button>
     </div>
-    <ul id="whList" style="margin-top:8px"></ul>
+    <ul id="whList" class="mt-8"></ul>
   </div>
 </div>
 
@@ -260,6 +296,37 @@
 <script src="https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
 
 <style>
+  .opencti-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  
+  .opencti-empty i {
+    font-size: 4rem;
+    opacity: 0.3;
+    margin-bottom: 20px;
+    display: block;
+  }
+  
+  .opencti-empty p {
+    margin: 10px 0;
+    font-size: 1rem;
+  }
+  
+  .opencti-empty strong {
+    color: var(--primary);
+  }
+  
+  .flex-1-m-0 {
+    flex: 1;
+    margin: 0;
+  }
+  
+  .m-0 {
+    margin: 0;
+  }
+
   /* Graph Visualization Styles */
   .cy-container {
     position: relative;
@@ -303,6 +370,11 @@
     border: 1px solid var(--border);
   }
 
+  .legend-color.indicator { background: #d4af37; }
+  .legend-color.malware { background: #228b22; }
+  .legend-color.attack-pattern { background: #b22222; }
+  .legend-color.threat-actor { background: #ff8c00; }
+
   .graph-overlay {
     position: absolute;
     top: 10px;
@@ -319,6 +391,23 @@
     font-size: 12px;
     line-height: 1.4;
   }
+
+  /* New utility classes */
+  .flex-gap-8 { display: flex; gap: 8px; }
+  .flex-gap-12 { display: flex; gap: 12px; }
+  .flex-gap-12-wrap { display: flex; gap: 12px; flex-wrap: wrap; }
+  .grid-2-gap-8 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .grid-auto-fit-gap { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0; }
+  .mt-12 { margin-top: 12px; }
+  .hidden { display: none; }
+  .text-center-muted { text-align: center; color: var(--text-muted); padding: 20px; }
+  .type-badge { background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; display: inline-block; }
+  
+  /* Legend colors */
+  .indicator { background: #d4af37; }
+  .malware { background: #228b22; }
+  .attack-pattern { background: #b22222; }
+  .threat-actor { background: #4169e1; }
 
   .node-details h4 {
     margin: 0 0 6px 0;
@@ -404,6 +493,22 @@
     min-width: 120px;
     font-weight: 600;
   }
+
+  /* Utility classes for common inline styles */
+  .flex-gap-8 { display: flex; gap: 8px; }
+  .flex-gap-8-mt-8 { display: flex; gap: 8px; margin-top: 8px; }
+  .flex-center { display: flex; align-items: center; }
+  .flex-end { display: flex; justify-content: flex-end; }
+  .grid-2-gap-6 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .grid-2-gap-8 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .grid-2-gap-8-mt-8 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mb-12 { margin-bottom: 12px; }
+  .ml-8 { margin-left: 8px; }
+  .fs-09 { font-size: 0.9em; }
+  .hidden { display: none; }
+  .text-center-muted { text-align: center; color: var(--text-muted); padding: 20px; }
 </style>
 
 <!-- Add SweetAlert2 CSS & JS -->
@@ -684,7 +789,7 @@
       el.taxiiTable.innerHTML = '';
       
       if (objects.length === 0) {
-        el.taxiiResults.style.display = 'none';
+        el.taxiiResults.classList.add('hidden');
         return;
       }
       
@@ -700,7 +805,7 @@
         el.taxiiTable.appendChild(tr);
       });
       
-      el.taxiiResults.style.display = 'block';
+      el.taxiiResults.classList.remove('hidden');
       
       // Store STIX objects for graph visualization
       state.stixObjects = objects;
@@ -720,7 +825,7 @@
     }
 
     function hideTaxiiResults() {
-      el.taxiiResults.style.display = 'none';
+      el.taxiiResults.classList.add('hidden');
     }
 
     // =========================
@@ -821,7 +926,7 @@
           
           state.cy.on('tap', function(evt) {
             if (evt.target === state.cy) {
-              el.graphOverlay.style.display = 'none';
+              el.graphOverlay.classList.add('hidden');
             }
           });
           
@@ -932,7 +1037,7 @@
       el.stixGraph.innerHTML = `
         <div style="color: white; padding: 20px;">
           <h3>🎯 Threat Intelligence Relationships</h3>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0;">
+          <div class="grid-auto-fit-gap">
             ${state.stixObjects.map(obj => `
               <div style="background: ${getNodeColor(obj.type)}; 
                           color: white; 
@@ -943,7 +1048,7 @@
                   <div style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">
                       ${obj.name || obj.id}
                   </div>
-                  <div style="background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; display: inline-block;">
+                  <div class="type-badge">
                       ${obj.type}
                   </div>
                   <div style="margin-top: 10px; font-size: 12px;">
@@ -977,7 +1082,7 @@
       $("#nodeTitle").textContent = nodeData.label;
       $("#nodeType").textContent = nodeData.type;
       $("#nodeDescription").textContent = nodeData.description;
-      el.graphOverlay.style.display = 'block';
+      el.graphOverlay.classList.remove('hidden');
     }
 
     function updateGraphStats() {
@@ -989,7 +1094,7 @@
     }
 
     function hideGraph() {
-      el.stixGraphCard.style.display = 'none';
+      el.stixGraphCard.classList.add('hidden');
     }
 
     // =========================
@@ -1099,14 +1204,14 @@
         html += '</div></div>';
       });
       
-      html += '</div><div style="display: flex; gap: 12px; margin-top: 12px;">';
+      html += '</div><div class="flex-gap-12 mt-12">';
       html += '<div class="legend-item"><div class="legend-color heatmap-cell low"></div><span>Low (1-2)</span></div>';
       html += '<div class="legend-item"><div class="legend-color heatmap-cell medium"></div><span>Medium (3-6)</span></div>';
       html += '<div class="legend-item"><div class="legend-color heatmap-cell high"></div><span>High (7+)</span></div>';
       html += '</div>';
       
       el.heatmapContainer.innerHTML = html;
-      el.heatmapContainer.style.display = 'block';
+      el.heatmapContainer.classList.remove('hidden');
     }
 
     // =========================
@@ -1118,7 +1223,7 @@
       
       if (state.stixObjects.length > 0) {
         // Show the card FIRST
-        el.stixGraphCard.style.display = 'block';
+        el.stixGraphCard.classList.remove('hidden');
         
         // Wait for card to be visible in DOM
         setTimeout(async () => {
@@ -1242,7 +1347,7 @@
           
           state.cy.on('tap', function(evt) {
             if (evt.target === state.cy) {
-              el.graphOverlay.style.display = 'none';
+              el.graphOverlay.classList.add('hidden');
             }
           });
           
@@ -1661,6 +1766,197 @@
       a.href = url; a.download = name; a.click();
       setTimeout(() => URL.revokeObjectURL(url), 600);
     }
+
+    // =========================
+    // ADVANCED THREAT INTELLIGENCE
+    // =========================
+    const openctiState = {
+      submissions: [],
+      status: null
+    };
+
+    async function loadOpenCTISubmissions() {
+      try {
+        const r = await fetch('/api/ti/opencti/submissions');
+        if (!r.ok) {
+          throw new Error(`HTTP ${r.status}`);
+        }
+        
+        const data = await r.json();
+        openctiState.submissions = data.submissions || [];
+        openctiState.status = {
+          enabled: data.opencti_enabled,
+          connected: data.opencti_connected,
+          total: data.total
+        };
+        
+        renderOpenCTIStatus();
+        renderOpenCTISubmissions();
+      } catch (error) {
+        console.error('Failed to load Advanced TI submissions:', error);
+        $("#openctiStatus").innerHTML = `<div class="alert alert-error">Failed to load Advanced Threat Intelligence: ${error.message}</div>`;
+      }
+    }
+
+    function renderOpenCTIStatus() {
+      const status = openctiState.status;
+      if (!status) return;
+      
+      let html = '<div class="flex-gap-12-wrap">';
+      
+      if (status.enabled) {
+        const statusClass = status.connected ? 'success' : 'warning';
+        const statusIcon = status.connected ? '✅' : '⚠️';
+        const statusText = status.connected ? 'Connected to OpenCTI' : 'OpenCTI Not Connected';
+        html += `<div class="alert alert-${statusClass} flex-1-m-0">${statusIcon} <strong>${statusText}</strong></div>`;
+      } else {
+        html += `<div class="alert alert-info flex-1-m-0">🔧 <strong>Mock Mode</strong> - Submissions are stored locally. Set OPENCTI_URL and OPENCTI_API_KEY to enable real OpenCTI integration.</div>`;
+      }
+      
+      html += `<div class="alert alert-info m-0">📊 <strong>${status.total}</strong> Alert${status.total !== 1 ? 's' : ''} Submitted</div>`;
+      html += '</div>';
+      
+      $("#openctiStatus").innerHTML = html;
+    }
+
+    function renderOpenCTISubmissions() {
+      const tbody = $("#openctiTable tbody");
+      tbody.innerHTML = '';
+      
+      if (openctiState.submissions.length === 0) {
+        $("#openctiTable").classList.add('hidden');
+        $("#openctiEmpty").classList.remove('hidden');
+        return;
+      }
+      
+      $("#openctiTable").classList.remove('hidden');
+      $("#openctiEmpty").classList.add('hidden');
+      
+      openctiState.submissions.forEach(sub => {
+        const tr = document.createElement('tr');
+        
+        const severityBadge = sub.severity === 'critical' ? 'bad' : 
+                             sub.severity === 'high' ? 'warn' : 
+                             sub.severity === 'medium' ? 'ok' : 'ok';
+        
+        const timestamp = sub.submitted_at ? new Date(sub.submitted_at).toLocaleString() : 'N/A';
+        
+        const iocCount = Object.values(sub.iocs || {}).reduce((sum, arr) => sum + arr.length, 0);
+        
+        tr.innerHTML = `
+          <td><a href="#" class="view-alert" data-id="${sub.alert_id}">#${sub.alert_id}</a></td>
+          <td>${sub.title}</td>
+          <td><span class="badge ${severityBadge}">${sub.severity}</span></td>
+          <td>${timestamp}</td>
+          <td>${sub.incident_count}</td>
+          <td>${sub.indicator_count} <span class="muted">(${iocCount} IOCs)</span></td>
+          <td>${sub.attack_pattern_count} <span class="muted">${sub.mitre_techniques.slice(0, 2).join(', ')}</span></td>
+          <td>
+            <button class="btn sm ghost view-stix" data-alert="${sub.alert_id}"><i class="bi bi-file-code"></i></button>
+            <button class="btn sm ghost view-iocs" data-alert="${sub.alert_id}"><i class="bi bi-shield-exclamation"></i></button>
+          </td>
+        `;
+        
+        tbody.appendChild(tr);
+      });
+      
+      // Wire up event handlers
+      tbody.querySelectorAll('.view-alert').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const alertId = btn.dataset.id;
+          window.location.href = `/soc/pages/alerts.html?id=${alertId}`;
+        });
+      });
+      
+      tbody.querySelectorAll('.view-stix').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const alertId = btn.dataset.alert;
+          const sub = openctiState.submissions.find(s => s.alert_id == alertId);
+          if (sub) {
+            showStixBundle(sub);
+          }
+        });
+      });
+      
+      tbody.querySelectorAll('.view-iocs').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const alertId = btn.dataset.alert;
+          const sub = openctiState.submissions.find(s => s.alert_id == alertId);
+          if (sub) {
+            showIOCs(sub);
+          }
+        });
+      });
+    }
+
+    function showStixBundle(submission) {
+      const bundle = submission.stix_bundle;
+      const json = JSON.stringify(bundle, null, 2);
+      
+      Swal.fire({
+        title: `STIX Bundle - Alert #${submission.alert_id}`,
+        html: `<div style="text-align: left;">
+          <p><strong>Objects:</strong> ${bundle.objects.length}</p>
+          <p><strong>Incidents:</strong> ${submission.incident_count}</p>
+          <p><strong>Indicators:</strong> ${submission.indicator_count}</p>
+          <p><strong>Attack Patterns:</strong> ${submission.attack_pattern_count}</p>
+          <pre style="background: var(--bg-soft); padding: 12px; border-radius: 6px; max-height: 400px; overflow-y: auto; text-align: left;">${json}</pre>
+        </div>`,
+        width: '800px',
+        showCancelButton: true,
+        confirmButtonText: 'Download STIX',
+        cancelButtonText: 'Close',
+        background: 'var(--card)',
+        color: 'var(--text)',
+        confirmButtonColor: 'var(--primary)'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          download(`stix_alert_${submission.alert_id}.json`, json, 'application/json');
+        }
+      });
+    }
+
+    function showIOCs(submission) {
+      const iocs = submission.iocs;
+      let html = '<div style="text-align: left;">';
+      
+      Object.keys(iocs).forEach(type => {
+        if (iocs[type].length > 0) {
+          html += `<h4>${type.toUpperCase()}</h4><ul>`;
+          iocs[type].forEach(ioc => {
+            html += `<li><code>${ioc}</code></li>`;
+          });
+          html += '</ul>';
+        }
+      });
+      
+      html += '</div>';
+      
+      Swal.fire({
+        title: `IOCs - Alert #${submission.alert_id}`,
+        html: html,
+        width: '600px',
+        confirmButtonText: 'Close',
+        background: 'var(--card)',
+        color: 'var(--text)',
+        confirmButtonColor: 'var(--primary)'
+      });
+    }
+
+    // Wire up OpenCTI buttons
+    $("#btnRefreshOpenCTI")?.addEventListener('click', () => {
+      loadOpenCTISubmissions();
+    });
+
+    $("#btnViewOpenCTI")?.addEventListener('click', () => {
+      // Open OpenCTI platform in new tab (default localhost:8080)
+      const openctiUrl = 'http://localhost:8080';
+      window.open(openctiUrl, '_blank');
+    });
+
+    // Load Advanced Threat Intelligence submissions on page load
+    loadOpenCTISubmissions();
 
   })();
 </script>
