@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en-ZA" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Msebetsi Solutions - Lesson 18: Quantum Box Model Implementation">
+    <title>Lesson 18: Quantum Box Model | AfricaConnect Dashboard</title>
+    
+    <link rel="stylesheet" href="./assets/css/quantum-box.css">
+    
+    <!-- Msebetsi Design System -->
+    <link rel="stylesheet" href="https://design.msebetsi.africa/css/msebetsi-core.css">
+    
+    <style>
+        /* Quantum Layout Foundation */
+        :root {
+            /* Mathematical Constants */
+            --phi: 1.618;
+            --spatial-base: 1rem;
+            --spatial-constant: calc(var(--spatial-base) * var(--phi));
+            
+            /* Cultural Spacing Variables */
+            --spacing-density: 1.2;
+            --cultural-context: 0.8;
+            
+            /* Regional Color Scheme */
+            --region-za: #3498db;  /* South Africa - Blue */
+            --region-ke: #2ecc71;  /* Kenya - Green */
+            --region-ng: #e74c3c;  /* Nigeria - Red */
+            --region-gh: #f39c12;  /* Ghana - Orange */
+            
+            /* Accessibility Standards */
+            --min-tap-target: 44px;
+            --focus-ring: 3px solid rgba(52, 152, 219, 0.5);
+            --contrast-threshold: 4.5;
+        }
+        
+        /* Reset with Quantum Principles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: var(--phi);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: var(--spatial-constant);
+            color: #2c3e50;
+        }
+        
+        /* Mission Header */
+        .mission-header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: calc(var(--spatial-constant) * 1.5);
+            border-radius: calc(var(--spatial-constant) / 2);
+            margin-bottom: var(--spatial-constant);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            text-align: center;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+        }
+        
+        .mission-header::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                var(--region-za), 
+                var(--region-ke), 
+                var(--region-ng), 
+                var(--region-gh));
+            border-radius: calc(var(--spatial-constant) / 2 + 2px);
+            z-index: -1;
+            animation: quantum-glow 4s ease-in-out infinite alternate;
+        }
+        
+        @keyframes quantum-glow {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .mission-title {
+            font-size: calc(var(--spatial-constant) * 1.5);
+            background: linear-gradient(45deg, 
+                var(--region-za), 
+                var(--region-ke));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: calc(var(--spatial-constant) / var(--phi));
+        }
+        
+        .mission-subtitle {
+            color: #7f8c8d;
+            font-size: calc(var(--spatial-base) * 1.2);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: calc(var(--phi) * 1.2);
+        }
+        
+        /* AfricaConnect Dashboard Container */
+        .africaconnect-dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: calc(var(--spatial-constant) / 2);
+            padding: var(--spatial-constant);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dashboard-title {
+            font-size: calc(var(--spatial-constant) * 1.2);
+            color: #2c3e50;
+            margin-bottom: calc(var(--spatial-constant) / var(--phi));
+            display: flex;
+            align-items: center;
+            gap: calc(var(--spatial-base) * 1.5);
+            padding-bottom: calc(var(--spatial-base) * 1.5);
+            border-bottom: 2px solid #f1f2f6;
+        }
+        
+        .dashboard-title::before {
+            content: '🌍';
+            font-size: 1.5em;
+        }
+        
+        /* Quantum Orchestrator Grid */
+        .quantum-orchestrator {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spatial-constant);
+            margin-top: var(--spatial-constant);
+        }
+        
+        /* Regional Quantum Pods */
+        .quantum-pod {
+            /* Predictive Box Model Foundation */
+            --predicted-content: 280px;
+            --predicted-padding: calc(var(--predicted-content) / (var(--phi) * 2));
+            --predicted-margin: calc(var(--predicted-padding) / var(--phi));
+            
+            /* Self-regulating properties */
+            min-height: calc(var(--predicted-content) * 0.75);
+            padding: var(--predicted-padding);
+            margin-bottom: var(--predicted-margin);
+            
+            /* Multi-dimensional Border System */
+            border: 2px solid;
+            border-image-slice: 1;
+            border-width: 2px;
+            border-radius: calc(var(--predicted-padding) / 2);
+            
+            /* Cultural Adaptation Layer */
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            
+            /* Accessibility Foundation */
+            outline: none;
+        }
+        
+        /* South Africa Pod */
+        .quantum-pod[data-region="za"] {
+            border-color: var(--region-za);
+            background: linear-gradient(135deg, 
+                rgba(52, 152, 219, 0.05), 
+                rgba(52, 152, 219, 0.1));
+            --cultural-context: 0.9;
+        }
+        
+        .quantum-pod[data-region="za"]::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                var(--region-za), 
+                rgba(52, 152, 219, 0.5));
+        }
+        
+        /* Kenya Pod */
+        .quantum-pod[data-region="ke"] {
+            border-color: var(--region-ke);
+            background: linear-gradient(135deg, 
+                rgba(46, 204, 113, 0.05), 
+                rgba(46, 204, 113, 0.1));
+            --cultural-context: 0.8;
+        }
+        
+        .quantum-pod[data-region="ke"]::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                var(--region-ke), 
+                rgba(46, 204, 113, 0.5));
+        }
+        
+        /* Nigeria Pod */
+        .quantum-pod[data-region="ng"] {
+            border-color: var(--region-ng);
+            background: linear-gradient(135deg, 
+                rgba(231, 76, 60, 0.05), 
+                rgba(231, 76, 60, 0.1));
+            --cultural-context: 0.7;
+        }
+        
+        .quantum-pod[data-region="ng"]::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                var(--region-ng), 
+                rgba(231, 76, 60, 0.5));
+        }
+        
+        /* Ghana Pod */
+        .quantum-pod[data-region="gh"] {
+            border-color: var(--region-gh);
+            background: linear-gradient(135deg, 
+                rgba(243, 156, 18, 0.05), 
+                rgba(243, 156, 18, 0.1));
+            --cultural-context: 0.85;
+        }
+        
+        .quantum-pod[data-region="gh"]::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                var(--region-gh), 
+                rgba(243, 156, 18, 0.5));
+        }
+        
+        /* Pod Header */
+        .pod-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: calc(var(--predicted-padding) / var(--phi));
+            padding-bottom: calc(var(--predicted-padding) / (var(--phi) * 2));
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .region-title {
+            font-size: calc(var(--spatial-base) * 1.3);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: calc(var(--spatial-base) / 2);
+        }
+        
+        /* Quantum Status Indicator */
+        .quantum-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            position: relative;
+            animation: status-pulse 2s infinite;
+        }
+        
+        .quantum-status[data-status="operational"] {
+            background: #2ecc71;
+            box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.2);
+        }
+        
+        .quantum-status[data-status="warning"] {
+            background: #f39c12;
+            box-shadow: 0 0 0 4px rgba(243, 156, 18, 0.2);
+        }
+        
+        .quantum-status[data-status="critical"] {
+            background: #e74c3c;
+            box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.2);
+            animation: critical-pulse 1s infinite;
+        }
+        
+        @keyframes status-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        @keyframes critical-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Pod Content */
+        .pod-content {
+            margin-bottom: calc(var(--predicted-padding) / var(--phi));
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: calc(var(--predicted-padding) / 2);
+        }
+        
+        .metric-item {
+            padding: calc(var(--predicted-padding) / 2);
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: calc(var(--predicted-padding) / 4);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .metric-label {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            margin-bottom: 4px;
+        }
+        
+        .metric-value {
+            font-size: 1.3em;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+        
+        /* Pod Controls */
+        .pod-controls {
+            display: flex;
+            gap: calc(var(--predicted-padding) / 2);
+            margin-top: auto;
+            padding-top: calc(var(--predicted-padding) / 2);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .quantum-btn {
+            flex: 1;
+            padding: calc(var(--predicted-padding) / 2) var(--predicted-padding);
+            border: none;
+            border-radius: calc(var(--predicted-padding) / 4);
+            background: rgba(0, 0, 0, 0.05);
+            color: #2c3e50;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+        
+        .quantum-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .quantum-btn:focus {
+            outline: var(--focus-ring);
+            outline-offset: 2px;
+        }
+        
+        /* Golden Ratio Visualization */
+        .golden-visualization {
+            margin-top: calc(var(--spatial-constant) * 2);
+            padding: var(--spatial-constant);
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: calc(var(--spatial-constant) / 2);
+            border: 2px dashed rgba(0, 0, 0, 0.1);
+        }
+        
+        .ratio-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: calc(var(--spatial-constant) * 2);
+            margin-bottom: var(--spatial-constant);
+        }
+        
+        .ratio-box {
+            width: 100px;
+            height: 161.8px;
+            background: linear-gradient(45deg, var(--region-za), var(--region-ke));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .ratio-equation {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5em;
+            color: #2c3e50;
+        }
+        
+        /* Responsive Adaptations */
+        @media (max-width: 768px) {
+            :root {
+                --spatial-base: 0.875rem;
+            }
+            
+            .quantum-orchestrator {
+                grid-template-columns: 1fr;
+            }
+            
+            .ratio-display {
+                flex-direction: column;
+                gap: var(--spatial-constant);
+            }
+        }
+        
+        /* RTL Language Support */
+        [dir="rtl"] .quantum-pod {
+            text-align: right;
+        }
+        
+        [dir="rtl"] .pod-header {
+            flex-direction: row-reverse;
+        }
+        
+        /* High Contrast Mode */
+        @media (prefers-contrast: high) {
+            .quantum-pod {
+                border-width: 3px;
+                border-style: double;
+            }
+            
+            .metric-item {
+                border-width: 2px;
+            }
+        }
+        
+        /* Focus Management */
+        .quantum-pod:focus-within {
+            outline: var(--focus-ring);
+            outline-offset: 4px;
+            transform: translateY(-4px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Hover Enhancements */
+        .quantum-pod:hover {
+            transform: translateY(-8px);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mission-header">
+        <h1 class="mission-title">🚀 Lesson 18: Quantum Box Model Engineering</h1>
+        <p class="mission-subtitle">
+            Implement AfricaConnect's predictive layout system using advanced CSS box model properties.
+            Master mathematical precision, cultural adaptation, and accessibility compliance.
+        </p>
+    </div>
+    
+    <main class="africaconnect-dashboard">
+        <h2 class="dashboard-title">AfricaConnect Regional Operations Dashboard</h2>
+        <p style="color: #7f8c8d; margin-bottom: var(--spatial-constant);">
+            Real-time monitoring across African digital infrastructure • WCAG 2.2 AAA Compliant
+        </p>
+        
+        <!-- Quantum Orchestrator: Four Regional Pods -->
+        <div class="quantum-orchestrator" role="region" aria-label="African regional data pods">
+            <!-- South Africa Pod -->
+            <article class="quantum-pod" data-region="za" data-density="high" tabindex="0">
+                <header class="pod-header">
+                    <h3 class="region-title">
+                        <span aria-label="South Africa flag">🇿🇦</span>
+                        South Africa Hub
+                    </h3>
+                    <div class="quantum-status" data-status="operational" aria-label="Operational status"></div>
+                </header>
+                
+                <div class="pod-content">
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <div class="metric-label">Uptime</div>
+                            <div class="metric-value">99.98%</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Latency</div>
+                            <div class="metric-value">12ms</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Throughput</div>
+                            <div class="metric-value">2.4k/s</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Errors</div>
+                            <div class="metric-value">0.02%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pod-controls">
+                    <button class="quantum-btn" aria-label="View detailed metrics for South Africa">
+                        Details
+                    </button>
+                    <button class="quantum-btn" aria-label="Refresh South Africa data">
+                        Refresh
+                    </button>
+                </div>
+            </article>
+            
+            <!-- Kenya Pod -->
+            <article class="quantum-pod" data-region="ke" data-density="medium" tabindex="0">
+                <header class="pod-header">
+                    <h3 class="region-title">
+                        <span aria-label="Kenya flag">🇰🇪</span>
+                        Kenya Hub
+                    </h3>
+                    <div class="quantum-status" data-status="warning" aria-label="Warning status"></div>
+                </header>
+                
+                <div class="pod-content">
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <div class="metric-label">Uptime</div>
+                            <div class="metric-value">99.85%</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Latency</div>
+                            <div class="metric-value">45ms</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Throughput</div>
+                            <div class="metric-value">1.8k/s</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Errors</div>
+                            <div class="metric-value">0.15%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pod-controls">
+                    <button class="quantum-btn" aria-label="View detailed metrics for Kenya">
+                        Details
+                    </button>
+                    <button class="quantum-btn" aria-label="Refresh Kenya data">
+                        Refresh
+                    </button>
+                </div>
+            </article>
+            
+            <!-- Nigeria Pod -->
+            <article class="quantum-pod" data-region="ng" data-density="high" tabindex="0">
+                <header class="pod-header">
+                    <h3 class="region-title">
+                        <span aria-label="Nigeria flag">🇳🇬</span>
+                        Nigeria Hub
+                    </h3>
+                    <div class="quantum-status" data-status="operational" aria-label="Operational status"></div>
+                </header>
+                
+                <div class="pod-content">
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <div class="metric-label">Uptime</div>
+                            <div class="metric-value">99.97%</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Latency</div>
+                            <div class="metric-value">85ms</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Throughput</div>
+                            <div class="metric-value">3.2k/s</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Errors</div>
+                            <div class="metric-value">0.03%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pod-controls">
+                    <button class="quantum-btn" aria-label="View detailed metrics for Nigeria">
+                        Details
+                    </button>
+                    <button class="quantum-btn" aria-label="Refresh Nigeria data">
+                        Refresh
+                    </button>
+                </div>
+            </article>
+            
+            <!-- Ghana Pod -->
+            <article class="quantum-pod" data-region="gh" data-density="medium" tabindex="0">
+                <header class="pod-header">
+                    <h3 class="region-title">
+                        <span aria-label="Ghana flag">🇬🇭</span>
+                        Ghana Hub
+                    </h3>
+                    <div class="quantum-status" data-status="critical" aria-label="Critical status"></div>
+                </header>
+                
+                <div class="pod-content">
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <div class="metric-label">Uptime</div>
+                            <div class="metric-value">99.65%</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Latency</div>
+                            <div class="metric-value">120ms</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Throughput</div>
+                            <div class="metric-value">1.2k/s</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Errors</div>
+                            <div class="metric-value">0.35%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pod-controls">
+                    <button class="quantum-btn" aria-label="View detailed metrics for Ghana">
+                        Details
+                    </button>
+                    <button class="quantum-btn" aria-label="Refresh Ghana data">
+                        Refresh
+                    </button>
+                </div>
+            </article>
+        </div>
+        
+        <!-- Golden Ratio Visualization -->
+        <div class="golden-visualization">
+            <h3 style="margin-bottom: var(--spatial-base); color: #2c3e50;">
+                <span aria-hidden="true">📐</span> Golden Ratio Visualization (φ = 1.618)
+            </h3>
+            <p style="color: #7f8c8d; margin-bottom: var(--spatial-constant);">
+                Our quantum layout uses the Golden Ratio for mathematically perfect spacing and proportions.
+                This creates visual harmony that aligns with natural patterns found across African art and architecture.
+            </p>
+            
+            <div class="ratio-display">
+                <div class="ratio-box" role="img" aria-label="Golden ratio rectangle 100 by 161.8 pixels">
+                    100 × 161.8
+                </div>
+                <div class="ratio-equation">
+                    100 × φ = 161.8
+                </div>
+            </div>
+            
+            <div style="text-align: center; color: #7f8c8d; font-size: 0.9em;">
+                <p>All padding, margins, and spacing follow φ-based calculations</p>
+                <p>Cultural adaptation modifies φ by ±20% based on regional preferences</p>
+            </div>
+        </div>
+    </main>
+    
+    <footer style="text-align: center; padding: var(--spatial-constant); color: rgba(255, 255, 255, 0.8); margin-top: var(--spatial-constant);">
+        <p>© 2024 Msebetsi Solutions • AfricaConnect Dashboard • Quantum Layout Engineering</p>
+        <p style="font-size: 0.9em; margin-top: calc(var(--spatial-base) / 2);">
+            WCAG 2.2 AAA Compliant • Supports 14 African regions • Predictive Box Model v2.1
+        </p>
+    </footer>
+    
+    <script>
+        // Quantum Layout Performance Monitor
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 AfricaConnect Quantum Layout Loaded');
+            console.log('📐 Golden Ratio (φ):', getComputedStyle(document.documentElement)
+                .getPropertyValue('--phi').trim());
+            
+            // Monitor layout stability
+            if ('PerformanceObserver' in window) {
+                const observer = new PerformanceObserver((list) => {
+                    const layoutShifts = list.getEntries().filter(entry => !entry.hadRecentInput);
+                    if (layoutShifts.length > 0) {
+                        console.warn('⚠️ Quantum layout shift detected:', layoutShifts);
+                    }
+                });
+                observer.observe({ entryTypes: ['layout-shift'] });
+            }
+            
+            // Cultural adaptation simulation
+            const pods = document.querySelectorAll('.quantum-pod');
+            pods.forEach(pod => {
+                pod.addEventListener('click', function() {
+                    const region = this.dataset.region;
+                    const culturalContext = getComputedStyle(this)
+                        .getPropertyValue('--cultural-context').trim();
+                    
+                    console.log(`🌍 ${region.toUpperCase()} Cultural Context:`, culturalContext);
+                    
+                    // Visual feedback
+                    this.style.transform = 'translateY(-12px) scale(1.02)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 300);
+                });
+                
+                // Keyboard navigation
+                pod.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        this.click();
+                        e.preventDefault();
+                    }
+                });
+            });
+            
+            // Calculate actual box model dimensions
+            function analyzeQuantumPod(pod) {
+                const style = getComputedStyle(pod);
+                const padding = parseFloat(style.paddingTop);
+                const margin = parseFloat(style.marginBottom);
+                const border = parseFloat(style.borderTopWidth);
+                
+                console.group('📦 Quantum Pod Analysis');
+                console.log('Padding (predictive):', padding, 'px');
+                console.log('Margin (context-aware):', margin, 'px');
+                console.log('Border (multi-dimensional):', border, 'px');
+                console.log('Total spacing (p + b + m):', padding + border + margin, 'px');
+                console.groupEnd();
+            }
+            
+            // Analyze first pod as example
+            setTimeout(() => analyzeQuantumPod(pods[0]), 1000);
+        });
+    </script>
+</body>
+</html>

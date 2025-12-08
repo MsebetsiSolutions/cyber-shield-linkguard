@@ -1,0 +1,446 @@
+/* 
+  Msebetsi Solutions - Quantum Positioning System
+  Lesson 19: Advanced CSS Positioning
+  Version: 2.1 • Performance Optimized
+*/
+
+/* Quantum Positioning Foundation */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Performance Optimizations */
+.quantum-position {
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  
+  /* Layout containment */
+  contain: layout style paint;
+}
+
+/* Positioning Utility Classes */
+.position-static {
+  position: static !important;
+}
+
+.position-relative {
+  position: relative !important;
+}
+
+.position-absolute {
+  position: absolute !important;
+}
+
+.position-fixed {
+  position: fixed !important;
+}
+
+.position-sticky {
+  position: sticky !important;
+}
+
+/* Z-Index Scale */
+.z-index-1 { z-index: 10; }
+.z-index-2 { z-index: 20; }
+.z-index-3 { z-index: 30; }
+.z-index-4 { z-index: 40; }
+.z-index-max { z-index: 9999; }
+
+/* Offset Utilities */
+.offset-top-sm { top: 1rem; }
+.offset-top-md { top: 2rem; }
+.offset-top-lg { top: 4rem; }
+
+.offset-right-sm { right: 1rem; }
+.offset-right-md { right: 2rem; }
+.offset-right-lg { right: 4rem; }
+
+.offset-bottom-sm { bottom: 1rem; }
+.offset-bottom-md { bottom: 2rem; }
+.offset-bottom-lg { bottom: 4rem; }
+
+.offset-left-sm { left: 1rem; }
+.offset-left-md { left: 2rem; }
+.offset-left-lg { left: 4rem; }
+
+/* Transform Utilities */
+.transform-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.transform-center-x {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.transform-center-y {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Sticky Header Pattern */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+/* Fixed Navigation Pattern */
+.fixed-navigation {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid #dee2e6;
+  backdrop-filter: blur(10px);
+}
+
+/* Overlay Pattern */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  background: white;
+  border-radius: 15px;
+  overflow: auto;
+}
+
+/* Tooltip Pattern */
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2c3e50;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #2c3e50;
+}
+
+.tooltip-container:hover .tooltip {
+  opacity: 1;
+}
+
+/* Badge Positioning */
+.badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 20px;
+  height: 20px;
+  background: #e74c3c;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* Dropdown Menu */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+}
+
+.dropdown:hover .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Modal Positioning */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-dialog {
+  position: relative;
+  width: 90%;
+  max-width: 500px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  transform: translateY(-20px);
+  transition: transform 0.3s ease;
+}
+
+.modal.active .modal-dialog {
+  transform: translateY(0);
+}
+
+/* Progress Indicator */
+.progress-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3498db, #2ecc71);
+  z-index: 1001;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+/* Floating Action Button */
+.fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 56px;
+  height: 56px;
+  background: #3498db;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 20px rgba(52, 152, 219, 0.4);
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 30px rgba(52, 152, 219, 0.6);
+}
+
+/* Back to Top */
+.back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #dee2e6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  cursor: pointer;
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Responsive Positioning */
+@media (max-width: 768px) {
+  .position-fixed-mobile {
+    position: fixed;
+  }
+  
+  .position-absolute-mobile {
+    position: absolute;
+  }
+  
+  .fab {
+    bottom: 1rem;
+    right: 1rem;
+  }
+  
+  .back-to-top {
+    bottom: 1rem;
+    right: 1rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .position-fixed,
+  .position-sticky,
+  .fab,
+  .back-to-top {
+    position: static !important;
+  }
+  
+  .modal {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .tooltip,
+  .dropdown-menu,
+  .modal,
+  .modal-dialog,
+  .progress-fixed,
+  .fab,
+  .back-to-top {
+    transition: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .tooltip {
+    border: 2px solid white;
+  }
+  
+  .dropdown-menu {
+    border: 2px solid currentColor;
+  }
+  
+  .modal-dialog {
+    border: 2px solid currentColor;
+  }
+}
+
+/* RTL Support */
+[dir="rtl"] {
+  .tooltip {
+    left: auto;
+    right: 50%;
+    transform: translateX(50%);
+  }
+  
+  .fab {
+    left: 2rem;
+    right: auto;
+  }
+  
+  .back-to-top {
+    left: 2rem;
+    right: auto;
+  }
+}
+
+/* Performance Monitoring */
+.position-perf {
+  /* Layout stability indicators */
+  contain-intrinsic-size: auto;
+  content-visibility: auto;
+}
+
+/* Debug Mode */
+.debug-position {
+  outline: 1px solid rgba(231, 76, 60, 0.3);
+  
+  &::before {
+    content: attr(data-position);
+    position: absolute;
+    top: -1.5em;
+    left: 0;
+    font-size: 0.7em;
+    font-family: monospace;
+    color: #e74c3c;
+    background: white;
+    padding: 2px 4px;
+    border-radius: 2px;
+    opacity: 0.7;
+  }
+}
+
+/* Quantum Positioning Excellence */
+.quantum-position-excellence {
+  position: relative;
+  
+  &::after {
+    content: '⚛️';
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 1.2em;
+    animation: quantum-pulse 2s infinite;
+  }
+}
+
+@keyframes quantum-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}

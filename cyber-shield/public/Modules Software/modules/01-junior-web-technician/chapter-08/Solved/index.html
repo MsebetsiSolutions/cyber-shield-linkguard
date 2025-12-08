@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Msebetsi Professional Profile — Your Name</title>
+  <meta name="description" content="Msebetsi Solutions employee profile: role, contact, and professional links." />
+  
+  <!-- Performance hints -->
+  <link rel="preconnect" href="https://via.placeholder.com">
+  <link rel="dns-prefetch" href="https://github.com">
+  
+  <style>
+    /* CSS Custom Properties for theming */
+    :root {
+      --color-primary: #0066cc;
+      --color-primary-dark: #0052a3;
+      --color-surface: #ffffff;
+      --color-background: #f6f8fb;
+      --color-text: #0d1b2a;
+      --color-text-secondary: #495b6a;
+      --color-border: #e8f0ff;
+      --border-radius-sm: 8px;
+      --border-radius-lg: 12px;
+      --spacing-xs: 0.5rem;
+      --spacing-sm: 0.75rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.25rem;
+      --shadow-sm: 0 2px 4px rgba(6, 15, 30, 0.08);
+      --shadow-md: 0 8px 26px rgba(6, 15, 30, 0.06);
+    }
+
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Utility classes using attribute selectors */
+    [hidden] {
+      display: none !important;
+    }
+
+    [aria-busy="true"] {
+      cursor: progress;
+      opacity: 0.7;
+    }
+
+    /* BEM Methodology Implementation */
+    .profile-card {
+      /* Block */
+      max-width: 920px;
+      width: 100%;
+      background: var(--color-surface);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: var(--spacing-lg);
+      display: grid;
+      gap: var(--spacing-md);
+      grid-template-columns: 320px 1fr;
+      align-items: start;
+      margin: 0 auto;
+    }
+
+    .profile-card__header {
+      /* Element */
+      grid-column: 1 / -1;
+      border-bottom: 2px solid var(--color-border);
+      padding-bottom: var(--spacing-sm);
+    }
+
+    .profile-card__name {
+      margin: 0 0 var(--spacing-xs) 0;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+
+    .profile-card__role {
+      margin: 0;
+      color: var(--color-text-secondary);
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .profile-card__avatar-container {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--border-radius-lg);
+    }
+
+    .profile-card__avatar {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .profile-card__avatar:hover {
+      transform: scale(1.02);
+    }
+
+    .profile-card__bio {
+      line-height: 1.6;
+      margin-top: var(--spacing-sm);
+      color: var(--color-text);
+    }
+
+    .profile-card__meta {
+      font-size: 0.9rem;
+      color: var(--color-text-secondary);
+      margin-top: var(--spacing-sm);
+    }
+
+    .profile-card__company {
+      display: inline-block;
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+
+    /* Contact section with modifier */
+    .profile-card__contact {
+      background: var(--color-background);
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius-lg);
+      border: 1px solid var(--color-border);
+    }
+
+    .profile-card__contact--highlighted {
+      border-left: 4px solid var(--color-primary);
+      background: linear-gradient(135deg, #fbfcff 0%, #f0f7ff 100%);
+    }
+
+    .profile-card__contact-title {
+      margin: 0 0 var(--spacing-sm) 0;
+      font-size: 1.1rem;
+      color: var(--color-primary-dark);
+    }
+
+    .profile-card__links {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    }
+
+    .profile-card__link-item {
+      /* Using data attributes for dynamic styling */
+      transition: all 0.2s ease;
+    }
+
+    .profile-card__link-item[data-priority="high"] {
+      order: -1;
+    }
+
+    .profile-card__link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius-sm);
+      text-decoration: none;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      color: var(--color-primary);
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .profile-card__link:hover,
+    .profile-card__link:focus {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .profile-card__link:focus {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    .profile-card__link-icon {
+      width: 16px;
+      height: 16px;
+      opacity: 0.7;
+    }
+
+    /* Print styles */
+    @media print {
+      .profile-card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
+      
+      .profile-card__contact {
+        break-inside: avoid;
+      }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .profile-card {
+        grid-template-columns: 1fr;
+        padding: var(--spacing-md);
+      }
+      
+      .profile-card__avatar-container {
+        max-width: 280px;
+        margin: 0 auto;
+      }
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-surface: #1a1a1a;
+        --color-background: #0d0d0d;
+        --color-text: #ffffff;
+        --color-text-secondary: #b3b3b3;
+        --color-border: #333333;
+      }
+      
+      .profile-card__link:hover,
+      .profile-card__link:focus {
+        background: var(--color-primary-dark);
+      }
+    }
+  </style>
+
+  <!-- Enhanced structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": "#employee",
+        "name": "Your Name",
+        "jobTitle": "Senior Software Engineer",
+        "worksFor": {
+          "@type": "Organization",
+          "name": "Msebetsi Solutions",
+          "url": "https://www.msebetsi.africa"
+        },
+        "email": "mailto:your.name@msebetsi.africa",
+        "sameAs": [
+          "https://www.linkedin.com/in/yourprofile",
+          "https://github.com/yourusername"
+        ],
+        "memberOf": {
+          "@type": "OrganizationRole",
+          "roleName": "Cloud & DevOps Team",
+          "startDate": "2023-01-01"
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <!-- Main content with enhanced semantic attributes -->
+  <main 
+    class="profile-card" 
+    role="main" 
+    aria-labelledby="pageTitle"
+    data-component="employee-profile"
+    data-version="2.0"
+    data-department="engineering"
+    itemscope 
+    itemtype="https://schema.org/Person"
+  >
+    <!-- Header section -->
+    <header class="profile-card__header">
+      <h1 id="pageTitle" class="profile-card__name" itemprop="name">
+        <span itemprop="givenName">Your</span> 
+        <span itemprop="familyName">Name</span>
+      </h1>
+      <p class="profile-card__role" itemprop="jobTitle">
+        Senior Software Engineer • Msebetsi Solutions
+      </p>
+    </header>
+
+    <!-- Profile content section -->
+    <section 
+      class="profile-card__content" 
+      aria-labelledby="profileHeading"
+      itemprop="description"
+    >
+      <h2 id="profileHeading" class="visually-hidden">Professional Profile</h2>
+      
+      <article class="profile-card__profile" itemscope itemtype="https://schema.org/Person">
+        <div class="profile-card__avatar-container">
+          <picture>
+            <!-- Responsive images with modern attributes -->
+            <source 
+              media="(min-width: 800px)" 
+              srcset="
+                https://via.placeholder.com/400x400?text=Your+Photo 1x,
+                https://via.placeholder.com/800x800?text=Your+Photo+HD 2x
+              "
+              type="image/jpeg"
+            >
+            <img 
+              src="https://via.placeholder.com/400x400?text=Your+Photo" 
+              alt="Professional portrait of Your Name, Senior Software Engineer at Msebetsi Solutions" 
+              class="profile-card__avatar"
+              width="400" 
+              height="400"
+              loading="lazy"
+              decoding="async"
+              fetchpriority="high"
+              itemprop="image"
+              crossorigin="anonymous"
+              data-image-type="profile"
+              data-image-role="primary"
+            >
+          </picture>
+        </div>
+
+        <div class="profile-card__bio-content">
+          <p class="profile-card__bio">
+            I am an employee at 
+            <span class="profile-card__company" itemprop="worksFor" itemscope itemtype="https://schema.org/Organization">
+              <span itemprop="name">Msebetsi Solutions</span>
+            </span>, 
+            focused on building secure cloud-native applications, leading mentorship programmes, 
+            and supporting regional technology initiatives. I specialise in full-stack development, 
+            API design, and developer experience.
+          </p>
+
+          <div class="profile-card__meta" aria-label="Additional information">
+            <p>
+              <strong>Location:</strong> 
+              <span itemprop="homeLocation">Johannesburg, South Africa</span>
+            </p>
+            <p>
+              <strong>Team:</strong> 
+              <span itemprop="memberOf" itemscope itemtype="https://schema.org/OrganizationRole">
+                <span itemprop="roleName">Cloud & DevOps</span>
+              </span>
+            </p>
+            <p>
+              <strong>Employee ID:</strong> 
+              <span itemprop="employeeID">MSB-024</span>
+            </p>
+            <p>
+              <strong>Status:</strong> 
+              <span itemprop="employmentStatus" content="FULL_TIME">Full-time</span>
+            </p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- Contact section with enhanced accessibility -->
+    <aside 
+      class="profile-card__contact profile-card__contact--highlighted"
+      role="complementary" 
+      aria-label="Contact and professional links"
+      data-section="contact"
+    >
+      <h2 class="profile-card__contact-title">Contact & Professional Links</h2>
+      
+      <ul class="profile-card__links" role="list">
+        <!-- Each link with unique identifier and data attributes -->
+        <li 
+          class="profile-card__link-item" 
+          id="contact-email"
+          data-priority="high"
+          data-contact-type="primary"
+        >
+          <a 
+            href="mailto:your.name@msebetsi.africa" 
+            class="profile-card__link"
+            aria-label="Email Your Name at Msebetsi Solutions"
+            itemprop="email"
+            data-analytics-event="contact_click"
+            data-analytics-type="email"
+          >
+            <svg class="profile-card__link-icon" aria-hidden="true" focusable="false">
+              <use href="#icon-email"></use>
+            </svg>
+            your.name@msebetsi.africa
+          </a>
+        </li>
+        
+        <li 
+          class="profile-card__link-item" 
+          id="contact-linkedin"
+          data-contact-type="professional"
+        >
+          <a 
+            href="https://www.linkedin.com/in/yourprofile" 
+            class="profile-card__link"
+            target="_blank" 
+            rel="noopener noreferrer"
+            aria-label="Visit LinkedIn profile (opens in new window)"
+            itemprop="sameAs"
+            data-analytics-event="social_click"
+            data-analytics-platform="linkedin"
+          >
+            <svg class="profile-card__link-icon" aria-hidden="true" focusable="false">
+              <use href="#icon-linkedin"></use>
+            </svg>
+            LinkedIn Profile
+          </a>
+        </li>
+        
+        <li 
+          class="profile-card__link-item" 
+          id="contact-directory"
+          data-contact-type="internal"
+        >
+          <a 
+            href="https://intranet.msebetsi.africa/staff/your-username" 
+            class="profile-card__link"
+            target="_blank" 
+            rel="noopener noreferrer"
+            aria-label="View staff directory entry (opens in new window)"
+            data-internal-link="true"
+          >
+            <svg class="profile-card__link-icon" aria-hidden="true" focusable="false">
+              <use href="#icon-directory"></use>
+            </svg>
+            Staff Directory
+          </a>
+        </li>
+        
+        <li 
+          class="profile-card__link-item" 
+          id="contact-github"
+          data-contact-type="professional"
+        >
+          <a 
+            href="https://github.com/yourusername" 
+            class="profile-card__link"
+            target="_blank" 
+            rel="noopener noreferrer"
+            aria-label="Visit GitHub profile (opens in new window)"
+            itemprop="sameAs"
+            data-analytics-event="social_click"
+            data-analytics-platform="github"
+          >
+            <svg class="profile-card__link-icon" aria-hidden="true" focusable="false">
+              <use href="#icon-github"></use>
+            </svg>
+            GitHub — @yourusername
+          </a>
+        </li>
+        
+        <!-- Hidden icon definitions for SVG sprites -->
+        <svg hidden>
+          <symbol id="icon-email" viewBox="0 0 24 24">
+            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+          </symbol>
+          <symbol id="icon-linkedin" viewBox="0 0 24 24">
+            <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14zm-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+          </symbol>
+          <symbol id="icon-github" viewBox="0 0 24 24">
+            <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+          </symbol>
+          <symbol id="icon-directory" viewBox="0 0 24 24">
+            <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+          </symbol>
+        </svg>
+      </ul>
+
+      <p class="profile-card__meta">
+        <strong>Usage notes:</strong> Use your official Msebetsi email for external outreach. 
+        Update the staff directory profile to keep credentials current.
+      </p>
+    </aside>
+  </main>
+
+  <!-- Hidden visually but accessible to screen readers -->
+  <div class="visually-hidden" aria-live="polite" aria-atomic="true">
+    Profile loaded successfully. Use tab key to navigate through contact links.
+  </div>
+
+  <script>
+    // Progressive enhancement: Add interaction
+    document.addEventListener('DOMContentLoaded', function() {
+      const profileCard = document.querySelector('.profile-card');
+      
+      // Add focus management for better accessibility
+      const links = profileCard.querySelectorAll('a');
+      links.forEach(link => {
+        link.addEventListener('focus', function() {
+          this.setAttribute('data-focused', 'true');
+        });
+        
+        link.addEventListener('blur', function() {
+          this.removeAttribute('data-focused');
+        });
+      });
+      
+      // Lazy load images that might enter viewport
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            if (img.dataset.src) {
+              img.src = img.dataset.src;
+            }
+            observer.unobserve(img);
+          }
+        });
+      });
+      
+      // Observe all images for lazy loading
+      document.querySelectorAll('img[data-src]').forEach(img => {
+        observer.observe(img);
+      });
+    });
+  </script>
+</body>
+</html>

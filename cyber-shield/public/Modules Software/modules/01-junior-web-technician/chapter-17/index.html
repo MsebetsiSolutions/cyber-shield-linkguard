@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en-ZA" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Msebetsi Solutions - Lesson 17: CSS Box Model Mastery">
+    
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="./assets/css/box-model.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <title>Lesson 17: CSS Box Model | Msebetsi Solutions</title>
+    
+    <!-- Lesson-specific styles -->
+    <style>
+        /* Lesson Theme */
+        :root {
+            --box-model-primary: #3498db;
+            --box-model-secondary: #2ecc71;
+            --box-model-accent: #e74c3c;
+            --box-model-border: #95a5a6;
+            --lesson-bg: #f8f9fa;
+        }
+        
+        .lesson-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--lesson-bg);
+            min-height: 100vh;
+        }
+        
+        /* Lesson Header */
+        .lesson-header {
+            background: linear-gradient(135deg, var(--box-model-primary), #2980b9);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.2);
+            text-align: center;
+        }
+        
+        .lesson-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .lesson-header h1 i {
+            font-size: 1.8em;
+        }
+        
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .meta-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        /* Instructor Note */
+        .instructor-note {
+            background: #e8f4fc;
+            border-left: 5px solid var(--box-model-primary);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        
+        .instructor-note i {
+            color: var(--box-model-primary);
+            font-size: 1.5em;
+            margin-top: 3px;
+        }
+        
+        /* Learning Objectives */
+        .learning-objectives {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        
+        .objectives-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .objective-card {
+            padding: 20px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border-left: 4px solid var(--box-model-secondary);
+        }
+        
+        /* Interactive Demo Container */
+        .demo-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            border: 2px solid #e9ecef;
+        }
+        
+        .demo-title {
+            color: var(--box-model-primary);
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+        
+        /* Box Model Visualizer */
+        .box-model-visualizer {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            margin: 40px auto;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .box-model-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-style: solid;
+            transition: all 0.3s ease;
+        }
+        
+        .margin-layer {
+            width: 90%;
+            height: 90%;
+            border-color: #f39c12;
+            background: rgba(243, 156, 18, 0.1);
+        }
+        
+        .border-layer {
+            width: 70%;
+            height: 70%;
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+        }
+        
+        .padding-layer {
+            width: 50%;
+            height: 50%;
+            border-color: #2ecc71;
+            background: rgba(46, 204, 113, 0.1);
+        }
+        
+        .content-layer {
+            width: 30%;
+            height: 30%;
+            background: #e74c3c;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .layer-label {
+            position: absolute;
+            font-size: 0.9em;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* Controls */
+        .box-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .control-group label {
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-group input[type="range"] {
+            width: 100%;
+        }
+        
+        .value-display {
+            font-family: 'Courier New', monospace;
+            background: #2c3e50;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        /* Code Examples */
+        .code-example {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .css-property {
+            color: #3498db;
+        }
+        
+        .css-value {
+            color: #2ecc71;
+        }
+        
+        .css-comment {
+            color: #95a5a6;
+        }
+        
+        /* Comparison Section */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .comparison-card {
+            padding: 25px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--box-model-accent);
+        }
+        
+        /* Practice Exercise */
+        .practice-exercise {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 2px dashed #f39c12;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 40px 0;
+        }
+        
+        .exercise-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .exercise-header i {
+            color: #e67e22;
+            font-size: 1.8em;
+        }
+        
+        /* Footer */
+        .lesson-footer {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .nav-btn {
+            padding: 12px 25px;
+            background: var(--box-model-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .box-model-visualizer {
+                height: 300px;
+            }
+            
+            .lesson-header h1 {
+                font-size: 2em;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="lesson-container">
+        <!-- Lesson Header -->
+        <header class="lesson-header">
+            <h1>
+                <i class="fas fa-cube"></i>
+                Lesson 17: CSS Box Model
+            </h1>
+            <p class="lesson-subtitle">Mastering Element Spacing, Padding, Margins & Borders</p>
+            <div class="lesson-meta">
+                <span class="meta-badge">📚 Msebetsi Solutions</span>
+                <span class="meta-badge">🎯 Lesson 17 of 24</span>
+                <span class="meta-badge">⏱️ 45-60 minutes</span>
+                <span class="meta-badge">🧠 Intermediate</span>
+            </div>
+        </header>
+
+        <!-- Instructor Note -->
+        <div class="instructor-note">
+            <i class="fas fa-chalkboard-teacher"></i>
+            <div>
+                <h3>👨‍🏫 Instructor's Insight</h3>
+                <p>The box model is <strong>fundamental to CSS mastery</strong>. Every element on a web page is a rectangular box. Understanding how these boxes interact through margins, borders, and padding is crucial for creating precise, predictable layouts. Think of it as the foundation of web design!</p>
+            </div>
+        </div>
+
+        <!-- Learning Objectives -->
+        <section class="learning-objectives">
+            <h2><i class="fas fa-bullseye"></i> Learning Objectives</h2>
+            <p>By the end of this lesson, you will be able to:</p>
+            <div class="objectives-grid">
+                <div class="objective-card">
+                    <h4><i class="fas fa-layer-group"></i> Visualize the Box Model</h4>
+                    <p>Understand content, padding, border, and margin layers</p>
+                </div>
+                <div class="objective-card">
+                    <h4><i class="fas fa-ruler-combined"></i> Calculate Total Dimensions</h4>
+                    <p>Determine actual element size including all box model components</p>
+                </div>
+                <div class="objective-card">
+                    <h4><i class="fas fa-code"></i> Apply box-sizing Property</h4>
+                    <p>Master border-box vs content-box sizing methods</p>
+                </div>
+                <div class="objective-card">
+                    <h4><i class="fas fa-puzzle-piece"></i> Solve Layout Problems</h4>
+                    <p>Debug and fix common box model layout issues</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Box Model Demo -->
+        <section class="demo-container">
+            <h2 class="demo-title"><i class="fas fa-sliders-h"></i> Interactive Box Model Visualizer</h2>
+            <p>Adjust the sliders to see how each component affects the element's total size:</p>
+            
+            <div class="box-model-visualizer" id="boxModelDemo">
+                <!-- Box Model Layers -->
+                <div class="box-model-layer margin-layer" id="marginLayer">
+                    <div class="layer-label" style="top: -25px; left: 10px;">Margin</div>
+                </div>
+                <div class="box-model-layer border-layer" id="borderLayer">
+                    <div class="layer-label" style="top: -25px; left: 10px;">Border</div>
+                </div>
+                <div class="box-model-layer padding-layer" id="paddingLayer">
+                    <div class="layer-label" style="top: -25px; left: 10px;">Padding</div>
+                </div>
+                <div class="box-model-layer content-layer" id="contentLayer">
+                    Content Area
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="box-controls">
+                <div class="control-group">
+                    <label for="contentSize"><i class="fas fa-square-full"></i> Content Width</label>
+                    <input type="range" id="contentSize" min="100" max="300" value="150">
+                    <div class="value-display">Width: <span id="contentValue">150px</span></div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="paddingSize"><i class="fas fa-expand-arrows-alt"></i> Padding</label>
+                    <input type="range" id="paddingSize" min="0" max="50" value="20">
+                    <div class="value-display">Padding: <span id="paddingValue">20px</span></div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="borderSize"><i class="fas fa-border-style"></i> Border</label>
+                    <input type="range" id="borderSize" min="0" max="20" value="5">
+                    <div class="value-display">Border: <span id="borderValue">5px</span></div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="marginSize"><i class="fas fa-arrows-alt"></i> Margin</label>
+                    <input type="range" id="marginSize" min="0" max="50" value="30">
+                    <div class="value-display">Margin: <span id="marginValue">30px</span></div>
+                </div>
+            </div>
+
+            <!-- Total Size Display -->
+            <div style="text-align: center; margin-top: 25px; padding: 15px; background: #2c3e50; color: white; border-radius: 8px;">
+                <h3><i class="fas fa-calculator"></i> Total Element Size Calculation</h3>
+                <p style="font-family: 'Courier New', monospace; font-size: 1.2em;">
+                    Total Width = <span id="totalWidth">265px</span><br>
+                    (150 + 40 + 10 + 30 + 30 + 5)
+                </p>
+                <p style="font-size: 0.9em; opacity: 0.9;">
+                    Content(150) + Padding(20×2) + Border(5×2) + Margin(30×2)
+                </p>
+            </div>
+        </section>
+
+        <!-- Box Model Components -->
+        <section class="demo-container">
+            <h2 class="demo-title"><i class="fas fa-puzzle-piece"></i> Box Model Components</h2>
+            
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h3><i class="fas fa-cube" style="color: #e74c3c;"></i> Content Area</h3>
+                    <p>The actual content of the element (text, images, etc.)</p>
+                    <div class="code-example">
+                        <span class="css-property">width</span>: <span class="css-value">200px</span>;<br>
+                        <span class="css-property">height</span>: <span class="css-value">100px</span>;<br>
+                        <span class="css-comment">/* Defines content dimensions */</span>
+                    </div>
+                </div>
+                
+                <div class="comparison-card">
+                    <h3><i class="fas fa-expand" style="color: #2ecc71;"></i> Padding</h3>
+                    <p>Space between content and border (inside the element)</p>
+                    <div class="code-example">
+                        <span class="css-property">padding</span>: <span class="css-value">20px</span>;<br>
+                        <span class="css-comment">/* Shorthand for all sides */</span><br>
+                        <span class="css-property">padding-top</span>: <span class="css-value">10px</span>;<br>
+                        <span class="css-comment">/* Individual side control */</span>
+                    </div>
+                </div>
+                
+                <div class="comparison-card">
+                    <h3><i class="fas fa-border-all" style="color: #3498db;"></i> Border</h3>
+                    <p>Line surrounding padding (and content)</p>
+                    <div class="code-example">
+                        <span class="css-property">border</span>: <span class="css-value">2px solid #3498db</span>;<br>
+                        <span class="css-comment">/* Shorthand: width style color */</span><br>
+                        <span class="css-property">border-radius</span>: <span class="css-value">8px</span>;<br>
+                        <span class="css-comment">/* Rounded corners */</span>
+                    </div>
+                </div>
+                
+                <div class="comparison-card">
+                    <h3><i class="fas fa-arrows-alt" style="color: #f39c12;"></i> Margin</h3>
+                    <p>Space outside the border (between elements)</p>
+                    <div class="code-example">
+                        <span class="css-property">margin</span>: <span class="css-value">15px</span>;<br>
+                        <span class="css-comment">/* Equal margin on all sides */</span><br>
+                        <span class="css-property">margin</span>: <span class="css-value">10px 20px</span>;<br>
+                        <span class="css-comment">/* Top/Bottom | Left/Right */</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Box-Sizing Property -->
+        <section class="demo-container">
+            <h2 class="demo-title"><i class="fas fa-balance-scale"></i> The box-sizing Property</h2>
+            <p>This property changes how the total width and height are calculated.</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 25px;">
+                <div>
+                    <h3><i class="fas fa-times-circle" style="color: #e74c3c;"></i> content-box (Default)</h3>
+                    <p><strong>Width/Height = Content only</strong></p>
+                    <div class="code-example">
+                        <span class="css-property">box-sizing</span>: <span class="css-value">content-box</span>;<br>
+                        <span class="css-property">width</span>: <span class="css-value">200px</span>;<br>
+                        <span class="css-property">padding</span>: <span class="css-value">20px</span>;<br>
+                        <span class="css-property">border</span>: <span class="css-value">5px solid</span>;<br>
+                        <br>
+                        <span class="css-comment">/* Total width = 200 + 40 + 10 = 250px */</span>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3><i class="fas fa-check-circle" style="color: #2ecc71;"></i> border-box (Recommended)</h3>
+                    <p><strong>Width/Height = Content + Padding + Border</strong></p>
+                    <div class="code-example">
+                        <span class="css-property">box-sizing</span>: <span class="css-value">border-box</span>;<br>
+                        <span class="css-property">width</span>: <span class="css-value">200px</span>;<br>
+                        <span class="css-property">padding</span>: <span class="css-value">20px</span>;<br>
+                        <span class="css-property">border</span>: <span class="css-value">5px solid</span>;<br>
+                        <br>
+                        <span class="css-comment">/* Total width = 200px (content = 150px) */</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="instructor-note" style="margin-top: 25px;">
+                <i class="fas fa-lightbulb"></i>
+                <div>
+                    <h3>💡 Pro Tip: Reset Your CSS</h3>
+                    <p>Always start your CSS with this rule to use border-box by default:</p>
+                    <div class="code-example" style="margin: 10px 0;">
+                        * {<br>
+                        &nbsp;&nbsp;<span class="css-property">box-sizing</span>: <span class="css-value">border-box</span>;<br>
+                        }
+                    </div>
+                    <p>This makes layout calculations much more predictable!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Practice Exercise -->
+        <section class="practice-exercise">
+            <div class="exercise-header">
+                <i class="fas fa-hammer"></i>
+                <h2>🏋️‍♂️ Msebetsi Box Model Challenge</h2>
+            </div>
+            
+            <h3>Exercise: Create a Perfectly Spaced Card Component</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 25px 0;">
+                <div>
+                    <h4>📋 Requirements:</h4>
+                    <ol>
+                        <li>Create a div with class "card"</li>
+                        <li>Set total width to 300px (including padding/border)</li>
+                        <li>Add 20px padding inside</li>
+                        <li>Add 2px solid border with color #3498db</li>
+                        <li>Add 15px margin on all sides</li>
+                        <li>Center the card horizontally</li>
+                        <li>Add border-radius: 12px</li>
+                        <li>Add box-shadow for depth</li>
+                    </ol>
+                </div>
+                
+                <div>
+                    <h4>🎯 Expected Result:</h4>
+                    <div style="border: 2px dashed #3498db; padding: 20px; border-radius: 12px; background: white;">
+                        <p><strong>Your card should look like this:</strong></p>
+                        <ul>
+                            <li>Total visible width: 300px</li>
+                            <li>Spaced from other elements: 15px</li>
+                            <li>Content area inside padding: 256px</li>
+                            <li>Rounded corners: 12px</li>
+                            <li>Blue border: 2px</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="code-example">
+                <span class="css-comment">/* Starter CSS - Complete the missing values */</span><br>
+                .card {<br>
+                &nbsp;&nbsp;<span class="css-property">box-sizing</span>: <span class="css-value">border-box</span>;<br>
+                &nbsp;&nbsp;<span class="css-property">width</span>: <span class="css-value">/* Your code here */</span>;<br>
+                &nbsp;&nbsp;<span class="css-property">padding</span>: <span class="css-value">/* Your code here */</span>;<br>
+                &nbsp;&nbsp;<span class="css-property">border</span>: <span class="css-value">/* Your code here */</span>;<br>
+                &nbsp;&nbsp;<span class="css-property">margin</span>: <span class="css-value">/* Your code here */</span>;<br>
+                &nbsp;&nbsp;<span class="css-property">border-radius</span>: <span class="css-value">/* Your code here */</span>;<br>
+                &nbsp;&nbsp;<span class="css-property">background</span>: <span class="css-value">white</span>;<br>
+                &nbsp;&nbsp;<span class="css-property">box-shadow</span>: <span class="css-value">0 4px 12px rgba(0,0,0,0.1)</span>;<br>
+                }
+            </div>
+        </section>
+
+        <!-- Real-World Example -->
+        <section class="demo-container">
+            <h2 class="demo-title"><i class="fas fa-desktop"></i> Real-World Application</h2>
+            <p>Here's how the box model applies to our Operations Dashboard components:</p>
+            
+            <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-top: 20px;">
+                <div style="display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">
+                    <div style="border: 2px solid #3498db; padding: 20px; border-radius: 8px; background: white; flex: 1; min-width: 300px;">
+                        <h4>Status Card Box Model</h4>
+                        <div class="code-example" style="margin: 15px 0;">
+                            .status-card {<br>
+                            &nbsp;&nbsp;<span class="css-property">box-sizing</span>: <span class="css-value">border-box</span>;<br>
+                            &nbsp;&nbsp;<span class="css-property">padding</span>: <span class="css-value">20px</span>;<br>
+                            &nbsp;&nbsp;<span class="css-property">margin</span>: <span class="css-value">10px</span>;<br>
+                            &nbsp;&nbsp;<span class="css-property">border</span>: <span class="css-value">1px solid #e0e0e0</span>;<br>
+                            &nbsp;&nbsp;<span class="css-property">border-radius</span>: <span class="css-value">8px</span>;<br>
+                            }
+                        </div>
+                    </div>
+                    
+                    <div style="flex: 1; min-width: 300px;">
+                        <h4>💡 Box Model in Action</h4>
+                        <ul>
+                            <li><strong>Margin</strong>: Creates space between cards</li>
+                            <li><strong>Border</strong>: Defines card boundaries</li>
+                            <li><strong>Padding</strong>: Provides breathing room for content</li>
+                            <li><strong>box-sizing: border-box</strong>: Ensures consistent sizing</li>
+                        </ul>
+                        <p style="margin-top: 15px; padding: 10px; background: #e8f4fc; border-radius: 6px;">
+                            <i class="fas fa-info-circle"></i> This consistent spacing creates a professional, readable interface.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lesson Footer -->
+        <footer class="lesson-footer">
+            <h3><i class="fas fa-graduation-cap"></i> Lesson Summary</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 25px 0;">
+                <div>
+                    <h4>✅ Key Takeaways</h4>
+                    <ul style="text-align: left;">
+                        <li>Every element is a rectangular box</li>
+                        <li>Box model = Content + Padding + Border + Margin</li>
+                        <li>box-sizing controls calculation method</li>
+                        <li>Use border-box for predictable layouts</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4>🔧 Common Issues</h4>
+                    <ul style="text-align: left;">
+                        <li>Unexpected element overflow</li>
+                        <li>Margin collapsing</li>
+                        <li>Forgetting box-sizing reset</li>
+                        <li>Padding vs Margin confusion</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4>📚 Next Lesson</h4>
+                    <p><strong>Lesson 18: CSS Flexbox</strong></p>
+                    <p>Modern one-dimensional layouts</p>
+                    <p>Alignment and distribution</p>
+                    <p>Responsive design patterns</p>
+                </div>
+            </div>
+            
+            <div class="navigation-buttons">
+                <button class="nav-btn" onclick="window.location.href='lesson16-display.html'">
+                    <i class="fas fa-arrow-left"></i> Previous: Display Properties
+                </button>
+                
+                <button class="nav-btn" onclick="window.location.href='lesson18-flexbox.html'">
+                    Next: Flexbox <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+            
+            <p style="margin-top: 30px; opacity: 0.8; font-size: 0.9em;">
+                © 2024 Msebetsi Solutions | Software Development Course | Lesson 17
+            </p>
+        </footer>
+    </div>
+
+    <!-- JavaScript for Interactive Demo -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get DOM elements
+            const contentSlider = document.getElementById('contentSize');
+            const paddingSlider = document.getElementById('paddingSize');
+            const borderSlider = document.getElementById('borderSize');
+            const marginSlider = document.getElementById('marginSize');
+            
+            const contentValue = document.getElementById('contentValue');
+            const paddingValue = document.getElementById('paddingValue');
+            const borderValue = document.getElementById('borderValue');
+            const marginValue = document.getElementById('marginValue');
+            const totalWidth = document.getElementById('totalWidth');
+            
+            const contentLayer = document.getElementById('contentLayer');
+            const paddingLayer = document.getElementById('paddingLayer');
+            const borderLayer = document.getElementById('borderLayer');
+            const marginLayer = document.getElementById('marginLayer');
+            
+            // Update function
+            function updateBoxModel() {
+                const content = parseInt(contentSlider.value);
+                const padding = parseInt(paddingSlider.value);
+                const border = parseInt(borderSlider.value);
+                const margin = parseInt(marginSlider.value);
+                
+                // Update display values
+                contentValue.textContent = `${content}px`;
+                paddingValue.textContent = `${padding}px`;
+                borderValue.textContent = `${border}px`;
+                marginValue.textContent = `${margin}px`;
+                
+                // Calculate total width
+                const total = content + (padding * 2) + (border * 2) + (margin * 2);
+                totalWidth.textContent = `${total}px`;
+                
+                // Update visual layers
+                contentLayer.style.width = `${content}px`;
+                contentLayer.style.height = `${content}px`;
+                
+                paddingLayer.style.width = `${content + (padding * 2)}px`;
+                paddingLayer.style.height = `${content + (padding * 2)}px`;
+                paddingLayer.style.borderWidth = `${padding}px`;
+                
+                borderLayer.style.width = `${content + (padding * 2) + (border * 2)}px`;
+                borderLayer.style.height = `${content + (padding * 2) + (border * 2)}px`;
+                borderLayer.style.borderWidth = `${border}px`;
+                
+                marginLayer.style.width = `${content + (padding * 2) + (border * 2) + (margin * 2)}px`;
+                marginLayer.style.height = `${content + (padding * 2) + (border * 2) + (margin * 2)}px`;
+                marginLayer.style.borderWidth = `${margin}px`;
+            }
+            
+            // Add event listeners
+            contentSlider.addEventListener('input', updateBoxModel);
+            paddingSlider.addEventListener('input', updateBoxModel);
+            borderSlider.addEventListener('input', updateBoxModel);
+            marginSlider.addEventListener('input', updateBoxModel);
+            
+            // Initialize
+            updateBoxModel();
+            
+            // Add keyboard controls
+            document.addEventListener('keydown', function(e) {
+                let slider, value;
+                
+                switch(e.key) {
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        contentSlider.value = Math.min(300, parseInt(contentSlider.value) + 10);
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        contentSlider.value = Math.max(100, parseInt(contentSlider.value) - 10);
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        paddingSlider.value = Math.min(50, parseInt(paddingSlider.value) + 5);
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        paddingSlider.value = Math.max(0, parseInt(paddingSlider.value) - 5);
+                        break;
+                }
+                
+                updateBoxModel();
+            });
+            
+            // Console logging for educational purposes
+            console.log('📦 Msebetsi Box Model Lesson Loaded');
+            console.log('🎮 Use arrow keys to adjust content (up/down) and padding (left/right)');
+            console.log('📐 Try different combinations to see how the box model works!');
+        });
+    </script>
+</body>
+</html>
