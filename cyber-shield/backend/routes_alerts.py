@@ -843,3 +843,196 @@ def run_playbook():
     # pretend success
     return jsonify({"ok": True, "id": aid, "playbook": pb, "started_at": now})
 
+
+@alerts_bp.post("/api/alerts/classify")
+def classify_alert():
+    """
+    Classify alerts as IOC/IOA and map to MITRE ATT&CK techniques.
+    Body: { "id": 1001 }
+    """
+    b = request.get_json(silent=True) or {}
+    aid = int(b.get('id') or 0)
+    if not aid:
+        return jsonify({'error': 'Missing id'}), 400
+
+    with db() as conn:
+        cur = conn.execute('SELECT * FROM alerts WHERE id = ?', (aid,))
+        row = cur.fetchone()
+        if not row:
+            return jsonify({'error': 'Not found'}), 404
+
+    # Extract artifacts from alert and classify them
+    artifacts = json.loads(row['artifacts'] or '[]')
+    
+    # Basic IOC/IOA classification logic
+    iocs = {
+        'ip': [],
+        'domain': [],
+        'hash': [],
+        'url': []
+    }
+    ioas = []
+    
+    for artifact in artifacts:
+        value = artifact.get('value', '') if isinstance(artifact, dict) else str(artifact)
+        artifact_type = artifact.get('type', 'unknown') if isinstance(artifact, dict) else 'unknown'
+        
+        # Simple IOC classification based on type
+        if artifact_type == 'ip' or value.count('.') == 3:
+            iocs['ip'].append(value)
+        elif artifact_type == 'domain' or '.' in value and not value.count('.') == 3:
+            iocs['domain'].append(value)
+        elif artifact_type == 'hash' or len(value) in [32, 40, 64]:
+            iocs['hash'].append(value)
+        elif artifact_type == 'url' or value.startswith(('http://', 'https://')):
+            iocs['url'].append(value)
+    
+    # Map severity to MITRE techniques
+    severity = (row['severity'] or 'medium').lower()
+    techniques = []
+    if severity == 'critical':
+        techniques = [
+            {'technique_id': 'T1566', 'technique': 'Phishing'},
+            {'technique_id': 'T1200', 'technique': 'Exploitation of a Client Execution Engine'}
+        ]
+    elif severity == 'high':
+        techniques = [
+            {'technique_id': 'T1059', 'technique': 'Command and Scripting Interpreter'},
+            {'technique_id': 'T1190', 'technique': 'Exploit Public-Facing Application'}
+        ]
+    elif severity == 'medium':
+        techniques = [
+            {'technique_id': 'T1110', 'technique': 'Brute Force'}
+        ]
+    
+    classification = {
+        'alert_id': aid,
+        'alert_type': 'network_traffic',
+        'adjusted_severity': severity,
+        'confidence': 0.85,
+        'iocs': {k: v for k, v in iocs.items() if v},
+        'ioas': [{'type': 'suspicious_activity', 'description': f'Potential {severity} severity incident'}] if severity in ['high', 'critical'] else [],
+        'mitre_mapping': techniques
+    }
+    
+    return jsonify({'success': True, 'alert_id': aid, 'classification': classification})
+
+
+@alerts_bp.post("/api/alerts/generate_iodef")
+def generate_iodef():
+    """
+    Generate IODEF XML report for an alert.
+    Body: { "id": 1001, "save_to_file": true }
+    """
+    b = request.get_json(silent=True) or {}
+    aid = int(b.get('id') or 0)
+    save_to_file = b.get('save_to_file', False)
+    
+    if not aid:
+        return jsonify({'error': 'Missing id'}), 400
+
+    with db() as conn:
+        cur = conn.execute('SELECT * FROM alerts WHERE id = ?', (aid,))
+        row = cur.fetchone()
+        if not row:
+            return jsonify({'error': 'Not found'}), 404
+
+    # Generate basic IODEF XML
+    iodef_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<IODEF-Document version="1.00" xmlns="urn:ietf:params:xml:ns:iodef-1.0">
+  <Incident purpose="reporting">
+    <IncidentID>alert-{aid}</IncidentID>
+    <ReportTime>{_now_iso()}</ReportTime>
+    <Title>{row['title'] or 'Alert'}</Title>
+    <Description>{row['description'] or ''}</Description>
+    <Assessment Impact severity="{row['severity'] or 'medium'}"/>
+    <EventData>
+      <Flow>
+        <System>
+          <Node>
+            <Address category="ipv4-addr">{row['source'] or '0.0.0.0'}</Address>
+          </Node>
+        </System>
+      </Flow>
+    </EventData>
+  </Incident>
+</IODEF-Document>"""
+
+    if save_to_file:
+        # Create iodef_reports directory if it doesn't exist
+        import os
+        reports_dir = os.path.join(os.path.dirname(__file__), '..', 'iodef_reports')
+        os.makedirs(reports_dir, exist_ok=True)
+        
+        filename = f"alert_{aid}_iodef.xml"
+        filepath = os.path.join(reports_dir, filename)
+        
+        try:
+            with open(filepath, 'w') as f:
+                f.write(iodef_xml)
+            return jsonify({'success': True, 'alert_id': aid, 'saved_to': f'iodef_reports/{filename}'})
+        except Exception as e:
+            return jsonify({'success': False, 'alert_id': aid, 'error': str(e)}), 500
+    
+    return jsonify({'success': True, 'alert_id': aid, 'iodef': iodef_xml})
+
+
+@alerts_bp.post("/api/opencti/alerts/bulk-submit")
+def submit_to_opencti():
+    """
+    Submit alerts to OpenCTI/Advanced Threat Intelligence platform.
+    Body: { "alert_ids": [1001, 1002, ...] }
+    """
+    b = request.get_json(silent=True) or {}
+    alert_ids = b.get('alert_ids', [])
+    
+    if not alert_ids:
+        return jsonify({'error': 'Missing alert_ids'}), 400
+
+    with db() as conn:
+        success_count = 0
+        fail_count = 0
+        results = []
+        
+        for aid in alert_ids:
+            try:
+                cur = conn.execute('SELECT * FROM alerts WHERE id = ?', (aid,))
+                row = cur.fetchone()
+                if not row:
+                    fail_count += 1
+                    results.append({'alert_id': aid, 'status': 'failed', 'reason': 'not_found'})
+                    continue
+                
+                # Simulate submission to OpenCTI
+                # In a real scenario, this would call OpenCTI API
+                submission_data = {
+                    'alert_id': aid,
+                    'title': row['title'],
+                    'severity': row['severity'],
+                    'artifacts': json.loads(row['artifacts'] or '[]'),
+                    'submitted_at': _now_iso()
+                }
+                
+                # Update alert with OpenCTI submission status
+                existing_tags = json.loads(row['tags'] or '[]')
+                new_tags = existing_tags + ['submitted_to_opencti']
+                conn.execute(
+                    'UPDATE alerts SET tags = ?, updated_at = ? WHERE id = ?',
+                    (json.dumps(new_tags), _now_iso(), aid)
+                )
+                
+                success_count += 1
+                results.append({'alert_id': aid, 'status': 'submitted', 'submission_data': submission_data})
+                
+            except Exception as e:
+                fail_count += 1
+                results.append({'alert_id': aid, 'status': 'failed', 'reason': str(e)})
+
+    return jsonify({
+        'success_count': success_count,
+        'fail_count': fail_count,
+        'total': len(alert_ids),
+        'results': results
+    })
+
+

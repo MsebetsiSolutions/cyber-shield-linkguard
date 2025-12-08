@@ -14,6 +14,10 @@ function generateSessionId() {
     return 'cs_sess_' + result;
 }
 
+// Clear invalid session
+localStorage.removeItem('token');
+localStorage.removeItem('session');
+
 // Validate and manage session
 async function initSession() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -89,6 +93,98 @@ async function initSession() {
     
     return sessionId;
 }
+
+// --- Linkguard SOC Dashboard Dynamic Data Loader ---
+async function loadPageData(page) {
+    const sessionId = CyberShieldSession.getCurrentSessionId();
+    if (!sessionId) {
+        console.warn("No session ID, redirecting to login...");
+        return CyberShieldSession.logout();
+    }
+
+    let url = "";
+    switch (page) {
+        case "overview":
+            url = "/api/routes_monitor/overview";
+            break;
+        case "alerts":
+            url = "/api/routes_alerts/list";
+            break;
+        case "monitoring":
+            url = "/api/routes_monitoring/status";
+            break;
+        case "pentesting":
+            url = "/api/routes_pentesting/summary";
+            break;
+        case "reports":
+            url = "/api/reports/summary";
+            break;
+        case "settings":
+            url = "/api/routes_settings/settings";
+            break;
+        case "intel":
+            url = "/api/routes_intel/latest";
+            break;
+        default:
+            console.warn("Unknown page:", page);
+            return;
+    }
+
+    try {
+        const response = await fetch(url + "?session=" + sessionId, {
+            credentials: 'include'
+        });
+        const data = await response.json();
+        renderData(page, data);
+    } catch (err) {
+        console.error("Error fetching " + page + ":", err);
+    }
+}
+
+function renderData(page, data) {
+    const container = document.getElementById(`page-${page}`);
+    if (!container) return;
+    
+    container.classList.add("show");
+    container.innerHTML = `
+        <div class="card">
+            <div class="card-head"><h3>${page.toUpperCase()}</h3></div>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+        </div>
+    `;
+}
+
+// --- Handle Sidebar Navigation ---
+document.querySelectorAll(".nav-item").forEach(item => {
+    item.addEventListener("click", () => {
+        const page = item.getAttribute("data-page");
+        document.querySelectorAll(".page").forEach(p => p.classList.remove("show"));
+        loadPageData(page);
+    });
+});
+
+// Load default page on startup
+document.addEventListener("DOMContentLoaded", () => {
+    loadPageData("overview");
+});
+// Fetch system monitoring data
+async function loadSystemMonitoring() {
+  const response = await fetch("/api/monitoring/system", {
+    method: "POST",
+  });
+  const data = await response.json();
+
+  if (data.error) {
+    alert("Error: " + data.error);
+  } else {
+    console.log("System data:", data);
+    // Update dashboard elements dynamically here
+    document.getElementById("cpuUsage").innerText = data.cpu.percent + "%";
+    document.getElementById("memoryUsage").innerText = data.memory.percent + "%";
+    document.getElementById("diskUsage").innerText = data.disk.percent + "%";
+  }
+}
+
 
 // Update URL with session ID
 function updateUrlWithSession(sessionId) {
