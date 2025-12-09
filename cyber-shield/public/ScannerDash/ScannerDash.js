@@ -29,9 +29,9 @@ let qrScanningActive = false;
 
 const FEATURE_ACCESS = {
   0: ['feature-learning-hub', 'feature-cybersmart-kids'],
-  1: ['feature-learning-hub', 'feature-cybersmart-kids', 'feature-stats', 'feature-cyber-awareness'],
-  2: ['feature-learning-hub', 'feature-cybersmart-kids', 'feature-stats', 'feature-cyber-awareness', 'feature-team-workspace', 'feature-background-check', 'feature-cybersecurity-exams'],
-  3: ['feature-learning-hub', 'feature-cybersmart-kids', 'feature-stats', 'feature-cyber-awareness', 'feature-background-check', 'feature-cybersecurity-exams', 'feature-enterprise']
+  1: ['feature-learning-hub', 'feature-learning-hub2', 'feature-cybersmart-kids', 'feature-stats', 'feature-cyber-awareness'],
+  2: ['feature-learning-hub', 'feature-learning-hub2', 'feature-cybersmart-kids', 'feature-stats', 'feature-cyber-awareness', 'feature-team-workspace', 'feature-background-check', 'feature-cybersecurity-exams'],
+  3: ['feature-learning-hub', 'feature-learning-hub2', 'feature-cybersmart-kids', 'feature-stats', 'feature-cyber-awareness', 'feature-background-check', 'feature-cybersecurity-exams', 'feature-enterprise']
 };
 
 // Initialize Chart.js
