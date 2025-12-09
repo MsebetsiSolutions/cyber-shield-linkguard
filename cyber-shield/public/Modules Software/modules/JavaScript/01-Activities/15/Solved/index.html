@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MSEBETSI Oil Field Methods Lab</title>
+    <style>
+        body { font-family: monospace; margin: 20px; background: #f5f5f5; }
+        .console { background: #1e1e1e; color: #00ff00; padding: 20px; border-radius: 5px; }
+        .output { background: #2d2d2d; color: #fff; padding: 10px; margin-top: 10px; }
+        .task { background: #fff; padding: 15px; margin: 10px 0; border-left: 4px solid #006400; }
+        code { background: #e0e0e0; padding: 2px 4px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>🛢️ MSEBETSI Oil Field Methods Interactive Lab</h1>
+    
+    <div class="task">
+        <h3>Task 1: Field Name Cleanup</h3>
+        <p>Open browser console (F12) and try:</p>
+        <code>FieldDataProcessor.standardizeFieldName("  ghawar-NORTH_2024  ")</code>
+        <div class="output" id="task1"></div>
+    </div>
+    
+    <div class="task">
+        <h3>Task 2: Production Calculation</h3>
+        <p>Calculate daily production:</p>
+        <code>
+const readings = [
+    {sensor:"FT-301", value:"8500", unit:"bpd", valid:true},
+    {sensor:"FT-302", value:"8200", unit:"bpd", valid:true}
+];
+ProductionAnalyzer.calculateDailyProduction(readings);
+        </code>
+        <div class="output" id="task2"></div>
+    </div>
+    
+    <div class="task">
+        <h3>Task 3: Equipment Efficiency</h3>
+        <p>Check pump efficiency:</p>
+        <code>
+const pump = {
+    id: "PUMP-001",
+    specifications: { capacity: 10000, pressure: 1250, efficiency: 0.87 },
+    readings: { currentPressure: 1245, currentFlow: 9850 }
+};
+new EquipmentManager(pump).calculateEfficiencyScore();
+        </code>
+        <div class="output" id="task3"></div>
+    </div>
+    
+    <div class="console">
+        <h3 style="color: #fff;">📟 Your Console Output Will Appear Here:</h3>
+        <div id="liveConsole"></div>
+    </div>
+    
+    <script src="msebetsi-oil-methods.js"></script>
+    <script>
+        // Live console output
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            document.getElementById('liveConsole').innerHTML += 
+                args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ') + '<br>';
+        };
+        
+        // Auto-run examples
+        setTimeout(() => {
+            console.log("🚀 MSEBETSI Methods Lab Initialized");
+            console.log("Try the tasks above in your console (F12)");
+        }, 1000);
+    </script>
+</body>
+</html>

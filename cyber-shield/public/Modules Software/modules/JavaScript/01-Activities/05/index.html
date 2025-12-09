@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Msebetsi Data Detective: Primitive Types</title>
+    <style>
+        :root {
+            --detective-dark: #1a237e;
+            --detective-light: #bbdefb;
+            --evidence-red: #d32f2f;
+            --clue-green: #388e3c;
+            --highlight-yellow: #ffd600;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0d47a1 0%, #1976d2 100%);
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .case-file {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            color: #000;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 5px solid var(--detective-dark);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .case-file::before {
+            content: "CONFIDENTIAL";
+            position: absolute;
+            top: 20px;
+            right: -30px;
+            background: var(--evidence-red);
+            color: white;
+            padding: 10px 40px;
+            transform: rotate(45deg);
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid var(--detective-dark);
+        }
+        
+        .badge {
+            background: var(--detective-dark);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+        
+        .case-number {
+            font-size: 2.5rem;
+            color: var(--detective-dark);
+            margin: 10px 0;
+        }
+        
+        .evidence-box {
+            background: #f5f5f5;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border-left: 5px solid var(--detective-dark);
+            font-family: 'Courier New', monospace;
+        }
+        
+        .clue {
+            background: var(--detective-light);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 2px dashed var(--detective-dark);
+        }
+        
+        .code-evidence {
+            background: #2d2d2d;
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #444;
+        }
+        
+        .suspect {
+            color: #569cd6;
+        }
+        
+        .string-clue {
+            color: #ce9178;
+        }
+        
+        .number-clue {
+            color: #b5cea8;
+        }
+        
+        .boolean-clue {
+            color: #d7ba7d;
+        }
+        
+        .task {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border: 2px solid var(--detective-dark);
+            counter-increment: task-counter;
+        }
+        
+        .task::before {
+            content: "TASK " counter(task-counter);
+            display: block;
+            background: var(--detective-dark);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .interactive-lab {
+            background: #e3f2fd;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border: 3px solid var(--clue-green);
+        }
+        
+        button {
+            background: var(--detective-dark);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: var(--evidence-red);
+            transform: translateY(-2px);
+        }
+        
+        .evidence-tag {
+            display: inline-block;
+            background: var(--evidence-red);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .type-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid;
+            transition: transform 0.3s;
+        }
+        
+        .type-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .string-card { border-color: #ce9178; }
+        .number-card { border-color: #b5cea8; }
+        .boolean-card { border-color: #d7ba7d; }
+        .undefined-card { border-color: #569cd6; }
+        .null-card { border-color: #646695; }
+        .symbol-card { border-color: #9b59b6; }
+        .bigint-card { border-color: #e67e22; }
+        
+        .console-output {
+            background: #000;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            min-height: 100px;
+            border: 1px solid #444;
+        }
+        
+        .magnifying-glass {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 2rem;
+        }
+        
+        .fingerprint {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            opacity: 0.1;
+            font-size: 4rem;
+            transform: rotate(15deg);
+        }
+        
+        .hint {
+            background: var(--highlight-yellow);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .case-file {
+                padding: 20px;
+            }
+            
+            .case-number {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="case-file">
+        <div class="magnifying-glass">🔍</div>
+        <div class="fingerprint">🖐️</div>
+        
+        <div class="header">
+            <div class="badge">MSEBETSI DATA DIVISION</div>
+            <h1 class="case-number">CASE #007</h1>
+            <h2>THE PRIMITIVE TYPES INVESTIGATION</h2>
+            <p><em>"When the data doesn't add up, we dig deeper"</em></p>
+        </div>
+
+        <!-- Case Brief -->
+        <div class="evidence-box">
+            <h3>📋 CASE BRIEF</h3>
+            <p><strong>Date:</strong> Today</p>
+            <p><strong>Location:</strong> Msebetsi Client Database</p>
+            <p><strong>Issue:</strong> Data type mismatches causing system errors</p>
+            <p><strong>Your Mission:</strong> Identify all primitive types and fix the bugs</p>
+        </div>
+
+        <!-- Evidence -->
+        <div class="evidence-box">
+            <h3>🔎 EVIDENCE FOUND</h3>
+            <div class="type-grid">
+                <div class="type-card string-card">
+                    <div style="font-size: 1.5rem;">"📝"</div>
+                    <h4>String</h4>
+                    <p>Text data</p>
+                </div>
+                <div class="type-card number-card">
+                    <div style="font-size: 1.5rem;">🔢</div>
+                    <h4>Number</h4>
+                    <p>Numeric data</p>
+                </div>
+                <div class="type-card boolean-card">
+                    <div style="font-size: 1.5rem;">✅❌</div>
+                    <h4>Boolean</h4>
+                    <p>True/False</p>
+                </div>
+                <div class="type-card undefined-card">
+                    <div style="font-size: 1.5rem;">❓</div>
+                    <h4>Undefined</h4>
+                    <p>Not assigned</p>
+                </div>
+                <div class="type-card null-card">
+                    <div style="font-size: 1.5rem;">∅</div>
+                    <h4>Null</h4>
+                    <p>Empty value</p>
+                </div>
+                <div class="type-card symbol-card">
+                    <div style="font-size: 1.5rem;">⚡</div>
+                    <h4>Symbol</h4>
+                    <p>Unique ID</p>
+                </div>
+                <div class="type-card bigint-card">
+                    <div style="font-size: 1.5rem;">∞</div>
+                    <h4>BigInt</h4>
+                    <p>Large numbers</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task 1: Identify the Types -->
+        <div class="task">
+            <h3>🔍 TASK 1: Identify the Suspects</h3>
+            <p>For each piece of evidence below, predict what <code>typeof</code> will return:</p>
+            
+            <div class="code-evidence">
+                // Suspect Evidence List<br>
+                <span class="suspect">const</span> evidence1 = <span class="string-clue">"Msebetsi Solutions"</span>;<br>
+                <span class="suspect">const</span> evidence2 = <span class="number-clue">500000</span>;<br>
+                <span class="suspect">const</span> evidence3 = <span class="boolean-clue">true</span>;<br>
+                <span class="suspect">let</span> evidence4;<br>
+                <span class="suspect">const</span> evidence5 = <span class="suspect">null</span>;<br>
+                <span class="suspect">const</span> evidence6 = <span class="suspect">Symbol</span>(<span class="string-clue">"client_id"</span>);<br>
+                <span class="suspect">const</span> evidence7 = <span class="number-clue">9007199254740991</span><span class="suspect">n</span>;
+            </div>
+            
+            <div class="clue">
+                <strong>Your Predictions:</strong><br>
+                <span class="evidence-tag">evidence1:</span> <input type="text" id="pred1" placeholder="type?" size="10"><br>
+                <span class="evidence-tag">evidence2:</span> <input type="text" id="pred2" placeholder="type?" size="10"><br>
+                <span class="evidence-tag">evidence3:</span> <input type="text" id="pred3" placeholder="type?" size="10"><br>
+                <span class="evidence-tag">evidence4:</span> <input type="text" id="pred4" placeholder="type?" size="10"><br>
+                <span class="evidence-tag">evidence5:</span> <input type="text" id="pred5" placeholder="type?" size="10"><br>
+                <span class="evidence-tag">evidence6:</span> <input type="text" id="pred6" placeholder="type?" size="10"><br>
+                <span class="evidence-tag">evidence7:</span> <input type="text" id="pred7" placeholder="type?" size="10">
+            </div>
+            
+            <button onclick="checkTask1()">✅ Check Predictions</button>
+            <button onclick="showHint(1)">💡 Need Hint?</button>
+            <button onclick="runTask1()">🔍 Test in Console</button>
+            
+            <div class="hint" id="hint1">
+                <strong>Investigator's Tip:</strong> Use the <code>typeof</code> operator to discover types. Example: <code>typeof "text"</code> returns "string"
+            </div>
+            
+            <div class="console-output" id="output1">
+                Your investigation results will appear here...
+            </div>
+        </div>
+
+        <!-- Task 2: Debug Business Code -->
+        <div class="task">
+            <h3>🔧 TASK 2: Fix the Buggy Code</h3>
+            <p>This client payment system has type-related bugs. Fix them!</p>
+            
+            <div class="code-evidence">
+                <span class="suspect">function</span> processPayment(clientName, amount, isPaid) {<br>
+                &nbsp;&nbsp;<span class="comment">// Bug 1: Client name validation</span><br>
+                &nbsp;&nbsp;<span class="suspect">if</span> (clientName === <span class="suspect">null</span>) {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="suspect">return</span> <span class="string-clue">"Error: Client name required"</span>;<br>
+                &nbsp;&nbsp;}<br>
+                &nbsp;&nbsp;<br>
+                &nbsp;&nbsp;<span class="comment">// Bug 2: Amount calculation</span><br>
+                &nbsp;&nbsp;<span class="suspect">const</span> vat = amount * <span class="number-clue">0.15</span>;<br>
+                &nbsp;&nbsp;<span class="suspect">const</span> total = amount + vat;<br>
+                &nbsp;&nbsp;<br>
+                &nbsp;&nbsp;<span class="comment">// Bug 3: Payment status check</span><br>
+                &nbsp;&nbsp;<span class="suspect">if</span> (isPaid = <span class="boolean-clue">true</span>) {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="suspect">return</span> <span class="string-clue">`✅ Payment of R</span><span class="suspect">${</span>total<span class="suspect">}</span><span class="string-clue"> processed for </span><span class="suspect">${</span>clientName<span class="suspect">}</span><span class="string-clue">`</span>;<br>
+                &nbsp;&nbsp;} <span class="suspect">else</span> {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="suspect">return</span> <span class="string-clue">`Pending: R</span><span class="suspect">${</span>total<span class="suspect">}</span><span class="string-clue">`</span>;<br>
+                &nbsp;&nbsp;}<br>
+                }<br>
+                <br>
+                <span class="comment">// Test the function</span><br>
+                console.log(processPayment(<span class="string-clue">"ABSA Bank"</span>, <span class="number-clue">50000</span>, <span class="boolean-clue">true</span>));<br>
+                console.log(processPayment(<span class="string-clue">""</span>, <span class="string-clue">"50000"</span>, <span class="string-clue">"yes"</span>));
+            </div>
+            
+            <div class="clue">
+                <strong>Bugs to Find:</strong>
+                <ol>
+                    <li>Wrong check for empty client name</li>
+                    <li>No validation for amount type</li>
+                    <li>Assignment instead of comparison</li>
+                </ol>
+            </div>
+            
+            <button onclick="showTask2Solution()">🔧 Show Fixed Code</button>
+            <button onclick="runTask2()">🔍 Test Current Code</button>
+            
+            <div class="console-output" id="output2">
+                Debug results will appear here...
+            </div>
+        </div>
+
+        <!-- Task 3: Create Type Validator -->
+        <div class="task">
+            <h3>🛡️ TASK 3: Build a Type Validator</h3>
+            <p>Create a function that validates Msebetsi project data:</p>
+            
+            <div class="interactive-lab">
+                <h4>Project Data Validator</h4>
+                <p>Complete this function to check all data types:</p>
+                
+                <div class="code-evidence" style="background: #fff; color: #000;">
+                    function validateProject(project) {<br>
+                    &nbsp;&nbsp;const { name, budget, teamSize, isActive } = project;<br>
+                    &nbsp;&nbsp;let errors = [];<br>
+                    &nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;// TODO: Check name is string<br>
+                    &nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;// TODO: Check budget is number<br>
+                    &nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;// TODO: Check teamSize is number<br>
+                    &nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;// TODO: Check isActive is boolean<br>
+                    &nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;if (errors.length === 0) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;return "✅ All data types valid";<br>
+                    &nbsp;&nbsp;} else {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;return `❌ Errors found:\n${errors.join("\n")}`;<br>
+                    &nbsp;&nbsp;}<br>
+                    }
+                </div>
+                
+                <button onclick="testValidator()">🧪 Test Your Validator</button>
+                <button onclick="showValidatorSolution()">📋 Show Solution</button>
+            </div>
+            
+            <div class="console-output" id="output3">
+                Validator test results...
+            </div>
+        </div>
+
+        <!-- Interactive Type Tester -->
+        <div class="interactive-lab">
+            <h3>🧪 Interactive Type Lab</h3>
+            <p>Test any value to see its type:</p>
+            
+            <div style="display: flex; gap: 10px; margin: 15px 0;">
+                <input type="text" id="testValue" placeholder="Enter any value..." style="flex: 1; padding: 10px; border: 2px solid var(--detective-dark); border-radius: 5px;">
+                <button onclick="testType()">🔬 Analyze Type</button>
+                <button onclick="testExamples()">📚 Test Examples</button>
+            </div>
+            
+            <div class="console-output" id="typeOutput">
+                Enter a value to analyze...
+            </div>
+            
+            <div class="clue">
+                <strong>Test these values:</strong>
+                <span class="evidence-tag" onclick="quickTest('42')">42</span>
+                <span class="evidence-tag" onclick="quickTest('"Hello"')">"Hello"</span>
+                <span class="evidence-tag" onclick="quickTest('true')">true</span>
+                <span class="evidence-tag" onclick="quickTest('null')">null</span>
+                <span class="evidence-tag" onclick="quickTest('undefined')">undefined</span>
+                <span class="evidence-tag" onclick="quickTest('Symbol()')">Symbol()</span>
+                <span class="evidence-tag" onclick="quickTest('9007199254740991n')">9007199254740991n</span>
+            </div>
+        </div>
+
+        <!-- Case Solved -->
+        <div class="evidence-box" style="background: var(--clue-green); color: white; text-align: center;">
+            <h3>✅ CASE SOLVED CHECKLIST</h3>
+            <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin: 20px 0;">
+                <div>
+                    <input type="checkbox" id="check1"> 
+                    <label for="check1">Identified all 7 primitive types</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="check2"> 
+                    <label for="check2">Used typeof operator correctly</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="check3"> 
+                    <label for="check3">Fixed type-related bugs</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="check4"> 
+                    <label for="check4">Built data validator</label>
+                </div>
+            </div>
+            
+            <button onclick="completeCase()" style="background: white; color: var(--clue-green); font-size: 1.2rem; padding: 15px 30px;">
+                🎯 SUBMIT INVESTIGATION REPORT
+            </button>
+            
+            <div id="caseResult" style="margin-top: 20px;"></div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--detective-dark); color: #666;">
+            <p><strong>Msebetsi Data Division</strong> | Ensuring Data Integrity Since 2020</p>
+            <p><small>Remember: Always know your data types!</small></p>
+        </div>
+    </div>
+
+    <script>
+        // Task 1: Type Identification
+        function checkTask1() {
+            const predictions = [
+                document.getElementById('pred1').value.toLowerCase(),
+                document.getElementById('pred2').value.toLowerCase(),
+                document.getElementById('pred3').value.toLowerCase(),
+                document.getElementById('pred4').value.toLowerCase(),
+                document.getElementById('pred5').value.toLowerCase(),
+                document.getElementById('pred6').value.toLowerCase(),
+                document.getElementById('pred7').value.toLowerCase()
+            ];
+            
+            const answers = ['string', 'number', 'boolean', 'undefined', 'object', 'symbol', 'bigint'];
+            const evidenceNames = ['evidence1', 'evidence2', 'evidence3', 'evidence4', 'evidence5', 'evidence6', 'evidence7'];
+            
+            let score = 0;
+            let results = '<strong>🔍 Investigation Results:</strong><br><br>';
+            
+            predictions.forEach((pred, index) => {
+                if (pred === answers[index]) {
+                    score++;
+                    results += `✅ ${evidenceNames[index]}: "${pred}" is correct!<br>`;
+                } else {
+                    results += `❌ ${evidenceNames[index]}: "${pred}" → correct: "${answers[index]}"<br>`;
+                }
+            });
+            
+            results += `<br><strong>Accuracy: ${score}/7 correct</strong>`;
+            
+            if (score === 7) {
+                results += '<br>🎉 Perfect! You\'ve mastered primitive types!';
+            } else if (score >= 5) {
+                results += '<br>👍 Good work! Review the types you missed.';
+            } else {
+                results += '<br>📚 Study the 7 primitive types and try again!';
+            }
+            
+            document.getElementById('output1').innerHTML = results;
+        }
+        
+        function runTask1() {
+            // Define the evidence
+            const evidence1 = "Msebetsi Solutions";
+            const evidence2 = 500000;
+            const evidence3 = true;
+            let evidence4;
+            const evidence5 = null;
+            const evidence6 = Symbol("client_id");
+            const evidence7 = 9007199254740991n;
+            
+            document.getElementById('output1').innerHTML = `
+                <strong>🔬 Console Analysis:</strong><br><br>
+                evidence1: "${evidence1}" → typeof: "${typeof evidence1}"<br>
+                evidence2: ${evidence2} → typeof: "${typeof evidence2}"<br>
+                evidence3: ${evidence3} → typeof: "${typeof evidence3}"<br>
+                evidence4: ${evidence4} → typeof: "${typeof evidence4}"<br>
+                evidence5: ${evidence5} → typeof: "${typeof evidence5}"<br>
+                evidence6: Symbol → typeof: "${typeof evidence6}"<br>
+                evidence7: ${evidence7}n → typeof: "${typeof evidence7}"<br><br>
+                <em>💡 Note: typeof null returns "object" (historical JavaScript bug)</em>
+            `;
+        }
+        
+        // Task 2: Debug Business Code
+        function showTask2Solution() {
+            document.getElementById('output2').innerHTML = `
+                <strong>🔧 Fixed Code:</strong><br><br>
+                function processPayment(clientName, amount, isPaid) {<br>
+                &nbsp;&nbsp;// Fixed: Check for empty string instead of null<br>
+                &nbsp;&nbsp;if (typeof clientName !== "string" || clientName.trim() === "") {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;return "Error: Valid client name required";<br>
+                &nbsp;&nbsp;}<br>
+                &nbsp;&nbsp;<br>
+                &nbsp;&nbsp;// Fixed: Validate amount is a number<br>
+                &nbsp;&nbsp;if (typeof amount !== "number" || amount <= 0) {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;return "Error: Amount must be a positive number";<br>
+                &nbsp;&nbsp;}<br>
+                &nbsp;&nbsp;<br>
+                &nbsp;&nbsp;const vat = amount * 0.15;<br>
+                &nbsp;&nbsp;const total = amount + vat;<br>
+                &nbsp;&nbsp;<br>
+                &nbsp;&nbsp;// Fixed: Use comparison (===) not assignment (=)<br>
+                &nbsp;&nbsp;if (isPaid === true) {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;return \`✅ Payment of R\${total} processed for \${clientName}\`;<br>
+                &nbsp;&nbsp;} else {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;return \`Pending: R\${total}\`;<br>
+                &nbsp;&nbsp;}<br>
+                }
+            `;
+        }
+        
+        function runTask2() {
+            // Original buggy function
+            function processPayment(clientName, amount, isPaid) {
+                if (clientName === null) {
+                    return "Error: Client name required";
+                }
+                
+                const vat = amount * 0.15;
+                const total = amount + vat;
+                
+                if (isPaid = true) {
+                    return `✅ Payment of R${total} processed for ${clientName}`;
+                } else {
+                    return `Pending: R${total}`;
+                }
+            }
+            
+            document.getElementById('output2').innerHTML = `
+                <strong>🐛 Current Buggy Output:</strong><br><br>
+                ${processPayment("ABSA Bank", 50000, true)}<br>
+                ${processPayment("", "50000", "yes")}<br><br>
+                <em>⚠️ Issues found:<br>
+                1. Empty string "" passes the null check<br>
+                2. String "50000" causes NaN in calculation<br>
+                3. Assignment (=) instead of comparison (===)</em>
+            `;
+        }
+        
+        // Task 3: Type Validator
+        function testValidator() {
+            const testProjects = [
+                {
+                    name: "E-commerce Platform",
+                    budget: 500000,
+                    teamSize: 5,
+                    isActive: true
+                },
+                {
+                    name: 12345,  // Wrong type!
+                    budget: "750000",  // Wrong type!
+                    teamSize: "three",  // Wrong type!
+                    isActive: "yes"  // Wrong type!
+                },
+                {
+                    name: "",
+                    budget: -10000,  // Valid number but negative
+                    teamSize: 0,
+                    isActive: false
+                }
+            ];
+            
+            // Sample validator solution
+            function validateProject(project) {
+                const { name, budget, teamSize, isActive } = project;
+                let errors = [];
+                
+                // Check name is string and not empty
+                if (typeof name !== "string") {
+                    errors.push("Name must be a string");
+                } else if (name.trim() === "") {
+                    errors.push("Name cannot be empty");
+                }
+                
+                // Check budget is positive number
+                if (typeof budget !== "number") {
+                    errors.push("Budget must be a number");
+                } else if (budget <= 0) {
+                    errors.push("Budget must be positive");
+                }
+                
+                // Check teamSize is positive integer
+                if (typeof teamSize !== "number") {
+                    errors.push("Team size must be a number");
+                } else if (teamSize < 1) {
+                    errors.push("Team must have at least 1 member");
+                }
+                
+                // Check isActive is boolean
+                if (typeof isActive !== "boolean") {
+                    errors.push("Active status must be true or false");
+                }
+                
+                if (errors.length === 0) {
+                    return "✅ All data types valid";
+                } else {
+                    return `❌ Errors found:\n${errors.join("\n")}`;
+                }
+            }
+            
+            let output = "<strong>🧪 Validator Test Results:</strong><br><br>";
+            
+            testProjects.forEach((project, index) => {
+                output += `<strong>Project ${index + 1}:</strong><br>`;
+                output += validateProject(project);
+                output += "<br><br>";
+            });
+            
+            document.getElementById('output3').innerHTML = output;
+        }
+        
+        function showValidatorSolution() {
+            document.getElementById('output3').innerHTML = `
+                <strong>📋 Validator Solution:</strong><br><br>
+                function validateProject(project) {<br>
+                &nbsp;&nbsp;const { name, budget, teamSize, isActive } = project;<br>
+                &nbsp;&nbsp;let errors = [];<br>
+                &nbsp;&nbsp;<br>
+                &nbsp;&nbsp;// Check name is string and not empty<br>
+                &nbsp;&nbsp;if (typeof name !== "string") {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;errors.push("Name must be a string");<br>
+                &nbsp;&nbsp;} else if (name.trim() === "") {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;errors.push("Name cannot be empty");<br>
+                &nbsp;&nbsp;}<br>
+                &nbsp;&nbsp;<br>
+                &nbsp;&nbsp;// Check budget is positive number<br>
+                &nbsp;&nbsp;if (typeof budget !== "number") {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;errors.push("Budget must be a number");<br>
+                &nbsp;&nbsp;} else if (budget <= 0) {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;errors.push("Budget must be positive");<br>
+                &nbsp;&nbsp;}<br>
+                &nbsp;&nbsp;<br>
+                &nbsp;&nbsp;// Check teamSize is positive integer<br>
+                &nbsp;&nbsp;if (typeof teamSize !== "number") {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;errors.push("Team size must be a number");<br>
+                &nbsp;&nbsp;} else if (teamSize < 1) {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;errors.push("Team must have at least 1 member");<br>
+                &nbsp;&nbsp;}<br>
+                &nbsp;&nbsp;<br>
+                &nbsp;&nbsp;// Check isActive is boolean<br>
+                &nbsp;&nbsp;if (typeof isActive !== "boolean") {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;errors.push("Active status must be true or false");<br>
+                &nbsp;&nbsp;}<br>
+                &nbsp;&nbsp;<br>
+                &nbsp;&nbsp;if (errors.length === 0) {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;return "✅ All data types valid";<br>
+                &nbsp;&nbsp;} else {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;return \`❌ Errors found:\\n\${errors.join("\\n")}\`;<br>
+                &nbsp;&nbsp;}<br>
+                }
+            `;
+        }
+        
+        // Interactive Type Tester
+        function testType() {
+            const input = document.getElementById('testValue').value;
+            let value;
+            
+            // Try to parse the input intelligently
+            try {
+                if (input === 'true') value = true;
+                else if (input === 'false') value = false;
+                else if (input === 'null') value = null;
+                else if (input === 'undefined') value = undefined;
+                else if (input === 'Symbol()') value = Symbol();
+                else if (input.endsWith('n')) value = BigInt(input.slice(0, -1));
+                else if (!isNaN(input)) value = Number(input);
+                else if ((input.startsWith('"') && input.endsWith('"')) || 
+                         (input.startsWith("'") && input.endsWith("'"))) {
+                    value = input.slice(1, -1);
+                } else {
+                    value = input;
+                }
+            } catch (e) {
+                value = input;
+            }
+            
+            const type = typeof value;
+            let additionalInfo = '';
+            
+            if (value === null) {
+                additionalInfo = ' (Note: typeof null returns "object" - historical JavaScript bug)';
+            }
+            
+            document.getElementById('typeOutput').innerHTML = `
+                <strong>🔬 Type Analysis:</strong><br><br>
+                <strong>Input:</strong> ${JSON.stringify(value)}<br>
+                <strong>Type:</strong> "${type}"${additionalInfo}<br>
+                <strong>Is Primitive:</strong> ${typeof value !== 'object' || value === null}<br>
+                <strong>Constructor:</strong> ${value?.constructor?.name || 'N/A'}<br><br>
+                <strong>Console test:</strong> <code>typeof ${JSON.stringify(value)}</code> → "${type}"
+            `;
+        }
+        
+        function testExamples() {
+            const examples = [
+                { value: 42, desc: "Number" },
+                { value: "Hello", desc: "String" },
+                { value: true, desc: "Boolean" },
+                { value: null, desc: "Null" },
+                { value: undefined, desc: "Undefined" },
+                { value: Symbol("test"), desc: "Symbol" },
+                { value: 9007199254740991n, desc: "BigInt" }
+            ];
+            
+            let output = "<strong>📚 Example Types:</strong><br><br>";
+            
+            examples.forEach(example => {
+                output += `<strong>${example.desc}:</strong> ${JSON.stringify(example.value)} → typeof: "${typeof example.value}"<br>`;
+            });
+            
+            output += `<br><em>💡 There are 7 primitive types in JavaScript</em>`;
+            
+            document.getElementById('typeOutput').innerHTML = output;
+        }
+        
+        function quickTest(value) {
+            document.getElementById('testValue').value = value;
+            testType();
+        }
+        
+        // Case Completion
+        function completeCase() {
+            const checkboxes = ['check1', 'check2', 'check3', 'check4'];
+            const checked = checkboxes.filter(id => document.getElementById(id).checked).length;
+            
+            const resultDiv = document.getElementById('caseResult');
+            
+            if (checked === 4) {
+                resultDiv.innerHTML = `
+                    <div style="background: white; color: var(--clue-green); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <strong>🎉 CASE SOLVED!</strong><br>
+                        Investigation complete. Data types secured.<br>
+                        <small>Report filed: ${new Date().toLocaleDateString()}</small>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div style="background: var(--evidence-red); color: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <strong>⚠️ INVESTIGATION INCOMPLETE</strong><br>
+                        Complete ${4 - checked} more task(s) before submitting.
+                    </div>
+                `;
+            }
+        }
+        
+        // Helper functions
+        function showHint(taskNum) {
+            const hint = document.getElementById(`hint${taskNum}`);
+            hint.style.display = 'block';
+        }
+        
+        // Initialize
+        runTask1();
+        testExamples();
+    </script>
+</body>
+</html>

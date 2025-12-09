@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎪 Msebetsi Data Carnival: JavaScript Arrays</title>
+    <style>
+        /* Import fun carnival fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Poppins:wght@300;400;600;700&family=Fredoka+One&display=swap');
+        
+        :root {
+            --carnival-red: #FF6B6B;
+            --carnival-yellow: #FFD93D;
+            --carnival-blue: #4D96FF;
+            --carnival-green: #6BCF7F;
+            --carnival-purple: #9D65C9;
+            --dark-bg: #1A1A2E;
+            --light-bg: #2D3047;
+            --ticket-gold: #FFD700;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #16213E 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Carnival Background Effects */
+        .carnival-lights {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(255, 107, 107, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 30%, rgba(255, 217, 61, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 50% 80%, rgba(77, 150, 255, 0.1) 0%, transparent 20%);
+            animation: lights-twinkle 4s infinite alternate;
+        }
+        
+        @keyframes lights-twinkle {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--carnival-red);
+            border-radius: 50%;
+            animation: fall 5s linear infinite;
+        }
+        
+        @keyframes fall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        /* Main Container */
+        .carnival-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        /* Left Panel: Array Carousel */
+        .array-carousel {
+            background: rgba(45, 48, 71, 0.9);
+            border-radius: 20px;
+            padding: 25px;
+            border: 3px solid var(--carnival-yellow);
+            box-shadow: 0 0 30px rgba(255, 217, 61, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .carousel-header {
+            font-family: 'Bangers', cursive;
+            font-size: 2.2rem;
+            color: var(--carnival-yellow);
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 0 var(--carnival-red);
+            letter-spacing: 2px;
+        }
+        
+        .array-ride {
+            height: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 2px dashed var(--carnival-blue);
+        }
+        
+        .array-element {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: grab;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+        
+        .array-element:hover {
+            transform: scale(1.1) rotate(5deg);
+            z-index: 100;
+        }
+        
+        .element-0 { background: var(--carnival-red); top: 20%; left: 20%; }
+        .element-1 { background: var(--carnival-yellow); top: 40%; left: 40%; }
+        .element-2 { background: var(--carnival-blue); top: 60%; left: 60%; }
+        .element-3 { background: var(--carnival-green); top: 30%; left: 70%; }
+        .element-4 { background: var(--carnival-purple); top: 70%; left: 30%; }
+        
+        /* Array Operations Panel */
+        .operations-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .operation-btn {
+            background: linear-gradient(135deg, var(--carnival-blue), var(--carnival-purple));
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin: 8px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        .operation-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .push-btn { background: linear-gradient(135deg, var(--carnival-green), #4CAF50); }
+        .pop-btn { background: linear-gradient(135deg, var(--carnival-red), #F44336); }
+        .shift-btn { background: linear-gradient(135deg, var(--carnival-yellow), #FF9800); }
+        
+        /* Center Panel: Main Arena */
+        .main-arena {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .arena-header {
+            background: linear-gradient(135deg, var(--carnival-red), var(--carnival-purple));
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-family: 'Bangers', cursive;
+            font-size: 2.5rem;
+            letter-spacing: 3px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .arena-header::before {
+            content: '🎪 🎡 🎢';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 1.5rem;
+            opacity: 0.5;
+        }
+        
+        .arena-header::after {
+            content: '🚀 🎯 🏆';
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            opacity: 0.5;
+        }
+        
+        /* Array Visualizer */
+        .array-visualizer {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            border: 3px solid var(--carnival-green);
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .visualizer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .array-cell {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--carnival-blue);
+            border-radius: 10px;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .array-cell.active {
+            background: var(--carnival-yellow);
+            color: black;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px var(--carnival-yellow);
+        }
+        
+        .cell-index {
+            font-size: 0.8rem;
+            color: #999;
+            position: absolute;
+            top: 5px;
+            left: 5px;
+        }
+        
+        .cell-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .cell-type {
+            font-size: 0.7rem;
+            color: #666;
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+        }
+        
+        /* Array Methods Showcase */
+        .methods-stage {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid var(--carnival-purple);
+        }
+        
+        .method-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 5px solid;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .method-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(10px);
+        }
+        
+        .method-card.map { border-color: var(--carnival-green); }
+        .method-card.filter { border-color: var(--carnival-blue); }
+        .method-card.reduce { border-color: var(--carnival-red); }
+        .method-card.forEach { border-color: var(--carnival-yellow); }
+        
+        /* Right Panel: Code Circus */
+        .code-circus {
+            background: rgba(26, 26, 46, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            border: 3px solid var(--carnival-red);
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .circus-header {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.8rem;
+            color: var(--carnival-yellow);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .code-tent {
+            background: #1E1E1E;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #E0E0E0;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+        }
+        
+        .code-line {
+            margin: 8px 0;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .code-line.highlight {
+            background: rgba(255, 215, 0, 0.2);
+            border-left: 3px solid var(--carnival-yellow);
+        }
+        
+        .code-string { color: #CE9178; }
+        .code-keyword { color: #569CD6; }
+        .code-function { color: #DCDCAA; }
+        .code-number { color: #B5CEA8; }
+        .code-comment { color: #6A9955; }
+        
+        /* Interactive Challenges */
+        .challenges-booth {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 107, 107, 0.1));
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px dashed var(--carnival-yellow);
+        }
+        
+        .challenge-ticket {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .challenge-ticket:hover {
+            border-color: var(--carnival-green);
+            transform: translateY(-5px);
+        }
+        
+        .ticket-number {
+            display: inline-block;
+            background: var(--ticket-gold);
+            color: black;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        /* Carnival Games */
+        .carnival-games {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .game-stand {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .game-stand:hover {
+            border-color: var(--carnival-blue);
+            transform: scale(1.05);
+        }
+        
+        .game-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        /* Ticket Counter */
+        .ticket-counter {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--carnival-red), var(--carnival-purple));
+            padding: 15px 25px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        
+        .counter-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--ticket-gold);
+            text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .carnival-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .ticket-counter {
+                position: static;
+                margin: 20px auto;
+                width: fit-content;
+            }
+        }
+        
+        /* Animations */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .bounce { animation: bounce 2s infinite; }
+        .spin { animation: spin 3s linear infinite; }
+        
+        /* Floating Elements */
+        .floating-element {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Progress Bar */
+        .progress-ring {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+        }
+        
+        .ring-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 4;
+        }
+        
+        .ring-progress {
+            fill: none;
+            stroke: var(--carnival-green);
+            stroke-width: 4;
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <!-- Carnival Background -->
+    <div class="carnival-lights"></div>
+    
+    <!-- Confetti -->
+    <div id="confetti-container"></div>
+    
+    <!-- Floating Elements -->
+    <div class="floating-element" style="top: 10%; left: 5%;">🎪</div>
+    <div class="floating-element" style="top: 20%; right: 10%;">🎡</div>
+    <div class="floating-element" style="bottom: 30%; left: 15%;">🎢</div>
+    <div class="floating-element" style="bottom: 20%; right: 20%;">🎯</div>
+    
+    <!-- Main Container -->
+    <div class="carnival-container">
+        
+        <!-- Left Panel: Array Carousel -->
+        <div class="array-carousel">
+            <div class="carousel-header">ARRAY CAROUSEL 🎠</div>
+            
+            <!-- Interactive Array Ride -->
+            <div class="array-ride" id="arrayRide">
+                <!-- Array elements will be added here -->
+            </div>
+            
+            <!-- Array Creation -->
+            <div class="operations-panel">
+                <h3 style="color: var(--carnival-yellow); margin-bottom: 15px;">🎪 Create Arrays</h3>
+                <button class="operation-btn" onclick="createArray('clients')">
+                    👥 Client Array
+                </button>
+                <button class="operation-btn" onclick="createArray('projects')">
+                    🏗️ Project Array
+                </button>
+                <button class="operation-btn" onclick="createArray('mixed')">
+                    🎭 Mixed Array
+                </button>
+                <button class="operation-btn" onclick="createArray('empty')">
+                    📦 Empty Array
+                </button>
+            </div>
+            
+            <!-- Basic Operations -->
+            <div class="operations-panel">
+                <h3 style="color: var(--carnival-green); margin-bottom: 15px;">⚡ Array Operations</h3>
+                <button class="operation-btn push-btn" onclick="performOperation('push')">
+                    📌 Push (Add to end)
+                </button>
+                <button class="operation-btn pop-btn" onclick="performOperation('pop')">
+                    🗑️ Pop (Remove from end)
+                </button>
+                <button class="operation-btn shift-btn" onclick="performOperation('shift')">
+                    ← Shift (Remove from start)
+                </button>
+                <button class="operation-btn" onclick="performOperation('unshift')">
+                    → Unshift (Add to start)
+                </button>
+            </div>
+            
+            <!-- Array Info -->
+            <div class="operations-panel">
+                <h3 style="color: var(--carnival-blue); margin-bottom: 15px;">📊 Array Info</h3>
+                <div id="arrayInfo" style="padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                    Length: 0 | Type: Array | Empty: Yes
+                </div>
+            </div>
+        </div>
+        
+        <!-- Center Panel: Main Arena -->
+        <div class="main-arena">
+            <!-- Arena Header -->
+            <div class="arena-header">
+                🎪 MSEBETSI DATA CARNIVAL 🎪
+                <div style="font-size: 1rem; margin-top: 10px; font-family: 'Poppins'">
+                    Where Arrays Come to Play!
+                </div>
+            </div>
+            
+            <!-- Array Visualizer -->
+            <div class="array-visualizer">
+                <h3 style="color: var(--carnival-green); margin-bottom: 20px;">
+                    🎡 LIVE ARRAY VISUALIZER
+                    <span style="font-size: 0.8rem; color: #999; margin-left: 10px;" id="arrayLength">Length: 0</span>
+                </h3>
+                
+                <!-- Visualizer Grid -->
+                <div class="visualizer-grid" id="visualizerGrid">
+                    <!-- Array cells will be added here -->
+                </div>
+                
+                <!-- Array Methods -->
+                <div class="methods-stage">
+                    <h3 style="color: var(--carnival-purple); margin-bottom: 15px;">🎯 Array Methods</h3>
+                    <div class="method-card map" onclick="demonstrateMethod('map')">
+                        <strong>📍 Map</strong> - Transform each element
+                        <small>Creates new array with modified elements</small>
+                    </div>
+                    <div class="method-card filter" onclick="demonstrateMethod('filter')">
+                        <strong>🔍 Filter</strong> - Select matching elements
+                        <small>Returns elements that pass a test</small>
+                    </div>
+                    <div class="method-card reduce" onclick="demonstrateMethod('reduce')">
+                        <strong>🧮 Reduce</strong> - Accumulate values
+                        <small>Reduces array to single value</small>
+                    </div>
+                    <div class="method-card forEach" onclick="demonstrateMethod('forEach')">
+                        <strong>🔄 ForEach</strong> - Execute for each
+                        <small>Executes function for each element</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Panel: Code Circus -->
+        <div class="code-circus">
+            <div class="circus-header">💻 CODE CIRCUS TENT</div>
+            
+            <!-- Code Display -->
+            <div class="code-tent" id="codeTent">
+                // Welcome to the Array Carnival!<br>
+                // Watch as arrays transform before your eyes<br><br>
+                <span class="code-keyword">const</span> <span class="code-function">carnival</span> = <span class="code-keyword">new</span> <span class="code-function">Array</span>(<span class="code-string">"🎪"</span>, <span class="code-string">"🎡"</span>, <span class="code-string">"🎢"</span>);<br><br>
+                <span class="code-comment">// Click buttons to see array magic!</span>
+            </div>
+            
+            <!-- Interactive Challenges -->
+            <div class="challenges-booth">
+                <h3 style="color: var(--carnival-yellow); margin-bottom: 15px;">🎫 CARNIVAL CHALLENGES</h3>
+                
+                <div class="challenge-ticket" onclick="startChallenge(1)">
+                    <span class="ticket-number">1</span>
+                    <strong>Find the Biggest Budget</strong>
+                    <small>Use Math.max() with spread operator</small>
+                </div>
+                
+                <div class="challenge-ticket" onclick="startChallenge(2)">
+                    <span class="ticket-number">2</span>
+                    <strong>Filter Active Projects</strong>
+                    <small>Use filter() to find active projects</small>
+                </div>
+                
+                <div class="challenge-ticket" onclick="startChallenge(3)">
+                    <span class="ticket-number">3</span>
+                    <strong>Calculate Total Cost</strong>
+                    <small>Use reduce() to sum all budgets</small>
+                </div>
+                
+                <div class="challenge-ticket" onclick="startChallenge(4)">
+                    <span class="ticket-number">4</span>
+                    <strong>Sort by Deadline</strong>
+                    <small>Use sort() with date comparison</small>
+                </div>
+            </div>
+            
+            <!-- Carnival Games -->
+            <div class="carnival-games">
+                <div class="game-stand" onclick="playGame('memory')">
+                    <div class="game-icon">🧠</div>
+                    <div>Memory Match</div>
+                </div>
+                
+                <div class="game-stand" onclick="playGame('sort')">
+                    <div class="game-icon">🔢</div>
+                    <div>Array Sort</div>
+                </div>
+                
+                <div class="game-stand" onclick="playGame('search')">
+                    <div class="game-icon">🔍</div>
+                    <div>Element Search</div>
+                </div>
+                
+                <div class="game-stand" onclick="playGame('transform')">
+                    <div class="game-icon">✨</div>
+                    <div>Array Transform</div>
+                </div>
+            </div>
+            
+            <!-- Progress Ring -->
+            <div class="progress-ring">
+                <svg viewBox="0 0 100 100">
+                    <circle class="ring-bg" cx="50" cy="50" r="40"></circle>
+                    <circle class="ring-progress" cx="50" cy="50" r="40" 
+                            stroke-dasharray="251.2" stroke-dashoffset="251.2" 
+                            id="progressRing"></circle>
+                </svg>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ticket Counter -->
+    <div class="ticket-counter">
+        <div style="font-size: 1.2rem;">🎫 Tickets Earned:</div>
+        <div class="counter-value" id="ticketCounter">0</div>
+        <div style="font-size: 0.9rem; opacity: 0.8;">Complete challenges to earn more!</div>
+    </div>
+    
+    <!-- Sound Effects -->
+    <audio id="carnivalMusic" loop>
+        <source src="https://assets.mixkit.co/music/preview/mixkit-game-show-suspense-waiting-667.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="successSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="clickSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-plastic-bubble-click-1124.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // ================================================
+        // ARRAY CARNIVAL CORE
+        // ================================================
+
+        // State Management
+        const carnivalState = {
+            currentArray: [],
+            arrayHistory: [],
+            tickets: 0,
+            progress: 0,
+            currentChallenge: null,
+            activeGame: null
+        };
+
+        // Sample Data Sets
+        const dataSets = {
+            clients: [
+                { name: "ABSA Bank", budget: 750000, active: true },
+                { name: "MTN South Africa", budget: 500000, active: true },
+                { name: "Shoprite", budget: 300000, active: false },
+                { name: "Nando's", budget: 250000, active: true },
+                { name: "Discovery", budget: 900000, active: true }
+            ],
+            
+            projects: [
+                { name: "E-commerce Platform", deadline: "2024-06-30", team: 5 },
+                { name: "Mobile Banking App", deadline: "2024-05-15", team: 8 },
+                { name: "Inventory System", deadline: "2024-08-20", team: 3 },
+                { name: "Customer Portal", deadline: "2024-04-10", team: 4 },
+                { name: "Data Analytics Dashboard", deadline: "2024-09-30", team: 6 }
+            ],
+            
+            mixed: ["🎪", 42, true, {name: "Msebetsi"}, ["nested", "array"], null, undefined]
+        };
+
+        // Initialize Carnival
+        function initCarnival() {
+            // Create initial array
+            createArray('clients');
+            
+            // Setup confetti
+            createConfetti();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Play carnival music (softly)
+            const music = document.getElementById('carnivalMusic');
+            music.volume = 0.3;
+            music.play().catch(e => console.log("Audio play failed:", e));
+            
+            // Update display
+            updateAllDisplays();
+            
+            // Welcome message
+            logToCodeTent("🎪 Welcome to the Msebetsi Array Carnival!");
+            logToCodeTent("Click on array elements to interact with them!");
+            logToCodeTent("Complete challenges to earn tickets! 🎫");
+            
+            // Start carnival animation
+            startCarnivalAnimation();
+        }
+
+        // Create different types of arrays
+        function createArray(type) {
+            playSound('clickSound');
+            
+            switch(type) {
+                case 'clients':
+                    carnivalState.currentArray = [...dataSets.clients];
+                    carnivalState.arrayHistory.push([...dataSets.clients]);
+                    logToCodeTent("Created Clients array with 5 client objects");
+                    break;
+                    
+                case 'projects':
+                    carnivalState.currentArray = [...dataSets.projects];
+                    carnivalState.arrayHistory.push([...dataSets.projects]);
+                    logToCodeTent("Created Projects array with 5 project objects");
+                    break;
+                    
+                case 'mixed':
+                    carnivalState.currentArray = [...dataSets.mixed];
+                    carnivalState.arrayHistory.push([...dataSets.mixed]);
+                    logToCodeTent("Created Mixed array with different data types");
+                    break;
+                    
+                case 'empty':
+                    carnivalState.currentArray = [];
+                    carnivalState.arrayHistory.push([]);
+                    logToCodeTent("Created Empty array - ready for new elements!");
+                    break;
+            }
+            
+            updateAllDisplays();
+            createArrayRide();
+        }
+
+        // Perform array operations
+        function performOperation(operation) {
+            playSound('clickSound');
+            
+            switch(operation) {
+                case 'push':
+                    const newElement = {
+                        name: `New Client ${carnivalState.currentArray.length + 1}`,
+                        budget: Math.floor(Math.random() * 500000) + 50000,
+                        active: Math.random() > 0.5
+                    };
+                    carnivalState.currentArray.push(newElement);
+                    logToCodeTent(`Pushed new client: ${newElement.name} (R${newElement.budget})`);
+                    break;
+                    
+                case 'pop':
+                    if (carnivalState.currentArray.length > 0) {
+                        const popped = carnivalState.currentArray.pop();
+                        logToCodeTent(`Popped: ${popped.name || popped}`);
+                    } else {
+                        logToCodeTent("❌ Cannot pop from empty array!");
+                    }
+                    break;
+                    
+                case 'shift':
+                    if (carnivalState.currentArray.length > 0) {
+                        const shifted = carnivalState.currentArray.shift();
+                        logToCodeTent(`Shifted: ${shifted.name || shifted}`);
+                    } else {
+                        logToCodeTent("❌ Cannot shift from empty array!");
+                    }
+                    break;
+                    
+                case 'unshift':
+                    const newFirstElement = {
+                        name: `Priority Client ${carnivalState.currentArray.length + 1}`,
+                        budget: Math.floor(Math.random() * 1000000) + 100000,
+                        active: true
+                    };
+                    carnivalState.currentArray.unshift(newFirstElement);
+                    logToCodeTent(`Unshifted priority client: ${newFirstElement.name}`);
+                    break;
+            }
+            
+            carnivalState.arrayHistory.push([...carnivalState.currentArray]);
+            updateAllDisplays();
+            updateProgress();
+        }
+
+        // Demonstrate array methods
+        function demonstrateMethod(method) {
+            playSound('clickSound');
+            
+            switch(method) {
+                case 'map':
+                    const budgets = carnivalState.currentArray.map(item => item.budget);
+                    logToCodeTent("📊 Map: Extracted all budgets");
+                    logToCodeTent(`Result: [${budgets.join(', ')}]`);
+                    highlightArrayElements('budget');
+                    break;
+                    
+                case 'filter':
+                    const activeClients = carnivalState.currentArray.filter(item => item.active);
+                    logToCodeTent(`🔍 Filter: Found ${activeClients.length} active clients`);
+                    logToCodeTent(`Active: ${activeClients.map(c => c.name).join(', ')}`);
+                    highlightArrayElements('active');
+                    break;
+                    
+                case 'reduce':
+                    const totalBudget = carnivalState.currentArray.reduce((sum, item) => sum + (item.budget || 0), 0);
+                    logToCodeTent(`🧮 Reduce: Total budget = R${totalBudget.toLocaleString()}`);
+                    highlightAllElements();
+                    break;
+                    
+                case 'forEach':
+                    logToCodeTent("🔄 ForEach: Processing each element...");
+                    carnivalState.currentArray.forEach((item, index) => {
+                        logToCodeTent(`  ${index}: ${item.name} - R${item.budget}`);
+                    });
+                    break;
+            }
+            
+            updateProgress();
+        }
+
+        // Start a challenge
+        function startChallenge(challengeNumber) {
+            carnivalState.currentChallenge = challengeNumber;
+            playSound('clickSound');
+            
+            switch(challengeNumber) {
+                case 1:
+                    logToCodeTent("🎯 CHALLENGE 1: Find Biggest Budget");
+                    logToCodeTent("Use: Math.max(...array.map(item => item.budget))");
+                    logToCodeTent("Try it in your console!");
+                    break;
+                    
+                case 2:
+                    logToCodeTent("🎯 CHALLENGE 2: Filter Active Projects");
+                    logToCodeTent("Use: array.filter(item => item.active)");
+                    logToCodeTent("Click the Filter button to see it in action!");
+                    break;
+                    
+                case 3:
+                    logToCodeTent("🎯 CHALLENGE 3: Calculate Total Cost");
+                    logToCodeTent("Use: array.reduce((sum, item) => sum + item.budget, 0)");
+                    logToCodeTent("Click the Reduce button to see it in action!");
+                    break;
+                    
+                case 4:
+                    logToCodeTent("🎯 CHALLENGE 4: Sort by Deadline");
+                    logToCodeTent("Use: array.sort((a, b) => new Date(a.deadline) - new Date(b.deadline))");
+                    logToCodeTent("Try creating a projects array first!");
+                    break;
+            }
+            
+            // Update challenge UI
+            updateChallengeUI(challengeNumber);
+        }
+
+        // Complete a challenge
+        function completeChallenge() {
+            if (carnivalState.currentChallenge) {
+                carnivalState.tickets += 10;
+                carnivalState.progress += 25;
+                
+                document.getElementById('ticketCounter').textContent = carnivalState.tickets;
+                updateProgressRing();
+                
+                logToCodeTent(`🎉 CHALLENGE COMPLETE! +10 tickets! Total: ${carnivalState.tickets}`);
+                playSound('successSound');
+                createConfettiBurst();
+                
+                carnivalState.currentChallenge = null;
+                updateChallengeUI(null);
+            }
+        }
+
+        // Play carnival games
+        function playGame(gameType) {
+            playSound('clickSound');
+            
+            switch(gameType) {
+                case 'memory':
+                    logToCodeTent("🧠 MEMORY MATCH: Find matching array elements!");
+                    carnivalState.activeGame = 'memory';
+                    startMemoryGame();
+                    break;
+                    
+                case 'sort':
+                    logToCodeTent("🔢 ARRAY SORT: Sort elements in correct order!");
+                    carnivalState.activeGame = 'sort';
+                    startSortGame();
+                    break;
+                    
+                case 'search':
+                    logToCodeTent("🔍 ELEMENT SEARCH: Find specific elements!");
+                    carnivalState.activeGame = 'search';
+                    startSearchGame();
+                    break;
+                    
+                case 'transform':
+                    logToCodeTent("✨ ARRAY TRANSFORM: Modify array using methods!");
+                    carnivalState.activeGame = 'transform';
+                    startTransformGame();
+                    break;
+            }
+        }
+
+        // Update all visual displays
+        function updateAllDisplays() {
+            updateArrayInfo();
+            updateVisualizerGrid();
+            updateArrayRide();
+            updateProgressRing();
+        }
+
+        // Update array information display
+        function updateArrayInfo() {
+            const array = carnivalState.currentArray;
+            const infoDiv = document.getElementById('arrayInfo');
+            
+            const length = array.length;
+            const isEmpty = length === 0;
+            const types = [...new Set(array.map(item => typeof item))];
+            const typeString = types.length > 0 ? types.join(', ') : 'empty';
+            
+            infoDiv.innerHTML = `
+                <strong>Length:</strong> ${length} | 
+                <strong>Type:</strong> ${typeString} | 
+                <strong>Empty:</strong> ${isEmpty ? 'Yes' : 'No'}
+            `;
+            
+            document.getElementById('arrayLength').textContent = `Length: ${length}`;
+        }
+
+        // Update the visualizer grid
+        function updateVisualizerGrid() {
+            const grid = document.getElementById('visualizerGrid');
+            grid.innerHTML = '';
+            
+            carnivalState.currentArray.forEach((item, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                cell.dataset.index = index;
+                
+                // Determine content based on item type
+                let value, type;
+                if (typeof item === 'object' && item !== null) {
+                    value = item.name || 'Object';
+                    type = 'object';
+                } else {
+                    value = String(item);
+                    type = typeof item;
+                }
+                
+                cell.innerHTML = `
+                    <div class="cell-index">[${index}]</div>
+                    <div class="cell-value">${value}</div>
+                    <div class="cell-type">${type}</div>
+                `;
+                
+                // Add click event
+                cell.addEventListener('click', () => selectArrayElement(index));
+                
+                grid.appendChild(cell);
+            });
+            
+            // Add empty cells if array is small
+            if (carnivalState.currentArray.length < 8) {
+                for (let i = carnivalState.currentArray.length; i < 8; i++) {
+                    const emptyCell = document.createElement('div');
+                    emptyCell.className = 'array-cell';
+                    emptyCell.style.opacity = '0.3';
+                    emptyCell.innerHTML = `
+                        <div class="cell-index">[${i}]</div>
+                        <div class="cell-value">---</div>
+                        <div class="cell-type">empty</div>
+                    `;
+                    grid.appendChild(emptyCell);
+                }
+            }
+        }
+
+        // Create interactive array ride
+        function createArrayRide() {
+            const ride = document.getElementById('arrayRide');
+            ride.innerHTML = '';
+            
+            carnivalState.currentArray.forEach((item, index) => {
+                const element = document.createElement('div');
+                element.className = `array-element element-${index % 5}`;
+                element.textContent = item.name ? item.name.charAt(0) : String(item).charAt(0);
+                element.title = JSON.stringify(item, null, 2);
+                element.dataset.index = index;
+                
+                // Position elements in a circle
+                const angle = (index / carnivalState.currentArray.length) * Math.PI * 2;
+                const radius = 100;
+                const x = 50 + Math.cos(angle) * radius;
+                const y = 50 + Math.sin(angle) * radius;
+                
+                element.style.left = `${x}%`;
+                element.style.top = `${y}%`;
+                element.style.transform = `translate(-50%, -50%)`;
+                
+                // Add drag and drop
+                element.draggable = true;
+                element.addEventListener('dragstart', handleDragStart);
+                element.addEventListener('click', () => selectArrayElement(index));
+                
+                ride.appendChild(element);
+            });
+            
+            // Animate the ride
+            animateRide();
+        }
+
+        // Animate the array ride
+        function animateRide() {
+            const elements = document.querySelectorAll('.array-element');
+            elements.forEach((el, index) => {
+                el.style.animation = `bounce ${1 + index * 0.2}s infinite`;
+            });
+        }
+
+        // Select an array element
+        function selectArrayElement(index) {
+            playSound('clickSound');
+            
+            // Remove active class from all cells
+            document.querySelectorAll('.array-cell').forEach(cell => {
+                cell.classList.remove('active');
+            });
+            
+            // Add active class to selected cell
+            const selectedCell = document.querySelector(`.array-cell[data-index="${index}"]`);
+            if (selectedCell) {
+                selectedCell.classList.add('active');
+            }
+            
+            // Show element details in code tent
+            const element = carnivalState.currentArray[index];
+            logToCodeTent(`📌 Selected element [${index}]: ${JSON.stringify(element, null, 2)}`);
+            
+            // Highlight corresponding ride element
+            highlightRideElement(index);
+        }
+
+        // Highlight elements in array
+        function highlightArrayElements(property) {
+            document.querySelectorAll('.array-cell').forEach((cell, index) => {
+                const element = carnivalState.currentArray[index];
+                if (element && element[property]) {
+                    cell.classList.add('active');
+                    setTimeout(() => cell.classList.remove('active'), 1000);
+                }
+            });
+        }
+
+        function highlightAllElements() {
+            document.querySelectorAll('.array-cell').forEach(cell => {
+                cell.classList.add('active');
+                setTimeout(() => cell.classList.remove('active'), 500);
+            });
+        }
+
+        function highlightRideElement(index) {
+            const element = document.querySelector(`.array-element[data-index="${index}"]`);
+            if (element) {
+                element.style.zIndex = '100';
+                element.style.boxShadow = '0 0 30px gold';
+                setTimeout(() => {
+                    element.style.zIndex = '10';
+                    element.style.boxShadow = '';
+                }, 1000);
+            }
+        }
+
+        // Update progress ring
+        function updateProgressRing() {
+            const progress = carnivalState.progress;
+            const ring = document.getElementById('progressRing');
+            const circumference = 251.2; // 2 * π * 40
+            const offset = circumference - (progress / 100) * circumference;
+            ring.style.strokeDashoffset = offset;
+        }
+
+        // Log to code tent
+        function logToCodeTent(message) {
+            const tent = document.getElementById('codeTent');
+            const line = document.createElement('div');
+            line.className = 'code-line';
+            line.textContent = `// ${message}`;
+            tent.appendChild(line);
+            tent.scrollTop = tent.scrollHeight;
+        }
+
+        // Clear code tent
+        function clearCodeTent() {
+            const tent = document.getElementById('codeTent');
+            tent.innerHTML = '';
+        }
+
+        // Create confetti
+        function createConfetti() {
+            const container = document.getElementById('confetti-container');
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.animationDelay = `${Math.random() * 5}s`;
+                confetti.style.background = [
+                    'var(--carnival-red)',
+                    'var(--carnival-yellow)',
+                    'var(--carnival-blue)',
+                    'var(--carnival-green)',
+                    'var(--carnival-purple)'
+                ][Math.floor(Math.random() * 5)];
+                container.appendChild(confetti);
+            }
+        }
+
+        // Create confetti burst
+        function createConfettiBurst() {
+            const container = document.getElementById('confetti-container');
+            for (let i = 0; i < 20; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = '50%';
+                confetti.style.top = '50%';
+                confetti.style.animation = `fall ${1 + Math.random()}s linear forwards`;
+                confetti.style.background = [
+                    'var(--carnival-red)',
+                    'var(--carnival-yellow)',
+                    'var(--carnival-blue)',
+                    'var(--carnival-green)',
+                    'var(--carnival-purple)'
+                ][Math.floor(Math.random() * 5)];
+                container.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 1000);
+            }
+        }
+
+        // Update challenge UI
+        function updateChallengeUI(challengeNumber) {
+            const tickets = document.querySelectorAll('.challenge-ticket');
+            tickets.forEach(ticket => {
+                ticket.style.borderColor = 'transparent';
+                ticket.style.background = 'rgba(255, 255, 255, 0.1)';
+            });
+            
+            if (challengeNumber) {
+                const activeTicket = tickets[challengeNumber - 1];
+                if (activeTicket) {
+                    activeTicket.style.borderColor = 'var(--carnival-green)';
+                    activeTicket.style.background = 'rgba(107, 207, 127, 0.2)';
+                }
+            }
+        }
+
+        // Start carnival animation
+        function startCarnivalAnimation() {
+            // Animate floating elements
+            const floaters = document.querySelectorAll('.floating-element');
+            floaters.forEach((floater, index) => {
+                floater.style.animation = `float ${3 + index}s ease-in-out infinite`;
+            });
+        }
+
+        // Play sound
+        function playSound(soundId) {
+            const sound = document.getElementById(soundId);
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(() => {}); // Ignore errors
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Drag and drop for array elements
+            const ride = document.getElementById('arrayRide');
+            ride.addEventListener('dragover', handleDragOver);
+            ride.addEventListener('drop', handleDrop);
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        // Drag and drop handlers
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.index);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const fromIndex = e.dataTransfer.getData('text/plain');
+            // Implement array reordering logic here
+            logToCodeTent(`Moved element from index ${fromIndex}`);
+        }
+
+        // Keyboard shortcuts
+        function handleKeyPress(e) {
+            switch(e.key) {
+                case '1':
+                    createArray('clients');
+                    break;
+                case '2':
+                    createArray('projects');
+                    break;
+                case '3':
+                    createArray('mixed');
+                    break;
+                case 'p':
+                    performOperation('push');
+                    break;
+                case 'o':
+                    performOperation('pop');
+                    break;
+                case 'm':
+                    demonstrateMethod('map');
+                    break;
+                case 'f':
+                    demonstrateMethod('filter');
+                    break;
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initCarnival);
+
+        // Game implementations (simplified for demo)
+        function startMemoryGame() {
+            logToCodeTent("Game started! Match array elements with same values!");
+            // Simplified game logic for demo
+        }
+
+        function startSortGame() {
+            logToCodeTent("Sort these values in ascending order!");
+            // Simplified game logic for demo
+        }
+
+        function startSearchGame() {
+            logToCodeTent("Find the element with budget > R500,000!");
+            // Simplified game logic for demo
+        }
+
+        function startTransformGame() {
+            logToCodeTent("Transform array to show only client names!");
+            // Simplified game logic for demo
+        }
+
+        // Add some CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes float {
+                0%, 100% { transform: translateY(0) rotate(0deg); }
+                50% { transform: translateY(-20px) rotate(10deg); }
+            }
+            
+            .array-cell.active {
+                animation: pulse 0.5s ease-in-out;
+            }
+            
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+            }
+        `;
+        document.head.appendChild(style);
+
+    </script>
+</body>
+</html>
