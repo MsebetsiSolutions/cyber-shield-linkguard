@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSEBETSI SOLUTIONS | Scope Debugging Challenge</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <div class="logo-container">
+                <div class="logo">
+                    <span class="logo-icon">🔍</span>
+                    <h1>MSEBETSI <span class="highlight">SOLUTIONS</span></h1>
+                </div>
+                <p class="tagline">Scope Detective Challenge</p>
+            </div>
+            <nav class="nav">
+                <a href="#incident" class="nav-link active"><i class="fas fa-bug"></i> Incident</a>
+                <a href="#debug" class="nav-link"><i class="fas fa-code"></i> Debug</a>
+                <a href="#learn" class="nav-link"><i class="fas fa-graduation-cap"></i> Learn</a>
+                <a href="#solution" class="nav-link"><i class="fas fa-check-circle"></i> Solution</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h2><span class="hero-highlight">Production Incident:</span><br>Notification System Failure</h2>
+                <p class="hero-subtitle">Debugging Variable Scope Issues in Client Support Portal</p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">8</span>
+                        <span class="stat-label">Scope Bugs</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">R25K</span>
+                        <span class="stat-label">Business Impact</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">15+</span>
+                        <span class="stat-label">Clients Affected</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Incident Report Section -->
+    <section id="incident" class="section incident-section">
+        <div class="container">
+            <div class="section-header">
+                <h2><i class="fas fa-exclamation-triangle"></i> Production Incident Report</h2>
+                <p class="section-subtitle">MS-INC-2024-014 - Notification System Failure</p>
+            </div>
+            
+            <div class="incident-card">
+                <div class="incident-header">
+                    <div class="severity-badge critical">CRITICAL</div>
+                    <div class="incident-meta">
+                        <span><i class="far fa-calendar"></i> [Current Date]</span>
+                        <span><i class="far fa-clock"></i> 3+ hours downtime</span>
+                        <span><i class="fas fa-users"></i> 15 clients affected</span>
+                    </div>
+                </div>
+                
+                <div class="incident-body">
+                    <div class="symptoms">
+                        <h4><i class="fas fa-stethoscope"></i> Symptoms</h4>
+                        <ul>
+                            <li>Client notifications not displaying in dashboard</li>
+                            <li>Console shows "ReferenceError: [variable] is not defined"</li>
+                            <li>Client names and support codes missing from logs</li>
+                            <li>VIP client alerts failing completely</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="affected-clients">
+                        <h4><i class="fas fa-building"></i> Affected Clients</h4>
+                        <div class="client-tags">
+                            <span class="client-tag vip">AfriBank (VIP)</span>
+                            <span class="client-tag gov">SA Health Dept</span>
+                            <span class="client-tag corp">EcoEnergy</span>
+                            <span class="client-tag corp">12+ Enterprise Clients</span>
+                        </div>
+                    </div>
+                    
+                    <div class="error-console">
+                        <h4><i class="fas fa-terminal"></i> Console Error Log</h4>
+                        <div class="console-preview">
+                            <div class="console-line error">> ReferenceError: clientName is not defined</div>
+                            <div class="console-line error">> ReferenceError: clientEmail is not defined</div>
+                            <div class="console-line error">> TypeError: Cannot read property 'clientEmail' of undefined</div>
+                            <div class="console-line">> ❌ All notification tests failing</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Debugging Interface -->
+    <section id="debug" class="section debug-section">
+        <div class="container">
+            <div class="section-header">
+                <h2><i class="fas fa-code"></i> Debug The Buggy Code</h2>
+                <p class="section-subtitle">Identify and fix all 8 scope-related bugs</p>
+            </div>
+            
+            <div class="debug-container">
+                <!-- Code Editor -->
+                <div class="code-editor">
+                    <div class="editor-header">
+                        <div class="editor-tabs">
+                            <button class="editor-tab active" data-file="buggy">buggy-notification-service.js</button>
+                            <button class="editor-tab" data-file="fixed">fixed-notification-service.js</button>
+                        </div>
+                        <div class="editor-actions">
+                            <button class="btn-small" id="runCodeBtn">
+                                <i class="fas fa-play"></i> Run Code
+                            </button>
+                            <button class="btn-small" id="resetCodeBtn">
+                                <i class="fas fa-redo"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="editor-content">
+                        <div class="code-area active" id="buggyCode">
+                            <pre><code class="javascript">// MSEBETSI SOLUTIONS - Client Notification Service
+// STATUS: PRODUCTION - BROKEN
+
+const COMPANY_NAME = "MSEBETSI SOLUTIONS";
+let supportDepartment = "Technical Support";
+
+function sendNotification(clientId, messageType) {
+    let notificationId = generateNotificationId();
+    const timestamp = new Date().toISOString();
+    
+    // ❌ BUG 1: clientName is undefined here
+    console.log(`📧 Sending notification to ${clientName}`);
+    
+    function getClientDetails() {
+        let clientEmail = fetchClientEmail(clientId);
+        let priority = "Normal";
+        
+        if (clientId.startsWith("VIP")) {
+            priority = "High";
+            // ❌ BUG 2: supportDepartment modification issue
+            supportDepartment = "VIP Support";
+        }
+        
+        return { clientEmail, priority };
+    }
+    
+    function generateContent() {
+        let message = "";
+        
+        switch(messageType) {
+            case "welcome":
+                message = `Welcome to ${COMPANY_NAME}, ${clientName}!`;
+                break;
+            case "update":
+                // ❌ BUG 3: currentTime is undefined
+                message = `Update notification sent at ${currentTime}`;
+                break;
+            case "alert":
+                message = `ALERT: Requires immediate attention`;
+                // ❌ BUG 4: alertId is undefined
+                console.log(`Alert ID: ${alertId}`);
+                break;
+        }
+        
+        // ❌ BUG 5: details is undefined here
+        console.log(`Client email: ${details.clientEmail}`);
+        
+        return message;
+    }
+    
+    const notificationMessage = generateContent();
+    
+    function sendToClient() {
+        // ❌ BUG 6 & 7: Multiple undefined variables
+        console.log(`To: ${clientEmail}`);
+        console.log(`From: ${supportDepartment}`);
+        console.log(`Message: ${notificationMessage}`);
+        console.log(`Time: ${timestamp}`);
+        
+        return true;
+    }
+    
+    return sendToClient();
+}
+
+// ❌ BUG 8: Using undefined clientId
+function generateNotificationId() {
+    return `NOTIF-${clientId}-${Date.now()}`;
+}</code></pre>
+                        </div>
+                        
+                        <div class="code-area" id="fixedCode">
+                            <pre><code class="javascript">// MSEBETSI SOLUTIONS - DEBUGGED Notification Service
+// STATUS: PRODUCTION - FIXED
+
+const COMPANY_NAME = "MSEBETSI SOLUTIONS";
+let supportDepartment = "Technical Support";
+
+// Client database in appropriate scope
+const CLIENT_DATABASE = {
+    "VIP001": { name: "AfriBank CEO", email: "ceo@afribank.co.za" }
+};
+
+// Helper functions with proper parameters
+function getClientName(clientId) {
+    return CLIENT_DATABASE[clientId]?.name || "Valued Client";
+}
+
+function generateNotificationId(clientId) {
+    return `NOTIF-${clientId}-${Date.now()}`;
+}
+
+function sendNotification(clientId, messageType) {
+    // ✅ FIX 1: Get client name properly
+    const clientName = getClientName(clientId);
+    const notificationId = generateNotificationId(clientId);
+    const timestamp = new Date().toISOString();
+    
+    console.log(`📧 Sending notification to ${clientName}`);
+    
+    function getClientDetails(id) {
+        const clientEmail = CLIENT_DATABASE[id]?.email || "support@msebetsi.co.za";
+        let priority = "Normal";
+        
+        if (id.startsWith("VIP")) {
+            priority = "High";
+            supportDepartment = "VIP Support";
+        }
+        
+        return { clientEmail, priority };
+    }
+    
+    function generateContent(name, type, time, id) {
+        let message = "";
+        const currentTime = time; // ✅ FIX 3
+        
+        switch(type) {
+            case "welcome":
+                message = `Welcome to ${COMPANY_NAME}, ${name}!`;
+                break;
+            case "update":
+                message = `Update notification sent at ${currentTime}`;
+                break;
+            case "alert":
+                message = `ALERT: Requires immediate attention`;
+                console.log(`Alert ID: ${id}`); // ✅ FIX 4
+                break;
+        }
+        
+        return message;
+    }
+    
+    const details = getClientDetails(clientId); // ✅ FIX 5
+    const notificationMessage = generateContent(
+        clientName, 
+        messageType, 
+        timestamp, 
+        notificationId
+    );
+    
+    function sendToClient(email, department, message, time) {
+        console.log(`To: ${email}`); // ✅ FIX 6
+        console.log(`From: ${department}`); // ✅ FIX 7
+        console.log(`Message: ${message}`);
+        console.log(`Time: ${time}`);
+        
+        return true;
+    }
+    
+    return sendToClient(
+        details.clientEmail,
+        supportDepartment,
+        notificationMessage,
+        timestamp
+    );
+}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div class="editor-footer">
+                        <div class="bug-counter">
+                            <span class="bug-count">8</span> Scope Bugs Identified
+                        </div>
+                        <button class="btn-primary" id="showSolutionBtn">
+                            <i class="fas fa-lightbulb"></i> Show Solution
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Console Output -->
+                <div class="debug-console">
+                    <div class="console-header">
+                        <h4><i class="fas fa-terminal"></i> Debug Console</h4>
+                        <button class="btn-small" id="clearConsoleBtn">
+                            <i class="fas fa-broom"></i> Clear
+                        </button>
+                    </div>
+                    <div class="console-output" id="debugOutput">
+                        <div class="console-line"><span class="prompt">></span> // Ready to debug scope issues...</div>
+                        <div class="console-line"><span class="prompt">></span> // Click "Run Code" to test the buggy version</div>
+                    </div>
+                    <div class="console-actions">
+                        <button class="btn-small" id="testBuggyBtn">
+                            <i class="fas fa-bug"></i> Test Buggy Code
+                        </button>
+                        <button class="btn-small" id="testFixedBtn">
+                            <i class="fas fa-check"></i> Test Fixed Code
+                        </button>
+                        <button class="btn-small" id="scopeAnalysisBtn">
+                            <i class="fas fa-search"></i> Scope Analysis
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bug Tracker -->
+            <div class="bug-tracker">
+                <h4><i class="fas fa-list-check"></i> Bug Tracker</h4>
+                <div class="bugs-grid">
+                    <div class="bug-card" data-bug="1">
+                        <div class="bug-header">
+                            <span class="bug-id">BUG #1</span>
+                            <span class="bug-status unresolved">Unresolved</span>
+                        </div>
+                        <div class="bug-desc">clientName is undefined</div>
+                        <div class="bug-scope">Scope: Function-level variable missing</div>
+                    </div>
+                    <div class="bug-card" data-bug="2">
+                        <div class="bug-header">
+                            <span class="bug-id">BUG #2</span>
+                            <span class="bug-status unresolved">Unresolved</span>
+                        </div>
+                        <div class="bug-desc">supportDepartment scope issue</div>
+                        <div class="bug-scope">Scope: Global variable modification</div>
+                    </div>
+                    <div class="bug-card" data-bug="3">
+                        <div class="bug-header">
+                            <span class="bug-id">BUG #3</span>
+                            <span class="bug-status unresolved">Unresolved</span>
+                        </div>
+                        <div class="bug-desc">currentTime is undefined</div>
+                        <div class="bug-scope">Scope: Missing variable declaration</div>
+                    </div>
+                    <div class="bug-card" data-bug="4">
+                        <div class="bug-header">
+                            <span class="bug-id">BUG #4</span>
+                            <span class="bug-status unresolved">Unresolved</span>
+                        </div>
+                        <div class="bug-desc">alertId should be notificationId</div>
+                        <div class="bug-scope">Scope: Wrong variable name</div>
+                    </div>
+                    <div class="bug-card" data-bug="5">
+                        <div class="bug-header">
+                            <span class="bug-id">BUG #5</span>
+                            <span class="bug-status unresolved">Unresolved</span>
+                        </div>
+                        <div class="bug-desc">details is undefined</div>
+                        <div class="bug-scope">Scope: Variable called before declaration</div>
+                    </div>
+                    <div class="bug-card" data-bug="6">
+                        <div class="bug-header">
+                            <span class="bug-id">BUG #6</span>
+                            <span class="bug-status unresolved">Unresolved</span>
+                        </div>
+                        <div class="bug-desc">clientEmail not accessible</div>
+                        <div class="bug-scope">Scope: Inner function variable</div>
+                    </div>
+                    <div class="bug-card" data-bug="7">
+                        <div class="bug-header">
+                            <span class="bug-id">BUG #7</span>
+                            <span class="bug-status unresolved">Unresolved</span>
+                        </div>
+                        <div class="bug-desc">supportDepartment not passed</div>
+                        <div class="bug-scope">Scope: Parameter missing</div>
+                    </div>
+                    <div class="bug-card" data-bug="8">
+                        <div class="bug-header">
+                            <span class="bug-id">BUG #8</span>
+                            <span class="bug-status unresolved">Unresolved</span>
+                        </div>
+                        <div class="bug-desc">clientId not in scope</div>
+                        <div class="bug-scope">Scope: Parameter needed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Learning Section -->
+    <section id="learn" class="section learn-section">
+        <div class="container">
+            <div class="section-header">
+                <h2><i class="fas fa-graduation-cap"></i> Understanding JavaScript Scope</h2>
+                <p class="section-subtitle">Master global, local, and lexical scope concepts</p>
+            </div>
+            
+            <div class="learning-cards">
+                <div class="concept-card">
+                    <div class="concept-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>Global Scope</h3>
+                    <p>Variables declared outside any function. Accessible everywhere.</p>
+                    <pre><code>const COMPANY = "MSEBETSI"; // Global
+let department = "Support";   // Global
+
+function sendAlert() {
+    console.log(COMPANY); // ✅ Accessible
+}</code></pre>
+                    <div class="concept-example">
+                        <button class="btn-small demo-btn" data-demo="global">
+                            <i class="fas fa-play"></i> Demo
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="concept-card">
+                    <div class="concept-icon">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
+                    <h3>Local Scope</h3>
+                    <p>Variables declared inside a function. Only accessible within that function.</p>
+                    <pre><code>function processClient() {
+    const clientId = "VIP001"; // Local
+    console.log(clientId); // ✅ Works
+}
+
+console.log(clientId); // ❌ Error: Not defined</code></pre>
+                    <div class="concept-example">
+                        <button class="btn-small demo-btn" data-demo="local">
+                            <i class="fas fa-play"></i> Demo
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="concept-card">
+                    <div class="concept-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <h3>Lexical Scope</h3>
+                    <p>Inner functions can access variables from outer functions.</p>
+                    <pre><code>function outer() {
+    const outerVar = "data";
+    
+    function inner() {
+        console.log(outerVar); // ✅ Accessible
+    }
+    
+    inner();
+}</code></pre>
+                    <div class="concept-example">
+                        <button class="btn-small demo-btn" data-demo="lexical">
+                            <i class="fas fa-play"></i> Demo
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Scope Visualization -->
+            <div class="scope-visualization">
+                <h4><i class="fas fa-sitemap"></i> Scope Chain Visualization</h4>
+                <div class="scope-diagram">
+                    <div class="scope-level global">
+                        <div class="scope-label">Global Scope</div>
+                        <div class="scope-vars">
+                            <span class="var">COMPANY_NAME</span>
+                            <span class="var">supportDepartment</span>
+                        </div>
+                        <div class="scope-arrow">↓ accessible to all</div>
+                    </div>
+                    
+                    <div class="scope-level function">
+                        <div class="scope-label">sendNotification() Scope</div>
+                        <div class="scope-vars">
+                            <span class="var">clientId (param)</span>
+                            <span class="var">clientName</span>
+                            <span class="var">notificationId</span>
+                        </div>
+                        <div class="scope-arrow">↓ accessible to inner functions</div>
+                    </div>
+                    
+                    <div class="scope-level inner">
+                        <div class="scope-label">generateContent() Scope</div>
+                        <div class="scope-vars">
+                            <span class="var">message</span>
+                            <span class="var">currentTime</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="scope-rules">
+                    <h5><i class="fas fa-rules"></i> Scope Rules</h5>
+                    <ul>
+                        <li>✅ Inner scopes can access outer scope variables</li>
+                        <li>❌ Outer scopes cannot access inner scope variables</li>
+                        <li>✅ Same-level scopes cannot access each other's variables</li>
+                        <li>✅ Variables are searched from inner to outer (scope chain)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Interactive Scope Explorer -->
+            <div class="scope-explorer">
+                <h4><i class="fas fa-compass"></i> Interactive Scope Explorer</h4>
+                <div class="explorer-container">
+                    <div class="code-explorer">
+                        <pre><code class="javascript">// Try changing these values
+const company = "MSEBETSI";
+let counter = 0;
+
+function outerFunction() {
+    const outerVar = "I'm outer";
+    
+    function innerFunction() {
+        const innerVar = "I'm inner";
+        
+        // What can we access here?
+        console.log("Inner function accessing:");
+        return {
+            inner: innerVar,
+            outer: outerVar,
+            global: company,
+            counter: counter
+        };
+    }
+    
+    return innerFunction();
+}</code></pre>
+                    </div>
+                    
+                    <div class="explorer-controls">
+                        <div class="variable-control">
+                            <label>company (global):</label>
+                            <input type="text" id="companyInput" value="MSEBETSI">
+                        </div>
+                        <div class="variable-control">
+                            <label>counter (global):</label>
+                            <input type="number" id="counterInput" value="0">
+                        </div>
+                        <div class="variable-control">
+                            <label>outerVar (function):</label>
+                            <input type="text" id="outerVarInput" value="I'm outer">
+                        </div>
+                        
+                        <button class="btn-primary" id="runScopeExplorer">
+                            <i class="fas fa-play"></i> Run Scope Test
+                        </button>
+                    </div>
+                    
+                    <div class="explorer-results">
+                        <h5>Scope Accessibility Results:</h5>
+                        <div id="scopeResults">
+                            Click "Run Scope Test" to see what variables are accessible
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section id="solution" class="section solution-section">
+        <div class="container">
+            <div class="section-header">
+                <h2><i class="fas fa-check-circle"></i> Complete Solution</h2>
+                <p class="section-subtitle">Download the debugged notification service</p>
+            </div>
+            
+            <div class="solution-content">
+                <div class="solution-card">
+                    <div class="solution-header">
+                        <div class="solution-icon">
+                            <i class="fas fa-file-code"></i>
+                        </div>
+                        <div class="solution-info">
+                            <h3>msebetsi-scope-debug.js</h3>
+                            <p>Complete debugged solution with test suite</p>
+                        </div>
+                    </div>
+                    
+                    <div class="solution-features">
+                        <h4><i class="fas fa-star"></i> Features Included:</h4>
+                        <ul>
+                            <li>✅ All 8 scope bugs fixed</li>
+                            <li>✅ Comprehensive test suite</li>
+                            <li>✅ Scope analysis utilities</li>
+                            <li>✅ Lexical scope demonstrations</li>
+                            <li>✅ Business impact calculations</li>
+                            <li>✅ Professional documentation</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="solution-actions">
+                        <button class="btn-primary" id="downloadSolution">
+                            <i class="fas fa-download"></i> Download Solution File
+                        </button>
+                        <button class="btn-outline" id="runFullTest">
+                            <i class="fas fa-vial"></i> Run Complete Test Suite
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="business-impact">
+                    <h4><i class="fas fa-chart-line"></i> Business Impact Resolved</h4>
+                    <div class="impact-metrics">
+                        <div class="impact-metric">
+                            <div class="metric-value">R25,000</div>
+                            <div class="metric-label">Support Costs Saved</div>
+                        </div>
+                        <div class="impact-metric">
+                            <div class="metric-value">15+</div>
+                            <div class="metric-label">Clients Restored</div>
+                        </div>
+                        <div class="impact-metric">
+                            <div class="metric-value">100%</div>
+                            <div class="metric-label">Notifications Working</div>
+                        </div>
+                        <div class="impact-metric">
+                            <div class="metric-value">0</div>
+                            <div class="metric-label">Scope Bugs Remaining</div>
+                        </div>
+                    </div>
+                    
+                    <div class="client-testimonials">
+                        <div class="testimonial">
+                            <div class="testimonial-content">
+                                "Our VIP notifications are working perfectly again. Great debugging work!"
+                            </div>
+                            <div class="testimonial-author">— AfriBank IT Department</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Final Check -->
+            <div class="final-check">
+                <h4><i class="fas fa-clipboard-check"></i> Final Checklist</h4>
+                <div class="checklist">
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check1" checked>
+                        <label for="check1">All ReferenceError issues resolved</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check2" checked>
+                        <label for="check2">Variables declared in correct scopes</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check3" checked>
+                        <label for="check3">Proper parameter passing implemented</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check4" checked>
+                        <label for="check4">Test suite shows 100% pass rate</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check5">
+                        <label for="check5">Submit file to training platform</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h3>MSEBETSI <span class="highlight">SOLUTIONS</span></h3>
+                    <p>Scope Debugging Challenge Completed</p>
+                    <p>Lesson 14: Variable Scope Mastery</p>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Scope Concepts Mastered</h4>
+                    <ul>
+                        <li>✅ Global vs Local Scope</li>
+                        <li>✅ Lexical Scope & Closure</li>
+                        <li>✅ Scope Chain</li>
+                        <li>✅ Debugging ReferenceError</li>
+                    </ul>
+                </div>
+                
+                <div class="footer-actions">
+                    <h4>Ready to Submit</h4>
+                    <p>Download the solution file and submit to your training platform</p>
+                    <p class="console-hint">
+                        <i class="fas fa-terminal"></i> 
+                        Remember to test in browser console (F12)
+                    </p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2024 MSEBETSI SOLUTIONS. Scope Debugging Training Simulation.</p>
+                <p>"We don't just fix bugs—we build robust systems that withstand scale."</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>

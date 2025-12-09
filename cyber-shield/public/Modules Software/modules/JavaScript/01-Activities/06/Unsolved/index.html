@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Msebetsi Data Lab: Primitive Types Investigation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #2c3e50;
+        }
+        
+        .logo {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .mission-badge {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        
+        .investigation-area {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border: 2px dashed #3498db;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+            border: 1px solid #444;
+        }
+        
+        .comment {
+            color: #6a9955;
+            font-style: italic;
+        }
+        
+        .task-instruction {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+        
+        .task-box {
+            background: #fff8e1;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #ffc107;
+        }
+        
+        .task-number {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+        }
+        
+        .bonus-section {
+            background: #e8f5e9;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border-left: 4px solid #2ecc71;
+        }
+        
+        button {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #1a252f;
+        }
+        
+        .test-area {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .output-display {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 15px 0;
+            min-height: 100px;
+        }
+        
+        .type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .type-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        
+        .type-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .hint-box {
+            background: #fce4ec;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+        
+        .partner-instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">MSEBETSI DATA LAB</div>
+            <h1>Case File #003: Primitive Types Investigation</h1>
+            <div class="mission-badge">🔍 PARTNER ACTIVITY</div>
+            <p>Work with a partner to solve the type mysteries below</p>
+        </div>
+
+        <!-- Partner Instructions -->
+        <div class="partner-instructions">
+            <h3>👥 Pair Programming Setup</h3>
+            <p><strong>Driver:</strong> Controls the keyboard, writes the code</p>
+            <p><strong>Navigator:</strong> Reviews code, catches errors, suggests improvements</p>
+            <p><em>Switch roles after completing Task 7!</em></p>
+        </div>
+
+        <!-- Investigation Brief -->
+        <div class="task-instruction">
+            <h2>🕵️‍♂️ Your Mission</h2>
+            <p>Analyze the JavaScript code below and add detailed comments explaining:</p>
+            <ol>
+                <li>What each variable stores</li>
+                <li>What <code>typeof</code> will return for each</li>
+                <li>Why that type is important for Msebetsi business logic</li>
+            </ol>
+            <p><strong>Tools:</strong> Use Chrome DevTools (F12 → Console) to test your predictions!</p>
+        </div>
+
+        <!-- Code Investigation Area -->
+        <div class="investigation-area">
+            <h2>📝 Code Analysis Tasks</h2>
+            
+            <div class="task-box">
+                <div class="task-number">1</div>
+                <h3>Add Comments to This Code</h3>
+                <p>Copy this code into a new JavaScript file and add comments explaining each line:</p>
+                
+                <div class="code-block">
+<span class="comment">// ================================================</span><br>
+<span class="comment">// TASK 1: Add comments explaining each line below</span><br>
+<span class="comment">// ================================================</span><br>
+<br>
+<span class="comment">// Line 1: ???</span><br>
+let companyName = "Msebetsi Solutions";<br>
+<br>
+<span class="comment">// Line 2: ???</span><br>
+const yearlyRevenue = 5000000;<br>
+<br>
+<span class="comment">// Line 3: ??? What will this output?</span><br>
+console.log(typeof companyName);<br>
+<br>
+<span class="comment">// Line 4: ??? What will this output?</span><br>
+console.log(typeof yearlyRevenue);<br>
+<br>
+<span class="comment">// Line 5: ??? Explain this boolean</span><br>
+let isProfitable = true;<br>
+console.log(typeof isProfitable);<br>
+<br>
+<span class="comment">// Line 6: ??? Why undefined?</span><br>
+let clientFeedback;<br>
+console.log(typeof clientFeedback);<br>
+<br>
+<span class="comment">// Line 7: ??? The typeof quirk</span><br>
+let optionalData = null;<br>
+console.log(typeof optionalData);<br>
+<br>
+<span class="comment">// Line 8: ??? What's special about Symbol?</span><br>
+const projectID = Symbol("proj_001");<br>
+console.log(typeof projectID);<br>
+<br>
+<span class="comment">// Line 9: ??? When do we need BigInt?</span><br>
+const largeNumber = 9007199254740991n;<br>
+console.log(typeof largeNumber);<br>
+                </div>
+            </div>
+
+            <div class="task-box">
+                <div class="task-number">2</div>
+                <h3>Business Logic Validation</h3>
+                <p>Add comments to this validation function:</p>
+                
+                <div class="code-block">
+<span class="comment">// TASK 2: Explain this validation function</span><br>
+function validateClientData(clientName, budget) {<br>
+&nbsp;&nbsp;<span class="comment">// ??? Why check typeof here?</span><br>
+&nbsp;&nbsp;if (typeof clientName !== "string") {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return "Error: Client name must be text";<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;<span class="comment">// ??? Why check typeof here?</span><br>
+&nbsp;&nbsp;if (typeof budget !== "number") {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return "Error: Budget must be a number";<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;return "✅ Client data validated successfully";<br>
+}<br>
+<br>
+<span class="comment">// ??? What will these outputs be?</span><br>
+console.log(validateClientData("ABSA Bank", 500000));<br>
+console.log(validateClientData(12345, "500000"));
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Area -->
+        <div class="test-area">
+            <h2>🧪 Test Your Understanding</h2>
+            <p>Try predicting the outputs before testing in console:</p>
+            
+            <div class="type-grid">
+                <div class="type-card">
+                    <div class="type-icon">" "</div>
+                    <h4>typeof "Hello"</h4>
+                    <p>Your guess: <input type="text" id="guess1" placeholder="???" size="10"></p>
+                </div>
+                
+                <div class="type-card">
+                    <div class="type-icon">123</div>
+                    <h4>typeof 42</h4>
+                    <p>Your guess: <input type="text" id="guess2" placeholder="???" size="10"></p>
+                </div>
+                
+                <div class="type-card">
+                    <div class="type-icon">TF</div>
+                    <h4>typeof true</h4>
+                    <p>Your guess: <input type="text" id="guess3" placeholder="???" size="10"></p>
+                </div>
+                
+                <div class="type-card">
+                    <div class="type-icon">∅</div>
+                    <h4>typeof null</h4>
+                    <p>Your guess: <input type="text" id="guess4" placeholder="???" size="10"></p>
+                </div>
+            </div>
+            
+            <button onclick="checkAnswers()">✅ Check Answers</button>
+            <button onclick="showTestResults()">🧪 Test in Console</button>
+            
+            <div class="output-display" id="testResults">
+                Test results will appear here...
+            </div>
+        </div>
+
+        <!-- Bonus Challenge -->
+        <div class="bonus-section">
+            <h2>🏆 Bonus Investigation</h2>
+            <p>Research these advanced questions:</p>
+            
+            <div class="task-box">
+                <h3>🔬 Investigation Questions</h3>
+                <ol>
+                    <li>Why does <code>typeof null</code> return "object" instead of "null"?</li>
+                    <li>What's the maximum safe integer in JavaScript before needing BigInt?</li>
+                    <li>How are Symbols useful for creating private object properties?</li>
+                    <li>When would Msebetsi use BigInt in real financial applications?</li>
+                </ol>
+                
+                <button onclick="showHint()">💡 Research Hint</button>
+                <div class="hint-box" id="hintBox">
+                    <p><strong>Research Resources:</strong></p>
+                    <ul>
+                        <li>MDN Web Docs: JavaScript Data Types</li>
+                        <li>MDN Web Docs: typeof operator</li>
+                        <li>Search: "JavaScript null typeof object historical bug"</li>
+                        <li>Search: "BigInt use cases financial applications"</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real Application -->
+        <div class="task-instruction">
+            <h2>🌍 Real Msebetsi Application</h2>
+            <p>Create a function that validates project data for our client portal:</p>
+            
+            <div class="code-block">
+<span class="comment">// TASK 3: Create validation for project data</span><br>
+function validateProject(projectName, budget, teamSize, isActive) {<br>
+&nbsp;&nbsp;<span class="comment">// Add type checking for:</span><br>
+&nbsp;&nbsp;<span class="comment">// 1. projectName must be string</span><br>
+&nbsp;&nbsp;<span class="comment">// 2. budget must be number</span><br>
+&nbsp;&nbsp;<span class="comment">// 3. teamSize must be number</span><br>
+&nbsp;&nbsp;<span class="comment">// 4. isActive must be boolean</span><br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;<span class="comment">// Return appropriate error messages or success</span><br>
+&nbsp;&nbsp;<span class="comment">// Example: "Error: Project name must be text"</span><br>
+&nbsp;&nbsp;<span class="comment">// Or: "✅ Project data validated"</span><br>
+}<br>
+<br>
+<span class="comment">// Test your function:</span><br>
+console.log(validateProject("E-commerce Platform", 500000, 5, true));<br>
+console.log(validateProject(12345, "500000", "five", "yes"));
+            </div>
+            
+            <p><strong>Extension:</strong> Add validation that budget must be positive and teamSize must be at least 1.</p>
+        </div>
+
+        <!-- Submission -->
+        <div class="task-box">
+            <h2>📤 Submission Checklist</h2>
+            <p>Before submitting, ensure you have:</p>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <label><input type="checkbox" id="check1"> ✅ Added comments to all 9 code lines</label><br>
+                <label><input type="checkbox" id="check2"> ✅ Explained the validation function</label><br>
+                <label><input type="checkbox" id="check3"> ✅ Created project validation function</label><br>
+                <label><input type="checkbox" id="check4"> ✅ Researched BigInt and Symbol</label><br>
+                <label><input type="checkbox" id="check5"> ✅ Tested all code in browser console</label>
+            </div>
+            
+            <button onclick="validateSubmission()">📄 Submit Investigation Report</button>
+            <div id="submissionResult" style="margin-top: 15px; padding: 10px; border-radius: 5px;"></div>
+        </div>
+
+        <!-- Quick Reference -->
+        <div class="type-grid">
+            <div class="type-card" style="background: #e3f2fd;">
+                <h4>Primitive Types</h4>
+                <p>1. string</p>
+                <p>2. number</p>
+                <p>3. boolean</p>
+                <p>4. undefined</p>
+                <p>5. null</p>
+                <p>6. symbol</p>
+                <p>7. bigint</p>
+            </div>
+            
+            <div class="type-card" style="background: #e8f5e9;">
+                <h4>typeof Returns</h4>
+                <p>"string"</p>
+                <p>"number"</p>
+                <p>"boolean"</p>
+                <p>"undefined"</p>
+                <p>"object" (quirk!)</p>
+                <p>"symbol"</p>
+                <p>"bigint"</p>
+            </div>
+            
+            <div class="type-card" style="background: #fff3cd;">
+                <h4>Msebetsi Uses</h4>
+                <p>Client names</p>
+                <p>Budgets, costs</p>
+                <p>Status flags</p>
+                <p>Missing data</p>
+                <p>Empty values</p>
+                <p>Unique IDs</p>
+                <p>Large numbers</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="header" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+            <h3>🔍 Investigation Complete?</h3>
+            <p>Remember: Understanding types prevents bugs in production!</p>
+            <p style="color: #666; font-size: 0.9rem;">Msebetsi Solutions Learning Hub | Building Robust Software</p>
+        </div>
+    </div>
+
+    <script>
+        // Interactive functions for the unsolved activity
+        
+        function checkAnswers() {
+            const guesses = [
+                document.getElementById('guess1').value.toLowerCase(),
+                document.getElementById('guess2').value.toLowerCase(),
+                document.getElementById('guess3').value.toLowerCase(),
+                document.getElementById('guess4').value.toLowerCase()
+            ];
+            
+            const answers = ["string", "number", "boolean", "object"];
+            const results = document.getElementById('testResults');
+            
+            let score = 0;
+            let feedback = "<strong>📊 Your Results:</strong><br><br>";
+            
+            for (let i = 0; i < answers.length; i++) {
+                if (guesses[i] === answers[i]) {
+                    score++;
+                    feedback += `✅ Question ${i+1}: Correct! typeof returns "${answers[i]}"<br>`;
+                } else {
+                    feedback += `❌ Question ${i+1}: "${guesses[i]}" → Correct: "${answers[i]}"<br>`;
+                }
+            }
+            
+            feedback += `<br><strong>Score: ${score}/4</strong>`;
+            
+            if (score === 4) {
+                feedback += "<br>🎉 Perfect! You understand typeof well!";
+            } else if (score >= 2) {
+                feedback += "<br>👍 Good effort! Review the types you missed.";
+            } else {
+                feedback += "<br>📚 Review the primitive types and try again!";
+            }
+            
+            results.innerHTML = feedback;
+        }
+        
+        function showTestResults() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = `
+                <strong>🧪 Console Test Results:</strong><br><br>
+                typeof "Hello" → "${typeof "Hello"}"<br>
+                typeof 42 → "${typeof 42}"<br>
+                typeof true → "${typeof true}"<br>
+                typeof null → "${typeof null}"<br><br>
+                <em>💡 Remember: typeof null returns "object" due to a historical bug in JavaScript!</em>
+            `;
+        }
+        
+        function showHint() {
+            const hintBox = document.getElementById('hintBox');
+            hintBox.style.display = 'block';
+        }
+        
+        function validateSubmission() {
+            const checkboxes = [
+                document.getElementById('check1'),
+                document.getElementById('check2'),
+                document.getElementById('check3'),
+                document.getElementById('check4'),
+                document.getElementById('check5')
+            ];
+            
+            const checkedCount = checkboxes.filter(cb => cb.checked).length;
+            const resultDiv = document.getElementById('submissionResult');
+            
+            if (checkedCount === 5) {
+                resultDiv.innerHTML = `
+                    <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; border: 1px solid #c3e6cb;">
+                        <strong>✅ Investigation Report Complete!</strong><br>
+                        All tasks completed successfully. Ready for review.
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; border: 1px solid #f5c6cb;">
+                        <strong>📋 Missing Items:</strong><br>
+                        Complete ${5 - checkedCount} more task(s) before submitting.
+                    </div>
+                `;
+            }
+        }
+        
+        // Example validation function for students to see
+        function exampleValidateProject(projectName, budget, teamSize, isActive) {
+            // This is an example - students should write their own
+            if (typeof projectName !== "string") {
+                return "Error: Project name must be text";
+            }
+            
+            if (typeof budget !== "number") {
+                return "Error: Budget must be a number";
+            }
+            
+            if (typeof teamSize !== "number") {
+                return "Error: Team size must be a number";
+            }
+            
+            if (typeof isActive !== "boolean") {
+                return "Error: Active status must be true or false";
+            }
+            
+            if (budget <= 0) {
+                return "Error: Budget must be positive";
+            }
+            
+            if (teamSize < 1) {
+                return "Error: Team must have at least 1 member";
+            }
+            
+            return "✅ Project data validated successfully";
+        }
+        
+        // Initialize
+        showTestResults();
+    </script>
+</body>
+</html>
