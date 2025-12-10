@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Msebetsi Solutions - Spacecraft Dashboard</title>
+    <style>
+        :root {
+            /* Dark Theme (Default) */
+            --bg-primary: #0a0a2a;
+            --bg-secondary: #1a1a40;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --text-primary: #e0f7ff;
+            --text-secondary: #88d3ff;
+            --text-accent: #00ff88;
+            --border-color: rgba(0, 229, 255, 0.2);
+            --gradient-primary: linear-gradient(135deg, #0a0a2a 0%, #1a1a40 100%);
+            --gradient-accent: linear-gradient(90deg, #00e5ff, #00ff88);
+            --gradient-button: linear-gradient(90deg, #00e5ff, #0099ff);
+            --gradient-danger: linear-gradient(90deg, #ffa726, #ff6b6b);
+            --shadow-color: rgba(0, 229, 255, 0.3);
+            --code-bg: rgba(0, 0, 0, 0.5);
+        }
+
+        .light-mode {
+            /* Light Theme */
+            --bg-primary: #f0f8ff;
+            --bg-secondary: #ffffff;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --text-primary: #1a1a40;
+            --text-secondary: #2a4a6a;
+            --text-accent: #0066cc;
+            --border-color: rgba(0, 102, 204, 0.2);
+            --gradient-primary: linear-gradient(135deg, #f0f8ff 0%, #e6f2ff 100%);
+            --gradient-accent: linear-gradient(90deg, #0066cc, #00a86b);
+            --gradient-button: linear-gradient(90deg, #0066cc, #0099ff);
+            --gradient-danger: linear-gradient(90deg, #ff6b35, #ff3366);
+            --shadow-color: rgba(0, 102, 204, 0.2);
+            --code-bg: rgba(240, 248, 255, 0.9);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            background: var(--gradient-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-card);
+            padding: 10px 15px;
+            border-radius: 30px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .theme-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .theme-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-danger);
+            border-radius: 34px;
+            transition: .4s;
+        }
+
+        .theme-slider:before {
+            position: absolute;
+            content: "🌙";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            border-radius: 50%;
+            transition: .4s;
+            font-size: 12px;
+        }
+
+        input:checked + .theme-slider {
+            background: var(--gradient-accent);
+        }
+
+        input:checked + .theme-slider:before {
+            transform: translateX(30px);
+            content: "☀️";
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid var(--text-accent);
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .mission-badge {
+            display: inline-block;
+            background: var(--gradient-danger);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            .theme-toggle-container {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin-bottom: 20px;
+                justify-content: center;
+            }
+        }
+
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 30px;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--text-accent);
+            box-shadow: 0 10px 30px var(--shadow-color);
+        }
+
+        .card h2 {
+            color: var(--text-accent);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h3 {
+            color: var(--text-secondary);
+            margin: 25px 0 15px 0;
+            font-size: 1.4rem;
+        }
+
+        .module-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .module-option {
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .light-mode .module-option {
+            background: rgba(0, 102, 204, 0.1);
+        }
+
+        .module-option:hover {
+            background: rgba(0, 229, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .light-mode .module-option:hover {
+            background: rgba(0, 102, 204, 0.2);
+        }
+
+        .module-option.active {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: var(--text-accent);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .light-mode .module-option.active {
+            background: rgba(0, 170, 107, 0.2);
+            border-color: var(--text-accent);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        label {
+            color: var(--text-secondary);
+            min-width: 120px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            -webkit-appearance: none;
+            background: rgba(0, 229, 255, 0.2);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .light-mode input[type="range"] {
+            background: rgba(0, 102, 204, 0.2);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--text-accent);
+            cursor: pointer;
+        }
+
+        input[type="number"] {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 15px;
+            border-radius: 8px;
+            width: 100px;
+        }
+
+        .light-mode input[type="number"] {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 102, 204, 0.3);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ff6b6b;
+            border-radius: 34px;
+            transition: .4s;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            border-radius: 50%;
+            transition: .4s;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--text-accent);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        .btn {
+            background: var(--gradient-button);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px var(--shadow-color);
+        }
+
+        .btn-secondary {
+            background: var(--gradient-danger);
+            margin-top: 10px;
+        }
+
+        #output {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-operational {
+            background-color: var(--text-accent);
+            box-shadow: 0 0 10px var(--text-accent);
+        }
+
+        .status-offline {
+            background-color: #ff6b6b;
+            box-shadow: 0 0 10px #ff6b6b;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .bonus-section {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .bonus-controls {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            border-left: 4px solid var(--text-accent);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+
+        .highlight {
+            color: var(--text-accent);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle-container">
+        <span class="theme-label">Theme:</span>
+        <label class="theme-toggle">
+            <input type="checkbox" id="themeToggle">
+            <span class="theme-slider"></span>
+        </label>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">🚀</div>
+                <div>
+                    <h1>Msebetsi Solutions</h1>
+                    <div class="subtitle">Software Engineering Program - Aerospace Division</div>
+                </div>
+            </div>
+            <div class="mission-badge">MISSION: JavaScript Objects - Spacecraft Dashboard</div>
+        </header>
+
+        <div class="content-grid">
+            <!-- Left Column: Instructions and Configuration -->
+            <div class="card">
+                <h2>📋 Mission Brief</h2>
+                <p>As a Junior Aerospace Developer, your task is to configure a spacecraft module object and monitor its status.</p>
+                
+                <h3>🎯 Choose Your Module</h3>
+                <div class="module-options">
+                    <div class="module-option active" data-module="propulsion">
+                        🔥 Propulsion System
+                    </div>
+                    <div class="module-option" data-module="navigation">
+                        🧭 Navigation & Guidance
+                    </div>
+                    <div class="module-option" data-module="thermal">
+                        🌡 Thermal Control
+                    </div>
+                    <div class="module-option" data-module="life-support">
+                        🟢 Life Support Capsule
+                    </div>
+                    <div class="module-option" data-module="power">
+                        ⚡ Power Distribution
+                    </div>
+                </div>
+
+                <h3>⚙️ Module Configuration</h3>
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="temperature">Temperature (°C):</label>
+                        <input type="range" id="temperature" min="-100" max="1000" value="650">
+                        <input type="number" id="temperatureValue" value="650">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="power">Power Level (%):</label>
+                        <input type="range" id="power" min="0" max="100" value="75">
+                        <input type="number" id="powerValue" value="75">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="operational">Operational Status:</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="operational" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span id="statusText">🟢 Operational</span>
+                    </div>
+                </div>
+
+                <button class="btn" id="createObject">
+                    🚀 Create Module Object
+                </button>
+                <button class="btn btn-secondary" id="checkStatus">
+                    📡 Check Module Status
+                </button>
+
+                <div class="code-block">
+                    // JavaScript Object Structure<br>
+                    const spaceModule = {<br>
+                    &nbsp;&nbsp;moduleName: <span id="code-name" class="highlight">"Propulsion System"</span>,<br>
+                    &nbsp;&nbsp;temperature: <span id="code-temp" class="highlight">650</span>,<br>
+                    &nbsp;&nbsp;powerLevel: <span id="code-power" class="highlight">75</span>,<br>
+                    &nbsp;&nbsp;isOperational: <span id="code-status" class="highlight">true</span>,<br>
+                    &nbsp;&nbsp;checkStatus: function() {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;// Status logic here<br>
+                    &nbsp;&nbsp;}<br>
+                    };
+                </div>
+            </div>
+
+            <!-- Right Column: Output and Monitoring -->
+            <div class="card">
+                <h2>📊 Mission Control Dashboard</h2>
+                <div id="output">
+                    <div style="color: var(--text-secondary); font-style: italic;">
+                        // Output will appear here<br>
+                        // Configure your module and click "Create Module Object"
+                    </div>
+                </div>
+
+                <div class="bonus-section">
+                    <h3>⭐ Bonus Challenges</h3>
+                    <div class="bonus-controls">
+                        <button class="btn btn-secondary" id="boostPower">
+                            ⚡ Boost Power (+20%)
+                        </button>
+                        <button class="btn btn-secondary" id="createFleet">
+                            🛰 Create Fleet Array
+                        </button>
+                        <button class="btn btn-secondary" id="inspectModule">
+                            🔍 Inspect Module (for...in)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Msebetsi Solutions - Software Engineering Program | JavaScript Objects Aerospace Edition</p>
+            <p>Open browser console (F12) to see raw JavaScript execution</p>
+        </footer>
+    </div>
+
+    <script>
+        // Theme Toggle Functionality
+        const themeToggle = document.getElementById('themeToggle');
+        
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+            themeToggle.checked = true;
+        }
+        
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                document.body.classList.add('light-mode');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.body.classList.remove('light-mode');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Current module object
+        let spaceModule = null;
+        let spacecraftFleet = [];
+
+        // DOM Elements
+        const moduleOptions = document.querySelectorAll('.module-option');
+        const temperatureSlider = document.getElementById('temperature');
+        const temperatureValue = document.getElementById('temperatureValue');
+        const powerSlider = document.getElementById('power');
+        const powerValue = document.getElementById('powerValue');
+        const operationalToggle = document.getElementById('operational');
+        const statusText = document.getElementById('statusText');
+        const output = document.getElementById('output');
+
+        // Module configuration
+        const moduleConfigs = {
+            propulsion: {
+                name: "Propulsion System",
+                minTemp: 500,
+                maxTemp: 1000,
+                defaultTemp: 650
+            },
+            navigation: {
+                name: "Navigation & Guidance",
+                minTemp: -50,
+                maxTemp: 50,
+                defaultTemp: 22
+            },
+            thermal: {
+                name: "Thermal Control",
+                minTemp: -100,
+                maxTemp: 200,
+                defaultTemp: -45
+            },
+            'life-support': {
+                name: "Life Support Capsule",
+                minTemp: 18,
+                maxTemp: 25,
+                defaultTemp: 22
+            },
+            power: {
+                name: "Power Distribution Unit",
+                minTemp: 0,
+                maxTemp: 80,
+                defaultTemp: 35
+            }
+        };
+
+        // Initialize
+        function init() {
+            // Module selection
+            moduleOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    moduleOptions.forEach(opt => opt.classList.remove('active'));
+                    option.classList.add('active');
+                    
+                    const moduleType = option.dataset.module;
+                    const config = moduleConfigs[moduleType];
+                    
+                    // Update temperature range and value
+                    temperatureSlider.min = config.minTemp;
+                    temperatureSlider.max = config.maxTemp;
+                    temperatureSlider.value = config.defaultTemp;
+                    temperatureValue.value = config.defaultTemp;
+                    
+                    // Update code display
+                    document.getElementById('code-name').textContent = `"${config.name}"`;
+                    document.getElementById('code-temp').textContent = config.defaultTemp;
+                });
+            });
+
+            // Temperature sync
+            temperatureSlider.addEventListener('input', () => {
+                temperatureValue.value = temperatureSlider.value;
+                document.getElementById('code-temp').textContent = temperatureSlider.value;
+            });
+            
+            temperatureValue.addEventListener('input', () => {
+                temperatureSlider.value = temperatureValue.value;
+                document.getElementById('code-temp').textContent = temperatureValue.value;
+            });
+
+            // Power sync
+            powerSlider.addEventListener('input', () => {
+                powerValue.value = powerSlider.value;
+                document.getElementById('code-power').textContent = powerSlider.value;
+            });
+            
+            powerValue.addEventListener('input', () => {
+                const value = Math.min(100, Math.max(0, parseInt(powerValue.value) || 0));
+                powerSlider.value = value;
+                powerValue.value = value;
+                document.getElementById('code-power').textContent = value;
+            });
+
+            // Operational status
+            operationalToggle.addEventListener('change', () => {
+                const isOperational = operationalToggle.checked;
+                statusText.textContent = isOperational ? '🟢 Operational' : '🔴 Offline';
+                statusText.innerHTML = (isOperational ? '🟢' : '🔴') + ' ' + (isOperational ? 'Operational' : 'Offline');
+                document.getElementById('code-status').textContent = isOperational;
+            });
+        }
+
+        // Create module object
+        document.getElementById('createObject').addEventListener('click', () => {
+            const activeModule = document.querySelector('.module-option.active');
+            const moduleType = activeModule.dataset.module;
+            const moduleName = moduleConfigs[moduleType].name;
+            
+            spaceModule = {
+                moduleName: moduleName,
+                temperature: parseInt(temperatureSlider.value),
+                powerLevel: parseInt(powerSlider.value),
+                isOperational: operationalToggle.checked,
+                checkStatus: function() {
+                    if (this.isOperational) {
+                        return `🟢 ${this.moduleName} systems are stable.`;
+                    } else {
+                        return `🔴 ${this.moduleName} requires immediate attention!`;
+                    }
+                },
+                boostPower: function(amount) {
+                    const oldPower = this.powerLevel;
+                    this.powerLevel = Math.min(100, this.powerLevel + amount);
+                    return {
+                        old: oldPower,
+                        new: this.powerLevel,
+                        boosted: this.powerLevel - oldPower
+                    };
+                }
+            };
+
+            output.innerHTML = `<span style="color: var(--text-accent)">✅ Module Object Created Successfully!</span>\n\n`;
+            output.innerHTML += `<span style="color: var(--text-secondary)">Object Structure:</span>\n`;
+            output.innerHTML += `{\n`;
+            output.innerHTML += `  moduleName: <span style="color: var(--text-accent)">"${spaceModule.moduleName}"</span>,\n`;
+            output.innerHTML += `  temperature: <span style="color: var(--text-accent)">${spaceModule.temperature}</span>,\n`;
+            output.innerHTML += `  powerLevel: <span style="color: var(--text-accent)">${spaceModule.powerLevel}</span>,\n`;
+            output.innerHTML += `  isOperational: <span style="color: var(--text-accent)">${spaceModule.isOperational}</span>,\n`;
+            output.innerHTML += `  checkStatus: <span style="color: #ffa726">[Function]</span>\n`;
+            output.innerHTML += `}\n\n`;
+            output.innerHTML += `<span style="color: var(--text-secondary)">Check the browser console (F12) to see the actual JavaScript object.</span>`;
+            
+            // Also log to console
+            console.log('🚀 Space Module Created:', spaceModule);
+            console.log('📋 Object Structure:', JSON.stringify(spaceModule, null, 2));
+        });
+
+        // Check status
+        document.getElementById('checkStatus').addEventListener('click', () => {
+            if (!spaceModule) {
+                output.innerHTML = `<span style="color: #ff6b6b">❌ Please create a module object first!</span>`;
+                return;
+            }
+            
+            const status = spaceModule.checkStatus();
+            output.innerHTML = `<span style="color: var(--text-secondary)">📡 STATUS REPORT:</span>\n\n`;
+            output.innerHTML += `${status}\n\n`;
+            output.innerHTML += `<span style="color: var(--text-secondary)">Module Details:</span>\n`;
+            output.innerHTML += `• Name: ${spaceModule.moduleName}\n`;
+            output.innerHTML += `• Temperature: ${spaceModule.temperature}°C\n`;
+            output.innerHTML += `• Power: ${spaceModule.powerLevel}%\n`;
+            output.innerHTML += `• Operational: ${spaceModule.isOperational ? '✅ Yes' : '❌ No'}\n`;
+            
+            console.log('📡 Status Check:', status);
+        });
+
+        // Boost power
+        document.getElementById('boostPower').addEventListener('click', () => {
+            if (!spaceModule) {
+                output.innerHTML = `<span style="color: #ff6b6b">❌ Please create a module object first!</span>`;
+                return;
+            }
+            
+            const result = spaceModule.boostPower(20);
+            output.innerHTML = `<span style="color: var(--text-secondary)">⚡ POWER BOOST INITIATED:</span>\n\n`;
+            output.innerHTML += `Previous power: ${result.old}%\n`;
+            output.innerHTML += `Boost amount: +20%\n`;
+            output.innerHTML += `New power level: <span style="color: var(--text-accent)">${result.new}%</span>\n`;
+            
+            // Update UI
+            powerSlider.value = spaceModule.powerLevel;
+            powerValue.value = spaceModule.powerLevel;
+            document.getElementById('code-power').textContent = spaceModule.powerLevel;
+            
+            console.log('⚡ Power Boosted:', result);
+        });
+
+        // Create fleet
+        document.getElementById('createFleet').addEventListener('click', () => {
+            spacecraftFleet = [
+                {
+                    moduleName: "Propulsion System",
+                    powerLevel: 85,
+                    isOperational: true,
+                    checkStatus: function() {
+                        return this.isOperational ? "🟢 Operational" : "🔴 Offline";
+                    }
+                },
+                {
+                    moduleName: "Navigation System",
+                    powerLevel: 45,
+                    isOperational: false,
+                    checkStatus: function() {
+                        return this.isOperational ? "🟢 Operational" : "🔴 Offline";
+                    }
+                },
+                {
+                    moduleName: "Life Support",
+                    powerLevel: 92,
+                    isOperational: true,
+                    checkStatus: function() {
+                        return this.isOperational ? "🟢 Operational" : "🔴 Offline";
+                    }
+                }
+            ];
+            
+            output.innerHTML = `<span style="color: var(--text-secondary)">🛰 SPACECRAFT FLEET CREATED:</span>\n\n`;
+            output.innerHTML += `<span style="color: var(--text-secondary)">Fleet Status Report:</span>\n`;
+            
+            spacecraftFleet.forEach((module, index) => {
+                const statusIcon = module.isOperational ? '<span class="status-indicator status-operational"></span>' : 
+                                                    '<span class="status-indicator status-offline"></span>';
+                output.innerHTML += `${index + 1}. ${statusIcon} ${module.moduleName}: ${module.checkStatus()} (Power: ${module.powerLevel}%)\n`;
+            });
+            
+            output.innerHTML += `\n<span style="color: var(--text-secondary)">This is an array containing ${spacecraftFleet.length} module objects.</span>`;
+            
+            console.log('🛰 Spacecraft Fleet:', spacecraftFleet);
+        });
+
+        // Inspect module
+        document.getElementById('inspectModule').addEventListener('click', () => {
+            if (!spaceModule) {
+                output.innerHTML = `<span style="color: #ff6b6b">❌ Please create a module object first!</span>`;
+                return;
+            }
+            
+            output.innerHTML = `<span style="color: var(--text-secondary)">🔍 MODULE INSPECTION (for...in loop):</span>\n\n`;
+            
+            for (let property in spaceModule) {
+                const value = spaceModule[property];
+                const type = typeof value;
+                let displayValue;
+                
+                if (type === 'function') {
+                    displayValue = `<span style="color: #ffa726">[Function: ${property}]</span>`;
+                } else if (type === 'string') {
+                    displayValue = `<span style="color: var(--text-accent)">"${value}"</span>`;
+                } else if (type === 'boolean') {
+                    displayValue = `<span style="color: #ff6b6b">${value}</span>`;
+                } else {
+                    displayValue = `<span style="color: var(--text-accent)">${value}</span>`;
+                }
+                
+                output.innerHTML += `<span style="color: var(--text-secondary)">${property}</span>: ${displayValue} <span style="color: #888">(type: ${type})</span>\n`;
+            }
+            
+            console.log('🔍 Module Inspection:');
+            for (let property in spaceModule) {
+                console.log(`${property}:`, spaceModule[property], `(type: ${typeof spaceModule[property]})`);
+            }
+        });
+
+        // Initialize the application
+        init();
+    </script>
+</body>
+</html>
