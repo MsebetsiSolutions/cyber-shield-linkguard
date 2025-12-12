@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Lesson 15: CSS Display Property | Msebetsi Solutions</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* CSS Custom Properties for Black & White Theme */
+    :root {
+      /* Light theme (default) */
+      --color-surface: #ffffff;
+      --color-background: #f8f9fa;
+      --color-card: #ffffff;
+      --color-text: #000000;
+      --color-text-secondary: #495057;
+      --color-border: #dee2e6;
+      --color-primary: #000000;
+      --color-secondary: #212529;
+      --color-accent: #000000;
+      --color-success: #28a745;
+      --color-warning: #ffc107;
+      --color-error: #dc3545;
+      --color-info: #17a2b8;
+      
+      /* UI Constants */
+      --border-radius-sm: 6px;
+      --border-radius-md: 10px;
+      --border-radius-lg: 16px;
+      --spacing-xs: 0.5rem;
+      --spacing-sm: 0.875rem;
+      --spacing-md: 1.25rem;
+      --spacing-lg: 1.75rem;
+      --spacing-xl: 2.5rem;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* Dark theme */
+    [data-theme="dark"] {
+      --color-surface: #000000;
+      --color-background: #121212;
+      --color-card: #1a1a1a;
+      --color-text: #ffffff;
+      --color-text-secondary: #adb5bd;
+      --color-border: #343a40;
+      --color-primary: #ffffff;
+      --color-secondary: #e9ecef;
+      --color-accent: #ffffff;
+      --color-success: #20c997;
+      --color-warning: #ffd166;
+      --color-error: #ff6b6b;
+      --color-info: #4cc9f0;
+    }
+
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-body);
+      line-height: 1.6;
+      color: var(--color-text);
+      background-color: var(--color-background);
+      padding: var(--spacing-md);
+      max-width: 1200px;
+      margin: 0 auto;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      background: var(--color-card);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-md);
+    }
+
+    .theme-toggle-btn {
+      background: var(--color-surface);
+      border: 2px solid var(--color-border);
+      border-radius: 50px;
+      width: 60px;
+      height: 30px;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--color-primary);
+    }
+
+    .theme-toggle-btn::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      background: var(--color-primary);
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    [data-theme="dark"] .theme-toggle-btn::after {
+      transform: translateX(30px);
+    }
+
+    .theme-label {
+      font-size: 0.9rem;
+      color: var(--color-text);
+      font-weight: 500;
+      min-width: 50px;
+    }
+
+    /* ORIGINAL LESSON STYLES - PRESERVED EXACTLY */
+    .lesson-header {
+      background: linear-gradient(135deg, #2c3e50, #4a6491);
+      color: white;
+      padding: 25px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .lesson-header h1 {
+      color: white;
+      margin-bottom: 10px;
+      font-size: 2.2em;
+    }
+    
+    .lesson-subtitle {
+      color: #ecf0f1;
+      font-style: italic;
+      font-size: 1.1em;
+    }
+    
+    .lesson-section {
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border-left: 5px solid #3498db;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .code-comment {
+      color: #7f8c8d;
+      font-style: italic;
+      background: #f1f2f6;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+      border-left: 3px solid #95a5a6;
+    }
+    
+    .msebetsi-note {
+      background: #e8f4fc;
+      border-left: 4px solid #3498db;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    
+    .msebetsi-note strong {
+      color: #2980b9;
+    }
+    
+    .exercise-box {
+      background: #fff3cd;
+      border: 2px dashed #ffc107;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 25px 0;
+    }
+    
+    .exercise-title {
+      color: #856404;
+      margin-top: 0;
+    }
+
+    /* Demo elements styling - PRESERVED */
+    .inline-example, .block-example {
+      margin: 10px;
+      padding: 10px;
+    }
+
+    .first-element {
+      background-color: #3498db;
+      color: white;
+      padding: 10px;
+      border-radius: 4px;
+      display: inline-block;
+      margin: 5px;
+    }
+
+    .second-element {
+      background-color: #2ecc71;
+      color: white;
+      padding: 10px;
+      border-radius: 4px;
+      display: inline-block;
+      margin: 5px;
+    }
+
+    .third-element {
+      background-color: #9b59b6;
+      color: white;
+      padding: 10px;
+      border-radius: 4px;
+      display: inline-block;
+      margin: 5px;
+    }
+
+    .display-inline {
+      display: inline;
+      background-color: #9b59b6;
+      color: white;
+      padding: 10px;
+      margin: 5px;
+    }
+
+    .display-block {
+      display: block;
+      background-color: #e74c3c;
+      color: white;
+      padding: 10px;
+      margin: 10px 0;
+      width: 200px;
+    }
+
+    .display-none {
+      display: none;
+    }
+
+    .inline-block-demo {
+      margin: 20px 0;
+    }
+
+    .box {
+      display: inline-block;
+      width: 100px;
+      height: 100px;
+      background-color: #f39c12;
+      color: white;
+      text-align: center;
+      line-height: 100px;
+      margin: 5px;
+      border-radius: 5px;
+    }
+
+    /* Demo images */
+    .demo-img {
+      width: 200px;
+      height: 200px;
+      background-color: #ecf0f1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 10px;
+      border: 2px dashed #bdc3c7;
+      border-radius: 5px;
+      color: #7f8c8d;
+      font-weight: bold;
+    }
+
+    /* Interactive demo styles */
+    .interactive-demo {
+      background: #3498db;
+      color: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+
+    /* Buttons for interactive features */
+    .demo-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid #dee2e6;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+      gap: 8px;
+      background-color: white;
+      color: #212529;
+      margin: 5px;
+    }
+
+    .demo-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      border-color: #3498db;
+    }
+
+    .demo-btn-primary {
+      background-color: #3498db;
+      color: white;
+      border-color: #3498db;
+    }
+
+    .btn-icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Code editor for interactive demo */
+    .interactive-code-editor {
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 20px 0;
+      border: 1px solid #dee2e6;
+    }
+
+    .code-header {
+      background-color: #2c3e50;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+
+    .code-body {
+      padding: 20px;
+      overflow-x: auto;
+      background-color: white;
+    }
+
+    .code-body code {
+      font-family: 'Courier New', monospace;
+      background-color: transparent;
+      color: #2c3e50;
+      padding: 0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 40px;
+      padding: 20px;
+      text-align: center;
+      background: #2c3e50;
+      color: white;
+      border-radius: 8px;
+    }
+
+    footer h3 {
+      color: white;
+    }
+
+    footer ul {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+
+    footer li {
+      margin: 10px 0;
+    }
+
+    /* Modal styles */
+    .solution-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      z-index: 1000;
+      max-width: 800px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      display: none;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      .theme-toggle {
+        top: 10px;
+        right: 10px;
+        padding: 8px 12px;
+      }
+      
+      .lesson-section {
+        padding: 20px;
+      }
+      
+      .box {
+        width: 80px;
+        height: 80px;
+        line-height: 80px;
+      }
+      
+      .demo-btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Animation for notifications */
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translate(-50%, -60%); }
+      to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+
+    /* Utility classes */
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .mt-3 {
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Theme Toggle -->
+  <div class="theme-toggle">
+    <span class="theme-label" id="themeLabel">Light</span>
+    <button class="theme-toggle-btn" id="themeToggle" aria-label="Toggle theme">
+      <span class="visually-hidden">Toggle theme</span>
+    </button>
+  </div>
+
+  <!-- ORIGINAL LESSON CONTENT - PRESERVED EXACTLY -->
+  <header class="lesson-header">
+    <h1>📚 Lesson 15: CSS Display Property</h1>
+    <p class="lesson-subtitle">Msebetsi Solutions Software Development Course</p>
+    <p>Learn how to control element layout with CSS display property</p>
+  </header>
+
+  <div class="msebetsi-note">
+    <strong>👨‍🏫 Instructor Note:</strong> In this lesson, we'll explore how HTML elements naturally behave (inline vs block) and how we can override this behavior using CSS display property. This is crucial for building responsive layouts!
+  </div>
+
+  <section class="lesson-section">
+    <h2>📝 Understanding Default Display Values</h2>
+    <p class="code-comment">/* Every HTML element has a default display value */</p>
+    
+    <h3>1. Inline Elements</h3>
+    <p><strong>Characteristics:</strong> Sit side-by-side, width determined by content, cannot set width/height</p>
+    <p><strong>Common examples:</strong> &lt;span&gt;, &lt;a&gt;, &lt;img&gt;, &lt;strong&gt;, &lt;em&gt;</p>
+    
+    <div class="code-comment">&lt;!-- Anchor elements are inline by default --&gt;</div>
+    <h4>🔗 Anchor Elements Demo:</h4>
+    <a class="first-element inline-example" href="#">
+      Link 1 (Inline)
+    </a>
+    <a class="second-element inline-example" href="#">
+      Link 2 (Inline)
+    </a>
+    
+    <div class="code-comment">&lt;!-- Image elements are also inline --&gt;</div>
+    <h4>🖼️ Image Elements Demo:</h4>
+    <div class="demo-img">image-1.png</div>
+    <div class="demo-img">image-2.png</div>
+    
+    <div class="msebetsi-note">
+      <strong>💡 Real-world Example:</strong> Navigation menus use inline display for horizontal links. Try resizing your browser to see how inline elements wrap naturally.
+    </div>
+  </section>
+
+  <section class="lesson-section">
+    <h3>2. Block Elements</h3>
+    <p><strong>Characteristics:</strong> Start on new line, take full available width, can set width/height</p>
+    <p><strong>Common examples:</strong> &lt;div&gt;, &lt;p&gt;, &lt;h1&gt;-&lt;h6&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;section&gt;</p>
+    
+    <div class="code-comment">&lt;!-- Paragraphs are block-level by default --&gt;</div>
+    <h4>📄 Paragraph Elements Demo:</h4>
+    <p class="first-element block-example">First paragraph (Block)</p>
+    <p class="second-element block-example">Second paragraph with <strong>bold text</strong> (Block)</p>
+    
+    <div class="code-comment">&lt;!-- Lists are block-level elements --&gt;</div>
+    <h4>📋 List Elements Demo:</h4>
+    <ul class="block-example">
+      <li class="first-element">List item 1</li>
+      <li class="second-element">List item 2</li>
+    </ul>
+  </section>
+
+  <section class="lesson-section">
+    <h2>🎨 CSS Display Property Overrides</h2>
+    <p class="code-comment">/* We can change default display behavior with CSS */</p>
+    
+    <h3>3. display: inline</h3>
+    <p><strong>Changes block elements to behave like inline elements</strong></p>
+    
+    <div class="code-comment">&lt;!-- These paragraphs would normally stack --&gt;</div>
+    <h4>📝 Paragraphs with display: inline</h4>
+    <p class="first-element display-inline">Paragraph 1 (now inline)</p>
+    <p class="second-element display-inline">Paragraph 2 (now inline)</p>
+    <p class="third-element display-inline">Notice they sit side-by-side</p>
+    
+    <div class="msebetsi-note">
+      <strong>⚠️ Warning:</strong> When you make block elements inline, you lose the ability to set width, height, and vertical margins properly.
+    </div>
+  </section>
+
+  <section class="lesson-section">
+    <h3>4. display: block</h3>
+    <p><strong>Changes inline elements to behave like block elements</strong></p>
+    
+    <div class="code-comment">&lt;!-- These images would normally sit side-by-side --&gt;</div>
+    <h4>🖼️ Images with display: block</h4>
+    <div class="first-element display-block">Image 1 (now block)</div>
+    <div class="second-element display-block">Image 2 (now block)</div>
+    <p>Images now stack vertically instead of sitting side-by-side</p>
+  </section>
+
+  <section class="lesson-section">
+    <h3>5. display: none</h3>
+    <p><strong>Completely removes element from document flow</strong></p>
+    
+    <h4>🎭 Hidden List Demo:</h4>
+    <p>The list below has <code>display: none</code> applied:</p>
+    <ul class="display-none">
+      <li>This list item is hidden</li>
+      <li>This list item is also hidden</li>
+    </ul>
+    <p>↑ The list above exists in HTML but is not visible on the page.</p>
+    
+    <div class="msebetsi-note">
+      <strong>🔍 Important Distinction:</strong> <code>display: none</code> removes the element entirely, while <code>visibility: hidden</code> just makes it invisible but it still takes up space.
+    </div>
+  </section>
+
+  <section class="lesson-section">
+    <h2>6. display: inline-block</h2>
+    <p><strong>Best of both worlds: sits side-by-side but accepts width/height</strong></p>
+    
+    <div class="code-comment">&lt;!-- Special demonstration --&gt;</div>
+    <h4>📦 Inline-Block Elements:</h4>
+    <div class="inline-block-demo">
+      <div class="box">Box 1</div>
+      <div class="box">Box 2</div>
+      <div class="box">Box 3</div>
+    </div>
+    <p>These boxes sit side-by-side <strong>and</strong> have fixed width/height.</p>
+  </section>
+
+  <!-- INTERACTIVE DEMO SECTION -->
+  <section class="lesson-section">
+    <h2>🎮 Interactive Display Property Playground</h2>
+    <p>Try changing the display property of the demo element below to see how it affects layout:</p>
+    
+    <div id="interactiveDemo" class="interactive-demo">
+      This is a demo element. Try changing my display property using the buttons below!
+    </div>
+    
+    <div class="text-center mt-3">
+      <button class="demo-btn" onclick="changeDisplay('inline')">display: inline</button>
+      <button class="demo-btn" onclick="changeDisplay('block')">display: block</button>
+      <button class="demo-btn" onclick="changeDisplay('inline-block')">display: inline-block</button>
+      <button class="demo-btn" onclick="changeDisplay('none')">display: none</button>
+      <button class="demo-btn" onclick="resetDisplay()">Reset</button>
+    </div>
+    
+    <div class="interactive-code-editor">
+      <div class="code-header">
+        <span>Current CSS Code</span>
+        <button class="demo-btn" onclick="copyCSS()" style="padding: 5px 10px; font-size: 0.8rem;">Copy CSS</button>
+      </div>
+      <div class="code-body">
+        <pre><code id="cssOutput">#interactiveDemo {
+  display: block;
+  background-color: #3498db;
+  color: white;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 5px;
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="exercise-box">
+    <h3 class="exercise-title">🏋️‍♂️ Msebetsi Solutions Practice Exercise</h3>
+    <p><strong>Task:</strong> Create a simple navigation menu</p>
+    <ol>
+      <li>Create 5 anchor tags (&lt;a&gt;) for Home, About, Services, Portfolio, Contact</li>
+      <li>By default, they'll appear inline (side-by-side)</li>
+      <li>Add a class and use CSS to make them display as block elements</li>
+      <li>Observe how they stack vertically</li>
+      <li>Now change them to display: inline-block and add padding, background colors</li>
+    </ol>
+    <p><strong>Challenge:</strong> Create a button that toggles between displaying a sidebar with <code>display: block</code> and hiding it with <code>display: none</code>.</p>
+    
+    <div class="text-center mt-3">
+      <button class="demo-btn demo-btn-primary" id="downloadExercise">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+        </svg>
+        Download Exercise Files
+      </button>
+      <button class="demo-btn" id="showSolution">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+        </svg>
+        Show Solution
+      </button>
+    </div>
+  </section>
+
+  <footer>
+    <h3>🎯 Lesson Summary</h3>
+    <p><strong>Key Takeaways:</strong></p>
+    <ul>
+      <li>✅ <strong>Inline:</strong> Side-by-side, content-based width</li>
+      <li>✅ <strong>Block:</strong> Full width, starts new line</li>
+      <li>✅ <strong>Inline-block:</strong> Hybrid approach</li>
+      <li>✅ <strong>None:</strong> Completely hidden</li>
+    </ul>
+    <p><em>Next Lesson: CSS Flexbox for Modern Layouts</em></p>
+    <p style="margin-top: 15px;">© <span id="currentYear">2024</span> Msebetsi Solutions Software Development Course</p>
+  </footer>
+
+  <!-- Solution Modal -->
+  <div id="solutionModal" class="solution-modal">
+    <h2>✅ Navigation Menu Solution</h2>
+    <p>Here's the complete solution for the navigation menu exercise:</p>
+    
+    <div class="interactive-code-editor">
+      <div class="code-header">
+        <span>HTML & CSS Solution</span>
+        <button class="demo-btn" onclick="copySolution()" style="padding: 5px 10px; font-size: 0.8rem;">Copy Code</button>
+      </div>
+      <div class="code-body">
+        <pre><code id="htmlSolution">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Navigation Menu Exercise&lt;/title&gt;
+  &lt;style&gt;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    
+    body {
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    
+    h2 {
+      color: #34495e;
+      margin: 30px 0 15px 0;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 5px;
+    }
+    
+    /* Navigation styling */
+    .navbar {
+      background-color: #2c3e50;
+      padding: 15px;
+      margin-bottom: 30px;
+      border-radius: 5px;
+    }
+    
+    /* Default inline behavior */
+    .nav-link {
+      color: white;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+    
+    /* Block behavior */
+    .nav-link.block {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #34495e;
+      border-radius: 3px;
+    }
+    
+    /* Inline-block behavior */
+    .nav-link.inline-block {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 0 5px;
+      background-color: #3498db;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-link.inline-block:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    /* Toggle sidebar example */
+    .sidebar {
+      background-color: #ecf0f1;
+      padding: 20px;
+      width: 250px;
+      border-radius: 5px;
+      margin-top: 20px;
+      border-left: 4px solid #3498db;
+    }
+    
+    .toggle-btn {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 20px;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+    
+    .toggle-btn:hover {
+      background-color: #c0392b;
+    }
+    
+    .sidebar h3 {
+      color: #2c3e50;
+      margin-top: 0;
+    }
+    
+    .sidebar ul {
+      padding-left: 20px;
+      margin: 15px 0;
+    }
+    
+    .sidebar li {
+      margin: 8px 0;
+      color: #34495e;
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;CSS Display Property - Navigation Menu Exercise&lt;/h1&gt;
+  
+  &lt;h2&gt;1. Default Inline Navigation&lt;/h2&gt;
+  &lt;p&gt;Anchor tags are inline by default:&lt;/p&gt;
+  &lt;nav class="navbar"&gt;
+    &lt;a href="#" class="nav-link"&gt;Home&lt;/a&gt;
+    &lt;a href="#" class="nav-link"&gt;About&lt;/a&gt;
+    &lt;a href="#" class="nav-link"&gt;Services&lt;/a&gt;
+    &lt;a href="#" class="nav-link"&gt;Portfolio&lt;/a&gt;
+    &lt;a href="#" class="nav-link"&gt;Contact&lt;/a&gt;
+  &lt;/nav&gt;
+  
+  &lt;h2&gt;2. Block Navigation&lt;/h2&gt;
+  &lt;p&gt;With display: block, links stack vertically:&lt;/p&gt;
+  &lt;nav class="navbar"&gt;
+    &lt;a href="#" class="nav-link block"&gt;Home&lt;/a&gt;
+    &lt;a href="#" class="nav-link block"&gt;About&lt;/a&gt;
+    &lt;a href="#" class="nav-link block"&gt;Services&lt;/a&gt;
+    &lt;a href="#" class="nav-link block"&gt;Portfolio&lt;/a&gt;
+    &lt;a href="#" class="nav-link block"&gt;Contact&lt;/a&gt;
+  &lt;/nav&gt;
+  
+  &lt;h2&gt;3. Inline-Block Navigation (Recommended)&lt;/h2&gt;
+  &lt;p&gt;With display: inline-block, links are horizontal but accept padding/margin:&lt;/p&gt;
+  &lt;nav class="navbar" style="text-align: center;"&gt;
+    &lt;a href="#" class="nav-link inline-block"&gt;Home&lt;/a&gt;
+    &lt;a href="#" class="nav-link inline-block"&gt;About&lt;/a&gt;
+    &lt;a href="#" class="nav-link inline-block"&gt;Services&lt;/a&gt;
+    &lt;a href="#" class="nav-link inline-block"&gt;Portfolio&lt;/a&gt;
+    &lt;a href="#" class="nav-link inline-block"&gt;Contact&lt;/a&gt;
+  &lt;/nav&gt;
+  
+  &lt;h2&gt;4. Toggle Sidebar Challenge&lt;/h2&gt;
+  &lt;p&gt;Toggle the sidebar using display property:&lt;/p&gt;
+  &lt;button class="toggle-btn" id="toggleBtn"&gt;Hide Sidebar&lt;/button&gt;
+  &lt;div class="sidebar" id="sidebar"&gt;
+    &lt;h3&gt;Sidebar Content&lt;/h3&gt;
+    &lt;p&gt;This sidebar demonstrates display: none/block toggling.&lt;/p&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Dashboard&lt;/li&gt;
+      &lt;li&gt;Profile&lt;/li&gt;
+      &lt;li&gt;Settings&lt;/li&gt;
+      &lt;li&gt;Messages&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+  
+  &lt;script&gt;
+    const toggleBtn = document.getElementById('toggleBtn');
+    const sidebar = document.getElementById('sidebar');
+    
+    toggleBtn.addEventListener('click', () =&gt; {
+      if (sidebar.style.display === 'none') {
+        sidebar.style.display = 'block';
+        toggleBtn.textContent = 'Hide Sidebar';
+      } else {
+        sidebar.style.display = 'none';
+        toggleBtn.textContent = 'Show Sidebar';
+      }
+    });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+      </div>
+    </div>
+    
+    <div class="text-center mt-3">
+      <button class="demo-btn demo-btn-primary" onclick="downloadSolution()">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+        </svg>
+        Download Solution
+      </button>
+      <button class="demo-btn" onclick="closeSolution()">Close</button>
+    </div>
+  </div>
+
+  <div id="modalOverlay" class="modal-overlay"></div>
+
+  <script>
+    // Theme Toggle Functionality
+    const themeToggle = document.getElementById('themeToggle');
+    const themeLabel = document.getElementById('themeLabel');
+    const htmlElement = document.documentElement;
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    // Initialize theme
+    function initTheme() {
+      if (savedTheme) {
+        htmlElement.setAttribute('data-theme', savedTheme);
+        themeLabel.textContent = savedTheme === 'dark' ? 'Dark' : 'Light';
+      } else if (prefersDark) {
+        htmlElement.setAttribute('data-theme', 'dark');
+        themeLabel.textContent = 'Dark';
+        localStorage.setItem('theme', 'dark');
+      } else {
+        themeLabel.textContent = 'Light';
+      }
+    }
+
+    initTheme();
+
+    // Toggle theme
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = htmlElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      htmlElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      themeLabel.textContent = newTheme === 'dark' ? 'Dark' : 'Light';
+      
+      showNotification(`Switched to ${newTheme} theme`, 'info');
+    });
+
+    // Interactive Display Demo
+    const interactiveDemo = document.getElementById('interactiveDemo');
+    const cssOutput = document.getElementById('cssOutput');
+    
+    function changeDisplay(displayValue) {
+      interactiveDemo.style.display = displayValue;
+      
+      // Update CSS output
+      const currentCSS = `#interactiveDemo {
+  display: ${displayValue};
+  background-color: #3498db;
+  color: white;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 5px;
+}`;
+      
+      cssOutput.textContent = currentCSS;
+      
+      // Show notification
+      let message = '';
+      switch(displayValue) {
+        case 'inline':
+          message = 'Element is now inline (side-by-side with other inline elements)';
+          break;
+        case 'block':
+          message = 'Element is now block (takes full width, starts new line)';
+          break;
+        case 'inline-block':
+          message = 'Element is now inline-block (horizontal but accepts width/height)';
+          break;
+        case 'none':
+          message = 'Element is now hidden (completely removed from layout)';
+          break;
+      }
+      showNotification(message, 'info');
+    }
+    
+    function resetDisplay() {
+      interactiveDemo.style.display = 'block';
+      cssOutput.textContent = `#interactiveDemo {
+  display: block;
+  background-color: #3498db;
+  color: white;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 5px;
+}`;
+      showNotification('Display property reset to block', 'info');
+    }
+    
+    function copyCSS() {
+      navigator.clipboard.writeText(cssOutput.textContent)
+        .then(() => {
+          showNotification('CSS code copied to clipboard!', 'success');
+        })
+        .catch(err => {
+          console.error('Failed to copy: ', err);
+          showNotification('Failed to copy CSS', 'error');
+        });
+    }
+
+    // Download Exercise Files
+    document.getElementById('downloadExercise').addEventListener('click', function() {
+      const exerciseContent = `MSEBETSI SOLUTIONS - CSS DISPLAY PROPERTY EXERCISE
+===================================================
+
+EXERCISE: Create a Navigation Menu
+-----------------------------------
+Complete the following tasks:
+
+1. Create HTML structure with 5 navigation links:
+   - Home
+   - About
+   - Services
+   - Portfolio
+   - Contact
+
+2. Observe default inline behavior:
+   - Links appear side-by-side
+   - Width is determined by content
+   - Cannot set width/height
+
+3. Apply display: block to see vertical stacking:
+   - Links stack vertically
+   - Each link takes full width
+   - Can set width/height
+
+4. Apply display: inline-block for horizontal layout with styling:
+   - Links appear side-by-side
+   - Can set width/height, padding, margin
+   - Add background colors and hover effects
+
+5. Create a sidebar toggle using display: none/block:
+   - Button that shows/hides sidebar
+   - Use JavaScript to toggle display property
+   - Add smooth transitions
+
+STARTER CODE:
+-------------
+
+HTML:
+<nav class="navbar">
+  <a href="#" class="nav-link">Home</a>
+  <a href="#" class="nav-link">About</a>
+  <a href="#" class="nav-link">Services</a>
+  <a href="#" class="nav-link">Portfolio</a>
+  <a href="#" class="nav-link">Contact</a>
+</nav>
+
+<button id="toggleBtn">Toggle Sidebar</button>
+<div class="sidebar" id="sidebar">
+  <h3>Sidebar</h3>
+  <p>This content can be toggled.</p>
+</div>
+
+CSS TASKS:
+1. Create three navigation styles:
+   - Default (inline)
+   - Block version
+   - Inline-block version
+
+2. Add styling for each version:
+   - Colors, padding, margins
+   - Hover effects
+   - Border radius
+
+3. Style the sidebar:
+   - Background color
+   - Padding
+   - Borders
+
+4. Make it responsive:
+   - Mobile-friendly navigation
+   - Adjust layout for small screens
+
+JAVASCRIPT TASK:
+1. Create toggle functionality:
+   - Button click shows/hides sidebar
+   - Change button text accordingly
+   - Optional: Add animation
+
+CHALLENGE:
+----------
+Make the navigation responsive so it switches to a
+hamburger menu on mobile screens.
+
+TIPS:
+-----
+- Use display: inline-block for the final navigation
+- Add transition for smooth hover effects
+- Use CSS variables for consistent colors
+- Test with different screen sizes
+- Use console.log() for debugging JavaScript`;
+
+      downloadFile('css-display-exercise.txt', exerciseContent);
+    });
+
+    // Show Solution Modal
+    document.getElementById('showSolution').addEventListener('click', function() {
+      document.getElementById('solutionModal').style.display = 'block';
+      document.getElementById('modalOverlay').style.display = 'block';
+    });
+
+    function closeSolution() {
+      document.getElementById('solutionModal').style.display = 'none';
+      document.getElementById('modalOverlay').style.display = 'none';
+    }
+
+    function copySolution() {
+      const solutionText = document.getElementById('htmlSolution').textContent;
+      navigator.clipboard.writeText(solutionText)
+        .then(() => {
+          showNotification('Solution code copied to clipboard!', 'success');
+        })
+        .catch(err => {
+          console.error('Failed to copy: ', err);
+          showNotification('Failed to copy solution', 'error');
+        });
+    }
+
+    function downloadSolution() {
+      const solutionContent = document.getElementById('htmlSolution').textContent;
+      downloadFile('navigation-menu-solution.html', solutionContent);
+    }
+
+    // Close modal when clicking overlay
+    document.getElementById('modalOverlay').addEventListener('click', closeSolution);
+
+    // Utility Functions
+    function downloadFile(filename, content) {
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showNotification(`${filename} downloaded successfully!`, 'success');
+    }
+
+    function showNotification(message, type) {
+      // Remove existing notification
+      const existingNotification = document.querySelector('.notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+      
+      // Create new notification
+      const notification = document.createElement('div');
+      notification.className = 'notification';
+      notification.textContent = message;
+      
+      // Style based on type
+      const backgroundColor = type === 'success' ? '#28a745' : 
+                              type === 'error' ? '#dc3545' : 
+                              type === 'info' ? '#17a2b8' : '#ffc107';
+      
+      notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 5px;
+        background-color: ${backgroundColor};
+        color: white;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1001;
+        animation: slideIn 0.3s ease;
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Remove after 3 seconds
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.style.animation = 'slideOut 0.3s ease';
+          setTimeout(() => notification.remove(), 300);
+        }
+      }, 3000);
+    }
+
+    // Initialize page
+    window.addEventListener('load', function() {
+      showNotification('Welcome to CSS Display Property Lesson! Try the interactive demo.', 'info');
+      
+      // Set current year in footer
+      document.getElementById('currentYear').textContent = new Date().getFullYear();
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      // Close modal with Escape key
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('solutionModal');
+        if (modal.style.display === 'block') {
+          closeSolution();
+        }
+      }
+      
+      // Theme toggle with Ctrl+T
+      if (e.ctrlKey && e.key === 't') {
+        e.preventDefault();
+        themeToggle.click();
+      }
+      
+      // Interactive demo shortcuts
+      if (e.key === '1') {
+        changeDisplay('inline');
+        e.preventDefault();
+      } else if (e.key === '2') {
+        changeDisplay('block');
+        e.preventDefault();
+      } else if (e.key === '3') {
+        changeDisplay('inline-block');
+        e.preventDefault();
+      } else if (e.key === '4') {
+        changeDisplay('none');
+        e.preventDefault();
+      } else if (e.key === '0') {
+        resetDisplay();
+        e.preventDefault();
+      }
+    });
+
+    // Display keyboard shortcuts info on first visit
+    if (!localStorage.getItem('cssLessonVisited')) {
+      setTimeout(() => {
+        showNotification('Tip: Use Ctrl+T to toggle theme, number keys 1-4 for display properties', 'info');
+        localStorage.setItem('cssLessonVisited', 'true');
+      }, 5000);
+    }
+  </script>
+</body>
+</html>

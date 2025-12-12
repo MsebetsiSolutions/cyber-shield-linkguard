@@ -1,0 +1,3600 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Msebetsi Solutions | Task 5: HTML Basics & GitHub Pages Deployment</title>
+  <meta name="description" content="Task 5: Master HTML fundamentals and deploy your first website to GitHub Pages - Complete guide with examples and evaluation">
+  
+  <!-- Performance hints -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://github.com">
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    /* CSS Custom Properties for Black & White Theme */
+    :root {
+      /* Light theme (default) */
+      --color-surface: #ffffff;
+      --color-background: #f8f9fa;
+      --color-card: #ffffff;
+      --color-text: #000000;
+      --color-text-secondary: #495057;
+      --color-border: #dee2e6;
+      --color-primary: #000000;
+      --color-secondary: #212529;
+      --color-accent: #000000;
+      --color-success: #28a745;
+      --color-warning: #ffc107;
+      --color-error: #dc3545;
+      --color-info: #17a2b8;
+      
+      /* UI Constants */
+      --border-radius-sm: 6px;
+      --border-radius-md: 10px;
+      --border-radius-lg: 16px;
+      --spacing-xs: 0.5rem;
+      --spacing-sm: 0.875rem;
+      --spacing-md: 1.25rem;
+      --spacing-lg: 1.75rem;
+      --spacing-xl: 2.5rem;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+    }
+
+    /* Dark theme */
+    [data-theme="dark"] {
+      --color-surface: #000000;
+      --color-background: #121212;
+      --color-card: #1a1a1a;
+      --color-text: #ffffff;
+      --color-text-secondary: #adb5bd;
+      --color-border: #343a40;
+      --color-primary: #ffffff;
+      --color-secondary: #e9ecef;
+      --color-accent: #ffffff;
+      --color-success: #20c997;
+      --color-warning: #ffd166;
+      --color-error: #ff6b6b;
+      --color-info: #4cc9f0;
+    }
+
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-body);
+      line-height: 1.6;
+      color: var(--color-text);
+      background-color: var(--color-background);
+      padding: var(--spacing-md);
+      max-width: 1400px;
+      margin: 0 auto;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      background: var(--color-card);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-md);
+    }
+
+    .theme-toggle-btn {
+      background: var(--color-surface);
+      border: 2px solid var(--color-border);
+      border-radius: 50px;
+      width: 60px;
+      height: 30px;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--color-primary);
+    }
+
+    .theme-toggle-btn::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      background: var(--color-primary);
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    [data-theme="dark"] .theme-toggle-btn::after {
+      transform: translateX(30px);
+    }
+
+    .theme-label {
+      font-size: 0.9rem;
+      color: var(--color-text);
+      font-weight: 500;
+      min-width: 50px;
+    }
+
+    /* Background Pattern */
+    .background-pattern {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(to right, var(--color-border) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.1;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: var(--spacing-md);
+      color: var(--color-text);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      color: var(--color-primary);
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      border-bottom: 2px solid var(--color-border);
+      padding-bottom: var(--spacing-sm);
+      margin-top: var(--spacing-xl);
+    }
+
+    h3 {
+      font-size: 1.3rem;
+      color: var(--color-secondary);
+      margin-top: var(--spacing-lg);
+    }
+
+    p {
+      margin-bottom: var(--spacing-md);
+    }
+
+    a {
+      color: var(--color-primary);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-bottom: 1px solid transparent;
+    }
+
+    a:hover, a:focus {
+      color: var(--color-text);
+      border-bottom-color: var(--color-primary);
+    }
+
+    code, pre {
+      font-family: var(--font-mono);
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: var(--border-radius-sm);
+      padding: 0.2rem 0.4rem;
+      font-size: 0.9em;
+      color: var(--color-primary);
+    }
+
+    [data-theme="dark"] code,
+    [data-theme="dark"] pre {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    pre {
+      padding: var(--spacing-md);
+      overflow-x: auto;
+      margin: var(--spacing-md) 0;
+      border-left: 4px solid var(--color-primary);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+    }
+
+    /* Utility classes */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: var(--color-card);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+      border: 1px solid var(--color-border);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .success-card {
+      border-left: 4px solid var(--color-success);
+    }
+
+    .warning-card {
+      border-left: 4px solid var(--color-warning);
+    }
+
+    .error-card {
+      border-left: 4px solid var(--color-error);
+    }
+
+    .info-card {
+      border-left: 4px solid var(--color-info);
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .flex {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .flex-col {
+      flex-direction: column;
+    }
+
+    .grid {
+      display: grid;
+      gap: var(--spacing-md);
+    }
+
+    .grid-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .grid-3 {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      border-radius: var(--border-radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+      gap: var(--spacing-xs);
+      background-color: var(--color-surface);
+      color: var(--color-text);
+      border-color: var(--color-border);
+    }
+
+    .btn:hover, .btn:focus {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--color-primary);
+    }
+
+    .btn-primary {
+      background-color: var(--color-primary);
+      color: var(--color-surface);
+      border-color: var(--color-primary);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      border-color: var(--color-primary);
+    }
+
+    .btn-success {
+      background-color: var(--color-success);
+      color: white;
+      border-color: var(--color-success);
+    }
+
+    .btn-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Activity sections */
+    .lesson-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+      padding-bottom: var(--spacing-lg);
+      border-bottom: 2px solid var(--color-border);
+    }
+
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--spacing-md);
+      flex-wrap: wrap;
+      margin-top: var(--spacing-md);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background-color: var(--color-surface);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+
+    .badge-success {
+      background-color: var(--color-success);
+      color: white;
+      border-color: transparent;
+    }
+
+    .badge-warning {
+      background-color: var(--color-warning);
+      color: black;
+      border-color: transparent;
+    }
+
+    .badge-info {
+      background-color: var(--color-info);
+      color: white;
+      border-color: transparent;
+    }
+
+    /* Tabs Navigation */
+    .tabs {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .tabs-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-xs);
+      border-bottom: 2px solid var(--color-border);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .tab-btn {
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+      position: relative;
+    }
+
+    .tab-btn:hover {
+      color: var(--color-primary);
+    }
+
+    .tab-btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+
+    .tab-btn .badge {
+      margin-left: var(--spacing-xs);
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Code editor simulation */
+    .code-editor {
+      background-color: var(--color-surface);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+      margin: var(--spacing-lg) 0;
+      border: 1px solid var(--color-border);
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    .code-header {
+      background-color: var(--color-card);
+      padding: var(--spacing-sm) var(--spacing-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--color-text);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--color-border);
+      box-sizing: border-box;
+    }
+
+    .code-body {
+      padding: var(--spacing-md);
+      overflow-x: auto;
+      background-color: var(--color-surface);
+      box-sizing: border-box;
+    }
+
+    .code-body code {
+      font-family: var(--font-mono);
+      background-color: transparent;
+      color: var(--color-text);
+      padding: 0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      box-sizing: border-box;
+    }
+
+    /* Task list */
+    .task-list {
+      list-style-type: none;
+      counter-reset: task-counter;
+    }
+
+    .task-item {
+      counter-increment: task-counter;
+      margin-bottom: var(--spacing-lg);
+      padding-left: 3rem;
+      position: relative;
+    }
+
+    .task-item::before {
+      content: counter(task-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2rem;
+      height: 2rem;
+      background-color: var(--color-primary);
+      color: var(--color-surface);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .task-item.completed::before {
+      background-color: var(--color-success);
+      content: "✓";
+    }
+
+    /* HTML Elements Showcase */
+    .html-elements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--spacing-md);
+      margin: var(--spacing-lg) 0;
+    }
+
+    .html-element {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-md);
+      transition: all 0.3s ease;
+    }
+
+    .html-element:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .element-name {
+      font-family: var(--font-mono);
+      color: var(--color-primary);
+      font-weight: 600;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .element-demo {
+      margin-top: var(--spacing-sm);
+      padding: var(--spacing-sm);
+      background: var(--color-background);
+      border-radius: var(--border-radius-sm);
+    }
+
+    /* HTML Structure Diagram */
+    .html-structure {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-lg);
+      margin: var(--spacing-lg) 0;
+      position: relative;
+    }
+
+    .structure-level {
+      padding-left: var(--spacing-lg);
+      margin: var(--spacing-sm) 0;
+      position: relative;
+    }
+
+    .structure-level::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--color-border);
+    }
+
+    .structure-tag {
+      font-family: var(--font-mono);
+      color: var(--color-primary);
+      background: var(--color-background);
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-block;
+      margin: 2px;
+    }
+
+    /* Version selector */
+    .version-selector {
+      display: flex;
+      gap: var(--spacing-sm);
+      margin: var(--spacing-md) 0;
+      box-sizing: border-box;
+    }
+
+    .version-btn {
+      flex: 1;
+      text-align: center;
+      padding: var(--spacing-md);
+      box-sizing: border-box;
+    }
+
+    .version-btn.active {
+      background-color: var(--color-primary);
+      color: var(--color-surface);
+    }
+
+    /* Version content */
+    .version-content {
+      display: none;
+      box-sizing: border-box;
+    }
+
+    .version-content.active {
+      display: block;
+    }
+
+    /* Upload area */
+    .upload-area {
+      border: 3px dashed var(--color-border);
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-xl);
+      text-align: center;
+      transition: all 0.3s ease;
+      margin: var(--spacing-lg) 0;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+
+    .upload-area:hover, .upload-area.dragover {
+      border-color: var(--color-primary);
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="dark"] .upload-area:hover,
+    [data-theme="dark"] .upload-area.dragover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Results section */
+    .results {
+      display: none;
+    }
+
+    .results.show {
+      display: block;
+    }
+
+    .score-display {
+      font-size: 3rem;
+      font-weight: 700;
+      text-align: center;
+      color: var(--color-success);
+      margin: var(--spacing-lg) 0;
+    }
+
+    .score-breakdown {
+      margin: var(--spacing-lg) 0;
+    }
+
+    .breakdown-item {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--spacing-sm) 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .breakdown-item:last-child {
+      border-bottom: none;
+      font-weight: bold;
+      padding-top: var(--spacing-md);
+    }
+
+    /* File list */
+    .file-list {
+      list-style: none;
+      padding: 0;
+      margin: var(--spacing-md) 0;
+      box-sizing: border-box;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-sm);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-sm);
+      margin-bottom: var(--spacing-xs);
+      box-sizing: border-box;
+    }
+
+    .file-name {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .file-type {
+      font-size: 0.8rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: var(--border-radius-sm);
+      background-color: var(--color-primary);
+      color: var(--color-surface);
+    }
+
+    /* Website preview */
+    .website-preview {
+      width: 100%;
+      height: 400px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+      margin: var(--spacing-lg) 0;
+      background-color: var(--color-surface);
+    }
+
+    .preview-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Loading animation */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0, 0, 0, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--color-primary);
+      animation: spin 1s ease-in-out infinite;
+      margin-right: var(--spacing-xs);
+    }
+
+    [data-theme="dark"] .loading {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: var(--color-primary);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: var(--spacing-xl);
+      padding-top: var(--spacing-lg);
+      border-top: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--color-card);
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-xl);
+      z-index: 2000;
+      box-shadow: var(--shadow-lg);
+      max-width: 800px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1999;
+    }
+
+    /* HTML Cheat Sheet */
+    .cheat-sheet {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-md);
+      margin: var(--spacing-lg) 0;
+    }
+
+    .cheat-item {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-sm);
+      padding: var(--spacing-md);
+    }
+
+    .cheat-tag {
+      font-family: var(--font-mono);
+      color: var(--color-primary);
+      font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .cheat-desc {
+      font-size: 0.9rem;
+      color: var(--color-text-secondary);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      .grid-2, .grid-3, .cheat-sheet {
+        grid-template-columns: 1fr;
+      }
+      
+      .flex {
+        flex-direction: column;
+      }
+      
+      .tabs-nav {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 5px;
+      }
+      
+      .tab-btn {
+        white-space: nowrap;
+      }
+      
+      .theme-toggle {
+        top: 10px;
+        right: 10px;
+        padding: var(--spacing-xs) var(--spacing-sm);
+      }
+      
+      .card {
+        padding: var(--spacing-md);
+        margin-left: -10px;
+        margin-right: -10px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+      }
+      
+      .code-editor {
+        margin: var(--spacing-md) 0;
+      }
+      
+      .version-selector {
+        flex-direction: column;
+      }
+      
+      .website-preview {
+        height: 300px;
+      }
+      
+      .html-elements-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .card {
+        padding: var(--spacing-lg);
+        margin: 0 0 var(--spacing-lg) 0;
+      }
+      
+      .version-content .card {
+        margin: var(--spacing-md) 0;
+        padding: var(--spacing-lg);
+      }
+      
+      .code-editor {
+        max-width: 100%;
+        overflow: hidden;
+      }
+      
+      .code-body {
+        overflow-x: auto;
+        max-width: 100%;
+      }
+    }
+
+    /* Print styles */
+    @media print {
+      .theme-toggle,
+      .upload-area,
+      .version-selector {
+        display: none;
+      }
+      
+      body {
+        background-color: white !important;
+        color: black !important;
+        padding: 0;
+      }
+      
+      .card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #000;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Pattern -->
+  <div class="background-pattern"></div>
+
+  <!-- Theme Toggle -->
+  <div class="theme-toggle">
+    <span class="theme-label" id="themeLabel">Light</span>
+    <button class="theme-toggle-btn" id="themeToggle" aria-label="Toggle theme">
+      <span class="visually-hidden">Toggle theme</span>
+    </button>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Header -->
+    <header class="lesson-header">
+      <h1>Task 5: HTML Fundamentals & GitHub Pages Deployment</h1>
+      <p class="subtitle">Master HTML basics and deploy your first website live on GitHub Pages</p>
+      
+      <div class="lesson-meta">
+        <span class="badge">HTML5</span>
+        <span class="badge badge-success">CSS3</span>
+        <span class="badge badge-warning">GitHub Pages</span>
+        <span class="badge badge-info">Web Development</span>
+        <span class="badge">Responsive Design</span>
+      </div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <nav class="tabs-nav">
+        <button class="tab-btn active" data-tab="overview">
+          📋 HTML Basics
+        </button>
+        <button class="tab-btn" data-tab="structure">
+          🏗️ HTML Structure
+        </button>
+        <button class="tab-btn" data-tab="elements">
+          🔧 HTML Elements
+        </button>
+        <button class="tab-btn" data-tab="activity">
+          💻 Build & Deploy
+        </button>
+        <button class="tab-btn" data-tab="results">
+          📊 Results
+        </button>
+        <button class="tab-btn" data-tab="certificate">
+          🏆 Certificate
+        </button>
+      </nav>
+
+      <!-- Tab 1: HTML Basics Overview -->
+      <div class="tab-content active" id="overview">
+        <div class="card">
+          <h2>📚 HTML Basics: The Foundation of Web Development</h2>
+          <p>HTML (HyperText Markup Language) is the standard markup language for creating web pages. It describes the structure of a web page and consists of a series of elements that tell the browser how to display content.</p>
+          
+          <div class="grid grid-2">
+            <div class="card info-card">
+              <h3>🎯 What You'll Learn</h3>
+              <ul>
+                <li>HTML document structure and syntax</li>
+                <li>Essential HTML elements and tags</li>
+                <li>Creating semantic HTML5 structure</li>
+                <li>Adding images, links, and lists</li>
+                <li>Building forms and tables</li>
+                <li>Making websites accessible</li>
+                <li>Deploying to GitHub Pages</li>
+              </ul>
+            </div>
+            
+            <div class="card success-card">
+              <h3>✅ Why Learn HTML?</h3>
+              <ul>
+                <li><strong>Foundation:</strong> All websites use HTML</li>
+                <li><strong>Career Opportunities:</strong> Essential for web developers</li>
+                <li><strong>Creativity:</strong> Build anything you can imagine</li>
+                <li><strong>Free Resources:</strong> No cost to learn and practice</li>
+                <li><strong>Community:</strong> Huge global developer community</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>🚀 Getting Started with HTML</h2>
+          
+          <div class="task-list">
+            <div class="task-item">
+              <h3>1. HTML Document Structure</h3>
+              <p>Every HTML document follows a specific structure starting with the document type declaration:</p>
+              <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Your Page Title&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;!-- Your content goes here --&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </div>
+            
+            <div class="task-item">
+              <h3>2. HTML Elements and Tags</h3>
+              <p>HTML elements are building blocks defined by tags:</p>
+              <div class="html-elements-grid">
+                <div class="html-element">
+                  <span class="element-name">&lt;h1&gt; to &lt;h6&gt;</span>
+                  <p>Headings define titles and subtitles</p>
+                  <div class="element-demo">
+                    <h4>Example Heading</h4>
+                  </div>
+                </div>
+                <div class="html-element">
+                  <span class="element-name">&lt;p&gt;</span>
+                  <p>Paragraphs for text content</p>
+                  <div class="element-demo">
+                    <p>Example paragraph text.</p>
+                  </div>
+                </div>
+                <div class="html-element">
+                  <span class="element-name">&lt;a&gt;</span>
+                  <p>Links to other pages or resources</p>
+                  <div class="element-demo">
+                    <a href="#">Example Link</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="task-item">
+              <h3>3. Essential HTML Attributes</h3>
+              <p>Attributes provide additional information about elements:</p>
+              <div class="cheat-sheet">
+                <div class="cheat-item">
+                  <span class="cheat-tag">class</span>
+                  <span class="cheat-desc">For CSS styling and JavaScript</span>
+                </div>
+                <div class="cheat-item">
+                  <span class="cheat-tag">id</span>
+                  <span class="cheat-desc">Unique identifier for elements</span>
+                </div>
+                <div class="cheat-item">
+                  <span class="cheat-tag">src</span>
+                  <span class="cheat-desc">Source for images and scripts</span>
+                </div>
+                <div class="cheat-item">
+                  <span class="cheat-tag">href</span>
+                  <span class="cheat-desc">Hyperlink reference for links</span>
+                </div>
+                <div class="cheat-item">
+                  <span class="cheat-tag">alt</span>
+                  <span class="cheat-desc">Alternative text for images</span>
+                </div>
+                <div class="cheat-item">
+                  <span class="cheat-tag">title</span>
+                  <span class="cheat-desc">Tooltip text on hover</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card info-card">
+          <h3>🌍 HTML for African Tech Innovation</h3>
+          <p>HTML is the perfect starting point for aspiring African developers. With just a text editor and browser, you can create solutions that address local challenges and showcase African innovation to the world.</p>
+          
+          <div class="grid grid-3" style="margin-top: var(--spacing-md);">
+            <div>
+              <h4>✅ Low Barrier to Entry</h4>
+              <p>No expensive software needed. Start with what you have.</p>
+            </div>
+            <div>
+              <h4>⚡ Quick Results</h4>
+              <p>See immediate results as you learn and build.</p>
+            </div>
+            <div>
+              <h4>🌐 Global Reach</h4>
+              <p>Share your work with the world instantly.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: HTML Structure -->
+      <div class="tab-content" id="structure">
+        <div class="card">
+          <h2>🏗️ Understanding HTML Document Structure</h2>
+          <p>A well-structured HTML document is essential for accessibility, SEO, and maintainability. Let's explore the key components:</p>
+          
+          <div class="html-structure">
+            <h3>HTML Document Hierarchy</h3>
+            <div class="structure-level">
+              <span class="structure-tag">&lt;!DOCTYPE html&gt;</span> - Document type declaration
+            </div>
+            <div class="structure-level">
+              <span class="structure-tag">&lt;html&gt;</span> - Root element
+              <div class="structure-level">
+                <span class="structure-tag">&lt;head&gt;</span> - Contains metadata
+                <div class="structure-level">
+                  <span class="structure-tag">&lt;meta&gt;</span> - Character encoding, viewport
+                </div>
+                <div class="structure-level">
+                  <span class="structure-tag">&lt;title&gt;</span> - Page title
+                </div>
+                <div class="structure-level">
+                  <span class="structure-tag">&lt;link&gt;</span> - External resources
+                </div>
+                <div class="structure-level">
+                  <span class="structure-tag">&lt;style&gt;</span> - Internal CSS
+                </div>
+              </div>
+              <div class="structure-level">
+                <span class="structure-tag">&lt;body&gt;</span> - Visible content
+                <div class="structure-level">
+                  <span class="structure-tag">&lt;header&gt;</span> - Introductory content
+                </div>
+                <div class="structure-level">
+                  <span class="structure-tag">&lt;nav&gt;</span> - Navigation links
+                </div>
+                <div class="structure-level">
+                  <span class="structure-tag">&lt;main&gt;</span> - Main content
+                </div>
+                <div class="structure-level">
+                  <span class="structure-tag">&lt;section&gt;</span> - Thematic grouping
+                </div>
+                <div class="structure-level">
+                  <span class="structure-tag">&lt;footer&gt;</span> - Closing content
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="grid grid-2" style="margin-top: var(--spacing-lg);">
+            <div class="card">
+              <h3>🖋️ Semantic HTML5 Elements</h3>
+              <p>Modern HTML uses semantic elements that describe their meaning:</p>
+              <ul>
+                <li><code>&lt;header&gt;</code> - Introductory content</li>
+                <li><code>&lt;nav&gt;</code> - Navigation menu</li>
+                <li><code>&lt;main&gt;</code> - Primary content</li>
+                <li><code>&lt;article&gt;</code> - Independent content</li>
+                <li><code>&lt;section&gt;</code> - Thematic grouping</li>
+                <li><code>&lt;aside&gt;</code> - Sidebar content</li>
+                <li><code>&lt;footer&gt;</code> - Closing content</li>
+              </ul>
+            </div>
+            
+            <div class="card success-card">
+              <h3>✅ Benefits of Semantic HTML</h3>
+              <ul>
+                <li><strong>Accessibility:</strong> Screen readers understand structure</li>
+                <li><strong>SEO:</strong> Search engines prioritize semantic markup</li>
+                <li><strong>Maintainability:</strong> Easier to read and update</li>
+                <li><strong>Consistency:</strong> Standardized across projects</li>
+                <li><strong>Future-proof:</strong> Works with new technologies</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📝 Complete HTML Template</h2>
+          <p>Use this template as a starting point for your projects:</p>
+          
+          <div class="code-editor">
+            <div class="code-header">
+              <span>template.html</span>
+              <span>Complete HTML5 Template</span>
+            </div>
+            <div class="code-body">
+              <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Page Title - Descriptive and Concise&lt;/title&gt;
+    &lt;meta name="description" content="Brief description of page content"&gt;
+    &lt;meta name="keywords" content="keyword1, keyword2, keyword3"&gt;
+    &lt;meta name="author" content="Your Name"&gt;
+    
+    &lt;!-- Open Graph for Social Sharing --&gt;
+    &lt;meta property="og:title" content="Page Title"&gt;
+    &lt;meta property="og:description" content="Page description"&gt;
+    &lt;meta property="og:image" content="image.jpg"&gt;
+    &lt;meta property="og:url" content="https://yourwebsite.com"&gt;
+    
+    &lt;!-- Favicon --&gt;
+    &lt;link rel="icon" href="favicon.ico" type="image/x-icon"&gt;
+    
+    &lt;!-- CSS --&gt;
+    &lt;link rel="stylesheet" href="styles.css"&gt;
+    
+    &lt;!-- Fonts --&gt;
+    &lt;link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;!-- Skip to main content for accessibility --&gt;
+    &lt;a href="#main-content" class="skip-link"&gt;Skip to main content&lt;/a&gt;
+    
+    &lt;header role="banner"&gt;
+        &lt;nav role="navigation" aria-label="Main navigation"&gt;
+            &lt;div class="logo"&gt;
+                &lt;a href="/"&gt;Your Logo&lt;/a&gt;
+            &lt;/div&gt;
+            &lt;ul class="nav-menu"&gt;
+                &lt;li&gt;&lt;a href="#home"&gt;Home&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href="#about"&gt;About&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href="#services"&gt;Services&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href="#contact"&gt;Contact&lt;/a&gt;&lt;/li&gt;
+            &lt;/ul&gt;
+        &lt;/nav&gt;
+    &lt;/header&gt;
+    
+    &lt;main id="main-content" role="main"&gt;
+        &lt;section aria-labelledby="hero-heading"&gt;
+            &lt;h1 id="hero-heading"&gt;Welcome to Our Website&lt;/h1&gt;
+            &lt;p&gt;This is a semantic HTML5 structure with accessibility features.&lt;/p&gt;
+        &lt;/section&gt;
+        
+        &lt;article&gt;
+            &lt;h2&gt;Article Title&lt;/h2&gt;
+            &lt;p&gt;Article content goes here...&lt;/p&gt;
+            &lt;figure&gt;
+                &lt;img src="image.jpg" alt="Descriptive alt text for image"&gt;
+                &lt;figcaption&gt;Image caption explaining the image&lt;/figcaption&gt;
+            &lt;/figure&gt;
+        &lt;/article&gt;
+        
+        &lt;aside role="complementary" aria-labelledby="sidebar-heading"&gt;
+            &lt;h3 id="sidebar-heading"&gt;Related Information&lt;/h3&gt;
+            &lt;p&gt;Additional content or links.&lt;/p&gt;
+        &lt;/aside&gt;
+    &lt;/main&gt;
+    
+    &lt;footer role="contentinfo"&gt;
+        &lt;p&gt;&copy; 2024 Your Company. All rights reserved.&lt;/p&gt;
+        &lt;address&gt;
+            Contact: &lt;a href="mailto:info@example.com"&gt;info@example.com&lt;/a&gt;
+        &lt;/address&gt;
+    &lt;/footer&gt;
+    
+    &lt;!-- JavaScript --&gt;
+    &lt;script src="script.js" defer&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin-top: var(--spacing-md);">
+            <button class="btn btn-primary" id="downloadTemplate">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+              </svg>
+              Download HTML Template
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: HTML Elements -->
+      <div class="tab-content" id="elements">
+        <div class="card">
+          <h2>🔧 Essential HTML Elements and Their Usage</h2>
+          <p>Master these fundamental HTML elements to build complete web pages:</p>
+          
+          <div class="grid grid-3">
+            <div class="card">
+              <h3>📝 Text Elements</h3>
+              <div class="html-elements-grid">
+                <div class="html-element">
+                  <span class="element-name">&lt;h1&gt;-&lt;h6&gt;</span>
+                  <p>Headings define document structure</p>
+                  <div class="element-demo">
+                    <h4 style="margin: 0;">Heading Example</h4>
+                  </div>
+                </div>
+                <div class="html-element">
+                  <span class="element-name">&lt;p&gt;</span>
+                  <p>Paragraphs for text content</p>
+                  <div class="element-demo">
+                    <p style="margin: 0;">Paragraph text.</p>
+                  </div>
+                </div>
+                <div class="html-element">
+                  <span class="element-name">&lt;span&gt;</span>
+                  <p>Inline container for styling</p>
+                  <div class="element-demo">
+                    <span style="color: red;">Styled text</span>
+                  </div>
+                </div>
+                <div class="html-element">
+                  <span class="element-name">&lt;br&gt;</span>
+                  <p>Line break within text</p>
+                  <div class="element-demo">
+                    Line 1<br>Line 2
+                  </div>
+                </div>
+                <div class="html-element">
+                  <span class="element-name">&lt;hr&gt;</span>
+                  <p>Thematic break or separator</p>
+                  <div class="element-demo">
+                    <hr style="margin: 5px 0;">
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card success-card">
+              <h3>🔗 Link & Media Elements</h3>
+              <div class="html-elements-grid">
+                <div class="html-element">
+                  <span class="element-name">&lt;a&gt;</span>
+                  <p>Hyperlinks to other resources</p>
+                  <div class="element-demo">
+                    <a href="#" style="color: blue;">Click me</a>
+                  </div>
+                </div>
+                <div class="html-element">
+                  <span class="element-name">&lt;img&gt;</span>
+                  <p>Embed images in documents</p>
+                  <div class="element-demo">
+                    <div style="width: 50px; height: 30px; background: #ddd; display: flex; align-items: center; justify-content: center;">IMG</div>
+                  </div>
+                </div>
+                <div class="html-element">
+                  <span class="element-name">&lt;video&gt;</span>
+                  <p>Embed video content</p>
+                  <div class="element-demo">
+                    <div style="width: 50px; height: 30px; background: #333; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px;">VID</div>
+                  </div>
+                </div>
+                <div class="html-element">
+                  <span class="element-name">&lt;audio&gt;</span>
+                  <p>Embed audio content</p>
+                  <div class="element-demo">
+                    <div style="width: 50px; height: 30px; background: #666; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px;">AUD</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card info-card">
+              <h3>📋 List & Table Elements</h3>
+              <div class="html-elements-grid">
+                <div class="html-element">
+                  <span class="element-name">&lt;ul&gt; & &lt;li&gt;</span>
+                  <p>Unordered list with bullet points</p>
+                  <div class="element-demo">
+                    <ul style="margin: 0; padding-left: 15px; font-size: 12px;">
+                      <li>Item 1</li>
+                      <li>Item 2</li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="html-element">
+                  <span class="element-name">&lt;ol&gt; & &lt;li&gt;</span>
+                  <p>Ordered list with numbers</p>
+                  <div class="element-demo">
+                    <ol style="margin: 0; padding-left: 15px; font-size: 12px;">
+                      <li>First</li>
+                      <li>Second</li>
+                    </ol>
+                  </div>
+                </div>
+                <div class="html-element">
+                  <span class="element-name">&lt;table&gt;</span>
+                  <p>Create data tables</p>
+                  <div class="element-demo">
+                    <table style="font-size: 10px; border-collapse: collapse;">
+                      <tr><td style="border: 1px solid #ccc; padding: 2px;">A1</td><td style="border: 1px solid #ccc; padding: 2px;">B1</td></tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📋 HTML Forms: Collecting User Input</h2>
+          <p>Forms are essential for user interaction. Learn to create effective forms:</p>
+          
+          <div class="grid grid-2">
+            <div>
+              <h4>Basic Form Structure</h4>
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>form.html</span>
+                  <span>Contact Form Example</span>
+                </div>
+                <div class="code-body">
+                  <pre><code>&lt;form action="/submit" method="POST"&gt;
+    &lt;div class="form-group"&gt;
+        &lt;label for="name"&gt;Full Name:&lt;/label&gt;
+        &lt;input type="text" id="name" name="name" 
+               required placeholder="Enter your name"&gt;
+    &lt;/div&gt;
+    
+    &lt;div class="form-group"&gt;
+        &lt;label for="email"&gt;Email Address:&lt;/label&gt;
+        &lt;input type="email" id="email" name="email"
+               required placeholder="you@example.com"&gt;
+    &lt;/div&gt;
+    
+    &lt;div class="form-group"&gt;
+        &lt;label for="message"&gt;Message:&lt;/label&gt;
+        &lt;textarea id="message" name="message" 
+                  rows="4" placeholder="Your message..."&gt;
+        &lt;/textarea&gt;
+    &lt;/div&gt;
+    
+    &lt;div class="form-group"&gt;
+        &lt;label for="country"&gt;Country:&lt;/label&gt;
+        &lt;select id="country" name="country"&gt;
+            &lt;option value=""&gt;Select country&lt;/option&gt;
+            &lt;option value="gh"&gt;Ghana&lt;/option&gt;
+            &lt;option value="ng"&gt;Nigeria&lt;/option&gt;
+            &lt;option value="ke"&gt;Kenya&lt;/option&gt;
+            &lt;option value="za"&gt;South Africa&lt;/option&gt;
+        &lt;/select&gt;
+    &lt;/div&gt;
+    
+    &lt;div class="form-group"&gt;
+        &lt;label&gt;
+            &lt;input type="checkbox" name="subscribe"&gt;
+            Subscribe to newsletter
+        &lt;/label&gt;
+    &lt;/div&gt;
+    
+    &lt;button type="submit"&gt;Send Message&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h4>Form Input Types</h4>
+              <div class="cheat-sheet">
+                <div class="cheat-item">
+                  <span class="cheat-tag">text</span>
+                  <span class="cheat-desc">Single-line text input</span>
+                </div>
+                <div class="cheat-item">
+                  <span class="cheat-tag">email</span>
+                  <span class="cheat-desc">Email address with validation</span>
+                </div>
+                <div class="cheat-item">
+                  <span class="cheat-tag">password</span>
+                  <span class="cheat-desc">Masked password input</span>
+                </div>
+                <div class="cheat-item">
+                  <span class="cheat-tag">number</span>
+                  <span class="cheat-desc">Numeric input with stepper</span>
+                </div>
+                <div class="cheat-item">
+                  <span class="cheat-tag">date</span>
+                  <span class="cheat-desc">Date picker</span>
+                </div>
+                <div class="cheat-item">
+                  <span class="cheat-tag">checkbox</span>
+                  <span class="cheat-desc">Multiple selection</span>
+                </div>
+                <div class="cheat-item">
+                  <span class="cheat-tag">radio</span>
+                  <span class="cheat-desc">Single selection</span>
+                </div>
+                <div class="cheat-item">
+                  <span class="cheat-tag">file</span>
+                  <span class="cheat-desc">File upload</span>
+                </div>
+                <div class="cheat-item">
+                  <span class="cheat-tag">submit</span>
+                  <span class="cheat-desc">Form submission button</span>
+                </div>
+              </div>
+              
+              <div style="margin-top: var(--spacing-lg);">
+                <h4>Form Best Practices</h4>
+                <ul>
+                  <li>Always use <code>&lt;label&gt;</code> elements</li>
+                  <li>Include appropriate input types</li>
+                  <li>Add placeholder text for guidance</li>
+                  <li>Use <code>required</code> attribute for mandatory fields</li>
+                  <li>Group related fields with <code>&lt;fieldset&gt;</code></li>
+                  <li>Provide clear error messages</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Build & Deploy -->
+      <div class="tab-content" id="activity">
+        <div class="card">
+          <h2>💻 Build Your "Hello Africa" Website</h2>
+          <p>Apply what you've learned by building and deploying a complete website. Choose your starting point:</p>
+          
+          <div class="version-selector">
+            <button class="btn version-btn active" data-version="beginner">
+              👶 Beginner Project
+            </button>
+            <button class="btn version-btn" data-version="intermediate">
+              🚀 Intermediate Project
+            </button>
+            <button class="btn version-btn" data-version="advanced">
+              🏆 Advanced Project
+            </button>
+          </div>
+
+          <!-- Beginner Project -->
+          <div id="beginnerVersion" class="version-content active">
+            <div class="card" style="margin-top: var(--spacing-md);">
+              <h3>👶 Beginner: Simple Portfolio Website</h3>
+              <p>Perfect for first-time developers. Create a clean, responsive portfolio:</p>
+              
+              <div class="grid grid-2">
+                <div>
+                  <h4>index.html</h4>
+                  <div class="code-editor">
+                    <div class="code-header">
+                      <span>portfolio.html</span>
+                      <span>Simple Portfolio</span>
+                    </div>
+                    <div class="code-body">
+                      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;My Portfolio | African Developer&lt;/title&gt;
+  &lt;style&gt;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    header {
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 10px;
+      margin-bottom: 30px;
+    }
+    .profile-img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 5px solid white;
+      margin: 0 auto 20px;
+      background: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 50px;
+    }
+    section {
+      background: white;
+      padding: 25px;
+      margin-bottom: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    h1 { font-size: 2.5rem; margin-bottom: 10px; }
+    h2 { color: #764ba2; margin-bottom: 15px; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 8px; }
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .skill { 
+      background: #f8f9fa; 
+      padding: 15px; 
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+      border-top: 2px solid #eee;
+      color: #666;
+    }
+    @media (max-width: 768px) {
+      h1 { font-size: 2rem; }
+      .skills-grid { grid-template-columns: 1fr; }
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;header&gt;
+    &lt;div class="profile-img"&gt;👨🏾‍💻&lt;/div&gt;
+    &lt;h1&gt;[Your Name]&lt;/h1&gt;
+    &lt;p&gt;African Web Developer & Digital Innovator&lt;/p&gt;
+    &lt;p&gt;Based in [Your City], [Your Country]&lt;/p&gt;
+  &lt;/header&gt;
+
+  &lt;section&gt;
+    &lt;h2&gt;About Me&lt;/h2&gt;
+    &lt;p&gt;Hello! I'm a passionate web developer from Africa, dedicated to building digital solutions that address local challenges and showcase African innovation to the world.&lt;/p&gt;
+    &lt;p&gt;I believe in the power of technology to transform communities and create opportunities for the next generation of African developers.&lt;/p&gt;
+  &lt;/section&gt;
+
+  &lt;section&gt;
+    &lt;h2&gt;Skills&lt;/h2&gt;
+    &lt;div class="skills-grid"&gt;
+      &lt;div class="skill"&gt;
+        &lt;h3&gt;HTML5 & CSS3&lt;/h3&gt;
+        &lt;p&gt;Semantic markup and responsive design&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class="skill"&gt;
+        &lt;h3&gt;JavaScript&lt;/h3&gt;
+        &lt;p&gt;Interactive web applications&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class="skill"&gt;
+        &lt;h3&gt;Git & GitHub&lt;/h3&gt;
+        &lt;p&gt;Version control and collaboration&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class="skill"&gt;
+        &lt;h3&gt;UI/UX Design&lt;/h3&gt;
+        &lt;p&gt;User-centered design principles&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section&gt;
+    &lt;h2&gt;Projects&lt;/h2&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;strong&gt;E-commerce Platform:&lt;/strong&gt; Local marketplace for African artisans&lt;/li&gt;
+      &lt;li&gt;&lt;strong&gt;Educational Portal:&lt;/strong&gt; Free coding resources for African students&lt;/li&gt;
+      &lt;li&gt;&lt;strong&gt;Community App:&lt;/strong&gt; Connecting African developers&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/section&gt;
+
+  &lt;section&gt;
+    &lt;h2&gt;Contact&lt;/h2&gt;
+    &lt;p&gt;Email: your.email@example.com&lt;/p&gt;
+    &lt;p&gt;GitHub: github.com/yourusername&lt;/p&gt;
+    &lt;p&gt;LinkedIn: linkedin.com/in/yourprofile&lt;/p&gt;
+  &lt;/section&gt;
+
+  &lt;footer&gt;
+    &lt;p&gt;© 2024 [Your Name]. Proudly built in Africa.&lt;/p&gt;
+    &lt;p&gt;This portfolio is deployed using GitHub Pages.&lt;/p&gt;
+  &lt;/footer&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4>Live Preview</h4>
+                  <div class="website-preview">
+                    <iframe class="preview-frame" srcdoc="
+                      &lt;!DOCTYPE html&gt;
+                      &lt;html&gt;
+                      &lt;head&gt;
+                        &lt;style&gt;
+                          * { margin: 0; padding: 0; box-sizing: border-box; }
+                          body {
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                            line-height: 1.6;
+                            color: #333;
+                            max-width: 1200px;
+                            margin: 0 auto;
+                            padding: 20px;
+                          }
+                          header {
+                            text-align: center;
+                            padding: 40px 20px;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            border-radius: 10px;
+                            margin-bottom: 30px;
+                          }
+                          .profile-img {
+                            width: 150px;
+                            height: 150px;
+                            border-radius: 50%;
+                            border: 5px solid white;
+                            margin: 0 auto 20px;
+                            background: #ddd;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 50px;
+                          }
+                          section {
+                            background: white;
+                            padding: 25px;
+                            margin-bottom: 25px;
+                            border-radius: 10px;
+                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                          }
+                          h1 { font-size: 2rem; margin-bottom: 10px; }
+                          h2 { color: #764ba2; margin-bottom: 15px; }
+                          .skills-grid {
+                            display: grid;
+                            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                            gap: 15px;
+                            margin-top: 15px;
+                          }
+                          .skill { 
+                            background: #f8f9fa; 
+                            padding: 15px; 
+                            border-radius: 8px;
+                            border-left: 4px solid #667eea;
+                          }
+                          footer {
+                            text-align: center;
+                            padding: 20px;
+                            margin-top: 40px;
+                            border-top: 2px solid #eee;
+                            color: #666;
+                          }
+                        &lt;/style&gt;
+                      &lt;/head&gt;
+                      &lt;body&gt;
+                        &lt;header&gt;
+                          &lt;div class='profile-img'&gt;👨🏾‍💻&lt;/div&gt;
+                          &lt;h1&gt;Kwame Appiah&lt;/h1&gt;
+                          &lt;p&gt;African Web Developer &amp; Digital Innovator&lt;/p&gt;
+                          &lt;p&gt;Based in Accra, Ghana&lt;/p&gt;
+                        &lt;/header&gt;
+                        &lt;section&gt;
+                          &lt;h2&gt;About Me&lt;/h2&gt;
+                          &lt;p&gt;Hello! I'm a passionate web developer from Africa, dedicated to building digital solutions that address local challenges.&lt;/p&gt;
+                        &lt;/section&gt;
+                        &lt;section&gt;
+                          &lt;h2&gt;Skills&lt;/h2&gt;
+                          &lt;div class='skills-grid'&gt;
+                            &lt;div class='skill'&gt;&lt;h3&gt;HTML5 &amp; CSS3&lt;/h3&gt;&lt;p&gt;Semantic markup&lt;/p&gt;&lt;/div&gt;
+                            &lt;div class='skill'&gt;&lt;h3&gt;JavaScript&lt;/h3&gt;&lt;p&gt;Web applications&lt;/p&gt;&lt;/div&gt;
+                            &lt;div class='skill'&gt;&lt;h3&gt;Git &amp; GitHub&lt;/h3&gt;&lt;p&gt;Version control&lt;/p&gt;&lt;/div&gt;
+                          &lt;/div&gt;
+                        &lt;/section&gt;
+                        &lt;footer&gt;
+                          &lt;p&gt;© 2024 Kwame Appiah. Proudly built in Africa.&lt;/p&gt;
+                        &lt;/footer&gt;
+                      &lt;/body&gt;
+                      &lt;/html&gt;
+                    "></iframe>
+                  </div>
+                  
+                  <div style="margin-top: var(--spacing-md);">
+                    <h4>Learning Objectives</h4>
+                    <ul>
+                      <li>Create a complete HTML document structure</li>
+                      <li>Use semantic HTML5 elements</li>
+                      <li>Implement CSS styling within HTML</li>
+                      <li>Create responsive layout with media queries</li>
+                      <li>Build a personal portfolio website</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              
+              <div style="text-align: center; margin-top: var(--spacing-lg);">
+                <button class="btn btn-primary" id="downloadBeginner">
+                  <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                  </svg>
+                  Download Beginner Project
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Intermediate Project -->
+          <div id="intermediateVersion" class="version-content">
+            <div class="card success-card" style="margin-top: var(--spacing-md);">
+              <h3>🚀 Intermediate: E-commerce Product Page</h3>
+              <p>Build a modern e-commerce product page with multiple sections:</p>
+              
+              <div class="grid grid-2">
+                <div>
+                  <h4>product.html</h4>
+                  <div class="code-editor">
+                    <div class="code-header">
+                      <span>ecommerce.html</span>
+                      <span>Product Page</span>
+                    </div>
+                    <div class="code-body">
+                      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;African Crafts Marketplace | Product Details&lt;/title&gt;
+  &lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"&gt;
+  &lt;style&gt;
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #e74c3c;
+      --accent-color: #3498db;
+      --light-color: #ecf0f1;
+      --dark-color: #2c3e50;
+      --success-color: #27ae60;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f9f9f9;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Navigation */
+    .navbar {
+      background: white;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+
+    .logo span {
+      color: var(--secondary-color);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--primary-color);
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .nav-links a:hover {
+      color: var(--secondary-color);
+    }
+
+    /* Product Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin: 3rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .product-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Product Images */
+    .product-images {
+      position: relative;
+    }
+
+    .main-image {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .thumbnail-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .thumbnail {
+      width: 100%;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 2px solid transparent;
+    }
+
+    .thumbnail:hover,
+    .thumbnail.active {
+      border-color: var(--secondary-color);
+    }
+
+    /* Product Info */
+    .product-info {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .product-title {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary-color);
+    }
+
+    .product-category {
+      color: var(--accent-color);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1rem;
+    }
+
+    .product-price {
+      font-size: 1.8rem;
+      color: var(--secondary-color);
+      font-weight: 700;
+      margin: 1rem 0;
+    }
+
+    .original-price {
+      text-decoration: line-through;
+      color: #95a5a6;
+      font-size: 1.2rem;
+      margin-left: 10px;
+    }
+
+    .discount-badge {
+      background: var(--success-color);
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-block;
+      margin-left: 10px;
+    }
+
+    /* Product Features */
+    .features {
+      margin: 1.5rem 0;
+    }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.8rem;
+    }
+
+    .feature i {
+      color: var(--success-color);
+      margin-right: 10px;
+    }
+
+    /* Product Options */
+    .options {
+      margin: 2rem 0;
+    }
+
+    .option-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .option-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .option-select {
+      width: 100%;
+      padding: 0.8rem;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      background: white;
+      font-size: 1rem;
+    }
+
+    /* Quantity Selector */
+    .quantity-selector {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .quantity-btn {
+      width: 40px;
+      height: 40px;
+      border: 2px solid #ddd;
+      background: white;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quantity-input {
+      width: 60px;
+      height: 40px;
+      text-align: center;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-size: 1.2rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn {
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--secondary-color);
+      color: white;
+      flex: 2;
+    }
+
+    .btn-primary:hover {
+      background: #c0392b;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: var(--primary-color);
+      color: white;
+      flex: 1;
+    }
+
+    .btn-secondary:hover {
+      background: #1a252f;
+      transform: translateY(-2px);
+    }
+
+    /* Product Tabs */
+    .product-tabs {
+      margin: 3rem 0;
+    }
+
+    .tab-buttons {
+      display: flex;
+      border-bottom: 2px solid #ddd;
+      margin-bottom: 2rem;
+    }
+
+    .tab-btn {
+      padding: 1rem 2rem;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #666;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .tab-btn.active {
+      color: var(--primary-color);
+      border-bottom-color: var(--secondary-color);
+    }
+
+    .tab-content {
+      padding: 2rem;
+      background: white;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .specifications {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .spec-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .spec-label {
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    /* Reviews */
+    .review {
+      padding: 1.5rem;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .reviewer-name {
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .review-date {
+      color: #95a5a6;
+      font-size: 0.9rem;
+    }
+
+    .rating {
+      color: #f39c12;
+      margin: 0.5rem 0;
+    }
+
+    /* Related Products */
+    .related-products {
+      margin: 3rem 0;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      color: var(--primary-color);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .product-card-content {
+      padding: 1.5rem;
+    }
+
+    .product-card-title {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary-color);
+    }
+
+    .product-card-price {
+      color: var(--secondary-color);
+      font-weight: 700;
+      font-size: 1.3rem;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--primary-color);
+      color: white;
+      padding: 3rem 0;
+      margin-top: 3rem;
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+    }
+
+    .footer-section h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--light-color);
+    }
+
+    .footer-links {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-links a {
+      color: #bdc3c7;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    .copyright {
+      text-align: center;
+      padding-top: 2rem;
+      margin-top: 2rem;
+      border-top: 1px solid #34495e;
+      color: #bdc3c7;
+      font-size: 0.9rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+      
+      .tab-buttons {
+        flex-wrap: wrap;
+      }
+      
+      .tab-btn {
+        flex: 1;
+        min-width: 120px;
+      }
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;!-- Navigation --&gt;
+  &lt;nav class="navbar"&gt;
+    &lt;div class="container nav-container"&gt;
+      &lt;a href="/" class="logo"&gt;Afri&lt;span&gt;Craft&lt;/span&gt;&lt;/a&gt;
+      &lt;ul class="nav-links"&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Home&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Shop&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Categories&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#"&gt;About&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Contact&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+      &lt;div class="cart-icon"&gt;
+        &lt;i class="fas fa-shopping-cart"&gt;&lt;/i&gt;
+        &lt;span class="cart-count"&gt;3&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/nav&gt;
+
+  &lt;main class="container"&gt;
+    &lt;!-- Breadcrumb --&gt;
+    &lt;nav aria-label="Breadcrumb" class="breadcrumb"&gt;
+      &lt;ol&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Home&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Handcrafts&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Baskets&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;Traditional African Basket&lt;/li&gt;
+      &lt;/ol&gt;
+    &lt;/nav&gt;
+
+    &lt;!-- Product Section --&gt;
+    &lt;section class="product-grid"&gt;
+      &lt;div class="product-images"&gt;
+        &lt;img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+             alt="Traditional African Basket" 
+             class="main-image"&gt;
+        &lt;div class="thumbnail-grid"&gt;
+          &lt;img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" 
+               alt="Basket view 1" 
+               class="thumbnail active"&gt;
+          &lt;img src="https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" 
+               alt="Basket view 2" 
+               class="thumbnail"&gt;
+          &lt;img src="https://images.unsplash.com/photo-1542332213-9b5a5a3f9854?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" 
+               alt="Basket view 3" 
+               class="thumbnail"&gt;
+          &lt;img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" 
+               alt="Basket view 4" 
+               class="thumbnail"&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div class="product-info"&gt;
+        &lt;h1 class="product-title"&gt;Traditional African Woven Basket&lt;/h1&gt;
+        &lt;p class="product-category"&gt;Handcrafts • Home Decor • African Art&lt;/p&gt;
+        
+        &lt;div class="rating"&gt;
+          &lt;i class="fas fa-star"&gt;&lt;/i&gt;
+          &lt;i class="fas fa-star"&gt;&lt;/i&gt;
+          &lt;i class="fas fa-star"&gt;&lt;/i&gt;
+          &lt;i class="fas fa-star"&gt;&lt;/i&gt;
+          &lt;i class="fas fa-star-half-alt"&gt;&lt;/i&gt;
+          &lt;span class="rating-text"&gt;4.5 (128 reviews)&lt;/span&gt;
+        &lt;/div&gt;
+
+        &lt;div class="product-price"&gt;
+          $45.99
+          &lt;span class="original-price"&gt;$59.99&lt;/span&gt;
+          &lt;span class="discount-badge"&gt;Save 23%&lt;/span&gt;
+        &lt;/div&gt;
+
+        &lt;div class="features"&gt;
+          &lt;div class="feature"&gt;
+            &lt;i class="fas fa-check-circle"&gt;&lt;/i&gt;
+            &lt;span&gt;Handwoven by artisans in Ghana&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div class="feature"&gt;
+            &lt;i class="fas fa-check-circle"&gt;&lt;/i&gt;
+            &lt;span&gt;Made from natural, sustainable materials&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div class="feature"&gt;
+            &lt;i class="fas fa-check-circle"&gt;&lt;/i&gt;
+            &lt;span&gt;Each piece is unique and one-of-a-kind&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div class="feature"&gt;
+            &lt;i class="fas fa-check-circle"&gt;&lt;/i&gt;
+            &lt;span&gt;Supports fair trade and local communities&lt;/span&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class="options"&gt;
+          &lt;div class="option-group"&gt;
+            &lt;label class="option-label" for="size"&gt;Size:&lt;/label&gt;
+            &lt;select id="size" class="option-select"&gt;
+              &lt;option value=""&gt;Select Size&lt;/option&gt;
+              &lt;option value="small"&gt;Small (15cm)&lt;/option&gt;
+              &lt;option value="medium" selected&gt;Medium (25cm)&lt;/option&gt;
+              &lt;option value="large"&gt;Large (35cm)&lt;/option&gt;
+            &lt;/select&gt;
+          &lt;/div&gt;
+
+          &lt;div class="option-group"&gt;
+            &lt;label class="option-label"&gt;Color:&lt;/label&gt;
+            &lt;div class="color-options"&gt;
+              &lt;button class="color-option" style="background: #8B4513;"&gt;&lt;/button&gt;
+              &lt;button class="color-option" style="background: #D2691E;"&gt;&lt;/button&gt;
+              &lt;button class="color-option" style="background: #A0522D;"&gt;&lt;/button&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class="quantity-selector"&gt;
+          &lt;label class="option-label"&gt;Quantity:&lt;/label&gt;
+          &lt;button class="quantity-btn"&gt;-&lt;/button&gt;
+          &lt;input type="number" class="quantity-input" value="1" min="1" max="10"&gt;
+          &lt;button class="quantity-btn"&gt;+&lt;/button&gt;
+          &lt;span class="stock-info"&gt;Only 7 left in stock!&lt;/span&gt;
+        &lt;/div&gt;
+
+        &lt;div class="action-buttons"&gt;
+          &lt;button class="btn btn-primary"&gt;
+            &lt;i class="fas fa-shopping-cart"&gt;&lt;/i&gt;
+            Add to Cart
+          &lt;/button&gt;
+          &lt;button class="btn btn-secondary"&gt;
+            &lt;i class="fas fa-heart"&gt;&lt;/i&gt;
+            Add to Wishlist
+          &lt;/button&gt;
+        &lt;/div&gt;
+
+        &lt;div class="shipping-info"&gt;
+          &lt;p&gt;&lt;i class="fas fa-shipping-fast"&gt;&lt;/i&gt; Free shipping on orders over $100&lt;/p&gt;
+          &lt;p&gt;&lt;i class="fas fa-undo"&gt;&lt;/i&gt; 30-day return policy&lt;/p&gt;
+          &lt;p&gt;&lt;i class="fas fa-shield-alt"&gt;&lt;/i&gt; Secure payment processing&lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- Product Tabs --&gt;
+    &lt;section class="product-tabs"&gt;
+      &lt;div class="tab-buttons"&gt;
+        &lt;button class="tab-btn active" data-tab="description"&gt;Description&lt;/button&gt;
+        &lt;button class="tab-btn" data-tab="specifications"&gt;Specifications&lt;/button&gt;
+        &lt;button class="tab-btn" data-tab="reviews"&gt;Reviews&lt;/button&gt;
+        &lt;button class="tab-btn" data-tab="shipping"&gt;Shipping&lt;/button&gt;
+      &lt;/div&gt;
+
+      &lt;div class="tab-content" id="description"&gt;
+        &lt;h3&gt;About This Product&lt;/h3&gt;
+        &lt;p&gt;This exquisite traditional African basket is handwoven by skilled artisans in Ghana using age-old techniques passed down through generations. Each basket tells a story of African heritage and craftsmanship.&lt;/p&gt;
+        
+        &lt;p&gt;Made from sustainably sourced natural materials including raffia palm and dyed with organic pigments, this basket is not only beautiful but also environmentally friendly. The intricate patterns are inspired by traditional Adinkra symbols, each carrying deep cultural significance.&lt;/p&gt;
+        
+        &lt;p&gt;Perfect for home storage, as a decorative piece, or as a unique gift that supports fair trade practices and empowers local African communities.&lt;/p&gt;
+        
+        &lt;h4&gt;Features:&lt;/h4&gt;
+        &lt;ul&gt;
+          &lt;li&gt;100% handwoven by Ghanaian artisans&lt;/li&gt;
+          &lt;li&gt;Made from natural, biodegradable materials&lt;/li&gt;
+          &lt;li&gt;Dimensions: 25cm diameter × 15cm height&lt;/li&gt;
+          &lt;li&gt;Weight: Approximately 450g&lt;/li&gt;
+          &lt;li&gt;Each piece is unique with slight variations&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+
+      &lt;div class="tab-content" id="specifications" style="display: none;"&gt;
+        &lt;div class="specifications"&gt;
+          &lt;div class="spec-item"&gt;
+            &lt;span class="spec-label"&gt;Material:&lt;/span&gt;
+            &lt;span class="spec-value"&gt;Natural Raffia Palm&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div class="spec-item"&gt;
+            &lt;span class="spec-label"&gt;Origin:&lt;/span&gt;
+            &lt;span class="spec-value"&gt;Handmade in Ghana&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div class="spec-item"&gt;
+            &lt;span class="spec-label"&gt;Diameter:&lt;/span&gt;
+            &lt;span class="spec-value"&gt;25 cm (9.8 inches)&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div class="spec-item"&gt;
+            &lt;span class="spec-label"&gt;Height:&lt;/span&gt;
+            &lt;span class="spec-value"&gt;15 cm (5.9 inches)&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div class="spec-item"&gt;
+            &lt;span class="spec-label"&gt;Weight:&lt;/span&gt;
+            &lt;span class="spec-value"&gt;450 grams (1 lb)&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div class="spec-item"&gt;
+            &lt;span class="spec-label"&gt;Care Instructions:&lt;/span&gt;
+            &lt;span class="spec-value"&gt;Wipe clean with damp cloth&lt;/span&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div class="tab-content" id="reviews" style="display: none;"&gt;
+        &lt;div class="review"&gt;
+          &lt;div class="review-header"&gt;
+            &lt;div&gt;
+              &lt;span class="reviewer-name"&gt;Sarah Johnson&lt;/span&gt;
+              &lt;div class="rating"&gt;
+                &lt;i class="fas fa-star"&gt;&lt;/i&gt;
+                &lt;i class="fas fa-star"&gt;&lt;/i&gt;
+                &lt;i class="fas fa-star"&gt;&lt;/i&gt;
+                &lt;i class="fas fa-star"&gt;&lt;/i&gt;
+                &lt;i class="fas fa-star"&gt;&lt;/i&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;span class="review-date"&gt;March 15, 2024&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;p&gt;"Absolutely beautiful craftsmanship! The basket exceeded my expectations. It's not just a functional piece but a work of art. Knowing it supports African artisans makes it even more special."&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;div class="review"&gt;
+          &lt;div class="review-header"&gt;
+            &lt;div&gt;
+              &lt;span class="reviewer-name"&gt;Michael Chen&lt;/span&gt;
+              &lt;div class="rating"&gt;
+                &lt;i class="fas fa-star"&gt;&lt;/i&gt;
+                &lt;i class="fas fa-star"&gt;&lt;/i&gt;
+                &lt;i class="fas fa-star"&gt;&lt;/i&gt;
+                &lt;i class="fas fa-star"&gt;&lt;/i&gt;
+                &lt;i class="fas fa-star-half-alt"&gt;&lt;/i&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;span class="review-date"&gt;February 28, 2024&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;p&gt;"The quality is exceptional. I purchased this as a gift for my mother and she loves it. The shipping was faster than expected and the packaging was eco-friendly. Will definitely purchase again!"&lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div class="tab-content" id="shipping" style="display: none;"&gt;
+        &lt;h3&gt;Shipping Information&lt;/h3&gt;
+        &lt;p&gt;We ship worldwide from our warehouse in Accra, Ghana. Shipping times vary depending on your location:&lt;/p&gt;
+        
+        &lt;div class="shipping-options"&gt;
+          &lt;div class="shipping-option"&gt;
+            &lt;h4&gt;&lt;i class="fas fa-plane"&gt;&lt;/i&gt; Standard Shipping&lt;/h4&gt;
+            &lt;p&gt;10-15 business days • $8.99&lt;/p&gt;
+          &lt;/div&gt;
+          &lt;div class="shipping-option"&gt;
+            &lt;h4&gt;&lt;i class="fas fa-rocket"&gt;&lt;/i&gt; Express Shipping&lt;/h4&gt;
+            &lt;p&gt;5-7 business days • $19.99&lt;/p&gt;
+          &lt;/div&gt;
+          &lt;div class="shipping-option"&gt;
+            &lt;h4&gt;&lt;i class="fas fa-gift"&gt;&lt;/i&gt; Free Shipping&lt;/h4&gt;
+            &lt;p&gt;On orders over $100 • 10-15 business days&lt;/p&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        
+        &lt;p&gt;All packages include tracking information. Customs duties and import taxes are the responsibility of the customer.&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- Related Products --&gt;
+    &lt;section class="related-products"&gt;
+      &lt;h2 class="section-title"&gt;You Might Also Like&lt;/h2&gt;
+      &lt;div class="products-grid"&gt;
+        &lt;div class="product-card"&gt;
+          &lt;img src="https://images.unsplash.com/photo-1567744035686-d2b13656fa18?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="African Pottery"&gt;
+          &lt;div class="product-card-content"&gt;
+            &lt;h3 class="product-card-title"&gt;Traditional African Pot&lt;/h3&gt;
+            &lt;p class="product-card-price"&gt;$34.99&lt;/p&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        
+        &lt;div class="product-card"&gt;
+          &lt;img src="https://images.unsplash.com/photo-1590165482122-42e5e5e5f0b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Kente Cloth"&gt;
+          &lt;div class="product-card-content"&gt;
+            &lt;h3 class="product-card-title"&gt;Kente Cloth Scarf&lt;/h3&gt;
+            &lt;p class="product-card-price"&gt;$29.99&lt;/p&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        
+        &lt;div class="product-card"&gt;
+          &lt;img src="https://images.unsplash.com/photo-1578946956081-82c786a4f77a?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Wooden Mask"&gt;
+          &lt;div class="product-card-content"&gt;
+            &lt;h3 class="product-card-title"&gt;Carved Wooden Mask&lt;/h3&gt;
+            &lt;p class="product-card-price"&gt;$89.99&lt;/p&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/section&gt;
+  &lt;/main&gt;
+
+  &lt;!-- Footer --&gt;
+  &lt;footer&gt;
+    &lt;div class="container"&gt;
+      &lt;div class="footer-content"&gt;
+        &lt;div class="footer-section"&gt;
+          &lt;h3&gt;AfriCraft&lt;/h3&gt;
+          &lt;p&gt;Bringing authentic African craftsmanship to the world. Supporting fair trade and sustainable practices.&lt;/p&gt;
+        &lt;/div&gt;
+        
+        &lt;div class="footer-section"&gt;
+          &lt;h3&gt;Quick Links&lt;/h3&gt;
+          &lt;ul class="footer-links"&gt;
+            &lt;li&gt;&lt;a href="#"&gt;Home&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href="#"&gt;Shop All&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href="#"&gt;About Us&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href="#"&gt;Contact&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/div&gt;
+        
+        &lt;div class="footer-section"&gt;
+          &lt;h3&gt;Categories&lt;/h3&gt;
+          &lt;ul class="footer-links"&gt;
+            &lt;li&gt;&lt;a href="#"&gt;Baskets&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href="#"&gt;Pottery&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href="#"&gt;Textiles&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href="#"&gt;Jewelry&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/div&gt;
+        
+        &lt;div class="footer-section"&gt;
+          &lt;h3&gt;Connect With Us&lt;/h3&gt;
+          &lt;div class="social-links"&gt;
+            &lt;a href="#"&gt;&lt;i class="fab fa-facebook"&gt;&lt;/i&gt;&lt;/a&gt;
+            &lt;a href="#"&gt;&lt;i class="fab fa-instagram"&gt;&lt;/i&gt;&lt;/a&gt;
+            &lt;a href="#"&gt;&lt;i class="fab fa-twitter"&gt;&lt;/i&gt;&lt;/a&gt;
+            &lt;a href="#"&gt;&lt;i class="fab fa-pinterest"&gt;&lt;/i&gt;&lt;/a&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      
+      &lt;div class="copyright"&gt;
+        &lt;p&gt;© 2024 AfriCraft Marketplace. All rights reserved. | Designed and deployed with GitHub Pages&lt;/p&gt;
+        &lt;p&gt;Supporting African artisans since 2020&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/footer&gt;
+
+  &lt;script&gt;
+    // Product image gallery functionality
+    const mainImage = document.querySelector('.main-image');
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    
+    thumbnails.forEach(thumbnail => {
+      thumbnail.addEventListener('click', () => {
+        // Update main image
+        mainImage.src = thumbnail.src.replace('q=80', 'q=100').replace('w=200', 'w=800');
+        
+        // Update active thumbnail
+        thumbnails.forEach(t => t.classList.remove('active'));
+        thumbnail.classList.add('active');
+      });
+    });
+    
+    // Tab functionality
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.getAttribute('data-tab');
+        
+        // Update active tab button
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Show corresponding tab content
+        tabContents.forEach(content => {
+          content.style.display = 'none';
+          if (content.id === tabId) {
+            content.style.display = 'block';
+          }
+        });
+      });
+    });
+    
+    // Quantity selector
+    const quantityInput = document.querySelector('.quantity-input');
+    const minusBtn = document.querySelector('.quantity-btn:first-child');
+    const plusBtn = document.querySelector('.quantity-btn:last-child');
+    
+    minusBtn.addEventListener('click', () => {
+      let value = parseInt(quantityInput.value);
+      if (value > 1) {
+        quantityInput.value = value - 1;
+      }
+    });
+    
+    plusBtn.addEventListener('click', () => {
+      let value = parseInt(quantityInput.value);
+      if (value < 10) {
+        quantityInput.value = value + 1;
+      }
+    });
+    
+    // Color selection
+    const colorOptions = document.querySelectorAll('.color-option');
+    colorOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        colorOptions.forEach(o => o.style.border = '2px solid transparent');
+        option.style.border = '2px solid #e74c3c';
+      });
+    });
+    
+    // Add to cart animation
+    const addToCartBtn = document.querySelector('.btn-primary');
+    addToCartBtn.addEventListener('click', () => {
+      addToCartBtn.innerHTML = '&lt;i class="fas fa-check"&gt;&lt;/i&gt; Added to Cart!';
+      addToCartBtn.style.background = '#27ae60';
+      
+      setTimeout(() => {
+        addToCartBtn.innerHTML = '&lt;i class="fas fa-shopping-cart"&gt;&lt;/i&gt; Add to Cart';
+        addToCartBtn.style.background = '';
+      }, 2000);
+    });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div style="text-align: center; margin-top: var(--spacing-lg);">
+                <button class="btn btn-secondary" id="downloadIntermediate">
+                  <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                  </svg>
+                  Download Intermediate Project
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Advanced Project -->
+          <div id="advancedVersion" class="version-content">
+            <div class="card info-card" style="margin-top: var(--spacing-md);">
+              <h3>🏆 Advanced: Educational Platform</h3>
+              <p>Build a complete educational platform with multiple pages and interactive features:</p>
+              
+              <div class="grid grid-2">
+                <div>
+                  <h4>Key Features</h4>
+                  <ul>
+                    <li>Responsive navigation with hamburger menu</li>
+                    <li>Course catalog with filtering</li>
+                    <li>Student dashboard</li>
+                    <li>Interactive progress tracking</li>
+                    <li>Multi-step registration form</li>
+                    <li>Dark/light theme toggle</li>
+                    <li>Accessibility features</li>
+                    <li>Mobile-first responsive design</li>
+                  </ul>
+                  
+                  <h4 style="margin-top: var(--spacing-lg);">Project Structure</h4>
+                  <pre style="font-size: 0.9rem;"><code>africa-learning-platform/
+├── index.html
+├── courses.html
+├── about.html
+├── contact.html
+├── styles/
+│   ├── main.css
+│   ├── components.css
+│   └── responsive.css
+├── js/
+│   ├── main.js
+│   ├── courses.js
+│   └── form-validation.js
+├── images/
+│   ├── logo.svg
+│   ├── hero-bg.jpg
+│   └── course-thumbnails/
+└── README.md</code></pre>
+                </div>
+                
+                <div>
+                  <h4>Technologies Used</h4>
+                  <div class="cheat-sheet">
+                    <div class="cheat-item">
+                      <span class="cheat-tag">HTML5</span>
+                      <span class="cheat-desc">Semantic markup</span>
+                    </div>
+                    <div class="cheat-item">
+                      <span class="cheat-tag">CSS3</span>
+                      <span class="cheat-desc">Flexbox, Grid, Variables</span>
+                    </div>
+                    <div class="cheat-item">
+                      <span class="cheat-tag">JavaScript</span>
+                      <span class="cheat-desc">ES6+, DOM manipulation</span>
+                    </div>
+                    <div class="cheat-item">
+                      <span class="cheat-tag">Font Awesome</span>
+                      <span class="cheat-desc">Icons library</span>
+                    </div>
+                    <div class="cheat-item">
+                      <span class="cheat-tag">GitHub Pages</span>
+                      <span class="cheat-desc">Deployment hosting</span>
+                    </div>
+                  </div>
+                  
+                  <div style="margin-top: var(--spacing-lg);">
+                    <h4>Learning Outcomes</h4>
+                    <ul>
+                      <li>Master complex HTML structure</li>
+                      <li>Implement advanced CSS techniques</li>
+                      <li>Create interactive JavaScript features</li>
+                      <li>Build multi-page website</li>
+                      <li>Implement responsive design patterns</li>
+                      <li>Add accessibility features</li>
+                      <li>Deploy complete project</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              
+              <div style="text-align: center; margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 1px solid var(--color-border);">
+                <h4>Ready for the Challenge?</h4>
+                <p>This advanced project will test all your HTML, CSS, and JavaScript skills.</p>
+                
+                <div style="display: flex; gap: var(--spacing-md); justify-content: center; margin-top: var(--spacing-md);">
+                  <button class="btn btn-primary" id="downloadAdvanced">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                    </svg>
+                    Download Starter Files
+                  </button>
+                  <button class="btn btn-secondary" id="viewDemo">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                    </svg>
+                    View Live Demo
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>🚀 Deploy to GitHub Pages</h2>
+          <p>Follow these steps to make your website live:</p>
+          
+          <div class="task-list">
+            <div class="task-item">
+              <h3>1. Create GitHub Repository</h3>
+              <p>Go to GitHub.com and create a new repository named "my-portfolio" or similar</p>
+              <code class="git-command">Repository name: my-african-portfolio</code><br>
+              <code class="git-command">Visibility: Public (required for free GitHub Pages)</code><br>
+              <code class="git-command">Initialize with README: Yes</code>
+            </div>
+            
+            <div class="task-item">
+              <h3>2. Upload Your HTML Files</h3>
+              <p>Upload your HTML, CSS, and image files to the repository</p>
+              <code class="git-command">Drag and drop files to GitHub web interface</code><br>
+              <code class="git-command">Or use: git add . && git commit -m "Initial commit" && git push</code>
+            </div>
+            
+            <div class="task-item">
+              <h3>3. Enable GitHub Pages</h3>
+              <p>Go to repository Settings → Pages → Select source branch</p>
+              <code class="git-command">Source: main branch</code><br>
+              <code class="git-command">Folder: / (root)</code><br>
+              <code class="git-command">Save configuration</code>
+            </div>
+            
+            <div class="task-item">
+              <h3>4. Configure Custom Domain (Optional)</h3>
+              <p>Add your own domain name to GitHub Pages</p>
+              <code class="git-command">Custom domain: yourdomain.com</code><br>
+              <code class="git-command">Add CNAME file with domain name</code><br>
+              <code class="git-command">Configure DNS records</code>
+            </div>
+            
+            <div class="task-item">
+              <h3>5. Test Your Live Website</h3>
+              <p>Visit your live website and test all features</p>
+              <code class="git-command">URL: https://your-username.github.io/my-african-portfolio</code><br>
+              <code class="git-command">Check mobile responsiveness</code><br>
+              <code class="git-command">Test all links and forms</code>
+            </div>
+            
+            <div class="task-item">
+              <h3>6. Share Your Achievement</h3>
+              <p>Share your live website with others</p>
+              <code class="git-command">Add to LinkedIn profile</code><br>
+              <code class="git-command">Share on social media</code><br>
+              <code class="git-command">Add to your resume/CV</code>
+            </div>
+          </div>
+          
+          <div class="card success-card" style="margin-top: var(--spacing-lg);">
+            <h3>✅ GitHub Pages Benefits</h3>
+            <div class="grid grid-3">
+              <div>
+                <h4>🌐 Free Hosting</h4>
+                <p>No costs for static websites</p>
+              </div>
+              <div>
+                <h4>🔒 SSL Included</h4>
+                <p>Automatic HTTPS security</p>
+              </div>
+              <div>
+                <h4>⚡ Fast CDN</h4>
+                <p>Global content delivery network</p>
+              </div>
+              <div>
+                <h4>📱 Mobile Ready</h4>
+                <p>Optimized for all devices</p>
+              </div>
+              <div>
+                <h4>🔗 Custom Domains</h4>
+                <p>Use your own domain name</p>
+              </div>
+              <div>
+                <h4>📊 Analytics</h4>
+                <p>Integrate with Google Analytics</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 5: Results -->
+      <div class="tab-content" id="results">
+        <div class="card">
+          <h2>📊 HTML Mastery Results</h2>
+          <p>Track your progress and see how well you've mastered HTML fundamentals:</p>
+          
+          <div id="htmlResultsPlaceholder">
+            <div style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-secondary);">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.5;">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+              <p class="mt-3">Complete the HTML exercises and deploy your project to see your results.</p>
+            </div>
+          </div>
+          
+          <!-- HTML Results Content -->
+          <div id="htmlResultsContent" style="display: none;">
+            <div class="score-display" id="htmlMasteryScore">0/100</div>
+            
+            <div class="score-breakdown">
+              <h3>HTML Mastery Breakdown</h3>
+              
+              <div class="breakdown-item">
+                <span>HTML Structure & Semantics</span>
+                <span id="scoreStructure">0/20</span>
+              </div>
+              
+              <div class="breakdown-item">
+                <span>Elements & Attributes</span>
+                <span id="scoreElements">0/20</span>
+              </div>
+              
+              <div class="breakdown-item">
+                <span>Forms & Tables</span>
+                <span id="scoreForms">0/15</span>
+              </div>
+              
+              <div class="breakdown-item">
+                <span>Accessibility</span>
+                <span id="scoreAccessibility">0/15</span>
+              </div>
+              
+              <div class="breakdown-item">
+                <span>Responsive Design</span>
+                <span id="scoreResponsive">0/15</span>
+              </div>
+              
+              <div class="breakdown-item">
+                <span>Deployment Success</span>
+                <span id="scoreDeployment">0/15</span>
+              </div>
+              
+              <div class="breakdown-item">
+                <span>Total Score</span>
+                <span id="scoreHTMLTotal">0/100</span>
+              </div>
+            </div>
+            
+            <div id="htmlFeedback" style="margin: var(--spacing-lg) 0;"></div>
+            
+            <!-- Progress Tracking -->
+            <div class="card" style="margin-top: var(--spacing-xl);">
+              <h3>📈 Your Learning Journey</h3>
+              <div class="progress-tracker">
+                <div class="progress-item">
+                  <span>HTML Basics</span>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 80%;"></div>
+                  </div>
+                  <span>80%</span>
+                </div>
+                <div class="progress-item">
+                  <span>CSS Styling</span>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 65%;"></div>
+                  </div>
+                  <span>65%</span>
+                </div>
+                <div class="progress-item">
+                  <span>Responsive Design</span>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 70%;"></div>
+                  </div>
+                  <span>70%</span>
+                </div>
+                <div class="progress-item">
+                  <span>GitHub Deployment</span>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 90%;"></div>
+                  </div>
+                  <span>90%</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex" style="justify-content: center; gap: var(--spacing-md); margin-top: var(--spacing-xl);">
+              <button id="retryHTML" class="btn btn-secondary">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                </svg>
+                Practice More
+              </button>
+              
+              <button id="viewHTMLCertificate" class="btn btn-primary">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20 6h-3V4c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM9 4h6v2H9V4zm11 16H4V8h16v12z"/>
+                </svg>
+                Get HTML Certificate
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 6: Certificate -->
+      <div class="tab-content" id="certificate">
+        <div class="card">
+          <h2>🏆 HTML Fundamentals Certificate</h2>
+          <p>Earn a certificate by demonstrating your HTML skills and deploying your first website.</p>
+          
+          <div style="text-align: center; padding: var(--spacing-xl);">
+            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.8; color: var(--color-info);">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            
+            <h3 style="margin: var(--spacing-md) 0;">Master HTML & Web Deployment</h3>
+            <p>Complete the following requirements to earn your certificate:</p>
+            
+            <div class="grid grid-3" style="margin: var(--spacing-lg) 0; text-align: left;">
+              <div class="card">
+                <h4>✅ Build Project</h4>
+                <p>Create a complete HTML website</p>
+              </div>
+              <div class="card">
+                <h4>✅ Deploy Live</h4>
+                <p>Deploy to GitHub Pages</p>
+              </div>
+              <div class="card">
+                <h4>✅ Score 80%+</h4>
+                <p>Pass the HTML mastery assessment</p>
+              </div>
+            </div>
+            
+            <button id="generateHTMLCertificate" class="btn btn-primary" style="padding: var(--spacing-lg) var(--spacing-xl); font-size: 1.1rem; margin-top: var(--spacing-md);">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 6h-3V4c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM9 4h6v2H9V4zm11 16H4V8h16v12z"/>
+              </svg>
+              Generate HTML Certificate
+            </button>
+          </div>
+          
+          <!-- Certificate Preview -->
+          <div id="htmlCertificatePreview" style="display: none; margin-top: var(--spacing-xl);">
+            <div class="card success-card" style="border: 3px solid var(--color-info); padding: var(--spacing-xl);">
+              <div style="text-align: center;">
+                <h1 style="color: var(--color-info); margin-bottom: var(--spacing-md);">Certificate of Achievement</h1>
+                <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-xl);">Msebetsi Solutions HTML Fundamentals Program</p>
+                
+                <div style="border-top: 2px solid var(--color-border); border-bottom: 2px solid var(--color-border); padding: var(--spacing-xl) 0; margin: var(--spacing-xl) 0;">
+                  <p style="font-size: 1.2rem; margin-bottom: var(--spacing-md);">This certifies that</p>
+                  <h2 style="font-size: 2.5rem; color: var(--color-primary); margin: var(--spacing-md) 0;" id="htmlCertificateName">[Your Name]</h2>
+                  <p style="font-size: 1.2rem; margin-top: var(--spacing-md);">has successfully completed</p>
+                  <h3 style="font-size: 1.8rem; color: var(--color-secondary); margin: var(--spacing-md) 0;">HTML Fundamentals & Web Deployment</h3>
+                  <p style="font-size: 1.1rem; margin-top: var(--spacing-md); color: var(--color-accent);">
+                    <i class="fas fa-globe"></i> Live Project: <span id="htmlProjectUrl">[your-project-url]</span>
+                  </p>
+                </div>
+                
+                <div class="grid grid-3" style="margin-top: var(--spacing-xl);">
+                  <div>
+                    <p style="font-weight: bold;">Mastery Score</p>
+                    <p id="htmlCertificateScore" style="font-size: 1.5rem; color: var(--color-success);">100%</p>
+                  </div>
+                  <div>
+                    <p style="font-weight: bold;">Completion Date</p>
+                    <p id="htmlCertificateDate" style="font-size: 1.2rem;"></p>
+                  </div>
+                  <div>
+                    <p style="font-weight: bold;">Certificate ID</p>
+                    <p id="htmlCertificateId" style="font-family: var(--font-mono);">HTML-2024-001</p>
+                  </div>
+                </div>
+                
+                <div style="margin-top: var(--spacing-xl); padding-top: var(--spacing-lg); border-top: 1px solid var(--color-border);">
+                  <button id="downloadHTMLCertificate" class="btn btn-primary">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                    </svg>
+                    Download Certificate
+                  </button>
+                  <button id="printHTMLCertificate" class="btn btn-secondary" style="margin-left: var(--spacing-md);">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
+                    </svg>
+                    Print Certificate
+                  </button>
+                  <button id="shareCertificate" class="btn btn-success" style="margin-left: var(--spacing-md);">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+                    </svg>
+                    Share Certificate
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Msebetsi Solutions &copy; <span id="currentYear"></span> | HTML Fundamentals & GitHub Pages Deployment</p>
+      <p>Empowering African developers with essential web skills</p>
+      <p style="margin-top: var(--spacing-sm); font-size: 0.8rem; color: var(--color-text-secondary);">
+        Connect with us: 
+        <a href="#" style="margin: 0 5px;">GitHub</a> • 
+        <a href="#" style="margin: 0 5px;">Twitter</a> • 
+        <a href="#" style="margin: 0 5px;">LinkedIn</a>
+      </p>
+    </footer>
+  </div>
+
+  <!-- HTML Certificate Modal -->
+  <div id="htmlCertificateModal" class="modal" style="display: none;">
+    <h2>🎉 Congratulations on Mastering HTML!</h2>
+    <p>You've successfully completed the HTML Fundamentals program and deployed your first website. Your certificate is ready to download.</p>
+    <div style="text-align: center; margin-top: var(--spacing-lg);">
+      <button id="closeHTMLModal" class="btn btn-primary">Close</button>
+      <button id="viewMyCertificate" class="btn btn-secondary" style="margin-left: var(--spacing-md);">View Certificate</button>
+    </div>
+  </div>
+  
+  <div id="htmlModalOverlay" class="modal-overlay" style="display: none;"></div>
+
+  <script>
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const themeLabel = document.getElementById('themeLabel');
+    const htmlElement = document.documentElement;
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme) {
+      htmlElement.setAttribute('data-theme', savedTheme);
+      themeLabel.textContent = savedTheme === 'dark' ? 'Dark' : 'Light';
+    } else if (prefersDark) {
+      htmlElement.setAttribute('data-theme', 'dark');
+      themeLabel.textContent = 'Dark';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = htmlElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      htmlElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      themeLabel.textContent = newTheme === 'dark' ? 'Dark' : 'Light';
+      showNotification(`Switched to ${newTheme} theme`, 'info');
+    });
+
+    // Set current year
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    // Tab functionality
+    document.querySelectorAll('.tab-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const tabId = button.getAttribute('data-tab');
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        button.classList.add('active');
+        
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    // Version selector
+    document.querySelectorAll('.version-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const version = button.getAttribute('data-version');
+        
+        document.querySelectorAll('.version-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        button.classList.add('active');
+        
+        document.querySelectorAll('.version-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        document.getElementById(`${version}Version`).classList.add('active');
+      });
+    });
+
+    // Download template
+    document.getElementById('downloadTemplate')?.addEventListener('click', () => {
+      const templateContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Professional HTML Template</title>
+  <meta name="description" content="Complete HTML5 template with best practices">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Your content here -->
+</body>
+</html>`;
+      
+      downloadFile('professional-template.html', templateContent);
+      showNotification('HTML template downloaded!', 'success');
+    });
+
+    // Download projects
+    document.getElementById('downloadBeginner')?.addEventListener('click', () => {
+      const beginnerContent = `BEGINNER PROJECT: PORTFOLIO WEBSITE
+===============================
+Complete code available in the HTML tab above.
+
+Instructions:
+1. Copy the HTML code from the Beginner Project section
+2. Save as index.html
+3. Customize with your information
+4. Deploy to GitHub Pages`;
+      
+      downloadFile('beginner-portfolio-guide.txt', beginnerContent);
+      showNotification('Beginner project guide downloaded!', 'success');
+    });
+
+    document.getElementById('downloadIntermediate')?.addEventListener('click', () => {
+      const intermediateContent = `INTERMEDIATE PROJECT: E-COMMERCE PAGE
+===================================
+Complete code available in the HTML tab above.
+
+Features included:
+- Product image gallery
+- Product options and variations
+- Shopping cart functionality
+- Product tabs (description, specs, reviews)
+- Related products section
+- Responsive design
+- Interactive JavaScript elements`;
+      
+      downloadFile('intermediate-ecommerce-guide.txt', intermediateContent);
+      showNotification('Intermediate project guide downloaded!', 'success');
+    });
+
+    document.getElementById('downloadAdvanced')?.addEventListener('click', () => {
+      const advancedContent = `ADVANCED PROJECT: EDUCATIONAL PLATFORM
+=====================================
+Project Structure:
+- Multi-page website (Home, Courses, About, Contact)
+- Responsive navigation with hamburger menu
+- Student dashboard
+- Course catalog with filtering
+- Progress tracking
+- Registration forms
+- Dark/light theme toggle
+
+Skills required:
+- Advanced HTML/CSS
+- JavaScript (ES6+)
+- Responsive design
+- Accessibility
+- GitHub deployment`;
+      
+      downloadFile('advanced-project-specs.txt', advancedContent);
+      showNotification('Advanced project specifications downloaded!', 'success');
+    });
+
+    document.getElementById('viewDemo')?.addEventListener('click', () => {
+      window.open('https://msebetsi.github.io/html-demo', '_blank');
+      showNotification('Opening live demo in new tab...', 'info');
+    });
+
+    // Mark tasks as completed
+    setTimeout(() => {
+      document.querySelectorAll('.task-item').forEach((item, index) => {
+        setTimeout(() => item.classList.add('completed'), index * 800);
+      });
+    }, 1000);
+
+    // HTML Certificate generation
+    document.getElementById('generateHTMLCertificate').addEventListener('click', () => {
+      const name = prompt('Enter your name for the certificate:') || 'HTML Developer';
+      const projectUrl = prompt('Enter your GitHub Pages URL (optional):') || 'https://github.com/your-username';
+      const score = Math.floor(Math.random() * 30) + 70; // Random score 70-100
+      
+      if (name) {
+        document.getElementById('htmlCertificateName').textContent = name;
+        document.getElementById('htmlCertificateScore').textContent = `${score}%`;
+        document.getElementById('htmlCertificateDate').textContent = new Date().toLocaleDateString();
+        document.getElementById('htmlCertificateId').textContent = `HTML-${Date.now().toString().slice(-8)}`;
+        document.getElementById('htmlProjectUrl').textContent = projectUrl;
+        
+        document.getElementById('htmlCertificatePreview').style.display = 'block';
+        
+        // Update results tab
+        document.getElementById('htmlMasteryScore').textContent = `${score}/100`;
+        document.getElementById('scoreStructure').textContent = `${Math.floor(score * 0.2)}/20`;
+        document.getElementById('scoreElements').textContent = `${Math.floor(score * 0.2)}/20`;
+        document.getElementById('scoreForms').textContent = `${Math.floor(score * 0.15)}/15`;
+        document.getElementById('scoreAccessibility').textContent = `${Math.floor(score * 0.15)}/15`;
+        document.getElementById('scoreResponsive').textContent = `${Math.floor(score * 0.15)}/15`;
+        document.getElementById('scoreDeployment').textContent = `${Math.floor(score * 0.15)}/15`;
+        document.getElementById('scoreHTMLTotal').textContent = `${score}/100`;
+        
+        // Show results content
+        document.getElementById('htmlResultsPlaceholder').style.display = 'none';
+        document.getElementById('htmlResultsContent').style.display = 'block';
+        
+        // Provide feedback
+        let feedback = '';
+        if (score >= 90) {
+          feedback = `<div class="card success-card">
+            <h3>🎉 Outstanding Achievement!</h3>
+            <p>You've mastered HTML fundamentals and deployed a professional website. Your skills are ready for real-world projects.</p>
+          </div>`;
+        } else if (score >= 75) {
+          feedback = `<div class="card warning-card">
+            <h3>👍 Strong Performance</h3>
+            <p>You have a solid understanding of HTML. Consider reviewing forms and accessibility for even better results.</p>
+          </div>`;
+        } else {
+          feedback = `<div class="card info-card">
+            <h3>📚 Good Progress</h3>
+            <p>You understand the basics. Practice more with the intermediate project to improve your skills.</p>
+          </div>`;
+        }
+        
+        document.getElementById('htmlFeedback').innerHTML = feedback;
+        
+        // Show modal
+        document.getElementById('htmlCertificateModal').style.display = 'block';
+        document.getElementById('htmlModalOverlay').style.display = 'block';
+        
+        showNotification(`HTML Certificate generated with ${score}% score!`, 'success');
+      }
+    });
+
+    // Download HTML certificate
+    document.getElementById('downloadHTMLCertificate')?.addEventListener('click', () => {
+      const name = document.getElementById('htmlCertificateName').textContent;
+      const score = document.getElementById('htmlCertificateScore').textContent;
+      const date = document.getElementById('htmlCertificateDate').textContent;
+      const id = document.getElementById('htmlCertificateId').textContent;
+      const url = document.getElementById('htmlProjectUrl').textContent;
+      
+      const certificateHTML = `<!DOCTYPE html>
+<html>
+<head>
+  <title>HTML Certificate - ${name}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .certificate {
+      background: white;
+      padding: 60px;
+      max-width: 900px;
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      text-align: center;
+      position: relative;
+      border: 15px solid #17a2b8;
+    }
+    h1 {
+      color: #2c3e50;
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+    }
+    h2 {
+      color: #3498db;
+      font-size: 1.8rem;
+      margin: 20px 0;
+    }
+    h3 {
+      color: #e74c3c;
+      font-size: 2.2rem;
+      margin: 30px 0;
+    }
+    .score {
+      font-size: 4rem;
+      color: #27ae60;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    .details {
+      margin: 30px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+    .seal {
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 120px;
+      height: 120px;
+      background: #17a2b8;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 3rem;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 2px solid #eee;
+      color: #7f8c8d;
+    }
+    .url {
+      background: #ecf0f1;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="certificate">
+    <div class="seal">✓</div>
+    <h1>Certificate of Achievement</h1>
+    <h2>HTML Fundamentals & Web Deployment</h2>
+    
+    <p>Awarded to</p>
+    <h3>${name}</h3>
+    
+    <div class="details">
+      <p>for successfully mastering HTML5, CSS3, and GitHub Pages deployment</p>
+      <div class="score">${score}</div>
+      <p>Mastery Score</p>
+    </div>
+    
+    <div class="project-info">
+      <p>Live Project:</p>
+      <div class="url">${url}</div>
+    </div>
+    
+    <div class="footer">
+      <p>Certificate ID: ${id} | Date: ${date}</p>
+      <p>Msebetsi Solutions HTML Fundamentals Program</p>
+      <p>Empowering African developers with essential web skills</p>
+    </div>
+  </div>
+</body>
+</html>`;
+      
+      downloadFile('html-certificate.html', certificateHTML);
+      showNotification('HTML Certificate downloaded!', 'success');
+    });
+
+    // Print HTML certificate
+    document.getElementById('printHTMLCertificate')?.addEventListener('click', () => {
+      window.print();
+    });
+
+    // Share certificate
+    document.getElementById('shareCertificate')?.addEventListener('click', () => {
+      const name = document.getElementById('htmlCertificateName').textContent;
+      const score = document.getElementById('htmlCertificateScore').textContent;
+      
+      if (navigator.share) {
+        navigator.share({
+          title: 'My HTML Certificate',
+          text: `I earned ${score} on the HTML Fundamentals certificate! ${name}`,
+          url: window.location.href
+        });
+      } else {
+        alert('Share feature not supported in this browser. You can download and share the certificate file.');
+      }
+    });
+
+    // Close modal
+    document.getElementById('closeHTMLModal')?.addEventListener('click', () => {
+      document.getElementById('htmlCertificateModal').style.display = 'none';
+      document.getElementById('htmlModalOverlay').style.display = 'none';
+    });
+
+    document.getElementById('viewMyCertificate')?.addEventListener('click', () => {
+      document.getElementById('htmlCertificateModal').style.display = 'none';
+      document.getElementById('htmlModalOverlay').style.display = 'none';
+      document.querySelector('[data-tab="certificate"]').click();
+    });
+
+    // View certificate from results
+    document.getElementById('viewHTMLCertificate')?.addEventListener('click', () => {
+      document.querySelector('[data-tab="certificate"]').click();
+      document.getElementById('generateHTMLCertificate').click();
+    });
+
+    // Retry HTML practice
+    document.getElementById('retryHTML')?.addEventListener('click', () => {
+      document.querySelector('[data-tab="activity"]').click();
+      showNotification('Practice more HTML exercises!', 'info');
+    });
+
+    // Utility functions
+    function downloadFile(filename, content) {
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.textContent = message;
+      notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius-md);
+        background-color: ${type === 'success' ? 'var(--color-success)' : 
+                         type === 'error' ? 'var(--color-error)' : 
+                         type === 'info' ? 'var(--color-info)' :
+                         'var(--color-warning)'};
+        color: white;
+        font-weight: 500;
+        box-shadow: var(--shadow-lg);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.style.animation = 'slideOut 0.3s ease';
+          setTimeout(() => notification.remove(), 300);
+        }
+      }, 4000);
+    }
+
+    // Initialize
+    showNotification('Welcome to HTML Fundamentals! Explore the tabs to learn.', 'info');
+  </script>
+</body>
+</html>

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Line Navigation & File Management</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #555;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: -10px;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        pre code {
+            background-color: transparent;
+            color: #ecf0f1;
+            padding: 0;
+        }
+        ul {
+            margin-left: 20px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .section {
+            margin: 30px 0;
+        }
+        .os-label {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .video-note {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 10px 15px;
+            margin: 15px 0;
+            font-size: 0.95em;
+        }
+        .action-buttons {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px solid #dee2e6;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-size: 16px;
+        }
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .upload-section {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        #uploadStatus {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Command Line Navigation & File Management</h1>
+    <p class="subtitle">Msebetsi Solutions — Software Development Course</p>
+
+    <div class="action-buttons">
+        <h3 style="margin-top: 0;">📚 Course Materials</h3>
+        <button class="btn btn-primary" onclick="downloadPDF()">
+            📥 Download Course as PDF
+        </button>
+        <button class="btn btn-primary" onclick="printPage()">
+            🖨️ Print/Save as PDF
+        </button>
+    </div>
+
+    <div class="upload-section">
+        <h3 style="margin-top: 0;">📤 Submit Your Work</h3>
+        <p>Upload your completed tasks as PDF, HTML, or Markdown files:</p>
+        <div class="file-input-wrapper">
+            <button class="btn btn-success" onclick="document.getElementById('taskUpload').click()">
+                Choose File to Upload
+            </button>
+            <input type="file" id="taskUpload" accept=".pdf,.html,.htm,.md,.markdown" onchange="handleFileUpload(event)">
+        </div>
+        <div id="uploadStatus"></div>
+    </div>
+
+    <div class="section">
+        <p>Modern developers rely heavily on the terminal to move through folders, automate tasks, and work efficiently. In this lesson, we'll walk through the essential command-line operations used across macOS, Linux, and Windows (PowerShell).</p>
+    </div>
+
+    <div class="section">
+        <h2>🔥 Why the Command Line Matters</h2>
+        
+        <div class="video-note">
+            <strong>📺 Watch:</strong> <a href="https://www.youtube.com/watch?v=5XgBd6rjuDQ" target="_blank" rel="noopener">Introduction to the Command Line for beginners</a>
+        </div>
+        <div class="video-container" style="background: #000;">
+            <a href="https://www.youtube.com/watch?v=5XgBd6rjuDQ" target="_blank" rel="noopener" style="display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; text-decoration: none;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: url('https://img.youtube.com/vi/5XgBd6rjuDQ/hqdefault.jpg') center/cover;">
+                    <div style="width: 80px; height: 56px; background: rgba(255,0,0,0.9); border-radius: 14px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <div style="width: 0; height: 0; border-left: 26px solid white; border-top: 16px solid transparent; border-bottom: 16px solid transparent; margin-left: 6px;"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <p>The command line allows you to:</p>
+        <ul>
+            <li>Navigate the filesystem faster than with a mouse</li>
+            <li>Create, modify, and manage files instantly</li>
+            <li>Automate repetitive tasks</li>
+            <li>Run developer tools like Git, Node.js, Docker, Python, etc.</li>
+        </ul>
+        <p>Every serious software engineer must be comfortable using CLI tools.</p>
+    </div>
+
+    <div class="section">
+        <h2>🚀 Open Your Terminal and Follow Along</h2>
+        
+        <div class="video-note">
+            <strong>📺 Watch:</strong> <a href="https://www.youtube.com/watch?v=ZtqBQ68cfJc" target="_blank" rel="noopener">Essential Linux/Mac Terminal Commands</a>
+        </div>
+        <div class="video-container" style="background: #000;">
+            <a href="https://www.youtube.com/watch?v=ZtqBQ68cfJc" target="_blank" rel="noopener" style="display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; text-decoration: none;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: url('https://img.youtube.com/vi/ZtqBQ68cfJc/maxresdefault.jpg') center/cover;">
+                    <div style="width: 80px; height: 56px; background: rgba(255,0,0,0.9); border-radius: 14px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <div style="width: 0; height: 0; border-left: 26px solid white; border-top: 16px solid transparent; border-bottom: 16px solid transparent; margin-left: 6px;"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <h3>1. List the contents of your current directory</h3>
+        <p>This shows everything inside your current location.</p>
+        <p><span class="os-label">Mac/Linux:</span></p>
+        <pre><code>ls</code></pre>
+        <p><span class="os-label">Windows PowerShell:</span></p>
+        <pre><code>Get-ChildItem</code></pre>
+        <p>You should see folders like: Desktop, Documents, Downloads, etc.</p>
+
+        <h3>2. Change to another directory</h3>
+        <p>Let's move into the Desktop folder.</p>
+        <p><span class="os-label">Mac/Linux:</span></p>
+        <pre><code>cd Desktop</code></pre>
+        <p><span class="os-label">Windows PowerShell:</span></p>
+        <pre><code>Set-Location Desktop</code></pre>
+
+        <h3>3. Move back to the previous directory</h3>
+        <p>Use <code>..</code> to go "up one level."</p>
+        <p><span class="os-label">Mac/Linux:</span></p>
+        <pre><code>cd ..</code></pre>
+        <p><span class="os-label">Windows PowerShell:</span></p>
+        <pre><code>Set-Location ..</code></pre>
+
+        <h3>4. Check your current working directory</h3>
+        <p>This prints the full path so you always know where you are.</p>
+        <p><span class="os-label">Mac/Linux:</span></p>
+        <pre><code>pwd</code></pre>
+        <p><span class="os-label">Windows PowerShell:</span></p>
+        <pre><code>Get-Location</code></pre>
+
+        <h3>5. Create a new folder inside Desktop</h3>
+        <p>Navigate back into Desktop:</p>
+        <pre><code>cd Desktop</code></pre>
+        <p>Now create a folder called demo-folder:</p>
+        <p><span class="os-label">Mac/Linux:</span></p>
+        <pre><code>mkdir demo-folder</code></pre>
+        <p><span class="os-label">Windows PowerShell:</span></p>
+        <pre><code>New-Item -Name "demo-folder" -ItemType "directory"</code></pre>
+
+        <h3>6. Enter the new folder</h3>
+        <pre><code>cd demo-folder</code></pre>
+        <p>(Windows PowerShell uses the same command.)</p>
+
+        <h3>7. Create a new file</h3>
+        <p>We'll create a simple <code>index.html</code> file.</p>
+        <p><span class="os-label">Mac/Linux:</span></p>
+        <pre><code>touch index.html</code></pre>
+        <p><span class="os-label">Windows PowerShell:</span></p>
+        <pre><code>New-Item -Name "index.html" -ItemType "file"</code></pre>
+
+        <h3>8. Confirm your file exists</h3>
+        <p><span class="os-label">Mac/Linux:</span></p>
+        <pre><code>ls</code></pre>
+        <p><span class="os-label">Windows PowerShell:</span></p>
+        <pre><code>Get-ChildItem</code></pre>
+        <p>You should now see:</p>
+        <pre><code>index.html</code></pre>
+        
+        <div class="video-note">
+            <strong>📺 Watch:</strong> <a href="https://www.youtube.com/watch?v=UVUd9_k9C6A" target="_blank" rel="noopener">PowerShell for Beginners</a>
+        </div>
+        <div class="video-container" style="background: #000;">
+            <a href="https://www.youtube.com/watch?v=UVUd9_k9C6A" target="_blank" rel="noopener" style="display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; text-decoration: none;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: url('https://img.youtube.com/vi/UVUd9_k9C6A/maxresdefault.jpg') center/cover;">
+                    <div style="width: 80px; height: 56px; background: rgba(255,0,0,0.9); border-radius: 14px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <div style="width: 0; height: 0; border-left: 26px solid white; border-top: 16px solid transparent; border-bottom: 16px solid transparent; margin-left: 6px;"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🌐 Advanced References for Modern Developers</h2>
+        <p>These replace the beginner links with more advanced, industry-standard resources:</p>
+        <ul>
+            <li><strong>Linux Command Line (Full Free Book):</strong><br>
+                <a href="https://linuxcommand.org/tlcl.php" target="_blank" rel="noopener">https://linuxcommand.org/tlcl.php</a></li>
+            <li><strong>PowerShell Scripting Reference:</strong><br>
+                <a href="https://learn.microsoft.com/en-us/powershell/" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/</a></li>
+            <li><strong>Apple Developer Terminal Guide:</strong><br>
+                <a href="https://developer.apple.com/library/archive/documentation/Darwin/Reference/ManPages/" target="_blank" rel="noopener">https://developer.apple.com/library/archive/documentation/Darwin/Reference/ManPages/</a></li>
+            <li><strong>WSL (Windows Subsystem for Linux) — Modern CLI for Windows Developers:</strong><br>
+                <a href="https://learn.microsoft.com/en-us/windows/wsl/" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/windows/wsl/</a></li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🏆 Bonus Challenge — Level Up Your Terminal Skills</h2>
+        
+        <div class="video-note">
+            <strong>📺 Watch:</strong> <a href="https://www.youtube.com/watch?v=DP218aBHm1Q" target="_blank" rel="noopener">Advanced Terminal Productivity Tips</a>
+        </div>
+        <div class="video-container" style="background: #000;">
+            <a href="https://www.youtube.com/watch?v=DP218aBHm1Q" target="_blank" rel="noopener" style="display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; text-decoration: none;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: url('https://img.youtube.com/vi/DP218aBHm1Q/maxresdefault.jpg') center/cover;">
+                    <div style="width: 80px; height: 56px; background: rgba(255,0,0,0.9); border-radius: 14px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <div style="width: 0; height: 0; border-left: 26px solid white; border-top: 16px solid transparent; border-bottom: 16px solid transparent; margin-left: 6px;"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <p>Try researching the following commands:</p>
+        <ul>
+            <li><code>rm</code> / <code>Remove-Item</code> — delete files</li>
+            <li><code>cp</code> / <code>Copy-Item</code> — copy files</li>
+            <li><code>mv</code> / <code>Move-Item</code> — rename or move files</li>
+            <li><code>tree</code> — visual directory structure (installable on most OS)</li>
+            <li><code>code .</code> — open folder in VS Code directly from terminal</li>
+        </ul>
+        <p>Search queries to guide you:</p>
+        <ul>
+            <li>"Best command-line shortcuts for developers"</li>
+            <li>"PowerShell vs Bash commands"</li>
+            <li>"Top terminal productivity tools for software engineers"</li>
+        </ul>
+    </div>
+
+    <script>
+        function playVideo(containerId, videoId) {
+            const container = document.getElementById(containerId);
+            if (!container || container.querySelector('iframe')) {
+                return; // Already loaded
+            }
+            
+            // Clear the thumbnail
+            container.innerHTML = '';
+            
+            // Create and insert iframe
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'absolute';
+            iframe.style.top = '0';
+            iframe.style.left = '0';
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            iframe.frameBorder = '0';
+            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+            iframe.allowFullscreen = true;
+            
+            container.appendChild(iframe);
+        }
+
+        function printPage() {
+            window.print();
+        }
+
+        function downloadPDF() {
+            // Create a print-friendly version and trigger download
+            const printWindow = window.open('', '', 'width=800,height=600');
+            const content = document.documentElement.outerHTML;
+            printWindow.document.write(content);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+                setTimeout(() => printWindow.close(), 500);
+            }, 500);
+            
+            // Show instruction
+            alert('Use the print dialog to save as PDF:\n1. Select "Save as PDF" or "Microsoft Print to PDF"\n2. Choose your save location\n3. Click Save');
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            const statusDiv = document.getElementById('uploadStatus');
+            
+            if (!file) {
+                return;
+            }
+
+            // Check file type
+            const allowedTypes = ['.pdf', '.html', '.htm', '.md', '.markdown'];
+            const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!allowedTypes.includes(fileExt)) {
+                statusDiv.className = 'error-message';
+                statusDiv.style.display = 'block';
+                statusDiv.innerHTML = '❌ Invalid file type. Please upload PDF, HTML, or Markdown files only.';
+                return;
+            }
+
+            // Check file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                statusDiv.className = 'error-message';
+                statusDiv.style.display = 'block';
+                statusDiv.innerHTML = '❌ File too large. Maximum size is 10MB.';
+                return;
+            }
+
+            // Simulate upload (in real implementation, this would send to a server)
+            statusDiv.className = 'success-message';
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = `
+                ✅ <strong>File ready for upload:</strong><br>
+                📄 Name: ${file.name}<br>
+                📊 Size: ${(file.size / 1024).toFixed(2)} KB<br>
+                📅 Last modified: ${new Date(file.lastModified).toLocaleString()}<br><br>
+                <em>Note: In a live system, this would be sent to the instructor's portal. For now, save this file in your assignments folder.</em>
+            `;
+
+            // Create a download link for the uploaded file (for local testing)
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const downloadLink = document.createElement('a');
+                downloadLink.href = e.target.result;
+                downloadLink.download = `submitted_${file.name}`;
+                downloadLink.textContent = '💾 Download a copy of your submission';
+                downloadLink.style.display = 'block';
+                downloadLink.style.marginTop = '10px';
+                downloadLink.style.color = '#27ae60';
+                downloadLink.style.fontWeight = 'bold';
+                statusDiv.appendChild(document.createElement('br'));
+                statusDiv.appendChild(downloadLink);
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+    
+    <!-- Added navigation buttons before closing body tag -->
+    <div style="max-width: 900px; margin: 40px auto; padding: 0 20px; display: flex; justify-content: space-between; gap: 20px;">
+        <button onclick="window.location.href='modules.html'" style="padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">← Back to Modules</button>
+        <button onclick="window.location.href='chapter2.html'" style="padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">Next Chapter →</button>
+    </div>
+</body>
+</html>

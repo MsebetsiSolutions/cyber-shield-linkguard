@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 8: HTML5 Semantic Elements & Layout | Msebetsi Solutions</title>
+    <meta name="description" content="Master HTML5 semantic elements and create accessible, well-structured web layouts">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            /* Blue Theme Variables */
+            --primary-blue: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #60a5fa;
+            --primary-lightest: #dbeafe;
+            --secondary-blue: #3b82f6;
+            --accent-blue: #1e40af;
+            
+            /* Neutral Colors */
+            --white: #ffffff;
+            --light-bg: #f8fafc;
+            --light-card: #ffffff;
+            --dark-text: #1e293b;
+            --medium-text: #475569;
+            --light-text: #64748b;
+            --border-color: #e2e8f0;
+            
+            /* Semantic Colors */
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #3b82f6;
+            
+            /* Spacing */
+            --space-xs: 0.5rem;
+            --space-sm: 0.875rem;
+            --space-md: 1.25rem;
+            --space-lg: 1.75rem;
+            --space-xl: 2.5rem;
+            
+            /* Border Radius */
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.1);
+            --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.1);
+            
+            /* Typography */
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+        }
+        
+        /* Dark Mode */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --light-bg: #0f172a;
+                --light-card: #1e293b;
+                --dark-text: #f1f5f9;
+                --medium-text: #94a3b8;
+                --light-text: #64748b;
+                --border-color: #334155;
+            }
+        }
+        
+        body {
+            font-family: var(--font-main);
+            line-height: 1.6;
+            color: var(--dark-text);
+            background-color: var(--light-bg);
+            padding: var(--space-md);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: var(--space-md);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary-blue);
+        }
+        
+        h2 {
+            font-size: 1.75rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: var(--space-sm);
+            margin-top: var(--space-xl);
+        }
+        
+        h3 {
+            font-size: 1.3rem;
+            color: var(--secondary-blue);
+            margin-top: var(--space-lg);
+        }
+        
+        p {
+            margin-bottom: var(--space-md);
+        }
+        
+        a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        
+        a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+        
+        /* Layout Components */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background-color: var(--light-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+            border: 1px solid var(--border-color);
+        }
+        
+        .card.info-card {
+            border-left: 4px solid var(--info);
+        }
+        
+        .card.success-card {
+            border-left: 4px solid var(--success);
+        }
+        
+        .card.warning-card {
+            border-left: 4px solid var(--warning);
+        }
+        
+        .card.error-card {
+            border-left: 4px solid var(--error);
+        }
+        
+        /* Tabs Navigation */
+        .tabs-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-xs);
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: var(--space-lg);
+            padding-bottom: var(--space-sm);
+        }
+        
+        .tab-btn {
+            padding: var(--space-sm) var(--space-lg);
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            color: var(--light-text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+        }
+        
+        .tab-btn:hover {
+            color: var(--primary-blue);
+        }
+        
+        .tab-btn.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Code Blocks */
+        .code-block {
+            background-color: #1e1e1e;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin: var(--space-lg) 0;
+        }
+        
+        .code-header {
+            background-color: #2d2d2d;
+            padding: var(--space-sm) var(--space-md);
+            color: #cccccc;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .code-body {
+            padding: var(--space-md);
+            overflow-x: auto;
+        }
+        
+        .code-body code {
+            font-family: var(--font-mono);
+            color: #d4d4d4;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        /* Task List */
+        .task-list {
+            list-style: none;
+            counter-reset: task-counter;
+        }
+        
+        .task-item {
+            counter-increment: task-counter;
+            margin-bottom: var(--space-lg);
+            padding-left: 3rem;
+            position: relative;
+        }
+        
+        .task-item::before {
+            content: counter(task-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 2rem;
+            height: 2rem;
+            background-color: var(--primary-blue);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .task-item.completed::before {
+            background-color: var(--success);
+            content: "✓";
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            gap: var(--space-xs);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+        }
+        
+        /* Upload Area */
+        .upload-area {
+            border: 3px dashed var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            text-align: center;
+            transition: all 0.3s ease;
+            margin: var(--space-lg) 0;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary-blue);
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+        
+        /* Results */
+        .score-display {
+            font-size: 3rem;
+            font-weight: 700;
+            text-align: center;
+            color: var(--primary-blue);
+            margin: var(--space-lg) 0;
+        }
+        
+        .score-breakdown {
+            margin: var(--space-lg) 0;
+        }
+        
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: var(--space-sm) 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .breakdown-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            padding-top: var(--space-md);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .tabs-nav {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+            
+            .tab-btn {
+                white-space: nowrap;
+            }
+        }
+        
+        /* Utility Classes */
+        .flex {
+            display: flex;
+            gap: var(--space-md);
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-md);
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .mt-3 {
+            margin-top: var(--space-md);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Lesson Header -->
+        <header class="text-center" style="margin-bottom: var(--space-xl); padding-bottom: var(--space-lg); border-bottom: 2px solid var(--border-color);">
+            <h1>Lesson 8: HTML5 Semantic Elements & Layout</h1>
+            <p style="color: var(--medium-text); font-size: 1.1rem; margin-top: var(--space-md);">
+                Master semantic HTML structure and create accessible, well-organized web layouts
+            </p>
+            
+            <div class="flex" style="justify-content: center; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-md);">
+                <span style="background: var(--primary-blue); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">HTML5</span>
+                <span style="background: var(--info); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Semantic HTML</span>
+                <span style="background: var(--success); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Accessibility</span>
+                <span style="background: var(--warning); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">CSS Layout</span>
+            </div>
+        </header>
+        
+        <!-- Tabs Navigation -->
+        <div class="tabs">
+            <nav class="tabs-nav">
+                <button class="tab-btn active" data-tab="overview">📋 Overview</button>
+                <button class="tab-btn" data-tab="starter">🔧 Starter Files</button>
+                <button class="tab-btn" data-tab="tasks">✅ Activity Tasks</button>
+                <button class="tab-btn" data-tab="upload">📤 Upload Solution</button>
+                <button class="tab-btn" data-tab="results">📊 Results</button>
+            </nav>
+            
+            <!-- Tab 1: Overview -->
+            <div class="tab-content active" id="overview">
+                <div class="card">
+                    <h2>📋 Learning Objectives</h2>
+                    <p>By the end of this lesson, you will be able to:</p>
+                    <ul style="margin-left: var(--space-lg); margin-bottom: var(--space-md);">
+                        <li>Implement HTML5 semantic elements correctly</li>
+                        <li>Create accessible web layouts using proper structure</li>
+                        <li>Apply modern CSS layout techniques (Grid & Flexbox)</li>
+                        <li>Enhance performance with semantic markup</li>
+                        <li>Improve SEO through proper HTML structure</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <h2>🔧 Project Scenario</h2>
+                    <p><strong>Company:</strong> Msebetsi Solutions</p>
+                    <p><strong>Task:</strong> Refactor the company's employee profile page to use proper HTML5 semantic elements and improve the layout structure.</p>
+                    
+                    <div class="grid-2" style="margin-top: var(--space-lg);">
+                        <div>
+                            <h3>Current Issues:</h3>
+                            <ul style="margin-left: var(--space-md);">
+                                <li>Excessive use of &lt;div&gt; elements</li>
+                                <li>Poor semantic structure</li>
+                                <li>Inadequate accessibility support</li>
+                                <li>Non-optimal layout on mobile devices</li>
+                                <li>Missing structured data</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3>Expected Outcomes:</h3>
+                            <ul style="margin-left: var(--space-md);">
+                                <li>Proper use of semantic HTML5 elements</li>
+                                <li>Enhanced accessibility (WCAG compliance)</li>
+                                <li>Responsive layout using CSS Grid/Flexbox</li>
+                                <li>Improved SEO through structured data</li>
+                                <li>Better performance and maintainability</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 2: Starter Files -->
+            <div class="tab-content" id="starter">
+                <div class="card">
+                    <h2>🔧 Starter Files Analysis</h2>
+                    <p>You will work with an existing employee profile page that needs semantic improvement.</p>
+                    
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>index.html (Current Implementation)</span>
+                        </div>
+                        <div class="code-body">
+                            <pre><code>&lt;!-- Non-semantic current structure --&gt;
+&lt;div class="profile-container"&gt;
+    &lt;div class="profile-header"&gt;
+        &lt;div class="name"&gt;John Doe&lt;/div&gt;
+        &lt;div class="title"&gt;Senior Developer&lt;/div&gt;
+    &lt;/div&gt;
+    
+    &lt;div class="profile-content"&gt;
+        &lt;div class="profile-image"&gt;
+            &lt;img src="profile.jpg" alt=""&gt;
+        &lt;/div&gt;
+        
+        &lt;div class="profile-info"&gt;
+            &lt;div class="bio"&gt;
+                &lt;p&gt;Bio information here...&lt;/p&gt;
+            &lt;/div&gt;
+            
+            &lt;div class="contact"&gt;
+                &lt;div&gt;Email: john@example.com&lt;/div&gt;
+                &lt;div&gt;Phone: +27 123 456 789&lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div>
+                            <h3>Problems to Fix:</h3>
+                            <ul style="margin-left: var(--space-md);">
+                                <li>Generic &lt;div&gt; elements everywhere</li>
+                                <li>Missing semantic meaning</li>
+                                <li>Poor accessibility attributes</li>
+                                <li>No structured data</li>
+                                <li>Improper heading hierarchy</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3>Your Task:</h3>
+                            <ul style="margin-left: var(--space-md);">
+                                <li>Replace divs with semantic elements</li>
+                                <li>Add proper ARIA attributes</li>
+                                <li>Implement structured data</li>
+                                <li>Create responsive layout</li>
+                                <li>Ensure accessibility compliance</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="flex" style="margin-top: var(--space-lg);">
+                        <button id="downloadStarter" class="btn btn-primary">
+                            📥 Download Starter Files
+                        </button>
+                        <button id="viewSolution" class="btn btn-secondary">
+                            👁️ View Expected Solution
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 3: Activity Tasks -->
+            <div class="tab-content" id="tasks">
+                <div class="card">
+                    <h2>✅ Activity Tasks</h2>
+                    <p>Complete the following tasks to transform the non-semantic profile page into a modern, accessible component:</p>
+                    
+                    <ol class="task-list">
+                        <li class="task-item">
+                            <h3>Task 1: Replace Generic Divs</h3>
+                            <p>Replace at least 5 generic &lt;div&gt; elements with appropriate semantic HTML5 elements.</p>
+                            <ul>
+                                <li>Use &lt;header&gt;, &lt;main&gt;, &lt;section&gt;, &lt;article&gt;, &lt;aside&gt;</li>
+                                <li>Add proper ARIA landmarks where needed</li>
+                                <li>Ensure proper heading hierarchy (h1-h6)</li>
+                            </ul>
+                        </li>
+                        
+                        <li class="task-item">
+                            <h3>Task 2: Add Semantic Text Elements</h3>
+                            <p>Enhance text content with semantic elements:</p>
+                            <ul>
+                                <li>Use &lt;time&gt; for dates</li>
+                                <li>Add &lt;address&gt; for contact information</li>
+                                <li>Include &lt;figure&gt; and &lt;figcaption&gt; for images</li>
+                                <li>Use &lt;mark&gt; for highlighted text</li>
+                            </ul>
+                        </li>
+                        
+                        <li class="task-item">
+                            <h3>Task 3: Implement Accessibility Features</h3>
+                            <p>Add accessibility attributes and features:</p>
+                            <ul>
+                                <li>Add alt text to all images</li>
+                                <li>Include ARIA labels and roles</li>
+                                <li>Ensure keyboard navigation support</li>
+                                <li>Add skip navigation links</li>
+                            </ul>
+                        </li>
+                        
+                        <li class="task-item">
+                            <h3>Task 4: Create Responsive Layout</h3>
+                            <p>Build a responsive layout using modern CSS:</p>
+                            <ul>
+                                <li>Implement CSS Grid for main layout</li>
+                                <li>Use Flexbox for component layouts</li>
+                                <li>Add responsive typography</li>
+                                <li>Ensure mobile-first design</li>
+                            </ul>
+                        </li>
+                        
+                        <li class="task-item">
+                            <h3>Task 5: Add Structured Data</h3>
+                            <p>Include structured data for SEO:</p>
+                            <ul>
+                                <li>Add JSON-LD structured data</li>
+                                <li>Implement microdata attributes</li>
+                                <li>Include Open Graph meta tags</li>
+                                <li>Add Twitter Card meta tags</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    
+                    <div class="card info-card" style="margin-top: var(--space-xl);">
+                        <h3>📝 Submission Requirements</h3>
+                        <p>Submit your completed files in a ZIP folder containing:</p>
+                        <ul style="margin-left: var(--space-md); margin-top: var(--space-sm);">
+                            <li><strong>index.html</strong> - Your enhanced semantic HTML file</li>
+                            <li><strong>style.css</strong> - Your CSS with responsive layout</li>
+                            <li><strong>README.md</strong> - Brief documentation of changes made</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 4: Upload Solution -->
+            <div class="tab-content" id="upload">
+                <div class="card">
+                    <h2>📤 Upload Your Solution</h2>
+                    <p>Upload your completed HTML and CSS files for evaluation.</p>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <div style="margin-bottom: var(--space-md);">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--primary-blue)" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                        </div>
+                        <h3>Drag & Drop Your Files Here</h3>
+                        <p style="color: var(--light-text);">Or click to browse your files</p>
+                        <p style="color: var(--light-text); font-size: 0.9rem; margin-top: var(--space-xs);">Accepted: .html and .css files (max 500KB each)</p>
+                        
+                        <input type="file" id="fileInput" accept=".html,.css" multiple style="display: none;">
+                        <button id="browseBtn" class="btn btn-primary" style="margin-top: var(--space-md);">
+                            📁 Select Files
+                        </button>
+                    </div>
+                    
+                    <!-- Uploaded Files -->
+                    <div id="uploadedFiles" class="hidden" style="margin-top: var(--space-lg);">
+                        <h3>Uploaded Files:</h3>
+                        <div id="fileList" style="margin-top: var(--space-sm);"></div>
+                        
+                        <div class="text-center" style="margin-top: var(--space-xl); padding: var(--space-lg); background: var(--light-bg); border-radius: var(--radius-lg); border: 2px solid var(--border-color);">
+                            <h3>Ready to Evaluate?</h3>
+                            <p style="margin-bottom: var(--space-md);">Click the button below to analyze your solution.</p>
+                            <button id="evaluateBtn" class="btn btn-primary" style="font-size: 1.1rem; padding: var(--space-md) var(--space-xl);">
+                                🎯 Evaluate My Solution
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 5: Results -->
+            <div class="tab-content" id="results">
+                <div class="card">
+                    <h2>📊 Evaluation Results</h2>
+                    <p>Your submission will be evaluated here once you upload your files.</p>
+                    
+                    <div id="resultsPlaceholder" class="text-center" style="padding: var(--space-xl); color: var(--light-text);">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.5;">
+                            <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/>
+                        </svg>
+                        <p class="mt-3">No results yet. Upload your solution files and click "Evaluate My Solution" to see your score.</p>
+                    </div>
+                    
+                    <div id="resultsContent" class="hidden">
+                        <div class="score-display" id="finalScore">0/100</div>
+                        
+                        <div class="score-breakdown">
+                            <h3>Score Breakdown</h3>
+                            
+                            <div class="breakdown-item">
+                                <span>Semantic HTML Implementation</span>
+                                <span id="scoreSemantic">0/30</span>
+                            </div>
+                            
+                            <div class="breakdown-item">
+                                <span>Accessibility Features</span>
+                                <span id="scoreAccessibility">0/20</span>
+                            </div>
+                            
+                            <div class="breakdown-item">
+                                <span>Responsive Layout</span>
+                                <span id="scoreLayout">0/20</span>
+                            </div>
+                            
+                            <div class="breakdown-item">
+                                <span>Structured Data</span>
+                                <span id="scoreStructured">0/15</span>
+                            </div>
+                            
+                            <div class="breakdown-item">
+                                <span>Code Quality</span>
+                                <span id="scoreQuality">0/15</span>
+                            </div>
+                            
+                            <div class="breakdown-item">
+                                <span>Total Score</span>
+                                <span id="totalScore">0/100</span>
+                            </div>
+                        </div>
+                        
+                        <div id="feedback" style="margin-top: var(--space-xl);"></div>
+                        
+                        <div class="flex" style="margin-top: var(--space-xl);">
+                            <button id="retryBtn" class="btn btn-secondary">
+                                🔄 Try Again
+                            </button>
+                            <button id="certificateBtn" class="btn btn-primary">
+                                🏆 Download Certificate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer style="text-align: center; margin-top: var(--space-xl); padding-top: var(--space-lg); border-top: 1px solid var(--border-color); color: var(--light-text); font-size: 0.9rem;">
+            <p>Msebetsi Solutions &copy; <span id="currentYear"></span> | Lesson 8: HTML5 Semantic Elements & Layout</p>
+            <p>Professional Web Development Curriculum</p>
+        </footer>
+    </div>
+
+    <!-- Solution Preview Modal -->
+    <div id="solutionModal" class="card hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
+        <h2>✅ Expected Solution Preview</h2>
+        <p>Here's what your enhanced semantic HTML should look like:</p>
+        
+        <div class="code-block">
+            <div class="code-header">
+                <span>Enhanced Semantic Structure</span>
+            </div>
+            <div class="code-body">
+                <pre><code>&lt;!-- Semantic HTML5 Structure --&gt;
+&lt;main class="profile" role="main" aria-label="Employee Profile"&gt;
+    
+    &lt;header class="profile-header"&gt;
+        &lt;h1&gt;John Doe&lt;/h1&gt;
+        &lt;p class="title"&gt;Senior Developer&lt;/p&gt;
+        &lt;time datetime="2023-01-15"&gt;Joined: January 15, 2023&lt;/time&gt;
+    &lt;/header&gt;
+    
+    &lt;article class="profile-content"&gt;
+        &lt;figure class="profile-image"&gt;
+            &lt;img src="profile.jpg" alt="Professional headshot of John Doe"&gt;
+            &lt;figcaption&gt;John Doe, Senior Developer&lt;/figcaption&gt;
+        &lt;/figure&gt;
+        
+        &lt;section class="profile-info" aria-labelledby="bio-heading"&gt;
+            &lt;h2 id="bio-heading"&gt;Professional Bio&lt;/h2&gt;
+            &lt;p&gt;Experienced developer specializing in web technologies...&lt;/p&gt;
+        &lt;/section&gt;
+        
+        &lt;aside class="contact-info" role="complementary"&gt;
+            &lt;h2&gt;Contact Information&lt;/h2&gt;
+            &lt;address&gt;
+                Email: &lt;a href="mailto:john@example.com"&gt;john@example.com&lt;/a&gt;&lt;br&gt;
+                Phone: &lt;a href="tel:+27123456789"&gt;+27 123 456 789&lt;/a&gt;
+            &lt;/address&gt;
+        &lt;/aside&gt;
+    &lt;/article&gt;
+    
+&lt;/main&gt;
+
+&lt;!-- Structured Data --&gt;
+&lt;script type="application/ld+json"&gt;
+{
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "John Doe",
+    "jobTitle": "Senior Developer",
+    "worksFor": "Msebetsi Solutions"
+}
+&lt;/script&gt;</code></pre>
+            </div>
+        </div>
+        
+        <button id="closeModal" class="btn btn-secondary" style="margin-top: var(--space-md); width: 100%;">
+            Close Preview
+        </button>
+    </div>
+    
+    <div id="modalOverlay" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+
+    <script>
+        // Set current year in footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // Tab functionality
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Add active class to clicked button
+                button.classList.add('active');
+                
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Show selected tab content
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Download starter files
+        document.getElementById('downloadStarter').addEventListener('click', function() {
+            const starterCode = `MSEBETSI SOLUTIONS - LESSON 8 STARTER CODE
+=============================
+
+FILE 1: index.html (Current non-semantic version)
+=================================================
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Profile - Non-semantic</title>
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .name {
+            font-size: 2em;
+            color: #0066cc;
+        }
+        .title {
+            color: #666;
+            font-size: 1.2em;
+        }
+        .profile-content {
+            display: flex;
+            gap: 30px;
+        }
+        .profile-image img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="name">John Doe</div>
+            <div class="title">Senior Developer</div>
+        </div>
+        
+        <div class="profile-content">
+            <div class="profile-image">
+                <img src="profile.jpg" alt="">
+            </div>
+            
+            <div class="profile-info">
+                <div class="bio">
+                    <p>John is a senior developer with 8 years of experience in web development. He specializes in front-end technologies and has contributed to numerous projects at Msebetsi Solutions.</p>
+                </div>
+                
+                <div class="contact">
+                    <div>Email: john.doe@msebetsi.africa</div>
+                    <div>Phone: +27 123 456 789</div>
+                    <div>Location: Johannesburg, South Africa</div>
+                    <div>Department: Engineering</div>
+                    <div>Joined: 2023-01-15</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+FILE 2: style.css (Basic styling)
+==================================
+
+/* Add your enhanced CSS here */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* TODO: Add semantic CSS selectors */
+/* TODO: Implement responsive layout */
+/* TODO: Add accessibility features */
+
+INSTRUCTIONS:
+1. Save these files locally
+2. Enhance index.html with semantic HTML5 elements
+3. Improve style.css with modern layout techniques
+4. Add accessibility features
+5. Include structured data
+6. Submit your enhanced version`;
+
+            // Create and download file
+            const blob = new Blob([starterCode], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'lesson8-starter-code.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Starter files downloaded!', 'success');
+        });
+        
+        // View solution modal
+        document.getElementById('viewSolution').addEventListener('click', function() {
+            document.getElementById('solutionModal').classList.remove('hidden');
+            document.getElementById('modalOverlay').classList.remove('hidden');
+        });
+        
+        // Close modal
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('solutionModal').classList.add('hidden');
+            document.getElementById('modalOverlay').classList.add('hidden');
+        });
+        
+        document.getElementById('modalOverlay').addEventListener('click', function() {
+            document.getElementById('solutionModal').classList.add('hidden');
+            this.classList.add('hidden');
+        });
+        
+        // File upload handling
+        const fileInput = document.getElementById('fileInput');
+        const browseBtn = document.getElementById('browseBtn');
+        const uploadArea = document.getElementById('uploadArea');
+        const uploadedFiles = document.getElementById('uploadedFiles');
+        const fileList = document.getElementById('fileList');
+        const evaluateBtn = document.getElementById('evaluateBtn');
+        
+        // Store uploaded files
+        let uploadedFilesData = {
+            html: null,
+            css: null
+        };
+        
+        // Browse files
+        browseBtn.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        // Handle file selection
+        fileInput.addEventListener('change', handleFiles);
+        
+        function handleFiles() {
+            const files = fileInput.files;
+            if (!files.length) return;
+            
+            // Reset file list
+            fileList.innerHTML = '';
+            
+            // Process each file
+            Array.from(files).forEach(file => {
+                // Check file type
+                if (!file.name.match(/\.(html|css)$/)) {
+                    showNotification(`Skipped ${file.name}: Only .html and .css files accepted`, 'error');
+                    return;
+                }
+                
+                // Check file size
+                if (file.size > 500000) {
+                    showNotification(`Skipped ${file.name}: File too large (max 500KB)`, 'error');
+                    return;
+                }
+                
+                // Read file
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    const type = file.name.endsWith('.html') ? 'html' : 'css';
+                    
+                    // Store file data
+                    uploadedFilesData[type] = {
+                        name: file.name,
+                        content: content,
+                        size: file.size
+                    };
+                    
+                    // Update UI
+                    updateFileList();
+                };
+                reader.readAsText(file);
+            });
+        }
+        
+        function updateFileList() {
+            fileList.innerHTML = '';
+            
+            // Add HTML file if uploaded
+            if (uploadedFilesData.html) {
+                const fileItem = createFileItem(uploadedFilesData.html, 'html');
+                fileList.appendChild(fileItem);
+            }
+            
+            // Add CSS file if uploaded
+            if (uploadedFilesData.css) {
+                const fileItem = createFileItem(uploadedFilesData.css, 'css');
+                fileList.appendChild(fileItem);
+            }
+            
+            // Show uploaded files section
+            uploadedFiles.classList.remove('hidden');
+            
+            // Enable/disable evaluate button
+            if (uploadedFilesData.html && uploadedFilesData.css) {
+                evaluateBtn.disabled = false;
+            } else {
+                evaluateBtn.disabled = true;
+                evaluateBtn.innerHTML = '⏳ Upload both HTML and CSS files to evaluate';
+            }
+        }
+        
+        function createFileItem(fileData, type) {
+            const div = document.createElement('div');
+            div.className = 'flex';
+            div.style.cssText = 'padding: var(--space-sm); background: var(--light-bg); border-radius: var(--radius-sm); margin-bottom: var(--space-xs); align-items: center;';
+            
+            div.innerHTML = `
+                <span style="background: ${type === 'html' ? 'var(--warning)' : 'var(--info)'}; color: white; padding: 2px 8px; border-radius: var(--radius-sm); font-size: 0.8rem; margin-right: var(--space-sm);">
+                    ${type.toUpperCase()}
+                </span>
+                <span style="flex-grow: 1;">${fileData.name} (${(fileData.size/1024).toFixed(1)} KB)</span>
+                <button class="remove-file" data-type="${type}" style="background: none; border: none; color: var(--error); cursor: pointer; padding: 4px;">
+                    ✕
+                </button>
+            `;
+            
+            return div;
+        }
+        
+        // Remove file
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-file')) {
+                const type = e.target.getAttribute('data-type');
+                uploadedFilesData[type] = null;
+                updateFileList();
+                showNotification(`Removed ${type.toUpperCase()} file`, 'info');
+            }
+        });
+        
+        // Evaluate solution
+        evaluateBtn.addEventListener('click', function() {
+            if (!uploadedFilesData.html || !uploadedFilesData.css) {
+                showNotification('Please upload both HTML and CSS files', 'error');
+                return;
+            }
+            
+            // Show loading state
+            evaluateBtn.innerHTML = '⏳ Evaluating...';
+            evaluateBtn.disabled = true;
+            
+            // Simulate evaluation process
+            setTimeout(() => {
+                evaluateSolution(uploadedFilesData.html.content, uploadedFilesData.css.content);
+                
+                // Reset button
+                evaluateBtn.innerHTML = '🎯 Evaluate My Solution';
+                evaluateBtn.disabled = false;
+                
+                // Switch to results tab
+                document.querySelector('[data-tab="results"]').click();
+            }, 2000);
+        });
+        
+        function evaluateSolution(html, css) {
+            // Initialize scores
+            let scores = {
+                semantic: 0,
+                accessibility: 0,
+                layout: 0,
+                structured: 0,
+                quality: 0
+            };
+            
+            // Check for semantic elements
+            const semanticElements = ['header', 'main', 'footer', 'section', 'article', 'aside', 'nav', 'figure', 'figcaption', 'time', 'address', 'mark'];
+            semanticElements.forEach(element => {
+                if (html.includes(`<${element}`) || html.includes(`</${element}>`)) {
+                    scores.semantic += 2;
+                }
+            });
+            scores.semantic = Math.min(scores.semantic, 30);
+            
+            // Check accessibility
+            if (html.includes('aria-')) scores.accessibility += 5;
+            if (html.includes('role=')) scores.accessibility += 5;
+            if (html.includes('alt=') && html.split('alt=').length > 2) scores.accessibility += 5;
+            if (html.includes('tabindex=')) scores.accessibility += 5;
+            
+            // Check layout
+            if (css.includes('display: grid')) scores.layout += 5;
+            if (css.includes('display: flex')) scores.layout += 5;
+            if (css.includes('@media')) scores.layout += 5;
+            if (css.includes('clamp(') || css.includes('minmax(')) scores.layout += 5;
+            
+            // Check structured data
+            if (html.includes('application/ld+json')) scores.structured += 5;
+            if (html.includes('itemscope') || html.includes('itemtype')) scores.structured += 5;
+            if (html.includes('og:')) scores.structured += 5;
+            
+            // Check code quality
+            if (!html.includes('TODO') && !html.includes('FIXME')) scores.quality += 5;
+            if (css.includes(':root') && css.includes('--')) scores.quality += 5;
+            if (css.includes('/*') && css.includes('*/')) scores.quality += 5;
+            
+            // Calculate total
+            const total = scores.semantic + scores.accessibility + scores.layout + scores.structured + scores.quality;
+            
+            // Update UI
+            document.getElementById('scoreSemantic').textContent = `${scores.semantic}/30`;
+            document.getElementById('scoreAccessibility').textContent = `${scores.accessibility}/20`;
+            document.getElementById('scoreLayout').textContent = `${scores.layout}/20`;
+            document.getElementById('scoreStructured').textContent = `${scores.structured}/15`;
+            document.getElementById('scoreQuality').textContent = `${scores.quality}/15`;
+            document.getElementById('totalScore').textContent = `${total}/100`;
+            document.getElementById('finalScore').textContent = `${total}/100`;
+            
+            // Color code final score
+            const finalScoreElem = document.getElementById('finalScore');
+            if (total >= 80) {
+                finalScoreElem.style.color = 'var(--success)';
+            } else if (total >= 60) {
+                finalScoreElem.style.color = 'var(--warning)';
+            } else {
+                finalScoreElem.style.color = 'var(--error)';
+            }
+            
+            // Provide feedback
+            const feedback = document.getElementById('feedback');
+            if (total >= 80) {
+                feedback.innerHTML = `
+                    <div class="card success-card">
+                        <h3>🎉 Excellent Work!</h3>
+                        <p>Your implementation demonstrates excellent understanding of semantic HTML5 elements and modern layout techniques. You've created an accessible, well-structured profile component.</p>
+                    </div>
+                `;
+            } else if (total >= 60) {
+                feedback.innerHTML = `
+                    <div class="card warning-card">
+                        <h3>👍 Good Progress</h3>
+                        <p>You've implemented many important concepts. Review the expected solution to see what you might have missed and try to improve your score.</p>
+                    </div>
+                `;
+            } else {
+                feedback.innerHTML = `
+                    <div class="card error-card">
+                        <h3>📚 Keep Learning</h3>
+                        <p>Review the lesson materials and try again. Focus on semantic HTML elements and accessibility features.</p>
+                    </div>
+                `;
+            }
+            
+            // Show results
+            document.getElementById('resultsPlaceholder').classList.add('hidden');
+            document.getElementById('resultsContent').classList.remove('hidden');
+            
+            showNotification(`Evaluation complete! Score: ${total}/100`, 'success');
+        }
+        
+        // Retry button
+        document.getElementById('retryBtn').addEventListener('click', function() {
+            // Reset uploaded files
+            uploadedFilesData = { html: null, css: null };
+            fileInput.value = '';
+            uploadedFiles.classList.add('hidden');
+            
+            // Reset results
+            document.getElementById('resultsPlaceholder').classList.remove('hidden');
+            document.getElementById('resultsContent').classList.add('hidden');
+            
+            // Switch to upload tab
+            document.querySelector('[data-tab="upload"]').click();
+            
+            showNotification('Ready for a new submission!', 'info');
+        });
+        
+        // Certificate button
+        document.getElementById('certificateBtn').addEventListener('click', function() {
+            const score = document.getElementById('finalScore').textContent;
+            const certificate = generateCertificate(score);
+            
+            const blob = new Blob([certificate], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'msebetsi-certificate-lesson8.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Certificate downloaded!', 'success');
+        });
+        
+        function generateCertificate(score) {
+            return `<!DOCTYPE html>
+<html>
+<head>
+    <title>Certificate of Completion</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .certificate {
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            max-width: 800px;
+            text-align: center;
+            border: 15px solid #2563eb;
+        }
+        h1 {
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
+        .student-name {
+            font-size: 2.5em;
+            margin: 30px 0;
+            color: #1e293b;
+            padding: 20px;
+            border-top: 2px solid #e2e8f0;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .score {
+            font-size: 3em;
+            color: #10b981;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate">
+        <h1>Certificate of Completion</h1>
+        <p>Msebetsi Solutions Professional Development Program</p>
+        
+        <p>This certifies that</p>
+        <div class="student-name">[Student Name]</div>
+        
+        <p>has successfully completed</p>
+        <h2>Lesson 8: HTML5 Semantic Elements & Layout</h2>
+        
+        <p>with a final score of</p>
+        <div class="score">${score}</div>
+        
+        <p>demonstrating proficiency in semantic HTML5, modern CSS layouts, and web accessibility.</p>
+        
+        <div class="footer">
+            <div>
+                <strong>Instructor Signature</strong><br>
+                Msebetsi Solutions
+            </div>
+            <div>
+                <strong>Date</strong><br>
+                ${new Date().toLocaleDateString()}
+            </div>
+        </div>
+    </div>
+</body>
+</html>`;
+        }
+        
+        // Notification system
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: var(--radius-md);
+                background: ${type === 'success' ? 'var(--success)' : 
+                           type === 'error' ? 'var(--error)' : 
+                           type === 'info' ? 'var(--info)' : 'var(--warning)'};
+                color: white;
+                font-weight: 500;
+                box-shadow: var(--shadow-lg);
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 300);
+            }, 3000);
+            
+            // Add animation styles
+            if (!document.getElementById('notification-styles')) {
+                const style = document.createElement('style');
+                style.id = 'notification-styles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOut {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
+        // Auto-complete tasks for demo (optional)
+        setTimeout(() => {
+            const taskItems = document.querySelectorAll('.task-item');
+            taskItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.classList.add('completed');
+                }, (index + 1) * 1000);
+            });
+        }, 1000);
+    </script>
+</body>
+</html>

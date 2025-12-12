@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en-ZA" dir="ltr" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Msebetsi Solutions | Advanced CSS Selector Architecture</title>
+  <meta name="description" content="Enterprise CSS mastery: attribute selectors, :has(), design tokens, WCAG 2.1 AA">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-surface: #ffffff;
+      --color-background: #f8f9fa;
+      --color-card: #ffffff;
+      --color-text: #000000;
+      --color-text-secondary: #495057;
+      --color-border: #dee2e6;
+      --color-primary: #000000;
+      --color-success: #28a745;
+      --color-warning: #ffc107;
+      --color-error: #dc3545;
+      --color-info: #17a2b8;
+
+      --border-radius-sm: 6px;
+      --border-radius-md: 10px;
+      --border-radius-lg:16px;
+      --spacing-xs:0.5rem;
+      --spacing-sm:0.875rem;
+      --spacing-md:1.25rem;
+      --spacing-lg:1.75rem;
+      --spacing-xl:2.5rem;
+      --shadow-sm:0 1px 3px rgba(0,0,0,0.1);
+      --shadow-md:0 4px 6px -1px rgba(0,0,0,0.1);
+      --shadow-lg:0 10px 25px -5px rgba(0,0,0,0.1);
+      --font-body:'Inter',sans-serif;
+      --font-mono:'JetBrains Mono',monospace;
+    }
+
+    [data-theme="dark"] {
+      --color-surface:#000000;
+      --color-background:#121212;
+      --color-card:#1a1a1a;
+      --color-text:#ffffff;
+      --color-text-secondary:#adb5bd;
+      --color-border:#343a40;
+      --color-primary:#ffffff;
+      --color-success:#20c997;
+      --color-warning:#ffd166;
+      --color-error:#ff6b6b;
+      --color-info:#4cc9f0;
+    }
+
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html{font-size:16px;scroll-behavior:smooth;}
+    body{
+      font-family:var(--font-body);line-height:1.6;color:var(--color-text);
+      background:var(--color-background);padding:var(--spacing-md);
+      max-width:1400px;margin:0 auto;min-height:100vh;transition:all .3s;
+    }
+
+    .background-pattern{
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background-image:linear-gradient(to right,var(--color-border) 1px,transparent 1px),
+                       linear-gradient(to bottom,var(--color-border) 1px,transparent 1px);
+      background-size:40px 40px;opacity:.08;z-index:-1;
+    }
+
+    .theme-toggle{
+      position:fixed;top:20px;right:20px;z-index:1000;display:flex;align-items:center;gap:var(--spacing-xs);
+      background:var(--color-card);padding:var(--spacing-sm) var(--spacing-md);
+      border-radius:var(--border-radius-md);border:2px solid var(--color-border);box-shadow:var(--shadow-md);
+    }
+    .theme-toggle-btn{
+      background:var(--color-surface);border:2px solid var(--color-border);
+      border-radius:50px;width:60px;height:30px;position:relative;cursor:pointer;transition:.3s;
+    }
+    .theme-toggle-btn::after{
+      content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;
+      background:var(--color-primary);border-radius:50%;transition:.3s;
+    }
+    [data-theme="dark"] .theme-toggle-btn::after{transform:translateX(30px);}
+
+    h1,h2,h3{font-weight:700;line-height:1.2;margin-bottom:var(--spacing-md);color:var(--color-text);}
+    h1{font-size:2.5rem;color:var(--color-primary);}
+    h2{font-size:1.75rem;border-bottom:2px solid var(--color-border);padding-bottom:var(--spacing-sm);margin-top:var(--spacing-xl);}
+    h3{font-size:1.3rem;color:var(--color-secondary);margin-top:var(--spacing-lg);}
+
+    .container{max-width:1200px;margin:0 auto;}
+    .card{
+      background:var(--color-card);border-radius:var(--border-radius-lg);
+      box-shadow:var(--shadow-md);padding:var(--spacing-lg);margin-bottom:var(--spacing-lg);
+      border:1px solid var(--color-border);transition:.3s;
+    }
+    .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+    .success-card{border-left:4px solid var(--color-success);}
+    .warning-card{border-left:4px solid var(--color-warning);}
+    .info-card{border-left:4px solid var(--color-info);}
+    .error-card{border-left:4px solid var(--color-error);}
+
+    .badge{
+      display:inline-block;padding:.25rem .75rem;border-radius:20px;
+      font-size:.85rem;font-weight:600;background:var(--color-surface);
+      color:var(--color-text);border:1px solid var(--color-border);
+    }
+    .badge-success{background:var(--color-success);color:white;border:none;}
+    .badge-warning{background:var(--color-warning);color:black;border:none;}
+    .badge-info{background:var(--color-info);color:white;border:none;}
+
+    .tabs-nav{
+      display:flex;flex-wrap:wrap;gap:var(--spacing-xs);
+      border-bottom:2px solid var(--color-border);margin-bottom:var(--spacing-lg);
+    }
+    .tab-btn{
+      padding:var(--spacing-sm) var(--spacing-lg);background:none;border:none;
+      border-bottom:3px solid transparent;font-weight:600;color:var(--color-text-secondary);
+      cursor:pointer;transition:.3s;
+    }
+    .tab-btn.active{color:var(--color-primary);border-bottom-color:var(--color-primary);}
+    .tab-content{display:none;animation:fadeIn .3s;}
+    .tab-content.active{display:block;}
+
+    .code-editor{
+      background:var(--color-surface);border-radius:var(--border-radius-md);
+      overflow:hidden;margin:var(--spacing-lg) 0;border:1px solid var(--color-border);
+    }
+    .code-header{
+      background:var(--color-card);padding:var(--spacing-sm) var(--spacing-md);
+      display:flex;justify-content:space-between;align-items:center;
+      font-family:var(--font-mono);font-size:.9rem;border-bottom:1px solid var(--color-border);
+    }
+    .code-body{padding:var(--spacing-md);overflow-x:auto;}
+    .code-body code{font-family:var(--font-mono);background:transparent;color:var(--color-text);font-size:.95rem;line-height:1.5;}
+
+    .task-list{list-style:none;counter-reset:task;}
+    .task-item{
+      counter-increment:task;margin-bottom:var(--spacing-lg);padding-left:3rem;position:relative;
+    }
+    .task-item::before{
+      content:counter(task);position:absolute;left:0;top:0;width:2rem;height:2rem;
+      background:var(--color-primary);color:var(--color-surface);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-weight:bold;
+    }
+    .task-item.completed::before{background:var(--color-success);content:"Checkmark";}
+
+    .version-selector{display:flex;gap:var(--spacing-sm);margin:var(--spacing-md) 0;}
+    .version-btn{
+      flex:1;text-align:center;padding:var(--spacing-md);
+      background:var(--color-surface);border:1px solid var(--color-border);
+      border-radius:var(--border-radius-md);cursor:pointer;transition:.3s;
+    }
+    .version-btn.active{background:var(--color-primary);color:var(--color-surface);}
+
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:var(--spacing-xs);
+      padding:var(--spacing-sm) var(--spacing-lg);border-radius:var(--border-radius-md);
+      font-weight:600;cursor:pointer;border:2px solid var(--color-border);
+      background:var(--color-surface);color:var(--color-text);transition:.3s;
+    }
+    .btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+    .btn-primary{background:var(--color-primary);color:var(--color-surface);border-color:var(--color-primary);}
+    .btn-success{background:var(--color-success);color:white;border-color:var(--color-success);}
+    .btn-secondary{background:transparent;border-color:var(--color-primary);color:var(--color-primary);}
+
+    .grid{display:grid;gap:var(--spacing-md);}
+    .grid-2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr));}
+
+    .lesson-header{text-align:center;margin-bottom:var(--spacing-xl);padding-bottom:var(--spacing-lg);border-bottom:2px solid var(--color-border);}
+
+    .upload-area{
+      border:3px dashed var(--color-border);border-radius:var(--border-radius-lg);
+      padding:var(--spacing-xl);text-align:center;transition:.3s;margin:var(--spacing-lg) 0;cursor:pointer;
+    }
+    .upload-area:hover,.upload-area.dragover{border-color:var(--color-primary);background:rgba(0,0,0,.05);}
+    [data-theme="dark"] .upload-area:hover{background:rgba(255,255,255,.05);}
+
+    .file-list{list-style:none;margin:var(--spacing-md) 0;}
+    .file-item{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:var(--spacing-sm);background:var(--color-surface);
+      border:1px solid var(--color-border);border-radius:var(--border-radius-sm);
+      margin-bottom:var(--spacing-xs);
+    }
+    .file-type{
+      font-size:.8rem;padding:.1rem .5rem;border-radius:var(--border-radius-sm);
+      background:var(--color-primary);color:var(--color-surface);
+    }
+
+    .score-display{font-size:3rem;font-weight:700;text-align:center;margin:var(--spacing-lg) 0;}
+    .breakdown-item{
+      display:flex;justify-content:space-between;padding:var(--spacing-sm) 0;
+      border-bottom:1px solid var(--color-border);
+    }
+    .breakdown-item:last-child{border:none;font-weight:bold;padding-top:var(--spacing-md);}
+
+    .loading{
+      display:inline-block;width:20px;height:20px;
+      border:3px solid rgba(0,0,0,.3);border-radius:50%;border-top-color:var(--color-primary);
+      animation:spin 1s ease-in-out infinite;margin-right:var(--spacing-xs);
+    }
+    [data-theme="dark"] .loading{border-color:rgba(255,255,255,.3);border-top-color:var(--color-primary);}
+
+    .footer{
+      text-align:center;margin-top:var(--spacing-xl);padding-top:var(--spacing-lg);
+      border-top:1px solid var(--color-border);color:var(--color-text-secondary);font-size:.9rem;
+    }
+
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    @media (max-width:768px){
+      h1{font-size:2rem;}
+      .grid-2{grid-template-columns:1fr;}
+      .theme-toggle{top:10px;right:10px;}
+      .tabs-nav{overflow-x:auto;white-space:nowrap;}
+    }
+  </style>
+</head>
+<body>
+  <div class="background-pattern"></div>
+
+  <div class="theme-toggle">
+    <span class="theme-label" id="themeLabel">Light</span>
+    <button class="theme-toggle-btn" id="themeToggle" aria-label="Toggle theme"></button>
+  </div>
+
+  <div class="container">
+    <header class="lesson-header">
+      <h1>Advanced CSS Selector Architecture</h1>
+      <p class="subtitle">Enterprise Dashboard Refactor – Msebetsi Solutions</p>
+      <div class="lesson-meta">
+        <span class="badge badge-success">CSS Mastery</span>
+        <span class="badge badge-warning">Performance</span>
+        <span class="badge badge-info">Accessibility</span>
+        <span class="badge">Design Tokens</span>
+      </div>
+    </header>
+
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="overview">Overview</button>
+      <button class="tab-btn" data-tab="challenge">Challenge Files</button>
+      <button class="tab-btn" data-tab="solution">Submit Solution</button>
+      <button class="tab-btn" data-tab="results">Results</button>
+      <button class="tab-btn" data-tab="certificate">Certificate</button>
+    </nav>
+
+    <!-- Overview Tab -->
+    <div class="tab-content active" id="overview">
+      <div class="card success-card">
+        <h2>Learning Objectives</h2>
+        <p>Build scalable, performant, accessible component systems using modern CSS selector patterns.</p>
+        <div class="grid grid-2">
+          <div class="card info-card">
+            <h3>Core Skills</h3>
+            <ul>
+              <li>Three-layer architecture</li>
+              <li>Attribute-first components</li>
+              <li>:has(), container queries</li>
+              <li>Design tokens & CSS variables</li>
+              <li>WCAG 2.1 AA compliance</li>
+            </ul>
+          </div>
+          <div class="card warning-card">
+            <h3>Success Metrics</h3>
+            <ul>
+              <li>40% smaller CSS</li>
+              <li>60% faster builds</li>
+              <li>100/100 Lighthouse</li>
+              <li>Specificity score less than 100</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>13 Tasks to Complete</h2>
+        <div class="task-list">
+          <div class="task-item">Add skip to main content link</div>
+          <div class="task-item">Style nav using attribute selectors</div>
+          <div class="task-item">Build theme switcher with ARIA</div>
+          <div class="task-item">Style cards with [data-card-type]</div>
+          <div class="task-item">Use :has(), :focus-within</div>
+          <div class="task-item">Create semantic design tokens</div>
+          <div class="task-item">Support high-contrast mode</div>
+          <div class="task-item">Respect reduced motion</div>
+          <div class="task-item">Keep specificity low</div>
+          <div class="task-item">Avoid deep descendant selectors</div>
+          <div class="task-item">Make all interactive elements keyboard accessible</div>
+          <div class="task-item">Document architecture decisions</div>
+          <div class="task-item">Achieve 90+ Lighthouse performance</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Challenge Files Tab -->
+    <div class="tab-content" id="challenge">
+      <div class="card">
+        <h2>Challenge Files</h2>
+        <div class="version-selector">
+          <button class="version-btn active" data-version="unsolved">Unsolved Starter</button>
+          <button class="version-btn" data-version="solved">Solved Reference</button>
+        </div>
+
+        <div id="unsolvedVersion" class="version-content active">
+          <div class="card">
+            <h3>Starter Kit</h3>
+            <p>Complete the 13 tasks in the provided files.</p>
+            <div class="grid grid-2">
+              <div class="code-editor">
+                <div class="code-header"><span>index.html</span><span>13 Tasks</span></div>
+                <div class="code-body"><pre><code><!-- Your second index.html with all TODO comments goes here --></code></pre></div>
+              </div>
+              <div>
+                <div class="code-editor">
+                  <div class="code-header"><span>design-tokens.css</span></div>
+                  <div class="code-body"><pre><code>/* Define tokens */</code></pre></div>
+                </div>
+                <div class="code-editor" style="margin-top:var(--spacing-md);">
+                  <div class="code-header"><span>component-system.css</span></div>
+                  <div class="code-body"><pre><code>/* Use attribute selectors */</code></pre></div>
+                </div>
+              </div>
+            </div>
+            <div style="text-align:center;margin-top:var(--spacing-lg);">
+              <button class="btn btn-primary" onclick="alert('Starter kit ready for download!')">Download Starter Kit</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="solvedVersion" class="version-content">
+          <div class="card success-card">
+            <h3>Solved Reference</h3>
+            <p>Professional implementation example.</p>
+            <div class="grid grid-2">
+              <div class="code-editor">
+                <div class="code-header"><span>design-tokens.css</span></div>
+                <div class="code-body"><pre><code>:root{--color-primary:#000;/* ... */}</code></pre></div>
+              </div>
+              <div class="code-editor">
+                <div class="code-header"><span>component-system.css</span></div>
+                <div class="code-body"><pre><code>[data-component="card"]{...}
+[data-component="card"][data-variant="alert"]{border-left:4px solid red;}</code></pre></div>
+              </div>
+            </div>
+            <div style="text-align:center;margin-top:var(--spacing-lg);">
+              <button class="btn btn-secondary" onclick="alert('Solved reference ready!')">Download Solved Files</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Solution Tab -->
+    <div class="tab-content" id="solution">
+      <div class="card">
+        <h2>Submit Your Solution</h2>
+        <p>Upload your <code>design-tokens.css</code> and <code>component-system.css</code> files.</p>
+
+        <div class="upload-area" id="uploadArea">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <h3>Drag & Drop CSS Files Here</h3>
+          <p>or click to browse</p>
+          <input type="file" id="fileUpload" accept=".css" multiple style="display:none;">
+        </div>
+
+        <div id="uploadedFilesSection" style="display:none;">
+          <h3>Uploaded Files:</h3>
+          <ul class="file-list" id="fileList"></ul>
+        </div>
+
+        <div id="evaluateSection" style="display:none;text-align:center;margin-top:var(--spacing-lg);">
+          <button id="evaluateBtn" class="btn btn-success" style="font-size:1.1rem;padding:var(--spacing-md) var(--spacing-xl);">
+            Evaluate My Solution
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Tab -->
+    <div class="tab-content" id="results">
+      <div class="card">
+        <h2>Evaluation Results</h2>
+
+        <div id="resultsPlaceholder">
+          <div style="text-align:center;padding:var(--spacing-xl);color:var(--color-text-secondary);">
+            <p>Upload your CSS files and click "Evaluate" to see your score.</p>
+          </div>
+        </div>
+
+        <div id="resultsContent" style="display:none;">
+          <div class="score-display" id="finalScore">0/100</div>
+
+          <div class="score-breakdown">
+            <h3>Score Breakdown</h3>
+            <div class="breakdown-item"><span>Design Tokens</span><span id="scoreTokens">0/20</span></div>
+            <div class="breakdown-item"><span>Attribute Selectors</span><span id="scoreAttributes">0/25</span></div>
+            <div class="breakdown-item"><span>Modern Selectors</span><span id="scoreModern">0/15</span></div>
+            <div class="breakdown-item"><span>Performance & Specificity</span><span id="scorePerf">0/15</span></div>
+            <div class="breakdown-item"><span>Accessibility</span><span id="scoreA11y">0/15</span></div>
+            <div class="breakdown-item"><span>Code Quality</span><span id="scoreQuality">0/10</span></div>
+            <div class="breakdown-item"><strong>Total</strong><strong id="scoreTotal">0/100</strong></div>
+          </div>
+
+          <div id="feedbackMessage" style="margin:var(--spacing-lg) 0;"></div>
+
+          <div style="text-align:center;margin-top:var(--spacing-lg);">
+            <button id="retryButton" class="btn btn-secondary">Try Again</button>
+            <button id="viewCertificate" class="btn btn-primary">View Certificate</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Certificate Tab -->
+    <div class="tab-content" id="certificate">
+      <div class="card">
+        <h2>Certificate of Completion</h2>
+        <div style="text-align:center;padding:var(--spacing-xl);">
+          <h3 id="certMessage">Complete the evaluation to unlock your certificate</h3>
+          <button id="generateCertificate" class="btn btn-primary" style="padding:var(--spacing-lg);font-size:1.1rem;">
+            Generate Certificate
+          </button>
+        </div>
+
+        <div id="certificatePreview" style="display:none;margin-top:var(--spacing-xl);">
+          <div class="card success-card" style="border:4px solid gold;padding:var(--spacing-xl);">
+            <div style="text-align:center;">
+              <h1 style="color:gold;margin-bottom:var(--spacing-md);">Certificate of Completion</h1>
+              <p style="color:var(--color-text-secondary);">Msebetsi Solutions Professional Development</p>
+
+              <div style="border:2px solid var(--color-border);padding:var(--spacing-xl);margin:var(--spacing-xl) 0;">
+                <p>This certifies that</p>
+                <h2 id="certificateName" style="font-size:2.8rem;color:var(--color-primary);margin:var(--spacing-md) 0;">[Your Name]</h2>
+                <p>has successfully completed</p>
+                <h3 style="color:var(--color-secondary);margin:var(--spacing-md) 0;">Advanced CSS Selector Architecture</h3>
+              </div>
+
+              <div class="grid grid-3" style="margin-top:var(--spacing-xl);">
+                <div><strong>Score</strong><p id="certificateScore" style="font-size:1.6rem;color:var(--color-success);">100%</p></div>
+                <div><strong>Date</strong><p id="certificateDate"></p></div>
+                <div><strong>Certificate ID</strong><p id="certificateId" style="font-family:var(--font-mono);"></p></div>
+              </div>
+
+              <div style="margin-top:var(--spacing-xl);">
+                <button id="downloadCertificate" class="btn btn-primary">Download Certificate</button>
+                <button id="printCertificate" class="btn btn-secondary" style="margin-left:var(--spacing-md);">Print</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>Msebetsi Solutions &copy; <span id="currentYear"></span> | Advanced CSS Selector Architecture</p>
+  </footer>
+
+  <script>
+    // Theme
+    const themeToggle = document.getElementById('themeToggle');
+    const themeLabel = document.getElementById('themeLabel');
+    const html = document.documentElement;
+
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      html.setAttribute('data-theme', saved);
+      themeLabel.textContent = saved === 'dark' ? 'Dark' : 'Light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      html.setAttribute('data-theme', 'dark');
+      themeLabel.textContent = 'Dark';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      themeLabel.textContent = next === 'dark' ? 'Dark' : 'Light';
+    });
+
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Version selector
+    document.querySelectorAll('.version-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.version-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.version-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.version + 'Version').classList.add('active');
+      });
+    });
+
+    // Upload
+    const uploadArea = document.getElementById('uploadArea');
+    const fileUpload = document.getElementById('fileUpload');
+    const fileList = document.getElementById('fileList');
+    const uploadedFilesSection = document.getElementById('uploadedFilesSection');
+    const evaluateSection = document.getElementById('evaluateSection');
+    let uploadedFiles = {};
+
+    uploadArea.addEventListener('click', () => fileUpload.click());
+    fileUpload.addEventListener('change', e => handleFiles(e.target.files));
+
+    ['dragenter','dragover'].forEach(ev => uploadArea.addEventListener(ev, () => uploadArea.classList.add('dragover')));
+    ['dragleave','drop'].forEach(ev => uploadArea.addEventListener(ev, () => uploadArea.classList.remove('dragover')));
+    uploadArea.addEventListener('drop', e => { e.preventDefault(); handleFiles(e.dataTransfer.files); });
+
+    function handleFiles(files) {
+      Array.from(files).forEach(file => {
+        if (!file.name.endsWith('.css')) {
+          alert('Only .css files are allowed');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = e => {
+          uploadedFiles[file.name] = e.target.result;
+          updateFileList();
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    function updateFileList() {
+      fileList.innerHTML = '';
+      Object.keys(uploadedFiles).forEach(name => {
+        const li = document.createElement('li');
+        li.className = 'file-item';
+        li.innerHTML = `
+          <div class="file-name">
+            <span class="file-type">CSS</span>
+            <span>${name}</span>
+          </div>
+          <button class="btn" onclick="delete '${name}')">Remove</button>
+        `;
+        fileList.appendChild(li);
+      });
+      uploadedFilesSection.style.display = Object.keys(uploadedFiles).length ? 'block' : 'none';
+      evaluateSection.style.display = Object.keys(uploadedFiles).length >= 2 ? 'block' : 'none';
+    }
+
+    window.deleteFile = name => {
+      delete uploadedFiles[name];
+      updateFileList();
+    };
+
+    // Evaluation
+    document.getElementById('evaluateBtn').addEventListener('click', () => {
+      const btn = document.getElementById('evaluateBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Evaluating...';
+
+      setTimeout(() => {
+        const allCSS = Object.values(uploadedFiles).join('\n');
+
+        const scores = {
+          tokens: 0,
+          attributes: 0,
+          modern: 0,
+          perf: 0,
+          a11y: 0,
+          quality: 0
+        };
+
+        if (/:root\s*{[\s\S]*--/.test(allCSS)) scores.tokens += 20;
+        if (/\[data-/.test(allCSS)) scores.attributes += 15;
+        if (allCSS.includes('[data-card-type') || allCSS.includes('[data-component')) scores.attributes += 10;
+        if (/:has\(/.test(allCSS)) scores.modern += 10;
+        if (/:focus-within|:focus-visible/.test(allCSS)) scores.modern += 5;
+        if (!/body\s+\.|\.container\s+\./.test(allCSS)) scores.perf += 15;
+        if (allCSS.includes('prefers-reduced-motion') || allCSS.includes('prefers-contrast')) scores.a11y += 15;
+        if (!allCSS.includes('!important')) scores.quality += 10;
+
+        const total = Object.values(scores).reduce((a,b)=>a+b,0);
+
+        // Update results
+        document.getElementById('scoreTokens').textContent = scores.tokens + '/20';
+        document.getElementById('scoreAttributes').textContent = scores.attributes + '/25';
+        document.getElementById('scoreModern').textContent = scores.modern + '/15';
+        document.getElementById('scorePerf').textContent = scores.perf + '/15';
+        document.getElementById('scoreA11y').textContent = scores.a11y + '/15';
+        document.getElementById('scoreQuality').textContent = scores.quality + '/10';
+        document.getElementById('scoreTotal').textContent = total + '/100';
+        document.getElementById('finalScore').textContent = total + '/100';
+        document.getElementById('finalScore').style.color = total >= 80 ? '#28a745' : total >= 60 ? '#ffc107' : '#dc3545';
+
+        const feedback = total >= 80 ?
+          `<div class="card success-card"><h3>Outstanding! Senior Engineer Level</h3><p>You have mastered enterprise CSS architecture.</p></div>` :
+          total >= 60 ?
+          `<div class="card warning-card"><h3>Good Work</h3><p>You're close! Study the solved example.</p></div>` :
+          `<div class="card error-card"><h3>Keep Learning</h3><p>Focus on attribute selectors and design tokens.</p></div>`;
+
+        document.getElementById('feedbackMessage').innerHTML = feedback;
+
+        document.getElementById('resultsPlaceholder').style.display = 'none';
+        document.getElementById('resultsContent').style.display = 'block';
+
+        localStorage.setItem('cssArchitectureScore2025', total);
+        localStorage.setItem('cssArchitectureDate', new Date().toISOString());
+
+        btn.disabled = false;
+        btn.innerHTML = 'Evaluate My Solution';
+        document.querySelector('[data-tab="results"]').click();
+      }, 2000);
+    });
+
+    // Retry
+    document.getElementById('retryButton').addEventListener('click', () => {
+      uploadedFiles = {};
+      updateFileList();
+      document.getElementById('resultsContent').style.display = 'none';
+      document.getElementById('resultsPlaceholder').style.display = 'block';
+      document.querySelector('[data-tab="solution"]').click();
+    });
+
+    // Certificate
+    document.getElementById('generateCertificate').addEventListener('click', () => {
+      const score = parseInt(localStorage.getItem('cssArchitectureScore2025') || '0');
+      if (score < 80) {
+        document.getElementById('certMessage').innerHTML = 'Score 80+ required to unlock certificate';
+        return;
+      }
+
+      const name = prompt('Enter your full name for the certificate:', '') || 'Engineer';
+      document.getElementById('certificateName').textContent = name;
+      document.getElementById('certificateScore').textContent = score + '%';
+      document.getElementById('certificateDate').textContent = new Date().toLocaleDateString('en-ZA');
+      document.getElementById('certificateId').textContent = 'CSS-' + Date.now().toString().slice(-8);
+
+      document.getElementById('certificatePreview').style.display = 'block';
+      document.querySelector('[data-tab="certificate"]').click();
+    });
+
+    document.getElementById('downloadCertificate')?.addEventListener('click', () => {
+      const content = document.querySelector('#certificatePreview .card').outerHTML;
+      const fullHTML = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Certificate</title><style>body{font-family:sans-serif;background:#f9f9f9;padding:40px;} .card{max-width:900px;margin:auto;background:white;padding:60px;border:4px solid gold;border-radius:16px;}</style></head><body>${content}</body></html>`;
+      const blob = new Blob([fullHTML], {type: 'text/html'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Msebetsi-CSS-Certificate-${document.getElementById('certificateName').textContent}.html`;
+      a.click();
+    });
+
+    document.getElementById('printCertificate')?.addEventListener('click', () => window.print());
+
+    // Task animation
+    setTimeout(() => {
+      document.querySelectorAll('.task-item').forEach((el,i) => {
+        setTimeout(() => el.classList.add('completed'), i*600);
+      });
+    }, 1000);
+  </script>
+</body>
+</html>

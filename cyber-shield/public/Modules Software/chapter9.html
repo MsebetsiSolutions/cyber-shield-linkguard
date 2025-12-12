@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 9: Design Systems & CSS Variables </title>
+    <style>
+        /* Base Styles */
+        :root {
+            --primary-600: #0066cc;
+            --primary-500: #3b82f6;
+            --success-500: #10b981;
+            --warning-500: #f59e0b;
+            --error-500: #ef4444;
+            --accent-500: #0d9488;
+            --neutral-0: #ffffff;
+            --neutral-50: #f9fafb;
+            --neutral-100: #f3f4f6;
+            --neutral-200: #e5e7eb;
+            --neutral-300: #d1d5db;
+            --neutral-700: #374151;
+            --neutral-900: #111827;
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, var(--neutral-50) 0%, var(--neutral-100) 100%);
+            color: var(--neutral-900);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: var(--space-4);
+        }
+
+        .lesson-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--neutral-0);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .lesson-header {
+            background: linear-gradient(135deg, var(--accent-500) 0%, #0d9488 100%);
+            color: var(--neutral-0);
+            padding: var(--space-8);
+            text-align: center;
+        }
+
+        .lesson-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-3);
+        }
+
+        .lesson-subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-6);
+            margin-top: var(--space-6);
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: var(--space-3) var(--space-6);
+            border-radius: var(--radius-md);
+        }
+
+        /* Main Content */
+        .lesson-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            min-height: 600px;
+        }
+
+        @media (max-width: 900px) {
+            .lesson-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar */
+        .lesson-sidebar {
+            background: var(--neutral-50);
+            border-right: 1px solid var(--neutral-200);
+            padding: var(--space-6);
+        }
+
+        .sidebar-section {
+            margin-bottom: var(--space-8);
+        }
+
+        .sidebar-section h3 {
+            color: var(--neutral-900);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .sidebar-section h3 i {
+            color: var(--accent-500);
+        }
+
+        /* TODO List */
+        .todo-list {
+            background: var(--neutral-0);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--neutral-200);
+            padding: var(--space-3);
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-2);
+            transition: background-color 0.2s ease;
+        }
+
+        .todo-item:hover {
+            background: var(--neutral-100);
+        }
+
+        .todo-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-500);
+            cursor: pointer;
+        }
+
+        .todo-number {
+            width: 24px;
+            height: 24px;
+            background: var(--neutral-200);
+            color: var(--neutral-700);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .todo-text {
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        /* Design Tokens Preview */
+        .tokens-preview {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-2);
+            margin-top: var(--space-4);
+        }
+
+        .token-sample {
+            height: 40px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--neutral-300);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--neutral-0);
+        }
+
+        .token-primary { background-color: var(--primary-600); }
+        .token-success { background-color: var(--success-500); }
+        .token-warning { background-color: var(--warning-500); }
+        .token-error { background-color: var(--error-500); }
+        .token-accent { background-color: var(--accent-500); }
+
+        /* Progress */
+        .progress-section {
+            margin-top: var(--space-6);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--space-2);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--neutral-200);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-500), #0d9488);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Main Content Area */
+        .content-area {
+            padding: var(--space-6);
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: var(--space-2);
+            margin-bottom: var(--space-6);
+            border-bottom: 1px solid var(--neutral-200);
+            padding-bottom: var(--space-4);
+        }
+
+        .tab-btn {
+            padding: var(--space-3) var(--space-6);
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--neutral-700);
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            background: var(--neutral-100);
+        }
+
+        .tab-btn.active {
+            background: var(--accent-500);
+            color: var(--neutral-0);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Instructions Tab */
+        .instructions-content h3 {
+            color: var(--neutral-900);
+            margin: var(--space-6) 0 var(--space-3);
+        }
+
+        .instructions-content ul, .instructions-content ol {
+            padding-left: var(--space-6);
+            margin-bottom: var(--space-4);
+        }
+
+        .instructions-content li {
+            margin-bottom: var(--space-2);
+        }
+
+        .instructions-content code {
+            background: var(--neutral-100);
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-md);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        .color-system {
+            background: var(--neutral-50);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            margin: var(--space-4) 0;
+            border: 1px solid var(--neutral-200);
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--space-3);
+            margin-top: var(--space-3);
+        }
+
+        .color-sample {
+            height: 60px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .download-box {
+            background: var(--neutral-50);
+            border: 2px dashed var(--neutral-300);
+            border-radius: var(--radius-md);
+            padding: var(--space-6);
+            text-align: center;
+            margin: var(--space-6) 0;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-6);
+            background: var(--accent-500);
+            color: var(--neutral-0);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #0d9488;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+        }
+
+        .btn-secondary {
+            background: var(--neutral-200);
+            color: var(--neutral-900);
+        }
+
+        .btn-secondary:hover {
+            background: var(--neutral-300);
+        }
+
+        /* Upload Tab */
+        .upload-area {
+            text-align: center;
+        }
+
+        .upload-box {
+            border: 2px dashed var(--neutral-300);
+            border-radius: var(--radius-md);
+            padding: var(--space-8) var(--space-6);
+            margin: var(--space-6) 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-box:hover {
+            border-color: var(--accent-500);
+            background: var(--neutral-50);
+        }
+
+        .upload-box i {
+            font-size: 3rem;
+            color: var(--neutral-400);
+            margin-bottom: var(--space-4);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .uploaded-files {
+            margin: var(--space-6) 0;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3);
+            background: var(--neutral-100);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-2);
+        }
+
+        /* Results Tab */
+        .results-placeholder {
+            text-align: center;
+            padding: var(--space-8) var(--space-6);
+            color: var(--neutral-700);
+        }
+
+        .results-content {
+            display: none;
+        }
+
+        .score-card {
+            background: linear-gradient(135deg, var(--neutral-50) 0%, var(--neutral-100) 100%);
+            border-radius: var(--radius-md);
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+        }
+
+        .score-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-4);
+        }
+
+        .score-badge {
+            background: var(--accent-500);
+            color: var(--neutral-0);
+            padding: var(--space-1) var(--space-3);
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .feedback-item {
+            padding: var(--space-3);
+            background: var(--neutral-0);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-2);
+            border-left: 4px solid var(--neutral-200);
+        }
+
+        .feedback-item.success {
+            border-left-color: var(--success-500);
+        }
+
+        .feedback-item.error {
+            border-left-color: var(--error-500);
+        }
+
+        /* Footer */
+        .lesson-footer {
+            padding: var(--space-6);
+            border-top: 1px solid var(--neutral-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .next-lesson-btn {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-6);
+            background: var(--success-500);
+            color: var(--neutral-0);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .next-lesson-btn:hover {
+            background: var(--accent-500);
+            transform: translateY(-1px);
+        }
+
+        .next-lesson-btn:disabled {
+            background: var(--neutral-300);
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- Header -->
+        <header class="lesson-header">
+            <h1><i class="fas fa-palette"></i> Lesson 9: Design Systems & CSS Variables</h1>
+            <p class="lesson-subtitle">Build professional UIs with design tokens and CSS custom properties</p>
+            <div class="lesson-meta">
+                <div class="meta-item"><i class="fas fa-clock"></i> 3-4 hours</div>
+                <div class="meta-item"><i class="fas fa-tasks"></i> 8 TODO items</div>
+                <div class="meta-item"><i class="fas fa-file-code"></i> 2 files</div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="lesson-content">
+            <!-- Sidebar -->
+            <aside class="lesson-sidebar">
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-list-check"></i> TODO Checklist</h3>
+                    <div class="todo-list">
+                        <div class="todo-item">
+                            <input type="checkbox" id="todo1" class="todo-checkbox">
+                            <span class="todo-number">1</span>
+                            <span class="todo-text">Define color tokens in :root</span>
+                        </div>
+                        <div class="todo-item">
+                            <input type="checkbox" id="todo2" class="todo-checkbox">
+                            <span class="todo-number">2</span>
+                            <span class="todo-text">Add spacing tokens (--space-2, --space-4, --space-6)</span>
+                        </div>
+                        <div class="todo-item">
+                            <input type="checkbox" id="todo3" class="todo-checkbox">
+                            <span class="todo-number">3</span>
+                            <span class="todo-text">Style success alert with --success-500</span>
+                        </div>
+                        <div class="todo-item">
+                            <input type="checkbox" id="todo4" class="todo-checkbox">
+                            <span class="todo-number">4</span>
+                            <span class="todo-text">Style warning alert with --warning-500</span>
+                        </div>
+                        <div class="todo-item">
+                            <input type="checkbox" id="todo5" class="todo-checkbox">
+                            <span class="todo-number">5</span>
+                            <span class="todo-text">Style error alert with --error-500</span>
+                        </div>
+                        <div class="todo-item">
+                            <input type="checkbox" id="todo6" class="todo-checkbox">
+                            <span class="todo-number">6</span>
+                            <span class="todo-text">Create primary button with --primary-600</span>
+                        </div>
+                        <div class="todo-item">
+                            <input type="checkbox" id="todo7" class="todo-checkbox">
+                            <span class="todo-number">7</span>
+                            <span class="todo-text">Test accessibility contrast</span>
+                        </div>
+                        <div class="todo-item">
+                            <input type="checkbox" id="todo8" class="todo-checkbox">
+                            <span class="todo-number">8</span>
+                            <span class="todo-text">Upload completed files</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-swatchbook"></i> Design Tokens</h3>
+                    <div class="tokens-preview">
+                        <div class="token-sample token-primary">--primary-600</div>
+                        <div class="token-sample token-success">--success-500</div>
+                        <div class="token-sample token-warning">--warning-500</div>
+                        <div class="token-sample token-error">--error-500</div>
+                        <div class="token-sample token-accent">--accent-500</div>
+                        <div class="token-sample" style="background: var(--neutral-100); color: var(--neutral-900);">--neutral-100</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section progress-section">
+                    <div class="progress-header">
+                        <span>Progress:</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-download"></i> Download Files</h3>
+                    <button class="btn btn-secondary" id="downloadBtn">
+                        <i class="fas fa-file-archive"></i> Download Starter Files
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="content-area">
+                <!-- Tab Navigation -->
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="instructions">Instructions</button>
+                    <button class="tab-btn" data-tab="upload">Upload Work</button>
+                    <button class="tab-btn" data-tab="results">Results</button>
+                </div>
+
+                <!-- Instructions Tab -->
+                <div class="tab-content active" id="instructions">
+                    <h2><i class="fas fa-book"></i> Design System Implementation</h2>
+                    <div class="instructions-content">
+                        <h3>Learning Objectives</h3>
+                        <ul>
+                            <li>Create and use CSS custom properties (variables)</li>
+                            <li>Implement a consistent design system</li>
+                            <li>Apply accessibility principles with color contrast</li>
+                            <li>Build responsive layouts with design tokens</li>
+                        </ul>
+
+                        <h3>Msebetsi Design System</h3>
+                        <p>You'll implement the official Msebetsi color palette using CSS variables:</p>
+                        
+                        <div class="color-system">
+                            <div class="color-grid">
+                                <div class="color-sample" style="background: #0066cc; color: white;">--primary-600: #0066cc</div>
+                                <div class="color-sample" style="background: #10b981; color: white;">--success-500: #10b981</div>
+                                <div class="color-sample" style="background: #f59e0b; color: black;">--warning-500: #f59e0b</div>
+                                <div class="color-sample" style="background: #ef4444; color: white;">--error-500: #ef4444</div>
+                                <div class="color-sample" style="background: #0d9488; color: white;">--accent-500: #0d9488</div>
+                                <div class="color-sample" style="background: #f3f4f6; color: black;">--neutral-100: #f3f4f6</div>
+                            </div>
+                        </div>
+
+                        <h3>Your Task</h3>
+                        <p>Complete the design system component library by implementing the missing CSS variables and styling the alert components and buttons.</p>
+
+                        <h3>Files Provided</h3>
+                        <ul>
+                            <li><code>index.html</code> - Design system component library</li>
+                            <li><code>style.css</code> - Incomplete CSS with TODO comments</li>
+                        </ul>
+
+                        <h3>Steps to Complete</h3>
+                        <ol>
+                            <li>Download the starter files</li>
+                            <li>Define CSS variables in the :root selector</li>
+                            <li>Style alert components using the design tokens</li>
+                            <li>Create a primary button component</li>
+                            <li>Test accessibility and responsiveness</li>
+                            <li>Upload your completed files</li>
+                        </ol>
+
+                        <div class="download-box">
+                            <h4>Ready to Start?</h4>
+                            <p>Download the starter files and begin implementing the design system.</p>
+                            <button class="btn" id="downloadBtn2">
+                                <i class="fas fa-download"></i> Download Starter Files
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Tab -->
+                <div class="tab-content" id="upload">
+                    <h2><i class="fas fa-upload"></i> Submit Your Work</h2>
+                    <div class="upload-area">
+                        <p>Upload your completed HTML and CSS files for assessment.</p>
+                        
+                        <div class="upload-box" id="dropArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <h3>Drag & Drop Files Here</h3>
+                            <p>or click to browse</p>
+                            <input type="file" id="fileInput" multiple accept=".html,.css">
+                            <p><small>Upload both index.html and style.css files</small></p>
+                        </div>
+
+                        <div class="uploaded-files">
+                            <h4>Uploaded Files:</h4>
+                            <div id="filesList">
+                                <p style="color: var(--neutral-500); font-style: italic;">No files uploaded yet</p>
+                            </div>
+                        </div>
+
+                        <button class="btn" id="submitBtn" disabled>
+                            <i class="fas fa-paper-plane"></i> Submit for Assessment
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Tab -->
+                <div class="tab-content" id="results">
+                    <h2><i class="fas fa-chart-line"></i> Assessment Results</h2>
+                    
+                    <div class="results-placeholder" id="resultsPlaceholder">
+                        <i class="fas fa-clipboard-check" style="font-size: 4rem; margin-bottom: var(--space-4); color: var(--neutral-300);"></i>
+                        <h3>Awaiting Submission</h3>
+                        <p>Submit your completed files to see your results and feedback.</p>
+                    </div>
+
+                    <div class="results-content" id="resultsContent">
+                        <div class="score-card">
+                            <div class="score-header">
+                                <h3>Lesson 9 Results</h3>
+                                <div class="score-badge">
+                                    <span id="scoreValue">0</span>/8
+                                </div>
+                            </div>
+                            <p>Feedback on your submitted work:</p>
+                            <div id="feedbackList"></div>
+                        </div>
+
+                        <h3>Next Steps</h3>
+                        <p>Based on your performance, you're ready to move on to the final lesson!</p>
+                        
+                        <!-- Next Lesson Button -->
+                        <div style="text-align: center; margin-top: var(--space-8);">
+                            <button class="next-lesson-btn" id="nextLessonBtn" disabled>
+                                <i class="fas fa-arrow-right"></i> Continue to Lesson 10
+                            </button>
+                            <p style="margin-top: var(--space-2); color: var(--neutral-700); font-size: 0.9rem;">
+                                Complete this lesson to unlock Lesson 10
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer class="lesson-footer">
+            <div>
+                <span style="color: var(--neutral-700);">Msebetsi Solutions © 2025 • Lesson 9</span>
+            </div>
+            <div>
+                <button class="next-lesson-btn" id="footerNextBtn" disabled>
+                    Next Lesson <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Tab Navigation
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // TODO Checklist Progress
+        const todoCheckboxes = document.querySelectorAll('.todo-checkbox');
+        const progressPercent = document.getElementById('progressPercent');
+        const progressFill = document.getElementById('progressFill');
+        const nextLessonBtn = document.getElementById('nextLessonBtn');
+        const footerNextBtn = document.getElementById('footerNextBtn');
+
+        function updateProgress() {
+            const total = todoCheckboxes.length;
+            const completed = Array.from(todoCheckboxes).filter(cb => cb.checked).length;
+            const percent = Math.round((completed / total) * 100);
+            
+            progressPercent.textContent = `${percent}%`;
+            progressFill.style.width = `${percent}%`;
+            
+            // Enable next lesson button when all TODOs are checked
+            if (completed === total) {
+                nextLessonBtn.disabled = false;
+                footerNextBtn.disabled = false;
+            } else {
+                nextLessonBtn.disabled = true;
+                footerNextBtn.disabled = true;
+            }
+        }
+
+        todoCheckboxes.forEach(cb => {
+            cb.addEventListener('change', updateProgress);
+        });
+
+        // Download Starter Files
+        function createZipFile() {
+            const htmlContent = `<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Msebetsi Design System - Components</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="system-header">
+            <h1>Msebetsi Design System</h1>
+            <p class="subtitle">Component Library & Design Tokens</p>
+        </header>
+
+        <main>
+            <section class="component-section">
+                <h2>Alert Components</h2>
+                <p class="section-description">Use these alerts for system feedback</p>
+
+                <!-- Success Alert -->
+                <div class="alert alert--success" role="alert">
+                    <span class="alert-icon">✅</span>
+                    <div class="alert-content">
+                        <h3 class="alert-title">Profile Updated</h3>
+                        <p class="alert-message">Your changes have been saved successfully.</p>
+                    </div>
+                </div>
+
+                <!-- Warning Alert -->
+                <div class="alert alert--warning" role="alert">
+                    <span class="alert-icon">⚠️</span>
+                    <div class="alert-content">
+                        <h3 class="alert-title">Scheduled Maintenance</h3>
+                        <p class="alert-message">System will be unavailable Sunday 2-4 AM.</p>
+                    </div>
+                </div>
+
+                <!-- Error Alert -->
+                <div class="alert alert--error" role="alert">
+                    <span class="alert-icon">❌</span>
+                    <div class="alert-content">
+                        <h3 class="alert-title">Connection Failed</h3>
+                        <p class="alert-message">Unable to sync data. Please check your connection.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="component-section">
+                <h2>Button Components</h2>
+                
+                <div class="button-group">
+                    <button class="btn btn--primary" type="button">
+                        Primary Action
+                    </button>
+                    
+                    <button class="btn btn--secondary" type="button">
+                        Secondary Action
+                    </button>
+                    
+                    <button class="btn btn--outline" type="button">
+                        Outline Button
+                    </button>
+                </div>
+            </section>
+
+            <section class="component-section">
+                <h2>Design Token Preview</h2>
+                
+                <div class="tokens-grid">
+                    <div class="token-preview" style="--token-color: var(--primary-600)">
+                        <div class="token-swatch"></div>
+                        <code>--primary-600</code>
+                    </div>
+                    
+                    <div class="token-preview" style="--token-color: var(--success-500)">
+                        <div class="token-swatch"></div>
+                        <code>--success-500</code>
+                    </div>
+                    
+                    <div class="token-preview" style="--token-color: var(--warning-500)">
+                        <div class="token-swatch"></div>
+                        <code>--warning-500</code>
+                    </div>
+                    
+                    <div class="token-preview" style="--token-color: var(--error-500)">
+                        <div class="token-swatch"></div>
+                        <code>--error-500</code>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="system-footer">
+            <p>Msebetsi Solutions Design System v1.0</p>
+            <p class="footer-note">All components use CSS Custom Properties for consistency</p>
+        </footer>
+    </div>
+</body>
+</html>`;
+
+            const cssContent = `/* TODO 1: Define Design Tokens in :root */
+:root {
+    /* Color Tokens */
+    /* TODO: Add these color variables */
+    /* --primary-600: #0066cc; */
+    /* --success-500: #10b981; */
+    /* --warning-500: #f59e0b; */
+    /* --error-500: #ef4444; */
+    /* --accent-500: #0d9488; */
+    
+    /* Neutral Colors */
+    --neutral-0: #ffffff;
+    --neutral-100: #f3f4f6;
+    --neutral-200: #e5e7eb;
+    --neutral-700: #374151;
+    --neutral-900: #111827;
+    
+    /* TODO 2: Add spacing tokens */
+    /* --space-2: ? */
+    /* --space-4: ? */
+    /* --space-6: ? */
+    
+    /* Typography */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    
+    /* Borders */
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+}
+
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--neutral-100);
+    color: var(--neutral-900);
+    line-height: 1.5;
+    padding: 2rem;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Header */
+.system-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.system-header h1 {
+    color: var(--primary-600);
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--neutral-700);
+    font-size: var(--font-size-lg);
+}
+
+/* Component Sections */
+.component-section {
+    background: var(--neutral-0);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.component-section h2 {
+    margin-bottom: 1rem;
+    color: var(--neutral-900);
+}
+
+.section-description {
+    color: var(--neutral-700);
+    margin-bottom: 1.5rem;
+}
+
+/* TODO 3-5: Style Alert Components */
+.alert {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+    align-items: flex-start;
+}
+
+/* Success Alert */
+.alert--success {
+    /* TODO: Use design tokens */
+    /* background-color: ? */
+    /* color: ? */
+}
+
+/* Warning Alert */
+.alert--warning {
+    /* TODO: Use design tokens */
+    /* background-color: ? */
+    /* color: ? */
+}
+
+/* Error Alert */
+.alert--error {
+    /* TODO: Use design tokens */
+    /* background-color: ? */
+    /* color: ? */
+}
+
+.alert-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.alert-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.alert-message {
+    opacity: 0.9;
+    font-size: 0.95rem;
+}
+
+/* TODO 6: Style Primary Button */
+.btn {
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1.5rem;
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-family: var(--font-family);
+}
+
+.btn--primary {
+    /* TODO: Use design tokens */
+    /* background-color: ? */
+    /* color: ? */
+}
+
+.btn--primary:hover {
+    /* TODO: Darken primary color by 10% */
+    /* Use: filter: brightness(90%) */
+}
+
+.btn--secondary {
+    background-color: var(--neutral-200);
+    color: var(--neutral-900);
+}
+
+.btn--outline {
+    background-color: transparent;
+    color: var(--primary-600);
+    border: 2px solid var(--primary-600);
+}
+
+.button-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Design Token Preview */
+.tokens-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.token-preview {
+    text-align: center;
+}
+
+.token-swatch {
+    width: 100%;
+    height: 100px;
+    background-color: var(--token-color);
+    border-radius: var(--radius-md);
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--neutral-200);
+}
+
+.token-preview code {
+    background-color: var(--neutral-100);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-md);
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: var(--neutral-700);
+}
+
+/* Footer */
+.system-footer {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--neutral-200);
+    color: var(--neutral-700);
+}
+
+.footer-note {
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    color: var(--neutral-700);
+}
+
+/* TODO 7: Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 1rem;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .tokens-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}`;
+
+            // Create a zip file using JSZip
+            if (typeof JSZip === 'undefined') {
+                // Fallback to separate downloads
+                downloadFile('index.html', htmlContent);
+                downloadFile('style.css', cssContent);
+                alert('Downloading files separately. For a zip file, include JSZip library.');
+            } else {
+                const zip = new JSZip();
+                zip.file("lesson9-starter/index.html", htmlContent);
+                zip.file("lesson9-starter/style.css", cssContent);
+                zip.generateAsync({type:"blob"})
+                   .then(blob => {
+                       const link = document.createElement('a');
+                       link.href = URL.createObjectURL(blob);
+                       link.download = "lesson9-starter-files.zip";
+                       document.body.appendChild(link);
+                       link.click();
+                       document.body.removeChild(link);
+                   });
+            }
+        }
+
+        function downloadFile(filename, content) {
+            const blob = new Blob([content], {type: 'text/plain'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        document.getElementById('downloadBtn').addEventListener('click', createZipFile);
+        document.getElementById('downloadBtn2').addEventListener('click', createZipFile);
+
+        // File Upload
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        const filesList = document.getElementById('filesList');
+        const submitBtn = document.getElementById('submitBtn');
+        const resultsPlaceholder = document.getElementById('resultsPlaceholder');
+        const resultsContent = document.getElementById('resultsContent');
+        const scoreValue = document.getElementById('scoreValue');
+        const feedbackList = document.getElementById('feedbackList');
+
+        let uploadedFiles = [];
+
+        // Drag and drop functionality
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => {
+                dropArea.style.borderColor = 'var(--accent-500)';
+                dropArea.style.background = 'var(--neutral-50)';
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => {
+                dropArea.style.borderColor = '';
+                dropArea.style.background = '';
+            }, false);
+        });
+
+        dropArea.addEventListener('drop', handleDrop, false);
+        dropArea.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', function() {
+            handleFiles(this.files);
+        });
+
+        function handleDrop(e) {
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            for (let file of files) {
+                if (file.name.endsWith('.html') || file.name.endsWith('.css')) {
+                    uploadedFiles.push(file);
+                } else {
+                    alert(`Invalid file type: ${file.name}. Please upload HTML or CSS files only.`);
+                }
+            }
+            updateFilesList();
+        }
+
+        function updateFilesList() {
+            if (uploadedFiles.length === 0) {
+                filesList.innerHTML = '<p style="color: var(--neutral-500); font-style: italic;">No files uploaded yet</p>';
+                submitBtn.disabled = true;
+                return;
+            }
+
+            let html = '';
+            uploadedFiles.forEach((file, index) => {
+                html += `
+                    <div class="file-item">
+                        <i class="fas fa-file-code"></i>
+                        <span>${file.name} (${(file.size/1024).toFixed(1)} KB)</span>
+                        <button onclick="removeFile(${index})" style="background: none; border: none; color: var(--error-500); cursor: pointer;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            filesList.innerHTML = html;
+            
+            // Enable submit if we have both HTML and CSS
+            const hasHTML = uploadedFiles.some(f => f.name.endsWith('.html'));
+            const hasCSS = uploadedFiles.some(f => f.name.endsWith('.css'));
+            submitBtn.disabled = !(hasHTML && hasCSS);
+        }
+
+        window.removeFile = function(index) {
+            uploadedFiles.splice(index, 1);
+            updateFilesList();
+        };
+
+        // Submit for Assessment
+        submitBtn.addEventListener('click', function() {
+            // Simulate assessment
+            const completedTodos = Array.from(todoCheckboxes).filter(cb => cb.checked).length;
+            const score = Math.min(completedTodos, 8); // Max 8 points
+            
+            // Update results
+            resultsPlaceholder.style.display = 'none';
+            resultsContent.style.display = 'block';
+            scoreValue.textContent = score;
+            
+            // Generate feedback
+            let feedbackHTML = '';
+            const feedbacks = [
+                {task: 'Color tokens defined', completed: document.getElementById('todo1').checked, hint: 'Define all color variables in :root'},
+                {task: 'Spacing tokens added', completed: document.getElementById('todo2').checked, hint: 'Add --space-2, --space-4, --space-6'},
+                {task: 'Success alert styled', completed: document.getElementById('todo3').checked, hint: 'Use --success-500 with white text'},
+                {task: 'Warning alert styled', completed: document.getElementById('todo4').checked, hint: 'Use --warning-500 with dark text'},
+                {task: 'Error alert styled', completed: document.getElementById('todo5').checked, hint: 'Use --error-500 with white text'},
+                {task: 'Primary button created', completed: document.getElementById('todo6').checked, hint: 'Use --primary-600 with hover effect'},
+                {task: 'Accessibility tested', completed: document.getElementById('todo7').checked, hint: 'Check contrast ratios'},
+                {task: 'Files uploaded', completed: document.getElementById('todo8').checked, hint: 'Both HTML and CSS files submitted'}
+            ];
+            
+            feedbacks.forEach((fb, i) => {
+                feedbackHTML += `
+                    <div class="feedback-item ${fb.completed ? 'success' : 'error'}">
+                        <strong>TODO ${i+1}:</strong> ${fb.task}
+                        <br><small>${fb.hint}</small>
+                    </div>
+                `;
+            });
+            
+            feedbackList.innerHTML = feedbackHTML;
+            
+            // Check if passed (at least 6/8)
+            if (score >= 6) {
+                nextLessonBtn.disabled = false;
+                footerNextBtn.disabled = false;
+                nextLessonBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Continue to Lesson 10';
+                nextLessonBtn.onclick = function() {
+                    window.location.href = 'lesson10.html';
+                };
+                footerNextBtn.onclick = function() {
+                    window.location.href = 'lesson10.html';
+                };
+            } else {
+                nextLessonBtn.innerHTML = '<i class="fas fa-redo"></i> Retry Lesson';
+                nextLessonBtn.onclick = function() {
+                    location.reload();
+                };
+            }
+            
+            // Switch to results tab
+            document.querySelector('[data-tab="results"]').click();
+        });
+
+        // Initialize progress
+        updateProgress();
+    </script>
+    
+    <!-- Include JSZip for zip file creation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</body>
+</html>

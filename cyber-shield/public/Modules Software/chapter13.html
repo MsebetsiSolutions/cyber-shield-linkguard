@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Msebetsi Solutions | CSS Selectors Activity</title>
+  <meta name="description" content="Interactive activity for learning CSS selectors with theme toggle, solved/unsolved versions, and certification">
+  
+  <!-- Performance hints -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    /* CSS Custom Properties for Black & White Theme */
+    :root {
+      /* Light theme (default) */
+      --color-surface: #ffffff;
+      --color-background: #f8f9fa;
+      --color-card: #ffffff;
+      --color-text: #000000;
+      --color-text-secondary: #495057;
+      --color-border: #dee2e6;
+      --color-primary: #000000;
+      --color-secondary: #212529;
+      --color-accent: #000000;
+      --color-success: #28a745;
+      --color-warning: #ffc107;
+      --color-error: #dc3545;
+      --color-info: #17a2b8;
+      
+      /* UI Constants */
+      --border-radius-sm: 6px;
+      --border-radius-md: 10px;
+      --border-radius-lg: 16px;
+      --spacing-xs: 0.5rem;
+      --spacing-sm: 0.875rem;
+      --spacing-md: 1.25rem;
+      --spacing-lg: 1.75rem;
+      --spacing-xl: 2.5rem;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+    }
+
+    /* Dark theme */
+    [data-theme="dark"] {
+      --color-surface: #000000;
+      --color-background: #121212;
+      --color-card: #1a1a1a;
+      --color-text: #ffffff;
+      --color-text-secondary: #adb5bd;
+      --color-border: #343a40;
+      --color-primary: #ffffff;
+      --color-secondary: #e9ecef;
+      --color-accent: #ffffff;
+      --color-success: #20c997;
+      --color-warning: #ffd166;
+      --color-error: #ff6b6b;
+      --color-info: #4cc9f0;
+    }
+
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-body);
+      line-height: 1.6;
+      color: var(--color-text);
+      background-color: var(--color-background);
+      padding: var(--spacing-md);
+      max-width: 1400px;
+      margin: 0 auto;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      background: var(--color-card);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-md);
+    }
+
+    .theme-toggle-btn {
+      background: var(--color-surface);
+      border: 2px solid var(--color-border);
+      border-radius: 50px;
+      width: 60px;
+      height: 30px;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--color-primary);
+    }
+
+    .theme-toggle-btn::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      background: var(--color-primary);
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    [data-theme="dark"] .theme-toggle-btn::after {
+      transform: translateX(30px);
+    }
+
+    .theme-label {
+      font-size: 0.9rem;
+      color: var(--color-text);
+      font-weight: 500;
+      min-width: 50px;
+    }
+
+    /* Background Pattern */
+    .background-pattern {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(to right, var(--color-border) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.1;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: var(--spacing-md);
+      color: var(--color-text);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      color: var(--color-primary);
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      border-bottom: 2px solid var(--color-border);
+      padding-bottom: var(--spacing-sm);
+      margin-top: var(--spacing-xl);
+    }
+
+    h3 {
+      font-size: 1.3rem;
+      color: var(--color-secondary);
+      margin-top: var(--spacing-lg);
+    }
+
+    p {
+      margin-bottom: var(--spacing-md);
+    }
+
+    a {
+      color: var(--color-primary);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-bottom: 1px solid transparent;
+    }
+
+    a:hover, a:focus {
+      color: var(--color-text);
+      border-bottom-color: var(--color-primary);
+    }
+
+    code, pre {
+      font-family: var(--font-mono);
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: var(--border-radius-sm);
+      padding: 0.2rem 0.4rem;
+      font-size: 0.9em;
+      color: var(--color-primary);
+    }
+
+    [data-theme="dark"] code,
+    [data-theme="dark"] pre {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    pre {
+      padding: var(--spacing-md);
+      overflow-x: auto;
+      margin: var(--spacing-md) 0;
+      border-left: 4px solid var(--color-primary);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+    }
+
+    /* Utility classes */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: var(--color-card);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+      border: 1px solid var(--color-border);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .success-card {
+      border-left: 4px solid var(--color-success);
+    }
+
+    .warning-card {
+      border-left: 4px solid var(--color-warning);
+    }
+
+    .error-card {
+      border-left: 4px solid var(--color-error);
+    }
+
+    .info-card {
+      border-left: 4px solid var(--color-info);
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .flex {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .flex-col {
+      flex-direction: column;
+    }
+
+    .grid {
+      display: grid;
+      gap: var(--spacing-md);
+    }
+
+    .grid-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .grid-3 {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      border-radius: var(--border-radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+      gap: var(--spacing-xs);
+      background-color: var(--color-surface);
+      color: var(--color-text);
+      border-color: var(--color-border);
+    }
+
+    .btn:hover, .btn:focus {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--color-primary);
+    }
+
+    .btn-primary {
+      background-color: var(--color-primary);
+      color: var(--color-surface);
+      border-color: var(--color-primary);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      border-color: var(--color-primary);
+    }
+
+    .btn-success {
+      background-color: var(--color-success);
+      color: white;
+      border-color: var(--color-success);
+    }
+
+    .btn-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Activity sections */
+    .lesson-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+      padding-bottom: var(--spacing-lg);
+      border-bottom: 2px solid var(--color-border);
+    }
+
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--spacing-md);
+      flex-wrap: wrap;
+      margin-top: var(--spacing-md);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background-color: var(--color-surface);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+
+    .badge-success {
+      background-color: var(--color-success);
+      color: white;
+      border-color: transparent;
+    }
+
+    .badge-warning {
+      background-color: var(--color-warning);
+      color: black;
+      border-color: transparent;
+    }
+
+    .badge-info {
+      background-color: var(--color-info);
+      color: white;
+      border-color: transparent;
+    }
+
+    /* Tabs Navigation */
+    .tabs {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .tabs-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-xs);
+      border-bottom: 2px solid var(--color-border);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .tab-btn {
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+      position: relative;
+    }
+
+    .tab-btn:hover {
+      color: var(--color-primary);
+    }
+
+    .tab-btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+
+    .tab-btn .badge {
+      margin-left: var(--spacing-xs);
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Code editor simulation */
+    .code-editor {
+      background-color: var(--color-surface);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+      margin: var(--spacing-lg) 0;
+      border: 1px solid var(--color-border);
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    .code-header {
+      background-color: var(--color-card);
+      padding: var(--spacing-sm) var(--spacing-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--color-text);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--color-border);
+      box-sizing: border-box;
+    }
+
+    .code-body {
+      padding: var(--spacing-md);
+      overflow-x: auto;
+      background-color: var(--color-surface);
+      box-sizing: border-box;
+    }
+
+    .code-body code {
+      font-family: var(--font-mono);
+      background-color: transparent;
+      color: var(--color-text);
+      padding: 0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      box-sizing: border-box;
+    }
+
+    /* Task list */
+    .task-list {
+      list-style-type: none;
+      counter-reset: task-counter;
+    }
+
+    .task-item {
+      counter-increment: task-counter;
+      margin-bottom: var(--spacing-lg);
+      padding-left: 3rem;
+      position: relative;
+    }
+
+    .task-item::before {
+      content: counter(task-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2rem;
+      height: 2rem;
+      background-color: var(--color-primary);
+      color: var(--color-surface);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .task-item.completed::before {
+      background-color: var(--color-success);
+      content: "✓";
+    }
+
+    /* Version selector */
+    .version-selector {
+      display: flex;
+      gap: var(--spacing-sm);
+      margin: var(--spacing-md) 0;
+      box-sizing: border-box;
+    }
+
+    .version-btn {
+      flex: 1;
+      text-align: center;
+      padding: var(--spacing-md);
+      box-sizing: border-box;
+    }
+
+    .version-btn.active {
+      background-color: var(--color-primary);
+      color: var(--color-surface);
+    }
+
+    /* Version content */
+    .version-content {
+      display: none;
+      box-sizing: border-box;
+    }
+
+    .version-content.active {
+      display: block;
+    }
+
+    /* Upload area */
+    .upload-area {
+      border: 3px dashed var(--color-border);
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-xl);
+      text-align: center;
+      transition: all 0.3s ease;
+      margin: var(--spacing-lg) 0;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+
+    .upload-area:hover, .upload-area.dragover {
+      border-color: var(--color-primary);
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="dark"] .upload-area:hover,
+    [data-theme="dark"] .upload-area.dragover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Results section */
+    .results {
+      display: none;
+    }
+
+    .results.show {
+      display: block;
+    }
+
+    .score-display {
+      font-size: 3rem;
+      font-weight: 700;
+      text-align: center;
+      color: var(--color-success);
+      margin: var(--spacing-lg) 0;
+    }
+
+    .score-breakdown {
+      margin: var(--spacing-lg) 0;
+    }
+
+    .breakdown-item {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--spacing-sm) 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .breakdown-item:last-child {
+      border-bottom: none;
+      font-weight: bold;
+      padding-top: var(--spacing-md);
+    }
+
+    /* File list */
+    .file-list {
+      list-style: none;
+      padding: 0;
+      margin: var(--spacing-md) 0;
+      box-sizing: border-box;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-sm);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-sm);
+      margin-bottom: var(--spacing-xs);
+      box-sizing: border-box;
+    }
+
+    .file-name {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .file-type {
+      font-size: 0.8rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: var(--border-radius-sm);
+      background-color: var(--color-primary);
+      color: var(--color-surface);
+    }
+
+    /* CSS Selector Preview Area */
+    .selector-preview {
+      margin: var(--spacing-lg) 0;
+      padding: var(--spacing-lg);
+      background-color: var(--color-surface);
+      border-radius: var(--border-radius-md);
+      border: 1px solid var(--color-border);
+    }
+
+    .preview-box {
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: var(--spacing-sm);
+      border: 2px solid var(--color-border);
+      border-radius: var(--border-radius-sm);
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .box-blue {
+      background-color: #3498db;
+      color: white;
+    }
+
+    #box-orange {
+      background-color: #e67e22;
+      color: white;
+    }
+
+    .box-green {
+      background-color: #2ecc71;
+      color: white;
+    }
+
+    /* Loading animation */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0, 0, 0, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--color-primary);
+      animation: spin 1s ease-in-out infinite;
+      margin-right: var(--spacing-xs);
+    }
+
+    [data-theme="dark"] .loading {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: var(--color-primary);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: var(--spacing-xl);
+      padding-top: var(--spacing-lg);
+      border-top: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--color-card);
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-xl);
+      z-index: 2000;
+      box-shadow: var(--shadow-lg);
+      max-width: 800px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1999;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+      
+      .flex {
+        flex-direction: column;
+      }
+      
+      .tabs-nav {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 5px;
+      }
+      
+      .tab-btn {
+        white-space: nowrap;
+      }
+      
+      .theme-toggle {
+        top: 10px;
+        right: 10px;
+        padding: var(--spacing-xs) var(--spacing-sm);
+      }
+      
+      .card {
+        padding: var(--spacing-md);
+        margin-left: -10px;
+        margin-right: -10px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+      }
+      
+      .code-editor {
+        margin: var(--spacing-md) 0;
+      }
+      
+      .version-selector {
+        flex-direction: column;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .card {
+        padding: var(--spacing-lg);
+        margin: 0 0 var(--spacing-lg) 0;
+      }
+      
+      .version-content .card {
+        margin: var(--spacing-md) 0;
+        padding: var(--spacing-lg);
+      }
+      
+      .code-editor {
+        max-width: 100%;
+        overflow: hidden;
+      }
+      
+      .code-body {
+        overflow-x: auto;
+        max-width: 100%;
+      }
+    }
+
+    /* Print styles */
+    @media print {
+      .theme-toggle,
+      .upload-area,
+      .version-selector {
+        display: none;
+      }
+      
+      body {
+        background-color: white !important;
+        color: black !important;
+        padding: 0;
+      }
+      
+      .card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #000;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Pattern -->
+  <div class="background-pattern"></div>
+
+  <!-- Theme Toggle -->
+  <div class="theme-toggle">
+    <span class="theme-label" id="themeLabel">Light</span>
+    <button class="theme-toggle-btn" id="themeToggle" aria-label="Toggle theme">
+      <span class="visually-hidden">Toggle theme</span>
+    </button>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Header -->
+    <header class="lesson-header">
+      <h1>Msebetsi Solutions | Lesson 13: CSS Selectors Activity</h1>
+      <p class="subtitle">Learn and practice CSS selectors by completing the tasks below</p>
+      
+      <div class="lesson-meta">
+        <span class="badge">CSS</span>
+        <span class="badge badge-success">Selectors</span>
+        <span class="badge badge-warning">HTML</span>
+        <span class="badge badge-info">Web Development</span>
+        <span class="badge">Frontend</span>
+      </div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <nav class="tabs-nav">
+        <button class="tab-btn active" data-tab="overview">
+          📋 Overview
+        </button>
+        <button class="tab-btn" data-tab="activity">
+          🔧 Activity <span class="badge">2 Versions</span>
+        </button>
+        <button class="tab-btn" data-tab="solution">
+          💡 Submit Solution
+        </button>
+        <button class="tab-btn" data-tab="results">
+          📊 Results
+        </button>
+        <button class="tab-btn" data-tab="certificate">
+          🏆 Certificate
+        </button>
+      </nav>
+
+      <!-- Tab 1: Overview -->
+      <div class="tab-content active" id="overview">
+        <div class="card">
+          <h2>📋 CSS Selectors Overview</h2>
+          <p>CSS selectors are patterns used to select the HTML elements you want to style. This activity will help you understand different types of selectors and how to use them effectively.</p>
+          
+          <div class="grid grid-2">
+            <div class="card info-card">
+              <h3>🎯 Learning Objectives</h3>
+              <ul>
+                <li>Understand different types of CSS selectors</li>
+                <li>Learn to use class and ID selectors</li>
+                <li>Practice writing CSS rules for specific elements</li>
+                <li>Understand selector specificity</li>
+                <li>Apply selectors to style HTML elements</li>
+              </ul>
+            </div>
+            
+            <div class="card success-card">
+              <h3>✅ HTML Structure to Style</h3>
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>index.html</span>
+                  <span>Given Structure</span>
+                </div>
+                <div class="code-body">
+                  <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;link rel="stylesheet" type="text/css" href="./assets/css/style.css"&gt;
+    &lt;title&gt;Selectors&lt;/title&gt;
+  &lt;/head&gt;
+
+  &lt;body&gt;
+    &lt;section class="box-blue"&gt;
+      &lt;p&gt;Blue&lt;/p&gt;
+    &lt;/section&gt;
+
+    &lt;section class="box-blue"&gt;
+      &lt;p&gt;Blue&lt;/p&gt;
+    &lt;/section&gt;
+
+    &lt;section id="box-orange"&gt;
+      &lt;p&gt;Orange&lt;/p&gt;
+    &lt;/section&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>🚀 CSS Selector Types</h2>
+          
+          <div class="task-list">
+            <div class="task-item">
+              <h3>1. Class Selectors</h3>
+              <p>Target elements with specific class attributes using the dot (.) notation</p>
+              <code class="css-command">.box-blue { background-color: blue; }</code>
+            </div>
+            
+            <div class="task-item">
+              <h3>2. ID Selectors</h3>
+              <p>Target a single element with a specific ID using the hash (#) notation</p>
+              <code class="css-command">#box-orange { background-color: orange; }</code>
+            </div>
+            
+            <div class="task-item">
+              <h3>3. Element Selectors</h3>
+              <p>Target all elements of a specific type</p>
+              <code class="css-command">section { border: 1px solid black; }</code>
+            </div>
+            
+            <div class="task-item">
+              <h3>4. Descendant Selectors</h3>
+              <p>Target elements that are descendants of other elements</p>
+              <code class="css-command">section p { color: white; }</code>
+            </div>
+            
+            <div class="task-item">
+              <h3>5. Grouping Selectors</h3>
+              <p>Apply the same styles to multiple selectors</p>
+              <code class="css-command">.box-blue, #box-orange { padding: 20px; }</code>
+            </div>
+            
+            <div class="task-item">
+              <h3>6. Specificity Rules</h3>
+              <p>ID selectors > Class selectors > Element selectors</p>
+              <code class="css-command">#box-orange overrides .box-blue</code>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Area -->
+        <div class="card">
+          <h2>👀 Selector Preview</h2>
+          <p>See how different selectors affect the HTML elements:</p>
+          
+          <div class="selector-preview">
+            <div class="flex" style="justify-content: center; flex-wrap: wrap;">
+              <div class="preview-box box-blue">
+                <p>Blue</p>
+              </div>
+              <div class="preview-box box-blue">
+                <p>Blue</p>
+              </div>
+              <div class="preview-box" id="box-orange">
+                <p>Orange</p>
+              </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: var(--spacing-md);">
+              <p><strong>Current HTML Structure:</strong></p>
+              <code>&lt;section class="box-blue"&gt;...&lt;/section&gt; (x2)</code><br>
+              <code>&lt;section id="box-orange"&gt;...&lt;/section&gt; (x1)</code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Activity -->
+      <div class="tab-content" id="activity">
+        <div class="card">
+          <h2>🔧 CSS Selectors Activity</h2>
+          <p>Practice writing CSS selectors to style the given HTML structure:</p>
+          
+          <div class="version-selector">
+            <button class="btn version-btn active" data-version="unsolved">
+              🔧 Unsolved Version
+            </button>
+            <button class="btn version-btn" data-version="solved">
+              ✅ Solved Version
+            </button>
+          </div>
+
+          <!-- Unsolved Version -->
+          <div id="unsolvedVersion" class="version-content active">
+            <div class="card" style="margin-top: var(--spacing-md);">
+              <h3>📝 Your Task: Complete the CSS File</h3>
+              <p>Write CSS rules using appropriate selectors to achieve the following:</p>
+              
+              <div class="grid grid-2">
+                <div>
+                  <h4>Requirements:</h4>
+                  <ul>
+                    <li>Style both blue boxes with class selector</li>
+                    <li>Style the orange box with ID selector</li>
+                    <li>Add padding to all boxes</li>
+                    <li>Center text inside all boxes</li>
+                    <li>Add border to all sections</li>
+                    <li>Make text white in blue boxes</li>
+                    <li>Add hover effect to orange box</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4>Expected Result:</h4>
+                  <div style="display: flex; gap: var(--spacing-sm); justify-content: center;">
+                    <div style="background-color: #3498db; color: white; padding: 20px; border: 2px solid #2980b9; border-radius: 8px; width: 100px; text-align: center;">
+                      Blue
+                    </div>
+                    <div style="background-color: #3498db; color: white; padding: 20px; border: 2px solid #2980b9; border-radius: 8px; width: 100px; text-align: center;">
+                      Blue
+                    </div>
+                    <div style="background-color: #e67e22; color: white; padding: 20px; border: 2px solid #d35400; border-radius: 8px; width: 100px; text-align: center;">
+                      Orange
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <h4>📁 Complete the CSS File:</h4>
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>style.css</span>
+                  <span>Complete the TODOs</span>
+                </div>
+                <div class="code-body">
+                  <pre><code>/* TODO: Style all boxes with padding and border */
+/* Add your CSS here */
+
+/* TODO: Style blue boxes using class selector */
+/* Add your CSS here */
+
+/* TODO: Style orange box using ID selector */
+/* Add your CSS here */
+
+/* TODO: Center text in all boxes */
+/* Add your CSS here */
+
+/* TODO: Make text white in blue boxes */
+/* Add your CSS here */
+
+/* TODO: Add hover effect to orange box */
+/* Add your CSS here */</code></pre>
+                </div>
+              </div>
+              
+              <div style="text-align: center; margin-top: var(--spacing-lg);">
+                <button class="btn btn-primary" id="downloadUnsolved">
+                  <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                  </svg>
+                  Download Starter Files
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Solved Version -->
+          <div id="solvedVersion" class="version-content">
+            <div class="card success-card" style="margin-top: var(--spacing-md);">
+              <h3>✅ Solved CSS Example</h3>
+              <p>Reference this completed CSS file to check your work:</p>
+              
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>style.css</span>
+                  <span>Completed Solution</span>
+                </div>
+                <div class="code-body">
+                  <pre><code>/* Style all boxes with padding and border */
+section {
+  padding: 20px;
+  border: 2px solid;
+  border-radius: 8px;
+  margin: 10px;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Style blue boxes using class selector */
+.box-blue {
+  background-color: #3498db;
+  border-color: #2980b9;
+}
+
+/* Style orange box using ID selector */
+#box-orange {
+  background-color: #e67e22;
+  border-color: #d35400;
+}
+
+/* Center text in all boxes */
+section {
+  text-align: center;
+}
+
+/* Make text white in blue boxes */
+.box-blue p {
+  color: white;
+  font-weight: bold;
+}
+
+/* Make text white in orange box */
+#box-orange p {
+  color: white;
+  font-weight: bold;
+}
+
+/* Add hover effect to orange box */
+#box-orange:hover {
+  background-color: #f39c12;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}</code></pre>
+                </div>
+              </div>
+              
+              <div style="text-align: center; margin-top: var(--spacing-lg);">
+                <button class="btn btn-secondary" id="downloadSolved">
+                  <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                  </svg>
+                  Download Solution Files
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Submit Solution -->
+      <div class="tab-content" id="solution">
+        <div class="card">
+          <h2>💡 Submit Your CSS Solution</h2>
+          <p>Upload your completed CSS file for evaluation. The system will check your selector usage and styling.</p>
+          
+          <div class="upload-area" id="uploadArea">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <h3>Drag & Drop Your CSS File Here</h3>
+            <p>Upload your completed style.css file</p>
+            <p class="file-requirements">Accepted: .css files (max 2MB)</p>
+            
+            <input type="file" id="fileUpload" accept=".css" style="display: none;">
+            <div style="text-align: center; margin-top: var(--spacing-md);">
+              <button id="browseFiles" class="btn btn-primary">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 16h6v-6h4l-7-7-7 7h4v6zm3-10.17L14.17 8H13v6h-2V8H9.83L12 5.83zM5 18h14v2H5z"/>
+                </svg>
+                Select CSS File
+              </button>
+            </div>
+          </div>
+          
+          <!-- Uploaded Files List -->
+          <div class="uploaded-files" id="uploadedFilesSection" style="display: none;">
+            <h3>Uploaded File:</h3>
+            <ul class="file-list" id="fileList"></ul>
+          </div>
+          
+          <!-- Evaluate Button -->
+          <div class="evaluate-section" id="evaluateSection" style="display: none; text-align: center;">
+            <h3>Ready for Evaluation?</h3>
+            <p>Click below to analyze your CSS selectors and receive feedback.</p>
+            <button id="evaluateBtn" class="btn btn-success" style="font-size: 1.1rem; padding: var(--spacing-md) var(--spacing-xl); margin-top: var(--spacing-md);">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              Evaluate My CSS
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Results -->
+      <div class="tab-content" id="results">
+        <div class="card">
+          <h2>📊 CSS Selectors Evaluation Results</h2>
+          <p>Your submission will be evaluated here once you upload your CSS file and click evaluate.</p>
+          
+          <div id="resultsPlaceholder">
+            <div style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-secondary);">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.5;">
+                <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/>
+              </svg>
+              <p class="mt-3">No results yet. Upload your CSS file and click "Evaluate My CSS" to see your score.</p>
+            </div>
+          </div>
+          
+          <!-- Results Content -->
+          <div id="resultsContent" style="display: none;">
+            <div class="score-display" id="finalScore">0/100</div>
+            
+            <div class="score-breakdown">
+              <h3>Score Breakdown</h3>
+              
+              <div class="breakdown-item">
+                <span>Class Selector Usage</span>
+                <span id="scoreClass">0/20</span>
+              </div>
+              
+              <div class="breakdown-item">
+                <span>ID Selector Usage</span>
+                <span id="scoreId">0/20</span>
+              </div>
+              
+              <div class="breakdown-item">
+                <span>Element Selectors</span>
+                <span id="scoreElement">0/15</span>
+              </div>
+              
+              <div class="breakdown-item">
+                <span>Descendant Selectors</span>
+                <span id="scoreDescendant">0/15</span>
+              </div>
+              
+              <div class="breakdown-item">
+                <span>Hover Effects</span>
+                <span id="scoreHover">0/10</span>
+              </div>
+              
+              <div class="breakdown-item">
+                <span>Code Quality</span>
+                <span id="scoreQuality">0/10</span>
+              </div>
+              
+              <div class="breakdown-item">
+                <span>Complete Styling</span>
+                <span id="scoreComplete">0/10</span>
+              </div>
+              
+              <div class="breakdown-item">
+                <span>Total Score</span>
+                <span id="scoreTotal">0/100</span>
+              </div>
+            </div>
+            
+            <div id="feedbackMessage" style="margin: var(--spacing-lg) 0;"></div>
+            
+            <div class="flex" style="justify-content: center; gap: var(--spacing-md);">
+              <button id="retryButton" class="btn btn-secondary">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                </svg>
+                Try Again
+              </button>
+              
+              <button id="viewCertificate" class="btn btn-primary">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20 6h-3V4c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM9 4h6v2H9V4zm11 16H4V8h16v12z"/>
+                </svg>
+                View Certificate
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 5: Certificate -->
+      <div class="tab-content" id="certificate">
+        <div class="card">
+          <h2>🏆 CSS Selectors Certificate</h2>
+          <p>Generate a certificate for successfully completing the CSS Selectors activity.</p>
+          
+          <div style="text-align: center; padding: var(--spacing-xl);">
+            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.8; color: var(--color-warning);">
+              <path d="M12 15l8-8H4l8 8z"/>
+              <path d="M4 15l8 8 8-8"/>
+              <path d="M12 3v12"/>
+            </svg>
+            
+            <h3 style="margin: var(--spacing-md) 0;">Ready to Generate Your Certificate</h3>
+            <p>Complete the activity and evaluation to generate your personalized certificate.</p>
+            
+            <button id="generateCertificate" class="btn btn-primary" style="padding: var(--spacing-lg) var(--spacing-xl); font-size: 1.1rem; margin-top: var(--spacing-md);">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 6h-3V4c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM9 4h6v2H9V4zm11 16H4V8h16v12z"/>
+              </svg>
+              Generate Certificate
+            </button>
+          </div>
+          
+          <!-- Certificate Preview -->
+          <div id="certificatePreview" style="display: none; margin-top: var(--spacing-xl);">
+            <div class="card success-card" style="border: 3px solid var(--color-warning); padding: var(--spacing-xl);">
+              <div style="text-align: center;">
+                <h1 style="color: var(--color-warning); margin-bottom: var(--spacing-md);">Certificate of Completion</h1>
+                <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-xl);">Msebetsi Solutions Professional Development Program</p>
+                
+                <div style="border-top: 2px solid var(--color-border); border-bottom: 2px solid var(--color-border); padding: var(--spacing-xl) 0; margin: var(--spacing-xl) 0;">
+                  <p style="font-size: 1.2rem; margin-bottom: var(--spacing-md);">This certifies that</p>
+                  <h2 style="font-size: 2.5rem; color: var(--color-primary); margin: var(--spacing-md) 0;" id="certificateName">[Your Name]</h2>
+                  <p style="font-size: 1.2rem; margin-top: var(--spacing-md);">has successfully completed</p>
+                  <h3 style="font-size: 1.8rem; color: var(--color-secondary); margin: var(--spacing-md) 0;">CSS Selectors Mastery</h3>
+                </div>
+                
+                <div class="grid grid-3" style="margin-top: var(--spacing-xl);">
+                  <div>
+                    <p style="font-weight: bold;">Score</p>
+                    <p id="certificateScore" style="font-size: 1.5rem; color: var(--color-success);">100%</p>
+                  </div>
+                  <div>
+                    <p style="font-weight: bold;">Date</p>
+                    <p id="certificateDate" style="font-size: 1.2rem;"></p>
+                  </div>
+                  <div>
+                    <p style="font-weight: bold;">Certificate ID</p>
+                    <p id="certificateId" style="font-family: var(--font-mono);">CSS-2024-001</p>
+                  </div>
+                </div>
+                
+                <div style="margin-top: var(--spacing-xl); padding-top: var(--spacing-lg); border-top: 1px solid var(--color-border);">
+                  <button id="downloadCertificate" class="btn btn-primary">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                    </svg>
+                    Download Certificate
+                  </button>
+                  <button id="printCertificate" class="btn btn-secondary" style="margin-left: var(--spacing-md);">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
+                    </svg>
+                    Print Certificate
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Msebetsi Solutions &copy; <span id="currentYear"></span> | Lesson 13: CSS Selectors Activity</p>
+      <p>Master CSS selectors for effective web styling</p>
+    </footer>
+  </div>
+
+  <!-- Certificate Modal -->
+  <div id="certificateModal" class="modal" style="display: none;">
+    <h2>🎉 Congratulations!</h2>
+    <p>Your certificate has been generated successfully. You can download or print it from the Certificate tab.</p>
+    <button id="closeModal" class="btn btn-primary" style="margin-top: var(--spacing-md);">Close</button>
+  </div>
+  
+  <div id="modalOverlay" class="modal-overlay" style="display: none;"></div>
+
+  <script>
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const themeLabel = document.getElementById('themeLabel');
+    const htmlElement = document.documentElement;
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme) {
+      htmlElement.setAttribute('data-theme', savedTheme);
+      themeLabel.textContent = savedTheme === 'dark' ? 'Dark' : 'Light';
+    } else if (prefersDark) {
+      htmlElement.setAttribute('data-theme', 'dark');
+      themeLabel.textContent = 'Dark';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = htmlElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      htmlElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      themeLabel.textContent = newTheme === 'dark' ? 'Dark' : 'Light';
+      showNotification(`Switched to ${newTheme} theme`, 'info');
+    });
+
+    // Set current year
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    // Tab functionality
+    document.querySelectorAll('.tab-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const tabId = button.getAttribute('data-tab');
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        button.classList.add('active');
+        
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    // Version selector
+    document.querySelectorAll('.version-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const version = button.getAttribute('data-version');
+        
+        document.querySelectorAll('.version-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        button.classList.add('active');
+        
+        document.querySelectorAll('.version-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        document.getElementById(`${version}Version`).classList.add('active');
+      });
+    });
+
+    // Download files
+    document.getElementById('downloadUnsolved').addEventListener('click', () => {
+      const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="./assets/css/style.css">
+    <title>Selectors</title>
+  </head>
+
+  <body>
+    <section class="box-blue">
+      <p>Blue</p>
+    </section>
+
+    <section class="box-blue">
+      <p>Blue</p>
+    </section>
+
+    <section id="box-orange">
+      <p>Orange</p>
+    </section>
+  </body>
+</html>`;
+      
+      const cssContent = `/* TODO: Style all boxes with padding and border */
+/* Add your CSS here */
+
+/* TODO: Style blue boxes using class selector */
+/* Add your CSS here */
+
+/* TODO: Style orange box using ID selector */
+/* Add your CSS here */
+
+/* TODO: Center text in all boxes */
+/* Add your CSS here */
+
+/* TODO: Make text white in blue boxes */
+/* Add your CSS here */
+
+/* TODO: Add hover effect to orange box */
+/* Add your CSS here */`;
+      
+      // Create zip content
+      const zipContent = `CSS SELECTORS ACTIVITY - STARTER FILES
+===============================
+
+1. index.html
+---------------
+${htmlContent}
+
+2. style.css
+-------------
+${cssContent}
+
+Instructions:
+1. Complete the TODOs in style.css
+2. Use appropriate CSS selectors
+3. Style the boxes as shown in the example
+4. Test your solution in a browser
+5. Upload your completed style.css for evaluation`;
+      
+      downloadFile('css-selectors-starter.txt', zipContent);
+      showNotification('Starter files downloaded!', 'success');
+    });
+
+    document.getElementById('downloadSolved').addEventListener('click', () => {
+      const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="./assets/css/style.css">
+    <title>Selectors</title>
+  </head>
+
+  <body>
+    <section class="box-blue">
+      <p>Blue</p>
+    </section>
+
+    <section class="box-blue">
+      <p>Blue</p>
+    </section>
+
+    <section id="box-orange">
+      <p>Orange</p>
+    </section>
+  </body>
+</html>`;
+      
+      const cssContent = `/* Style all boxes with padding and border */
+section {
+  padding: 20px;
+  border: 2px solid;
+  border-radius: 8px;
+  margin: 10px;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Style blue boxes using class selector */
+.box-blue {
+  background-color: #3498db;
+  border-color: #2980b9;
+}
+
+/* Style orange box using ID selector */
+#box-orange {
+  background-color: #e67e22;
+  border-color: #d35400;
+}
+
+/* Center text in all boxes */
+section {
+  text-align: center;
+}
+
+/* Make text white in blue boxes */
+.box-blue p {
+  color: white;
+  font-weight: bold;
+}
+
+/* Make text white in orange box */
+#box-orange p {
+  color: white;
+  font-weight: bold;
+}
+
+/* Add hover effect to orange box */
+#box-orange:hover {
+  background-color: #f39c12;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}`;
+      
+      const zipContent = `CSS SELECTORS ACTIVITY - SOLVED SOLUTION
+================================
+
+1. index.html
+---------------
+${htmlContent}
+
+2. style.css (Completed Solution)
+----------------------------------
+${cssContent}
+
+Selector Explanation:
+- section {}: Element selector for all sections
+- .box-blue {}: Class selector for blue boxes
+- #box-orange {}: ID selector for orange box
+- .box-blue p {}: Descendant selector for paragraphs in blue boxes
+- #box-orange:hover {}: Pseudo-class for hover effect`;
+      
+      downloadFile('css-selectors-solution.txt', zipContent);
+      showNotification('Solution files downloaded!', 'success');
+    });
+
+    // File upload handling
+    const fileUpload = document.getElementById('fileUpload');
+    const uploadArea = document.getElementById('uploadArea');
+    const browseFiles = document.getElementById('browseFiles');
+    let uploadedFile = null;
+
+    browseFiles.addEventListener('click', () => fileUpload.click());
+    uploadArea.addEventListener('click', () => fileUpload.click());
+
+    // Drag and drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      uploadArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      uploadArea.addEventListener(eventName, () => uploadArea.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('dragover'), false);
+    });
+
+    uploadArea.addEventListener('drop', handleDrop, false);
+    fileUpload.addEventListener('change', function() {
+      handleFiles(this.files);
+    });
+
+    function handleDrop(e) {
+      handleFiles(e.dataTransfer.files);
+    }
+
+    function handleFiles(files) {
+      if (!files.length) return;
+      
+      const file = files[0];
+      if (!file.name.match(/\.css$/)) {
+        showNotification('Only .css files are accepted', 'error');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        uploadedFile = { name: file.name, content: e.target.result, size: file.size };
+        updateFileList();
+      };
+      reader.readAsText(file);
+    }
+
+    function updateFileList() {
+      const fileList = document.getElementById('fileList');
+      const uploadedSection = document.getElementById('uploadedFilesSection');
+      const evaluateSection = document.getElementById('evaluateSection');
+      
+      fileList.innerHTML = '';
+      
+      if (uploadedFile) {
+        const li = document.createElement('li');
+        li.className = 'file-item';
+        li.innerHTML = `
+          <div class="file-name">
+            <span class="file-type">CSS</span>
+            <span>${uploadedFile.name}</span>
+            <span style="color: var(--color-text-secondary); font-size: 0.9rem;">(${(uploadedFile.size / 1024).toFixed(1)} KB)</span>
+          </div>
+          <button class="btn" onclick="removeFile()">Remove</button>
+        `;
+        fileList.appendChild(li);
+        
+        uploadedSection.style.display = 'block';
+        evaluateSection.style.display = 'block';
+      } else {
+        uploadedSection.style.display = 'none';
+        evaluateSection.style.display = 'none';
+      }
+    }
+
+    window.removeFile = function() {
+      uploadedFile = null;
+      updateFileList();
+      showNotification('CSS file removed', 'info');
+    };
+
+    // Evaluation
+    document.getElementById('evaluateBtn').addEventListener('click', function() {
+      if (!uploadedFile) {
+        showNotification('Please upload a CSS file first', 'error');
+        return;
+      }
+      
+      const btn = this;
+      btn.innerHTML = '<span class="loading"></span> Evaluating CSS...';
+      btn.disabled = true;
+      
+      setTimeout(() => {
+        evaluateCSS(uploadedFile.content);
+        btn.innerHTML = 'Evaluate My CSS';
+        btn.disabled = false;
+        document.querySelector('[data-tab="results"]').click();
+      }, 2000);
+    });
+
+    function evaluateCSS(cssContent) {
+      // Initialize scores
+      const scores = {
+        class: 0,
+        id: 0,
+        element: 0,
+        descendant: 0,
+        hover: 0,
+        quality: 0,
+        complete: 0
+      };
+      
+      const cssLower = cssContent.toLowerCase();
+      
+      // Check class selector usage
+      if (cssLower.includes('.box-blue')) scores.class += 10;
+      if (cssLower.includes('.box-blue') && cssLower.includes('background-color')) scores.class += 10;
+      
+      // Check ID selector usage
+      if (cssLower.includes('#box-orange')) scores.id += 10;
+      if (cssLower.includes('#box-orange') && cssLower.includes('background-color')) scores.id += 10;
+      
+      // Check element selector
+      if (cssLower.includes('section {') || cssLower.includes('section{')) scores.element += 5;
+      if (cssLower.includes('padding')) scores.element += 5;
+      if (cssLower.includes('border')) scores.element += 5;
+      
+      // Check descendant selector
+      if (cssLower.includes('.box-blue p') || cssLower.includes('#box-orange p')) scores.descendant += 5;
+      if (cssLower.includes('p {') && cssLower.includes('color')) scores.descendant += 5;
+      if (cssLower.includes('text-align')) scores.descendant += 5;
+      
+      // Check hover effect
+      if (cssLower.includes('#box-orange:hover') || cssLower.includes('.box-blue:hover')) scores.hover += 5;
+      if (cssLower.includes('transition') || cssLower.includes('transform')) scores.hover += 5;
+      
+      // Check code quality
+      if (cssLower.includes('border-radius')) scores.quality += 2;
+      if (cssLower.includes('margin')) scores.quality += 2;
+      if (cssLower.includes('display: flex') || cssLower.includes('display:flex')) scores.quality += 2;
+      if (cssLower.includes('align-items')) scores.quality += 2;
+      if (cssLower.includes('justify-content')) scores.quality += 2;
+      
+      // Check completeness
+      if (cssContent.length > 200) scores.complete += 2;
+      if (cssContent.split('{').length >= 4) scores.complete += 2;
+      if (!cssLower.includes('todo')) scores.complete += 3;
+      if (cssLower.includes('white') && cssLower.includes('color')) scores.complete += 3;
+      
+      // Calculate total
+      const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
+      
+      // Update UI
+      document.getElementById('scoreClass').textContent = `${scores.class}/20`;
+      document.getElementById('scoreId').textContent = `${scores.id}/20`;
+      document.getElementById('scoreElement').textContent = `${scores.element}/15`;
+      document.getElementById('scoreDescendant').textContent = `${scores.descendant}/15`;
+      document.getElementById('scoreHover').textContent = `${scores.hover}/10`;
+      document.getElementById('scoreQuality').textContent = `${scores.quality}/10`;
+      document.getElementById('scoreComplete').textContent = `${scores.complete}/10`;
+      document.getElementById('scoreTotal').textContent = `${totalScore}/100`;
+      document.getElementById('finalScore').textContent = `${totalScore}/100`;
+      
+      // Set score color
+      const finalScore = document.getElementById('finalScore');
+      finalScore.style.color = totalScore >= 80 ? 'var(--color-success)' : 
+                              totalScore >= 60 ? 'var(--color-warning)' : 
+                              'var(--color-error)';
+      
+      // Provide feedback
+      let feedback = '';
+      if (totalScore >= 80) {
+        feedback = `<div class="card success-card">
+          <h3>🎉 Excellent CSS Skills!</h3>
+          <p>You've mastered CSS selectors! Your code correctly uses class, ID, and descendant selectors with proper styling.</p>
+          <p><strong>Strengths:</strong> Good selector usage, complete styling, hover effects implemented.</p>
+        </div>`;
+      } else if (totalScore >= 60) {
+        feedback = `<div class="card warning-card">
+          <h3>👍 Good Understanding</h3>
+          <p>You understand CSS selectors but there's room for improvement. Review the solved example for better practices.</p>
+          <p><strong>Areas to improve:</strong> ${scores.class < 15 ? 'Class selectors, ' : ''}${scores.id < 15 ? 'ID selectors, ' : ''}${scores.hover < 5 ? 'Hover effects' : ''}</p>
+        </div>`;
+      } else {
+        feedback = `<div class="card error-card">
+          <h3>📚 Keep Practicing</h3>
+          <p>Review the selector types and try again. Focus on using proper class and ID selectors.</p>
+          <p><strong>Start with:</strong> Complete the TODOs in the starter file and test each selector.</p>
+        </div>`;
+      }
+      
+      document.getElementById('feedbackMessage').innerHTML = feedback;
+      
+      // Show results
+      document.getElementById('resultsPlaceholder').style.display = 'none';
+      document.getElementById('resultsContent').style.display = 'block';
+      
+      showNotification(`CSS evaluation complete! Score: ${totalScore}/100`, 'success');
+      
+      // Store score for certificate
+      localStorage.setItem('cssSelectorsScore', totalScore);
+    }
+
+    // Retry button
+    document.getElementById('retryButton').addEventListener('click', () => {
+      uploadedFile = null;
+      updateFileList();
+      document.getElementById('resultsPlaceholder').style.display = 'block';
+      document.getElementById('resultsContent').style.display = 'none';
+      document.querySelector('[data-tab="solution"]').click();
+      showNotification('Ready for new CSS submission!', 'info');
+    });
+
+    // Certificate generation
+    document.getElementById('generateCertificate').addEventListener('click', () => {
+      const score = localStorage.getItem('cssSelectorsScore') || 0;
+      const name = prompt('Enter your name for the certificate:') || 'CSS Learner';
+      
+      if (name) {
+        document.getElementById('certificateName').textContent = name;
+        document.getElementById('certificateScore').textContent = `${score}%`;
+        document.getElementById('certificateDate').textContent = new Date().toLocaleDateString();
+        document.getElementById('certificateId').textContent = `CSS-${Date.now().toString().slice(-6)}`;
+        
+        document.getElementById('certificatePreview').style.display = 'block';
+        document.querySelector('[data-tab="certificate"]').click();
+        
+        showNotification('Certificate generated!', 'success');
+      }
+    });
+
+    // View certificate from results
+    document.getElementById('viewCertificate')?.addEventListener('click', () => {
+      document.querySelector('[data-tab="certificate"]').click();
+      document.getElementById('generateCertificate').click();
+    });
+
+    // Download certificate
+    document.getElementById('downloadCertificate')?.addEventListener('click', () => {
+      const certificateContent = generateCertificateHTML();
+      downloadFile('css-selectors-certificate.html', certificateContent);
+      showNotification('Certificate downloaded!', 'success');
+    });
+
+    // Print certificate
+    document.getElementById('printCertificate')?.addEventListener('click', () => {
+      window.print();
+    });
+
+    function generateCertificateHTML() {
+      const name = document.getElementById('certificateName').textContent;
+      const score = document.getElementById('certificateScore').textContent;
+      const date = document.getElementById('certificateDate').textContent;
+      const id = document.getElementById('certificateId').textContent;
+      
+      return `<!DOCTYPE html>
+<html>
+<head>
+  <title>CSS Selectors Certificate - ${name}</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .certificate {
+      border: 20px solid #ffc107;
+      padding: 50px;
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+    h1 { color: #333; font-size: 2.5em; }
+    h2 { color: #666; font-size: 1.8em; }
+    .score { color: #28a745; font-size: 3em; font-weight: bold; }
+    .name { color: #3498db; font-size: 2.2em; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="certificate">
+    <h1>Certificate of Completion</h1>
+    <h2>CSS Selectors Mastery</h2>
+    <p>Awarded to</p>
+    <div class="name">${name}</div>
+    <p>for successfully completing the CSS Selectors Activity</p>
+    <div style="border-top: 2px solid #eee; border-bottom: 2px solid #eee; padding: 30px; margin: 30px 0;">
+      <p>Score: <span class="score">${score}</span></p>
+      <p>Date: ${date}</p>
+      <p>Certificate ID: ${id}</p>
+    </div>
+    <p>Msebetsi Solutions Professional Development Program</p>
+    <p style="margin-top: 40px; color: #777; font-size: 0.9em;">This certificate verifies completion of CSS selectors training including class, ID, element, and descendant selectors.</p>
+  </div>
+</body>
+</html>`;
+    }
+
+    // Utility functions
+    function downloadFile(filename, content) {
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.textContent = message;
+      notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius-md);
+        background-color: ${type === 'success' ? 'var(--color-success)' : 
+                         type === 'error' ? 'var(--color-error)' : 
+                         type === 'info' ? 'var(--color-info)' :
+                         'var(--color-warning)'};
+        color: white;
+        font-weight: 500;
+        box-shadow: var(--shadow-lg);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.style.animation = 'slideOut 0.3s ease';
+          setTimeout(() => notification.remove(), 300);
+        }
+      }, 4000);
+    }
+
+    // Mark tasks as completed (demo)
+    setTimeout(() => {
+      document.querySelectorAll('.task-item').forEach((item, index) => {
+        setTimeout(() => item.classList.add('completed'), index * 800);
+      });
+    }, 1000);
+
+    // Initialize
+    showNotification('Welcome to CSS Selectors Activity! Click on tabs to navigate.', 'info');
+  </script>
+</body>
+</html>

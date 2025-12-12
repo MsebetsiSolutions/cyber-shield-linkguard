@@ -1,0 +1,459 @@
+<!-- [file name]: Using the Command Line.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task 2 — Creating Directories & Files Using the Command Line</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #555;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: -10px;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        pre code {
+            background-color: transparent;
+            color: #ecf0f1;
+            padding: 0;
+        }
+        ul {
+            margin-left: 20px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .section {
+            margin: 30px 0;
+        }
+        .os-label {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .video-note {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 10px 15px;
+            margin: 15px 0;
+            font-size: 0.95em;
+        }
+        .task-card {
+            background-color: #f9f9f9;
+            border-left: 4px solid #2ecc71;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .reference-card {
+            background-color: #f0f7ff;
+            border: 1px solid #3498db;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .download-btn, .upload-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        .download-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .download-btn:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .upload-btn {
+            background-color: #2ecc71;
+            color: white;
+            display: inline-block;
+        }
+        .upload-btn:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        #uploadStatus {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        #uploadStatus.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        #uploadStatus.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Task 2 — Creating Directories & Files Using the Command Line</h1>
+    <p class="subtitle">Msebetsi Solutions — Software Development Course</p>
+
+    <div class="section">
+        <div class="action-buttons">
+            <button onclick="downloadPDF()" class="download-btn">
+                📥 Download Course Material (PDF)
+            </button>
+            <label for="fileUpload" class="upload-btn">
+                📤 Upload Your Task
+                <input type="file" id="fileUpload" accept=".pdf,.html,.md" onchange="handleFileUpload(event)" style="display: none;">
+            </label>
+        </div>
+        <div id="uploadStatus"></div>
+    </div>
+
+    <div class="section">
+        <div class="task-card">
+            <h2>🔥 User Story</h2>
+            <p>As a developer, I want to use the command line to create a new project folder and scaffold a file so that I can manage my work efficiently without relying on GUI tools.</p>
+            <p>This mirrors real-world engineering environments where automation, scripting, and CLI workflows are standard.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>✅ Acceptance Criteria</h2>
+        <p>Your task is complete when:</p>
+        <ul>
+            <li>A new directory named <code>first-day</code> is created using command-line tools only.</li>
+            <li>Inside the <code>first-day</code> directory, a new file named <code>index.html</code> is also created using command-line commands.</li>
+            <li>No clicking. No dragging. All CLI.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>📺 Command Line Basics Video</h2>
+        
+        <div class="video-note">
+            <strong>📺 Watch:</strong> <a href="https://www.youtube.com/watch?v=MBBWVgE0ewk" target="_blank" rel="noopener">Command Line Crash Course - Beginner Friendly</a>
+        </div>
+        <div class="video-container" style="background: #000;">
+            <a href="https://www.youtube.com/watch?v=MBBWVgE0ewk" target="_blank" rel="noopener" style="display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; text-decoration: none;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: url('https://img.youtube.com/vi/MBBWVgE0ewk/hqdefault.jpg') center/cover;">
+                    <div style="width: 80px; height: 56px; background: rgba(255,0,0,0.9); border-radius: 14px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <div style="width: 0; height: 0; border-left: 26px solid white; border-top: 16px solid transparent; border-bottom: 16px solid transparent; margin-left: 6px;"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>⚙️ Command-Line Reference (Advanced & Modern Tools)</h2>
+        <p>Instead of basic links, here are more advanced, industry-grade references aligned with your teaching style:</p>
+        
+        <div class="reference-card">
+            <h3>🔗 Modern CLI & Shell Mastery References</h3>
+            <ul>
+                <li><strong>The Linux Command Line Book (free full guide):</strong><br>
+                    <a href="https://linuxcommand.org/tlcl.php" target="_blank" rel="noopener">https://linuxcommand.org/tlcl.php</a></li>
+                <li><strong>Microsoft's Official Command Line Docs (Windows PowerShell & Terminal):</strong><br>
+                    <a href="https://learn.microsoft.com/en-us/windows/terminal/" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/windows/terminal/</a></li>
+                <li><strong>macOS Terminal User Guide (Official Apple Developer Docs):</strong><br>
+                    <a href="https://developer.apple.com/library/archive/documentation/Darwin/Reference/ManPages/" target="_blank" rel="noopener">https://developer.apple.com/library/archive/documentation/Darwin/Reference/ManPages/</a></li>
+            </ul>
+            
+            <h3>🔗 Advanced CLI Tools Developers Use</h3>
+            <ul>
+                <li><strong>Oh My Zsh (high-performance shell framework):</strong><br>
+                    <a href="https://ohmyz.sh/" target="_blank" rel="noopener">https://ohmyz.sh/</a></li>
+                <li><strong>PowerShell Scripting Reference:</strong><br>
+                    <a href="https://learn.microsoft.com/en-us/powershell/scripting/" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/powershell/scripting/</a></li>
+            </ul>
+            <p>These resources reflect modern developer workflows the way Msebetsi Solutions teaches them.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🧪 Step-by-Step Task Guide</h2>
+        
+        <div class="video-note">
+            <strong>📺 Watch:</strong> <a href="https://www.youtube.com/watch?v=oxuRxtrO2Ag" target="_blank" rel="noopener">Windows Command Line Tutorial - Creating Files and Folders</a>
+        </div>
+        <div class="video-container" style="background: #000;">
+            <a href="https://www.youtube.com/watch?v=oxuRxtrO2Ag" target="_blank" rel="noopener" style="display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; text-decoration: none;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: url('https://img.youtube.com/vi/oxuRxtrO2Ag/hqdefault.jpg') center/cover;">
+                    <div style="width: 80px; height: 56px; background: rgba(255,0,0,0.9); border-radius: 14px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <div style="width: 0; height: 0; border-left: 26px solid white; border-top: 16px solid transparent; border-bottom: 16px solid transparent; margin-left: 6px;"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <h3>1. Create the directory:</h3>
+        <pre><code>mkdir first-day</code></pre>
+
+        <h3>2. Move into the new directory:</h3>
+        <pre><code>cd first-day</code></pre>
+
+        <h3>3. Create the HTML file:</h3>
+        <p><span class="os-label">Mac/Linux:</span></p>
+        <pre><code>touch index.html</code></pre>
+        <p><span class="os-label">Windows PowerShell:</span></p>
+        <pre><code>New-Item -Name "index.html" -ItemType "file"</code></pre>
+    </div>
+
+    <div class="section">
+        <h2>💬 Verification Tips (Professional Developer Workflow)</h2>
+        <p>To confirm what you've created, list the directory contents:</p>
+        <p><span class="os-label">Mac/Linux:</span></p>
+        <pre><code>ls</code></pre>
+        <p><span class="os-label">Windows PowerShell:</span></p>
+        <pre><code>Get-ChildItem</code></pre>
+        <p>You should see: <code>index.html</code></p>
+        <p>If not, retrace your steps and check which directory you're in with:</p>
+        <pre><code>pwd</code></pre>
+    </div>
+
+    <div class="section">
+        <h2>💡 Hints</h2>
+        <p>To check if your directory or file exists:</p>
+        <ul>
+            <li>Use <code>ls</code> (Mac/Linux)</li>
+            <li>Use <code>dir</code> or <code>Get-ChildItem</code> (Windows)</li>
+            <li>Use <code>pwd</code> to verify your current path</li>
+            <li>Use <code>tree</code> (if installed) to view directory structure visually</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🏆 Bonus Challenge (Advanced CLI Skills)</h2>
+        
+        <div class="video-note">
+            <strong>📺 Watch:</strong> <a href="https://www.youtube.com/watch?v=H94QXela-KE" target="_blank" rel="noopener">PowerShell for Beginners - File Management</a>
+        </div>
+        <div class="video-container" style="background: #000;">
+            <a href="https://www.youtube.com/watch?v=H94QXela-KE" target="_blank" rel="noopener" style="display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; text-decoration: none;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: url('https://img.youtube.com/vi/H94QXela-KE/hqdefault.jpg') center/cover;">
+                    <div style="width: 80px; height: 56px; background: rgba(255,0,0,0.9); border-radius: 14px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <div style="width: 0; height: 0; border-left: 26px solid white; border-top: 16px solid transparent; border-bottom: 16px solid transparent; margin-left: 6px;"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <p>Improve your command-line power by exploring:</p>
+        
+        <h3>📁 Copying a file:</h3>
+        <p><span class="os-label">Mac/Linux:</span></p>
+        <pre><code>cp index.html backup.html</code></pre>
+        <p><span class="os-label">Windows PowerShell:</span></p>
+        <pre><code>Copy-Item index.html backup.html</code></pre>
+
+        <h3>📦 Moving or renaming a file:</h3>
+        <p><span class="os-label">Mac/Linux:</span></p>
+        <pre><code>mv index.html main.html</code></pre>
+        <p><span class="os-label">Windows PowerShell:</span></p>
+        <pre><code>Move-Item index.html main.html</code></pre>
+
+        <h3>📚 Recommended Research</h3>
+        <p>Search for:</p>
+        <ul>
+            <li>"Linux cp vs mv commands explained"</li>
+            <li>"PowerShell file system commands"</li>
+            <li>"Beginner to Advanced CLI workflows for developers"</li>
+        </ul>
+    </div>
+
+    <script>
+        // PDF Download functionality
+        function downloadPDF() {
+            // Use jsPDF library to generate PDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Set font and add content
+            doc.setFontSize(20);
+            doc.text("Task 2 — Creating Directories & Files", 20, 20);
+            doc.setFontSize(12);
+            doc.text("Using the Command Line", 20, 30);
+            
+            doc.setFontSize(14);
+            doc.text("User Story:", 20, 45);
+            doc.setFontSize(11);
+            doc.text("As a developer, I want to use the command line to create a new", 20, 55);
+            doc.text("project folder and scaffold a file so that I can manage my work", 20, 62);
+            doc.text("efficiently without relying on GUI tools.", 20, 69);
+            
+            doc.setFontSize(14);
+            doc.text("Acceptance Criteria:", 20, 85);
+            doc.setFontSize(11);
+            doc.text("- A new directory named 'first-day' is created using CLI only", 20, 95);
+            doc.text("- Inside 'first-day', a file named 'index.html' is created using CLI", 20, 102);
+            doc.text("- No clicking. No dragging. All CLI.", 20, 109);
+            
+            doc.setFontSize(14);
+            doc.text("Step-by-Step Guide:", 20, 125);
+            doc.setFontSize(11);
+            doc.text("1. Create the directory:", 20, 135);
+            doc.text("   mkdir first-day", 20, 142);
+            doc.text("2. Move into the new directory:", 20, 152);
+            doc.text("   cd first-day", 20, 159);
+            doc.text("3. Create the HTML file:", 20, 169);
+            doc.text("   Windows PowerShell: New-Item -Name \"index.html\" -ItemType \"file\"", 20, 176);
+            doc.text("   Mac/Linux: touch index.html", 20, 183);
+            
+            doc.setFontSize(14);
+            doc.text("Verification:", 20, 199);
+            doc.setFontSize(11);
+            doc.text("List directory contents:", 20, 209);
+            doc.text("   Windows: Get-ChildItem", 20, 216);
+            doc.text("   Mac/Linux: ls", 20, 223);
+            
+            doc.setFontSize(14);
+            doc.text("Bonus Challenge:", 20, 239);
+            doc.setFontSize(11);
+            doc.text("Copy a file:", 20, 249);
+            doc.text("   Windows: Copy-Item index.html backup.html", 20, 256);
+            doc.text("   Mac/Linux: cp index.html backup.html", 20, 263);
+            
+            // Save the PDF
+            doc.save("Task2-Command-Line.pdf");
+        }
+        
+        // File Upload functionality
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            const statusDiv = document.getElementById('uploadStatus');
+            
+            if (!file) {
+                return;
+            }
+            
+            // Check file type
+            const validTypes = ['application/pdf', 'text/html', 'text/markdown'];
+            const validExtensions = ['.pdf', '.html', '.md'];
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!validExtensions.includes(fileExtension)) {
+                statusDiv.textContent = '❌ Error: Please upload a PDF, HTML, or Markdown file only.';
+                statusDiv.className = 'error';
+                statusDiv.style.display = 'block';
+                return;
+            }
+            
+            // Simulate upload (in a real application, this would send to a server)
+            statusDiv.textContent = '⏳ Uploading ' + file.name + '...';
+            statusDiv.className = '';
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.textContent = '✅ Success! Your file "' + file.name + '" has been uploaded successfully.';
+                statusDiv.className = 'success';
+                
+                // Log file details (in real app, this would be sent to server)
+                console.log('File uploaded:', {
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    lastModified: new Date(file.lastModified)
+                });
+                
+                // Reset file input
+                event.target.value = '';
+            }, 1500);
+        }
+
+        function playVideo(containerId, videoId) {
+            const container = document.getElementById(containerId);
+            if (!container || container.querySelector('iframe')) {
+                return; // Already loaded
+            }
+            
+            // Clear the thumbnail
+            container.innerHTML = '';
+            
+            // Create and insert iframe
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'absolute';
+            iframe.style.top = '0';
+            iframe.style.left = '0';
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            iframe.frameBorder = '0';
+            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+            iframe.allowFullscreen = true;
+            
+            container.appendChild(iframe);
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</body>
+</html>

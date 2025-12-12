@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 7: CSS Selectors & Specificity </title>
+    <style>
+        /* Base Styles */
+        :root {
+            --primary-600: #0066cc;
+            --primary-500: #3b82f6;
+            --success-500: #10b981;
+            --warning-500: #f59e0b;
+            --error-500: #ef4444;
+            --accent-500: #0d9488;
+            --neutral-0: #ffffff;
+            --neutral-50: #f9fafb;
+            --neutral-100: #f3f4f6;
+            --neutral-200: #e5e7eb;
+            --neutral-300: #d1d5db;
+            --neutral-700: #374151;
+            --neutral-900: #111827;
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, var(--neutral-50) 0%, var(--neutral-100) 100%);
+            color: var(--neutral-900);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: var(--space-4);
+        }
+
+        .lesson-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--neutral-0);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .lesson-header {
+            background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+            color: var(--neutral-0);
+            padding: var(--space-8);
+            text-align: center;
+        }
+
+        .lesson-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-3);
+        }
+
+        .lesson-subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-6);
+            margin-top: var(--space-6);
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: var(--space-3) var(--space-6);
+            border-radius: var(--radius-md);
+        }
+
+        /* Main Content */
+        .lesson-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            min-height: 600px;
+        }
+
+        @media (max-width: 900px) {
+            .lesson-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar */
+        .lesson-sidebar {
+            background: var(--neutral-50);
+            border-right: 1px solid var(--neutral-200);
+            padding: var(--space-6);
+        }
+
+        .sidebar-section {
+            margin-bottom: var(--space-8);
+        }
+
+        .sidebar-section h3 {
+            color: var(--neutral-900);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .sidebar-section h3 i {
+            color: var(--primary-600);
+        }
+
+        /* TODO List */
+        .todo-list {
+            background: var(--neutral-0);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--neutral-200);
+            padding: var(--space-3);
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-2);
+            transition: background-color 0.2s ease;
+        }
+
+        .todo-item:hover {
+            background: var(--neutral-100);
+        }
+
+        .todo-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-600);
+            cursor: pointer;
+        }
+
+        .todo-number {
+            width: 24px;
+            height: 24px;
+            background: var(--neutral-200);
+            color: var(--neutral-700);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .todo-text {
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        /* Progress */
+        .progress-section {
+            margin-top: var(--space-6);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--space-2);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--neutral-200);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Main Content Area */
+        .content-area {
+            padding: var(--space-6);
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: var(--space-2);
+            margin-bottom: var(--space-6);
+            border-bottom: 1px solid var(--neutral-200);
+            padding-bottom: var(--space-4);
+        }
+
+        .tab-btn {
+            padding: var(--space-3) var(--space-6);
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--neutral-700);
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            background: var(--neutral-100);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-600);
+            color: var(--neutral-0);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Instructions Tab */
+        .instructions-content h3 {
+            color: var(--neutral-900);
+            margin: var(--space-6) 0 var(--space-3);
+        }
+
+        .instructions-content ul, .instructions-content ol {
+            padding-left: var(--space-6);
+            margin-bottom: var(--space-4);
+        }
+
+        .instructions-content li {
+            margin-bottom: var(--space-2);
+        }
+
+        .download-box {
+            background: var(--neutral-50);
+            border: 2px dashed var(--neutral-300);
+            border-radius: var(--radius-md);
+            padding: var(--space-6);
+            text-align: center;
+            margin: var(--space-6) 0;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-6);
+            background: var(--primary-600);
+            color: var(--neutral-0);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--primary-700);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.2);
+        }
+
+        .btn-secondary {
+            background: var(--neutral-200);
+            color: var(--neutral-900);
+        }
+
+        .btn-secondary:hover {
+            background: var(--neutral-300);
+        }
+
+        /* Upload Tab */
+        .upload-area {
+            text-align: center;
+        }
+
+        .upload-box {
+            border: 2px dashed var(--neutral-300);
+            border-radius: var(--radius-md);
+            padding: var(--space-8) var(--space-6);
+            margin: var(--space-6) 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-box:hover {
+            border-color: var(--primary-600);
+            background: var(--neutral-50);
+        }
+
+        .upload-box i {
+            font-size: 3rem;
+            color: var(--neutral-400);
+            margin-bottom: var(--space-4);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .uploaded-files {
+            margin: var(--space-6) 0;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3);
+            background: var(--neutral-100);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-2);
+        }
+
+        /* Results Tab */
+        .results-placeholder {
+            text-align: center;
+            padding: var(--space-8) var(--space-6);
+            color: var(--neutral-700);
+        }
+
+        .results-content {
+            display: none;
+        }
+
+        .score-card {
+            background: linear-gradient(135deg, var(--neutral-50) 0%, var(--neutral-100) 100%);
+            border-radius: var(--radius-md);
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+        }
+
+        .score-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-4);
+        }
+
+        .score-badge {
+            background: var(--primary-600);
+            color: var(--neutral-0);
+            padding: var(--space-1) var(--space-3);
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .feedback-item {
+            padding: var(--space-3);
+            background: var(--neutral-0);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-2);
+            border-left: 4px solid var(--neutral-200);
+        }
+
+        .feedback-item.success {
+            border-left-color: var(--success-500);
+        }
+
+        .feedback-item.error {
+            border-left-color: var(--error-500);
+        }
+
+        /* Footer */
+        .lesson-footer {
+            padding: var(--space-6);
+            border-top: 1px solid var(--neutral-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .next-lesson-btn {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-6);
+            background: var(--success-500);
+            color: var(--neutral-0);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .next-lesson-btn:hover {
+            background: var(--accent-500);
+            transform: translateY(-1px);
+        }
+
+        .next-lesson-btn:disabled {
+            background: var(--neutral-300);
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- Header -->
+        <header class="lesson-header">
+            <h1><i class="fas fa-bullseye"></i> Lesson 7: CSS Selectors & Specificity</h1>
+            <p class="lesson-subtitle">Master how CSS targets elements and resolves style conflicts</p>
+            <div class="lesson-meta">
+                <div class="meta-item"><i class="fas fa-clock"></i> 2-3 hours</div>
+                <div class="meta-item"><i class="fas fa-tasks"></i> 6 TODO items</div>
+                <div class="meta-item"><i class="fas fa-file-code"></i> 2 files</div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="lesson-content">
+            <!-- Sidebar -->
+            <aside class="lesson-sidebar">
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-list-check"></i> TODO Checklist</h3>
+                    <div class="todo-list">
+                        <div class="todo-item">
+                            <input type="checkbox" id="todo1" class="todo-checkbox">
+                            <span class="todo-number">1</span>
+                            <span class="todo-text">Style .employee-card with class selector</span>
+                        </div>
+                        <div class="todo-item">
+                            <input type="checkbox" id="todo2" class="todo-checkbox">
+                            <span class="todo-number">2</span>
+                            <span class="todo-text">Style #employee-of-month with ID selector</span>
+                        </div>
+                        <div class="todo-item">
+                            <input type="checkbox" id="todo3" class="todo-checkbox">
+                            <span class="todo-number">3</span>
+                            <span class="todo-text">Resolve .on-leave vs #urgent-review conflict</span>
+                        </div>
+                        <div class="todo-item">
+                            <input type="checkbox" id="todo4" class="todo-checkbox">
+                            <span class="todo-number">4</span>
+                            <span class="todo-text">Style .senior.remote (multiple classes)</span>
+                        </div>
+                        <div class="todo-item">
+                            <input type="checkbox" id="todo5" class="todo-checkbox">
+                            <span class="todo-number">5</span>
+                            <span class="todo-text">Test all selectors in browser</span>
+                        </div>
+                        <div class="todo-item">
+                            <input type="checkbox" id="todo6" class="todo-checkbox">
+                            <span class="todo-number">6</span>
+                            <span class="todo-text">Upload completed files</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section progress-section">
+                    <div class="progress-header">
+                        <span>Progress:</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-download"></i> Download Files</h3>
+                    <button class="btn btn-secondary" id="downloadBtn">
+                        <i class="fas fa-file-archive"></i> Download Starter Files
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="content-area">
+                <!-- Tab Navigation -->
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="instructions">Instructions</button>
+                    <button class="tab-btn" data-tab="upload">Upload Work</button>
+                    <button class="tab-btn" data-tab="results">Results</button>
+                </div>
+
+                <!-- Instructions Tab -->
+                <div class="tab-content active" id="instructions">
+                    <h2><i class="fas fa-book"></i> Exercise Instructions</h2>
+                    <div class="instructions-content">
+                        <h3>Learning Objectives</h3>
+                        <ul>
+                            <li>Differentiate between class and ID selectors</li>
+                            <li>Understand CSS specificity and the cascade</li>
+                            <li>Apply styles using appropriate selectors</li>
+                            <li>Troubleshoot style conflicts</li>
+                        </ul>
+
+                        <h3>Your Task</h3>
+                        <p>You'll be styling an employee directory for Msebetsi Solutions. Complete the CSS file by implementing the missing styles marked with TODO comments.</p>
+
+                        <h3>Files Provided</h3>
+                        <ul>
+                            <li><code>index.html</code> - Employee directory structure</li>
+                            <li><code>style.css</code> - Incomplete CSS with TODO comments</li>
+                        </ul>
+
+                        <h3>Steps to Complete</h3>
+                        <ol>
+                            <li>Download the starter files</li>
+                            <li>Open the files in your code editor</li>
+                            <li>Complete all TODO items in style.css</li>
+                            <li>Test your work in a browser</li>
+                            <li>Upload your completed files</li>
+                        </ol>
+
+                        <div class="download-box">
+                            <h4>Ready to Start?</h4>
+                            <p>Download the starter files and begin working on the TODOs.</p>
+                            <button class="btn" id="downloadBtn2">
+                                <i class="fas fa-download"></i> Download Starter Files
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Tab -->
+                <div class="tab-content" id="upload">
+                    <h2><i class="fas fa-upload"></i> Submit Your Work</h2>
+                    <div class="upload-area">
+                        <p>Upload your completed HTML and CSS files for assessment.</p>
+                        
+                        <div class="upload-box" id="dropArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <h3>Drag & Drop Files Here</h3>
+                            <p>or click to browse</p>
+                            <input type="file" id="fileInput" multiple accept=".html,.css">
+                            <p><small>Upload both index.html and style.css files</small></p>
+                        </div>
+
+                        <div class="uploaded-files">
+                            <h4>Uploaded Files:</h4>
+                            <div id="filesList">
+                                <p style="color: var(--neutral-500); font-style: italic;">No files uploaded yet</p>
+                            </div>
+                        </div>
+
+                        <button class="btn" id="submitBtn" disabled>
+                            <i class="fas fa-paper-plane"></i> Submit for Assessment
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Tab -->
+                <div class="tab-content" id="results">
+                    <h2><i class="fas fa-chart-line"></i> Assessment Results</h2>
+                    
+                    <div class="results-placeholder" id="resultsPlaceholder">
+                        <i class="fas fa-clipboard-check" style="font-size: 4rem; margin-bottom: var(--space-4); color: var(--neutral-300);"></i>
+                        <h3>Awaiting Submission</h3>
+                        <p>Submit your completed files to see your results and feedback.</p>
+                    </div>
+
+                    <div class="results-content" id="resultsContent">
+                        <div class="score-card">
+                            <div class="score-header">
+                                <h3>Lesson 7 Results</h3>
+                                <div class="score-badge">
+                                    <span id="scoreValue">0</span>/6
+                                </div>
+                            </div>
+                            <p>Feedback on your submitted work:</p>
+                            <div id="feedbackList"></div>
+                        </div>
+
+                        <h3>Next Steps</h3>
+                        <p>Based on your performance, you're ready to move on to the next lesson!</p>
+                        
+                        <!-- Next Lesson Button -->
+                        <div style="text-align: center; margin-top: var(--space-8);">
+                            <button class="next-lesson-btn" id="nextLessonBtn" disabled>
+                                <i class="fas fa-arrow-right"></i> Continue to Lesson 8
+                            </button>
+                            <p style="margin-top: var(--space-2); color: var(--neutral-700); font-size: 0.9rem;">
+                                Complete this lesson to unlock Lesson 8
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer class="lesson-footer">
+            <div>
+                <span style="color: var(--neutral-700);">Msebetsi Solutions © 2025 • Lesson 7</span>
+            </div>
+            <div>
+                <button class="next-lesson-btn" id="footerNextBtn" disabled>
+                    Next Lesson <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Tab Navigation
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // TODO Checklist Progress
+        const todoCheckboxes = document.querySelectorAll('.todo-checkbox');
+        const progressPercent = document.getElementById('progressPercent');
+        const progressFill = document.getElementById('progressFill');
+        const nextLessonBtn = document.getElementById('nextLessonBtn');
+        const footerNextBtn = document.getElementById('footerNextBtn');
+
+        function updateProgress() {
+            const total = todoCheckboxes.length;
+            const completed = Array.from(todoCheckboxes).filter(cb => cb.checked).length;
+            const percent = Math.round((completed / total) * 100);
+            
+            progressPercent.textContent = `${percent}%`;
+            progressFill.style.width = `${percent}%`;
+            
+            // Enable next lesson button when all TODOs are checked
+            if (completed === total) {
+                nextLessonBtn.disabled = false;
+                footerNextBtn.disabled = false;
+            } else {
+                nextLessonBtn.disabled = true;
+                footerNextBtn.disabled = true;
+            }
+        }
+
+        todoCheckboxes.forEach(cb => {
+            cb.addEventListener('change', updateProgress);
+        });
+
+        // Download Starter Files
+        function createZipFile() {
+            const htmlContent = `<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Msebetsi - Employee Directory</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Msebetsi Solutions Team</h1>
+        <p class="subtitle">Employee Performance Dashboard</p>
+    </header>
+
+    <main>
+        <!-- Regular Employee Card -->
+        <section class="employee-card">
+            <h2>Thandi Ngwenya</h2>
+            <p class="role">Frontend Developer</p>
+            <p class="department">Web Team</p>
+            <div class="tags">
+                <span class="tag">JavaScript</span>
+                <span class="tag">React</span>
+            </div>
+        </section>
+
+        <!-- Employee of the Month -->
+        <section class="employee-card" id="employee-of-month">
+            <h2>Kagiso Molefe</h2>
+            <p class="role">DevOps Engineer</p>
+            <p class="department">Cloud Infrastructure</p>
+            <div class="tags">
+                <span class="tag">AWS</span>
+                <span class="tag">Kubernetes</span>
+                <span class="tag">CI/CD</span>
+            </div>
+            <p class="badge">⭐ Employee of the Month</p>
+        </section>
+
+        <!-- Specificity Challenge -->
+        <section class="employee-card on-leave" id="urgent-review">
+            <h2>Lerato Smith</h2>
+            <p class="role">UX Designer</p>
+            <p class="department">Product Team</p>
+            <div class="tags">
+                <span class="tag">Figma</span>
+                <span class="tag">Research</span>
+            </div>
+            <p class="status">⚠️ Requires urgent performance review</p>
+        </section>
+
+        <!-- Multiple Classes -->
+        <section class="employee-card senior remote">
+            <h2>David Okafor</h2>
+            <p class="role">Technical Lead</p>
+            <p class="department">Engineering</p>
+            <div class="tags">
+                <span class="tag">Architecture</span>
+                <span class="tag">Mentoring</span>
+                <span class="tag remote-tag">Remote</span>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Msebetsi Solutions &copy; 2024 | Internal Use Only</p>
+    </footer>
+</body>
+</html>`;
+
+            const cssContent = `/* TODO 1: Style all employee cards using class selector */
+/* Target: .employee-card */
+/* Add styles here */
+
+/* TODO 2: Style employee of the month using ID selector */
+/* Target: #employee-of-month */
+/* Add styles here */
+
+/* TODO 3: Resolve specificity conflict */
+/* Both .on-leave and #urgent-review target the same element */
+/* Which selector should you use? Apply these styles: */
+/* color: #dc2626; */
+/* background-color: #fef2f2; */
+
+/* TODO 4: Style elements with multiple classes */
+/* Target: .senior.remote (both classes on same element) */
+/* Add styles here */
+
+/* Provided styles - DO NOT MODIFY */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f1f5f9;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+h1 {
+    color: #1e3a8a;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+.employee-card h2 {
+    margin-top: 0;
+    color: #0f172a;
+}
+
+.role {
+    color: #475569;
+    font-weight: 600;
+    margin: 8px 0;
+}
+
+.department {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.tags {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+}
+
+.tag {
+    background-color: #e2e8f0;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+.remote-tag {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+}
+
+.badge {
+    display: inline-block;
+    background-color: #fef3c7;
+    color: #92400e;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    margin-top: 12px;
+}
+
+.status {
+    font-style: italic;
+    margin-top: 12px;
+}
+
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #cbd5e1;
+    color: #64748b;
+    font-size: 0.9rem;
+}`;
+
+            // Create a zip file using JSZip
+            if (typeof JSZip === 'undefined') {
+                // Fallback to separate downloads
+                downloadFile('index.html', htmlContent);
+                downloadFile('style.css', cssContent);
+                alert('Downloading files separately. For a zip file, include JSZip library.');
+            } else {
+                const zip = new JSZip();
+                zip.file("lesson7-starter/index.html", htmlContent);
+                zip.file("lesson7-starter/style.css", cssContent);
+                zip.generateAsync({type:"blob"})
+                   .then(blob => {
+                       const link = document.createElement('a');
+                       link.href = URL.createObjectURL(blob);
+                       link.download = "lesson7-starter-files.zip";
+                       document.body.appendChild(link);
+                       link.click();
+                       document.body.removeChild(link);
+                   });
+            }
+        }
+
+        function downloadFile(filename, content) {
+            const blob = new Blob([content], {type: 'text/plain'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        document.getElementById('downloadBtn').addEventListener('click', createZipFile);
+        document.getElementById('downloadBtn2').addEventListener('click', createZipFile);
+
+        // File Upload
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        const filesList = document.getElementById('filesList');
+        const submitBtn = document.getElementById('submitBtn');
+        const resultsPlaceholder = document.getElementById('resultsPlaceholder');
+        const resultsContent = document.getElementById('resultsContent');
+        const scoreValue = document.getElementById('scoreValue');
+        const feedbackList = document.getElementById('feedbackList');
+
+        let uploadedFiles = [];
+
+        // Drag and drop functionality
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => {
+                dropArea.style.borderColor = 'var(--primary-600)';
+                dropArea.style.background = 'var(--neutral-50)';
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => {
+                dropArea.style.borderColor = '';
+                dropArea.style.background = '';
+            }, false);
+        });
+
+        dropArea.addEventListener('drop', handleDrop, false);
+        dropArea.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', function() {
+            handleFiles(this.files);
+        });
+
+        function handleDrop(e) {
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            for (let file of files) {
+                if (file.name.endsWith('.html') || file.name.endsWith('.css')) {
+                    uploadedFiles.push(file);
+                } else {
+                    alert(`Invalid file type: ${file.name}. Please upload HTML or CSS files only.`);
+                }
+            }
+            updateFilesList();
+        }
+
+        function updateFilesList() {
+            if (uploadedFiles.length === 0) {
+                filesList.innerHTML = '<p style="color: var(--neutral-500); font-style: italic;">No files uploaded yet</p>';
+                submitBtn.disabled = true;
+                return;
+            }
+
+            let html = '';
+            uploadedFiles.forEach((file, index) => {
+                html += `
+                    <div class="file-item">
+                        <i class="fas fa-file-code"></i>
+                        <span>${file.name} (${(file.size/1024).toFixed(1)} KB)</span>
+                        <button onclick="removeFile(${index})" style="background: none; border: none; color: var(--error-500); cursor: pointer;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            filesList.innerHTML = html;
+            
+            // Enable submit if we have both HTML and CSS
+            const hasHTML = uploadedFiles.some(f => f.name.endsWith('.html'));
+            const hasCSS = uploadedFiles.some(f => f.name.endsWith('.css'));
+            submitBtn.disabled = !(hasHTML && hasCSS);
+        }
+
+        window.removeFile = function(index) {
+            uploadedFiles.splice(index, 1);
+            updateFilesList();
+        };
+
+        // Submit for Assessment
+        submitBtn.addEventListener('click', function() {
+            // Simulate assessment
+            const completedTodos = Array.from(todoCheckboxes).filter(cb => cb.checked).length;
+            const score = Math.min(completedTodos, 6); // Max 6 points
+            
+            // Update results
+            resultsPlaceholder.style.display = 'none';
+            resultsContent.style.display = 'block';
+            scoreValue.textContent = score;
+            
+            // Generate feedback
+            let feedbackHTML = '';
+            const feedbacks = [
+                {task: 'Class selector', completed: document.getElementById('todo1').checked, hint: 'Should use .employee-card selector'},
+                {task: 'ID selector', completed: document.getElementById('todo2').checked, hint: 'Should use #employee-of-month selector'},
+                {task: 'Specificity conflict', completed: document.getElementById('todo3').checked, hint: 'ID selector wins over class selector'},
+                {task: 'Multiple classes', completed: document.getElementById('todo4').checked, hint: 'Use .senior.remote selector'},
+                {task: 'Browser testing', completed: document.getElementById('todo5').checked, hint: 'Check styles in browser'},
+                {task: 'File upload', completed: true, hint: 'Files submitted successfully'}
+            ];
+            
+            feedbacks.forEach((fb, i) => {
+                feedbackHTML += `
+                    <div class="feedback-item ${fb.completed ? 'success' : 'error'}">
+                        <strong>TODO ${i+1}:</strong> ${fb.task}
+                        <br><small>${fb.hint}</small>
+                    </div>
+                `;
+            });
+            
+            feedbackList.innerHTML = feedbackHTML;
+            
+            // Check if passed (at least 4/6)
+            if (score >= 4) {
+                nextLessonBtn.disabled = false;
+                footerNextBtn.disabled = false;
+                nextLessonBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Continue to Lesson 8';
+                nextLessonBtn.onclick = function() {
+                    window.location.href = 'lesson8.html';
+                };
+                footerNextBtn.onclick = function() {
+                    window.location.href = 'lesson8.html';
+                };
+            } else {
+                nextLessonBtn.innerHTML = '<i class="fas fa-redo"></i> Retry Lesson';
+                nextLessonBtn.onclick = function() {
+                    location.reload();
+                };
+            }
+            
+            // Switch to results tab
+            document.querySelector('[data-tab="results"]').click();
+        });
+
+        // Initialize progress
+        updateProgress();
+    </script>
+    
+    <!-- Include JSZip for zip file creation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</body>
+</html>

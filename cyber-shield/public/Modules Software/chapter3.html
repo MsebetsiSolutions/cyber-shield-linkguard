@@ -1,0 +1,536 @@
+<!-- [file name]: Git & GitHub Essentials.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task 1 — Instructor Demo: Git & GitHub Essentials</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #555;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: -10px;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        pre code {
+            background-color: transparent;
+            color: #ecf0f1;
+            padding: 0;
+        }
+        ul {
+            margin-left: 20px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .section {
+            margin: 30px 0;
+        }
+        .os-label {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .video-note {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 10px 15px;
+            margin: 15px 0;
+            font-size: 0.95em;
+        }
+        .step-card {
+            background-color: #f9f9f9;
+            border-left: 4px solid #9b59b6;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .git-command {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .upload-section {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 4px;
+        }
+        .upload-area {
+            background-color: white;
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            border-color: #2980b9;
+            background-color: #f8f9fa;
+        }
+        .upload-area.dragover {
+            border-color: #27ae60;
+            background-color: #d4edda;
+        }
+        .file-input {
+            display: none;
+        }
+        .file-info {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e8f4f8;
+            border-radius: 4px;
+            display: none;
+        }
+        .file-info.show {
+            display: block;
+        }
+        @media print {
+            .action-buttons, .upload-section {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Task 1 — Instructor Demo: Git & GitHub Essentials</h1>
+    <p class="subtitle">Msebetsi Solutions — Software Development Course</p>
+
+    <div class="action-buttons">
+        <button onclick="downloadPDF()" class="btn btn-primary">
+            <span>📥</span> Download as PDF
+        </button>
+        <button onclick="window.location.href='#upload-section'" class="btn btn-success">
+            <span>📤</span> Upload Task
+        </button>
+    </div>
+
+    <div class="section">
+        <h2>🚀 Why We Use Git & GitHub</h2>
+        
+        <div class="video-note">
+            <strong>📺 Watch:</strong> <a href="https://www.youtube.com/watch?v=RGOj5yH7evk" target="_blank" rel="noopener">Git and GitHub for Beginners - Crash Course</a>
+        </div>
+        <div class="video-container" style="background: #000;">
+            <a href="https://www.youtube.com/watch?v=RGOj5yH7evk" target="_blank" rel="noopener" style="display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; text-decoration: none;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: url('https://img.youtube.com/vi/RGOj5yH7evk/maxresdefault.jpg') center/cover;">
+                    <div style="width: 80px; height: 56px; background: rgba(255,0,0,0.9); border-radius: 14px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <div style="width: 0; height: 0; border-left: 26px solid white; border-top: 16px solid transparent; border-bottom: 16px solid transparent; margin-left: 6px;"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <p>As software developers, it's crucial to:</p>
+        <ul>
+            <li>Store and manage our code safely</li>
+            <li>Track every change</li>
+            <li>Work collaboratively with teams</li>
+            <li>Deploy and share projects easily</li>
+        </ul>
+        <p>For this course, we will use Git (version control) and GitHub (online hosting platform) to manage all source code.</p>
+    </div>
+
+    <div class="section">
+        <div class="step-card">
+            <h2>Step 1: Creating Your First GitHub Repository</h2>
+            <ol>
+                <li>Open GitHub in your browser:<br>
+                    <a href="https://github.com" target="_blank" rel="noopener">👉 https://github.com</a></li>
+                <li>At the top left or right of your dashboard, click "New" to begin creating a repository.</li>
+                <li>Under Owner, ensure your personal profile is selected.</li>
+                <li>Name the repository:<br>
+                    <code>first-day-demo</code></li>
+                <li>Enable the option:<br>
+                    <code>✓ Add a README file</code><br>
+                    This automatically creates a README.md for your project.</li>
+                <li>Click <strong>Create repository</strong>.</li>
+            </ol>
+            <p>Your remote repository now exists online — but to start working on it, we need it on our local machine.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="step-card">
+            <h2>Step 2: Cloning the Repository to Your Computer</h2>
+            <ol>
+                <li>On your repository page, click "Code".</li>
+                <li>Select the SSH option (recommended for developers).</li>
+                <li>Copy the SSH URL.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="step-card">
+            <h2>Step 3: Using the Terminal</h2>
+            <p>Open your terminal. We'll now pull the repo onto your machine.</p>
+            
+            <div class="video-note">
+                <strong>📺 Watch:</strong> <a href="https://www.youtube.com/watch?v=8JJ101D3knE" target="_blank" rel="noopener">Git Tutorial for Beginners: Learn Git in 1 Hour</a>
+            </div>
+            <div class="video-container" style="background: #000;">
+                <a href="https://www.youtube.com/watch?v=8JJ101D3knE" target="_blank" rel="noopener" style="display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; text-decoration: none;">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: url('https://img.youtube.com/vi/8JJ101D3knE/maxresdefault.jpg') center/cover;">
+                        <div style="width: 80px; height: 56px; background: rgba(255,0,0,0.9); border-radius: 14px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                            <div style="width: 0; height: 0; border-left: 26px solid white; border-top: 16px solid transparent; border-bottom: 16px solid transparent; margin-left: 6px;"></div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <ol>
+                <li>Navigate to the folder where you want your project stored:<br>
+                    <div class="git-command">cd Desktop</div></li>
+                <li>Clone the repository using the URL copied from GitHub:<br>
+                    <div class="git-command">git clone &lt;url&gt;</div></li>
+                <li>This will create a new folder on your machine named <code>first-day-demo</code>.</li>
+                <li>Move into your new project folder:<br>
+                    <div class="git-command">cd first-day-demo</div></li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="step-card">
+            <h2>Step 4: Creating Your First Project File</h2>
+            <p>Let's add an empty HTML file to the repository:</p>
+            <div class="git-command">touch index.html</div>
+            <p>This file will appear inside your project folder.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="step-card">
+            <h2>Step 5: Staging Changes</h2>
+            <p>Before Git saves your work, you must stage the changes:</p>
+            <div class="git-command">git add -A</div>
+            <p><code>-A</code> stages all new and updated files.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="step-card">
+            <h2>Step 6: Committing Your Work</h2>
+            <p>A commit is a snapshot of your project at a specific moment.</p>
+            <div class="git-command">git commit -m "Initial commit: added index.html"</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="step-card">
+            <h2>Step 7: Uploading (Pushing) Your Work to GitHub</h2>
+            <p>To send your local changes to your online GitHub repository:</p>
+            <div class="git-command">git push origin main</div>
+            <ul>
+                <li><code>origin</code> refers to your remote repository.</li>
+                <li><code>main</code> is the default branch.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="step-card">
+            <h2>Step 8: Keeping Your Local Copy Up-to-Date</h2>
+            <p>If someone else makes changes—or you switch devices—you must pull the latest version:</p>
+            <div class="git-command">git pull origin main</div>
+            <p>This syncs your machine with GitHub to avoid conflicts and outdated code.</p>
+            
+            <div class="video-note">
+                <strong>📺 Watch:</strong> <a href="https://www.youtube.com/watch?v=HkdAHXoRtos" target="_blank" rel="noopener">Git Push and Pull Tutorial</a>
+            </div>
+            <div class="video-container" style="background: #000;">
+                <a href="https://www.youtube.com/watch?v=HkdAHXoRtos" target="_blank" rel="noopener" style="display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; text-decoration: none;">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: url('https://img.youtube.com/vi/HkdAHXoRtos/maxresdefault.jpg') center/cover;">
+                        <div style="width: 80px; height: 56px; background: rgba(255,0,0,0.9); border-radius: 14px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                            <div style="width: 0; height: 0; border-left: 26px solid white; border-top: 16px solid transparent; border-bottom: 16px solid transparent; margin-left: 6px;"></div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="upload-section" id="upload-section">
+        <h2>📤 Submit Your Task</h2>
+        <p>Upload your completed task in PDF, HTML, or Markdown format:</p>
+        
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+            <p style="font-size: 48px; margin: 0;">📁</p>
+            <p style="margin: 10px 0; font-size: 18px; font-weight: 600;">Click to upload or drag and drop</p>
+            <p style="margin: 5px 0; color: #666;">Supported formats: PDF, HTML, Markdown (.pdf, .html, .md)</p>
+        </div>
+        
+        <input type="file" id="fileInput" class="file-input" accept=".pdf,.html,.htm,.md,.markdown" onchange="handleFileSelect(event)">
+        
+        <div id="fileInfo" class="file-info">
+            <p><strong>Selected file:</strong> <span id="fileName"></span></p>
+            <p><strong>File size:</strong> <span id="fileSize"></span></p>
+            <p><strong>File type:</strong> <span id="fileType"></span></p>
+            <button onclick="submitTask()" class="btn btn-success" style="margin-top: 10px;">Submit Task</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🌐 Advanced Git & GitHub Resources</h2>
+        <ul>
+            <li><strong>Official Git Documentation:</strong><br>
+                <a href="https://git-scm.com/doc" target="_blank" rel="noopener">https://git-scm.com/doc</a></li>
+            <li><strong>GitHub Learning Lab:</strong><br>
+                <a href="https://lab.github.com/" target="_blank" rel="noopener">https://lab.github.com/</a></li>
+            <li><strong>Atlassian Git Tutorials:</strong><br>
+                <a href="https://www.atlassian.com/git/tutorials" target="_blank" rel="noopener">https://www.atlassian.com/git/tutorials</a></li>
+            <li><strong>GitHub CLI Tool (Command Line Interface):</strong><br>
+                <a href="https://cli.github.com/" target="_blank" rel="noopener">https://cli.github.com/</a></li>
+        </ul>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        function playVideo(containerId, videoId) {
+            const container = document.getElementById(containerId);
+            if (!container || container.querySelector('iframe')) {
+                return; // Already loaded
+            }
+            
+            // Clear the thumbnail
+            container.innerHTML = '';
+            
+            // Create and insert iframe
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'absolute';
+            iframe.style.top = '0';
+            iframe.style.left = '0';
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            iframe.frameBorder = '0';
+            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+            iframe.allowFullscreen = true;
+            
+            container.appendChild(iframe);
+        }
+
+        function downloadPDF() {
+            const element = document.body;
+            const opt = {
+                margin: 10,
+                filename: 'Git_GitHub_Essentials.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            // Show loading message
+            const originalText = event.target.innerHTML;
+            event.target.innerHTML = '<span>⏳</span> Generating PDF...';
+            event.target.disabled = true;
+            
+            html2pdf().set(opt).from(element).save().then(() => {
+                event.target.innerHTML = originalText;
+                event.target.disabled = false;
+                alert('✅ PDF downloaded successfully!');
+            }).catch(err => {
+                event.target.innerHTML = originalText;
+                event.target.disabled = false;
+                alert('❌ Error generating PDF. Please try again.');
+                console.error('PDF generation error:', err);
+            });
+        }
+
+        // File upload handlers
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        let selectedFile = null;
+
+        // Drag and drop handlers
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => {
+                uploadArea.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => {
+                uploadArea.classList.remove('dragover');
+            }, false);
+        });
+
+        uploadArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect({ target: { files: files } });
+            }
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const validTypes = ['application/pdf', 'text/html', 'text/markdown', 'text/plain'];
+            const validExtensions = ['.pdf', '.html', '.htm', '.md', '.markdown'];
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+
+            if (!validExtensions.includes(fileExtension)) {
+                alert('❌ Invalid file type. Please upload a PDF, HTML, or Markdown file.');
+                return;
+            }
+
+            selectedFile = file;
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileType').textContent = fileExtension.toUpperCase().substring(1);
+            fileInfo.classList.add('show');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function submitTask() {
+            if (!selectedFile) {
+                alert('❌ Please select a file first.');
+                return;
+            }
+
+            // Simulate upload (in real application, this would send to a server)
+            const formData = new FormData();
+            formData.append('taskFile', selectedFile);
+            formData.append('courseName', 'Git & GitHub Essentials');
+            formData.append('submitDate', new Date().toISOString());
+
+            // Show success message
+            alert(`✅ Task "${selectedFile.name}" submitted successfully!\n\nIn a production environment, this would be uploaded to your course management system.`);
+            
+            // Reset form
+            fileInput.value = '';
+            selectedFile = null;
+            fileInfo.classList.remove('show');
+            
+            console.log('Task submitted:', {
+                fileName: selectedFile?.name,
+                fileSize: selectedFile?.size,
+                submitDate: new Date().toISOString()
+            });
+        }
+    </script>
+</body>
+</html>
