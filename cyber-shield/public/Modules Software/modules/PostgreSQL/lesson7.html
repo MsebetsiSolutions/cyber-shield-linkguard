@@ -1,0 +1,2600 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MSEBETSI PostgreSQL | Lesson 7: Debugging & Advanced Schema Operations</title>
+  <meta name="description" content="Lesson 7: Master PostgreSQL debugging techniques, ALTER TABLE operations, and real-world database troubleshooting">
+  
+  <!-- Performance hints -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <style>
+    /* CSS Custom Properties for Black & White Theme */
+    :root {
+      /* Light theme (default) */
+      --color-surface: #ffffff;
+      --color-background: #f8f9fa;
+      --color-card: #ffffff;
+      --color-text: #000000;
+      --color-text-secondary: #495057;
+      --color-border: #dee2e6;
+      --color-primary: #000000;
+      --color-secondary: #212529;
+      --color-accent: #000000;
+      --color-success: #28a745;
+      --color-warning: #ffc107;
+      --color-error: #dc3545;
+      --color-info: #17a2b8;
+      --color-debug: #6f42c1;
+      
+      /* UI Constants */
+      --border-radius-sm: 6px;
+      --border-radius-md: 10px;
+      --border-radius-lg: 16px;
+      --spacing-xs: 0.5rem;
+      --spacing-sm: 0.875rem;
+      --spacing-md: 1.25rem;
+      --spacing-lg: 1.75rem;
+      --spacing-xl: 2.5rem;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+    }
+
+    /* Dark theme */
+    [data-theme="dark"] {
+      --color-surface: #000000;
+      --color-background: #121212;
+      --color-card: #1a1a1a;
+      --color-text: #ffffff;
+      --color-text-secondary: #adb5bd;
+      --color-border: #343a40;
+      --color-primary: #ffffff;
+      --color-secondary: #e9ecef;
+      --color-accent: #ffffff;
+      --color-success: #20c997;
+      --color-warning: #ffd166;
+      --color-error: #ff6b6b;
+      --color-info: #4cc9f0;
+      --color-debug: #9d4edd;
+    }
+
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-body);
+      line-height: 1.6;
+      color: var(--color-text);
+      background-color: var(--color-background);
+      padding: var(--spacing-md);
+      max-width: 1400px;
+      margin: 0 auto;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    /* Background Pattern */
+    .background-pattern {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(to right, var(--color-border) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.1;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      background: var(--color-card);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-md);
+    }
+
+    .theme-toggle-btn {
+      background: var(--color-surface);
+      border: 2px solid var(--color-border);
+      border-radius: 50px;
+      width: 60px;
+      height: 30px;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--color-primary);
+    }
+
+    .theme-toggle-btn::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      background: var(--color-primary);
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    [data-theme="dark"] .theme-toggle-btn::after {
+      transform: translateX(30px);
+    }
+
+    .theme-label {
+      font-size: 0.9rem;
+      color: var(--color-text);
+      font-weight: 500;
+      min-width: 50px;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: var(--spacing-md);
+      color: var(--color-text);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      color: var(--color-primary);
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      border-bottom: 2px solid var(--color-border);
+      padding-bottom: var(--spacing-sm);
+      margin-top: var(--spacing-xl);
+    }
+
+    h3 {
+      font-size: 1.3rem;
+      color: var(--color-secondary);
+      margin-top: var(--spacing-lg);
+    }
+
+    p {
+      margin-bottom: var(--spacing-md);
+    }
+
+    a {
+      color: var(--color-primary);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-bottom: 1px solid transparent;
+    }
+
+    a:hover, a:focus {
+      color: var(--color-text);
+      border-bottom-color: var(--color-primary);
+    }
+
+    code, pre {
+      font-family: var(--font-mono);
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: var(--border-radius-sm);
+      padding: 0.2rem 0.4rem;
+      font-size: 0.9em;
+      color: var(--color-primary);
+    }
+
+    [data-theme="dark"] code,
+    [data-theme="dark"] pre {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    pre {
+      padding: var(--spacing-md);
+      overflow-x: auto;
+      margin: var(--spacing-md) 0;
+      border-left: 4px solid var(--color-primary);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+    }
+
+    /* Utility classes */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: var(--color-card);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+      border: 1px solid var(--color-border);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .success-card {
+      border-left: 4px solid var(--color-success);
+    }
+
+    .warning-card {
+      border-left: 4px solid var(--color-warning);
+    }
+
+    .error-card {
+      border-left: 4px solid var(--color-error);
+    }
+
+    .info-card {
+      border-left: 4px solid var(--color-info);
+    }
+
+    .debug-card {
+      border-left: 4px solid var(--color-debug);
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .flex {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .flex-col {
+      flex-direction: column;
+    }
+
+    .grid {
+      display: grid;
+      gap: var(--spacing-md);
+    }
+
+    .grid-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .grid-3 {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      border-radius: var(--border-radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+      gap: var(--spacing-xs);
+      background-color: var(--color-surface);
+      color: var(--color-text);
+      border-color: var(--color-border);
+    }
+
+    .btn:hover, .btn:focus {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--color-primary);
+    }
+
+    .btn-primary {
+      background-color: var(--color-primary);
+      color: var(--color-surface);
+      border-color: var(--color-primary);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      border-color: var(--color-primary);
+    }
+
+    .btn-success {
+      background-color: var(--color-success);
+      color: white;
+      border-color: var(--color-success);
+    }
+
+    .btn-error {
+      background-color: var(--color-error);
+      color: white;
+      border-color: var(--color-error);
+    }
+
+    .btn-warning {
+      background-color: var(--color-warning);
+      color: black;
+      border-color: var(--color-warning);
+    }
+
+    .btn-debug {
+      background-color: var(--color-debug);
+      color: white;
+      border-color: var(--color-debug);
+    }
+
+    .btn-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Lesson Header */
+    .lesson-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+      padding-bottom: var(--spacing-lg);
+      border-bottom: 2px solid var(--color-border);
+    }
+
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--spacing-md);
+      flex-wrap: wrap;
+      margin-top: var(--spacing-md);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background-color: var(--color-surface);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+
+    .badge-success {
+      background-color: var(--color-success);
+      color: white;
+      border-color: transparent;
+    }
+
+    .badge-warning {
+      background-color: var(--color-warning);
+      color: black;
+      border-color: transparent;
+    }
+
+    .badge-info {
+      background-color: var(--color-info);
+      color: white;
+      border-color: transparent;
+    }
+
+    .badge-error {
+      background-color: var(--color-error);
+      color: white;
+      border-color: transparent;
+    }
+
+    .badge-debug {
+      background-color: var(--color-debug);
+      color: white;
+      border-color: transparent;
+    }
+
+    /* Tabs Navigation */
+    .tabs {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .tabs-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-xs);
+      border-bottom: 2px solid var(--color-border);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .tab-btn {
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+      position: relative;
+    }
+
+    .tab-btn:hover {
+      color: var(--color-primary);
+    }
+
+    .tab-btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Code editor simulation */
+    .code-editor {
+      background-color: var(--color-surface);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+      margin: var(--spacing-lg) 0;
+      border: 1px solid var(--color-border);
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    .code-header {
+      background-color: var(--color-card);
+      padding: var(--spacing-sm) var(--spacing-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--color-text);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--color-border);
+      box-sizing: border-box;
+    }
+
+    .code-body {
+      padding: var(--spacing-md);
+      overflow-x: auto;
+      background-color: var(--color-surface);
+      box-sizing: border-box;
+      min-height: 200px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .code-body code {
+      font-family: var(--font-mono);
+      background-color: transparent;
+      color: var(--color-text);
+      padding: 0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      box-sizing: border-box;
+    }
+
+    /* Database Visualization */
+    .database-visualization {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-lg);
+      margin: var(--spacing-lg) 0;
+      position: relative;
+    }
+
+    .table-schema {
+      margin-bottom: var(--spacing-xl);
+      padding: var(--spacing-md);
+      border: 2px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      background: var(--color-background);
+    }
+
+    .table-header {
+      background: var(--color-card);
+      padding: var(--spacing-sm);
+      border-radius: var(--border-radius-sm);
+      margin-bottom: var(--spacing-md);
+      font-weight: bold;
+      border-left: 4px solid var(--color-primary);
+    }
+
+    .table-column {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-sm);
+      border-bottom: 1px dashed var(--color-border);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+    }
+
+    .table-column:last-child {
+      border-bottom: none;
+    }
+
+    .column-name {
+      font-weight: bold;
+      width: 150px;
+      min-width: 150px;
+    }
+
+    .column-details {
+      display: flex;
+      gap: var(--spacing-sm);
+      flex-wrap: wrap;
+    }
+
+    .data-type-tag {
+      background: rgba(0, 0, 0, 0.08);
+      color: var(--color-primary);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      border: 1px solid var(--color-border);
+    }
+
+    [data-theme="dark"] .data-type-tag {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .constraint-tag {
+      background: rgba(255, 193, 7, 0.15);
+      color: var(--color-warning);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    .error-tag {
+      background: rgba(220, 53, 69, 0.15);
+      color: var(--color-error);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    /* Debugging interface */
+    .debug-interface {
+      background: var(--color-background);
+      border: 2px solid var(--color-debug);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-lg);
+      margin: var(--spacing-lg) 0;
+    }
+
+    .debug-step {
+      margin-bottom: var(--spacing-lg);
+      padding: var(--spacing-md);
+      background: var(--color-surface);
+      border-radius: var(--border-radius-md);
+      border-left: 4px solid var(--color-debug);
+    }
+
+    .terminal {
+      background: #000;
+      color: #00ff00;
+      font-family: var(--font-mono);
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius-sm);
+      margin: var(--spacing-sm) 0;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    .terminal.error {
+      color: #ff5555;
+    }
+
+    .terminal.success {
+      color: #55ff55;
+    }
+
+    /* Task list */
+    .task-list {
+      list-style-type: none;
+      counter-reset: task-counter;
+    }
+
+    .task-item {
+      counter-increment: task-counter;
+      margin-bottom: var(--spacing-lg);
+      padding-left: 3rem;
+      position: relative;
+    }
+
+    .task-item::before {
+      content: counter(task-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2rem;
+      height: 2rem;
+      background-color: var(--color-primary);
+      color: var(--color-surface);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .task-item.completed::before {
+      background-color: var(--color-success);
+      content: "✓";
+    }
+
+    /* Interactive debugging */
+    .debug-panel {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: var(--spacing-lg);
+      margin: var(--spacing-lg) 0;
+    }
+
+    .code-panel {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+    }
+
+    .output-panel {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-md);
+    }
+
+    .debug-controls {
+      display: flex;
+      gap: var(--spacing-sm);
+      margin-top: var(--spacing-md);
+    }
+
+    /* Business scenario */
+    .business-scenario {
+      background: linear-gradient(135deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.02) 100%);
+      border: 2px solid var(--color-info);
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-xl);
+      margin: var(--spacing-xl) 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    [data-theme="dark"] .business-scenario {
+      background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+    }
+
+    .scenario-icon {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 3rem;
+      opacity: 0.1;
+      color: var(--color-info);
+    }
+
+    /* Progress indicators */
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--color-border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: var(--spacing-sm) 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--color-success);
+      transition: width 0.3s ease;
+    }
+
+    /* File Structure */
+    .file-structure {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-lg);
+      margin: var(--spacing-lg) 0;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+    }
+
+    .file-item {
+      padding: var(--spacing-xs) var(--spacing-md);
+      margin: 2px 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-radius: var(--border-radius-sm);
+    }
+
+    .file-item:hover {
+      background: var(--color-background);
+    }
+
+    .file-item.folder::before {
+      content: '📁 ';
+    }
+
+    .file-item.file::before {
+      content: '📄 ';
+    }
+
+    .file-item.active {
+      background: var(--color-primary);
+      color: var(--color-surface);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: var(--spacing-xl);
+      padding-top: var(--spacing-lg);
+      border-top: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      .grid-2, .grid-3, .debug-panel {
+        grid-template-columns: 1fr;
+      }
+      
+      .flex {
+        flex-direction: column;
+      }
+      
+      .tabs-nav {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 5px;
+      }
+      
+      .tab-btn {
+        white-space: nowrap;
+      }
+      
+      .theme-toggle {
+        top: 10px;
+        right: 10px;
+        padding: var(--spacing-xs) var(--spacing-sm);
+      }
+      
+      .card {
+        padding: var(--spacing-md);
+        margin-left: -10px;
+        margin-right: -10px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .code-editor {
+        max-width: 100%;
+        overflow: hidden;
+      }
+      
+      .code-body {
+        overflow-x: auto;
+        max-width: 100%;
+      }
+    }
+
+    /* Syntax highlighting */
+    .keyword { color: #d73a49; font-weight: bold; }
+    .string { color: #032f62; }
+    .comment { color: #6a737d; font-style: italic; }
+    .function { color: #6f42c1; }
+    .number { color: #005cc5; }
+    .type { color: #22863a; }
+    .constraint { color: #e36209; }
+    .error { color: #d73a49; font-weight: bold; }
+    .table-name { color: #005cc5; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <!-- Background Pattern -->
+  <div class="background-pattern"></div>
+
+  <!-- Theme Toggle -->
+  <div class="theme-toggle">
+    <span class="theme-label" id="themeLabel">Light</span>
+    <button class="theme-toggle-btn" id="themeToggle" aria-label="Toggle theme">
+      <span class="visually-hidden">Toggle theme</span>
+    </button>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Header -->
+    <header class="lesson-header">
+      <h1>Lesson 7: Debugging & Advanced Schema Operations</h1>
+      <p class="subtitle">Master PostgreSQL debugging techniques and ALTER TABLE operations for real-world scenarios</p>
+      
+      <div class="lesson-meta">
+        <span class="badge">PostgreSQL</span>
+        <span class="badge badge-error">Debugging</span>
+        <span class="badge badge-debug">ALTER TABLE</span>
+        <span class="badge badge-warning">Troubleshooting</span>
+        <span class="badge badge-info">Real-World Scenarios</span>
+      </div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <nav class="tabs-nav">
+        <button class="tab-btn active" data-tab="problem">
+          🐛 Debugging Challenge
+        </button>
+        <button class="tab-btn" data-tab="scenario">
+          🏭 Real-World Scenario
+        </button>
+        <button class="tab-btn" data-tab="debugging">
+          🔍 Debugging Tools
+        </button>
+        <button class="tab-btn" data-tab="alter">
+          🔧 ALTER TABLE
+        </button>
+        <button class="tab-btn" data-tab="project">
+          💻 Hands-On Project
+        </button>
+        <button class="tab-btn" data-tab="assessment">
+          📊 Assessment
+        </button>
+      </nav>
+
+      <!-- Tab 1: Problem -->
+      <div class="tab-content active" id="problem">
+        <div class="card error-card">
+          <h2>🐛 Seed Data Not Populating Table</h2>
+          <p><strong>Work with a partner to resolve the following issue:</strong></p>
+          
+          <div class="business-scenario">
+            <div class="scenario-icon">🏭</div>
+            <h3>🚨 CRITICAL BUSINESS ISSUE</h3>
+            <p><strong>Company:</strong> Africa Power Solutions Ltd. - Renewable Energy Power Plant</p>
+            <p><strong>Problem:</strong> Energy production data for Q1 2024 is not appearing in the monitoring system</p>
+            <p><strong>Impact:</strong> Cannot generate reports for investors, potential regulatory compliance issues</p>
+            <p><strong>Your Role:</strong> Database Engineer tasked with debugging and fixing the data population issue</p>
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>✅ Expected Behavior</h3>
+            <p>When the <code>seeds.sql</code> file is executed in PostgreSQL Shell, the data should populate the <code>power_plant_data</code> table.</p>
+            <div class="terminal success">
+              psql -d power_plant_db -f seeds.sql
+              INSERT 0 5
+              -- Success: 5 rows inserted
+            </div>
+            <div class="terminal success">
+              SELECT * FROM power_plant_data;
+              ┌────┬────────────────────┬─────────────┬────────────┐
+              │ id │     plant_name     │ output_mw   │   date     │
+              ├────┼────────────────────┼─────────────┼────────────┤
+              │  1 │ Solar Farm Alpha   │      45.20  │ 2024-01-15 │
+              │  2 │ Wind Turbine Beta  │      32.50  │ 2024-01-15 │
+              │  3 │ Hydro Plant Gamma  │     120.75  │ 2024-01-15 │
+              └────┴────────────────────┴─────────────┴────────────┘
+            </div>
+          </div>
+          
+          <div class="card error-card">
+            <h3>❌ Actual Behavior</h3>
+            <p>When the <code>seeds.sql</code> file is executed, the data is not successfully populated in the table.</p>
+            <div class="terminal error">
+              psql -d power_plant_db -f seeds.sql
+              ERROR:  column "plant_name" of relation "power_plant_data" does not exist
+              LINE 1: INSERT INTO power_plant_data (plant_name, output_mw, date) V...
+                                       ^
+            </div>
+            <div class="terminal error">
+              SELECT * FROM power_plant_data;
+              ┌────┬──────┬──────┬──────┐
+              │ id │ name │ mw   │ date │
+              ├────┼──────┼──────┼──────┤
+              └────┴──────┴──────┴──────┘
+              (0 rows)
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📋 Steps to Reproduce the Problem</h2>
+          <div class="task-list">
+            <div class="task-item">
+              <h3>1. Execute <code>schema.sql</code></h3>
+              <p>Execute schema.sql in PostgreSQL Shell to create the database and table.</p>
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>schema.sql</span>
+                  <span>Current (buggy) version</span>
+                </div>
+                <div class="code-body">
+                  <pre><code><span class="comment">-- Africa Power Solutions Database Schema</span>
+<span class="keyword">CREATE TABLE</span> <span class="table-name">power_plant_data</span> (
+    id <span class="type">SERIAL</span> <span class="constraint">PRIMARY KEY</span>,
+    name <span class="type">VARCHAR</span>(100) <span class="constraint">NOT NULL</span>,
+    mw <span class="type">DECIMAL</span>(10,2) <span class="constraint">NOT NULL</span>,
+    date <span class="type">DATE</span> <span class="constraint">NOT NULL</span>
+);</code></pre>
+                </div>
+              </div>
+            </div>
+            
+            <div class="task-item">
+              <h3>2. Execute <code>seeds.sql</code></h3>
+              <p>Execute seeds.sql in PostgreSQL Shell to populate data in the table.</p>
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>seeds.sql</span>
+                  <span>Current (buggy) version</span>
+                </div>
+                <div class="code-body">
+                  <pre><code><span class="comment">-- Seed data for power plant monitoring</span>
+<span class="keyword">INSERT INTO</span> <span class="table-name">power_plant_data</span> (plant_name, output_mw, date) <span class="keyword">VALUES</span>
+(<span class="string">'Solar Farm Alpha'</span>, <span class="number">45.20</span>, <span class="string">'2024-01-15'</span>),
+(<span class="string">'Wind Turbine Beta'</span>, <span class="number">32.50</span>, <span class="string">'2024-01-15'</span>),
+(<span class="string">'Hydro Plant Gamma'</span>, <span class="number">120.75</span>, <span class="string">'2024-01-15'</span>);</code></pre>
+                </div>
+              </div>
+            </div>
+            
+            <div class="task-item">
+              <h3>3. Verify Data</h3>
+              <p>Run <code>SELECT * FROM power_plant_data;</code> to view seeded data.</p>
+              <div class="terminal error">
+                SELECT * FROM power_plant_data;
+                id | name | mw | date 
+                ----+------+----+------
+                (0 rows)
+                <span class="error">-- NO DATA FOUND!</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="debug-card" style="margin-top: var(--spacing-lg);">
+            <h3>💡 Hints for Debugging</h3>
+            <ul>
+              <li>Compare column names in <code>CREATE TABLE</code> vs <code>INSERT INTO</code></li>
+              <li>Check for typos in column names</li>
+              <li>Verify data types match column definitions</li>
+              <li>Use <code>\d power_plant_data</code> in psql to see table structure</li>
+              <li>Look at the exact error message - it tells you what's wrong!</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Real-World Scenario -->
+      <div class="tab-content" id="scenario">
+        <div class="business-scenario">
+          <div class="scenario-icon">🌍</div>
+          <h2>🏭 Real-World Business Scenario</h2>
+          <p><strong>Company:</strong> Africa Data Centres Ltd. - Pan-African Data Center Operator</p>
+          <p><strong>Location:</strong> Johannesburg, Lagos, Nairobi, Cairo data centers</p>
+          <p><strong>Business Need:</strong> Monitor server performance, energy usage, and cooling systems</p>
+        </div>
+
+        <div class="card">
+          <h2>📊 Data Center Monitoring Database</h2>
+          <p>Our data center needs to track server performance, energy consumption, and temperature metrics.</p>
+          
+          <div class="database-visualization">
+            <h3>Current Schema (Needs Enhancement)</h3>
+            
+            <div class="table-schema">
+              <div class="table-header">servers</div>
+              <div class="table-column">
+                <div class="column-name">server_id</div>
+                <div class="column-details">
+                  <span class="data-type-tag">SERIAL</span>
+                  <span class="constraint-tag">PRIMARY KEY</span>
+                </div>
+              </div>
+              <div class="table-column">
+                <div class="column-name">hostname</div>
+                <div class="column-details">
+                  <span class="data-type-tag">VARCHAR(50)</span>
+                  <span class="constraint-tag">NOT NULL</span>
+                </div>
+              </div>
+              <div class="table-column">
+                <div class="column-name">status</div>
+                <div class="column-details">
+                  <span class="data-type-tag">VARCHAR(20)</span>
+                  <span class="error-tag">PROBLEM: Needs DEFAULT</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="table-schema">
+              <div class="table-header">metrics</div>
+              <div class="table-column">
+                <div class="column-name">metric_id</div>
+                <div class="column-details">
+                  <span class="data-type-tag">SERIAL</span>
+                  <span class="constraint-tag">PRIMARY KEY</span>
+                </div>
+              </div>
+              <div class="table-column">
+                <div class="column-name">server_id</div>
+                <div class="column-details">
+                  <span class="data-type-tag">INTEGER</span>
+                  <span class="error-tag">MISSING: FOREIGN KEY</span>
+                </div>
+              </div>
+              <div class="table-column">
+                <div class="column-name">cpu_usage</div>
+                <div class="column-details">
+                  <span class="data-type-tag">DECIMAL(5,2)</span>
+                  <span class="error-tag">MISSING: CHECK constraint</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="grid grid-2" style="margin-top: var(--spacing-lg);">
+            <div>
+              <h4>🔍 Business Requirements</h4>
+              <ul>
+                <li>Track server status (online, offline, maintenance)</li>
+                <li>Monitor CPU usage (0-100%)</li>
+                <li>Record temperature readings</li>
+                <li>Track energy consumption per server</li>
+                <li>Generate daily performance reports</li>
+                <li>Alert on critical thresholds</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4>🐛 Current Issues</h4>
+              <ul>
+                <li>Seed data fails to insert</li>
+                <li>Missing foreign key constraints</li>
+                <li>No data validation rules</li>
+                <li>Missing default values</li>
+                <li>Poor error messages</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📈 Business Impact Analysis</h2>
+          
+          <div class="grid grid-3">
+            <div class="card error-card">
+              <h4>💰 Financial Impact</h4>
+              <ul>
+                <li>Downtime costs: $5,000/minute</li>
+                <li>Missed SLA penalties</li>
+                <li>Customer compensation</li>
+                <li>Regulatory fines</li>
+              </ul>
+            </div>
+            
+            <div class="card warning-card">
+              <h4>🔧 Technical Impact</h4>
+              <ul>
+                <li>Inaccurate monitoring</li>
+                <li>Delayed issue detection</li>
+                <li>Poor capacity planning</li>
+                <li>Data integrity issues</li>
+              </ul>
+            </div>
+            
+            <div class="card info-card">
+              <h4>👥 Team Impact</h4>
+              <ul>
+                <li>Engineer frustration</li>
+                <li>Extended debugging time</li>
+                <li>Missed deadlines</li>
+                <li>Customer complaints</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin-top: var(--spacing-lg); padding: var(--spacing-lg); background: var(--color-background); border-radius: var(--border-radius-md);">
+            <h3>🎯 Your Mission</h3>
+            <p>Fix the database schema and seed data to ensure reliable power plant/data center monitoring</p>
+            <p><strong>Success Criteria:</strong> All seed data inserts successfully, queries return accurate results</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Debugging Tools -->
+      <div class="tab-content" id="debugging">
+        <div class="card">
+          <h2>🔍 PostgreSQL Debugging Toolkit</h2>
+          <p>Professional database engineers use these tools to diagnose and fix issues.</p>
+          
+          <div class="debug-panel">
+            <div class="code-panel">
+              <div class="code-header">
+                <span>Debugging Commands</span>
+                <span>Essential PostgreSQL debugging tools</span>
+              </div>
+              <div class="code-body">
+                <pre><code><span class="comment">-- 1. View table structure</span>
+<span class="keyword">\d</span> table_name
+<span class="keyword">\d+</span> table_name  <span class="comment">-- Detailed view</span>
+
+<span class="comment">-- 2. Check database connections</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> pg_stat_activity;
+
+<span class="comment">-- 3. View table constraints</span>
+<span class="keyword">SELECT</span> conname, contype, convalidated 
+<span class="keyword">FROM</span> pg_constraint 
+<span class="keyword">WHERE</span> conrelid = <span class="string">'table_name'</span>::regclass;
+
+<span class="comment">-- 4. Check for locks</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> pg_locks 
+<span class="keyword">WHERE</span> relation = <span class="string">'table_name'</span>::regclass;
+
+<span class="comment">-- 5. View query plan (EXPLAIN)</span>
+<span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> table_name;
+<span class="keyword">EXPLAIN</span> (ANALYZE, BUFFERS) <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> table_name;
+
+<span class="comment">-- 6. Check table size</span>
+<span class="keyword">SELECT</span> pg_size_pretty(pg_total_relation_size(<span class="string">'table_name'</span>));
+
+<span class="comment">-- 7. View active queries</span>
+<span class="keyword">SELECT</span> pid, query, state, age(clock_timestamp(), query_start) 
+<span class="keyword">FROM</span> pg_stat_activity 
+<span class="keyword">WHERE</span> state != <span class="string">'idle'</span>;
+
+<span class="comment">-- 8. Check for missing indexes</span>
+<span class="keyword">SELECT</span> schemaname, tablename, attname, n_distinct
+<span class="keyword">FROM</span> pg_stats 
+<span class="keyword">WHERE</span> tablename = <span class="string">'table_name'</span>;</code></pre>
+              </div>
+            </div>
+            
+            <div class="output-panel">
+              <h4>Example: Debugging Our Issue</h4>
+              <div class="terminal">
+                $ psql -d data_center_db
+                psql (14.0)
+                Type "help" for help.
+
+                data_center_db=# \d servers
+                                       Table "public.servers"
+                   Column   |         Type          | Collation | Nullable | Default 
+                ------------+-----------------------+-----------+----------+---------
+                 server_id  | integer               |           | not null | 
+                 hostname   | character varying(50) |           | not null | 
+                 status     | character varying(20) |           |          | 
+                Indexes:
+                    "servers_pkey" PRIMARY KEY, btree (server_id)
+                
+                <span class="error">-- PROBLEM: No default value for status!</span>
+              </div>
+              
+              <div class="terminal">
+                data_center_db=# \d metrics
+                                        Table "public.metrics"
+                   Column   |         Type          | Collation | Nullable | Default 
+                ------------+-----------------------+-----------+----------+---------
+                 metric_id  | integer               |           | not null | 
+                 server_id  | integer               |           |          | 
+                 cpu_usage  | numeric(5,2)          |           |          | 
+                Indexes:
+                    "metrics_pkey" PRIMARY KEY, btree (metric_id)
+                
+                <span class="error">-- PROBLEM: No foreign key to servers!</span>
+                <span class="error">-- PROBLEM: No CHECK constraint for cpu_usage!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>🐛 Interactive Debugging Challenge</h2>
+          <p>Let's debug the power plant data issue together:</p>
+          
+          <div class="debug-interface">
+            <div class="debug-step">
+              <h4>Step 1: Examine the Error</h4>
+              <div class="terminal error">
+                ERROR:  column "plant_name" of relation "power_plant_data" does not exist
+                LINE 1: INSERT INTO power_plant_data (plant_name, output_mw, date) V...
+                                         ^
+              </div>
+              <p><strong>Analysis:</strong> The INSERT statement references column "plant_name" but the table has column "name"</p>
+            </div>
+            
+            <div class="debug-step">
+              <h4>Step 2: Check Table Structure</h4>
+              <div class="terminal">
+                data_center_db=# \d power_plant_data
+                                           Table "public.power_plant_data"
+                   Column   |         Type          | Collation | Nullable | Default 
+                ------------+-----------------------+-----------+----------+---------
+                 id         | integer               |           | not null | 
+                 name       | character varying(100)|           | not null | 
+                 mw         | numeric(10,2)         |           | not null | 
+                 date       | date                  |           | not null | 
+                Indexes:
+                    "power_plant_data_pkey" PRIMARY KEY, btree (id)
+              </div>
+              <p><strong>Solution:</strong> Either rename column in table or fix INSERT statement</p>
+            </div>
+            
+            <div class="debug-step">
+              <h4>Step 3: Fix the Issue</h4>
+              <p>Choose your approach:</p>
+              <div class="debug-controls">
+                <button class="btn btn-primary" onclick="showSolution('fixInsert')">
+                  Fix INSERT Statement
+                </button>
+                <button class="btn btn-secondary" onclick="showSolution('fixTable')">
+                  ALTER TABLE
+                </button>
+                <button class="btn btn-warning" onclick="showSolution('both')">
+                  Both Solutions
+                </button>
+              </div>
+              
+              <div id="solutionFixInsert" style="display: none; margin-top: var(--spacing-md);">
+                <div class="code-editor">
+                  <div class="code-header">
+                    <span>Solution 1: Fix seeds.sql</span>
+                  </div>
+                  <div class="code-body">
+                    <pre><code><span class="comment">-- CORRECTED seeds.sql</span>
+<span class="keyword">INSERT INTO</span> <span class="table-name">power_plant_data</span> (name, mw, date) <span class="keyword">VALUES</span>
+(<span class="string">'Solar Farm Alpha'</span>, <span class="number">45.20</span>, <span class="string">'2024-01-15'</span>),
+(<span class="string">'Wind Turbine Beta'</span>, <span class="number">32.50</span>, <span class="string">'2024-01-15'</span>),
+(<span class="string">'Hydro Plant Gamma'</span>, <span class="number">120.75</span>, <span class="string">'2024-01-15'</span>);</code></pre>
+                  </div>
+                </div>
+              </div>
+              
+              <div id="solutionFixTable" style="display: none; margin-top: var(--spacing-md);">
+                <div class="code-editor">
+                  <div class="code-header">
+                    <span>Solution 2: ALTER TABLE</span>
+                  </div>
+                  <div class="code-body">
+                    <pre><code><span class="comment">-- ALTER TABLE to match seeds.sql</span>
+<span class="keyword">ALTER TABLE</span> <span class="table-name">power_plant_data</span> 
+<span class="keyword">RENAME COLUMN</span> name <span class="keyword">TO</span> plant_name;
+
+<span class="keyword">ALTER TABLE</span> <span class="table-name">power_plant_data</span>
+<span class="keyword">RENAME COLUMN</span> mw <span class="keyword">TO</span> output_mw;</code></pre>
+                  </div>
+                </div>
+              </div>
+              
+              <div id="solutionBoth" style="display: none; margin-top: var(--spacing-md);">
+                <div class="code-editor">
+                  <div class="code-header">
+                    <span>Best Practice: Both fixes</span>
+                  </div>
+                  <div class="code-body">
+                    <pre><code><span class="comment">-- 1. First, make table columns more descriptive</span>
+<span class="keyword">ALTER TABLE</span> <span class="table-name">power_plant_data</span> 
+<span class="keyword">RENAME COLUMN</span> name <span class="keyword">TO</span> plant_name;
+
+<span class="keyword">ALTER TABLE</span> <span class="table-name">power_plant_data</span>
+<span class="keyword">RENAME COLUMN</span> mw <span class="keyword">TO</span> output_mw;
+
+<span class="comment">-- 2. Update seeds.sql to use new column names</span>
+<span class="keyword">INSERT INTO</span> <span class="table-name">power_plant_data</span> (plant_name, output_mw, date) <span class="keyword">VALUES</span>
+(<span class="string">'Solar Farm Alpha'</span>, <span class="number">45.20</span>, <span class="string">'2024-01-15'</span>),
+(<span class="string">'Wind Turbine Beta'</span>, <span class="number">32.50</span>, <span class="string">'2024-01-15'</span>),
+(<span class="string">'Hydro Plant Gamma'</span>, <span class="number">120.75</span>, <span class="string">'2024-01-15'</span>);</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>🔧 Common PostgreSQL Errors & Solutions</h2>
+          
+          <div class="grid grid-2">
+            <div>
+              <h4>🚨 Error: "column does not exist"</h4>
+              <div class="terminal error">
+                ERROR: column "column_name" does not exist
+              </div>
+              <p><strong>Solutions:</strong></p>
+              <ul>
+                <li>Check column name spelling</li>
+                <li>Use <code>\d table_name</code> to see columns</li>
+                <li>Check for case sensitivity (use quotes for mixed case)</li>
+                <li>Verify you're querying the right table</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4>🚨 Error: "relation does not exist"</h4>
+              <div class="terminal error">
+                ERROR: relation "table_name" does not exist
+              </div>
+              <p><strong>Solutions:</strong></p>
+              <ul>
+                <li>Check table name spelling</li>
+                <li>Verify you're in the right database</li>
+                <li>Check schema (public vs other schemas)</li>
+                <li>Table might have been dropped</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4>🚨 Error: "syntax error at or near"</h4>
+              <div class="terminal error">
+                ERROR: syntax error at or near "INSERT"
+              </div>
+              <p><strong>Solutions:</strong></p>
+              <ul>
+                <li>Check SQL syntax</li>
+                <li>Look for missing commas, parentheses</li>
+                <li>Verify keyword spelling</li>
+                <li>Check for unclosed quotes</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4>🚨 Error: "duplicate key value violates unique constraint"</h4>
+              <div class="terminal error">
+                ERROR: duplicate key value violates unique constraint
+              </div>
+              <p><strong>Solutions:</strong></p>
+              <ul>
+                <li>Check for duplicate values in unique columns</li>
+                <li>Use ON CONFLICT clause for upserts</li>
+                <li>Delete duplicates before inserting</li>
+                <li>Use SERIAL for auto-incrementing IDs</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: ALTER TABLE -->
+      <div class="tab-content" id="alter">
+        <div class="card">
+          <h2>🔧 Mastering ALTER TABLE Operations</h2>
+          <p>The <code>ALTER TABLE</code> command modifies existing table structure without losing data.</p>
+          
+          <div class="business-scenario">
+            <div class="scenario-icon">⚡</div>
+            <h3>Business Requirement Change</h3>
+            <p><strong>Africa Power Solutions</strong> needs to:</p>
+            <ol>
+              <li>Add maintenance schedule tracking</li>
+              <li>Include location coordinates for each plant</li>
+              <li>Track renewable energy type (solar, wind, hydro)</li>
+              <li>Add capacity limits for safety</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📝 Complete ALTER TABLE Reference</h2>
+          
+          <div class="grid grid-2">
+            <div>
+              <h4>1. Add New Columns</h4>
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>Adding columns to existing table</span>
+                </div>
+                <div class="code-body">
+                  <pre><code><span class="comment">-- Add single column</span>
+<span class="keyword">ALTER TABLE</span> power_plant_data
+<span class="keyword">ADD COLUMN</span> energy_type <span class="type">VARCHAR</span>(20);
+
+<span class="comment">-- Add multiple columns</span>
+<span class="keyword">ALTER TABLE</span> power_plant_data
+<span class="keyword">ADD COLUMN</span> latitude <span class="type">DECIMAL</span>(9,6),
+<span class="keyword">ADD COLUMN</span> longitude <span class="type">DECIMAL</span>(9,6),
+<span class="keyword">ADD COLUMN</span> max_capacity <span class="type">DECIMAL</span>(10,2);
+
+<span class="comment">-- Add column with default value</span>
+<span class="keyword">ALTER TABLE</span> power_plant_data
+<span class="keyword">ADD COLUMN</span> is_active <span class="type">BOOLEAN</span> <span class="keyword">DEFAULT</span> <span class="keyword">true</span>;
+
+<span class="comment">-- Add column with NOT NULL constraint</span>
+<span class="keyword">ALTER TABLE</span> power_plant_data
+<span class="keyword">ADD COLUMN</span> country <span class="type">VARCHAR</span>(50) <span class="keyword">NOT NULL</span> <span class="keyword">DEFAULT</span> <span class="string">'South Africa'</span>;</code></pre>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h4>2. Modify Existing Columns</h4>
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>Changing column properties</span>
+                </div>
+                <div class="code-body">
+                  <pre><code><span class="comment">-- Change data type</span>
+<span class="keyword">ALTER TABLE</span> power_plant_data
+<span class="keyword">ALTER COLUMN</span> plant_name <span class="type">TYPE</span> <span class="type">VARCHAR</span>(150);
+
+<span class="comment">-- Set DEFAULT value</span>
+<span class="keyword">ALTER TABLE</span> power_plant_data
+<span class="keyword">ALTER COLUMN</span> status <span class="keyword">SET DEFAULT</span> <span class="string">'operational'</span>;
+
+<span class="comment">-- Drop DEFAULT value</span>
+<span class="keyword">ALTER TABLE</span> power_plant_data
+<span class="keyword">ALTER COLUMN</span> status <span class="keyword">DROP DEFAULT</span>;
+
+<span class="comment">-- Add NOT NULL constraint</span>
+<span class="keyword">ALTER TABLE</span> power_plant_data
+<span class="keyword">ALTER COLUMN</span> plant_name <span class="keyword">SET NOT NULL</span>;
+
+<span class="comment">-- Remove NOT NULL constraint</span>
+<span class="keyword">ALTER TABLE</span> power_plant_data
+<span class="keyword">ALTER COLUMN</span> plant_name <span class="keyword">DROP NOT NULL</span>;</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="grid grid-2" style="margin-top: var(--spacing-lg);">
+            <div>
+              <h4>3. Rename Columns & Tables</h4>
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>Renaming database objects</span>
+                </div>
+                <div class="code-body">
+                  <pre><code><span class="comment">-- Rename column</span>
+<span class="keyword">ALTER TABLE</span> power_plant_data
+<span class="keyword">RENAME COLUMN</span> mw <span class="keyword">TO</span> output_megawatts;
+
+<span class="comment">-- Rename table</span>
+<span class="keyword">ALTER TABLE</span> power_plant_data
+<span class="keyword">RENAME TO</span> power_plants;
+
+<span class="comment">-- Rename constraint</span>
+<span class="keyword">ALTER TABLE</span> power_plants
+<span class="keyword">RENAME CONSTRAINT</span> power_plant_data_pkey <span class="keyword">TO</span> power_plants_pkey;</code></pre>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h4>4. Drop Columns & Constraints</h4>
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>Removing elements safely</span>
+                </div>
+                <div class="code-body">
+                  <pre><code><span class="comment">-- Drop column (if empty or with CASCADE)</span>
+<span class="keyword">ALTER TABLE</span> power_plants
+<span class="keyword">DROP COLUMN</span> old_column_name;
+
+<span class="comment">-- Drop column with CASCADE (drops depending objects)</span>
+<span class="keyword">ALTER TABLE</span> power_plants
+<span class="keyword">DROP COLUMN</span> old_column <span class="keyword">CASCADE</span>;
+
+<span class="comment">-- Drop constraint</span>
+<span class="keyword">ALTER TABLE</span> power_plants
+<span class="keyword">DROP CONSTRAINT</span> constraint_name;
+
+<span class="comment">-- Drop multiple columns</span>
+<span class="keyword">ALTER TABLE</span> power_plants
+<span class="keyword">DROP COLUMN</span> column1,
+<span class="keyword">DROP COLUMN</span> column2;</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div style="margin-top: var(--spacing-lg);">
+            <h4>5. Add Constraints to Existing Tables</h4>
+            <div class="code-editor">
+              <div class="code-header">
+                <span>Adding constraints after table creation</span>
+              </div>
+              <div class="code-body">
+                <pre><code><span class="comment">-- Add PRIMARY KEY (if not already set)</span>
+<span class="keyword">ALTER TABLE</span> power_plants
+<span class="keyword">ADD PRIMARY KEY</span> (plant_id);
+
+<span class="comment">-- Add FOREIGN KEY</span>
+<span class="keyword">ALTER TABLE</span> maintenance_logs
+<span class="keyword">ADD CONSTRAINT</span> fk_plant
+<span class="keyword">FOREIGN KEY</span> (plant_id) <span class="keyword">REFERENCES</span> power_plants(plant_id);
+
+<span class="comment">-- Add UNIQUE constraint</span>
+<span class="keyword">ALTER TABLE</span> power_plants
+<span class="keyword">ADD CONSTRAINT</span> unique_plant_name <span class="keyword">UNIQUE</span> (plant_name);
+
+<span class="comment">-- Add CHECK constraint</span>
+<span class="keyword">ALTER TABLE</span> power_plants
+<span class="keyword">ADD CONSTRAINT</span> check_output_positive
+<span class="keyword">CHECK</span> (output_megawatts >= <span class="number">0</span>);
+
+<span class="comment">-- Add multiple constraints</span>
+<span class="keyword">ALTER TABLE</span> power_plants
+<span class="keyword">ADD CONSTRAINT</span> check_capacity 
+<span class="keyword">CHECK</span> (output_megawatts <= max_capacity),
+<span class="keyword">ADD CONSTRAINT</span> valid_energy_type
+<span class="keyword">CHECK</span> (energy_type <span class="keyword">IN</span> (<span class="string">'solar'</span>, <span class="string">'wind'</span>, <span class="string">'hydro'</span>, <span class="string">'geothermal'</span>));</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>🏆 Bonus: Real-World ALTER TABLE Scenario</h2>
+          
+          <div class="business-scenario">
+            <div class="scenario-icon">🚨</div>
+            <h3>Emergency Schema Change Required!</h3>
+            <p><strong>Situation:</strong> Data center monitoring system needs immediate updates before audit tomorrow</p>
+            <p><strong>Requirements:</strong></p>
+            <ol>
+              <li>Add emergency contact column to servers table</li>
+              <li>Change CPU usage to percentage (0-100) with validation</li>
+              <li>Add temperature monitoring with alert threshold</li>
+              <li>Create maintenance schedule table with foreign key</li>
+            </ol>
+          </div>
+          
+          <div class="debug-interface">
+            <h4>Your Task: Write the ALTER TABLE Statements</h4>
+            
+            <div class="code-editor">
+              <div class="code-header">
+                <span>Complete the schema updates</span>
+                <span>Write your ALTER TABLE statements below</span>
+              </div>
+              <div class="code-body" contenteditable="true" id="alterTableEditor">
+-- Current tables:
+-- servers(server_id, hostname, status)
+-- metrics(metric_id, server_id, cpu_usage)
+
+-- TASK 1: Add emergency_contact to servers table
+-- Type: VARCHAR(100), Default: 'admin@company.com'
+
+-- Your code here:
+
+
+
+-- TASK 2: Add CHECK constraint to metrics.cpu_usage
+-- Constraint: cpu_usage must be between 0 and 100
+
+-- Your code here:
+
+
+
+-- TASK 3: Add temperature column to metrics
+-- Column name: temperature_celsius, Type: DECIMAL(5,2)
+
+-- Your code here:
+
+
+
+-- TASK 4: Create maintenance_schedule table
+-- Columns: schedule_id SERIAL PRIMARY KEY, 
+--          server_id INTEGER REFERENCES servers(server_id),
+--          maintenance_date DATE NOT NULL,
+--          description TEXT
+
+-- Your code here:
+
+
+
+              </div>
+            </div>
+            
+            <div class="debug-controls">
+              <button class="btn btn-primary" onclick="validateAlterTable()">
+                <i class="fas fa-check"></i> Validate Solution
+              </button>
+              <button class="btn btn-secondary" onclick="showAlterTableSolution()">
+                <i class="fas fa-eye"></i> Show Solution
+              </button>
+            </div>
+            
+            <div id="alterTableValidation" style="margin-top: var(--spacing-md);"></div>
+            
+            <div id="alterTableSolution" style="display: none; margin-top: var(--spacing-md);">
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>Complete Solution</span>
+                </div>
+                <div class="code-body">
+                  <pre><code><span class="comment">-- TASK 1: Add emergency_contact to servers</span>
+<span class="keyword">ALTER TABLE</span> servers
+<span class="keyword">ADD COLUMN</span> emergency_contact <span class="type">VARCHAR</span>(100) 
+<span class="keyword">DEFAULT</span> <span class="string">'admin@company.com'</span>;
+
+<span class="comment">-- TASK 2: Add CHECK constraint to cpu_usage</span>
+<span class="keyword">ALTER TABLE</span> metrics
+<span class="keyword">ADD CONSTRAINT</span> check_cpu_range
+<span class="keyword">CHECK</span> (cpu_usage >= <span class="number">0</span> <span class="keyword">AND</span> cpu_usage <= <span class="number">100</span>);
+
+<span class="comment">-- TASK 3: Add temperature column</span>
+<span class="keyword">ALTER TABLE</span> metrics
+<span class="keyword">ADD COLUMN</span> temperature_celsius <span class="type">DECIMAL</span>(5,2);
+
+<span class="comment">-- TASK 4: Create maintenance_schedule table</span>
+<span class="keyword">CREATE TABLE</span> maintenance_schedule (
+    schedule_id <span class="type">SERIAL</span> <span class="constraint">PRIMARY KEY</span>,
+    server_id <span class="type">INTEGER</span> <span class="keyword">REFERENCES</span> servers(server_id),
+    maintenance_date <span class="type">DATE</span> <span class="constraint">NOT NULL</span>,
+    description <span class="type">TEXT</span>
+);</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 5: Hands-On Project -->
+      <div class="tab-content" id="project">
+        <div class="card">
+          <h2>💻 Hands-On Project: Data Center Monitoring System</h2>
+          
+          <div class="business-scenario">
+            <div class="scenario-icon">📊</div>
+            <h3>Project Overview</h3>
+            <p><strong>Build a complete data center monitoring system for "Africa Cloud Services"</strong></p>
+            <p>Your system must track servers, monitor performance, schedule maintenance, and generate reports.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📋 Project Requirements</h2>
+          
+          <div class="task-list">
+            <div class="task-item">
+              <h3>1. Create Project Structure</h3>
+              <p>Create the following folder and file structure:</p>
+              <div class="file-structure">
+                <div class="file-item folder">data-center-monitoring/</div>
+                <div class="file-item file">README.md</div>
+                <div class="file-item folder">database/</div>
+                <div class="file-item file" style="padding-left: 2rem;">schema.sql</div>
+                <div class="file-item file" style="padding-left: 2rem;">seeds.sql</div>
+                <div class="file-item file" style="padding-left: 2rem;">alterations.sql</div>
+                <div class="file-item file" style="padding-left: 2rem;">queries.sql</div>
+                <div class="file-item folder">frontend/</div>
+                <div class="file-item file" style="padding-left: 2rem;">index.html</div>
+                <div class="file-item file" style="padding-left: 2rem;">style.css</div>
+                <div class="file-item file" style="padding-left: 2rem;">app.js</div>
+              </div>
+            </div>
+            
+            <div class="task-item">
+              <h3>2. Create schema.sql</h3>
+              <p>Create tables for:</p>
+              <ul>
+                <li><code>data_centers</code> - Location information</li>
+                <li><code>servers</code> - Server hardware details</li>
+                <li><code>metrics</code> - Performance measurements</li>
+                <li><code>maintenance</code> - Maintenance schedule</li>
+                <li><code>alerts</code> - System alerts and notifications</li>
+              </ul>
+              
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>database/schema.sql</span>
+                  <span>Your task: Create the schema</span>
+                </div>
+                <div class="code-body" contenteditable="true" id="projectSchemaEditor">
+-- ============================================
+-- AFRICA CLOUD SERVICES - DATA CENTER MONITORING
+-- Student: [Your Name Here]
+-- Date: <span id="projectDate"></span>
+-- ============================================
+
+-- TODO: Create the following tables with proper constraints:
+
+-- 1. data_centers table
+--    Columns: center_id, location, country, capacity
+--    Constraints: PRIMARY KEY, NOT NULL where appropriate
+
+-- 2. servers table  
+--    Columns: server_id, hostname, data_center_id, status
+--    Constraints: PRIMARY KEY, FOREIGN KEY to data_centers
+
+-- 3. metrics table
+--    Columns: metric_id, server_id, cpu_usage, memory_usage, temperature
+--    Constraints: CHECK constraints for valid ranges (0-100 for percentages)
+
+-- 4. maintenance table
+--    Columns: maintenance_id, server_id, scheduled_date, completed
+
+-- 5. alerts table
+--    Columns: alert_id, server_id, alert_type, severity, created_at
+
+-- Remember: Add appropriate indexes and comments!
+
+-- Your code here:
+
+
+
+
+
+
+                </div>
+              </div>
+            </div>
+            
+            <div class="task-item">
+              <h3>3. Create seeds.sql</h3>
+              <p>Populate with realistic African data center information:</p>
+              <ul>
+                <li>3 data centers (Johannesburg, Lagos, Nairobi)</li>
+                <li>10 servers with African hostnames</li>
+                <li>Sample metrics for each server</li>
+                <li>Upcoming maintenance schedules</li>
+                <li>Active alerts for issues</li>
+              </ul>
+              
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>database/seeds.sql</span>
+                  <span>Your task: Add realistic seed data</span>
+                </div>
+                <div class="code-body" contenteditable="true" id="projectSeedsEditor">
+-- ============================================
+-- SEED DATA FOR AFRICA CLOUD SERVICES
+-- Add realistic data for testing and development
+-- ============================================
+
+-- TODO: Insert data into all tables
+-- 1. Add data centers in major African cities
+-- 2. Add servers with African-inspired hostnames
+-- 3. Add performance metrics (some normal, some problematic)
+-- 4. Schedule maintenance for some servers
+-- 5. Create alerts for critical issues
+
+-- Your code here:
+
+
+
+
+
+
+                </div>
+              </div>
+            </div>
+            
+            <div class="task-item">
+              <h3>4. Create alterations.sql</h3>
+              <p>Business requirements changed! Add these features:</p>
+              <ol>
+                <li>Add <code>energy_consumption_kwh</code> column to metrics</li>
+                <li>Add <code>COUNTRY</code> check constraint for valid African countries</li>
+                <li>Add <code>response_time_ms</code> column to metrics with DEFAULT</li>
+                <li>Add composite index on (server_id, created_at) for metrics</li>
+              </ol>
+              
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>database/alterations.sql</span>
+                  <span>Your task: ALTER TABLE operations</span>
+                </div>
+                <div class="code-body" contenteditable="true" id="projectAlterationsEditor">
+-- ============================================
+-- SCHEMA ALTERATIONS
+-- Business requirements have changed!
+-- ============================================
+
+-- TODO: Write ALTER TABLE statements to:
+-- 1. Add energy_consumption_kwh column to metrics table
+-- 2. Add CHECK constraint for valid African countries in data_centers
+-- 3. Add response_time_ms column with DEFAULT 0
+-- 4. Create composite index for better query performance
+
+-- Your code here:
+
+
+
+
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="interactive-area" style="margin-top: var(--spacing-xl);">
+            <h3>🚀 Submit Your Project</h3>
+            <p>Test your project by simulating the database operations:</p>
+            
+            <div class="debug-controls">
+              <button class="btn btn-primary" onclick="testProjectSchema()">
+                <i class="fas fa-database"></i> Test Schema
+              </button>
+              <button class="btn btn-success" onclick="testProjectSeeds()">
+                <i class="fas fa-seedling"></i> Test Seeds
+              </button>
+              <button class="btn btn-warning" onclick="testProjectAlterations()">
+                <i class="fas fa-tools"></i> Test Alterations
+              </button>
+              <button class="btn btn-debug" onclick="testAllProject()">
+                <i class="fas fa-vial"></i> Run All Tests
+              </button>
+            </div>
+            
+            <div id="projectTestResults" style="margin-top: var(--spacing-lg);"></div>
+            
+            <div style="margin-top: var(--spacing-lg); padding: var(--spacing-lg); background: var(--color-background); border-radius: var(--border-radius-md);">
+              <h4>📁 Final Project Submission</h4>
+              <p>Create a ZIP file with your complete project structure and upload it:</p>
+              
+              <div class="drop-zone" id="projectSubmissionZone">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <h4>Drag & Drop Your Project ZIP Here</h4>
+                <p>or click to select file</p>
+                <input type="file" id="projectUpload" accept=".zip" style="display: none;">
+              </div>
+              
+              <div id="submissionStatus" style="margin-top: var(--spacing-md);"></div>
+              
+              <button class="btn btn-primary" id="submitFinalProject" style="margin-top: var(--spacing-lg);" disabled>
+                <i class="fas fa-paper-plane"></i> Submit Final Project
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 6: Assessment -->
+      <div class="tab-content" id="assessment">
+        <div class="card">
+          <h2>📊 Lesson 7 Assessment</h2>
+          <p>Test your understanding of debugging techniques and ALTER TABLE operations.</p>
+          
+          <div id="finalQuizContainer">
+            <div class="card" style="margin-bottom: var(--spacing-md);">
+              <h3>Question 1: Debugging Seed Data</h3>
+              <p>You get this error: <code>ERROR: column "customer_email" does not exist</code>. What's the most likely cause?</p>
+              <div class="quiz-options">
+                <label><input type="radio" name="fq1" value="a"> A) The database is offline</label><br>
+                <label><input type="radio" name="fq1" value="b"> B) The INSERT statement uses wrong column name</label><br>
+                <label><input type="radio" name="fq1" value="c"> C) The table doesn't exist</label><br>
+                <label><input type="radio" name="fq1" value="d"> D) You don't have INSERT permission</label>
+              </div>
+            </div>
+            
+            <div class="card" style="margin-bottom: var(--spacing-md);">
+              <h3>Question 2: ALTER TABLE Syntax</h3>
+              <p>Which command adds a new column to an existing table?</p>
+              <div class="quiz-options">
+                <label><input type="radio" name="fq2" value="a"> A) ADD COLUMN column_name TYPE</label><br>
+                <label><input type="radio" name="fq2" value="b"> B) INSERT COLUMN column_name</label><br>
+                <label><input type="radio" name="fq2" value="c"> C) CREATE COLUMN column_name</label><br>
+                <label><input type="radio" name="fq2" value="d"> D) NEW COLUMN column_name</label>
+              </div>
+            </div>
+            
+            <div class="card" style="margin-bottom: var(--spacing-md);">
+              <h3>Question 3: Debugging Tool</h3>
+              <p>Which psql command shows the structure of a table including constraints?</p>
+              <div class="quiz-options">
+                <label><input type="radio" name="fq3" value="a"> A) \show table_name</label><br>
+                <label><input type="radio" name="fq3" value="b"> B) \d table_name</label><br>
+                <label><input type="radio" name="fq3" value="c"> C) \structure table_name</label><br>
+                <label><input type="radio" name="fq3" value="d"> D) \info table_name</label>
+              </div>
+            </div>
+            
+            <div class="card" style="margin-bottom: var(--spacing-md);">
+              <h3>Question 4: Adding Constraints</h3>
+              <p>How do you add a CHECK constraint to an existing table?</p>
+              <div class="quiz-options">
+                <label><input type="radio" name="fq4" value="a"> A) ADD CHECK (condition)</label><br>
+                <label><input type="radio" name="fq4" value="b"> B) ALTER TABLE ADD CONSTRAINT CHECK (condition)</label><br>
+                <label><input type="radio" name="fq4" value="c"> C) CREATE CONSTRAINT CHECK (condition)</label><br>
+                <label><input type="radio" name="fq4" value="d"> D) Both A and B are correct</label>
+              </div>
+            </div>
+            
+            <button class="btn btn-primary" id="submitFinalQuiz">
+              <i class="fas fa-check-circle"></i> Submit Assessment
+            </button>
+            
+            <div id="finalQuizResults" style="display: none; margin-top: var(--spacing-lg);">
+              <div class="card success-card">
+                <h3>🎉 Assessment Results</h3>
+                <p>Your Score: <span id="finalQuizScore">0</span>/4</p>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="finalQuizProgress" style="width: 0%;"></div>
+                </div>
+                <div id="finalQuizFeedback" style="margin-top: var(--spacing-md);"></div>
+                
+                <div style="margin-top: var(--spacing-lg);">
+                  <button class="btn btn-primary" id="generateCertificate" disabled>
+                    <i class="fas fa-certificate"></i> Generate Lesson 7 Certificate
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📈 Course Progress</h2>
+          
+          <div class="progress-tracker">
+            <div class="progress-item">
+              <span>Lesson 1-3: Database Fundamentals</span>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 100%;"></div>
+              </div>
+              <span>100%</span>
+            </div>
+            <div class="progress-item">
+              <span>Lesson 4: SQL Operations</span>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 100%;"></div>
+              </div>
+              <span>100%</span>
+            </div>
+            <div class="progress-item">
+              <span>Lesson 5: Data Types & Constraints</span>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 100%;"></div>
+              </div>
+              <span>100%</span>
+            </div>
+            <div class="progress-item">
+              <span>Lesson 6: Schema & Seeds</span>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 100%;"></div>
+              </div>
+              <span>100%</span>
+            </div>
+            <div class="progress-item">
+              <span>Lesson 7: Debugging & ALTER TABLE (Current)</span>
+              <div class="progress-bar">
+                <div class="progress-fill" id="lesson7Progress" style="width: 40%;"></div>
+              </div>
+              <span id="lesson7Percent">40%</span>
+            </div>
+          </div>
+          
+          <div id="certificateSection" style="display: none; margin-top: var(--spacing-xl); text-align: center;">
+            <div class="business-scenario">
+              <h3>🏆 Lesson 7 Complete!</h3>
+              <p>You've mastered PostgreSQL debugging and schema modification techniques</p>
+              <p><strong>Skills demonstrated:</strong></p>
+              <ul style="text-align: left; display: inline-block;">
+                <li>Debugging seed data insertion issues</li>
+                <li>Using PostgreSQL diagnostic tools</li>
+                <li>Modifying schemas with ALTER TABLE</li>
+                <li>Adding constraints to existing tables</li>
+                <li>Real-world business scenario implementation</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>MSEBETSI PostgreSQL Course &copy; <span id="currentYear"></span> | Lesson 7: Debugging & Advanced Schema Operations</p>
+      <p>Professional database engineering for real-world African business scenarios</p>
+      <div style="margin-top: var(--spacing-sm);">
+        <button class="btn btn-secondary" onclick="previousLesson()">
+          <i class="fas fa-arrow-left"></i> Lesson 6: Schema & Seeds
+        </button>
+        <button class="btn btn-secondary" onclick="nextLesson()" style="margin-left: var(--spacing-sm);">
+          Lesson 8: Advanced Queries <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Set current dates
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+    document.getElementById('projectDate').textContent = new Date().toLocaleDateString();
+
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const themeLabel = document.getElementById('themeLabel');
+    const htmlElement = document.documentElement;
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme) {
+      htmlElement.setAttribute('data-theme', savedTheme);
+      themeLabel.textContent = savedTheme === 'dark' ? 'Dark' : 'Light';
+    } else if (prefersDark) {
+      htmlElement.setAttribute('data-theme', 'dark');
+      themeLabel.textContent = 'Dark';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = htmlElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      htmlElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      themeLabel.textContent = newTheme === 'dark' ? 'Dark' : 'Light';
+      showNotification(`Switched to ${newTheme} theme`, 'info');
+    });
+
+    // Tab functionality
+    document.querySelectorAll('.tab-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const tabId = button.getAttribute('data-tab');
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        button.classList.add('active');
+        
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    // Debugging solutions
+    function showSolution(type) {
+      // Hide all solutions first
+      document.getElementById('solutionFixInsert').style.display = 'none';
+      document.getElementById('solutionFixTable').style.display = 'none';
+      document.getElementById('solutionBoth').style.display = 'none';
+      
+      // Show selected solution
+      document.getElementById('solution' + type.charAt(0).toUpperCase() + type.slice(1)).style.display = 'block';
+      
+      if (type === 'both') {
+        showNotification('Best practice: Update both schema and seeds for consistency', 'info');
+      } else {
+        showNotification(`Showing ${type} solution`, 'info');
+      }
+    }
+
+    // ALTER TABLE validation
+    function validateAlterTable() {
+      const content = document.getElementById('alterTableEditor').textContent;
+      const validation = document.getElementById('alterTableValidation');
+      
+      let score = 0;
+      let feedback = '';
+      
+      if (content.includes('ADD COLUMN emergency_contact')) {
+        score += 1;
+        feedback += '✅ Task 1: Added emergency_contact column<br>';
+      } else {
+        feedback += '❌ Task 1: Missing emergency_contact column<br>';
+      }
+      
+      if (content.includes('CHECK') && content.includes('cpu_usage')) {
+        score += 1;
+        feedback += '✅ Task 2: Added CHECK constraint for cpu_usage<br>';
+      } else {
+        feedback += '❌ Task 2: Missing CHECK constraint for cpu_usage<br>';
+      }
+      
+      if (content.includes('ADD COLUMN temperature_celsius')) {
+        score += 1;
+        feedback += '✅ Task 3: Added temperature_celsius column<br>';
+      } else {
+        feedback += '❌ Task 3: Missing temperature_celsius column<br>';
+      }
+      
+      if (content.includes('CREATE TABLE maintenance_schedule')) {
+        score += 1;
+        feedback += '✅ Task 4: Created maintenance_schedule table<br>';
+      } else {
+        feedback += '❌ Task 4: Missing maintenance_schedule table<br>';
+      }
+      
+      validation.innerHTML = `
+        <div class="${score === 4 ? 'success-card' : 'warning-card'}" style="padding: var(--spacing-md);">
+          <h4>Validation Results: ${score}/4 tasks complete</h4>
+          ${feedback}
+        </div>
+      `;
+      
+      updateProgress(score * 5);
+    }
+
+    function showAlterTableSolution() {
+      document.getElementById('alterTableSolution').style.display = 'block';
+      showNotification('Showing the complete solution', 'info');
+    }
+
+    // Project testing functions
+    function testProjectSchema() {
+      const content = document.getElementById('projectSchemaEditor').textContent;
+      const results = document.getElementById('projectTestResults');
+      
+      let score = 0;
+      let feedback = '<div class="card"><h4>Schema Test Results</h4>';
+      
+      if (content.includes('CREATE TABLE')) {
+        score += 1;
+        feedback += '✅ CREATE TABLE statements found<br>';
+      } else {
+        feedback += '❌ No CREATE TABLE statements<br>';
+      }
+      
+      if (content.includes('PRIMARY KEY')) {
+        score += 1;
+        feedback += '✅ PRIMARY KEY constraints found<br>';
+      } else {
+        feedback += '❌ Missing PRIMARY KEY constraints<br>';
+      }
+      
+      if (content.includes('FOREIGN KEY')) {
+        score += 1;
+        feedback += '✅ FOREIGN KEY constraints found<br>';
+      } else {
+        feedback += '❌ Missing FOREIGN KEY constraints<br>';
+      }
+      
+      if (content.includes('CHECK')) {
+        score += 1;
+        feedback += '✅ CHECK constraints found<br>';
+      } else {
+        feedback += '❌ Missing CHECK constraints<br>';
+      }
+      
+      feedback += `<br><strong>Score: ${score}/4</strong>`;
+      feedback += '</div>';
+      
+      results.innerHTML = feedback;
+      updateProgress(score * 5);
+    }
+
+    function testProjectSeeds() {
+      const content = document.getElementById('projectSeedsEditor').textContent;
+      const results = document.getElementById('projectTestResults');
+      
+      let score = 0;
+      let feedback = '<div class="card"><h4>Seeds Test Results</h4>';
+      
+      if (content.includes('INSERT INTO')) {
+        score += 1;
+        feedback += '✅ INSERT INTO statements found<br>';
+      } else {
+        feedback += '❌ No INSERT INTO statements<br>';
+      }
+      
+      if (content.includes('Johannesburg') || content.includes('Lagos') || content.includes('Nairobi')) {
+        score += 1;
+        feedback += '✅ African city names included<br>';
+      } else {
+        feedback += '❌ Missing African city names<br>';
+      }
+      
+      if ((content.match(/VALUES/g) || []).length >= 3) {
+        score += 1;
+        feedback += '✅ Multiple data rows inserted<br>';
+      } else {
+        feedback += '❌ Not enough data rows<br>';
+      }
+      
+      feedback += `<br><strong>Score: ${score}/3</strong>`;
+      feedback += '</div>';
+      
+      results.innerHTML = feedback;
+      updateProgress(score * 5);
+    }
+
+    function testProjectAlterations() {
+      const content = document.getElementById('projectAlterationsEditor').textContent;
+      const results = document.getElementById('projectTestResults');
+      
+      let score = 0;
+      let feedback = '<div class="card"><h4>Alterations Test Results</h4>';
+      
+      if (content.includes('ALTER TABLE')) {
+        score += 1;
+        feedback += '✅ ALTER TABLE statements found<br>';
+      } else {
+        feedback += '❌ No ALTER TABLE statements<br>';
+      }
+      
+      if (content.includes('ADD COLUMN')) {
+        score += 1;
+        feedback += '✅ ADD COLUMN operations found<br>';
+      } else {
+        feedback += '❌ Missing ADD COLUMN operations<br>';
+      }
+      
+      if (content.includes('ADD CONSTRAINT') || content.includes('CHECK')) {
+        score += 1;
+        feedback += '✅ Constraint additions found<br>';
+      } else {
+        feedback += '❌ Missing constraint additions<br>';
+      }
+      
+      if (content.includes('CREATE INDEX')) {
+        score += 1;
+        feedback += '✅ Index creation found<br>';
+      } else {
+        feedback += '❌ Missing index creation<br>';
+      }
+      
+      feedback += `<br><strong>Score: ${score}/4</strong>`;
+      feedback += '</div>';
+      
+      results.innerHTML = feedback;
+      updateProgress(score * 5);
+    }
+
+    function testAllProject() {
+      testProjectSchema();
+      setTimeout(() => testProjectSeeds(), 500);
+      setTimeout(() => testProjectAlterations(), 1000);
+      showNotification('Running all project tests...', 'info');
+    }
+
+    // Project submission
+    const projectZone = document.getElementById('projectSubmissionZone');
+    const projectUpload = document.getElementById('projectUpload');
+    const submitBtn = document.getElementById('submitFinalProject');
+    const submissionStatus = document.getElementById('submissionStatus');
+    
+    projectZone.addEventListener('click', () => projectUpload.click());
+    projectZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      projectZone.classList.add('drag-over');
+    });
+    
+    projectZone.addEventListener('dragleave', () => {
+      projectZone.classList.remove('drag-over');
+    });
+    
+    projectZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      projectZone.classList.remove('drag-over');
+      handleProjectUpload(e.dataTransfer.files[0]);
+    });
+    
+    projectUpload.addEventListener('change', (e) => {
+      handleProjectUpload(e.target.files[0]);
+    });
+    
+    function handleProjectUpload(file) {
+      if (file && file.name.endsWith('.zip')) {
+        submissionStatus.innerHTML = `
+          <div class="success-card" style="padding: var(--spacing-sm);">
+            ✅ Project uploaded: ${file.name} (${formatFileSize(file.size)})
+          </div>
+        `;
+        submitBtn.disabled = false;
+        showNotification('Project ZIP uploaded successfully', 'success');
+      } else {
+        submissionStatus.innerHTML = `
+          <div class="error-card" style="padding: var(--spacing-sm);">
+            ❌ Please upload a ZIP file containing your project
+          </div>
+        `;
+      }
+    }
+    
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' bytes';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    // Progress tracking
+    let lessonProgress = 40;
+    function updateProgress(increment) {
+      lessonProgress = Math.min(100, lessonProgress + increment);
+      document.getElementById('lesson7Progress').style.width = lessonProgress + '%';
+      document.getElementById('lesson7Percent').textContent = lessonProgress + '%';
+      
+      if (lessonProgress >= 100) {
+        document.getElementById('generateCertificate').disabled = false;
+        document.getElementById('certificateSection').style.display = 'block';
+        showNotification('🎉 Lesson 7 progress complete! You can now generate your certificate.', 'success');
+      }
+    }
+
+    // Final quiz
+    document.getElementById('submitFinalQuiz').addEventListener('click', () => {
+      const answers = {
+        fq1: 'b',
+        fq2: 'a',
+        fq3: 'b',
+        fq4: 'b'
+      };
+      
+      let score = 0;
+      for (let question in answers) {
+        const selected = document.querySelector(`input[name="${question}"]:checked`);
+        if (selected && selected.value === answers[question]) {
+          score++;
+        }
+      }
+      
+      const results = document.getElementById('finalQuizResults');
+      const quizScore = document.getElementById('finalQuizScore');
+      const quizProgress = document.getElementById('finalQuizProgress');
+      const quizFeedback = document.getElementById('finalQuizFeedback');
+      
+      quizScore.textContent = score;
+      quizProgress.style.width = (score / 4 * 100) + '%';
+      
+      let feedback = '';
+      if (score === 4) {
+        feedback = '🎉 Perfect score! You have mastered debugging and ALTER TABLE operations.';
+        updateProgress(20);
+      } else if (score >= 2) {
+        feedback = '👍 Good job! Review the debugging techniques section.';
+        updateProgress(10);
+      } else {
+        feedback = '📚 Review the lesson material and try the interactive exercises.';
+      }
+      
+      quizFeedback.innerHTML = feedback;
+      results.style.display = 'block';
+      showNotification(`Quiz submitted! Score: ${score}/4`, score === 4 ? 'success' : 'info');
+    });
+
+    // Certificate generation
+    document.getElementById('generateCertificate').addEventListener('click', () => {
+      const name = prompt('Enter your name for the certificate:') || 'PostgreSQL Developer';
+      const score = '100%';
+      
+      const certificateHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PostgreSQL Debugging Certificate - ${name}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #000000 0%, #434343 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .certificate {
+      background: white;
+      padding: 60px;
+      max-width: 900px;
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      text-align: center;
+      position: relative;
+      border: 15px solid #6f42c1;
+    }
+    h1 {
+      color: #2c3e50;
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+    }
+    h2 {
+      color: #6f42c1;
+      font-size: 1.8rem;
+      margin: 20px 0;
+    }
+    h3 {
+      color: #e74c3c;
+      font-size: 2.2rem;
+      margin: 30px 0;
+    }
+    .score {
+      font-size: 4rem;
+      color: #27ae60;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    .details {
+      margin: 30px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+    .seal {
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 120px;
+      height: 120px;
+      background: #6f42c1;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 3rem;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 2px solid #eee;
+      color: #7f8c8d;
+    }
+    .skills {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 20px 0;
+      text-align: left;
+    }
+    .skill-item {
+      padding: 10px;
+      background: #ecf0f1;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="certificate">
+    <div class="seal">🔧</div>
+    <h1>Certificate of Achievement</h1>
+    <h2>PostgreSQL Debugging & Schema Operations</h2>
+    
+    <p>Awarded to</p>
+    <h3>${name}</h3>
+    
+    <div class="details">
+      <p>for successfully mastering PostgreSQL debugging techniques and ALTER TABLE operations</p>
+      <div class="score">${score}</div>
+      <p>Mastery Score</p>
+    </div>
+    
+    <div class="skills">
+      <div class="skill-item">✅ Seed Data Debugging</div>
+      <div class="skill-item">✅ ALTER TABLE Operations</div>
+      <div class="skill-item">✅ Constraint Management</div>
+      <div class="skill-item">✅ Real-World Scenarios</div>
+    </div>
+    
+    <div class="footer">
+      <p>Certificate ID: PG-DEBUG-${Date.now().toString().slice(-8)} | Date: ${new Date().toLocaleDateString()}</p>
+      <p>MSEBETSI PostgreSQL Course - Lesson 7: Debugging & Advanced Schema Operations</p>
+      <p>Empowering African developers with professional database engineering skills</p>
+    </div>
+  </div>
+</body>
+</html>`;
+      
+      const blob = new Blob([certificateHTML], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'postgresql-debugging-certificate.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showNotification('🎉 Certificate generated and downloaded!', 'success');
+    });
+
+    // Navigation
+    function previousLesson() {
+      window.location.href = 'lesson6.html';
+    }
+
+    function nextLesson() {
+      window.location.href = 'lesson8.html';
+    }
+
+    // Utility functions
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.textContent = message;
+      notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius-md);
+        background-color: ${type === 'success' ? 'var(--color-success)' : 
+                         type === 'error' ? 'var(--color-error)' : 
+                         type === 'info' ? 'var(--color-info)' :
+                         type === 'debug' ? 'var(--color-debug)' :
+                         'var(--color-warning)'};
+        color: white;
+        font-weight: 500;
+        box-shadow: var(--shadow-lg);
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.style.animation = 'fadeOut 0.3s ease';
+          setTimeout(() => notification.remove(), 300);
+        }
+      }, 3000);
+    }
+
+    // Initialize
+    showNotification('Welcome to Lesson 7: Debugging & Advanced Schema Operations', 'info');
+    
+    // Simulate some initial progress
+    setTimeout(() => updateProgress(10), 1000);
+  </script>
+</body>
+</html>

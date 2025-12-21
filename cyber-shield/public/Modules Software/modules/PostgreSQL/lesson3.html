@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 3: PostgreSQL Table Creation & Management | MSEBETSI</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --accent: #0b5fff;
+            --accent-light: rgba(11, 95, 255, 0.1);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--bg);
+            color: #1e293b;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .lesson-container {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            margin-top: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid rgba(11, 95, 255, 0.1);
+        }
+        
+        .module-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .lesson-title {
+            font-size: 36px;
+            color: #0f172a;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .lesson-subtitle {
+            color: var(--muted);
+            font-size: 18px;
+            margin-bottom: 30px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .scenario-banner {
+            background: linear-gradient(135deg, #0b5fff 0%, #00d4ff 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+            box-shadow: 0 8px 32px rgba(11, 95, 255, 0.2);
+        }
+        
+        .scenario-banner h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .time-badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            padding: 6px 15px;
+            border-radius: 15px;
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .objectives {
+            background: linear-gradient(135deg, #f0f7ff, #e6f0ff);
+            border-left: 4px solid var(--accent);
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        
+        .objectives h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .objectives ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+        
+        .objectives li {
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .objectives li:before {
+            content: "✓";
+            color: var(--success);
+            font-weight: bold;
+            position: absolute;
+            left: -20px;
+        }
+        
+        .section {
+            margin: 40px 0;
+            padding: 30px;
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(11, 95, 255, 0.05);
+        }
+        
+        .section-title {
+            color: var(--accent);
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(11, 95, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .step {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(11, 95, 255, 0.02);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            overflow-x: auto;
+            border: 1px solid #334155;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .code-block .comment { color: #6A9955; }
+        .code-block .keyword { color: #569CD6; }
+        .code-block .string { color: #CE9178; }
+        .code-block .function { color: #DCDCAA; }
+        .code-block .number { color: #B5CEA8; }
+        .code-block .operator { color: #D4D4D4; }
+        .code-block .type { color: #4EC9B0; }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th {
+            background: rgba(11, 95, 255, 0.1);
+            color: var(--accent);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        tr:hover {
+            background: rgba(11, 95, 255, 0.03);
+        }
+        
+        .business-case {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border: 2px solid #2196f3;
+        }
+        
+        .business-case h4 {
+            color: #1565c0;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .note-box {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .warning-box {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--danger);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .success-box {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .exercise {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 40px 0;
+            border: 2px dashed var(--accent);
+        }
+        
+        .checklist {
+            margin: 20px 0;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .checklist-item input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            font-size: 15px;
+        }
+        
+        .btn:hover {
+            background: #0a4ed9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(11, 95, 255, 0.2);
+        }
+        
+        .btn-secondary {
+            background: rgba(11, 95, 255, 0.1);
+            color: var(--accent);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(11, 95, 255, 0.2);
+        }
+        
+        .btn-success {
+            background: var(--success);
+        }
+        
+        .btn-success:hover {
+            background: #0da271;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .file-upload-area {
+            border: 3px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin: 25px 0;
+            background: #f8fafc;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--accent);
+            background: #f1f7ff;
+        }
+        
+        .file-upload-area.dragover {
+            border-color: var(--success);
+            background: #f0fdf4;
+        }
+        
+        .file-preview {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Consolas', monospace;
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        
+        .validation-result {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .validation-result.success {
+            background: #f0fdf4;
+            border-left: 4px solid var(--success);
+            display: block;
+        }
+        
+        .validation-result.error {
+            background: #fef2f2;
+            border-left: 4px solid var(--danger);
+            display: block;
+        }
+        
+        .progress-container {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: var(--success);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .diagram-container {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 10px;
+        }
+        
+        .diagram {
+            display: inline-block;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .table-diagram {
+            border-collapse: collapse;
+            border: 2px solid #334155;
+        }
+        
+        .table-diagram th {
+            background: #334155;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #475569;
+        }
+        
+        .table-diagram td {
+            padding: 12px 20px;
+            border: 1px solid #cbd5e1;
+            text-align: center;
+        }
+        
+        .table-diagram .header-row {
+            background: rgba(11, 95, 255, 0.1);
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .lesson-container { padding: 20px; }
+            .lesson-title { font-size: 28px; }
+            .section { padding: 20px; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- Header Section -->
+        <div class="header">
+            <div class="module-badge">MODULE 10: POSTGRESQL TABLE ARCHITECTURE</div>
+            <h1 class="lesson-title">Lesson 3: Designing & Creating Database Tables</h1>
+            <p class="lesson-subtitle">Master the art of table creation, modification, and schema design for production applications</p>
+            <div class="time-badge"><i class="fas fa-clock"></i> 75-MINUTE PROFESSIONAL WORKSHOP</div>
+        </div>
+
+        <!-- Real-World Scenario -->
+        <div class="scenario-banner">
+            <h3><i class="fas fa-project-diagram"></i> REAL-WORLD PROJECT: MSEBETSI BIOGRAPHY ARCHIVE</h3>
+            <p><strong>Project Context:</strong> You're building a digital biography archive for MSEBETSI's historical department. The system needs a well-structured database to store biographies of key historical figures.</p>
+            <p><strong>Technical Requirement:</strong> Create a `biographies` table that can efficiently store and retrieve biography data with proper data types and constraints.</p>
+        </div>
+
+        <!-- Learning Objectives -->
+        <div class="objectives">
+            <h3><i class="fas fa-bullseye"></i> PROFESSIONAL LEARNING OUTCOMES</h3>
+            <ul>
+                <li>Design and create database tables with proper data types</li>
+                <li>Understand and implement table constraints (NOT NULL, UNIQUE, PRIMARY KEY)</li>
+                <li>Drop and recreate tables for schema evolution</li>
+                <li>Validate table structure using PostgreSQL meta-commands</li>
+                <li>Implement production-ready table creation scripts</li>
+                <li>Understand the difference between databases, tables, and schemas</li>
+            </ul>
+        </div>
+
+        <!-- Part 1: Understanding Table Structure -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-table"></i> PART 1: DATABASE TABLE FUNDAMENTALS</h2>
+            
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>What is a Database Table?</h3>
+                <p>A table is a structured collection of data organized into rows and columns. Think of it as a spreadsheet in your database.</p>
+                
+                <div class="business-case">
+                    <h4><i class="fas fa-building"></i> BUSINESS ANALOGY</h4>
+                    <p><strong>Database = Company Filing Cabinet</strong> (holds all records)<br>
+                    <strong>Table = Individual File Folder</strong> (e.g., "Employee Records", "Customer Profiles")<br>
+                    <strong>Columns = Standard Form Fields</strong> (e.g., Name, Date, Amount)<br>
+                    <strong>Rows = Individual Forms</strong> (each employee's or customer's data)</p>
+                </div>
+
+                <!-- Table Diagram -->
+                <div class="diagram-container">
+                    <h4>Table Structure Visualization</h4>
+                    <div class="diagram">
+                        <table class="table-diagram">
+                            <thead>
+                                <tr>
+                                    <th colspan="2">biographies Table Structure</th>
+                                </tr>
+                                <tr class="header-row">
+                                    <td>Column Name</td>
+                                    <td>Data Type & Constraints</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>id</strong></td>
+                                    <td>INTEGER (Primary Key)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>name</strong></td>
+                                    <td>VARCHAR(100) NOT NULL</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p style="margin-top: 15px; color: var(--muted);"><i>This is what you'll be creating in this lesson</i></p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Common PostgreSQL Data Types</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data Type</th>
+                                <th>Description</th>
+                                <th>Business Use Case</th>
+                                <th>Example</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>INTEGER</code></td>
+                                <td>Whole numbers</td>
+                                <td>IDs, quantities, ages</td>
+                                <td><code>42</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>VARCHAR(n)</code></td>
+                                <td>Variable length text (max n chars)</td>
+                                <td>Names, emails, addresses</td>
+                                <td><code>'John Doe'</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>TEXT</code></td>
+                                <td>Unlimited length text</td>
+                                <td>Descriptions, articles, logs</td>
+                                <td><code>Full biography text...</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>BOOLEAN</code></td>
+                                <td>True/False values</td>
+                                <td>Flags, status indicators</td>
+                                <td><code>TRUE</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>DATE</code></td>
+                                <td>Calendar date</td>
+                                <td>Birth dates, event dates</td>
+                                <td><code>'2024-01-15'</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>DECIMAL(p,s)</code></td>
+                                <td>Exact numeric values</td>
+                                <td>Prices, financial amounts</td>
+                                <td><code>99.99</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="note-box">
+                    <strong><i class="fas fa-lightbulb"></i> PROFESSIONAL TIP:</strong> Choose the smallest data type that fits your needs. Use <code>VARCHAR(100)</code> instead of <code>TEXT</code> when you know the maximum length to save storage and improve performance.
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 2: Table Creation Syntax -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-code"></i> PART 2: CREATING TABLES WITH SQL</h2>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Basic CREATE TABLE Syntax</h3>
+                
+                <div class="code-block">
+<span class="comment">-- Basic CREATE TABLE template</span><br>
+<span class="keyword">CREATE TABLE</span> table_name (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;column1_name column1_datatype column1_constraints,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;column2_name column2_datatype column2_constraints,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- ... more columns ...</span><br>
+);<br><br>
+
+<span class="comment">-- Create biographies table (our project requirement)</span><br>
+<span class="keyword">CREATE TABLE</span> biographies (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;id <span class="type">INTEGER</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name <span class="type">VARCHAR</span>(<span class="number">100</span>)<br>
+);
+                </div>
+                
+                <div class="note-box">
+                    <strong><i class="fas fa-exclamation-triangle"></i> IMPORTANT:</strong> Table and column names should be descriptive, use lowercase with underscores (snake_case), and avoid SQL keywords as names.
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Adding Constraints for Data Integrity</h3>
+                <p>Constraints enforce rules on your data to maintain quality and consistency.</p>
+                
+                <div class="code-block">
+<span class="comment">-- Common table constraints</span><br>
+<span class="keyword">CREATE TABLE</span> biographies (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- NOT NULL: Column must have a value</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;id <span class="type">INTEGER</span> <span class="keyword">NOT NULL</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- Specify maximum length for text</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;name <span class="type">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NOT NULL</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- UNIQUE: Values must be different across rows</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;email <span class="type">VARCHAR</span>(<span class="number">255</span>) <span class="keyword">UNIQUE</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- PRIMARY KEY: Unique identifier for each row</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- Combines NOT NULL and UNIQUE automatically</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_id <span class="type">SERIAL</span> <span class="keyword">PRIMARY KEY</span><br>
+);
+                </div>
+                
+                <div class="success-box">
+                    <strong><i class="fas fa-check-circle"></i> BEST PRACTICE:</strong> Always add <code>NOT NULL</code> constraints to columns that should always have data. This prevents empty values that could break your application logic.
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 3: Dropping and Recreating Tables -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-sync-alt"></i> PART 3: TABLE MANAGEMENT OPERATIONS</h2>
+            
+            <div class="step">
+                <div class="step-number">5</div>
+                <h3>Dropping Tables (DELETE with Caution!)</h3>
+                
+                <div class="warning-box">
+                    <strong><i class="fas fa-exclamation-triangle"></i> WARNING:</strong> <code>DROP TABLE</code> permanently deletes the table and all its data. Use with extreme caution in production!
+                </div>
+                
+                <div class="code-block">
+<span class="comment">-- Basic DROP TABLE (dangerous - no safety check)</span><br>
+<span class="keyword">DROP TABLE</span> biographies;<br><br>
+
+<span class="comment">-- Safer: Only drop if table exists</span><br>
+<span class="keyword">DROP TABLE IF EXISTS</span> biographies;<br><br>
+
+<span class="comment">-- Complete workflow: Drop and recreate</span><br>
+<span class="comment">-- This is what you'll implement for the biography archive</span><br>
+<span class="keyword">DROP TABLE IF EXISTS</span> biographies;<br>
+<span class="keyword">CREATE TABLE</span> biographies (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;id <span class="type">INTEGER</span> <span class="keyword">NOT NULL</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name <span class="type">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NOT NULL</span><br>
+);
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">6</div>
+                <h3>Viewing Table Structure</h3>
+                <p>After creating tables, verify their structure using PostgreSQL meta-commands.</p>
+                
+                <div class="code-block">
+<span class="comment">-- List all tables in current database</span><br>
+\<span class="keyword">dt</span><br><br>
+
+<span class="comment">-- Describe table structure (columns, types, constraints)</span><br>
+\<span class="keyword">d</span> table_name<br>
+\<span class="keyword">d</span> biographies<br><br>
+
+<span class="comment">-- Show detailed table information</span><br>
+\<span class="keyword">d+</span> biographies<br><br>
+
+<span class="comment">-- SQL alternative: Query system catalog</span><br>
+<span class="keyword">SELECT</span> column_name, data_type, is_nullable<br>
+<span class="keyword">FROM</span> information_schema.columns<br>
+<span class="keyword">WHERE</span> table_name = <span class="string">'biographies'</span><br>
+<span class="keyword">ORDER BY</span> ordinal_position;
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 4: Hands-On Lab Exercise -->
+        <div class="section exercise">
+            <h2 class="section-title"><i class="fas fa-laptop-code"></i> PART 4: HANDS-ON LAB - CREATE BIOGRAPHIES TABLE</h2>
+            
+            <div class="business-case">
+                <h4><i class="fas fa-briefcase"></i> YOUR ASSIGNMENT: MSEBETSI BIOGRAPHY ARCHIVE</h4>
+                <p><strong>Scenario:</strong> The historical department needs a new biographies table. The old table design was inadequate and needs to be replaced.</p>
+                <p><strong>Requirements:</strong></p>
+                <ul style="padding-left: 20px; margin-top: 10px;">
+                    <li>Drop existing `biographies` table (if it exists)</li>
+                    <li>Create new `biographies` table with proper structure</li>
+                    <li>Include `id` (INTEGER) and `name` (VARCHAR(100)) columns</li>
+                    <li>Add appropriate constraints for data integrity</li>
+                </ul>
+            </div>
+
+            <!-- File Upload Section -->
+            <div class="step">
+                <h3>Step 1: Create Your SQL Script</h3>
+                <p>Create a file named <code>create_biographies.sql</code> with your solution. Use the template below:</p>
+                
+                <div class="code-block">
+<span class="comment">-- create_biographies.sql</span><br>
+<span class="comment">-- MSEBETSI Biography Archive Table Creation</span><br>
+<span class="comment">-- Your Name: ___________________</span><br>
+<span class="comment">-- Date: ________________________</span><br>
+<br>
+<span class="comment">-- Drop existing table if it exists</span><br>
+<span class="comment">-- Your code here</span><br>
+<br>
+<br>
+<span class="comment">-- Create new biographies table</span><br>
+<span class="comment">-- Your code here</span><br>
+<br>
+<br>
+<span class="comment">-- Verification commands (optional)</span><br>
+<span class="comment">-- \dt  -- List tables</span><br>
+<span class="comment">-- \d biographies  -- Describe table</span><br>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="downloadTemplate()">
+                    <i class="fas fa-download"></i> Download Template File
+                </button>
+            </div>
+
+            <!-- File Upload Area -->
+            <div class="step">
+                <h3>Step 2: Upload & Validate Your Solution</h3>
+                <p>Upload your completed <code>create_biographies.sql</code> file for automated validation.</p>
+                
+                <div class="file-upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #94a3b8; margin-bottom: 15px;"></i>
+                    <h3>Drag & Drop Your <code>create_biographies.sql</code> File Here</h3>
+                    <p style="color: var(--muted); margin: 10px 0 20px;">or click to browse your computer</p>
+                    <input type="file" id="fileInput" accept=".sql" hidden>
+                </div>
+                
+                <div id="filePreview" class="file-preview" style="display: none;">
+                    <strong>File Preview:</strong>
+                    <pre id="previewContent"></pre>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                
+                <!-- Validation Results -->
+                <div id="validationSuccess" class="validation-result success">
+                    <h3 style="color: var(--success); margin-bottom: 10px;"><i class="fas fa-check-circle"></i> Perfect! Your Table Creation Script is Correct!</h3>
+                    <p>Your <code>biographies</code> table has been properly created with all required columns and constraints.</p>
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-success" onclick="showSolutionComparison()">
+                            <i class="fas fa-code-compare"></i> Compare with Professional Solution
+                        </button>
+                    </div>
+                </div>
+
+                <div id="validationError" class="validation-result error">
+                    <h3 style="color: var(--danger); margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i> Issues Found in Your Script</h3>
+                    <p id="errorDetails">Please check your file and try again.</p>
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-secondary" onclick="showHints()">
+                            <i class="fas fa-lightbulb"></i> Get Implementation Hints
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Solution Comparison -->
+                <div id="solutionComparison" style="display: none; margin-top: 30px;">
+                    <h3 style="color: var(--accent); margin-bottom: 20px;"><i class="fas fa-star"></i> Professional Solution Comparison</h3>
+                    <div class="code-block">
+<span class="comment">-- create_biographies.sql - Professional Solution</span><br>
+<span class="comment">-- MSEBETSI Biography Archive - Production Ready</span><br>
+<br>
+<span class="comment">-- Safely drop existing table to avoid errors</span><br>
+<span class="keyword">DROP TABLE IF EXISTS</span> biographies;<br>
+<br>
+<span class="comment">-- Create new table with proper data types and constraints</span><br>
+<span class="keyword">CREATE TABLE</span> biographies (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- Unique identifier for each biography</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;id <span class="type">INTEGER</span> <span class="keyword">NOT NULL</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- Biography subject name (max 100 characters)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;name <span class="type">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NOT NULL</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- Note: In production, you might want to add:</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">--   PRIMARY KEY (id) for better data integrity</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">--   SERIAL instead of INTEGER for auto-increment</span><br>
+);<br>
+<br>
+<span class="comment">-- Optional: Verification commands (for manual testing)</span><br>
+<span class="comment">-- \dt  -- Verify table exists</span><br>
+<span class="comment">-- \d biographies  -- Verify structure</span>
+                    </div>
+                    
+                    <div class="note-box" style="margin-top: 20px;">
+                        <strong><i class="fas fa-graduation-cap"></i> WHAT MAKES THIS PRODUCTION-READY:</strong>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li>Uses <code>IF EXISTS</code> to prevent errors if table doesn't exist</li>
+                            <li>Includes <code>NOT NULL</code> constraints for data integrity</li>
+                            <li>Documents each column's purpose with comments</li>
+                            <li>Considers future enhancements (PRIMARY KEY, SERIAL)</li>
+                            <li>Includes verification steps for quality assurance</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Professional Competency Checklist -->
+            <div class="step">
+                <h3>Step 3: Verify Your Competency</h3>
+                <div class="checklist">
+                    <div class="checklist-item">
+                        <input type="checkbox" id="comp1">
+                        <label for="comp1">I can create a table with specific column data types</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="comp2">
+                        <label for="comp2">I understand when to use <code>VARCHAR(n)</code> vs <code>TEXT</code></label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="comp3">
+                        <label for="comp3">I can safely drop and recreate tables using <code>IF EXISTS</code></label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="comp4">
+                        <label for="comp4">I know how to verify table structure using <code>\dt</code> and <code>\d</code></label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="comp5">
+                        <label for="comp5">I understand the difference between a database and a table</label>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="checkCompetency()" style="margin-top: 20px;">
+                    <i class="fas fa-certificate"></i> Verify Competency & Continue
+                </button>
+            </div>
+        </div>
+
+        <!-- Part 5: Bonus Challenge -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-trophy"></i> PART 5: BONUS CHALLENGE - ADVANCED CONCEPTS</h2>
+            
+            <div class="step">
+                <h3>Database vs Table: Understanding the Hierarchy</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Concept</th>
+                                <th>Definition</th>
+                                <th>Analogy</th>
+                                <th>PostgreSQL Command</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Database</strong></td>
+                                <td>A container that holds multiple tables, views, functions, and other objects</td>
+                                <td>Filing Cabinet</td>
+                                <td><code>CREATE DATABASE</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Table</strong></td>
+                                <td>A structured set of data organized into rows and columns within a database</td>
+                                <td>File Folder within Cabinet</td>
+                                <td><code>CREATE TABLE</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Schema</strong></td>
+                                <td>A namespace within a database that contains tables and other objects</td>
+                                <td>Drawer within Filing Cabinet</td>
+                                <td><code>CREATE SCHEMA</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Column</strong></td>
+                                <td>A single piece of data within a table (vertical dimension)</td>
+                                <td>Field on a Form</td>
+                                <td><code>column_name data_type</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Row</strong></td>
+                                <td>A single record within a table (horizontal dimension)</td>
+                                <td>Completed Form</td>
+                                <td><code>INSERT INTO</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="note-box">
+                    <strong><i class="fas fa-rocket"></i> CHALLENGE QUESTION:</strong> If a database is like a company's entire HR department, and tables are like specific record types (employees, payroll, benefits), what would schemas represent in this analogy? <em>(Answer: Different divisions or locations within the company, like "US Operations" or "European Division")</em>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>Advanced: Creating Enhanced Biography Table</h3>
+                <p>For extra credit, create a more comprehensive biography table:</p>
+                
+                <div class="code-block">
+<span class="comment">-- Enhanced biographies table with additional columns</span><br>
+<span class="keyword">DROP TABLE IF EXISTS</span> biographies;<br>
+<br>
+<span class="keyword">CREATE TABLE</span> biographies (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- Auto-incrementing primary key</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;id <span class="type">SERIAL</span> <span class="keyword">PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- Subject information</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;name <span class="type">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NOT NULL</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;birth_date <span class="type">DATE</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;death_date <span class="type">DATE</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- Biography content</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;summary <span class="type">TEXT</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;full_text <span class="type">TEXT</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- Metadata</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;category <span class="type">VARCHAR</span>(<span class="number">50</span>) <span class="keyword">DEFAULT</span> <span class="string">'Historical'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;last_updated <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="function">CURRENT_TIMESTAMP</span><br>
+);
+                </div>
+                
+                <div class="success-box">
+                    <strong><i class="fas fa-medal"></i> EXTRA CREDIT:</strong> Modify your <code>create_biographies.sql</code> to include at least two additional columns with appropriate data types. Upload it again to validate the enhanced version!
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional Summary -->
+        <div class="section" style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe);">
+            <h2 class="section-title"><i class="fas fa-clipboard-check"></i> PROFESSIONAL SUMMARY & KEY TAKEAWAYS</h2>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Command</th>
+                            <th>Purpose</th>
+                            <th>Professional Usage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>CREATE TABLE</code></td>
+                            <td>Define new table structure</td>
+                            <td>Initial database design, schema migrations</td>
+                        </tr>
+                        <tr>
+                            <td><code>DROP TABLE</code></td>
+                            <td>Remove table and its data</td>
+                            <td>Schema cleanup, table replacement (use with <code>IF EXISTS</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><code>\dt</code></td>
+                            <td>List all tables</td>
+                            <td>Database exploration, verification</td>
+                        </tr>
+                        <tr>
+                            <td><code>\d table_name</code></td>
+                            <td>Describe table structure</td>
+                            <td>Debugging, documentation, understanding existing schemas</td>
+                        </tr>
+                        <tr>
+                            <td><code>NOT NULL</code></td>
+                            <td>Require values in column</td>
+                            <td>Data integrity, preventing application errors</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="code-block" style="background: rgba(11, 95, 255, 0.05); color: var(--accent-2); margin-top: 20px;">
+                <span class="comment">-- PROFESSIONAL WORKFLOW FOR TABLE CREATION</span><br>
+                1. Design table structure on paper/diagram first<br>
+                2. Use <code>DROP TABLE IF EXISTS</code> for clean starts<br>
+                3. Specify precise data types (e.g., <code>VARCHAR(100)</code>)<br>
+                4. Add <code>NOT NULL</code> constraints where appropriate<br>
+                5. Test with <code>\dt</code> and <code>\d table_name</code><br>
+                6. Document with comments for team collaboration<br>
+                <span class="comment">-- Remember: Tables are the foundation of your application!</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="btn btn-secondary" onclick="window.location.href='lesson2.html'">
+                <i class="fas fa-arrow-left"></i> Previous: Database Management
+            </button>
+            <button class="btn" onclick="completeLesson()" id="nextLessonBtn" disabled>
+                Complete Lesson & Continue <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.1); color: var(--muted); font-size: 14px;">
+            <p><strong>MSEBETSI SOLUTIONS PROFESSIONAL INSIGHT:</strong> Well-designed tables are the foundation of efficient applications. Spend time on schema design—it pays dividends in performance and maintainability.</p>
+            <p>© 2024 MSEBETSI SOLUTIONS - Enterprise Database Architecture Training</p>
+        </div>
+    </div>
+
+    <script>
+        // Master solution for validation
+        const masterSolution = `DROP TABLE IF EXISTS biographies;
+CREATE TABLE biographies (
+    id INTEGER NOT NULL,
+    name VARCHAR(100) NOT NULL
+);`;
+
+        // DOM elements
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const filePreview = document.getElementById('filePreview');
+        const previewContent = document.getElementById('previewContent');
+        const validationSuccess = document.getElementById('validationSuccess');
+        const validationError = document.getElementById('validationError');
+        const progressBar = document.getElementById('progressBar');
+        const nextLessonBtn = document.getElementById('nextLessonBtn');
+        const solutionComparison = document.getElementById('solutionComparison');
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFileUpload();
+            applySyntaxHighlighting();
+            
+            // Check if lesson was previously completed
+            if (localStorage.getItem('sql-lesson3-completed') === 'true') {
+                enableNextLesson();
+            }
+        });
+        
+        // File upload functionality
+        function setupFileUpload() {
+            // Drag and drop events
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlightDropZone, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlightDropZone, false);
+            });
+            
+            dropZone.addEventListener('drop', handleDrop, false);
+            fileInput.addEventListener('change', handleFileSelect, false);
+        }
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        function highlightDropZone() {
+            dropZone.classList.add('dragover');
+        }
+        
+        function unhighlightDropZone() {
+            dropZone.classList.remove('dragover');
+        }
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+        
+        function handleFileSelect() {
+            handleFiles(this.files);
+        }
+        
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            const file = files[0];
+            
+            // Validate file type
+            if (!file.name.endsWith('.sql')) {
+                showError('Please upload a .sql file (e.g., create_biographies.sql)');
+                return;
+            }
+            
+            // Show progress
+            progressBar.style.width = '30%';
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Show preview
+                filePreview.style.display = 'block';
+                previewContent.textContent = e.target.result.substring(0, 500) + 
+                    (e.target.result.length > 500 ? '...' : '');
+                
+                // Validate content
+                progressBar.style.width = '60%';
+                setTimeout(() => {
+                    validateSQL(e.target.result, file.name);
+                    progressBar.style.width = '100%';
+                }, 500);
+            };
+            reader.readAsText(file);
+            
+            // Update UI
+            updateDropZoneUI(file.name);
+        }
+        
+        function updateDropZoneUI(fileName) {
+            dropZone.innerHTML = `
+                <i class="fas fa-file-code" style="font-size: 3rem; color: var(--success); margin-bottom: 15px;"></i>
+                <h3>${fileName}</h3>
+                <p style="color: var(--success); margin: 10px 0 20px;">
+                    <i class="fas fa-check"></i> File uploaded successfully
+                </p>
+                <button class="btn btn-secondary" onclick="resetUpload()">
+                    <i class="fas fa-redo"></i> Upload Different File
+                </button>
+            `;
+        }
+        
+        function resetUpload() {
+            dropZone.innerHTML = `
+                <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #94a3b8; margin-bottom: 15px;"></i>
+                <h3>Drag & Drop Your <code>create_biographies.sql</code> File Here</h3>
+                <p style="color: var(--muted); margin: 10px 0 20px;">or click to browse your computer</p>
+                <input type="file" id="fileInput" accept=".sql" hidden>
+            `;
+            fileInput.value = '';
+            filePreview.style.display = 'none';
+            validationSuccess.style.display = 'none';
+            validationError.style.display = 'none';
+            solutionComparison.style.display = 'none';
+            progressBar.style.width = '0%';
+            
+            // Re-attach event listeners
+            const newFileInput = document.getElementById('fileInput');
+            newFileInput.addEventListener('change', handleFileSelect, false);
+        }
+        
+        // Validation logic
+        function validateSQL(userContent, fileName) {
+            // Normalize content for comparison
+            const normalize = (text) => {
+                return text
+                    .toUpperCase()
+                    .replace(/--.*$/gm, '')  // Remove single-line comments
+                    .replace(/\/\*[\s\S]*?\*\//g, '')  // Remove multi-line comments
+                    .replace(/\s+/g, ' ')  // Normalize whitespace
+                    .trim();
+            };
+            
+            const normalizedUser = normalize(userContent);
+            const normalizedMaster = normalize(masterSolution);
+            
+            // Check for required components
+            const hasDropTable = normalizedUser.includes('DROP TABLE') && 
+                                normalizedUser.includes('BIOGRAPHIES');
+            const hasCreateTable = normalizedUser.includes('CREATE TABLE') && 
+                                  normalizedUser.includes('BIOGRAPHIES');
+            const hasIdColumn = normalizedUser.includes('ID') && 
+                               (normalizedUser.includes('INTEGER') || normalizedUser.includes('INT'));
+            const hasNameColumn = normalizedUser.includes('NAME') && 
+                                 normalizedUser.includes('VARCHAR');
+            
+            // Advanced check: Verify column definitions
+            const hasCorrectStructure = (
+                hasDropTable && 
+                hasCreateTable && 
+                hasIdColumn && 
+                hasNameColumn
+            );
+            
+            if (hasCorrectStructure) {
+                showValidationSuccess();
+            } else {
+                let errors = [];
+                if (!hasDropTable) errors.push('Missing DROP TABLE IF EXISTS biographies command');
+                if (!hasCreateTable) errors.push('Missing CREATE TABLE biographies command');
+                if (!hasIdColumn) errors.push('Missing id INTEGER column definition');
+                if (!hasNameColumn) errors.push('Missing name VARCHAR(100) column definition');
+                
+                showValidationError(errors);
+            }
+        }
+        
+        function showValidationSuccess() {
+            validationSuccess.style.display = 'block';
+            validationError.style.display = 'none';
+            
+            // Mark checkboxes as completed
+            document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+                cb.checked = true;
+                cb.parentElement.style.color = 'var(--success)';
+                cb.parentElement.style.fontWeight = '600';
+            });
+            
+            enableNextLesson();
+        }
+        
+        function showValidationError(errors) {
+            validationError.style.display = 'block';
+            validationSuccess.style.display = 'none';
+            
+            const errorDetails = document.getElementById('errorDetails');
+            errorDetails.innerHTML = `
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    ${errors.map(error => `<li>${error}</li>`).join('')}
+                </ul>
+                <p style="margin-top: 10px;">Review the requirements and try again.</p>
+            `;
+        }
+        
+        function showHints() {
+            alert(`HINTS FOR SUCCESS:
+            
+1. Your file must contain TWO main SQL statements:
+   - DROP TABLE IF EXISTS biographies;
+   - CREATE TABLE biographies (...);
+
+2. The CREATE TABLE statement must define:
+   - id INTEGER (or INT)
+   - name VARCHAR(100)
+
+3. Add NOT NULL constraints for better data integrity.
+
+4. Save your file as create_biographies.sql`);
+        }
+        
+        function showSolutionComparison() {
+            solutionComparison.style.display = 'block';
+            solutionComparison.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function downloadTemplate() {
+            const template = `-- create_biographies.sql
+-- MSEBETSI Biography Archive Table Creation
+-- Student: [Your Name Here]
+-- Date: ${new Date().toLocaleDateString()}
+
+-- Task 1: Drop the existing biographies table (if it exists)
+-- Write your DROP TABLE statement here
+
+
+-- Task 2: Create the new biographies table
+-- Write your CREATE TABLE statement here
+-- Include: id (INTEGER) and name (VARCHAR(100)) columns
+-- Consider adding NOT NULL constraints
+
+
+-- Optional verification (for manual testing in psql):
+-- \\dt  -- Lists all tables
+-- \\d biographies  -- Shows table structure
+`;
+            
+            const blob = new Blob([template], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'create_biographies_template.sql';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        function checkCompetency() {
+            const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+            let allChecked = true;
+            
+            checkboxes.forEach(cb => {
+                if (!cb.checked) {
+                    allChecked = false;
+                    cb.parentElement.style.color = 'var(--danger)';
+                }
+            });
+            
+            if (allChecked) {
+                alert('✅ Excellent! You have demonstrated competency in PostgreSQL table creation.\n\nYou are ready to proceed to more advanced database operations.');
+                enableNextLesson();
+            } else {
+                alert('Please complete all competency checkboxes before continuing.\n\nYou can review the lesson material or ask for help if needed.');
+            }
+        }
+        
+        function enableNextLesson() {
+            nextLessonBtn.disabled = false;
+            localStorage.setItem('sql-lesson3-completed', 'true');
+        }
+        
+        function completeLesson() {
+            const completionMessage = `
+🎉 LESSON 3: TABLE CREATION MASTERY ACHIEVED!
+
+What you've accomplished:
+✓ Designed and created database tables
+✓ Implemented proper data types and constraints
+✓ Learned safe table management practices
+✓ Validated your skills with hands-on practice
+
+Next: Data manipulation with INSERT, UPDATE, and DELETE
+            `;
+            
+            alert(completionMessage);
+            window.location.href = 'lesson4.html'; // Next lesson
+        }
+        
+        function applySyntaxHighlighting() {
+            document.querySelectorAll('.code-block').forEach(block => {
+                const html = block.innerHTML;
+                const highlighted = html
+                    .replace(/--.*$/gm, '<span class="comment">$&</span>')
+                    .replace(/\b(SELECT|FROM|WHERE|ORDER BY|LIMIT|OFFSET|ASC|DESC|BETWEEN|AND|OR|NOT|IN|LIKE|ILIKE|IS NULL|IS NOT NULL|CREATE TABLE|DROP TABLE|IF EXISTS|INSERT INTO|VALUES|PRIMARY KEY|NOT NULL|UNIQUE|DEFAULT|SERIAL|VARCHAR|INTEGER|INT|TEXT|BOOLEAN|DATE|TIMESTAMP|DECIMAL|CHECK|REFERENCES|JOIN|ON|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|INTERVAL|CURRENT_DATE|CURRENT_TIMESTAMP|DATE_TRUNC)\b/gi, '<span class="keyword">$1</span>')
+                    .replace(/'([^']*)'/g, '<span class="string">\'$1\'</span>')
+                    .replace(/\b(\d+(\.\d+)?)\b/g, '<span class="number">$1</span>')
+                    .replace(/(=|<|>|!=|<=|>=|<>|!<|!>)/g, '<span class="operator">$1</span>')
+                    .replace(/\b(INTEGER|VARCHAR|TEXT|BOOLEAN|DATE|TIMESTAMP|DECIMAL|SERIAL)\b/gi, '<span class="type">$1</span>');
+                block.innerHTML = highlighted;
+            });
+        }
+    </script>
+</body>
+</html>

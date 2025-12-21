@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 13: COUNT & GROUP BY Analytics | MSEBETSI Security Academy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --gray-light: #e2e8f0;
+            --border-radius: 12px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+
+            /* Theme Variables - Default is Light */
+            --bg-color: #f8fafc;
+            --text-color: #0f172a;
+            --card-bg: white;
+            --border-color: #e2e8f0;
+            --header-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --header-gradient: linear-gradient(135deg, #0c4a6e 0%, #1e3a8a 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .theme-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn:hover {
+            transform: rotate(30deg);
+            border-color: var(--primary);
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .title {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: var(--gray);
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .dashboard-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        /* Module Navigation */
+        .module-nav {
+            display: flex;
+            gap: 10px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .module-tab {
+            padding: 15px 30px;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .module-tab:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .module-tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-color: transparent;
+        }
+
+        .module-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .module-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Content Cards */
+        .content-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        /* Interactive Editor */
+        .interactive-editor {
+            background: var(--dark);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin: 40px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .editor-header {
+            background: var(--dark);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+        }
+
+        .editor-title {
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark), #6d28d9);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-light);
+        }
+
+        .editor-body {
+            padding: 30px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            color: #e2e8f0;
+            line-height: 1.8;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .sql-keyword { color: #569cd6; }
+        .sql-string { color: #ce9178; }
+        .sql-number { color: #b5cea8; }
+        .sql-comment { color: #6a9955; }
+        .sql-table { color: #ffcc00; }
+        .sql-column { color: #9cdcfe; }
+        .sql-function { color: #4ec9b0; }
+
+        /* File Upload Area */
+        .upload-area {
+            border: 3px dashed var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 50px;
+            text-align: center;
+            margin: 30px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--card-bg);
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        /* Progress Tracker */
+        .progress-tracker {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin: 40px 0;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: var(--gray-light);
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 5px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .title { font-size: 36px; }
+            .module-nav { flex-direction: column; }
+            .dashboard-cards { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+        <button class="theme-btn" id="themeToggle">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="badge">
+                <i class="fas fa-chart-bar"></i> SECURITY ANALYTICS ENGINEERING
+            </div>
+            <h1 class="title">COUNT & GROUP BY Analytics</h1>
+            <p class="subtitle">
+                Transform raw threat data into actionable intelligence using PostgreSQL aggregation.
+                Master the art of counting, categorizing, and analyzing security events at scale.
+            </p>
+            
+            <div class="dashboard-cards">
+                <div class="dashboard-card">
+                    <div class="stat-value" id="totalEvents">0</div>
+                    <div class="stat-label">Total Security Events</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="stat-value" id="uniqueThreats">0</div>
+                    <div class="stat-label">Unique Threat Types</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="stat-value">85%</div>
+                    <div class="stat-label">Query Performance Gain</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="stat-value">24/7</div>
+                    <div class="stat-label">Real-time Monitoring</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module Navigation -->
+        <div class="module-nav">
+            <div class="module-tab active" onclick="showModule(1)">
+                <i class="fas fa-database"></i> Analytics Foundation
+            </div>
+            <div class="module-tab" onclick="showModule(2)">
+                <i class="fas fa-filter"></i> COUNT() Deep Dive
+            </div>
+            <div class="module-tab" onclick="showModule(3)">
+                <i class="fas fa-layer-group"></i> GROUP BY Mastery
+            </div>
+            <div class="module-tab" onclick="showModule(4)">
+                <i class="fas fa-rocket"></i> Advanced Patterns
+            </div>
+            <div class="module-tab" onclick="showModule(5)">
+                <i class="fas fa-file-code"></i> Practical Mission
+            </div>
+        </div>
+
+        <!-- Module 1: Analytics Foundation -->
+        <div id="module1" class="module-content active">
+            <div class="content-card">
+                <div class="card-header">
+                    <i class="fas fa-database" style="color: var(--primary); font-size: 32px;"></i>
+                    <div>
+                        <h2>The Analytics Foundation: Why COUNT & GROUP BY Matter</h2>
+                        <p style="color: var(--gray);">From raw logs to security intelligence</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-cards">
+                    <div class="dashboard-card">
+                        <h4><i class="fas fa-bullseye"></i> Security Challenge</h4>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            "We have 10,000+ daily security events but can't identify patterns or prioritize threats."
+                        </p>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h4><i class="fas fa-lightbulb"></i> PostgreSQL Solution</h4>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            Use COUNT() with GROUP BY to categorize and quantify events by type, source, severity, and time.
+                        </p>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h4><i class="fas fa-chart-line"></i> Business Value</h4>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            Reduce mean time to detection (MTTD) by 65% through pattern recognition.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="interactive-editor">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fas fa-shield-alt"></i> Security Intelligence Schema
+                        </div>
+                    </div>
+                    <div class="editor-body">
+<span class="sql-comment">-- MSEBETSI SECURITY ANALYTICS DATABASE SCHEMA</span><br>
+<span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">security_events</span> (<br>
+&nbsp;&nbsp;event_id <span class="sql-keyword">SERIAL PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;event_type <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>) <span class="sql-keyword">NOT NULL</span>,<br>
+&nbsp;&nbsp;severity <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">20</span>) <span class="sql-keyword">CHECK</span> (severity <span class="sql-keyword">IN</span> (<span class="sql-string">'LOW'</span>, <span class="sql-string">'MEDIUM'</span>, <span class="sql-string">'HIGH'</span>, <span class="sql-string">'CRITICAL'</span>)),<br>
+&nbsp;&nbsp;source_ip <span class="sql-keyword">INET</span>,<br>
+&nbsp;&nbsp;timestamp <span class="sql-keyword">TIMESTAMPTZ DEFAULT</span> <span class="sql-keyword">NOW</span>(),<br>
+&nbsp;&nbsp;description <span class="sql-keyword">TEXT</span>,<br>
+&nbsp;&nbsp;analyst_id <span class="sql-keyword">INT REFERENCES</span> security_analysts(id),<br>
+&nbsp;&nbsp;threat_id <span class="sql-keyword">INT REFERENCES</span> threat_indicators(id)<br>
+);<br><br>
+
+<span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">threat_indicators</span> (<br>
+&nbsp;&nbsp;id <span class="sql-keyword">SERIAL PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;indicator_type <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>),<br>
+&nbsp;&nbsp;value <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">500</span>) <span class="sql-keyword">NOT NULL</span>,<br>
+&nbsp;&nbsp;first_seen <span class="sql-keyword">TIMESTAMPTZ</span>,<br>
+&nbsp;&nbsp;last_seen <span class="sql-keyword">TIMESTAMPTZ</span>,<br>
+&nbsp;&nbsp;confidence_score <span class="sql-keyword">DECIMAL</span>(<span class="sql-number">3</span>,<span class="sql-number">2</span>)<br>
+);<br><br>
+
+<span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">security_analysts</span> (<br>
+&nbsp;&nbsp;id <span class="sql-keyword">SERIAL PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;username <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>) <span class="sql-keyword">UNIQUE NOT NULL</span>,<br>
+&nbsp;&nbsp;team <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>),<br>
+&nbsp;&nbsp;clearance_level <span class="sql-keyword">INT DEFAULT</span> <span class="sql-number">1</span><br>
+);
+                    </div>
+                </div>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Aggregate Function</th>
+                            <th>Security Use Case</th>
+                            <th>Example Query Pattern</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>COUNT(*)</strong></td>
+                            <td>Total events in time period</td>
+                            <td><code>SELECT COUNT(*) FROM security_events WHERE timestamp > NOW() - INTERVAL '24 HOURS'</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>COUNT(DISTINCT)</strong></td>
+                            <td>Unique threat sources</td>
+                            <td><code>SELECT COUNT(DISTINCT source_ip) FROM security_events</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>GROUP BY + COUNT</strong></td>
+                            <td>Events by severity/type</td>
+                            <td><code>SELECT severity, COUNT(*) FROM security_events GROUP BY severity</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>STRING_AGG()</strong></td>
+                            <td>Concatenate related indicators</td>
+                            <td><code>SELECT threat_id, STRING_AGG(value, ', ') FROM threat_indicators GROUP BY threat_id</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Module 2: COUNT() Deep Dive -->
+        <div id="module2" class="module-content">
+            <div class="content-card">
+                <div class="card-header">
+                    <i class="fas fa-filter" style="color: var(--secondary); font-size: 32px;"></i>
+                    <div>
+                        <h2>COUNT() Function Deep Dive</h2>
+                        <p style="color: var(--gray);">Three variations for different security analytics needs</p>
+                    </div>
+                </div>
+
+                <p style="margin-bottom: 30px;">
+                    The <code>COUNT()</code> function returns the number of rows that match a specific condition [citation:7].
+                    Understanding its variations is crucial for accurate security reporting.
+                </p>
+
+                <div class="interactive-editor">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fas fa-code"></i> COUNT() Variations Comparison
+                        </div>
+                        <div class="editor-actions">
+                            <button class="btn btn-secondary" onclick="runCountExample('countStar')">
+                                <i class="fas fa-play"></i> Run COUNT(*)
+                            </button>
+                            <button class="btn btn-secondary" onclick="runCountExample('countColumn')">
+                                <i class="fas fa-play"></i> Run COUNT(column)
+                            </button>
+                            <button class="btn btn-secondary" onclick="runCountExample('countDistinct')">
+                                <i class="fas fa-play"></i> Run COUNT(DISTINCT)
+                            </button>
+                        </div>
+                    </div>
+                    <div class="editor-body">
+<span class="sql-comment">-- 1. COUNT(*): Counts ALL rows, including NULLs and duplicates</span><br>
+<span class="sql-comment">-- Security Use: Total events in investigation scope</span><br>
+<span class="sql-keyword">SELECT</span> <span class="sql-function">COUNT</span>(*) <span class="sql-keyword">AS</span> total_events<br>
+<span class="sql-keyword">FROM</span> <span class="sql-table">security_events</span><br>
+<span class="sql-keyword">WHERE</span> timestamp >= <span class="sql-string">'2024-01-01'</span>;<br>
+<span class="sql-comment">-- Result: 10,247 (all rows in timeframe)</span><br><br>
+
+<span class="sql-comment">-- 2. COUNT(column): Counts non-NULL values in specific column</span><br>
+<span class="sql-comment">-- Security Use: Events with complete attribution</span><br>
+<span class="sql-keyword">SELECT</span> <span class="sql-function">COUNT</span>(source_ip) <span class="sql-keyword">AS</span> events_with_ip<br>
+<span class="sql-keyword">FROM</span> <span class="sql-table">security_events</span>;<br>
+<span class="sql-comment">-- Result: 8,912 (excludes NULL source_ip values)</span><br><br>
+
+<span class="sql-comment">-- 3. COUNT(DISTINCT column): Counts unique non-NULL values</span><br>
+<span class="sql-comment">-- Security Use: Unique threat sources or indicators</span><br>
+<span class="sql-keyword">SELECT</span> <span class="sql-function">COUNT</span>(<span class="sql-keyword">DISTINCT</span> source_ip) <span class="sql-keyword">AS</span> unique_attack_sources<br>
+<span class="sql-keyword">FROM</span> <span class="sql-table">security_events</span><br>
+<span class="sql-keyword">WHERE</span> severity = <span class="sql-string">'CRITICAL'</span>;<br>
+<span class="sql-comment">-- Result: 142 (unique IPs with critical events)</span><br><br>
+
+<span class="sql-comment">-- 4. COUNT with FILTER: Advanced conditional counting</span><br>
+<span class="sql-keyword">SELECT</span><br>
+&nbsp;&nbsp;<span class="sql-function">COUNT</span>(*) <span class="sql-keyword">FILTER</span> (<span class="sql-keyword">WHERE</span> severity = <span class="sql-string">'CRITICAL'</span>) <span class="sql-keyword">AS</span> critical_count,<br>
+&nbsp;&nbsp;<span class="sql-function">COUNT</span>(*) <span class="sql-keyword">FILTER</span> (<span class="sql-keyword">WHERE</span> severity = <span class="sql-string">'HIGH'</span>) <span class="sql-keyword">AS</span> high_count,<br>
+&nbsp;&nbsp;<span class="sql-function">COUNT</span>(*) <span class="sql-keyword">FILTER</span> (<span class="sql-keyword">WHERE</span> event_type LIKE <span class="sql-string">'%SQL_INJECTION%'</span>) <span class="sql-keyword">AS</span> sql_injection_count<br>
+<span class="sql-keyword">FROM</span> <span class="sql-table">security_events</span><br>
+<span class="sql-keyword">WHERE</span> timestamp >= <span class="sql-string">'2024-01-01'</span>;<br>
+<span class="sql-comment">-- Result: Multiple counts in single query pass</span>
+                    </div>
+                </div>
+
+                <div id="countResult" style="margin-top: 20px; padding: 20px; background: var(--success); color: white; border-radius: var(--border-radius); display: none;">
+                    <h4><i class="fas fa-check-circle"></i> Query Result</h4>
+                    <p id="resultText"></p>
+                </div>
+
+                <div style="background: rgba(37, 99, 235, 0.1); padding: 25px; border-radius: var(--border-radius); margin-top: 30px;">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Performance Consideration</h4>
+                    <p>
+                        <strong>Warning:</strong> <code>COUNT(*)</code> on large tables requires a full scan in PostgreSQL due to its MVCC implementation.
+                        For frequent counting on large security event tables, consider maintaining a counter table or using estimate methods [citation:1][citation:7].
+                    </p>
+                </div>
+
+                <div class="dashboard-cards" style="margin-top: 40px;">
+                    <div class="dashboard-card">
+                        <h4><i class="fas fa-download"></i> Download COUNT() Exercises</h4>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            Practice with real security event data
+                        </p>
+                        <button class="btn btn-primary" onclick="downloadCountExercises()">
+                            <i class="fas fa-file-download"></i> Download Exercises
+                        </button>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h4><i class="fas fa-upload"></i> Submit Your Solutions</h4>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            Upload your SQL file for automated validation
+                        </p>
+                        <button class="btn btn-secondary" onclick="document.getElementById('countFileInput').click()">
+                            <i class="fas fa-file-upload"></i> Upload Solutions
+                        </button>
+                        <input type="file" id="countFileInput" accept=".sql" style="display: none;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 3: GROUP BY Mastery -->
+        <div id="module3" class="module-content">
+            <div class="content-card">
+                <div class="card-header">
+                    <i class="fas fa-layer-group" style="color: var(--warning); font-size: 32px;"></i>
+                    <div>
+                        <h2>GROUP BY Mastery & HAVING Clause</h2>
+                        <p style="color: var(--gray);">Categorize and filter aggregated security data</p>
+                    </div>
+                </div>
+
+                <p style="margin-bottom: 30px;">
+                    The <code>GROUP BY</code> clause groups rows that have the same values into summary rows [citation:4].
+                    It's particularly useful with aggregate functions to analyze patterns within categories [citation:5].
+                </p>
+
+                <div class="interactive-editor">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fas fa-chart-pie"></i> Security Event Analysis Patterns
+                        </div>
+                    </div>
+                    <div class="editor-body">
+<span class="sql-comment">-- PATTERN 1: Basic GROUP BY - Events by severity level</span><br>
+<span class="sql-keyword">SELECT</span><br>
+&nbsp;&nbsp;severity,<br>
+&nbsp;&nbsp;<span class="sql-function">COUNT</span>(*) <span class="sql-keyword">AS</span> event_count,<br>
+&nbsp;&nbsp;<span class="sql-function">AVG</span>(EXTRACT(EPOCH FROM (NOW() - timestamp))/3600) <span class="sql-keyword">AS</span> avg_hours_old<br>
+<span class="sql-keyword">FROM</span> <span class="sql-table">security_events</span><br>
+<span class="sql-keyword">WHERE</span> timestamp >= <span class="sql-string">'2024-01-01'</span><br>
+<span class="sql-keyword">GROUP BY</span> severity<br>
+<span class="sql-keyword">ORDER BY</span> event_count <span class="sql-keyword">DESC</span>;<br><br>
+
+<span class="sql-comment">-- PATTERN 2: GROUP BY multiple columns - Events by type and severity</span><br>
+<span class="sql-keyword">SELECT</span><br>
+&nbsp;&nbsp;event_type,<br>
+&nbsp;&nbsp;severity,<br>
+&nbsp;&nbsp;<span class="sql-function">COUNT</span>(*) <span class="sql-keyword">AS</span> count,<br>
+&nbsp;&nbsp;<span class="sql-function">MIN</span>(timestamp) <span class="sql-keyword">AS</span> first_occurrence,<br>
+&nbsp;&nbsp;<span class="sql-function">MAX</span>(timestamp) <span class="sql-keyword">AS</span> last_occurrence<br>
+<span class="sql-keyword">FROM</span> <span class="sql-table">security_events</span><br>
+<span class="sql-keyword">GROUP BY</span> event_type, severity<br>
+<span class="sql-keyword">ORDER BY</span> count <span class="sql-keyword">DESC</span>;<br><br>
+
+<span class="sql-comment">-- PATTERN 3: HAVING clause - Filter aggregated results</span><br>
+<span class="sql-comment">-- WHERE filters before grouping, HAVING filters after grouping [citation:2]</span><br>
+<span class="sql-keyword">SELECT</span><br>
+&nbsp;&nbsp;source_ip,<br>
+&nbsp;&nbsp;<span class="sql-function">COUNT</span>(*) <span class="sql-keyword">AS</span> attack_count,<br>
+&nbsp;&nbsp;<span class="sql-function">STRING_AGG</span>(<span class="sql-keyword">DISTINCT</span> event_type, <span class="sql-string">', '</span>) <span class="sql-keyword">AS</span> attack_types<br>
+<span class="sql-keyword">FROM</span> <span class="sql-table">security_events</span><br>
+<span class="sql-keyword">WHERE</span> severity <span class="sql-keyword">IN</span> (<span class="sql-string">'HIGH'</span>, <span class="sql-string">'CRITICAL'</span>)<br>
+<span class="sql-keyword">GROUP BY</span> source_ip<br>
+<span class="sql-keyword">HAVING</span> <span class="sql-function">COUNT</span>(*) >= <span class="sql-number">5</span>  <span class="sql-comment">-- Only IPs with 5+ high/critical events</span><br>
+<span class="sql-keyword">ORDER BY</span> attack_count <span class="sql-keyword">DESC</span>;<br><br>
+
+<span class="sql-comment">-- PATTERN 4: GROUP BY with JOIN - Analyst performance metrics</span><br>
+<span class="sql-keyword">SELECT</span><br>
+&nbsp;&nbsp;a.username,<br>
+&nbsp;&nbsp;a.team,<br>
+&nbsp;&nbsp;<span class="sql-function">COUNT</span>(e.event_id) <span class="sql-keyword">AS</span> events_assigned,<br>
+&nbsp;&nbsp;<span class="sql-function">COUNT</span>(e.event_id) <span class="sql-keyword">FILTER</span> (<span class="sql-keyword">WHERE</span> e.severity = <span class="sql-string">'CRITICAL'</span>) <span class="sql-keyword">AS</span> critical_events,<br>
+&nbsp;&nbsp;<span class="sql-function">AVG</span>(EXTRACT(EPOCH FROM (e.resolved_at - e.timestamp))/3600) <span class="sql-keyword">AS</span> avg_resolution_hours<br>
+<span class="sql-keyword">FROM</span> security_analysts a<br>
+<span class="sql-keyword">LEFT JOIN</span> security_events e <span class="sql-keyword">ON</span> a.id = e.analyst_id<br>
+<span class="sql-keyword">WHERE</span> e.timestamp >= <span class="sql-string">'2024-01-01'</span><br>
+<span class="sql-keyword">GROUP BY</span> a.id, a.username, a.team<br>
+<span class="sql-keyword">HAVING</span> <span class="sql-function">COUNT</span>(e.event_id) > <span class="sql-number">0</span><br>
+<span class="sql-keyword">ORDER BY</span> events_assigned <span class="sql-keyword">DESC</span>;
+                    </div>
+                </div>
+
+                <table class="comparison-table" style="margin-top: 40px;">
+                    <thead>
+                        <tr>
+                            <th>Clause</th>
+                            <th>Execution Order</th>
+                            <th>Purpose</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>WHERE</strong></td>
+                            <td>Before GROUP BY</td>
+                            <td>Filter individual rows before aggregation</td>
+                            <td><code>WHERE severity = 'CRITICAL'</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>GROUP BY</strong></td>
+                            <td>After WHERE</td>
+                            <td>Group rows for aggregation</td>
+                            <td><code>GROUP BY event_type, source_ip</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>HAVING</strong></td>
+                            <td>After GROUP BY</td>
+                            <td>Filter aggregated results</td>
+                            <td><code>HAVING COUNT(*) > 10</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>ORDER BY</strong></td>
+                            <td>Last (usually)</td>
+                            <td>Sort final result set</td>
+                            <td><code>ORDER BY event_count DESC</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="upload-area" onclick="document.getElementById('groupbyFileInput').click()" style="margin-top: 40px;">
+                    <i class="fas fa-project-diagram" style="font-size: 48px; color: var(--primary); margin-bottom: 20px;"></i>
+                    <h3>GROUP BY Challenge: Threat Cluster Analysis</h3>
+                    <p>Download the challenge file and identify threat clusters by source, type, and time patterns</p>
+                    <button class="btn btn-primary" onclick="downloadGroupByChallenge()">
+                        <i class="fas fa-download"></i> Download Challenge
+                    </button>
+                    <input type="file" id="groupbyFileInput" accept=".sql" style="display: none;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 4: Advanced Patterns -->
+        <div id="module4" class="module-content">
+            <div class="content-card">
+                <div class="card-header">
+                    <i class="fas fa-rocket" style="color: var(--danger); font-size: 32px;"></i>
+                    <div>
+                        <h2>Advanced Aggregation Patterns</h2>
+                        <p style="color: var(--gray);">Enterprise-grade security analytics techniques</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-cards">
+                    <div class="dashboard-card">
+                        <h4><i class="fas fa-cubes"></i> GROUPING SETS</h4>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            Multiple grouping levels in single query
+                        </p>
+                        <button class="btn btn-secondary" onclick="showPattern('groupingsets')">
+                            View Pattern
+                        </button>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h4><i class="fas fa-sitemap"></i> ROLLUP</h4>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            Hierarchical subtotals and grand total
+                        </p>
+                        <button class="btn btn-secondary" onclick="showPattern('rollup')">
+                            View Pattern
+                        </button>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h4><i class="fas fa-cube"></i> CUBE</h4>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            All possible grouping combinations
+                        </p>
+                        <button class="btn btn-secondary" onclick="showPattern('cube')">
+                            View Pattern
+                        </button>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h4><i class="fas fa-braille"></i> Window Functions</h4>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            Aggregates without collapsing rows
+                        </p>
+                        <button class="btn btn-secondary" onclick="showPattern('window')">
+                            View Pattern
+                        </button>
+                    </div>
+                </div>
+
+                <div id="patternContent" style="margin-top: 40px;">
+                    <!-- Dynamic content will load here -->
+                </div>
+
+                <div class="interactive-editor" style="margin-top: 40px;">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fas fa-tachometer-alt"></i> Real-time Dashboard Query Pattern
+                        </div>
+                        <button class="btn btn-primary" onclick="copyDashboardQuery()">
+                            <i class="fas fa-copy"></i> Copy Query
+                        </button>
+                    </div>
+                    <div class="editor-body">
+<span class="sql-comment">-- ENTERPRISE SECURITY DASHBOARD QUERY</span><br>
+<span class="sql-comment">-- Provides complete situational awareness in single query</span><br>
+<span class="sql-keyword">WITH</span> event_summary <span class="sql-keyword">AS</span> (<br>
+&nbsp;&nbsp;<span class="sql-keyword">SELECT</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;severity,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;event_type,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-function">COUNT</span>(*) <span class="sql-keyword">AS</span> event_count,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-function">COUNT</span>(<span class="sql-keyword">DISTINCT</span> source_ip) <span class="sql-keyword">AS</span> unique_sources,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-function">AVG</span>(EXTRACT(EPOCH FROM (NOW() - timestamp))/60) <span class="sql-keyword">AS</span> avg_minutes_old<br>
+&nbsp;&nbsp;<span class="sql-keyword">FROM</span> security_events<br>
+&nbsp;&nbsp;<span class="sql-keyword">WHERE</span> timestamp >= NOW() - INTERVAL <span class="sql-string">'24 HOURS'</span><br>
+&nbsp;&nbsp;<span class="sql-keyword">GROUP BY</span> <span class="sql-keyword">GROUPING SETS</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(severity, event_type),  <span class="sql-comment">-- Detail level</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(severity),              <span class="sql-comment">-- Severity subtotal</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;()                       <span class="sql-comment">-- Grand total</span><br>
+&nbsp;&nbsp;)<br>
+)<br>
+<span class="sql-keyword">SELECT</span><br>
+&nbsp;&nbsp;<span class="sql-keyword">COALESCE</span>(severity, <span class="sql-string">'ALL'</span>) <span class="sql-keyword">AS</span> severity_group,<br>
+&nbsp;&nbsp;<span class="sql-keyword">COALESCE</span>(event_type, <span class="sql-string">'TOTAL'</span>) <span class="sql-keyword">AS</span> event_type_group,<br>
+&nbsp;&nbsp;event_count,<br>
+&nbsp;&nbsp;unique_sources,<br>
+&nbsp;&nbsp;<span class="sql-function">ROUND</span>(avg_minutes_old, <span class="sql-number">1</span>) <span class="sql-keyword">AS</span> avg_age_minutes,<br>
+&nbsp;&nbsp;<span class="sql-function">ROUND</span>(<span class="sql-number">100.0</span> * event_count / <span class="sql-function">SUM</span>(event_count) OVER (), <span class="sql-number">2</span>) <span class="sql-keyword">AS</span> pct_of_total<br>
+<span class="sql-keyword">FROM</span> event_summary<br>
+<span class="sql-keyword">ORDER BY</span><br>
+&nbsp;&nbsp;<span class="sql-keyword">CASE</span> <span class="sql-keyword">WHEN</span> severity = <span class="sql-string">'CRITICAL'</span> <span class="sql-keyword">THEN</span> <span class="sql-number">1</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-keyword">WHEN</span> severity = <span class="sql-string">'HIGH'</span> <span class="sql-keyword">THEN</span> <span class="sql-number">2</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-keyword">WHEN</span> severity = <span class="sql-string">'MEDIUM'</span> <span class="sql-keyword">THEN</span> <span class="sql-number">3</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-keyword">WHEN</span> severity = <span class="sql-string">'LOW'</span> <span class="sql-keyword">THEN</span> <span class="sql-number">4</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-keyword">ELSE</span> <span class="sql-number">5</span> <span class="sql-keyword">END</span>,<br>
+&nbsp;&nbsp;event_count <span class="sql-keyword">DESC</span>;<br><br>
+
+<span class="sql-comment">-- Expected Output:</span><br>
+<span class="sql-comment">-- severity_group | event_type_group   | event_count | unique_sources | avg_age_minutes | pct_of_total</span><br>
+<span class="sql-comment">-- CRITICAL       | SQL_INJECTION      | 12          | 8              | 45.2            | 24.00</span><br>
+<span class="sql-comment">-- CRITICAL       | DDoS               | 8           | 3              | 120.5           | 16.00</span><br>
+<span class="sql-comment">-- CRITICAL       | TOTAL              | 20          | 11             | 82.9            | 40.00</span><br>
+<span class="sql-comment">-- HIGH           | BRUTE_FORCE        | 15          | 12             | 210.3           | 30.00</span><br>
+<span class="sql-comment">-- ... (and so on) ...</span><br>
+<span class="sql-comment">-- ALL            | TOTAL              | 50          | 25             | 145.6           | 100.00</span>
+                    </div>
+                </div>
+
+                <div class="progress-tracker" style="margin-top: 40px;">
+                    <h3><i class="fas fa-chart-line"></i> Advanced Pattern Mastery</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="advancedProgress" style="width: 0%"></div>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="btn btn-success" onclick="completeAdvancedPatterns()">
+                            <i class="fas fa-flag-checkered"></i> Mark Patterns as Complete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 5: Practical Mission -->
+        <div id="module5" class="module-content">
+            <div class="content-card">
+                <div class="card-header">
+                    <i class="fas fa-file-code" style="color: var(--success); font-size: 32px;"></i>
+                    <div>
+                        <h2>Practical Mission: Security Intelligence Report</h2>
+                        <p style="color: var(--gray);">Apply COUNT() & GROUP BY to real threat data</p>
+                    </div>
+                </div>
+
+                <div style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 40px; border-radius: var(--border-radius); margin-bottom: 40px;">
+                    <h3 style="color: white; margin-bottom: 20px;">Mission Briefing: Operation Data Shield</h3>
+                    <p><strong>Client:</strong> Global Financial Institution</p>
+                    <p><strong>Situation:</strong> 72-hour security event surge requires immediate analysis</p>
+                    <p><strong>Your Objective:</strong> Generate intelligence report using COUNT() & GROUP BY analytics</p>
+                    <p><strong>Success Criteria:</strong> Identify top 3 threat patterns and recommend mitigation</p>
+                </div>
+
+                <div class="dashboard-cards">
+                    <div class="dashboard-card">
+                        <h4><i class="fas fa-database"></i> Step 1: Download Database</h4>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            Get the security_intel database with 10,000+ real events
+                        </p>
+                        <button class="btn btn-primary" onclick="downloadMissionDatabase()">
+                            <i class="fas fa-download"></i> Download security_intel_db.sql
+                        </button>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h4><i class="fas fa-tasks"></i> Step 2: Get Mission Tasks</h4>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            Analytical queries to complete for intelligence report
+                        </p>
+                        <button class="btn btn-primary" onclick="downloadMissionTasks()">
+                            <i class="fas fa-download"></i> Download mission_tasks.sql
+                        </button>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h4><i class="fas fa-code"></i> Step 3: Starter Template</h4>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            Node.js/TypeScript template for your implementation
+                        </p>
+                        <button class="btn btn-primary" onclick="downloadStarterTemplate()">
+                            <i class="fas fa-download"></i> Download server.ts
+                        </button>
+                    </div>
+                </div>
+
+                <div class="interactive-editor" style="margin-top: 40px;">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fas fa-file-alt"></i> Mission Task Preview
+                        </div>
+                    </div>
+                    <div class="editor-body">
+<span class="sql-comment">-- TASK 1: THREAT LANDSCAPE OVERVIEW</span><br>
+<span class="sql-comment">-- Calculate total events, unique sources, and average severity age</span><br>
+<span class="sql-comment">-- Expected: Single row with aggregated metrics</span><br>
+<span class="sql-comment">-- HINT: Use multiple aggregate functions in SELECT</span><br><br>
+
+<span class="sql-comment">-- TASK 2: TOP THREAT CATEGORIES</span><br>
+<span class="sql-comment">-- Identify top 5 event types by count in last 24 hours</span><br>
+<span class="sql-comment">-- Expected: event_type, count, percentage of total</span><br>
+<span class="sql-comment">-- HINT: Use COUNT(), GROUP BY, and window function for percentage</span><br><br>
+
+<span class="sql-comment">-- TASK 3: CRITICAL EVENT CLUSTERS</span><br>
+<span class="sql-comment">-- Find source IPs with 10+ critical events, with event types</span><br>
+<span class="sql-comment">-- Expected: source_ip, critical_count, event_types (comma-separated)</span><br>
+<span class="sql-comment">-- HINT: Use GROUP BY, HAVING, and STRING_AGG()</span><br><br>
+
+<span class="sql-comment">-- TASK 4: ANALYST PERFORMANCE METRICS</span><br>
+<span class="sql-comment">-- Calculate events per analyst, resolution time, by team</span><br>
+<span class="sql-comment">-- Expected: team, analyst, event_count, avg_resolution_hours</span><br>
+<span class="sql-comment">-- HINT: Use JOIN between analysts and events tables</span><br><br>
+
+<span class="sql-comment">-- TASK 5: TIME-BASED PATTERN ANALYSIS</span><br>
+<span class="sql-comment">-- Events per hour for last 72 hours, with 3-hour rolling average</span><br>
+<span class="sql-comment">-- Expected: hour_bucket, event_count, rolling_avg</span><br>
+<span class="sql-comment">-- HINT: Use date_trunc() and window functions</span>
+                    </div>
+                </div>
+
+                <div class="upload-area" onclick="document.getElementById('missionFileInput').click()" style="margin-top: 40px;">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: var(--warning); margin-bottom: 20px;"></i>
+                    <h3>Step 4: Upload Your Intelligence Report</h3>
+                    <p>Submit your completed SQL queries or TypeScript implementation</p>
+                    <p style="font-size: 14px; color: var(--gray); margin-top: 10px;">
+                        Accepts .sql files, .ts files, or .zip containing both
+                    </p>
+                    <input type="file" id="missionFileInput" accept=".sql,.ts,.zip" style="display: none;" onchange="handleMissionUpload(this.files[0])">
+                </div>
+
+                <div id="missionValidation" style="margin-top: 20px; display: none;"></div>
+
+                <div class="progress-tracker">
+                    <h3><i class="fas fa-rocket"></i> Mission Progress</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="missionProgress" style="width: 0%"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                        <div style="text-align: center;">
+                            <div style="font-weight: 600;">Data Acquired</div>
+                            <div id="step1Status" style="color: var(--gray);">Not Started</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-weight: 600;">Tasks Downloaded</div>
+                            <div id="step2Status" style="color: var(--gray);">Not Started</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-weight: 600;">Implementation</div>
+                            <div id="step3Status" style="color: var(--gray);">Not Started</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-weight: 600;">Submission</div>
+                            <div id="step4Status" style="color: var(--gray);">Not Started</div>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button class="btn btn-success" onclick="submitMission()" id="submitMissionBtn" style="padding: 15px 40px; font-size: 16px;">
+                            <i class="fas fa-paper-plane"></i> Submit Mission for Review
+                        </button>
+                    </div>
+                </div>
+
+                <div style="background: rgba(16, 185, 129, 0.1); padding: 30px; border-radius: var(--border-radius); margin-top: 40px; text-align: center;">
+                    <h4><i class="fas fa-certificate"></i> Certification: Security Data Analyst</h4>
+                    <p>Complete this mission to earn your PostgreSQL Security Analytics certification</p>
+                    <p style="font-size: 14px; color: var(--gray); margin-top: 10px;">
+                        Validates expertise in threat intelligence analysis using SQL aggregation
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle Functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const icon = themeToggle.querySelector('i');
+        
+        // Check for saved theme or prefer-color-scheme
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        const currentTheme = localStorage.getItem('theme');
+        
+        if (currentTheme === 'dark' || (!currentTheme && prefersDarkScheme.matches)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            icon.className = 'fas fa-sun';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            icon.className = 'fas fa-moon';
+        }
+        
+        themeToggle.addEventListener('click', function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            
+            if (currentTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                icon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                icon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Module Navigation
+        function showModule(moduleNumber) {
+            // Hide all modules
+            document.querySelectorAll('.module-content').forEach(module => {
+                module.classList.remove('active');
+            });
+            
+            // Remove active from all tabs
+            document.querySelectorAll('.module-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected module
+            document.getElementById(`module${moduleNumber}`).classList.add('active');
+            
+            // Activate corresponding tab
+            document.querySelectorAll('.module-tab')[moduleNumber - 1].classList.add('active');
+        }
+
+        // Initialize with random stats (simulated)
+        document.addEventListener('DOMContentLoaded', function() {
+            showModule(1);
+            
+            // Simulate live data updates
+            document.getElementById('totalEvents').textContent = Math.floor(Math.random() * 10000) + 5000;
+            document.getElementById('uniqueThreats').textContent = Math.floor(Math.random() * 500) + 100;
+            
+            // Setup drag and drop
+            const uploadAreas = document.querySelectorAll('.upload-area');
+            uploadAreas.forEach(area => {
+                area.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('dragover');
+                });
+                
+                area.addEventListener('dragleave', function() {
+                    this.classList.remove('dragover');
+                });
+                
+                area.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        handleMissionUpload(files[0]);
+                    }
+                });
+            });
+        });
+
+        // COUNT() Examples
+        function runCountExample(type) {
+            const resultDiv = document.getElementById('countResult');
+            const resultText = document.getElementById('resultText');
+            
+            let result = '';
+            
+            switch(type) {
+                case 'countStar':
+                    result = 'COUNT(*) Result: 10,247 events (all rows in timeframe)';
+                    break;
+                case 'countColumn':
+                    result = 'COUNT(source_ip) Result: 8,912 events (excluding NULL IPs)';
+                    break;
+                case 'countDistinct':
+                    result = 'COUNT(DISTINCT source_ip) Result: 142 unique attack sources';
+                    break;
+            }
+            
+            resultText.textContent = result;
+            resultDiv.style.display = 'block';
+            resultDiv.style.background = 'linear-gradient(135deg, var(--success), var(--primary))';
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                resultDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Download Functions
+        function downloadCountExercises() {
+            const content = `-- COUNT() FUNCTION EXERCISES
+-- MSEBETSI Security Academy - Lesson 13
+
+-- Exercise 1: Basic Counting
+-- 1.1 Count total security events in the database
+-- 1.2 Count events with a non-NULL source_ip
+-- 1.3 Count unique source IPs that generated events
+
+-- Exercise 2: Conditional Counting with WHERE
+-- 2.1 Count critical events in the last 7 days
+-- 2.2 Count SQL injection attempts (event_type contains 'SQL_INJECTION')
+-- 2.3 Count events from IP range '192.168.%'
+
+-- Exercise 3: COUNT with DISTINCT
+-- 3.1 Count distinct event types
+-- 3.2 Count distinct analysts who handled events
+-- 3.3 Count distinct threat indicators referenced
+
+-- Exercise 4: COUNT with FILTER
+-- 4.1 Single query showing: total events, critical events, high events
+-- 4.2 Count events by severity using FILTER in single query
+-- 4.3 Count resolved vs unresolved events (assuming resolved_at column)
+
+-- Submit your solutions in a file named: count_exercises_solution.sql`;
+
+            downloadFile(content, 'count_exercises.sql');
+        }
+
+        function downloadGroupByChallenge() {
+            const content = `-- GROUP BY CHALLENGE: Threat Cluster Analysis
+-- MSEBETSI Security Academy - Advanced Analytics
+
+/*
+BACKGROUND:
+We've detected anomalous activity patterns. Your task is to identify
+potential threat clusters using GROUP BY analytics.
+
+TABLES:
+- security_events (as defined in schema)
+- threat_indicators
+- security_analysts
+
+CHALLENGE TASKS:
+*/
+
+-- TASK 1: Threat Actor Profiling
+-- Group events by source_ip to identify the most active threat sources
+-- Include: IP, total events, unique event types, date range of activity
+
+-- TASK 2: Temporal Pattern Analysis  
+-- Group events by hour of day to identify attack patterns
+-- Include: hour (0-23), event count, average severity score
+
+-- TASK 3: Cross-Reference Analysis
+-- Join events with threat_indicators to find which indicators
+-- are associated with the most events
+-- Include: indicator_type, indicator_value, event_count
+
+-- TASK 4: Team Workload Analysis
+-- Group events by analyst team to identify workload distribution
+-- Include: team, event_count, avg_resolution_time, backlog_count
+
+-- TASK 5: Composite Grouping
+-- Create a multi-level analysis: events by (severity, event_type, hour)
+-- Use GROUPING SETS or CUBE to show different aggregation levels
+
+/*
+SUBMISSION:
+1. Complete all 5 tasks
+2. Add comments explaining your query logic
+3. Include any insights discovered from the data
+4. Submit as: threat_cluster_analysis.sql
+*/`;
+
+            downloadFile(content, 'groupby_challenge.sql');
+        }
+
+        function downloadMissionDatabase() {
+            const content = `-- SECURITY INTEL DATABASE
+-- Contains simulated security events for training purposes
+
+CREATE DATABASE security_intel;
+\\c security_intel;
+
+-- security_events table with sample data
+CREATE TABLE security_events (
+    event_id SERIAL PRIMARY KEY,
+    event_type VARCHAR(50) NOT NULL,
+    severity VARCHAR(20) CHECK (severity IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')),
+    source_ip INET,
+    timestamp TIMESTAMPTZ DEFAULT NOW(),
+    description TEXT,
+    analyst_id INT,
+    threat_id INT,
+    resolved_at TIMESTAMPTZ
+);
+
+-- Insert sample data (10,000+ events)
+-- This is a simplified version for the exercise
+INSERT INTO security_events (event_type, severity, source_ip, timestamp, description) VALUES
+('SQL_INJECTION', 'CRITICAL', '192.168.1.100', '2024-01-15 08:30:00', 'Attempted SQL injection on login endpoint'),
+('DDoS', 'HIGH', '10.0.0.5', '2024-01-15 09:15:00', 'Distributed denial of service attack detected'),
+('BRUTE_FORCE', 'MEDIUM', '172.16.0.22', '2024-01-15 10:45:00', 'Multiple failed login attempts'),
+-- ... (more sample data in full version)
+;
+
+-- Additional tables would be included in full version
+UPDATE mission_progress SET step1 = true WHERE user_id = current_user;`;
+
+            downloadFile(content, 'security_intel_db.sql');
+            updateMissionProgress(1, 'Completed');
+        }
+
+        function downloadMissionTasks() {
+            const content = `-- MISSION TASKS: Operation Data Shield
+-- Complete these analytical queries to generate intelligence report
+
+-- TASK 1: Threat Landscape Overview
+-- Calculate: total events, unique sources, average severity age
+-- Use: COUNT(*), COUNT(DISTINCT), AVG with date arithmetic
+
+-- TASK 2: Top Threat Categories  
+-- Find: top 5 event types by count in last 24 hours
+-- Include: event_type, count, percentage of total
+-- Use: GROUP BY, window function for percentage
+
+-- TASK 3: Critical Event Clusters
+-- Identify: source IPs with 10+ critical events
+-- Include: source_ip, critical_count, event_types (comma-separated)
+-- Use: GROUP BY, HAVING, STRING_AGG()
+
+-- TASK 4: Analyst Performance Metrics
+-- Calculate: events per analyst, resolution time, grouped by team
+-- Include: team, analyst, event_count, avg_resolution_hours
+-- Use: JOIN between analysts and events tables
+
+-- TASK 5: Time-Based Pattern Analysis
+-- Analyze: events per hour for last 72 hours
+-- Include: hour_bucket, event_count, 3-hour rolling average
+-- Use: date_trunc() and window functions
+
+-- BONUS: Predictive Analysis
+-- Identify: events that follow specific temporal patterns
+-- Suggest: which hours/days need increased monitoring
+
+/*
+IMPLEMENTATION NOTES:
+1. Write efficient queries - use indexes where appropriate
+2. Handle NULL values properly
+3. Format results for executive reporting
+4. Include comments explaining your analytical approach
+*/`;
+
+            downloadFile(content, 'mission_tasks.sql');
+            updateMissionProgress(2, 'Completed');
+        }
+
+        function downloadStarterTemplate() {
+            const content = `// server.ts - Mission Implementation Template
+import { Pool } from 'pg';
+import express from 'express';
+
+const pool = new Pool({
+    user: 'postgres',
+    host: 'localhost',
+    database: 'security_intel',
+    password: 'your_password',
+    port: 5432,
+});
+
+const app = express();
+const PORT = 3001;
+
+// TASK 1: Threat Landscape Overview
+app.get('/api/threat-overview', async (req, res) => {
+    try {
+        const query = \`
+            -- YOUR IMPLEMENTATION HERE
+            -- Return: total_events, unique_sources, avg_severity_age
+        \`;
+        
+        const result = await pool.query(query);
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Error in threat-overview:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// TASK 2: Top Threat Categories
+app.get('/api/top-threats', async (req, res) => {
+    try {
+        const query = \`
+            -- YOUR IMPLEMENTATION HERE  
+            -- Return: event_type, count, percentage
+            -- Limit to top 5, last 24 hours
+        \`;
+        
+        const result = await pool.query(query);
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error in top-threats:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// TASK 3: Critical Event Clusters
+app.get('/api/critical-clusters', async (req, res) => {
+    try {
+        const query = \`
+            -- YOUR IMPLEMENTATION HERE
+            -- Return: source_ip, critical_count, event_types
+            -- Filter: 10+ critical events
+        \`;
+        
+        const result = await pool.query(query);
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error in critical-clusters:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Add similar endpoints for Tasks 4 and 5
+
+app.listen(PORT, () => {
+    console.log(\`Server running on port \${PORT}\`);
+});`;
+
+            downloadFile(content, 'server.ts');
+            updateMissionProgress(3, 'Completed');
+        }
+
+        function downloadFile(content, filename) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            // Show notification
+            showNotification(`Downloaded: ${filename}`);
+        }
+
+        // Advanced Patterns
+        function showPattern(pattern) {
+            const patternContent = document.getElementById('patternContent');
+            let content = '';
+            
+            switch(pattern) {
+                case 'groupingsets':
+                    content = `
+                        <div class="interactive-editor">
+                            <div class="editor-header">
+                                <div class="editor-title">
+                                    <i class="fas fa-cubes"></i> GROUPING SETS Pattern
+                                </div>
+                            </div>
+                            <div class="editor-body">
+<span class="sql-comment">-- GROUPING SETS: Multiple aggregation levels in one query</span><br>
+<span class="sql-keyword">SELECT</span><br>
+&nbsp;&nbsp;severity,<br>
+&nbsp;&nbsp;event_type, <br>
+&nbsp;&nbsp;<span class="sql-function">COUNT</span>(*) <span class="sql-keyword">AS</span> count<br>
+<span class="sql-keyword">FROM</span> security_events<br>
+<span class="sql-keyword">GROUP BY</span> <span class="sql-keyword">GROUPING SETS</span> (<br>
+&nbsp;&nbsp;(severity, event_type),  <span class="sql-comment">-- Detail by severity and type</span><br>
+&nbsp;&nbsp;(severity),              <span class="sql-comment">-- Subtotal by severity only</span><br>
+&nbsp;&nbsp;(event_type),            <span class="sql-comment">-- Subtotal by type only</span><br>
+&nbsp;&nbsp;()                       <span class="sql-comment">-- Grand total</span><br>
+)<br>
+<span class="sql-keyword">ORDER BY</span><br>
+&nbsp;&nbsp;<span class="sql-keyword">GROUPING</span>(severity, event_type),<br>
+&nbsp;&nbsp;severity <span class="sql-keyword">NULLS LAST</span>,<br>
+&nbsp;&nbsp;event_type <span class="sql-keyword">NULLS LAST</span>;<br><br>
+<span class="sql-comment">-- Security Use: Executive dashboard with drill-down capability</span>
+                            </div>
+                        </div>`;
+                    break;
+                    
+                case 'rollup':
+                    content = `
+                        <div class="interactive-editor">
+                            <div class="editor-header">
+                                <div class="editor-title">
+                                    <i class="fas fa-sitemap"></i> ROLLUP Pattern
+                                </div>
+                            </div>
+                            <div class="editor-body">
+<span class="sql-comment">-- ROLLUP: Hierarchical subtotals (like GROUPING SETS with hierarchy)</span><br>
+<span class="sql-keyword">SELECT</span><br>
+&nbsp;&nbsp;EXTRACT(YEAR <span class="sql-keyword">FROM</span> timestamp) <span class="sql-keyword">AS</span> year,<br>
+&nbsp;&nbsp;EXTRACT(MONTH <span class="sql-keyword">FROM</span> timestamp) <span class="sql-keyword">AS</span> month,<br>
+&nbsp;&nbsp;severity,<br>
+&nbsp;&nbsp;<span class="sql-function">COUNT</span>(*) <span class="sql-keyword">AS</span> event_count<br>
+<span class="sql-keyword">FROM</span> security_events<br>
+<span class="sql-keyword">GROUP BY</span> <span class="sql-keyword">ROLLUP</span> (<br>
+&nbsp;&nbsp;EXTRACT(YEAR <span class="sql-keyword">FROM</span> timestamp),<br>
+&nbsp;&nbsp;EXTRACT(MONTH <span class="sql-keyword">FROM</span> timestamp),<br>
+&nbsp;&nbsp;severity<br>
+)<br>
+<span class="sql-keyword">ORDER BY</span><br>
+&nbsp;&nbsp;year <span class="sql-keyword">NULLS LAST</span>,<br>
+&nbsp;&nbsp;month <span class="sql-keyword">NULLS LAST</span>,<br>
+&nbsp;&nbsp;severity <span class="sql-keyword">NULLS LAST</span>;<br><br>
+<span class="sql-comment">-- Produces: Year-Month-Severity details → Year-Month subtotals → Year subtotals → Grand total</span><br>
+<span class="sql-comment">-- Security Use: Time-based trend analysis with multiple aggregation levels</span>
+                            </div>
+                        </div>`;
+                    break;
+            }
+            
+            patternContent.innerHTML = content;
+            
+            // Update progress
+            document.getElementById('advancedProgress').style.width = '25%';
+        }
+
+        function copyDashboardQuery() {
+            const query = `WITH event_summary AS (
+    SELECT
+        severity,
+        event_type,
+        COUNT(*) AS event_count,
+        COUNT(DISTINCT source_ip) AS unique_sources,
+        AVG(EXTRACT(EPOCH FROM (NOW() - timestamp))/60) AS avg_minutes_old
+    FROM security_events
+    WHERE timestamp >= NOW() - INTERVAL '24 HOURS'
+    GROUP BY GROUPING SETS (
+        (severity, event_type),
+        (severity),
+        ()
+    )
+)
+SELECT
+    COALESCE(severity, 'ALL') AS severity_group,
+    COALESCE(event_type, 'TOTAL') AS event_type_group,
+    event_count,
+    unique_sources,
+    ROUND(avg_minutes_old, 1) AS avg_age_minutes,
+    ROUND(100.0 * event_count / SUM(event_count) OVER (), 2) AS pct_of_total
+FROM event_summary
+ORDER BY
+    CASE WHEN severity = 'CRITICAL' THEN 1
+         WHEN severity = 'HIGH' THEN 2
+         WHEN severity = 'MEDIUM' THEN 3
+         WHEN severity = 'LOW' THEN 4
+         ELSE 5 END,
+    event_count DESC;`;
+            
+            navigator.clipboard.writeText(query)
+                .then(() => showNotification('Dashboard query copied to clipboard!'))
+                .catch(err => console.error('Failed to copy: ', err));
+        }
+
+        function completeAdvancedPatterns() {
+            document.getElementById('advancedProgress').style.width = '100%';
+            showNotification('Advanced patterns marked as complete!');
+        }
+
+        // Mission Functions
+        function handleMissionUpload(file) {
+            if (!file) return;
+            
+            const uploadArea = document.querySelector('.upload-area:last-of-type');
+            uploadArea.innerHTML = `
+                <i class="fas fa-check-circle" style="color: var(--success); font-size: 48px; margin-bottom: 20px;"></i>
+                <h3>${file.name}</h3>
+                <p>Mission file uploaded successfully!</p>
+                <p style="font-size: 14px; color: var(--gray); margin-top: 10px;">
+                    Ready for submission and validation
+                </p>
+            `;
+            
+            updateMissionProgress(4, 'Completed');
+            window.missionFile = file;
+        }
+
+        function updateMissionProgress(step, status) {
+            document.getElementById(`step${step}Status`).textContent = status;
+            document.getElementById(`step${step}Status`).style.color = 'var(--success)';
+            
+            // Calculate overall progress
+            const steps = [1, 2, 3, 4];
+            const completed = steps.filter(s => 
+                document.getElementById(`step${s}Status`).textContent === 'Completed'
+            ).length;
+            
+            const progress = (completed / steps.length) * 100;
+            document.getElementById('missionProgress').style.width = `${progress}%`;
+            
+            if (completed === steps.length) {
+                document.getElementById('submitMissionBtn').disabled = false;
+            }
+        }
+
+        function submitMission() {
+            const validationDiv = document.getElementById('missionValidation');
+            
+            validationDiv.innerHTML = `
+                <div class="validation-result success">
+                    <h4><i class="fas fa-check-circle"></i> Mission Submitted Successfully!</h4>
+                    <p>Your security intelligence report has been received for analysis.</p>
+                    <p><strong>Next Steps:</strong></p>
+                    <ol>
+                        <li>Automated validation of query syntax (immediate)</li>
+                        <li>Manual review by MSEBETSI security analysts (24-48 hours)</li>
+                        <li>Certification issuance upon successful completion</li>
+                    </ol>
+                    <p style="margin-top: 15px;"><strong>You will receive an email with results and feedback.</strong></p>
+                </div>
+            `;
+            validationDiv.style.display = 'block';
+            
+            // Disable submit button
+            document.getElementById('submitMissionBtn').disabled = true;
+            document.getElementById('submitMissionBtn').innerHTML = '<i class="fas fa-check"></i> Submitted';
+            
+            // Generate and offer certificate download
+            setTimeout(() => {
+                generateCertificate();
+            }, 2000);
+        }
+
+        function generateCertificate() {
+            const certContent = `MSEBETSI SECURITY ACADEMY - CERTIFICATION
+===========================================
+
+Certificate of Achievement
+Security Data Analyst - PostgreSQL Aggregation Specialist
+
+Awarded To: [Your Name]
+Date: ${new Date().toLocaleDateString()}
+Certificate ID: MSEB-AGG-${Date.now().toString().slice(-8)}
+
+Skills Validated:
+✓ Advanced COUNT() function usage
+✓ GROUP BY clause mastery for threat categorization
+✓ HAVING clause for aggregated data filtering  
+✓ JOIN operations with aggregated results
+✓ STRING_AGG() for concatenated threat intelligence
+✓ Performance optimization for large datasets
+✓ Security dashboard query design
+
+Mission Completed: Operation Data Shield
+- Analyzed 10,000+ security events
+- Identified top threat patterns
+- Generated actionable intelligence report
+- Recommended specific mitigation strategies
+
+This certifies successful completion of Lesson 13:
+"COUNT() & GROUP BY Analytics for Security Intelligence"
+
+Valid Through: 2025-12-31
+Verification: https://verify.msebetsi.solutions
+
+Instructor: MSEBETSI Security Engineering Team
+"Transforming data into defensive intelligence"`;
+
+            const blob = new Blob([certContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `MSEBETSI_Security_Data_Analyst_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Certificate downloaded! Check your downloads folder.');
+        }
+
+        function showNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, var(--primary), var(--secondary));
+                color: white;
+                padding: 15px 25px;
+                border-radius: var(--border-radius);
+                box-shadow: var(--shadow-lg);
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+            
+            // Add keyframe animations
+            if (!document.querySelector('#notification-styles')) {
+                const style = document.createElement('style');
+                style.id = 'notification-styles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOut {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+    </script>
+</body>
+</html>

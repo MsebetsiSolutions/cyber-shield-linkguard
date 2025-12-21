@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 10: PostgreSQL Performance Mastery | MSEBETSI Security Academy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --gray-light: #e2e8f0;
+            --border-radius: 12px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .title {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--dark), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: var(--gray);
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-light);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .dashboard-card h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        /* Module Navigation */
+        .module-nav {
+            display: flex;
+            gap: 10px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .module-tab {
+            padding: 15px 30px;
+            background: white;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .module-tab:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .module-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Module Content */
+        .module-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .module-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Code Editor */
+        .code-editor {
+            background: #1e293b;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin: 25px 0;
+            border: 1px solid #334155;
+        }
+
+        .editor-header {
+            background: #334155;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-title {
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 1px solid var(--gray-light);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-light);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .editor-body {
+            padding: 30px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            color: #e2e8f0;
+            line-height: 1.8;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .sql-keyword { color: #569cd6; }
+        .sql-string { color: #ce9178; }
+        .sql-number { color: #b5cea8; }
+        .sql-comment { color: #6a9955; }
+        .sql-table { color: #ffcc00; }
+        .sql-column { color: #9cdcfe; }
+
+        /* Interactive Tools */
+        .interactive-tool {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: var(--shadow);
+        }
+
+        .tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .index-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .index-option {
+            padding: 25px;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .index-option:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .index-option.selected {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        /* Progress Tracker */
+        .progress-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin: 40px 0;
+            box-shadow: var(--shadow);
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: var(--gray-light);
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        /* File Upload */
+        .upload-area {
+            border: 3px dashed var(--gray-light);
+            border-radius: var(--border-radius);
+            padding: 50px;
+            text-align: center;
+            margin: 30px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.02);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        /* Validation Results */
+        .validation-result {
+            padding: 25px;
+            border-radius: var(--border-radius);
+            margin: 25px 0;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .validation-result.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+            display: block;
+        }
+
+        .validation-result.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            display: block;
+        }
+
+        /* Charts */
+        .chart-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: var(--shadow);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .title { font-size: 36px; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .module-nav { flex-direction: column; }
+            .module-tab { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="badge">
+                <i class="fas fa-bolt"></i> ADVANCED PERFORMANCE ENGINEERING
+            </div>
+            <h1 class="title">PostgreSQL Performance Mastery</h1>
+            <p class="subtitle">
+                Transform security data chaos into optimized intelligence systems. Master normalization and indexing to achieve enterprise-grade performance at Msebetsi Solutions.
+            </p>
+            
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-database"></i> Storage Efficiency</h3>
+                    <div class="stat-value">68%</div>
+                    <div class="stat-label">Average Reduction with 3NF</div>
+                </div>
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-tachometer-alt"></i> Query Speed</h3>
+                    <div class="stat-value">94%</div>
+                    <div class="stat-label">Faster with Proper Indexing</div>
+                </div>
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-shield-alt"></i> Data Integrity</h3>
+                    <div class="stat-value">100%</div>
+                    <div class="stat-label">Guaranteed with Normalization</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module Navigation -->
+        <div class="module-nav">
+            <div class="module-tab active" onclick="showModule(1)">
+                <i class="fas fa-sitemap"></i> Module 1: Normalization
+            </div>
+            <div class="module-tab" onclick="showModule(2)">
+                <i class="fas fa-bolt"></i> Module 2: Advanced Indexing
+            </div>
+            <div class="module-tab" onclick="showModule(3)">
+                <i class="fas fa-flask"></i> Module 3: Security Lab
+            </div>
+            <div class="module-tab" onclick="showModule(4)">
+                <i class="fas fa-certificate"></i> Module 4: Certification
+            </div>
+        </div>
+
+        <!-- Module 1: Normalization -->
+        <div id="module1" class="module-content active">
+            <div class="interactive-tool">
+                <div class="tool-header">
+                    <h2><i class="fas fa-sitemap"></i> Database Normalization Challenge</h2>
+                    <div class="editor-actions">
+                        <button class="btn btn-secondary" onclick="downloadFile('normalization_starter.sql')">
+                            <i class="fas fa-download"></i> Download Starter
+                        </button>
+                        <button class="btn btn-primary" onclick="validateNormalization()">
+                            <i class="fas fa-check"></i> Validate Solution
+                        </button>
+                    </div>
+                </div>
+
+                <div class="code-editor">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fas fa-code"></i> Problem: 1NF Security Incidents Table
+                        </div>
+                    </div>
+                    <div class="editor-body" id="normalizationProblem">
+<span class="sql-comment">-- SECURITY INCIDENTS IN 1NF (PROBLEMATIC DESIGN)</span><br>
+<span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">security_incidents_1nf</span> (<br>
+&nbsp;&nbsp;<span class="sql-column">incident_id</span> <span class="sql-keyword">SERIAL</span>,<br>
+&nbsp;&nbsp;<span class="sql-column">analyst_id</span> <span class="sql-keyword">INTEGER</span>,<br>
+&nbsp;&nbsp;<span class="sql-column">analyst_name</span> <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">100</span>),        <span class="sql-comment">-- Redundant data</span><br>
+&nbsp;&nbsp;<span class="sql-column">threat_id</span> <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">20</span>),<br>
+&nbsp;&nbsp;<span class="sql-column">threat_name</span> <span class="sql-keyword">TEXT</span>,                  <span class="sql-comment">-- Transitive dependency</span><br>
+&nbsp;&nbsp;<span class="sql-column">threat_category</span> <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>),       <span class="sql-comment">-- Transitive dependency</span><br>
+&nbsp;&nbsp;<span class="sql-column">asset_id</span> <span class="sql-keyword">INTEGER</span>,<br>
+&nbsp;&nbsp;<span class="sql-column">asset_hostname</span> <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">100</span>),<br>
+&nbsp;&nbsp;<span class="sql-column">asset_os</span> <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>),              <span class="sql-comment">-- Partial dependency</span><br>
+&nbsp;&nbsp;<span class="sql-column">asset_location</span> <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">100</span>),       <span class="sql-comment">-- Partial dependency</span><br>
+&nbsp;&nbsp;<span class="sql-column">detection_time</span> <span class="sql-keyword">TIMESTAMP</span>,<br>
+&nbsp;&nbsp;<span class="sql-column">severity</span> <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">20</span>),<br>
+&nbsp;&nbsp;<span class="sql-column">remediation_owner</span> <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">100</span>),    <span class="sql-comment">-- Transitive dependency</span><br>
+&nbsp;&nbsp;<span class="sql-keyword">PRIMARY KEY</span> (incident_id, threat_id, asset_id)<br>
+);<br><br>
+
+<span class="sql-comment">-- YOUR TASK: Normalize this to 3NF</span><br>
+<span class="sql-comment">-- 1. Create separate tables for analysts, threats, assets</span><br>
+<span class="sql-comment">-- 2. Remove all transitive and partial dependencies</span><br>
+<span class="sql-comment">-- 3. Add proper foreign key relationships</span><br>
+<span class="sql-comment">-- 4. Submit your solution using the upload below</span>
+                    </div>
+                </div>
+
+                <!-- File Upload Area -->
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: var(--gray); margin-bottom: 20px;"></i>
+                    <h3>Upload Your Normalized Solution</h3>
+                    <p>Drag & drop your .sql file here or click to browse</p>
+                    <p style="font-size: 14px; color: var(--gray); margin-top: 10px;">
+                        Supported formats: .sql, .txt
+                    </p>
+                    <input type="file" id="fileInput" accept=".sql,.txt" style="display: none;" onchange="handleFileUpload(this.files[0])">
+                </div>
+
+                <!-- Validation Results -->
+                <div id="validationResult" class="validation-result"></div>
+
+                <!-- Progress Tracker -->
+                <div class="progress-section">
+                    <h3><i class="fas fa-tasks"></i> Normalization Progress</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="normalizationProgress" style="width: 0%"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 14px; color: var(--gray);">
+                        <span>1NF</span>
+                        <span>2NF</span>
+                        <span>3NF</span>
+                        <span>Complete</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="normalizationChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Module 2: Advanced Indexing -->
+        <div id="module2" class="module-content">
+            <div class="interactive-tool">
+                <div class="tool-header">
+                    <h2><i class="fas fa-bolt"></i> Advanced Indexing Laboratory</h2>
+                    <button class="btn btn-primary" onclick="runBenchmark()">
+                        <i class="fas fa-play"></i> Run Performance Test
+                    </button>
+                </div>
+
+                <p style="color: var(--gray); margin-bottom: 25px;">
+                    Select the optimal index type for this security query pattern:
+                </p>
+
+                <div class="code-editor">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fas fa-search"></i> Query Pattern: Time-Range Threat Analysis
+                        </div>
+                    </div>
+                    <div class="editor-body">
+<span class="sql-keyword">SELECT</span> <br>
+&nbsp;&nbsp;threat_id,<br>
+&nbsp;&nbsp;<span class="sql-keyword">COUNT</span>(*) <span class="sql-keyword">AS</span> incident_count,<br>
+&nbsp;&nbsp;<span class="sql-keyword">AVG</span>(severity_score) <span class="sql-keyword">AS</span> avg_severity<br>
+<span class="sql-keyword">FROM</span> <span class="sql-table">security_incidents</span><br>
+<span class="sql-keyword">WHERE</span> detection_time <span class="sql-keyword">BETWEEN</span> <span class="sql-string">'2024-01-01'</span> <span class="sql-keyword">AND</span> <span class="sql-string">'2024-01-31'</span><br>
+<span class="sql-keyword">AND</span> severity <span class="sql-keyword">IN</span> (<span class="sql-string">'CRITICAL'</span>, <span class="sql-string">'HIGH'</span>)<br>
+<span class="sql-keyword">GROUP BY</span> threat_id<br>
+<span class="sql-keyword">ORDER BY</span> incident_count <span class="sql-keyword">DESC</span>;<br>
+<br>
+<span class="sql-comment">-- TABLE SIZE: 5 million rows, growing at 100K/day</span><br>
+<span class="sql-comment">-- QUERY FREQUENCY: 150 times/hour (real-time dashboard)</span><br>
+<span class="sql-comment">-- DATA CHARACTERISTICS: Time-series, frequently filtered by time ranges</span>
+                    </div>
+                </div>
+
+                <div class="index-options">
+                    <div class="index-option" onclick="selectIndex(this, 'btree')">
+                        <h4><i class="fas fa-sitemap"></i> B-Tree Index</h4>
+                        <p style="color: var(--gray); margin: 10px 0; font-size: 14px;">
+                            Best for equality and range queries on sortable data
+                        </p>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--success); font-weight: 600;">
+                                <i class="fas fa-tachometer-alt"></i> 85% Speed
+                            </span>
+                            <span style="color: var(--warning);">
+                                <i class="fas fa-database"></i> 4.2GB
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="index-option" onclick="selectIndex(this, 'brin')">
+                        <h4><i class="fas fa-chart-line"></i> BRIN Index</h4>
+                        <p style="color: var(--gray); margin: 10px 0; font-size: 14px;">
+                            Best for time-series data with natural sort order
+                        </p>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--success); font-weight: 600;">
+                                <i class="fas fa-tachometer-alt"></i> 95% Speed
+                            </span>
+                            <span style="color: var(--success);">
+                                <i class="fas fa-database"></i> 42MB
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="index-option" onclick="selectIndex(this, 'composite')">
+                        <h4><i class="fas fa-layer-group"></i> Composite Index</h4>
+                        <p style="color: var(--gray); margin: 10px 0; font-size: 14px;">
+                            Best for queries filtering multiple columns
+                        </p>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--success); font-weight: 600;">
+                                <i class="fas fa-tachometer-alt"></i> 92% Speed
+                            </span>
+                            <span style="color: var(--warning);">
+                                <i class="fas fa-database"></i> 3.8GB
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="indexingChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 3: Security Lab -->
+        <div id="module3" class="module-content">
+            <div class="interactive-tool">
+                <div class="tool-header">
+                    <h2><i class="fas fa-flask"></i> Complete Security System Lab</h2>
+                    <div class="editor-actions">
+                        <button class="btn btn-secondary" onclick="downloadLabStarter()">
+                            <i class="fas fa-download"></i> Download Lab Kit
+                        </button>
+                        <button class="btn btn-success" onclick="submitCompleteSolution()">
+                            <i class="fas fa-paper-plane"></i> Submit Final Solution
+                        </button>
+                    </div>
+                </div>
+
+                <div class="code-editor">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fas fa-shield-alt"></i> Complete Security Schema Template
+                        </div>
+                    </div>
+                    <div class="editor-body" id="labTemplate" contenteditable="true">
+<span class="sql-comment">-- MSEBETSI SECURITY INTELLIGENCE SCHEMA</span><br>
+<span class="sql-comment">-- YOUR MISSION: Complete this 3NF schema with optimal indexes</span><br><br>
+
+<span class="sql-keyword">-- Dimension Tables (Complete these)</span><br>
+<span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">dim_analysts</span> (<br>
+&nbsp;&nbsp;<span class="sql-column">analyst_id</span> <span class="sql-keyword">SERIAL PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;<span class="sql-comment">-- TODO: Add analyst details here</span><br>
+);<br><br>
+
+<span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">dim_threats</span> (<br>
+&nbsp;&nbsp;<span class="sql-column">threat_id</span> <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">30</span>) <span class="sql-keyword">PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;<span class="sql-comment">-- TODO: Add threat details (CVE data)</span><br>
+);<br><br>
+
+<span class="sql-keyword">-- Fact Table (Complete with foreign keys)</span><br>
+<span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">fact_incidents</span> (<br>
+&nbsp;&nbsp;<span class="sql-column">incident_id</span> <span class="sql-keyword">BIGSERIAL</span>,<br>
+&nbsp;&nbsp;<span class="sql-comment">-- TODO: Add foreign key columns</span><br>
+&nbsp;&nbsp;<span class="sql-column">detection_time</span> <span class="sql-keyword">TIMESTAMP NOT NULL</span>,<br>
+&nbsp;&nbsp;<span class="sql-column">severity</span> <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">20</span>),<br>
+&nbsp;&nbsp;<span class="sql-keyword">PRIMARY KEY</span> (incident_id, detection_time)<br>
+) <span class="sql-keyword">PARTITION BY RANGE</span> (detection_time);<br><br>
+
+<span class="sql-keyword">-- Indexing Challenge: Add these indexes</span><br>
+<span class="sql-comment">-- 1. Time-based query index</span><br>
+<span class="sql-comment">-- 2. Severity filter index</span><br>
+<span class="sql-comment">-- 3. Composite index for dashboard queries</span><br>
+<span class="sql-comment">-- 4. Partial index for critical incidents</span>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 30px;">
+                    <div class="dashboard-card">
+                        <h3><i class="fas fa-upload"></i> Upload Your Solution</h3>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            Submit your complete schema and indexing strategy
+                        </p>
+                        <div class="upload-area" style="padding: 20px; margin: 0;" onclick="document.getElementById('labFileInput').click()">
+                            <i class="fas fa-file-code"></i> Click to upload .sql
+                            <input type="file" id="labFileInput" accept=".sql" style="display: none;" onchange="handleLabUpload(this.files[0])">
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3><i class="fas fa-award"></i> Earn Badges</h3>
+                        <div id="badgesContainer" style="margin-top: 20px;">
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <span class="badge" style="background: var(--gray);">3NF Novice</span>
+                                <span class="badge" style="background: var(--gray);">Index Expert</span>
+                                <span class="badge" style="background: var(--gray);">Performance Pro</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 4: Certification -->
+        <div id="module4" class="module-content">
+            <div class="interactive-tool">
+                <h2><i class="fas fa-certificate"></i> Performance Engineer Certification</h2>
+                <p style="color: var(--gray); margin: 20px 0;">
+                    Complete all challenges to earn your PostgreSQL Performance Engineer certification
+                </p>
+
+                <div style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 40px; border-radius: var(--border-radius); text-align: center; margin: 30px 0;">
+                    <h3 style="color: white; margin-bottom: 20px;">Your Certification Progress</h3>
+                    <div style="display: inline-block; background: rgba(255,255,255,0.2); padding: 20px 40px; border-radius: var(--border-radius);">
+                        <div style="font-size: 48px; font-weight: 700;" id="certificationScore">0%</div>
+                        <div style="opacity: 0.9;">Complete</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3><i class="fas fa-check-circle"></i> Normalization Challenge</h3>
+                        <div class="progress-bar" style="margin: 15px 0;">
+                            <div class="progress-fill" id="certProgress1" style="width: 0%"></div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="showModule(1)">
+                            Complete Module 1
+                        </button>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3><i class="fas fa-check-circle"></i> Indexing Challenge</h3>
+                        <div class="progress-bar" style="margin: 15px 0;">
+                            <div class="progress-fill" id="certProgress2" style="width: 0%"></div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="showModule(2)">
+                            Complete Module 2
+                        </button>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3><i class="fas fa-check-circle"></i> Security Lab</h3>
+                        <div class="progress-bar" style="margin: 15px 0;">
+                            <div class="progress-fill" id="certProgress3" style="width: 0%"></div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="showModule(3)">
+                            Complete Module 3
+                        </button>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn btn-primary" style="padding: 15px 50px; font-size: 18px;" onclick="claimCertification()" id="claimCertBtn" disabled>
+                        <i class="fas fa-graduation-cap"></i> Claim Certification
+                    </button>
+                    <p style="color: var(--gray); margin-top: 15px;">
+                        Available after completing all modules with 80%+ score
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Module Navigation
+        function showModule(moduleNumber) {
+            // Hide all modules
+            document.querySelectorAll('.module-content').forEach(module => {
+                module.classList.remove('active');
+            });
+            
+            // Remove active from all tabs
+            document.querySelectorAll('.module-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected module
+            document.getElementById(`module${moduleNumber}`).classList.add('active');
+            
+            // Activate corresponding tab
+            document.querySelectorAll('.module-tab')[moduleNumber - 1].classList.add('active');
+            
+            // Initialize charts if needed
+            if (moduleNumber === 1) initializeNormalizationChart();
+            if (moduleNumber === 2) initializeIndexingChart();
+        }
+
+        // File Handling
+        function downloadFile(filename) {
+            let content = '';
+            
+            if (filename === 'normalization_starter.sql') {
+                content = `-- MSEBETSI NORMALIZATION STARTER KIT
+-- Normalize this 1NF table to 3NF
+
+CREATE TABLE security_incidents_1nf (
+    incident_id SERIAL,
+    analyst_id INTEGER,
+    analyst_name VARCHAR(100),
+    threat_id VARCHAR(20),
+    threat_name TEXT,
+    threat_category VARCHAR(50),
+    asset_id INTEGER,
+    asset_hostname VARCHAR(100),
+    asset_os VARCHAR(50),
+    asset_location VARCHAR(100),
+    detection_time TIMESTAMP,
+    severity VARCHAR(20),
+    remediation_owner VARCHAR(100),
+    PRIMARY KEY (incident_id, threat_id, asset_id)
+);
+
+-- YOUR 3NF SOLUTION:
+
+-- Step 1: Create analysts table
+
+
+-- Step 2: Create threats table
+
+
+-- Step 3: Create assets table
+
+
+-- Step 4: Create incidents table with foreign keys
+
+
+-- Step 5: Add sample data to test your design`;
+            }
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadLabStarter() {
+            const content = document.getElementById('labTemplate').textContent;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'security_lab_starter.sql';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // File Upload Handlers
+        function handleFileUpload(file) {
+            if (!file) return;
+            
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.innerHTML = `
+                <i class="fas fa-check-circle" style="color: var(--success); font-size: 48px; margin-bottom: 20px;"></i>
+                <h3>${file.name}</h3>
+                <p>File uploaded successfully!</p>
+                <p style="font-size: 14px; color: var(--gray); margin-top: 10px;">
+                    Click "Validate Solution" to check your work
+                </p>
+            `;
+            
+            // Store file reference
+            window.uploadedFile = file;
+        }
+
+        function handleLabUpload(file) {
+            if (!file) return;
+            
+            alert(`Lab file "${file.name}" uploaded successfully!\n\nYour solution will be validated when you submit.`);
+            
+            // Store lab file reference
+            window.labFile = file;
+        }
+
+        // Validation System
+        function validateNormalization() {
+            if (!window.uploadedFile) {
+                alert('Please upload your solution file first!');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const solution = e.target.result;
+                const validationResult = validateNormalizationSolution(solution);
+                
+                const resultDiv = document.getElementById('validationResult');
+                resultDiv.className = validationResult.passed ? 
+                    'validation-result success' : 'validation-result error';
+                
+                resultDiv.innerHTML = validationResult.message;
+                
+                // Update progress
+                if (validationResult.passed) {
+                    const progressBar = document.getElementById('normalizationProgress');
+                    progressBar.style.width = '100%';
+                    
+                    // Update certification progress
+                    updateCertificationProgress(1, 100);
+                    
+                    // Award badge
+                    awardBadge('3NF Master', 'Successfully normalized to 3NF');
+                }
+            };
+            
+            reader.readAsText(window.uploadedFile);
+        }
+
+        function validateNormalizationSolution(solution) {
+            // Simplified validation logic
+            // In production, this would be more sophisticated
+            
+            const checks = {
+                hasAnalystsTable: solution.toLowerCase().includes('create table') && 
+                                 (solution.toLowerCase().includes('analysts') || 
+                                  solution.toLowerCase().includes('analyst')),
+                hasThreatsTable: solution.toLowerCase().includes('create table') && 
+                                 solution.toLowerCase().includes('threat'),
+                hasAssetsTable: solution.toLowerCase().includes('create table') && 
+                                solution.toLowerCase().includes('asset'),
+                hasForeignKeys: solution.toLowerCase().includes('foreign key') || 
+                                solution.toLowerCase().includes('references'),
+                noCompositePK: !solution.toLowerCase().includes('primary key') || 
+                              !solution.match(/primary key.*\(.*,.*\)/i)
+            };
+            
+            const passed = Object.values(checks).every(check => check);
+            
+            if (passed) {
+                return {
+                    passed: true,
+                    message: `
+                        <h4><i class="fas fa-check-circle"></i> Excellent Work!</h4>
+                        <p>Your solution successfully achieves 3NF:</p>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li>✓ Separate tables for entities</li>
+                            <li>✓ Foreign key relationships established</li>
+                            <li>✓ Transitive dependencies removed</li>
+                            <li>✓ Partial dependencies eliminated</li>
+                        </ul>
+                        <p style="margin-top: 15px;"><strong>Storage Impact:</strong> 68% reduction achieved</p>
+                        <p><strong>Query Performance:</strong> 3.2x faster lookups</p>
+                    `
+                };
+            } else {
+                return {
+                    passed: false,
+                    message: `
+                        <h4><i class="fas fa-exclamation-triangle"></i> Needs Improvement</h4>
+                        <p>Your solution needs these improvements:</p>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            ${!checks.hasAnalystsTable ? '<li>Missing analysts table</li>' : ''}
+                            ${!checks.hasThreatsTable ? '<li>Missing threats table</li>' : ''}
+                            ${!checks.hasAssetsTable ? '<li>Missing assets table</li>' : ''}
+                            ${!checks.hasForeignKeys ? '<li>Missing foreign key relationships</li>' : ''}
+                            ${checks.noCompositePK ? '<li>Still using composite primary key</li>' : ''}
+                        </ul>
+                        <p style="margin-top: 15px;">Review the normalization rules and try again!</p>
+                    `
+                };
+            }
+        }
+
+        // Indexing Laboratory
+        let selectedIndexType = null;
+
+        function selectIndex(element, type) {
+            // Remove selected class from all options
+            document.querySelectorAll('.index-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            element.classList.add('selected');
+            selectedIndexType = type;
+            
+            // Show performance comparison
+            setTimeout(() => {
+                if (window.indexingChart) {
+                    updateIndexingChart(type);
+                }
+            }, 100);
+        }
+
+        function runBenchmark() {
+            if (!selectedIndexType) {
+                alert('Please select an index type first!');
+                return;
+            }
+            
+            const results = {
+                btree: { queryTime: '0.8s', indexSize: '4.2GB', improvement: '85%' },
+                brin: { queryTime: '0.3s', indexSize: '42MB', improvement: '95%' },
+                composite: { queryTime: '0.5s', indexSize: '3.8GB', improvement: '92%' }
+            };
+            
+            const result = results[selectedIndexType];
+            
+            alert(`⚡ Benchmark Results for ${selectedIndexType.toUpperCase()} Index:\n\n` +
+                  `Query Execution Time: ${result.queryTime}\n` +
+                  `Index Storage Size: ${result.indexSize}\n` +
+                  `Performance Improvement: ${result.improvement}\n\n` +
+                  `Analysis: ${getIndexAnalysis(selectedIndexType)}`);
+            
+            // Update certification progress
+            updateCertificationProgress(2, 100);
+            awardBadge('Index Expert', 'Mastered advanced indexing strategies');
+        }
+
+        function getIndexAnalysis(type) {
+            const analyses = {
+                btree: 'Excellent for general-purpose queries but consumes significant storage.',
+                brin: 'Perfect for time-series security data - minimal storage with maximum speed.',
+                composite: 'Ideal for dashboard queries filtering multiple columns.'
+            };
+            return analyses[type] || 'Good choice for this query pattern.';
+        }
+
+        // Charts
+        function initializeNormalizationChart() {
+            const ctx = document.getElementById('normalizationChart').getContext('2d');
+            window.normalizationChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['1NF', '2NF', '3NF'],
+                    datasets: [{
+                        label: 'Storage Usage (GB)',
+                        data: [87, 45, 27],
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(16, 185, 129, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(239, 68, 68)',
+                            'rgb(245, 158, 11)',
+                            'rgb(16, 185, 129)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Storage Reduction Through Normalization',
+                            font: { size: 16 }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Storage (GB)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initializeIndexingChart() {
+            const ctx = document.getElementById('indexingChart').getContext('2d');
+            window.indexingChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Query Speed', 'Storage Efficiency', 'Maintenance', 'Insert Performance', 'Range Queries'],
+                    datasets: [{
+                        label: 'B-Tree Index',
+                        data: [85, 40, 70, 65, 90],
+                        backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                        borderColor: 'rgb(37, 99, 235)',
+                        pointBackgroundColor: 'rgb(37, 99, 235)'
+                    }, {
+                        label: 'BRIN Index',
+                        data: [95, 95, 90, 85, 95],
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        borderColor: 'rgb(16, 185, 129)',
+                        pointBackgroundColor: 'rgb(16, 185, 129)'
+                    }, {
+                        label: 'Composite Index',
+                        data: [92, 45, 60, 50, 85],
+                        backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                        borderColor: 'rgb(139, 92, 246)',
+                        pointBackgroundColor: 'rgb(139, 92, 246)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Index Type Performance Comparison',
+                            font: { size: 16 }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: { display: true },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateIndexingChart(indexType) {
+            // Update chart to highlight selected index
+            if (window.indexingChart) {
+                window.indexingChart.data.datasets.forEach((dataset, index) => {
+                    dataset.borderWidth = dataset.label.toLowerCase().includes(indexType) ? 3 : 1;
+                });
+                window.indexingChart.update();
+            }
+        }
+
+        // Certification System
+        let certificationProgress = {
+            module1: 0,
+            module2: 0,
+            module3: 0
+        };
+
+        function updateCertificationProgress(module, score) {
+            certificationProgress[`module${module}`] = score;
+            
+            // Update progress bars
+            document.getElementById(`certProgress${module}`).style.width = `${score}%`;
+            
+            // Update overall score
+            const totalScore = Math.round(
+                (certificationProgress.module1 + 
+                 certificationProgress.module2 + 
+                 certificationProgress.module3) / 3
+            );
+            
+            document.getElementById('certificationScore').textContent = `${totalScore}%`;
+            
+            // Enable claim button if all modules completed
+            if (certificationProgress.module1 >= 80 && 
+                certificationProgress.module2 >= 80 && 
+                certificationProgress.module3 >= 80) {
+                document.getElementById('claimCertBtn').disabled = false;
+            }
+        }
+
+        function awardBadge(name, description) {
+            const badgesContainer = document.getElementById('badgesContainer');
+            const badge = document.createElement('span');
+            badge.className = 'badge';
+            badge.style.background = 'var(--primary)';
+            badge.textContent = name;
+            badge.title = description;
+            badgesContainer.querySelector('.badge').replaceWith(badge);
+        }
+
+        function submitCompleteSolution() {
+            if (!window.labFile) {
+                alert('Please upload your complete lab solution first!');
+                return;
+            }
+            
+            // Simulate validation
+            setTimeout(() => {
+                const passed = Math.random() > 0.3; // 70% chance of passing
+                
+                if (passed) {
+                    alert('🎉 Congratulations!\n\nYour complete security system design has been validated successfully!\n\nPerformance Metrics:\n✓ 3NF Compliance: 100%\n✓ Index Coverage: 92%\n✓ Query Performance: 94% faster\n✓ Storage Efficiency: 68% reduction\n\nYou have earned the "Security Architect" badge!');
+                    
+                    updateCertificationProgress(3, 100);
+                    awardBadge('Security Architect', 'Designed complete security intelligence system');
+                } else {
+                    alert('Your solution needs some improvements. Please review:\n\n1. Check all foreign key relationships\n2. Verify index coverage for common queries\n3. Ensure partitioning strategy is optimal\n4. Validate data types and constraints');
+                }
+            }, 1500);
+        }
+
+        function claimCertification() {
+            const certData = {
+                studentName: 'Security Analyst',
+                completionDate: new Date().toLocaleDateString(),
+                score: document.getElementById('certificationScore').textContent,
+                modules: certificationProgress,
+                certificationId: 'MSEB-PSQL-PE-' + Date.now()
+            };
+            
+            const certContent = `
+╔═══════════════════════════════════════════════╗
+║     MSEBETSI SOLUTIONS - CERTIFICATION        ║
+╠═══════════════════════════════════════════════╣
+║                                               ║
+║  POSTGRESQL PERFORMANCE ENGINEER             ║
+║  Security Intelligence Specialization        ║
+║                                               ║
+║  Awarded to: ${certData.studentName.padEnd(30)} ║
+║  Date: ${certData.completionDate.padEnd(33)} ║
+║  Score: ${certData.score.padEnd(34)} ║
+║  ID: ${certData.certificationId.padEnd(33)} ║
+║                                               ║
+║  Skills Demonstrated:                         ║
+║  • 3NF Database Normalization                ║
+║  • Advanced Indexing Strategies              ║
+║  • Query Performance Optimization            ║
+║  • Security Data Architecture                ║
+║  • Enterprise System Design                  ║
+║                                               ║
+║  Valid through: 2025-12-31                   ║
+║  Verification: verify.msebetsi.solutions     ║
+║                                               ║
+╚═══════════════════════════════════════════════╝
+            `;
+            
+            const blob = new Blob([certContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Msebetsi_Performance_Engineer_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('🎓 Certification Claimed!\n\nYour PostgreSQL Performance Engineer certificate has been downloaded.\n\nShare your achievement on LinkedIn!\n\n#PostgreSQL #PerformanceEngineering #MsebetsiSolutions');
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            showModule(1);
+            
+            // Initialize drag and drop for upload areas
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', function() {
+                this.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload(files[0]);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
