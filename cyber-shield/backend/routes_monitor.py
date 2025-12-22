@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from flask import Blueprint, jsonify
 from functools import wraps
 
@@ -28,4 +29,36 @@ def get_traffic():
             {"time": "08:00", "in": 120, "out": 80},
             {"time": "08:10", "in": 140, "out": 90}
         ]
+=======
+from flask import Blueprint, jsonify
+from functools import wraps
+
+monitor_bp = Blueprint('monitoring', __name__)
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        # Add real auth later
+        return f(*args, **kwargs)
+    return decorated
+
+@monitor_bp.route('/hosts', methods=['GET'])
+@requires_auth
+def get_hosts():
+    return jsonify({
+        "hosts": [
+            {"hostname": "web01", "ip": "192.168.1.10", "status": "up", "os": "Ubuntu"},
+            {"hostname": "db01", "ip": "192.168.1.20", "status": "down", "os": "Windows"}
+        ]
+    })
+
+@monitor_bp.route('/traffic', methods=['GET'])
+@requires_auth
+def get_traffic():
+    return jsonify({
+        "traffic": [
+            {"time": "08:00", "in": 120, "out": 80},
+            {"time": "08:10", "in": 140, "out": 90}
+        ]
+>>>>>>> deploy
     })
