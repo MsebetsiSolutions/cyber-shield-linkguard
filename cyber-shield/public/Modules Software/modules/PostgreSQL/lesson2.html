@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson Lab: Database Management with PostgreSQL | MSEBETSI</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --accent: #0b5fff;
+            --accent-light: rgba(11, 95, 255, 0.1);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        body {
+            background: var(--bg);
+            color: #1e293b;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 40px 0 30px;
+        }
+        .badge {
+            background: var(--accent-light);
+            color: var(--accent);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #0f172a;
+        }
+        .subtitle {
+            color: var(--muted);
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .lesson-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+        }
+        .card-title {
+            color: var(--accent);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .task-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        .task-list li {
+            padding: 12px 0 12px 40px;
+            position: relative;
+            border-bottom: 1px dashed var(--border);
+        }
+        .task-list li:last-child {
+            border-bottom: none;
+        }
+        .task-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 15px;
+            top: 12px;
+            width: 22px;
+            height: 22px;
+            background: var(--accent-light);
+            color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .action-box {
+            background: linear-gradient(135deg, #f0f9ff, #e6f3ff);
+            border-left: 4px solid var(--accent);
+            padding: 25px;
+            border-radius: 8px;
+            margin: 25px 0;
+        }
+        .action-title {
+            color: #1e40af;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .workflow-step {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border: 2px solid #e2e8f0;
+        }
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .step-number {
+            background: var(--accent);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #0a4ed9;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+        .file-input-area {
+            border: 3px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin: 25px 0;
+            background: #f8fafc;
+            transition: all 0.3s;
+        }
+        .file-input-area:hover {
+            border-color: var(--accent);
+            background: #f1f7ff;
+        }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 25px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+            white-space: pre;
+            tab-size: 4;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .feedback-panel {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+            display: none;
+        }
+        .feedback-panel.success {
+            background: #f0fdf4;
+            border-left: 4px solid var(--success);
+            display: block;
+        }
+        .feedback-panel.error {
+            background: #fef2f2;
+            border-left: 4px solid var(--danger);
+            display: block;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border: 1px solid var(--border);
+        }
+        .comparison-table th {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+        .tip-box {
+            background: #fffbeb;
+            border-left: 4px solid var(--warning);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+        }
+        .hidden {
+            display: none;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .lesson-card { padding: 25px; }
+            h1 { font-size: 2rem; }
+            .code-block { font-size: 0.85rem; padding: 20px; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="header">
+        <div class="badge">Hands-On SQL Lab</div>
+        <h1>Database Management with PostgreSQL</h1>
+        <p class="subtitle">Apply your knowledge by creating, dropping, and selecting databases. Submit your <code>schema.sql</code> file for automated validation.</p>
+    </div>
+
+    <div class="lesson-card">
+        <h2 class="card-title"><i class="fas fa-bullseye"></i> Learning Objectives</h2>
+        <ul class="task-list">
+            <li>Execute <code>DROP DATABASE</code> to remove existing databases</li>
+            <li>Use <code>CREATE DATABASE</code> to establish new databases</li>
+            <li>Select and connect to a specific database using <code>\c</code> or SQL statements</li>
+            <li>Write a complete SQL script that performs multiple operations</li>
+            <li>Validate your work by comparing it to a professional solution</li>
+        </ul>
+    </div>
+
+    <!-- Original Activity Requirements -->
+    <div class="lesson-card">
+        <h2 class="card-title"><i class="fas fa-tasks"></i> Your Mission: Database Setup</h2>
+        <div class="action-box">
+            <h3 class="action-title"><i class="fas fa-user-check"></i> Acceptance Criteria</h3>
+            <ul class="task-list">
+                <li>Drop the existing <code>sample_db</code> database</li>
+                <li>Create a new database named <code>books_db</code></li>
+                <li>Select <code>books_db</code> for use in subsequent operations</li>
+            </ul>
+        </div>
+        <div class="tip-box">
+            <strong><i class="fas fa-lightbulb"></i> Hint:</strong> Use <code>\l</code> in the psql shell to list all databases and verify your work.
+        </div>
+    </div>
+
+    <!-- Interactive Workflow -->
+    <div class="lesson-card">
+        <h2 class="card-title"><i class="fas fa-laptop-code"></i> Interactive Lab Workflow</h2>
+        
+        <!-- Step 1: Understand the Task -->
+        <div class="workflow-step">
+            <div class="step-header">
+                <div class="step-number">1</div>
+                <h3>Understand the Task & Key Commands</h3>
+            </div>
+            <p>Review the essential PostgreSQL commands you'll need:</p>
+            <div class="code-block">
+-- 1. List all databases (psql meta-command)
+\l
+
+-- 2. Drop/Delete an existing database
+DROP DATABASE IF EXISTS sample_db;
+
+-- 3. Create a new database
+CREATE DATABASE books_db;
+
+-- 4. Connect to/Select a database (psql meta-command)
+\c books_db
+
+-- Alternative: Connect via initial login
+-- psql -d books_db
+            </div>
+            <button class="btn" onclick="document.getElementById('hint-box').classList.toggle('hidden')">
+                <i class="fas fa-question-circle"></i> Show Command Explanations
+            </button>
+            <div id="hint-box" class="hidden" style="margin-top: 20px; padding: 15px; background: #f1f5f9; border-radius: 6px;">
+                <p><strong><code>\l</code></strong>: Meta-command to list all databases in your PostgreSQL cluster[citation:1].</p>
+                <p><strong><code>DROP DATABASE</code></strong>: Permanently removes a database and all its contents. Use <code>IF EXISTS</code> to avoid errors.</p>
+                <p><strong><code>CREATE DATABASE</code></strong>: Creates a new, empty database with the specified name.</p>
+                <p><strong><code>\c</code></strong>: Meta-command to connect your psql session to a different database.</p>
+            </div>
+        </div>
+
+        <!-- Step 2: Create Your Schema File -->
+        <div class="workflow-step">
+            <div class="step-header">
+                <div class="step-number">2</div>
+                <h3>Create Your <code>schema.sql</code> File</h3>
+            </div>
+            <p>Using a text editor (VS Code, Sublime, Notepad++), create a file named <code>schema.sql</code> with the following structure:</p>
+            <div class="code-block">
+-- ============================================
+-- schema.sql
+-- Purpose: Drop sample_db and create books_db
+-- Author: [Your Name]
+-- ============================================
+
+-- 1. Drop the sample_db if it exists
+DROP DATABASE IF EXISTS sample_db;
+
+-- 2. Create the new books_db database
+CREATE DATABASE books_db;
+
+-- 3. Comment: The connection command is typically 
+--    executed in the psql shell, not in the SQL file.
+--    To connect: \c books_db
+            </div>
+            <p><strong>Save this file</strong> to a known location on your computer (e.g., Desktop or project folder).</p>
+            <button class="btn btn-secondary" onclick="downloadTemplate()">
+                <i class="fas fa-download"></i> Download Template File
+            </button>
+        </div>
+
+        <!-- Step 3: Test Your Script -->
+        <div class="workflow-step">
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <h3>Test Your Script (Optional)</h3>
+            </div>
+            <p>If you have PostgreSQL installed locally, you can test your script:</p>
+            <div class="code-block">
+-- Method 1: Execute via psql
+psql -U postgres -f schema.sql
+
+-- Method 2: Copy-paste into psql shell
+-- 1. Start psql: psql -U postgres
+-- 2. Execute: \i /path/to/your/schema.sql
+            </div>
+            <p><em>Note: The lab validation below will check your file's content, not actually execute it against a database.</em></p>
+        </div>
+
+        <!-- Step 4: Upload & Validate -->
+        <div class="workflow-step">
+            <div class="step-header">
+                <div class="step-number">4</div>
+                <h3>Upload & Validate Your Solution</h3>
+            </div>
+            <p>Submit your <code>schema.sql</code> file for automated validation against the master solution.</p>
+            
+            <div class="file-input-area" id="dropZone">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #94a3b8; margin-bottom: 15px;"></i>
+                <h3>Drag & Drop Your <code>schema.sql</code> File Here</h3>
+                <p style="color: var(--muted); margin: 10px 0 20px;">or click to browse your computer</p>
+                <input type="file" id="fileInput" accept=".sql" hidden>
+                <button class="btn" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-file-upload"></i> Choose File
+                </button>
+            </div>
+
+            <!-- Validation Results -->
+            <div id="feedbackSuccess" class="feedback-panel success">
+                <h3 style="color: var(--success); margin-bottom: 10px;"><i class="fas fa-check-circle"></i> Success! Your schema.sql is correct!</h3>
+                <p>All commands match the expected solution. Your database management script is ready for production.</p>
+                <div style="margin-top: 15px;">
+                    <button class="btn" onclick="showComparison()"><i class="fas fa-eye"></i> View Solution Comparison</button>
+                </div>
+            </div>
+
+            <div id="feedbackError" class="feedback-panel error">
+                <h3 style="color: var(--danger); margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i> Issues Found</h3>
+                <p id="errorMessage">Please check your file and try again.</p>
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-secondary" onclick="showHint()"><i class="fas fa-lightbulb"></i> Get Help</button>
+                </div>
+            </div>
+
+            <!-- Solution Comparison (Initially Hidden) -->
+            <div id="solutionComparison" class="hidden" style="margin-top: 30px;">
+                <h3 style="color: var(--accent); margin-bottom: 20px;"><i class="fas fa-code-compare"></i> Solution Comparison</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Your Command</th>
+                            <th>Expected Command</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparisonBody">
+                        <!-- Filled by JavaScript -->
+                    </tbody>
+                </table>
+                <div class="tip-box" style="margin-top: 20px;">
+                    <strong><i class="fas fa-graduation-cap"></i> Professional Insight:</strong> A well-structured SQL script includes comments, uses <code>IF EXISTS</code> for safety, and maintains proper formatting for team collaboration.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Master Solution Reference -->
+    <div class="lesson-card">
+        <h2 class="card-title"><i class="fas fa-unlock"></i> Master Solution Reference</h2>
+        <p>This is the complete, production-ready solution. Compare it with your work <strong>after</strong> you've attempted the exercise.</p>
+        <button class="btn btn-secondary" onclick="document.getElementById('masterSolution').classList.toggle('hidden')">
+            <i class="fas fa-lock-open"></i> Reveal Master Solution
+        </button>
+        <div id="masterSolution" class="hidden">
+            <div class="code-block" style="margin-top: 20px;">
+-- ============================================
+-- schema.sql - Master Solution
+-- MSEBETSI Professional Database Setup Script
+-- ============================================
+
+/*
+OBJECTIVE: Drop sample_db and create books_db
+BEST PRACTICES:
+1. Use IF EXISTS to prevent errors
+2. Add descriptive comments
+3. Use uppercase for SQL keywords
+4. Include script metadata
+*/
+
+-- Safely remove the existing sample_db
+-- This prevents errors if the database doesn't exist
+DROP DATABASE IF EXISTS sample_db;
+
+-- Create the new books_db database
+-- This establishes a clean database for the application
+CREATE DATABASE books_db;
+
+/*
+CONNECTION INSTRUCTIONS:
+After running this script, connect to books_db using:
+   psql -d books_db
+Or within psql:
+   \c books_db
+
+NEXT STEPS:
+1. Create tables within books_db
+2. Define schema relationships
+3. Populate with initial data
+*/
+            </div>
+            <div class="tip-box" style="margin-top: 20px;">
+                <strong><i class="fas fa-star"></i> What Makes This Professional:</strong>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li>Includes comprehensive header comments</li>
+                    <li>Uses <code>IF EXISTS</code> for error-free execution</li>
+                    <li>Adds explanatory comments for each major operation</li>
+                    <li>Provides clear next steps for database development</li>
+                    <li>Follows consistent code formatting standards</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div style="display: flex; justify-content: space-between; margin-top: 40px; padding-top: 30px; border-top: 1px solid var(--border);">
+        <button class="btn btn-secondary" onclick="window.location.href='lesson1.html'">
+            <i class="fas fa-arrow-left"></i> Previous Lesson
+        </button>
+        <button class="btn" onclick="window.location.href='lesson3.html'" id="nextLessonBtn" disabled>
+            Next Lesson <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <footer>
+        <p><strong>MSEBETSI SOLUTIONS PROFESSIONAL TIP:</strong> Always test SQL scripts in a development environment before running them in production.</p>
+        <p>© 2024 MSEBETSI SOLUTIONS - Enterprise Database Training</p>
+    </footer>
+
+    <script>
+        // File handling and validation logic
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const masterSolution = `-- Safely remove the existing sample_db
+DROP DATABASE IF EXISTS sample_db;
+
+-- Create the new books_db database
+CREATE DATABASE books_db;`;
+
+        // Drag and drop functionality
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            dropZone.style.borderColor = 'var(--accent)';
+            dropZone.style.backgroundColor = '#f0f7ff';
+        }
+        
+        function unhighlight() {
+            dropZone.style.borderColor = '#cbd5e1';
+            dropZone.style.backgroundColor = '#f8fafc';
+        }
+        
+        // Handle file drop
+        dropZone.addEventListener('drop', handleDrop, false);
+        fileInput.addEventListener('change', handleFileSelect, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+        
+        function handleFileSelect() {
+            handleFiles(this.files);
+        }
+        
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            const file = files[0];
+            
+            if (!file.name.endsWith('.sql')) {
+                showError('Please upload a .sql file.');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                validateSQL(e.target.result);
+            };
+            reader.readAsText(file);
+            
+            // Update UI to show file name
+            dropZone.innerHTML = `
+                <i class="fas fa-file-code" style="font-size: 3rem; color: var(--success); margin-bottom: 15px;"></i>
+                <h3>${file.name}</h3>
+                <p style="color: var(--success); margin: 10px 0 20px;">
+                    <i class="fas fa-check"></i> File uploaded successfully
+                </p>
+                <button class="btn btn-secondary" onclick="resetUpload()">
+                    <i class="fas fa-redo"></i> Upload Different File
+                </button>
+            `;
+        }
+        
+        function resetUpload() {
+            dropZone.innerHTML = `
+                <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #94a3b8; margin-bottom: 15px;"></i>
+                <h3>Drag & Drop Your <code>schema.sql</code> File Here</h3>
+                <p style="color: var(--muted); margin: 10px 0 20px;">or click to browse your computer</p>
+                <input type="file" id="fileInput" accept=".sql" hidden>
+                <button class="btn" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-file-upload"></i> Choose File
+                </button>
+            `;
+            fileInput.value = '';
+            document.getElementById('feedbackSuccess').style.display = 'none';
+            document.getElementById('feedbackError').style.display = 'none';
+            document.getElementById('solutionComparison').classList.add('hidden');
+            
+            // Re-attach event listeners
+            const newFileInput = document.getElementById('fileInput');
+            newFileInput.addEventListener('change', handleFileSelect, false);
+        }
+        
+        // Validation logic
+        function validateSQL(userContent) {
+            // Normalize content: remove comments, extra whitespace, normalize case
+            const normalize = (text) => {
+                return text
+                    .toUpperCase()
+                    .replace(/--.*$/gm, '')  // Remove single-line comments
+                    .replace(/\/\*[\s\S]*?\*\//g, '')  // Remove multi-line comments
+                    .replace(/\s+/g, ' ')  // Normalize whitespace
+                    .trim();
+            };
+            
+            const normalizedUser = normalize(userContent);
+            const normalizedMaster = normalize(masterSolution);
+            
+            // Check for required commands
+            const hasDrop = normalizedUser.includes('DROP DATABASE') && 
+                           normalizedUser.includes('SAMPLE_DB');
+            const hasCreate = normalizedUser.includes('CREATE DATABASE') && 
+                             normalizedUser.includes('BOOKS_DB');
+            
+            // Simple validation
+            if (hasDrop && hasCreate) {
+                showSuccess();
+            } else {
+                let errors = [];
+                if (!hasDrop) errors.push('Missing or incorrect DROP DATABASE command for sample_db');
+                if (!hasCreate) errors.push('Missing or incorrect CREATE DATABASE command for books_db');
+                showError(errors.join('. '));
+            }
+        }
+        
+        function showSuccess() {
+            document.getElementById('feedbackSuccess').style.display = 'block';
+            document.getElementById('feedbackError').style.display = 'none';
+            document.getElementById('nextLessonBtn').disabled = false;
+            localStorage.setItem('sql-lab-completed', 'true');
+        }
+        
+        function showError(message) {
+            document.getElementById('feedbackError').style.display = 'block';
+            document.getElementById('feedbackSuccess').style.display = 'none';
+            document.getElementById('errorMessage').textContent = message;
+        }
+        
+        function showComparison() {
+            const comparisonBody = document.getElementById('comparisonBody');
+            comparisonBody.innerHTML = `
+                <tr>
+                    <td><code>DROP DATABASE IF EXISTS sample_db;</code></td>
+                    <td><code>DROP DATABASE IF EXISTS sample_db;</code></td>
+                    <td style="color: var(--success);"><i class="fas fa-check"></i> Correct</td>
+                </tr>
+                <tr>
+                    <td><code>CREATE DATABASE books_db;</code></td>
+                    <td><code>CREATE DATABASE books_db;</code></td>
+                    <td style="color: var(--success);"><i class="fas fa-check"></i> Correct</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align: center; background: #f8fafc;">
+                        <strong>Note:</strong> Connection commands (<code>\c</code>) are typically executed in psql, not in SQL files
+                    </td>
+                </tr>
+            `;
+            document.getElementById('solutionComparison').classList.remove('hidden');
+        }
+        
+        function showHint() {
+            alert('Hint: Your schema.sql should contain exactly two SQL statements:\n1. DROP DATABASE IF EXISTS sample_db;\n2. CREATE DATABASE books_db;\n\nMake sure you have no syntax errors and the database names are spelled correctly.');
+        }
+        
+        function downloadTemplate() {
+            const template = `-- schema.sql template
+-- Complete the following statements:
+
+-- Drop the sample_db database if it exists
+
+
+-- Create a new database named books_db
+
+
+-- Note: Connection is done separately in psql
+-- Use: \\c books_db
+`;
+            
+            const blob = new Blob([template], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'schema_template.sql';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Check for previous completion
+        window.addEventListener('load', function() {
+            if (localStorage.getItem('sql-lab-completed') === 'true') {
+                document.getElementById('nextLessonBtn').disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

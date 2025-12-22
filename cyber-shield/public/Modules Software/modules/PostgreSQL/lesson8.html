@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 8: Table Joins & Data Correlation | MSEBETSI Advanced SQL</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --accent: #0b5fff;
+            --accent-light: rgba(11, 95, 255, 0.1);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --join-bg: rgba(139, 92, 246, 0.1);
+            --join-color: #7c3aed;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--bg);
+            color: #1e293b;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .lesson-container {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            margin-top: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid rgba(11, 95, 255, 0.1);
+        }
+        
+        .module-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .lesson-title {
+            font-size: 36px;
+            color: #0f172a;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .lesson-subtitle {
+            color: var(--muted);
+            font-size: 18px;
+            margin-bottom: 30px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .time-badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            padding: 6px 15px;
+            border-radius: 15px;
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .security-banner {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+            box-shadow: 0 8px 32px rgba(30, 41, 59, 0.2);
+            border: 2px solid #475569;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .security-banner::before {
+            content: '🔒';
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 60px;
+            opacity: 0.2;
+        }
+        
+        .security-banner h3 {
+            color: #60a5fa;
+            margin-bottom: 15px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .objectives {
+            background: linear-gradient(135deg, #f0f7ff, #e6f0ff);
+            border-left: 4px solid var(--accent);
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        
+        .objectives h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .objectives ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+        
+        .objectives li {
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .objectives li:before {
+            content: "✓";
+            color: var(--success);
+            font-weight: bold;
+            position: absolute;
+            left: -20px;
+        }
+        
+        .section {
+            margin: 40px 0;
+            padding: 30px;
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(11, 95, 255, 0.05);
+        }
+        
+        .section-title {
+            color: var(--accent);
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(11, 95, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .join-visualization {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            margin: 40px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .table-box {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 2px solid #334155;
+            min-width: 300px;
+            position: relative;
+        }
+        
+        .table-box h4 {
+            color: #334155;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .table-box::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #334155;
+            color: white;
+            padding: 5px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .table-box.risk-levels::before { content: 'risk_levels'; }
+        .table-box.assets::before { content: 'vulnerable_assets'; }
+        
+        .join-operator {
+            background: var(--join-color);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+        
+        .table-column {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        
+        .table-column:last-child {
+            border-bottom: none;
+        }
+        
+        .column-name {
+            font-weight: 600;
+            width: 120px;
+            color: #334155;
+        }
+        
+        .column-type {
+            color: var(--muted);
+            font-size: 0.9em;
+        }
+        
+        .pk-tag, .fk-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .pk-tag {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+        
+        .fk-tag {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+        
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 25px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            overflow-x: auto;
+            border: 1px solid #334155;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            position: relative;
+        }
+        
+        .code-block .comment { color: #6A9955; }
+        .code-block .keyword { color: #569CD6; }
+        .code-block .string { color: #CE9178; }
+        .code-block .function { color: #DCDCAA; }
+        .code-block .number { color: #B5CEA8; }
+        .code-block .operator { color: #D4D4D4; }
+        .code-block .type { color: #4EC9B0; font-weight: bold; }
+        .code-block .table-name { color: #ffcc00; font-weight: bold; }
+        .code-block .join-clause { color: #c586c0; font-weight: bold; }
+        
+        .join-type-tag {
+            display: inline-block;
+            background: var(--join-bg);
+            color: var(--join-color);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0 5px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th {
+            background: rgba(11, 95, 255, 0.1);
+            color: var(--accent);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        tr:hover {
+            background: rgba(11, 95, 255, 0.03);
+        }
+        
+        .vulnerability-matrix {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .vuln-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .vuln-card.critical { border-color: #ef4444; }
+        .vuln-card.high { border-color: #f59e0b; }
+        .vuln-card.medium { border-color: #3b82f6; }
+        .vuln-card.low { border-color: #10b981; }
+        
+        .vuln-card h5 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .note-box {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .warning-box {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--danger);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .success-box {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .exercise {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 40px 0;
+            border: 2px dashed var(--accent);
+        }
+        
+        .checklist {
+            margin: 20px 0;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .checklist-item input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            font-size: 15px;
+        }
+        
+        .btn:hover {
+            background: #0a4ed9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(11, 95, 255, 0.2);
+        }
+        
+        .btn-security {
+            background: linear-gradient(135deg, #334155, #475569);
+            color: white;
+        }
+        
+        .btn-security:hover {
+            background: linear-gradient(135deg, #475569, #64748b);
+        }
+        
+        .btn-join {
+            background: var(--join-color);
+            color: white;
+        }
+        
+        .btn-join:hover {
+            background: #6d28d9;
+        }
+        
+        .file-browser {
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            border: 1px solid #334155;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background: #0f172a;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        
+        .file-item:hover {
+            background: #1e293b;
+            border-color: #475569;
+        }
+        
+        .file-item.active {
+            background: #334155;
+            border-color: var(--accent);
+        }
+        
+        .file-icon {
+            margin-right: 10px;
+            color: #94a3b8;
+        }
+        
+        .file-content {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 25px;
+            border-radius: 6px;
+            font-family: 'Consolas', monospace;
+            min-height: 200px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            line-height: 1.6;
+            border: 1px solid #475569;
+            display: none;
+        }
+        
+        .file-content.active {
+            display: block;
+        }
+        
+        .query-result {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+        }
+        
+        .query-result table {
+            margin: 0;
+        }
+        
+        .query-result th {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .data-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .data-node {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            min-width: 150px;
+            border: 2px solid;
+        }
+        
+        .data-node.disconnected { border-color: #e2e8f0; opacity: 0.6; }
+        .data-node.connected { border-color: var(--success); }
+        
+        .data-arrow {
+            font-size: 24px;
+            color: var(--muted);
+        }
+        
+        .data-arrow.connected { color: var(--success); transform: scale(1.2); }
+        
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .lesson-container { padding: 20px; }
+            .lesson-title { font-size: 28px; }
+            .section { padding: 20px; }
+            .join-visualization { flex-direction: column; }
+            .table-box { width: 100%; }
+            .data-flow { flex-direction: column; }
+            .data-arrow { transform: rotate(90deg); }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- Header Section -->
+        <div class="header">
+            <div class="module-badge">SECURITY DATA CORRELATION</div>
+            <h1 class="lesson-title">Lesson 8: SQL Joins in PostgreSQL</h1>
+            <p class="lesson-subtitle">Master table joins to correlate security data across multiple sources for comprehensive vulnerability assessment</p>
+            <div class="time-badge"><i class="fas fa-clock"></i> PENETRATION TESTING LAB - 90 MINUTES</div>
+        </div>
+
+        <!-- Security Scenario -->
+        <div class="security-banner">
+            <h3><i class="fas fa-shield-alt"></i> MSEBETSI SOLUTIONS PENETRATION TESTING SCENARIO</h3>
+            <p><strong>Mission:</strong> As a security analyst at Msebetsi Solutions, you need to correlate vulnerability data from separate database tables to identify critical security risks.</p>
+            <p><strong>Challenge:</strong> Discovered vulnerabilities and risk assessments are stored in different tables. You must JOIN them to answer critical security questions.</p>
+        </div>
+
+        <!-- Learning Objectives -->
+        <div class="objectives">
+            <h3><i class="fas fa-bullseye"></i> PENETRATION TESTING OBJECTIVES</h3>
+            <ul>
+                <li>Master INNER JOIN operations for security data correlation</li>
+                <li>Understand primary key and foreign key relationships in security contexts</li>
+                <li>Build comprehensive vulnerability reports by joining multiple data sources</li>
+                <li>Apply joins to real-world security analysis scenarios</li>
+                <li>Create single queries that combine asset and risk data</li>
+                <li>Learn to identify many-to-many relationships in security data</li>
+            </ul>
+        </div>
+
+        <!-- Part 1: The Problem -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-exclamation-triangle"></i> PART 1: THE SECURITY DATA DISCONNECTION PROBLEM</h2>
+            
+            <div class="step">
+                <h3>Disconnected Security Intelligence</h3>
+                
+                <div class="data-flow">
+                    <div class="data-node disconnected">
+                        <h5>Risk Levels Table</h5>
+                        <p>Contains risk scores (1-5) and severity labels</p>
+                        <div style="font-size: 12px; color: var(--muted); margin-top: 10px;">
+                            <i class="fas fa-table"></i> risk_levels
+                        </div>
+                    </div>
+                    
+                    <div class="data-arrow disconnected">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                    
+                    <div class="data-node disconnected">
+                        <h5>Vulnerable Assets Table</h5>
+                        <p>Lists discovered vulnerable systems</p>
+                        <div style="font-size: 12px; color: var(--muted); margin-top: 10px;">
+                            <i class="fas fa-table"></i> vulnerable_assets
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="note-box">
+                    <strong><i class="fas fa-lightbulb"></i> SECURITY INSIGHT:</strong> Without joins, we cannot answer critical questions like "Which assets have CRITICAL vulnerabilities?" or "What's the severity of our compromised database server?" This disconnected view creates security blind spots.
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 2: Database Schema -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-database"></i> PART 2: SECURITY DATABASE SCHEMA</h2>
+            
+            <div class="step">
+                <h3>Security Database Structure</h3>
+                
+                <div class="file-browser">
+                    <h4 style="color: white; margin-bottom: 15px;">Project Files</h4>
+                    <div class="file-item active" data-file="schema">
+                        <div class="file-icon"><i class="fas fa-code"></i></div>
+                        <div>
+                            <strong>schema.sql</strong>
+                            <div style="font-size: 12px; color: #94a3b8;">Security database schema</div>
+                        </div>
+                    </div>
+                    <div class="file-item" data-file="seeds">
+                        <div class="file-icon"><i class="fas fa-seedling"></i></div>
+                        <div>
+                            <strong>seeds.sql</strong>
+                            <div style="font-size: 12px; color: #94a3b8;">Sample security data</div>
+                        </div>
+                    </div>
+                    <div class="file-item" data-file="query">
+                        <div class="file-icon"><i class="fas fa-search"></i></div>
+                        <div>
+                            <strong>query.sql</strong>
+                            <div style="font-size: 12px; color: #94a3b8;">Join query to complete</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="file-content active" id="schemaFile">
+-- ============================================
+-- MSEBETSI SECURITY DATABASE SCHEMA
+-- Penetration Testing Vulnerability Database
+-- ============================================
+
+DROP DATABASE IF EXISTS security_db;
+CREATE DATABASE security_db;
+
+\c security_db;
+
+-- Table 1: Vulnerability Risk Levels
+CREATE TABLE risk_levels (
+  id SERIAL PRIMARY KEY,
+  risk_score INTEGER NOT NULL,
+  severity VARCHAR(20) NOT NULL
+);
+
+-- Table 2: Vulnerable Assets
+CREATE TABLE vulnerable_assets (
+  id SERIAL PRIMARY KEY,
+  asset_name VARCHAR(50) NOT NULL,
+  is_exploited BOOLEAN,
+  risk_id INTEGER,
+  FOREIGN KEY (risk_id)
+  REFERENCES risk_levels(id)
+  ON DELETE SET NULL
+);
+
+-- ============================================
+-- RELATIONSHIP:
+-- risk_levels (One)  ──────┐
+--                         │
+--                   id (Primary Key)
+--                         │
+-- vulnerable_assets (Many) ──────┘
+--                   risk_id (Foreign Key)
+-- ============================================
+                </div>
+                
+                <div class="file-content" id="seedsFile">
+-- ============================================
+-- SAMPLE SECURITY DATA FOR PENETRATION TESTING
+-- ============================================
+
+-- Risk Levels (1=Low, 5=Urgent)
+INSERT INTO risk_levels (risk_score, severity)
+VALUES (1, 'LOW'),
+       (2, 'MEDIUM'),
+       (3, 'HIGH'),
+       (4, 'CRITICAL'),
+       (5, 'URGENT');
+
+-- Discovered Vulnerable Assets
+INSERT INTO vulnerable_assets (asset_name, is_exploited, risk_id)
+VALUES ('Web Server - Apache', true, 1),
+       ('Database - PostgreSQL', false, 3),
+       ('Firewall - Cisco ASA', true, 5),
+       ('Load Balancer - F5', false, 2),
+       ('API Gateway - Kong', true, 4),
+       ('DNS Server - BIND', false, 3),
+       ('Mail Server - Postfix', true, 1);
+
+-- ============================================
+-- CURRENT DISCONNECTION:
+-- We know what assets are vulnerable,
+-- We know risk severity levels,
+-- But we cannot CORRELATE them without JOINs
+-- ============================================
+                </div>
+                
+                <div class="file-content" id="queryFile">
+-- ============================================
+-- QUERY.SQL - PENETRATION TESTER'S CHALLENGE
+-- ============================================
+-- MISSION: Create a JOIN query that correlates
+-- vulnerable assets with their risk levels
+--
+-- ACCEPTANCE CRITERIA:
+-- 1. Query combines data from both tables
+-- 2. Returns asset_name, risk_score, severity
+-- 3. Uses proper JOIN syntax
+-- 4. Matches the expected output format
+-- ============================================
+
+-- YOUR TASK: Replace this placeholder query with
+-- a proper JOIN operation
+
+-- Current (problematic) approach:
+SELECT asset_name FROM vulnerable_assets;  -- Only shows assets
+SELECT risk_score, severity FROM risk_levels;  -- Only shows risks
+
+-- DESIRED SOLUTION: JOIN both tables
+-- Write your JOIN query below:
+
+
+
+-- ============================================
+-- EXPECTED OUTPUT (after running \i query.sql):
+--
+--    vulnerable_system    | threat_level | risk_category
+-- ------------------------+--------------+---------------
+--  Web Server - Apache    |            1 | LOW
+--  Database - PostgreSQL  |            3 | HIGH
+--  Firewall - Cisco ASA   |            5 | URGENT
+--  Load Balancer - F5     |            2 | MEDIUM
+--  API Gateway - Kong     |            4 | CRITICAL
+--  DNS Server - BIND      |            3 | HIGH
+--  Mail Server - Postfix  |            1 | LOW
+-- ============================================
+                </div>
+            </div>
+            
+            <div class="join-visualization">
+                <div class="table-box risk-levels">
+                    <h4>risk_levels Table</h4>
+                    <div class="table-column">
+                        <div class="column-name">id</div>
+                        <div class="column-type">SERIAL</div>
+                        <span class="pk-tag">PK</span>
+                    </div>
+                    <div class="table-column">
+                        <div class="column-name">risk_score</div>
+                        <div class="column-type">INTEGER</div>
+                    </div>
+                    <div class="table-column">
+                        <div class="column-name">severity</div>
+                        <div class="column-type">VARCHAR(20)</div>
+                    </div>
+                </div>
+                
+                <div class="join-operator">JOIN</div>
+                
+                <div class="table-box assets">
+                    <h4>vulnerable_assets Table</h4>
+                    <div class="table-column">
+                        <div class="column-name">id</div>
+                        <div class="column-type">SERIAL</div>
+                        <span class="pk-tag">PK</span>
+                    </div>
+                    <div class="table-column">
+                        <div class="column-name">asset_name</div>
+                        <div class="column-type">VARCHAR(50)</div>
+                    </div>
+                    <div class="table-column">
+                        <div class="column-name">is_exploited</div>
+                        <div class="column-type">BOOLEAN</div>
+                    </div>
+                    <div class="table-column">
+                        <div class="column-name">risk_id</div>
+                        <div class="column-type">INTEGER</div>
+                        <span class="fk-tag">FK → risk_levels.id</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="success-box">
+                <strong><i class="fas fa-link"></i> KEY RELATIONSHIP IDENTIFIED:</strong> The <code>risk_id</code> column in <code>vulnerable_assets</code> is a foreign key that references the <code>id</code> column in <code>risk_levels</code>. This is our JOIN point!
+            </div>
+        </div>
+
+        <!-- Part 3: JOIN Syntax -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-code"></i> PART 3: JOIN SYNTAX MASTERY</h2>
+            
+            <div class="step">
+                <h3>INNER JOIN - The Security Analyst's Tool</h3>
+                
+                <div class="code-block">
+<span class="comment">-- BASIC JOIN SYNTAX PATTERN:</span><br>
+<span class="keyword">SELECT</span> table1.column1, table2.column2, ...<br>
+<span class="keyword">FROM</span> <span class="table-name">table1</span><br>
+<span class="join-clause">JOIN</span> <span class="table-name">table2</span> <span class="keyword">ON</span> table1.matching_column = table2.matching_column;<br><br>
+
+<span class="comment">-- OUR SECURITY CONTEXT:</span><br>
+<span class="keyword">SELECT</span> <br>
+&nbsp;&nbsp;vulnerable_assets.asset_name <span class="keyword">AS</span> vulnerable_system,<br>
+&nbsp;&nbsp;risk_levels.risk_score <span class="keyword">AS</span> threat_level,<br>
+&nbsp;&nbsp;risk_levels.severity <span class="keyword">AS</span> risk_category<br>
+<span class="keyword">FROM</span> <span class="table-name">vulnerable_assets</span><br>
+<span class="join-clause">JOIN</span> <span class="table-name">risk_levels</span> <br>
+&nbsp;&nbsp;<span class="keyword">ON</span> vulnerable_assets.risk_id = risk_levels.id;<br><br>
+
+<span class="comment">-- HOW IT WORKS (Visualized):</span><br>
+<span class="comment">-- 1. Start with vulnerable_assets table</span><br>
+<span class="comment">-- 2. For EACH row, look for MATCHING risk_id in risk_levels.id</span><br>
+<span class="comment">-- 3. When match found, COMBINE columns from both tables</span><br>
+<span class="comment">-- 4. Return combined result set</span>
+                </div>
+                
+                <div class="data-flow">
+                    <div class="data-node connected">
+                        <h5>vulnerable_assets</h5>
+                        <div style="font-size: 12px; margin-top: 5px;">
+                            <code>risk_id = 3</code>
+                        </div>
+                    </div>
+                    
+                    <div class="data-arrow connected">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    
+                    <div class="data-node connected">
+                        <h5>risk_levels</h5>
+                        <div style="font-size: 12px; margin-top: 5px;">
+                            <code>id = 3</code><br>
+                            <code>severity = "HIGH"</code>
+                        </div>
+                    </div>
+                    
+                    <div class="data-arrow connected">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                    
+                    <div class="data-node connected" style="background: #f0fdf4;">
+                        <h5>Result</h5>
+                        <div style="font-size: 12px; margin-top: 5px;">
+                            <code>asset_name = "Database - PostgreSQL"</code><br>
+                            <code>severity = "HIGH"</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <h3>Practical Security Applications</h3>
+                
+                <div class="vulnerability-matrix">
+                    <div class="vuln-card critical">
+                        <h5><i class="fas fa-fire"></i> Critical Vulnerabilities</h5>
+                        <p>Find all assets with CRITICAL or URGENT risk levels</p>
+                        <div class="code-block" style="background: rgba(239, 68, 68, 0.1); margin: 10px 0; padding: 10px; font-size: 0.8em;">
+<span class="keyword">SELECT</span> asset_name, severity<br>
+<span class="keyword">FROM</span> vulnerable_assets<br>
+<span class="join-clause">JOIN</span> risk_levels <span class="keyword">ON</span> risk_id = id<br>
+<span class="keyword">WHERE</span> risk_score >= 4;
+                        </div>
+                    </div>
+                    
+                    <div class="vuln-card high">
+                        <h5><i class="fas fa-bug"></i> Exploited High-Risk Assets</h5>
+                        <p>Identify already-exploited high-risk systems</p>
+                        <div class="code-block" style="background: rgba(245, 158, 11, 0.1); margin: 10px 0; padding: 10px; font-size: 0.8em;">
+<span class="keyword">SELECT</span> asset_name, severity, is_exploited<br>
+<span class="keyword">FROM</span> vulnerable_assets<br>
+<span class="join-clause">JOIN</span> risk_levels <span class="keyword">ON</span> risk_id = id<br>
+<span class="keyword">WHERE</span> is_exploited = true<br>
+&nbsp;&nbsp;<span class="keyword">AND</span> risk_score >= 3;
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 4: Hands-On Exercise -->
+        <div class="section exercise">
+            <h2 class="section-title"><i class="fas fa-flask"></i> PART 4: PENETRATION TESTER'S CHALLENGE</h2>
+            
+            <div class="step">
+                <h3>Complete the Security Correlation Query</h3>
+                
+                <div class="business-case">
+                    <h4><i class="fas fa-tasks"></i> MISSION REQUIREMENTS</h4>
+                    <p>As a Msebetsi Solutions security analyst, create a comprehensive vulnerability report by joining security data:</p>
+                    <ol style="margin-top: 15px; padding-left: 20px;">
+                        <li>Write a JOIN query in <code>query.sql</code></li>
+                        <li>Combine data from both <code>vulnerable_assets</code> and <code>risk_levels</code> tables</li>
+                        <li>Return columns: <code>vulnerable_system</code>, <code>threat_level</code>, <code>risk_category</code></li>
+                        <li>Use proper JOIN syntax with table aliases</li>
+                        <li>Match the expected output format exactly</li>
+                    </ol>
+                </div>
+                
+                <div class="step">
+                    <h4>Interactive Query Builder</h4>
+                    <p>Build your query in the editor below:</p>
+                    
+                    <div class="code-block" id="queryEditor" contenteditable="true" style="min-height: 200px;">
+-- ============================================
+-- query.sql - Security Data Correlation Query
+-- Student: [Your Name Here]
+-- Date: <span id="currentDate"></span>
+-- ============================================
+
+-- Your JOIN query here:
+SELECT
+
+
+
+-- Remember:
+-- 1. vulnerable_assets has: asset_name, risk_id
+-- 2. risk_levels has: risk_score, severity
+-- 3. Join ON: vulnerable_assets.risk_id = risk_levels.id
+-- 4. Use AS for column aliases:
+--    vulnerable_system, threat_level, risk_category
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button class="btn btn-security" onclick="testQuery()">
+                            <i class="fas fa-vial"></i> Test Query
+                        </button>
+                        <button class="btn" onclick="showSolution()">
+                            <i class="fas fa-lightbulb"></i> Show Hint
+                        </button>
+                        <button class="btn btn-join" onclick="submitSolution()">
+                            <i class="fas fa-check"></i> Submit Solution
+                        </button>
+                    </div>
+                    
+                    <div id="testResult" style="display: none; margin-top: 20px;">
+                        <!-- Test results appear here -->
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <h3>Expected Output</h3>
+                    <p>Your query should produce this exact result:</p>
+                    
+                    <div class="query-result">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>vulnerable_system</th>
+                                    <th>threat_level</th>
+                                    <th>risk_category</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Web Server - Apache</td>
+                                    <td>1</td>
+                                    <td>LOW</td>
+                                </tr>
+                                <tr>
+                                    <td>Database - PostgreSQL</td>
+                                    <td>3</td>
+                                    <td>HIGH</td>
+                                </tr>
+                                <tr>
+                                    <td>Firewall - Cisco ASA</td>
+                                    <td>5</td>
+                                    <td>URGENT</td>
+                                </tr>
+                                <tr>
+                                    <td>Load Balancer - F5</td>
+                                    <td>2</td>
+                                    <td>MEDIUM</td>
+                                </tr>
+                                <tr>
+                                    <td>API Gateway - Kong</td>
+                                    <td>4</td>
+                                    <td>CRITICAL</td>
+                                </tr>
+                                <tr>
+                                    <td>DNS Server - BIND</td>
+                                    <td>3</td>
+                                    <td>HIGH</td>
+                                </tr>
+                                <tr>
+                                    <td>Mail Server - Postfix</td>
+                                    <td>1</td>
+                                    <td>LOW</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Success Criteria -->
+                <div class="step">
+                    <h3>Success Criteria Checklist</h3>
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria1">
+                            <label for="criteria1">Query uses JOIN keyword</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria2">
+                            <label for="criteria2">Correct ON clause with matching columns</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria3">
+                            <label for="criteria3">Returns exactly 3 columns with aliases</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria4">
+                            <label for="criteria4">Column names match expected output</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria5">
+                            <label for="criteria5">Query produces 7 rows of results</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria6">
+                            <label for="criteria6">Code is professionally formatted and commented</label>
+                        </div>
+                    </div>
+                    
+                    <button class="btn" onclick="checkAllCriteria()" style="margin-top: 20px;">
+                        <i class="fas fa-certificate"></i> Verify & Complete Mission
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 5: Advanced JOIN Concepts -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-rocket"></i> PART 5: ADVANCED SECURITY DATA CORRELATION</h2>
+            
+            <div class="step">
+                <h3>Different JOIN Types for Security Analysis</h3>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>JOIN Type</th>
+                                <th>Syntax</th>
+                                <th>Security Use Case</th>
+                                <th>Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="join-type-tag">INNER JOIN</span></td>
+                                <td><code>JOIN ... ON</code></td>
+                                <td>Find assets WITH risk assessments</td>
+                                <td>Only matching rows</td>
+                            </tr>
+                            <tr>
+                                <td><span class="join-type-tag">LEFT JOIN</span></td>
+                                <td><code>LEFT JOIN ... ON</code></td>
+                                <td>Find ALL assets, even without risk data</td>
+                                <td>All left + matching right</td>
+                            </tr>
+                            <tr>
+                                <td><span class="join-type-tag">RIGHT JOIN</span></td>
+                                <td><code>RIGHT JOIN ... ON</code></td>
+                                <td>Find ALL risk levels, even unused ones</td>
+                                <td>All right + matching left</td>
+                            </tr>
+                            <tr>
+                                <td><span class="join-type-tag">FULL JOIN</span></td>
+                                <td><code>FULL JOIN ... ON</code></td>
+                                <td>Complete audit of all data</td>
+                                <td>All rows from both tables</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="code-block">
+<span class="comment">-- ADVANCED: Find assets WITHOUT risk assessments (security gap!)</span><br>
+<span class="keyword">SELECT</span> asset_name<br>
+<span class="keyword">FROM</span> vulnerable_assets<br>
+<span class="join-clause">LEFT JOIN</span> risk_levels <span class="keyword">ON</span> risk_id = id<br>
+<span class="keyword">WHERE</span> risk_levels.id <span class="keyword">IS NULL</span>;<br><br>
+
+<span class="comment">-- ADVANCED: Many-to-Many Security Example</span><br>
+<span class="comment">-- One vulnerability affects multiple assets</span><br>
+<span class="comment">-- One asset has multiple vulnerabilities</span><br>
+<span class="comment">-- Requires a JUNCTION TABLE:</span><br>
+
+<span class="keyword">CREATE TABLE</span> cve_assets (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cve_id <span class="type">INTEGER</span> <span class="keyword">REFERENCES</span> cves(id),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;asset_id <span class="type">INTEGER</span> <span class="keyword">REFERENCES</span> vulnerable_assets(id),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">PRIMARY KEY</span> (cve_id, asset_id)  <span class="comment">-- Composite key</span><br>
+);<br><br>
+
+<span class="keyword">SELECT</span> cve_id, COUNT(asset_id) <span class="keyword">AS</span> affected_assets<br>
+<span class="keyword">FROM</span> cve_assets<br>
+<span class="keyword">GROUP BY</span> cve_id<br>
+<span class="keyword">ORDER BY</span> affected_assets <span class="keyword">DESC</span>;
+                </div>
+            </div>
+            
+            <div class="step">
+                <h3>🏆 Bonus Challenge: Many-to-Many Relationships</h3>
+                
+                <div class="note-box">
+                    <h4><i class="fas fa-brain"></i> Research Question</h4>
+                    <p><strong>What is a many-to-many relationship in database design?</strong></p>
+                    <p><strong>Security Context:</strong> Consider CVEs (Common Vulnerabilities and Exposures) and affected assets:</p>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li>CVE-2021-1234 affects Server A, Server B</li>
+                        <li>CVE-2021-5678 affects Server B, Server C, Server D</li>
+                        <li>Server B has CVE-2021-1234 AND CVE-2021-5678</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>Solution:</strong> Use a junction table with composite primary key to handle this relationship.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional Summary -->
+        <div class="section" style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe);">
+            <h2 class="section-title"><i class="fas fa-clipboard-check"></i> SECURITY INTELLIGENCE SUMMARY</h2>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>JOIN Concept</th>
+                            <th>Security Application</th>
+                            <th>Key Syntax</th>
+                            <th>Business Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>INNER JOIN</strong></td>
+                            <td>Correlate known risks with assets</td>
+                            <td><code>JOIN ... ON x.id = y.foreign_key</code></td>
+                            <td>Identify immediate threats</td>
+                        </tr>
+                        <tr>
+                            <td><strong>LEFT JOIN</strong></td>
+                            <td>Find unassessed assets</td>
+                            <td><code>LEFT JOIN ... WHERE right.id IS NULL</code></td>
+                            <td>Discover security gaps</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Primary Key</strong></td>
+                            <td>Unique identifier for each record</td>
+                            <td><code>id SERIAL PRIMARY KEY</code></td>
+                            <td>Guarantees data uniqueness</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Foreign Key</strong></td>
+                            <td>Reference between tables</td>
+                            <td><code>FOREIGN KEY ... REFERENCES</code></td>
+                            <td>Maintains data integrity</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="success-box" style="margin-top: 20px;">
+                <h4><i class="fas fa-shield-alt"></i> SECURITY DATA CORRELATION MASTERY ACHIEVED</h4>
+                <p>You've learned how to connect disparate security data sources to create comprehensive threat intelligence. This skill is critical for:</p>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li><strong>Vulnerability Prioritization:</strong> Focus on critical risks first</li>
+                    <li><strong>Attack Surface Analysis:</strong> Understand which assets are most exposed</li>
+                    <li><strong>Security Reporting:</strong> Create executive dashboards from raw data</li>
+                    <li><strong>Risk Assessment:</strong> Quantify and categorize security threats</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="btn btn-secondary" onclick="window.location.href='lesson7.html'">
+                <i class="fas fa-arrow-left"></i> Previous: Foreign Keys
+            </button>
+            <button class="btn" onclick="completeLesson()" id="nextLessonBtn" disabled>
+                Complete Mission & Continue <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.1); color: var(--muted); font-size: 14px;">
+            <p><strong>MSEBETSI SOLUTIONS SECURITY PRINCIPLE:</strong> "Data correlation is the foundation of threat intelligence. The ability to JOIN tables effectively separates junior analysts from senior security professionals."</p>
+            <p>© 2024 MSEBETSI SOLUTIONS - Cybersecurity & Penetration Testing Division</p>
+        </div>
+    </div>
+
+    <script>
+        // Set current date in editor
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString();
+        
+        // File browser functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // File switching
+            document.querySelectorAll('.file-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all
+                    document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
+                    document.querySelectorAll('.file-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked
+                    this.classList.add('active');
+                    const fileId = this.getAttribute('data-file') + 'File';
+                    document.getElementById(fileId).classList.add('active');
+                });
+            });
+            
+            // Check for previous completion
+            if (localStorage.getItem('sql-lesson8-joins-completed') === 'true') {
+                enableNextLesson();
+                markCheckboxesAsComplete();
+            }
+            
+            // Apply syntax highlighting
+            applySyntaxHighlighting();
+        });
+        
+        function applySyntaxHighlighting() {
+            const codeBlocks = document.querySelectorAll('.code-block');
+            codeBlocks.forEach(block => {
+                const html = block.innerHTML;
+                const highlighted = html
+                    .replace(/--.*$/gm, '<span class="comment">$&</span>')
+                    .replace(/\b(SELECT|FROM|WHERE|JOIN|ON|AS|LEFT|RIGHT|INNER|FULL|OUTER|AND|OR|IS|NULL|GROUP BY|ORDER BY|DESC|ASC|COUNT|CREATE TABLE|REFERENCES|PRIMARY KEY|FOREIGN KEY|SERIAL|INTEGER|VARCHAR|BOOLEAN)\b/gi, '<span class="keyword">$1</span>')
+                    .replace(/\b(vulnerable_assets|risk_levels|cve_assets)\b/g, '<span class="table-name">$1</span>')
+                    .replace(/\b(JOIN|LEFT JOIN|RIGHT JOIN|FULL JOIN)\b/g, '<span class="join-clause">$1</span>')
+                    .replace(/'([^']*)'/g, '<span class="string">\'$1\'</span>')
+                    .replace(/\b(\d+)\b/g, '<span class="number">$1</span>')
+                    .replace(/(=|<|>|!=|<=|>=|<>)/g, '<span class="operator">$1</span>')
+                    .replace(/\b(INTEGER|VARCHAR|BOOLEAN|SERIAL)\b/g, '<span class="type">$1</span>');
+                block.innerHTML = highlighted;
+            });
+        }
+        
+        function testQuery() {
+            const query = document.getElementById('queryEditor').textContent;
+            const resultDiv = document.getElementById('testResult');
+            
+            // Basic validation
+            const hasJoin = query.includes('JOIN');
+            const hasOn = query.includes('ON');
+            const hasSelect = query.includes('SELECT');
+            const hasFrom = query.includes('FROM');
+            const hasCorrectColumns = query.includes('vulnerable_system') && 
+                                      query.includes('threat_level') && 
+                                      query.includes('risk_category');
+            
+            let messages = [];
+            let isCorrect = true;
+            
+            if (!hasSelect) {
+                messages.push('Missing SELECT statement');
+                isCorrect = false;
+            }
+            if (!hasFrom) {
+                messages.push('Missing FROM clause');
+                isCorrect = false;
+            }
+            if (!hasJoin) {
+                messages.push('Missing JOIN keyword');
+                isCorrect = false;
+            }
+            if (!hasOn) {
+                messages.push('Missing ON clause for JOIN condition');
+                isCorrect = false;
+            }
+            if (!hasCorrectColumns) {
+                messages.push('Column aliases should be: vulnerable_system, threat_level, risk_category');
+                isCorrect = false;
+            }
+            
+            if (messages.length === 0) {
+                resultDiv.innerHTML = `
+                    <div class="success-box">
+                        <h4><i class="fas fa-check-circle"></i> Query Structure Valid!</h4>
+                        <p>Your JOIN query appears to be correctly structured. Check the success criteria to verify all requirements are met.</p>
+                        <p style="margin-top: 10px;"><strong>Next step:</strong> Test in PostgreSQL with <code>\\i query.sql</code> to verify output matches exactly.</p>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="warning-box">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Query Needs Improvement</h4>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            ${messages.map(m => `<li>${m}</li>`).join('')}
+                        </ul>
+                        <p style="margin-top: 15px;"><strong>Tip:</strong> Remember the basic pattern: <code>SELECT ... FROM table1 JOIN table2 ON table1.column = table2.column</code></p>
+                    </div>
+                `;
+            }
+            
+            resultDiv.style.display = 'block';
+            
+            // Mark checkboxes based on validation
+            document.getElementById('criteria1').checked = hasJoin;
+            document.getElementById('criteria2').checked = hasOn;
+            document.getElementById('criteria3').checked = hasCorrectColumns;
+            document.getElementById('criteria6').checked = query.includes('--');
+        }
+        
+        function showSolution() {
+            const solution = `
+SELECT
+  va.asset_name AS vulnerable_system,
+  rl.risk_score AS threat_level,
+  rl.severity AS risk_category
+FROM vulnerable_assets AS va
+JOIN risk_levels AS rl ON va.risk_id = rl.id
+ORDER BY rl.risk_score DESC;
+            `;
+            
+            alert("Hint Solution:\n\n" + solution + "\n\nTry to build it yourself first!");
+        }
+        
+        function submitSolution() {
+            const query = document.getElementById('queryEditor').textContent;
+            
+            // Check for correct solution patterns
+            const hasCorrectJoin = /JOIN.*risk_levels.*ON.*risk_id.*=.*id/.test(query) || 
+                                  /JOIN.*risk_levels.*ON.*id.*=.*risk_id/.test(query);
+            const hasAllColumns = query.includes('asset_name') && query.includes('risk_score') && query.includes('severity');
+            const hasAliases = query.includes('vulnerable_system') && query.includes('threat_level') && query.includes('risk_category');
+            
+            if (hasCorrectJoin && hasAllColumns && hasAliases) {
+                // Mark all criteria as met
+                document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+                    cb.checked = true;
+                    cb.parentElement.style.color = 'var(--success)';
+                    cb.parentElement.style.fontWeight = '600';
+                });
+                
+                alert("✅ MISSION ACCOMPLISHED!\n\nYou've successfully correlated security data using SQL JOINs!\n\nWhat you've achieved:\n✓ Mastered INNER JOIN operations\n✓ Connected vulnerability and risk data\n✓ Created comprehensive security reports\n✓ Understood PK/FK relationships\n\nNext: Advanced security data analysis!");
+                
+                enableNextLesson();
+            } else {
+                alert("Close! But there might be an issue with your query.\n\nCheck:\n1. Are you joining on the correct columns? (risk_id = id)\n2. Are you selecting the right columns from each table?\n3. Are you using AS for column aliases?\n\nTry the 'Test Query' button for specific feedback.");
+            }
+        }
+        
+        function checkAllCriteria() {
+            const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            
+            if (allChecked) {
+                completeLesson();
+            } else {
+                alert('Please complete all success criteria before continuing. Use the "Test Query" and "Submit Solution" buttons to validate your work.');
+            }
+        }
+        
+        function enableNextLesson() {
+            document.getElementById('nextLessonBtn').disabled = false;
+        }
+        
+        function markCheckboxesAsComplete() {
+            document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+                cb.checked = true;
+                cb.parentElement.style.color = 'var(--success)';
+                cb.parentElement.style.fontWeight = '600';
+            });
+        }
+        
+        function completeLesson() {
+            localStorage.setItem('sql-lesson8-joins-completed', 'true');
+            
+            const completionMessage = `
+🎖️ SECURITY DATA CORRELATION MASTERY
+
+MISSION SUCCESS!
+You've completed the penetration testing lab.
+
+Key Skills Demonstrated:
+✓ SQL JOIN operations for data correlation
+✓ Primary Key / Foreign Key relationships
+✓ Security intelligence report generation
+✓ Real-world vulnerability assessment
+
+Professional Impact:
+Your ability to JOIN tables transforms raw data into actionable security intelligence. This skill enables:
+
+• Prioritizing remediation efforts
+• Identifying critical vulnerabilities  
+• Creating executive security dashboards
+• Making data-driven security decisions
+
+Remember: In cybersecurity, data correlation is intelligence.
+The ability to connect disparate data sources separates junior analysts from security leaders.
+
+Next: Advanced querying for security analytics!
+            `;
+            
+            alert(completionMessage);
+            // window.location.href = 'lesson9.html'; // Uncomment for actual navigation
+        }
+    </script>
+</body>
+</html>

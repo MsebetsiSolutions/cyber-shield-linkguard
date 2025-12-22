@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 4: Data Types & Constraints | MSEBETSI Advanced SQL</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --accent: #0b5fff;
+            --accent-light: rgba(11, 95, 255, 0.1);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --type-bg: rgba(78, 201, 176, 0.1);
+            --constraint-bg: rgba(245, 158, 11, 0.1);
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--bg);
+            color: #1e293b;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .lesson-container {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            margin-top: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid rgba(11, 95, 255, 0.1);
+        }
+        
+        .module-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .lesson-title {
+            font-size: 36px;
+            color: #0f172a;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .lesson-subtitle {
+            color: var(--muted);
+            font-size: 18px;
+            margin-bottom: 30px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .time-badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            padding: 6px 15px;
+            border-radius: 15px;
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .concept-visualization {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+        
+        .concept-card {
+            background: white;
+            padding: 30px 25px;
+            border-radius: 12px;
+            text-align: center;
+            width: 250px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .concept-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+        }
+        
+        .concept-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+        
+        .concept-card.data-types::before { background: linear-gradient(90deg, #3b82f6, #8b5cf6); }
+        .concept-card.constraints::before { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+        
+        .concept-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .concept-card.data-types .concept-icon { color: #3b82f6; }
+        .concept-card.constraints .concept-icon { color: #f59e0b; }
+        
+        .interactive-schema-builder {
+            background: linear-gradient(135deg, #f0f9ff, #e6f3ff);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+            border: 2px solid #1890ff;
+        }
+        
+        .scenario-banner {
+            background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+            box-shadow: 0 8px 32px rgba(14, 165, 233, 0.2);
+        }
+        
+        .scenario-banner h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .objectives {
+            background: linear-gradient(135deg, #f0f7ff, #e6f0ff);
+            border-left: 4px solid var(--accent);
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        
+        .objectives h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .objectives ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+        
+        .objectives li {
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .objectives li:before {
+            content: "✓";
+            color: var(--success);
+            font-weight: bold;
+            position: absolute;
+            left: -20px;
+        }
+        
+        .section {
+            margin: 40px 0;
+            padding: 30px;
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(11, 95, 255, 0.05);
+        }
+        
+        .section-title {
+            color: var(--accent);
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(11, 95, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .step {
+            margin: 25px 0;
+            padding: 25px;
+            background: rgba(11, 95, 255, 0.02);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 25px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            overflow-x: auto;
+            border: 1px solid #334155;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            position: relative;
+        }
+        
+        .code-block .comment { color: #6A9955; }
+        .code-block .keyword { color: #569CD6; }
+        .code-block .string { color: #CE9178; }
+        .code-block .function { color: #DCDCAA; }
+        .code-block .number { color: #B5CEA8; }
+        .code-block .operator { color: #D4D4D4; }
+        .code-block .type { color: #4EC9B0; font-weight: bold; }
+        .code-block .constraint { color: #ffcc00; font-weight: bold; }
+        
+        .data-type-tag {
+            display: inline-block;
+            background: var(--type-bg);
+            color: #0d9488;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0 5px;
+            border: 1px solid rgba(78, 201, 176, 0.3);
+        }
+        
+        .constraint-tag {
+            display: inline-block;
+            background: var(--constraint-bg);
+            color: #d97706;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0 5px;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th {
+            background: rgba(11, 95, 255, 0.1);
+            color: var(--accent);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        tr:hover {
+            background: rgba(11, 95, 255, 0.03);
+        }
+        
+        .interactive-builder {
+            background: linear-gradient(135deg, #fef7ff, #f5f3ff);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border: 2px solid #8b5cf6;
+        }
+        
+        .note-box {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .warning-box {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--danger);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .success-box {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .exercise {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 40px 0;
+            border: 2px dashed var(--accent);
+        }
+        
+        .checklist {
+            margin: 20px 0;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .checklist-item input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            font-size: 15px;
+        }
+        
+        .btn:hover {
+            background: #0a4ed9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(11, 95, 255, 0.2);
+        }
+        
+        .btn-secondary {
+            background: rgba(11, 95, 255, 0.1);
+            color: var(--accent);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(11, 95, 255, 0.2);
+        }
+        
+        .btn-success {
+            background: var(--success);
+        }
+        
+        .btn-success:hover {
+            background: #0da271;
+        }
+        
+        .btn-type {
+            background: var(--type-bg);
+            color: #0d9488;
+            border: 1px solid rgba(78, 201, 176, 0.3);
+        }
+        
+        .btn-constraint {
+            background: var(--constraint-bg);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .live-schema-editor {
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 25px 0;
+            border: 1px solid #334155;
+        }
+        
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .editor-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .editor-tab {
+            padding: 8px 20px;
+            background: #334155;
+            color: #cbd5e1;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .editor-tab:hover {
+            background: #475569;
+        }
+        
+        .editor-tab.active {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .editor-content {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 25px;
+            border-radius: 6px;
+            font-family: 'Consolas', monospace;
+            min-height: 300px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            line-height: 1.6;
+            border: 1px solid #475569;
+            position: relative;
+        }
+        
+        .toolbox {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .toolbox-section {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .toolbox-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .toolbox-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .toolbox-item {
+            padding: 8px 15px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: move;
+            font-size: 13px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .toolbox-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .toolbox-item.data-type {
+            background: var(--type-bg);
+            border-color: rgba(78, 201, 176, 0.3);
+            color: #0d9488;
+        }
+        
+        .toolbox-item.constraint {
+            background: var(--constraint-bg);
+            border-color: rgba(245, 158, 11, 0.3);
+            color: #d97706;
+        }
+        
+        .data-validation-tester {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border: 2px solid var(--success);
+        }
+        
+        .test-case {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid var(--border);
+        }
+        
+        .test-result {
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .test-result.success {
+            background: #f0fdf4;
+            border: 1px solid var(--success);
+            color: var(--success);
+            display: block;
+        }
+        
+        .test-result.error {
+            background: #fef2f2;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            display: block;
+        }
+        
+        .schema-diagram {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 10px;
+        }
+        
+        .diagram-table {
+            display: inline-block;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 2px solid #334155;
+            position: relative;
+        }
+        
+        .diagram-table::before {
+            content: 'customers';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #334155;
+            color: white;
+            padding: 5px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .diagram-column {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        
+        .diagram-column:last-child {
+            border-bottom: none;
+        }
+        
+        .column-name {
+            font-weight: bold;
+            width: 150px;
+            text-align: left;
+        }
+        
+        .column-details {
+            display: flex;
+            gap: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .lesson-container { padding: 20px; }
+            .lesson-title { font-size: 28px; }
+            .section { padding: 20px; }
+            .concept-visualization { flex-direction: column; align-items: center; }
+            .concept-card { width: 100%; max-width: 300px; }
+            .toolbox { flex-direction: column; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- Header Section -->
+        <div class="header">
+            <div class="module-badge">DATA INTEGRITY & SCHEMA DESIGN</div>
+            <h1 class="lesson-title">Lesson 5: PostgreSQL Data Types & Constraints</h1>
+            <p class="lesson-subtitle">Master the art of data integrity through precise typing and constraint enforcement</p>
+            <div class="time-badge"><i class="fas fa-clock"></i> ADVANCED 90-MINUTE WORKSHOP</div>
+        </div>
+
+        <!-- Concept Visualization -->
+        <div class="concept-visualization">
+            <div class="concept-card data-types">
+                <div class="concept-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Data Types</h3>
+                <p style="color: var(--muted); margin: 10px 0;">Define WHAT data can be stored</p>
+                <div style="font-size: 14px; margin-top: 15px;">
+                    <span class="data-type-tag">INTEGER</span>
+                    <span class="data-type-tag">VARCHAR</span>
+                    <span class="data-type-tag">BOOLEAN</span>
+                </div>
+            </div>
+            
+            <div class="concept-card constraints">
+                <div class="concept-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h3>Constraints</h3>
+                <p style="color: var(--muted); margin: 10px 0;">Define RULES for data</p>
+                <div style="font-size: 14px; margin-top: 15px;">
+                    <span class="constraint-tag">NOT NULL</span>
+                    <span class="constraint-tag">UNIQUE</span>
+                    <span class="constraint-tag">CHECK</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-World Scenario -->
+        <div class="scenario-banner">
+            <h3><i class="fas fa-database"></i> REAL-WORLD PROJECT: MSEBETSI CUSTOMER DATABASE</h3>
+            <p><strong>Business Challenge:</strong> Design a production-grade customer database with guaranteed data quality. Every field must enforce strict typing and business rules.</p>
+            <p><strong>Technical Goal:</strong> Implement a <code>customers</code> table with proper data types and constraints to prevent invalid data entry.</p>
+        </div>
+
+        <!-- Learning Objectives -->
+        <div class="objectives">
+            <h3><i class="fas fa-bullseye"></i> PROFESSIONAL LEARNING OUTCOMES</h3>
+            <ul>
+                <li>Master PostgreSQL data types for different data categories</li>
+                <li>Implement column-level constraints for data integrity</li>
+                <li>Understand table-level vs column-level constraints</li>
+                <li>Design schemas that prevent invalid data at the database level</li>
+                <li>Validate constraint enforcement through interactive testing</li>
+                <li>Optimize data types for storage and performance</li>
+            </ul>
+        </div>
+
+        <!-- Part 1: Data Types Deep Dive -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-tags"></i> PART 1: POSTGRESQL DATA TYPES MASTERY</h2>
+            
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Why Data Types Matter</h3>
+                
+                <div class="interactive-builder">
+                    <h4><i class="fas fa-balance-scale"></i> The Data Type Decision Matrix</h4>
+                    <p>Choose the right data type for each business requirement:</p>
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Business Data</th>
+                                    <th>Wrong Type</th>
+                                    <th>Right Type</th>
+                                    <th>Why It Matters</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Customer Age</td>
+                                    <td><code>VARCHAR(10)</code></td>
+                                    <td><code>INTEGER</code></td>
+                                    <td>Prevents "twenty-five", enables math operations</td>
+                                </tr>
+                                <tr>
+                                    <td>Email Address</td>
+                                    <td><code>TEXT</code></td>
+                                    <td><code>VARCHAR(255)</code></td>
+                                    <td>Enforces max length, hints at validation</td>
+                                </tr>
+                                <tr>
+                                    <td>Member Status</td>
+                                    <td><code>VARCHAR(10)</code></td>
+                                    <td><code>BOOLEAN</code></td>
+                                    <td>Only true/false, prevents "yes", "no", "maybe"</td>
+                                </tr>
+                                <tr>
+                                    <td>Price</td>
+                                    <td><code>REAL</code></td>
+                                    <td><code>DECIMAL(10,2)</code></td>
+                                    <td>Precise currency, no floating-point errors</td>
+                                </tr>
+                                <tr>
+                                    <td>Created Date</td>
+                                    <td><code>VARCHAR(20)</code></td>
+                                    <td><code>TIMESTAMP</code></td>
+                                    <td>Enables date math, sorting, timezone handling</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="note-box">
+                    <strong><i class="fas fa-lightbulb"></i> PROFESSIONAL INSIGHT:</strong> Choosing the right data type is your first line of defense against bad data. It's easier to prevent invalid data than to clean it later.
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Essential PostgreSQL Data Types</h3>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Data Type</th>
+                                <th>Storage</th>
+                                <th>Range/Example</th>
+                                <th>Best For</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td rowspan="3">Numeric</td>
+                                <td><code>INTEGER</code></td>
+                                <td>4 bytes</td>
+                                <td>-2M to +2M</td>
+                                <td>Counters, IDs, ages</td>
+                            </tr>
+                            <tr>
+                                <td><code>BIGINT</code></td>
+                                <td>8 bytes</td>
+                                <td>±9.2 quintillion</td>
+                                <td>Large counts, financial IDs</td>
+                            </tr>
+                            <tr>
+                                <td><code>DECIMAL(p,s)</code></td>
+                                <td>Variable</td>
+                                <td>Exact decimal</td>
+                                <td>Currency, precise measurements</td>
+                            </tr>
+                            <tr>
+                                <td rowspan="3">Text</td>
+                                <td><code>VARCHAR(n)</code></td>
+                                <td>Variable</td>
+                                <td>Max n characters</td>
+                                <td>Names, emails, codes</td>
+                            </tr>
+                            <tr>
+                                <td><code>TEXT</code></td>
+                                <td>Variable</td>
+                                <td>Unlimited</td>
+                                <td>Descriptions, content</td>
+                            </tr>
+                            <tr>
+                                <td><code>CHAR(n)</code></td>
+                                <td>Fixed</td>
+                                <td>Exactly n chars</td>
+                                <td>Fixed codes (ISO, UPC)</td>
+                            </tr>
+                            <tr>
+                                <td rowspan="2">Boolean</td>
+                                <td><code>BOOLEAN</code></td>
+                                <td>1 byte</td>
+                                <td>TRUE/FALSE/NULL</td>
+                                <td>Flags, switches, status</td>
+                            </tr>
+                            <tr>
+                                <td><code>BIT(n)</code></td>
+                                <td>Variable</td>
+                                <td>Bit strings</td>
+                                <td>Permissions, options</td>
+                            </tr>
+                            <tr>
+                                <td rowspan="2">Date/Time</td>
+                                <td><code>DATE</code></td>
+                                <td>4 bytes</td>
+                                <td>4713 BC - 5874897 AD</td>
+                                <td>Birthdates, events</td>
+                            </tr>
+                            <tr>
+                                <td><code>TIMESTAMP</code></td>
+                                <td>8 bytes</td>
+                                <td>4713 BC - 294276 AD</td>
+                                <td>Logs, transactions</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="code-block">
+<span class="comment">-- Practical data type selection examples</span><br>
+<span class="keyword">CREATE TABLE</span> professional_choices (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- ID: Use INTEGER for small tables, BIGINT for large</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;customer_id <span class="type">BIGINT</span> <span class="constraint">PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- Names: VARCHAR with reasonable limits</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;first_name <span class="type">VARCHAR</span>(<span class="number">50</span>) <span class="constraint">NOT NULL</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;last_name <span class="type">VARCHAR</span>(<span class="number">50</span>) <span class="constraint">NOT NULL</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- Email: Standard max length</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;email <span class="type">VARCHAR</span>(<span class="number">255</span>) <span class="constraint">UNIQUE NOT NULL</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- Status: BOOLEAN for yes/no</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;is_active <span class="type">BOOLEAN</span> <span class="keyword">DEFAULT</span> <span class="keyword">true</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- Money: DECIMAL for precision</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;balance <span class="type">DECIMAL</span>(<span class="number">12</span>, <span class="number">2</span>) <span class="keyword">DEFAULT</span> <span class="number">0.00</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- Timestamps: For audit trails</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;created_at <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="function">CURRENT_TIMESTAMP</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;updated_at <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="function">CURRENT_TIMESTAMP</span><br>
+);
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 2: Constraints Mastery -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-lock"></i> PART 2: CONSTRAINT ENFORCEMENT</h2>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>The NOT NULL Constraint - Your Data Quality Guardian</h3>
+                
+                <div class="data-validation-tester">
+                    <h4><i class="fas fa-vial"></i> Interactive Constraint Tester</h4>
+                    <p>Test what happens with and without NOT NULL constraints:</p>
+                    
+                    <div class="test-case">
+                        <h5>Test Case 1: Without NOT NULL</h5>
+                        <div class="code-block" style="font-size: 0.9rem;">
+<span class="keyword">CREATE TABLE</span> test_no_constraint (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name <span class="type">VARCHAR</span>(<span class="number">30</span>)  <span class="comment">-- No constraint!</span><br>
+);<br>
+<span class="keyword">INSERT INTO</span> test_no_constraint (name) <span class="keyword">VALUES</span> (<span class="keyword">NULL</span>); <span class="comment">-- This works!</span>
+                        </div>
+                        <button class="btn btn-secondary" onclick="runTest('test1')" style="margin-top: 10px;">
+                            <i class="fas fa-play"></i> Run Test
+                        </button>
+                        <div id="testResult1" class="test-result"></div>
+                    </div>
+                    
+                    <div class="test-case">
+                        <h5>Test Case 2: With NOT NULL</h5>
+                        <div class="code-block" style="font-size: 0.9rem;">
+<span class="keyword">CREATE TABLE</span> test_with_constraint (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name <span class="type">VARCHAR</span>(<span class="number">30</span>) <span class="constraint">NOT NULL</span><br>
+);<br>
+<span class="keyword">INSERT INTO</span> test_with_constraint (name) <span class="keyword">VALUES</span> (<span class="keyword">NULL</span>); <span class="comment">-- This FAILS!</span>
+                        </div>
+                        <button class="btn btn-secondary" onclick="runTest('test2')" style="margin-top: 10px;">
+                            <i class="fas fa-play"></i> Run Test
+                        </button>
+                        <div id="testResult2" class="test-result"></div>
+                    </div>
+                </div>
+                
+                <div class="warning-box">
+                    <strong><i class="fas fa-exclamation-triangle"></i> PRODUCTION RULE:</strong> Always add NOT NULL to columns that must have values. It's much harder to fix missing data later than to prevent it at insertion time.
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Column-Level vs Table-Level Constraints</h3>
+                
+                <div class="schema-diagram">
+                    <h4>Constraint Placement Visualization</h4>
+                    <div class="diagram-table">
+                        <div class="diagram-column">
+                            <div class="column-name">id</div>
+                            <div class="column-details">
+                                <span class="data-type-tag">INTEGER</span>
+                                <span class="constraint-tag">NOT NULL</span>
+                                <span class="constraint-tag" style="background: rgba(139, 92, 246, 0.1); color: #7c3aed;">PRIMARY KEY</span>
+                            </div>
+                        </div>
+                        <div class="diagram-column">
+                            <div class="column-name">first_name</div>
+                            <div class="column-details">
+                                <span class="data-type-tag">VARCHAR(30)</span>
+                                <span class="constraint-tag">NOT NULL</span>
+                            </div>
+                        </div>
+                        <div class="diagram-column">
+                            <div class="column-name">last_name</div>
+                            <div class="column-details">
+                                <span class="data-type-tag">VARCHAR(30)</span>
+                                <span class="constraint-tag">NOT NULL</span>
+                            </div>
+                        </div>
+                        <div class="diagram-column">
+                            <div class="column-name">value_card_member</div>
+                            <div class="column-details">
+                                <span class="data-type-tag">BOOLEAN</span>
+                                <span class="constraint-tag">NOT NULL</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 20px; color: var(--muted);">
+                        <i class="fas fa-info-circle"></i> All constraints shown are <strong>column-level</strong> - defined with each column
+                    </p>
+                </div>
+                
+                <div class="code-block">
+<span class="comment">-- COLUMN-LEVEL constraints (attached to specific columns)</span><br>
+<span class="keyword">CREATE TABLE</span> customers_column_level (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;id <span class="type">INTEGER</span> <span class="constraint">PRIMARY KEY</span>,  <span class="comment">-- Column-level PK</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;email <span class="type">VARCHAR</span>(<span class="number">255</span>) <span class="constraint">UNIQUE NOT NULL</span>,  <span class="comment">-- Multiple constraints</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;age <span class="type">INTEGER</span> <span class="constraint">CHECK</span> (age >= <span class="number">18</span>)  <span class="comment">-- Column-level CHECK</span><br>
+);<br><br>
+
+<span class="comment">-- TABLE-LEVEL constraints (defined separately)</span><br>
+<span class="keyword">CREATE TABLE</span> customers_table_level (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;id <span class="type">INTEGER</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;email <span class="type">VARCHAR</span>(<span class="number">255</span>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;age <span class="type">INTEGER</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- Table-level constraints come AFTER columns</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">CONSTRAINT</span> pk_customers <span class="keyword">PRIMARY KEY</span> (id),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">CONSTRAINT</span> uq_email <span class="keyword">UNIQUE</span> (email),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">CONSTRAINT</span> chk_age <span class="keyword">CHECK</span> (age >= <span class="number">18</span>)<br>
+);
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Constraint Type</th>
+                                <th>Column-Level</th>
+                                <th>Table-Level</th>
+                                <th>When to Use</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>NOT NULL</code></td>
+                                <td>✅ Yes</td>
+                                <td>❌ No</td>
+                                <td>Always column-level</td>
+                            </tr>
+                            <tr>
+                                <td><code>UNIQUE</code></td>
+                                <td>✅ Single column</td>
+                                <td>✅ Multiple columns</td>
+                                <td>Use table-level for composite keys</td>
+                            </tr>
+                            <tr>
+                                <td><code>PRIMARY KEY</code></td>
+                                <td>✅ Single column</td>
+                                <td>✅ Multiple columns</td>
+                                <td>Table-level for composite PKs</td>
+                            </tr>
+                            <tr>
+                                <td><code>FOREIGN KEY</code></td>
+                                <td>✅ Single column</td>
+                                <td>✅ Multiple columns</td>
+                                <td>Table-level for composite FKs</td>
+                            </tr>
+                            <tr>
+                                <td><code>CHECK</code></td>
+                                <td>✅ Column-specific</td>
+                                <td>✅ Cross-column rules</td>
+                                <td>Use table-level for complex logic</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 3: Interactive Schema Builder -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-tools"></i> PART 3: INTERACTIVE SCHEMA BUILDER</h2>
+            
+            <div class="step">
+                <div class="step-number">5</div>
+                <h3>Build Your Customers Table</h3>
+                <p>Drag and drop data types and constraints to build the perfect customers table:</p>
+                
+                <div class="live-schema-editor">
+                    <div class="editor-header">
+                        <h4 style="color: white; margin: 0;">Schema Builder: customers Table</h4>
+                        <button class="btn btn-success" onclick="validateSchema()">
+                            <i class="fas fa-check"></i> Validate Schema
+                        </button>
+                    </div>
+                    
+                    <div class="toolbox">
+                        <div class="toolbox-section">
+                            <div class="toolbox-title">Data Types</div>
+                            <div class="toolbox-items" id="dataTypeToolbox">
+                                <div class="toolbox-item data-type" draggable="true" data-type="INTEGER">INTEGER</div>
+                                <div class="toolbox-item data-type" draggable="true" data-type="VARCHAR(30)">VARCHAR(30)</div>
+                                <div class="toolbox-item data-type" draggable="true" data-type="BOOLEAN">BOOLEAN</div>
+                                <div class="toolbox-item data-type" draggable="true" data-type="VARCHAR(50)">VARCHAR(50)</div>
+                                <div class="toolbox-item data-type" draggable="true" data-type="TEXT">TEXT</div>
+                                <div class="toolbox-item data-type" draggable="true" data-type="DECIMAL(10,2)">DECIMAL(10,2)</div>
+                            </div>
+                        </div>
+                        
+                        <div class="toolbox-section">
+                            <div class="toolbox-title">Constraints</div>
+                            <div class="toolbox-items" id="constraintToolbox">
+                                <div class="toolbox-item constraint" draggable="true" data-constraint="NOT NULL">NOT NULL</div>
+                                <div class="toolbox-item constraint" draggable="true" data-constraint="UNIQUE">UNIQUE</div>
+                                <div class="toolbox-item constraint" draggable="true" data-constraint="PRIMARY KEY">PRIMARY KEY</div>
+                                <div class="toolbox-item constraint" draggable="true" data-constraint="DEFAULT true">DEFAULT true</div>
+                                <div class="toolbox-item constraint" draggable="true" data-constraint="CHECK">CHECK</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="editor-content" id="schemaBuilder">
+<span class="comment">-- Build your customers table here</span><br>
+<span class="keyword">CREATE TABLE</span> customers (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span id="column1" class="drop-zone">id <span class="placeholder">[Drag data type here]</span> <span class="placeholder">[Drag constraints here]</span></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span id="column2" class="drop-zone">first_name <span class="placeholder">[Drag data type here]</span> <span class="placeholder">[Drag constraints here]</span></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span id="column3" class="drop-zone">last_name <span class="placeholder">[Drag data type here]</span> <span class="placeholder">[Drag constraints here]</span></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span id="column4" class="drop-zone">value_card_member <span class="placeholder">[Drag data type here]</span> <span class="placeholder">[Drag constraints here]</span></span><br>
+);
+                    </div>
+                    
+                    <div style="margin-top: 20px; color: #94a3b8; font-size: 14px;">
+                        <i class="fas fa-info-circle"></i> Drag data types and constraints onto the column placeholders above
+                    </div>
+                </div>
+                
+                <div id="validationResults" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+
+        <!-- Part 4: Hands-On Challenge -->
+        <div class="section exercise">
+            <h2 class="section-title"><i class="fas fa-flask"></i> PART 4: PROFESSIONAL IMPLEMENTATION CHALLENGE</h2>
+            
+            <div class="step">
+                <div class="step-number">6</div>
+                <h3>Complete the Customer Database Implementation</h3>
+                
+                <div class="business-case">
+                    <h4><i class="fas fa-briefcase"></i> BUSINESS REQUIREMENTS</h4>
+                    <p>Implement a production-ready customer database for MSEBETSI Retail with the following specifications:</p>
+                    <ol style="margin-top: 15px; padding-left: 20px;">
+                        <li>Create <code>customer_db</code> database</li>
+                        <li>Create <code>customers</code> table with exactly 4 columns</li>
+                        <li><strong>id</strong>: Integer, cannot be NULL</li>
+                        <li><strong>first_name</strong>: String (max 30 chars), cannot be NULL</li>
+                        <li><strong>last_name</strong>: String (max 30 chars), cannot be NULL</li>
+                        <li><strong>value_card_member</strong>: Boolean, cannot be NULL</li>
+                        <li>All code must be professionally commented</li>
+                    </ol>
+                </div>
+                
+                <!-- Code Editor for Challenge -->
+                <div class="step">
+                    <h3>Write Your Solution</h3>
+                    <p>Create your implementation in the editor below:</p>
+                    
+                    <div class="live-schema-editor">
+                        <div class="editor-header">
+                            <h4 style="color: white; margin: 0;">Solution Editor</h4>
+                            <div>
+                                <button class="btn btn-secondary" onclick="downloadSolution()">
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                                <button class="btn btn-success" onclick="submitSolution()">
+                                    <i class="fas fa-paper-plane"></i> Submit Solution
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="editor-content" contenteditable="true" id="solutionEditor">
+-- ============================================
+-- customer_db.sql
+-- MSEBETSI Customer Database Implementation
+-- Student: [Your Name Here]
+-- Date: <span id="currentDate"></span>
+-- ============================================
+
+-- Task 1: Create the database
+-- Write your code here
+
+
+
+-- Task 2: Create the customers table
+-- Write your code here
+
+
+
+-- Task 3: Add comments explaining your choices
+                        </div>
+                    </div>
+                    
+                    <div id="solutionFeedback" class="validation-result" style="display: none; margin-top: 20px;">
+                        <!-- Feedback appears here -->
+                    </div>
+                </div>
+                
+                <!-- Success Criteria -->
+                <div class="step">
+                    <h3>Success Criteria Checklist</h3>
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria1">
+                            <label for="criteria1">Database created with correct name</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria2">
+                            <label for="criteria2">Table has exactly 4 specified columns</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria3">
+                            <label for="criteria3">All columns have correct data types</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria4">
+                            <label for="criteria4">id, first_name, last_name have NOT NULL</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria5">
+                            <label for="criteria5">value_card_member has correct type</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria6">
+                            <label for="criteria6">Code is professionally commented</label>
+                        </div>
+                    </div>
+                    
+                    <button class="btn" onclick="checkAllCriteria()" style="margin-top: 20px;">
+                        <i class="fas fa-certificate"></i> Verify & Complete Lesson
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 5: Advanced Concepts -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-rocket"></i> PART 5: ADVANCED CONSTRAINT PATTERNS</h2>
+            
+            <div class="step">
+                <div class="step-number">7</div>
+                <h3>Beyond NOT NULL: Advanced Constraint Patterns</h3>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Constraint</th>
+                                <th>Syntax</th>
+                                <th>Purpose</th>
+                                <th>Production Example</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>CHECK</code></td>
+                                <td><code>CHECK (age >= 18)</code></td>
+                                <td>Business rule validation</td>
+                                <td>Age restrictions, valid ranges</td>
+                            </tr>
+                            <tr>
+                                <td><code>UNIQUE</code></td>
+                                <td><code>UNIQUE (email)</code></td>
+                                <td>Prevent duplicates</td>
+                                <td>Email addresses, usernames</td>
+                            </tr>
+                            <tr>
+                                <td><code>DEFAULT</code></td>
+                                <td><code>DEFAULT CURRENT_TIMESTAMP</code></td>
+                                <td>Automatic values</td>
+                                <td>Created dates, status flags</td>
+                            </tr>
+                            <tr>
+                                <td><code>GENERATED</code></td>
+                                <td><code>GENERATED ALWAYS AS (price * quantity)</code></td>
+                                <td>Computed columns</td>
+                                <td>Calculated totals, derived data</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="code-block">
+<span class="comment">-- Advanced constraint patterns for production systems</span><br>
+<span class="keyword">CREATE TABLE</span> professional_customers (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;customer_id <span class="type">BIGINT</span> <span class="keyword">GENERATED ALWAYS AS IDENTITY</span> <span class="constraint">PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- CHECK for business rules</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;age <span class="type">INTEGER</span> <span class="keyword">CHECK</span> (age >= <span class="number">18</span> <span class="keyword">AND</span> age <= <span class="number">120</span>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- UNIQUE for data integrity</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;email <span class="type">VARCHAR</span>(<span class="number">255</span>) <span class="keyword">UNIQUE NOT NULL</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- DEFAULT for common values</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;membership_tier <span class="type">VARCHAR</span>(<span class="number">20</span>) <span class="keyword">DEFAULT</span> <span class="string">'basic'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">CHECK</span> (membership_tier <span class="keyword">IN</span> (<span class="string">'basic'</span>, <span class="string">'premium'</span>, <span class="string">'enterprise'</span>)),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">-- Table-level CHECK for complex logic</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">CONSTRAINT</span> valid_signup <span class="keyword">CHECK</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(age >= <span class="number">18</span> <span class="keyword">AND</span> membership_tier != <span class="string">'enterprise'</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">OR</span> (age >= <span class="number">21</span> <span class="keyword">AND</span> membership_tier = <span class="string">'enterprise'</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br>
+);
+                </div>
+                
+                <div class="success-box">
+                    <strong><i class="fas fa-graduation-cap"></i> PROFESSIONAL PRINCIPLE:</strong> Let the database do the work! Constraints enforce data quality at the lowest level, preventing bad data from ever entering your system. This is more reliable than application-level validation.
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional Summary -->
+        <div class="section" style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe);">
+            <h2 class="section-title"><i class="fas fa-clipboard-check"></i> PROFESSIONAL SUMMARY</h2>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data Type Category</th>
+                            <th>Key Types</th>
+                            <th>Constraint Type</th>
+                            <th>Key Constraints</th>
+                            <th>Best Practice</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Numeric</td>
+                            <td><code>INTEGER, DECIMAL</code></td>
+                            <td>Column-Level</td>
+                            <td><code>NOT NULL, CHECK</code></td>
+                            <td>Use smallest appropriate type</td>
+                        </tr>
+                        <tr>
+                            <td>Text</td>
+                            <td><code>VARCHAR(n), TEXT</code></td>
+                            <td>Table-Level</td>
+                            <td><code>PRIMARY KEY, UNIQUE</code></td>
+                            <td>Name constraints for clarity</td>
+                        </tr>
+                        <tr>
+                            <td>Boolean</td>
+                            <td><code>BOOLEAN</code></td>
+                            <td>Data Integrity</td>
+                            <td><code>DEFAULT, CHECK</code></td>
+                            <td>Validate at database level</td>
+                        </tr>
+                        <tr>
+                            <td>Date/Time</td>
+                            <td><code>TIMESTAMP, DATE</code></td>
+                            <td>Business Rules</td>
+                            <td><code>CHECK, FOREIGN KEY</code></td>
+                            <td>Enforce rules in schema</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="note-box" style="margin-top: 20px;">
+                <h4><i class="fas fa-key"></i> DATA INTEGRITY MASTERY ACHIEVED</h4>
+                <p>You now understand how to build databases that <strong>prevent</strong> bad data instead of just storing it. This is the difference between amateur and professional database design.</p>
+                <p style="margin-top: 10px;"><strong>Remember:</strong> Constraints are your friends. They make your data more reliable, your applications more robust, and your life easier in the long run.</p>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="btn btn-secondary" onclick="window.location.href='lesson3.html'">
+                <i class="fas fa-arrow-left"></i> Previous: Table Creation
+            </button>
+            <button class="btn" onclick="completeLesson()" id="nextLessonBtn" disabled>
+                Complete Lesson & Continue <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.1); color: var(--muted); font-size: 14px;">
+            <p><strong>MSEBETSI SOLUTIONS PROFESSIONAL INSIGHT:</strong> A well-constrained database is a self-documenting database. The constraints tell you exactly what the business rules are.</p>
+            <p>© 2024 MSEBETSI SOLUTIONS - Enterprise Data Integrity Training</p>
+        </div>
+    </div>
+
+    <script>
+        // Set current date in editor
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString();
+        
+        // Initialize drag and drop
+        document.addEventListener('DOMContentLoaded', function() {
+            setupDragAndDrop();
+            applySyntaxHighlighting();
+            
+            // Check for previous completion
+            if (localStorage.getItem('sql-lesson4-constraints-completed') === 'true') {
+                enableNextLesson();
+                markCheckboxesAsComplete();
+            }
+        });
+        
+        // Drag and drop setup for schema builder
+        function setupDragAndDrop() {
+            const draggables = document.querySelectorAll('.toolbox-item');
+            const dropZones = document.querySelectorAll('.drop-zone');
+            
+            draggables.forEach(draggable => {
+                draggable.addEventListener('dragstart', dragStart);
+            });
+            
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', dragOver);
+                zone.addEventListener('drop', drop);
+                zone.addEventListener('dragenter', dragEnter);
+                zone.addEventListener('dragleave', dragLeave);
+            });
+        }
+        
+        function dragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.textContent);
+            e.dataTransfer.setData('type', e.target.classList.contains('data-type') ? 'datatype' : 'constraint');
+            e.target.classList.add('dragging');
+        }
+        
+        function dragOver(e) {
+            e.preventDefault();
+        }
+        
+        function dragEnter(e) {
+            e.preventDefault();
+            if (e.target.classList.contains('drop-zone')) {
+                e.target.classList.add('drag-over');
+            } else if (e.target.closest('.drop-zone')) {
+                e.target.closest('.drop-zone').classList.add('drag-over');
+            }
+        }
+        
+        function dragLeave(e) {
+            if (e.target.classList.contains('drop-zone')) {
+                e.target.classList.remove('drag-over');
+            } else if (e.target.closest('.drop-zone')) {
+                e.target.closest('.drop-zone').classList.remove('drag-over');
+            }
+        }
+        
+        function drop(e) {
+            e.preventDefault();
+            const dropZone = e.target.classList.contains('drop-zone') ? e.target : e.target.closest('.drop-zone');
+            
+            if (dropZone) {
+                dropZone.classList.remove('drag-over');
+                const data = e.dataTransfer.getData('text/plain');
+                const type = e.dataTransfer.getData('type');
+                
+                // Remove existing placeholder
+                const placeholders = dropZone.querySelectorAll('.placeholder');
+                if (placeholders.length > 0) {
+                    if (type === 'datatype') {
+                        placeholders[0].remove();
+                    } else if (type === 'constraint' && placeholders.length > 1) {
+                        placeholders[1].remove();
+                    }
+                }
+                
+                // Add the dragged item
+                const span = document.createElement('span');
+                span.textContent = data + ' ';
+                
+                if (type === 'datatype') {
+                    span.className = 'data-type-tag';
+                    span.style.marginRight = '5px';
+                    dropZone.insertBefore(span, dropZone.firstChild.nextSibling);
+                } else if (type === 'constraint') {
+                    span.className = 'constraint-tag';
+                    span.style.marginRight = '5px';
+                    dropZone.appendChild(span);
+                }
+            }
+            
+            // Remove dragging class from all draggables
+            document.querySelectorAll('.toolbox-item').forEach(item => {
+                item.classList.remove('dragging');
+            });
+        }
+        
+        // Schema validation
+        function validateSchema() {
+            const columns = {
+                column1: document.getElementById('column1').textContent,
+                column2: document.getElementById('column2').textContent,
+                column3: document.getElementById('column3').textContent,
+                column4: document.getElementById('column4').textContent
+            };
+            
+            let errors = [];
+            let successes = [];
+            
+            // Check each column
+            Object.entries(columns).forEach(([id, content]) => {
+                const columnName = content.split(' ')[0];
+                
+                // Check for data type
+                if (!content.includes('INTEGER') && !content.includes('VARCHAR') && !content.includes('BOOLEAN')) {
+                    errors.push(`${columnName} is missing a data type`);
+                }
+                
+                // Check for constraints based on column
+                if (['id', 'first_name', 'last_name'].includes(columnName) && !content.includes('NOT NULL')) {
+                    errors.push(`${columnName} must have NOT NULL constraint`);
+                } else if (['id', 'first_name', 'last_name'].includes(columnName) && content.includes('NOT NULL')) {
+                    successes.push(`${columnName} has correct NOT NULL constraint`);
+                }
+                
+                // Check value_card_member has BOOLEAN
+                if (columnName === 'value_card_member' && content.includes('BOOLEAN')) {
+                    successes.push(`${columnName} has correct BOOLEAN type`);
+                } else if (columnName === 'value_card_member' && !content.includes('BOOLEAN')) {
+                    errors.push(`${columnName} must be BOOLEAN type`);
+                }
+            });
+            
+            const resultsDiv = document.getElementById('validationResults');
+            
+            if (errors.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div class="success-box">
+                        <h4><i class="fas fa-check-circle"></i> Perfect Schema Design!</h4>
+                        <p>All columns have correct data types and constraints.</p>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            ${successes.map(s => `<li>${s}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            } else {
+                resultsDiv.innerHTML = `
+                    <div class="warning-box">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Schema Needs Improvement</h4>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            ${errors.map(e => `<li>${e}</li>`).join('')}
+                        </ul>
+                        ${successes.length > 0 ? `
+                            <p style="margin-top: 15px;">Good work on:</p>
+                            <ul style="padding-left: 20px;">
+                                ${successes.map(s => `<li>${s}</li>`).join('')}
+                            </ul>
+                        ` : ''}
+                    </div>
+                `;
+            }
+        }
+        
+        // Test case execution
+        function runTest(testId) {
+            const resultDiv = document.getElementById(`testResult${testId.slice(-1)}`);
+            
+            if (testId === 'test1') {
+                resultDiv.className = 'test-result success';
+                resultDiv.innerHTML = `
+                    <i class="fas fa-check-circle"></i> Test Passed: NULL was inserted successfully.
+                    <div style="margin-top: 5px; font-size: 0.9em;">
+                        This demonstrates the problem - without NOT NULL, bad data can enter your database.
+                    </div>
+                `;
+            } else if (testId === 'test2') {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = `
+                    <i class="fas fa-times-circle"></i> Test Failed: NULL cannot be inserted!
+                    <div style="margin-top: 5px; font-size: 0.9em;">
+                        This is GOOD! The NOT NULL constraint prevented bad data.
+                        Error would be: "null value in column "name" violates not-null constraint"
+                    </div>
+                `;
+            }
+        }
+        
+        // Solution submission
+        function submitSolution() {
+            const solution = document.getElementById('solutionEditor').textContent;
+            const feedbackDiv = document.getElementById('solutionFeedback');
+            
+            // Simple validation
+            const hasDatabase = solution.includes('CREATE DATABASE') && solution.includes('customer_db');
+            const hasTable = solution.includes('CREATE TABLE') && solution.includes('customers');
+            const hasColumns = solution.includes('id') && solution.includes('first_name') && 
+                               solution.includes('last_name') && solution.includes('value_card_member');
+            const hasNotNull = (solution.match(/NOT NULL/g) || []).length >= 3;
+            const hasComments = (solution.match(/--/g) || []).length >= 3;
+            
+            let messages = [];
+            
+            if (!hasDatabase) messages.push('Missing CREATE DATABASE customer_db');
+            if (!hasTable) messages.push('Missing CREATE TABLE customers');
+            if (!hasColumns) messages.push('Missing required columns');
+            if (!hasNotNull) messages.push('Need NOT NULL on id, first_name, last_name');
+            if (!hasComments) messages.push('Add more comments for documentation');
+            
+            if (messages.length === 0) {
+                feedbackDiv.className = 'validation-result success';
+                feedbackDiv.style.display = 'block';
+                feedbackDiv.innerHTML = `
+                    <h4><i class="fas fa-check-circle"></i> Excellent Solution!</h4>
+                    <p>Your implementation meets all requirements. Good work!</p>
+                `;
+                
+                // Mark checkboxes
+                document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+                    cb.checked = true;
+                    cb.parentElement.style.color = 'var(--success)';
+                    cb.parentElement.style.fontWeight = '600';
+                });
+                
+                enableNextLesson();
+            } else {
+                feedbackDiv.className = 'validation-result error';
+                feedbackDiv.style.display = 'block';
+                feedbackDiv.innerHTML = `
+                    <h4><i class="fas fa-exclamation-triangle"></i> Needs Improvement</h4>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        ${messages.map(m => `<li>${m}</li>`).join('')}
+                    </ul>
+                `;
+            }
+        }
+        
+        function downloadSolution() {
+            const solution = document.getElementById('solutionEditor').textContent;
+            const blob = new Blob([solution], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'customer_db_solution.sql';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        function checkAllCriteria() {
+            const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            
+            if (allChecked) {
+                const completionMessage = `
+🎉 DATA INTEGRITY MASTERY ACHIEVED!
+
+What you've accomplished:
+✓ Mastered PostgreSQL data types
+✓ Implemented NOT NULL constraints
+✓ Understood column vs table-level constraints
+✓ Built a production-ready customer database
+✓ Learned to prevent bad data at the source
+
+Professional Principle:
+"Let the database do the validation work.
+Constraints are cheaper than data cleanup."
+
+Next: Advanced queries and relationships!
+                `;
+                
+                alert(completionMessage);
+                completeLesson();
+            } else {
+                alert('Please complete all success criteria before continuing. Use the checklist above to track your progress.');
+            }
+        }
+        
+        function enableNextLesson() {
+            document.getElementById('nextLessonBtn').disabled = false;
+        }
+        
+        function markCheckboxesAsComplete() {
+            document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+                cb.checked = true;
+                cb.parentElement.style.color = 'var(--success)';
+                cb.parentElement.style.fontWeight = '600';
+            });
+        }
+        
+        function completeLesson() {
+            localStorage.setItem('sql-lesson4-constraints-completed', 'true');
+            window.location.href = 'lesson5.html'; // Next lesson
+        }
+        
+        // Syntax highlighting
+        function applySyntaxHighlighting() {
+            document.querySelectorAll('.code-block').forEach(block => {
+                const html = block.innerHTML;
+                const highlighted = html
+                    .replace(/--.*$/gm, '<span class="comment">$&</span>')
+                    .replace(/\/\*[\s\S]*?\*\//g, '<span class="comment">$&</span>')
+                    .replace(/\b(SELECT|INSERT|UPDATE|DELETE|FROM|WHERE|INTO|VALUES|SET|CREATE|DROP|DATABASE|TABLE|IF EXISTS|CONSTRAINT|NOT NULL|UNIQUE|PRIMARY KEY|FOREIGN KEY|CHECK|DEFAULT|GENERATED|ALWAYS|AS|IDENTITY|IN|AND|OR|NOT|CURRENT_TIMESTAMP)\b/gi, '<span class="keyword">$1</span>')
+                    .replace(/'([^']*)'/g, '<span class="string">\'$1\'</span>')
+                    .replace(/\b(\d+(\.\d+)?)\b/g, '<span class="number">$1</span>')
+                    .replace(/(=|<|>|!=|<=|>=|<>)/g, '<span class="operator">$1</span>')
+                    .replace(/\b(INTEGER|BIGINT|DECIMAL|VARCHAR|TEXT|CHAR|BOOLEAN|BIT|DATE|TIMESTAMP|REAL|SERIAL)\b/gi, '<span class="type">$1</span>')
+                    .replace(/\b(NOT NULL|UNIQUE|PRIMARY KEY|FOREIGN KEY|CHECK|DEFAULT)\b/gi, '<span class="constraint">$1</span>');
+                block.innerHTML = highlighted;
+            });
+        }
+    </script>
+</body>
+</html>

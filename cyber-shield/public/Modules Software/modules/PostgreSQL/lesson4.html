@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 4: Data CRUD Operations | MSEBETSI Interactive SQL Lab</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --accent: #0b5fff;
+            --accent-light: rgba(11, 95, 255, 0.1);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--bg);
+            color: #1e293b;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .lesson-container {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            margin-top: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid rgba(11, 95, 255, 0.1);
+        }
+        
+        .module-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .lesson-title {
+            font-size: 36px;
+            color: #0f172a;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .lesson-subtitle {
+            color: var(--muted);
+            font-size: 18px;
+            margin-bottom: 30px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .time-badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            padding: 6px 15px;
+            border-radius: 15px;
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .crud-animation {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .crud-card {
+            background: white;
+            padding: 25px 20px;
+            border-radius: 12px;
+            text-align: center;
+            width: 200px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .crud-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+        
+        .crud-card.create { border-color: var(--success); }
+        .crud-card.read { border-color: var(--accent); }
+        .crud-card.update { border-color: var(--warning); }
+        .crud-card.delete { border-color: var(--danger); }
+        
+        .crud-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .crud-card.create .crud-icon { color: var(--success); }
+        .crud-card.read .crud-icon { color: var(--accent); }
+        .crud-card.update .crud-icon { color: var(--warning); }
+        .crud-card.delete .crud-icon { color: var(--danger); }
+        
+        .scenario-banner {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
+        }
+        
+        .scenario-banner h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .objectives {
+            background: linear-gradient(135deg, #f0f7ff, #e6f0ff);
+            border-left: 4px solid var(--accent);
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        
+        .objectives h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .objectives ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+        
+        .objectives li {
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .objectives li:before {
+            content: "✓";
+            color: var(--success);
+            font-weight: bold;
+            position: absolute;
+            left: -20px;
+        }
+        
+        .section {
+            margin: 40px 0;
+            padding: 30px;
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(11, 95, 255, 0.05);
+        }
+        
+        .section-title {
+            color: var(--accent);
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(11, 95, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .step {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(11, 95, 255, 0.02);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            overflow-x: auto;
+            border: 1px solid #334155;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .code-block .comment { color: #6A9955; }
+        .code-block .keyword { color: #569CD6; }
+        .code-block .string { color: #CE9178; }
+        .code-block .function { color: #DCDCAA; }
+        .code-block .number { color: #B5CEA8; }
+        .code-block .operator { color: #D4D4D4; }
+        .code-block .type { color: #4EC9B0; }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th {
+            background: rgba(11, 95, 255, 0.1);
+            color: var(--accent);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        tr:hover {
+            background: rgba(11, 95, 255, 0.03);
+        }
+        
+        .interactive-lab {
+            background: linear-gradient(135deg, #e6f7ff, #d6edff);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border: 2px solid #1890ff;
+        }
+        
+        .note-box {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .warning-box {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--danger);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .success-box {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .exercise {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 40px 0;
+            border: 2px dashed var(--accent);
+        }
+        
+        .checklist {
+            margin: 20px 0;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .checklist-item input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            font-size: 15px;
+        }
+        
+        .btn:hover {
+            background: #0a4ed9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(11, 95, 255, 0.2);
+        }
+        
+        .btn-secondary {
+            background: rgba(11, 95, 255, 0.1);
+            color: var(--accent);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(11, 95, 255, 0.2);
+        }
+        
+        .btn-success {
+            background: var(--success);
+        }
+        
+        .btn-success:hover {
+            background: #0da271;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: #1e293b;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .live-editor {
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            border: 1px solid #334155;
+        }
+        
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .editor-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .editor-tab {
+            padding: 8px 16px;
+            background: #334155;
+            color: #cbd5e1;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .editor-tab.active {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .editor-content {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            min-height: 200px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            line-height: 1.5;
+            border: 1px solid #475569;
+        }
+        
+        .data-table-preview {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .file-upload-area {
+            border: 3px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin: 25px 0;
+            background: #f8fafc;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--accent);
+            background: #f1f7ff;
+        }
+        
+        .validation-result {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .validation-result.success {
+            background: #f0fdf4;
+            border-left: 4px solid var(--success);
+            display: block;
+        }
+        
+        .validation-result.error {
+            background: #fef2f2;
+            border-left: 4px solid var(--danger);
+            display: block;
+        }
+        
+        .interactive-exercise {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .exercise-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .lesson-container { padding: 20px; }
+            .lesson-title { font-size: 28px; }
+            .section { padding: 20px; }
+            .interactive-exercise { grid-template-columns: 1fr; }
+            .crud-animation { flex-direction: column; align-items: center; }
+            .crud-card { width: 100%; max-width: 300px; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- Header Section -->
+        <div class="header">
+            <div class="module-badge">MODULE 10: DATA MANIPULATION LAB</div>
+            <h1 class="lesson-title">Lesson 4: CRUD Operations with PostgreSQL</h1>
+            <p class="lesson-subtitle">Master Create, Read, Update, Delete operations through interactive hands-on exercises</p>
+            <div class="time-badge"><i class="fas fa-clock"></i> INTERACTIVE 90-MINUTE WORKSHOP</div>
+        </div>
+
+        <!-- CRUD Animation -->
+        <div class="crud-animation">
+            <div class="crud-card create">
+                <div class="crud-icon"><i class="fas fa-plus-circle"></i></div>
+                <h3>CREATE</h3>
+                <p>Add new data with INSERT</p>
+                <div style="font-size: 12px; color: var(--muted); margin-top: 10px;">Add records</div>
+            </div>
+            <div class="crud-card read">
+                <div class="crud-icon"><i class="fas fa-eye"></i></div>
+                <h3>READ</h3>
+                <p>Retrieve data with SELECT</p>
+                <div style="font-size: 12px; color: var(--muted); margin-top: 10px;">Query records</div>
+            </div>
+            <div class="crud-card update">
+                <div class="crud-icon"><i class="fas fa-edit"></i></div>
+                <h3>UPDATE</h3>
+                <p>Modify data with UPDATE</p>
+                <div style="font-size: 12px; color: var(--muted); margin-top: 10px;">Edit records</div>
+            </div>
+            <div class="crud-card delete">
+                <div class="crud-icon"><i class="fas fa-trash-alt"></i></div>
+                <h3>DELETE</h3>
+                <p>Remove data with DELETE</p>
+                <div style="font-size: 12px; color: var(--muted); margin-top: 10px;">Remove records</div>
+            </div>
+        </div>
+
+        <!-- Real-World Scenario -->
+        <div class="scenario-banner">
+            <h3><i class="fas fa-store"></i> REAL-WORLD PROJECT: MSEBETSI INVENTORY MANAGEMENT</h3>
+            <p><strong>Business Context:</strong> You're building an inventory system for MSEBETSI's retail operations. The system needs full CRUD functionality to manage product inventory in real-time.</p>
+            <p><strong>Technical Challenge:</strong> Implement and document complete data operations for the produce inventory table.</p>
+        </div>
+
+        <!-- Learning Objectives -->
+        <div class="objectives">
+            <h3><i class="fas fa-bullseye"></i> PROFESSIONAL LEARNING OUTCOMES</h3>
+            <ul>
+                <li>Execute INSERT statements to add single and multiple records</li>
+                <li>Use SELECT to query and retrieve data with precision</li>
+                <li>Implement UPDATE operations to modify existing data</li>
+                <li>Apply DELETE operations with proper WHERE clauses</li>
+                <li>Write comprehensive SQL comments for team collaboration</li>
+                <li>Validate data operations through interactive testing</li>
+            </ul>
+        </div>
+
+        <!-- Part 1: The Complete CRUD Cycle -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-redo-alt"></i> PART 1: THE CRUD CYCLE EXPLAINED</h2>
+            
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Understanding the Full Data Lifecycle</h3>
+                
+                <div class="interactive-lab">
+                    <h4><i class="fas fa-play-circle"></i> Interactive CRUD Demonstration</h4>
+                    <p>Watch the complete data lifecycle in action:</p>
+                    
+                    <div class="data-table-preview">
+                        <h5>Current Inventory Status</h5>
+                        <table class="data-table" id="inventoryTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Product Name</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryBody">
+                                <!-- Filled by JavaScript -->
+                            </tbody>
+                        </table>
+                        <div style="margin-top: 15px; display: flex; gap: 10px;">
+                            <button class="btn btn-secondary" onclick="performInsert()">
+                                <i class="fas fa-plus"></i> Add Apple (INSERT)
+                            </button>
+                            <button class="btn btn-secondary" onclick="performSelect()">
+                                <i class="fas fa-eye"></i> View All (SELECT)
+                            </button>
+                            <button class="btn btn-warning" onclick="performUpdate()">
+                                <i class="fas fa-edit"></i> Update to Strawberry
+                            </button>
+                            <button class="btn" style="background: var(--danger);" onclick="performDelete()">
+                                <i class="fas fa-trash"></i> Delete Orange
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="note-box">
+                    <strong><i class="fas fa-database"></i> DATA LIFECYCLE:</strong> Every piece of data goes through CRUD operations: Created (INSERT), Read (SELECT), Updated (UPDATE), and eventually Deleted (DELETE). Understanding this cycle is fundamental to database management.
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 2: Interactive Code Editor -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-code"></i> PART 2: INTERACTIVE SQL EDITOR</h2>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Live SQL Practice Environment</h3>
+                <p>Experiment with SQL statements in our safe, interactive editor:</p>
+                
+                <div class="live-editor">
+                    <div class="editor-header">
+                        <h4 style="color: white; margin: 0;">SQL Playground</h4>
+                        <button class="btn btn-success" onclick="executeSQL()">
+                            <i class="fas fa-play"></i> Execute SQL
+                        </button>
+                    </div>
+                    
+                    <div class="editor-tabs">
+                        <button class="editor-tab active" onclick="switchTab('insert')">INSERT</button>
+                        <button class="editor-tab" onclick="switchTab('select')">SELECT</button>
+                        <button class="editor-tab" onclick="switchTab('update')">UPDATE</button>
+                        <button class="editor-tab" onclick="switchTab('delete')">DELETE</button>
+                        <button class="editor-tab" onclick="switchTab('schema')">Schema</button>
+                    </div>
+                    
+                    <div class="editor-content" id="editorContent">
+-- INSERT: Add new products to inventory
+INSERT INTO produce (id, name)
+VALUES (4, 'grapes');
+
+-- Add multiple products at once
+INSERT INTO produce (id, name)
+VALUES 
+    (5, 'pineapple'),
+    (6, 'mango');
+                    </div>
+                    
+                    <div style="margin-top: 15px; color: #94a3b8; font-size: 14px;">
+                        <i class="fas fa-info-circle"></i> Edit the SQL above and click "Execute SQL" to see results
+                    </div>
+                </div>
+                
+                <div class="data-table-preview">
+                    <h5>Execution Results</h5>
+                    <div id="executionResults" style="padding: 15px; background: #f8fafc; border-radius: 6px; min-height: 100px;">
+                        Results will appear here after execution...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 3: Core CRUD Operations -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-cogs"></i> PART 3: MASTERING CORE OPERATIONS</h2>
+            
+            <div class="interactive-exercise">
+                <!-- INSERT Panel -->
+                <div class="exercise-panel">
+                    <h3><i class="fas fa-plus" style="color: var(--success);"></i> INSERT Operation</h3>
+                    <p>Add new records to your tables:</p>
+                    
+                    <div class="code-block">
+<span class="comment">-- Insert single record</span><br>
+<span class="keyword">INSERT INTO</span> produce (id, name)<br>
+<span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">'apple'</span>);<br><br>
+
+<span class="comment">-- Insert multiple records</span><br>
+<span class="keyword">INSERT INTO</span> produce (id, name)<br>
+<span class="keyword">VALUES</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="number">1</span>, <span class="string">'apple'</span>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="number">2</span>, <span class="string">'orange'</span>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="number">3</span>, <span class="string">'banana'</span>);
+                    </div>
+                    
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <input type="checkbox" id="insert1">
+                            <label for="insert1">I can insert single records</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="insert2">
+                            <label for="insert2">I can insert multiple records at once</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SELECT Panel -->
+                <div class="exercise-panel">
+                    <h3><i class="fas fa-eye" style="color: var(--accent);"></i> SELECT Operation</h3>
+                    <p>Retrieve and filter data:</p>
+                    
+                    <div class="code-block">
+<span class="comment">-- Select all columns</span><br>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> produce;<br><br>
+
+<span class="comment">-- Select specific columns</span><br>
+<span class="keyword">SELECT</span> name, id <span class="keyword">FROM</span> produce;<br><br>
+
+<span class="comment">-- Select with WHERE clause</span><br>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> produce<br>
+<span class="keyword">WHERE</span> id = <span class="number">1</span>;
+                    </div>
+                    
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <input type="checkbox" id="select1">
+                            <label for="select1">I can select all columns with *</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="select2">
+                            <label for="select2">I can select specific columns</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- UPDATE Panel -->
+                <div class="exercise-panel">
+                    <h3><i class="fas fa-edit" style="color: var(--warning);"></i> UPDATE Operation</h3>
+                    <p>Modify existing records:</p>
+                    
+                    <div class="code-block">
+<span class="comment">-- Update single record</span><br>
+<span class="keyword">UPDATE</span> produce<br>
+<span class="keyword">SET</span> name = <span class="string">'strawberry'</span><br>
+<span class="keyword">WHERE</span> id = <span class="number">1</span>;<br><br>
+
+<span class="comment">-- Update multiple records</span><br>
+<span class="keyword">UPDATE</span> produce<br>
+<span class="keyword">SET</span> name = <span class="string">'organic '</span> || name<br>
+<span class="keyword">WHERE</span> id <span class="keyword">IN</span> (<span class="number">1</span>, <span class="number">2</span>);
+                    </div>
+                    
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <input type="checkbox" id="update1">
+                            <label for="update1">I can update single records</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="update2">
+                            <label for="update2">I understand the importance of WHERE in UPDATE</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- DELETE Panel -->
+                <div class="exercise-panel">
+                    <h3><i class="fas fa-trash-alt" style="color: var(--danger);"></i> DELETE Operation</h3>
+                    <p>Remove records from tables:</p>
+                    
+                    <div class="code-block">
+<span class="comment">-- Delete specific record</span><br>
+<span class="keyword">DELETE FROM</span> produce<br>
+<span class="keyword">WHERE</span> id = <span class="number">2</span>;<br><br>
+
+<span class="comment">-- Delete multiple records</span><br>
+<span class="keyword">DELETE FROM</span> produce<br>
+<span class="keyword">WHERE</span> name <span class="keyword">LIKE</span> <span class="string">'%apple%'</span>;
+                    </div>
+                    
+                    <div class="warning-box" style="margin: 15px 0; padding: 15px;">
+                        <strong><i class="fas fa-exclamation-triangle"></i> CRITICAL:</strong> Always use a WHERE clause with DELETE! Omitting WHERE will delete ALL records in the table.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 4: Documentation & Comments -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-comments"></i> PART 4: PROFESSIONAL DOCUMENTATION</h2>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>The Art of SQL Comments</h3>
+                <p>Professional SQL developers document their code thoroughly. Good comments:</p>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Comment Type</th>
+                                <th>Syntax</th>
+                                <th>Best Use</th>
+                                <th>Example</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Single-line</td>
+                                <td><code>-- Comment text</code></td>
+                                <td>Brief explanations, line comments</td>
+                                <td><code>-- Get all active products</code></td>
+                            </tr>
+                            <tr>
+                                <td>Multi-line</td>
+                                <td><code>/* Comment */</code></td>
+                                <td>Block explanations, function headers</td>
+                                <td><code>/* Inventory update procedure */</code></td>
+                            </tr>
+                            <tr>
+                                <td>Header Comment</td>
+                                <td>Multi-line block</td>
+                                <td>File documentation, authorship</td>
+                                <td>File headers with purpose and author</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="interactive-lab">
+                    <h4><i class="fas fa-file-code"></i> Commenting Exercise</h4>
+                    <p>Add appropriate comments to this SQL file:</p>
+                    
+                    <div class="code-block" id="commentExercise">
+-- TODO: Add comments to explain this code
+
+DROP DATABASE IF EXISTS inventory_db;
+
+CREATE DATABASE inventory_db;
+
+\c inventory_db;
+
+CREATE TABLE produce (
+  id INTEGER NOT NULL,
+  name VARCHAR(30) NOT NULL
+);
+
+INSERT INTO produce (id, name)
+VALUES
+    (1, 'apple'),
+    (2, 'orange'),
+    (3, 'banana');
+
+SELECT * FROM produce;
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-secondary" onclick="showCommentedSolution()">
+                            <i class="fas fa-lightbulb"></i> Show Professional Solution
+                        </button>
+                        <button class="btn" onclick="checkComments()">
+                            <i class="fas fa-check"></i> Validate My Comments
+                        </button>
+                    </div>
+                    
+                    <div id="commentFeedback" style="margin-top: 20px; display: none;">
+                        <!-- Feedback appears here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 5: Hands-On Challenge -->
+        <div class="section exercise">
+            <h2 class="section-title"><i class="fas fa-tasks"></i> PART 5: COMPREHENSIVE CHALLENGE</h2>
+            
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Complete Inventory Management System</h3>
+                
+                <div class="business-case">
+                    <h4><i class="fas fa-briefcase"></i> BUSINESS REQUIREMENTS</h4>
+                    <p>Create a complete inventory management solution for MSEBETSI Retail:</p>
+                    <ol style="margin-top: 15px; padding-left: 20px;">
+                        <li>Create database and table structure</li>
+                        <li>Populate with initial inventory data</li>
+                        <li>Implement CRUD operations for daily management</li>
+                        <li>Document all code professionally</li>
+                    </ol>
+                </div>
+                
+                <!-- File Upload Section -->
+                <div class="step">
+                    <h3>Submit Your Solution</h3>
+                    <p>Upload your complete SQL file(s) for validation:</p>
+                    
+                    <div class="file-upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #94a3b8; margin-bottom: 15px;"></i>
+                        <h3>Drag & Drop Your SQL File(s) Here</h3>
+                        <p style="color: var(--muted); margin: 10px 0 20px;">Accepted: .sql files or zip archives</p>
+                        <input type="file" id="fileInput" accept=".sql,.zip" hidden multiple>
+                    </div>
+                    
+                    <div id="fileList" style="margin-top: 20px;"></div>
+                    
+                    <div class="validation-result success" id="uploadSuccess" style="display: none;">
+                        <h3 style="color: var(--success); margin-bottom: 10px;"><i class="fas fa-check-circle"></i> Solution Submitted Successfully!</h3>
+                        <p>Your CRUD implementation has been received and will be validated.</p>
+                    </div>
+                    
+                    <div class="validation-result error" id="uploadError" style="display: none;">
+                        <h3 style="color: var(--danger); margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i> Submission Error</h3>
+                        <p id="errorMessage">Please check your files and try again.</p>
+                    </div>
+                </div>
+                
+                <!-- Success Criteria -->
+                <div class="step">
+                    <h3>Success Criteria Checklist</h3>
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria1">
+                            <label for="criteria1">Database and table created successfully</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria2">
+                            <label for="criteria2">Initial data inserted (at least 3 products)</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria3">
+                            <label for="criteria3">UPDATE operation implemented correctly</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria4">
+                            <label for="criteria4">DELETE operation implemented correctly</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria5">
+                            <label for="criteria5">All code properly commented</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="criteria6">
+                            <label for="criteria6">SELECT queries return expected results</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 6: Bonus - Advanced Operations -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-rocket"></i> PART 6: BONUS - ADVANCED DATA OPERATIONS</h2>
+            
+            <div class="step">
+                <div class="step-number">5</div>
+                <h3>Beyond Basic CRUD</h3>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Advanced Operation</th>
+                                <th>PostgreSQL Feature</th>
+                                <th>Use Case</th>
+                                <th>Example</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Bulk Operations</td>
+                                <td><code>COPY</code> command</td>
+                                <td>Import/export large datasets</td>
+                                <td><code>COPY produce FROM 'data.csv'</code></td>
+                            </tr>
+                            <tr>
+                                <td>Transaction Control</td>
+                                <td><code>BEGIN; COMMIT; ROLLBACK;</code></td>
+                                <td>Atomic operations, data consistency</td>
+                                <td>Group multiple operations</td>
+                            </tr>
+                            <tr>
+                                <td>Conditional Logic</td>
+                                <td><code>CASE</code> statements</td>
+                                <td>Complex data transformations</td>
+                                <td>Conditional updates in SELECT</td>
+                            </tr>
+                            <tr>
+                                <td>Full Text Search</td>
+                                <td><code>tsvector</code>, <code>tsquery</code></td>
+                                <td>Powerful text searching</td>
+                                <td>Search product descriptions</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="note-box">
+                    <strong><i class="fas fa-graduation-cap"></i> NEXT STEPS:</strong> After mastering basic CRUD, explore PostgreSQL's advanced features: window functions, JSON support, geospatial queries, and full-text search capabilities.
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional Summary -->
+        <div class="section" style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe);">
+            <h2 class="section-title"><i class="fas fa-clipboard-check"></i> PROFESSIONAL SUMMARY</h2>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Operation</th>
+                            <th>SQL Command</th>
+                            <th>Critical Best Practice</th>
+                            <th>Common Pitfall</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Create</strong></td>
+                            <td><code>INSERT INTO</code></td>
+                            <td>Validate data before insertion</td>
+                            <td>Inserting duplicate primary keys</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Read</strong></td>
+                            <td><code>SELECT</code></td>
+                            <td>Use specific columns, not <code>SELECT *</code></td>
+                            <td>Missing indexes on filtered columns</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Update</strong></td>
+                            <td><code>UPDATE</code></td>
+                            <td>ALWAYS test WHERE clause first with SELECT</td>
+                            <td>Omitting WHERE clause (updates all rows!)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Delete</strong></td>
+                            <td><code>DELETE FROM</code></td>
+                            <td>Use transactions for safety</td>
+                            <td>Forgetting WHERE clause (deletes everything!)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="success-box" style="margin-top: 20px;">
+                <h4><i class="fas fa-key"></i> CRUD MASTERY ACHIEVED</h4>
+                <p>You now possess the fundamental skills for any database interaction. These four operations form the foundation of 90% of all database work in professional applications.</p>
+                <p style="margin-top: 10px;"><strong>Professional Tip:</strong> Always backup your database before running UPDATE or DELETE operations on production data.</p>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="btn btn-secondary" onclick="window.location.href='lesson3.html'">
+                <i class="fas fa-arrow-left"></i> Previous: Table Creation
+            </button>
+            <button class="btn" onclick="completeLesson()" id="nextLessonBtn">
+                Complete Lesson & Continue <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.1); color: var(--muted); font-size: 14px;">
+            <p><strong>MSEBETSI SOLUTIONS PROFESSIONAL INSIGHT:</strong> CRUD operations are the alphabet of database programming. Master these, and you can build any data-driven application.</p>
+            <p>© 2024 MSEBETSI SOLUTIONS - Enterprise Data Operations Training</p>
+        </div>
+    </div>
+
+    <script>
+        // Lesson state and data
+        let currentTab = 'insert';
+        let inventoryData = [
+            { id: 1, name: 'apple', status: 'Active' },
+            { id: 2, name: 'orange', status: 'Active' },
+            { id: 3, name: 'banana', status: 'Active' }
+        ];
+        
+        // Tab content definitions
+        const tabContents = {
+            insert: `-- INSERT: Add new products to inventory
+-- Single record insertion
+INSERT INTO produce (id, name)
+VALUES (4, 'grapes');
+
+-- Multiple records insertion (more efficient)
+INSERT INTO produce (id, name)
+VALUES 
+    (5, 'pineapple'),
+    (6, 'mango'),
+    (7, 'watermelon');
+
+-- Insert with explicit column order
+INSERT INTO produce (name, id)
+VALUES ('kiwi', 8);`,
+            
+            select: `-- SELECT: Retrieve and filter data
+-- Select all columns from table
+SELECT * FROM produce;
+
+-- Select specific columns
+SELECT id, name FROM produce;
+
+-- Select with WHERE clause (filtering)
+SELECT * FROM produce 
+WHERE id = 1;
+
+-- Select with LIKE pattern matching
+SELECT * FROM produce 
+WHERE name LIKE '%apple%';
+
+-- Select with ORDER BY (sorting)
+SELECT * FROM produce 
+ORDER BY name ASC;
+
+-- Select with LIMIT (pagination)
+SELECT * FROM produce 
+LIMIT 5;`,
+            
+            update: `-- UPDATE: Modify existing records
+-- Update single record (ALWAYS use WHERE!)
+UPDATE produce
+SET name = 'strawberry'
+WHERE id = 1;
+
+-- Update multiple records
+UPDATE produce
+SET name = 'organic ' || name
+WHERE id IN (1, 2, 3);
+
+-- Update based on condition
+UPDATE produce
+SET name = UPPER(name)
+WHERE LENGTH(name) > 5;
+
+-- Update with calculation (if we had a price column)
+-- UPDATE produce
+-- SET price = price * 1.10  -- 10% price increase
+-- WHERE category = 'fruit';`,
+            
+            delete: `-- DELETE: Remove records from table
+-- Delete specific record
+DELETE FROM produce
+WHERE id = 2;
+
+-- Delete multiple records
+DELETE FROM produce
+WHERE name LIKE '%test%';
+
+-- Delete with complex condition
+DELETE FROM produce
+WHERE id > 10 AND name IS NULL;
+
+-- CRITICAL SAFETY TIP: Always test with SELECT first!
+-- SELECT * FROM produce WHERE id = 2;  -- Test this first
+-- DELETE FROM produce WHERE id = 2;    -- Then delete`,
+            
+            schema: `-- Complete schema with CRUD examples
+-- Drop database if exists
+DROP DATABASE IF EXISTS inventory_db;
+
+-- Create new database
+CREATE DATABASE inventory_db;
+
+-- Connect to database
+\\c inventory_db;
+
+-- Create products table
+CREATE TABLE produce (
+    id INTEGER NOT NULL,
+    name VARCHAR(30) NOT NULL,
+    price DECIMAL(10,2),
+    stock_quantity INTEGER DEFAULT 0,
+    category VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert sample data
+INSERT INTO produce (id, name, price, category)
+VALUES
+    (1, 'apple', 1.99, 'fruit'),
+    (2, 'orange', 2.49, 'fruit'),
+    (3, 'banana', 0.99, 'fruit'),
+    (4, 'carrot', 1.49, 'vegetable');
+    
+-- Create indexes for better performance
+CREATE INDEX idx_produce_name ON produce(name);
+CREATE INDEX idx_produce_category ON produce(category);`
+        };
+        
+        // Initialize the lesson
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeInventoryTable();
+            setupFileUpload();
+            applySyntaxHighlighting();
+            
+            // Check for previous completion
+            if (localStorage.getItem('sql-lesson4-completed') === 'true') {
+                markCheckboxesAsComplete();
+            }
+        });
+        
+        // Inventory table operations
+        function initializeInventoryTable() {
+            const tbody = document.getElementById('inventoryBody');
+            tbody.innerHTML = '';
+            
+            inventoryData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.id}</td>
+                    <td>${item.name}</td>
+                    <td><span style="color: var(--success);">${item.status}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function performInsert() {
+            const newId = inventoryData.length + 1;
+            inventoryData.push({ 
+                id: newId, 
+                name: 'apple', 
+                status: 'Newly Added' 
+            });
+            initializeInventoryTable();
+            
+            document.getElementById('executionResults').innerHTML = `
+                <div style="color: var(--success);">
+                    <i class="fas fa-check-circle"></i> INSERT operation completed!
+                </div>
+                <div style="margin-top: 10px;">
+                    Added new product: apple (ID: ${newId})
+                </div>
+            `;
+        }
+        
+        function performSelect() {
+            document.getElementById('executionResults').innerHTML = `
+                <div style="color: var(--accent);">
+                    <i class="fas fa-eye"></i> SELECT operation results:
+                </div>
+                <div style="margin-top: 10px;">
+                    Found ${inventoryData.length} products in inventory
+                </div>
+                <div style="margin-top: 10px; font-family: monospace;">
+                    ${inventoryData.map(item => `ID: ${item.id}, Name: ${item.name}`).join('<br>')}
+                </div>
+            `;
+        }
+        
+        function performUpdate() {
+            const item = inventoryData.find(i => i.id === 1);
+            if (item) {
+                item.name = 'strawberry';
+                item.status = 'Updated';
+            }
+            initializeInventoryTable();
+            
+            document.getElementById('executionResults').innerHTML = `
+                <div style="color: var(--warning);">
+                    <i class="fas fa-edit"></i> UPDATE operation completed!
+                </div>
+                <div style="margin-top: 10px;">
+                    Changed product ID 1 from "apple" to "strawberry"
+                </div>
+            `;
+        }
+        
+        function performDelete() {
+            const initialLength = inventoryData.length;
+            inventoryData = inventoryData.filter(item => item.id !== 2);
+            initializeInventoryTable();
+            
+            document.getElementById('executionResults').innerHTML = `
+                <div style="color: var(--danger);">
+                    <i class="fas fa-trash-alt"></i> DELETE operation completed!
+                </div>
+                <div style="margin-top: 10px;">
+                    Removed product ID 2 (orange) from inventory<br>
+                    ${initialLength > inventoryData.length ? 'Successfully deleted' : 'Product not found'}
+                </div>
+            `;
+        }
+        
+        // Editor functionality
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // Update tab buttons
+            document.querySelectorAll('.editor-tab').forEach(button => {
+                button.classList.remove('active');
+                if (button.textContent.toUpperCase() === tabName.toUpperCase()) {
+                    button.classList.add('active');
+                }
+            });
+            
+            // Update content
+            document.getElementById('editorContent').textContent = tabContents[tabName];
+            applySyntaxHighlightingToElement(document.getElementById('editorContent'));
+        }
+        
+        function executeSQL() {
+            const content = document.getElementById('editorContent').textContent;
+            const resultsDiv = document.getElementById('executionResults');
+            
+            // Simulate different results based on current tab
+            let resultMessage = '';
+            let resultColor = 'var(--accent)';
+            let resultIcon = 'fa-check-circle';
+            
+            switch(currentTab) {
+                case 'insert':
+                    resultMessage = 'INSERT successful: Added new products to inventory';
+                    resultColor = 'var(--success)';
+                    break;
+                case 'select':
+                    resultMessage = 'SELECT returned 4 records from produce table';
+                    resultColor = 'var(--accent)';
+                    break;
+                case 'update':
+                    resultMessage = 'UPDATE successful: Modified 1 record';
+                    resultColor = 'var(--warning)';
+                    break;
+                case 'delete':
+                    resultMessage = 'DELETE successful: Removed specified records';
+                    resultColor = 'var(--danger)';
+                    resultIcon = 'fa-exclamation-triangle';
+                    break;
+                case 'schema':
+                    resultMessage = 'Schema operations completed successfully';
+                    resultColor = '#8b5cf6';
+                    break;
+            }
+            
+            resultsDiv.innerHTML = `
+                <div style="color: ${resultColor};">
+                    <i class="fas ${resultIcon}"></i> SQL Execution Complete
+                </div>
+                <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; border-left: 4px solid ${resultColor};">
+                    <strong>Result:</strong> ${resultMessage}
+                </div>
+                <div style="margin-top: 10px; font-size: 14px; color: var(--muted);">
+                    <i class="fas fa-info-circle"></i> In a real PostgreSQL environment, you would see actual query results
+                </div>
+            `;
+        }
+        
+        // Commenting exercise
+        function showCommentedSolution() {
+            const solution = `-- ============================================
+-- inventory_setup.sql
+-- Purpose: Initialize inventory database and sample data
+-- Author: MSEBETSI Solutions
+-- Created: ${new Date().toLocaleDateString()}
+-- ============================================
+
+-- Drop existing database to start fresh (development only!)
+DROP DATABASE IF EXISTS inventory_db;
+
+-- Create new inventory database
+CREATE DATABASE inventory_db;
+
+-- Connect to the newly created database
+\\c inventory_db;
+
+-- Create produce table with appropriate data types and constraints
+CREATE TABLE produce (
+  -- Unique identifier for each product
+  id INTEGER NOT NULL,
+  
+  -- Product name with maximum 30 characters
+  name VARCHAR(30) NOT NULL
+);
+
+-- Insert initial inventory data
+-- Using multi-row INSERT for efficiency
+INSERT INTO produce (id, name)
+VALUES
+    (1, 'apple'),   -- Common fruit
+    (2, 'orange'),  -- Citrus fruit
+    (3, 'banana');  -- Tropical fruit
+
+-- Verify the data was inserted correctly
+-- This SELECT is for validation purposes
+SELECT * FROM produce;`;
+            
+            document.getElementById('commentExercise').innerHTML = solution;
+            applySyntaxHighlightingToElement(document.getElementById('commentExercise'));
+        }
+        
+        function checkComments() {
+            const content = document.getElementById('commentExercise').textContent;
+            const commentCount = (content.match(/--/g) || []).length;
+            const blockCommentCount = (content.match(/\/\*/g) || []).length;
+            
+            let feedback = '';
+            
+            if (commentCount < 5) {
+                feedback = `
+                <div style="color: var(--danger); padding: 15px; background: #fef2f2; border-radius: 6px;">
+                    <i class="fas fa-exclamation-triangle"></i> <strong>Needs more comments:</strong> Only ${commentCount} single-line comments found.
+                    <div style="margin-top: 10px;">
+                        Professional SQL files should include:
+                        <ul style="margin-top: 5px; padding-left: 20px;">
+                            <li>File header with purpose and author</li>
+                            <li>Comments for each major section</li>
+                            <li>Line comments for complex operations</li>
+                            <li>Comments explaining non-obvious logic</li>
+                        </ul>
+                    </div>
+                </div>
+                `;
+            } else {
+                feedback = `
+                <div style="color: var(--success); padding: 15px; background: #f0fdf4; border-radius: 6px;">
+                    <i class="fas fa-check-circle"></i> <strong>Well documented!</strong> Found ${commentCount} single-line comments.
+                    <div style="margin-top: 10px;">
+                        Your code is well-commented and maintainable. Good documentation includes:
+                        <ul style="margin-top: 5px; padding-left: 20px;">
+                            <li>Purpose of each SQL statement</li>
+                            <li>Explanation of complex operations</li>
+                            <li>Notes about data relationships</li>
+                            <li>Any assumptions or constraints</li>
+                        </ul>
+                    </div>
+                </div>
+                `;
+            }
+            
+            document.getElementById('commentFeedback').innerHTML = feedback;
+            document.getElementById('commentFeedback').style.display = 'block';
+        }
+        
+        // File upload functionality
+        function setupFileUpload() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlightDropZone, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlightDropZone, false);
+            });
+            
+            dropZone.addEventListener('drop', handleDrop, false);
+            fileInput.addEventListener('change', handleFileSelect, false);
+        }
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        function highlightDropZone() {
+            dropZone.style.borderColor = 'var(--accent)';
+            dropZone.style.background = '#f1f7ff';
+        }
+        
+        function unhighlightDropZone() {
+            dropZone.style.borderColor = '#cbd5e1';
+            dropZone.style.background = '#f8fafc';
+        }
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            processFiles(files);
+        }
+        
+        function handleFileSelect() {
+            processFiles(this.files);
+        }
+        
+        function processFiles(files) {
+            if (files.length === 0) return;
+            
+            const fileListDiv = document.getElementById('fileList');
+            fileListDiv.innerHTML = '<h4>Uploaded Files:</h4>';
+            
+            Array.from(files).forEach(file => {
+                const fileDiv = document.createElement('div');
+                fileDiv.style.padding = '10px';
+                fileDiv.style.margin = '5px 0';
+                fileDiv.style.background = '#f1f5f9';
+                fileDiv.style.borderRadius = '4px';
+                fileDiv.innerHTML = `
+                    <i class="fas fa-file-code"></i> ${file.name} (${(file.size/1024).toFixed(1)} KB)
+                `;
+                fileListDiv.appendChild(fileDiv);
+            });
+            
+            // Show success message
+            document.getElementById('uploadSuccess').style.display = 'block';
+            document.getElementById('uploadError').style.display = 'none';
+            
+            // Mark checklist items
+            markCheckboxesAsComplete();
+        }
+        
+        function markCheckboxesAsComplete() {
+            document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+                cb.checked = true;
+                cb.parentElement.style.color = 'var(--success)';
+                cb.parentElement.style.fontWeight = '600';
+            });
+            
+            // Enable next lesson
+            document.getElementById('nextLessonBtn').disabled = false;
+        }
+        
+        function completeLesson() {
+            const completionMessage = `
+🎉 CRUD MASTERY ACHIEVED!
+
+What you've accomplished:
+✓ Mastered all four CRUD operations
+✓ Learned professional SQL documentation
+✓ Practiced with interactive exercises
+✓ Submitted complete solutions
+
+Key Takeaways:
+• INSERT adds new data
+• SELECT retrieves data
+• UPDATE modifies existing data
+• DELETE removes data (use WITH CARE!)
+• Always document your SQL code
+
+Next: Advanced queries and data relationships!
+            `;
+            
+            alert(completionMessage);
+            localStorage.setItem('sql-lesson4-completed', 'true');
+            window.location.href = 'lesson5.html'; // Next lesson
+        }
+        
+        // Syntax highlighting
+        function applySyntaxHighlighting() {
+            document.querySelectorAll('.code-block').forEach(block => {
+                applySyntaxHighlightingToElement(block);
+            });
+        }
+        
+        function applySyntaxHighlightingToElement(element) {
+            const html = element.innerHTML;
+            const highlighted = html
+                .replace(/--.*$/gm, '<span class="comment">$&</span>')
+                .replace(/\/\*[\s\S]*?\*\//g, '<span class="comment">$&</span>')
+                .replace(/\b(SELECT|INSERT|UPDATE|DELETE|FROM|WHERE|INTO|VALUES|SET|CREATE|DROP|DATABASE|TABLE|IF EXISTS|NOT NULL|VARCHAR|INTEGER|DECIMAL|TIMESTAMP|DEFAULT|CURRENT_TIMESTAMP|ORDER BY|GROUP BY|HAVING|LIMIT|OFFSET|ASC|DESC|AND|OR|NOT|IN|LIKE|ILIKE|IS NULL|IS NOT NULL|BEGIN|COMMIT|ROLLBACK|COPY|CASE|WHEN|THEN|END)\b/gi, '<span class="keyword">$1</span>')
+                .replace(/'([^']*)'/g, '<span class="string">\'$1\'</span>')
+                .replace(/\b(\d+(\.\d+)?)\b/g, '<span class="number">$1</span>')
+                .replace(/(=|<|>|!=|<=|>=|<>)/g, '<span class="operator">$1</span>')
+                .replace(/\b(INTEGER|VARCHAR|DECIMAL|TIMESTAMP|SERIAL|BOOLEAN|TEXT|DATE)\b/gi, '<span class="type">$1</span>');
+            element.innerHTML = highlighted;
+        }
+    </script>
+</body>
+</html>

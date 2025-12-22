@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 1: Introduction to SQL & Your First Database - MSEBETSI Solutions</title>
+    <style>
+        :root {
+            --bg: #f6f7f9;
+            --card: #ffffff;
+            --muted: #6b7280;
+            --accent: #0b5fff;
+            --accent-2: #0f1724;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--bg);
+            color: var(--accent-2);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .lesson-container {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            margin-top: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid rgba(11, 95, 255, 0.1);
+        }
+        
+        .module-badge {
+            display: inline-block;
+            background: rgba(11, 95, 255, 0.1);
+            color: var(--accent);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .lesson-title {
+            font-size: 36px;
+            color: var(--accent-2);
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .lesson-meta {
+            color: var(--muted);
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        
+        .time-badge {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            padding: 6px 15px;
+            border-radius: 15px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .objectives {
+            background: linear-gradient(135deg, #f0f7ff, #e6f0ff);
+            border-left: 4px solid var(--accent);
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        
+        .objectives h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .objectives ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+        
+        .objectives li {
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .objectives li:before {
+            content: "✓";
+            color: var(--success);
+            font-weight: bold;
+            position: absolute;
+            left: -20px;
+        }
+        
+        .section {
+            margin: 40px 0;
+            padding: 30px;
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(11, 95, 255, 0.05);
+        }
+        
+        .section-title {
+            color: var(--accent);
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(11, 95, 255, 0.1);
+        }
+        
+        .step {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(11, 95, 255, 0.02);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            overflow-x: auto;
+            border: 1px solid #333;
+        }
+        
+        .code-block .comment {
+            color: #6A9955;
+        }
+        
+        .code-block .keyword {
+            color: #569CD6;
+        }
+        
+        .code-block .string {
+            color: #CE9178;
+        }
+        
+        .code-block .function {
+            color: #DCDCAA;
+        }
+        
+        .code-block .number {
+            color: #B5CEA8;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th {
+            background: rgba(11, 95, 255, 0.1);
+            color: var(--accent);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        tr:hover {
+            background: rgba(11, 95, 255, 0.03);
+        }
+        
+        .command-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .command-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(11, 95, 255, 0.1);
+        }
+        
+        .command-card h4 {
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        
+        .note-box {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .warning-box {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--danger);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .success-box {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .exercise {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 40px 0;
+            border: 2px dashed var(--accent);
+        }
+        
+        .exercise h3 {
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+        
+        .checklist {
+            margin: 20px 0;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .checklist-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+        
+        .btn:hover {
+            background: #0a4ed9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(11, 95, 255, 0.2);
+        }
+        
+        .btn-secondary {
+            background: rgba(11, 95, 255, 0.1);
+            color: var(--accent);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(11, 95, 255, 0.2);
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .lesson-container {
+                padding: 20px;
+            }
+            
+            .lesson-title {
+                font-size: 28px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .command-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="lesson-container">
+        <div class="header">
+            <div class="module-badge">MODULE 10: SQL DATABASES</div>
+            <h1 class="lesson-title">Lesson 1: Introduction to SQL & Your First Database</h1>
+            <p class="lesson-meta">Learn PostgreSQL installation, database creation, and basic SQL commands</p>
+            <div class="time-badge"><i class="fas fa-clock"></i> 90-MINUTE LESSON</div>
+        </div>
+
+        <div class="objectives">
+            <h3><i class="fas fa-bullseye"></i> LESSON OBJECTIVES</h3>
+            <ul>
+                <li>Install PostgreSQL on your machine</li>
+                <li>Navigate the PostgreSQL Shell (psql)</li>
+                <li>Create your first database and table</li>
+                <li>Understand basic SQL command structure</li>
+                <li>Execute SQL from files</li>
+            </ul>
+        </div>
+
+        <!-- Part 1: Installation -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-download"></i> PART 1: INSTALLING POSTGRESQL</h2>
+            
+            <div class="note-box">
+                <strong><i class="fas fa-info-circle"></i> PREREQUISITES:</strong> Basic computer literacy, Terminal/Command Prompt access, Administrative rights
+            </div>
+
+            <div class="step">
+                <span class="step-number">1</span>
+                <h3>For Windows Users</h3>
+                <p>1. Download installer from <a href="https://www.postgresql.org/download/windows/" target="_blank">postgresql.org/download/windows/</a></p>
+                <p>2. Run the installer and follow the setup wizard</p>
+                <p>3. <strong>Remember your password</strong> - you'll need it later!</p>
+                <p>4. Use default port: 5432</p>
+                <p>5. Complete installation</p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <h3>For Mac Users</h3>
+                <div class="code-block">
+                    <span class="comment"># Option 1: Using Homebrew</span><br>
+                    brew install postgresql@14<br>
+                    brew services start postgresql@14<br><br>
+                    <span class="comment"># Option 2: Download from postgresql.org/download/macosx/</span>
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <h3>For Linux (Ubuntu/Debian)</h3>
+                <div class="code-block">
+                    sudo apt update<br>
+                    sudo apt install postgresql postgresql-contrib<br>
+                    sudo systemctl start postgresql
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <h3>Verification Check</h3>
+                <div class="code-block">
+                    psql --version
+                </div>
+                <p><strong>Expected output:</strong> <code>psql (PostgreSQL) 14.x</code></p>
+            </div>
+        </div>
+
+        <!-- Part 2: PostgreSQL Shell Basics -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-terminal"></i> PART 2: POSTGRESQL SHELL BASICS</h2>
+            
+            <div class="step">
+                <h3>Connecting to PostgreSQL</h3>
+                <div class="code-block">
+                    <span class="comment"># Connect as default superuser</span><br>
+                    <span class="keyword">psql</span> -U postgres<br><br>
+                    
+                    <span class="comment"># Connect to specific database</span><br>
+                    <span class="keyword">psql</span> -U postgres -d database_name<br><br>
+                    
+                    <span class="comment"># Connect with host and port</span><br>
+                    <span class="keyword">psql</span> -h localhost -p 5432 -U postgres
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>Common psql Commands</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Command</th>
+                                <th>What it does</th>
+                                <th>Example</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>\l</code></td>
+                                <td>List all databases</td>
+                                <td><code>\l</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>\c</code></td>
+                                <td>Connect to database</td>
+                                <td><code>\c mydatabase</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>\dt</code></td>
+                                <td>List tables</td>
+                                <td><code>\dt</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>\d table_name</code></td>
+                                <td>Describe table</td>
+                                <td><code>\d users</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>\q</code></td>
+                                <td>Quit psql</td>
+                                <td><code>\q</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>\i</code></td>
+                                <td>Execute SQL file</td>
+                                <td><code>\i setup.sql</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 3: Creating Your First Database & Table -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-database"></i> PART 3: CREATING YOUR FIRST DATABASE & TABLE</h2>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <h3>Create a Database</h3>
+                <div class="code-block">
+                    <span class="comment">-- First, connect to PostgreSQL</span><br>
+                    psql -U postgres<br><br>
+                    
+                    <span class="comment">-- Create your first database</span><br>
+                    <span class="keyword">CREATE DATABASE</span> school_db;<br><br>
+                    
+                    <span class="comment">-- Verify it was created</span><br>
+                    \l<br><br>
+                    
+                    <span class="comment">-- Connect to your new database</span><br>
+                    \c school_db
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <h3>Create Your First Table</h3>
+                <div class="code-block">
+                    <span class="comment">-- Create a simple students table</span><br>
+                    <span class="keyword">CREATE TABLE</span> students (<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;student_id <span class="keyword">SERIAL PRIMARY KEY</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;first_name <span class="keyword">VARCHAR</span>(50) <span class="keyword">NOT NULL</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;last_name <span class="keyword">VARCHAR</span>(50) <span class="keyword">NOT NULL</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;email <span class="keyword">VARCHAR</span>(100) <span class="keyword">UNIQUE</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;enrollment_date <span class="keyword">DATE DEFAULT</span> <span class="function">CURRENT_DATE</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;gpa <span class="keyword">DECIMAL</span>(3,2) <span class="keyword">CHECK</span> (gpa >= 0.0 <span class="keyword">AND</span> gpa <= 4.0)<br>
+                    );<br><br>
+                    
+                    <span class="comment">-- Verify table creation</span><br>
+                    \dt<br>
+                    \d students
+                </div>
+            </div>
+
+            <div class="success-box">
+                <strong><i class="fas fa-check-circle"></i> UNDERSTANDING TABLE STRUCTURE:</strong>
+                <pre style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 5px; margin-top: 10px;">
+students
+├── student_id (SERIAL, PRIMARY KEY) → Auto-incrementing unique ID
+├── first_name (VARCHAR(50), NOT NULL) → Required text field
+├── last_name (VARCHAR(50), NOT NULL) → Required text field
+├── email (VARCHAR(100), UNIQUE) → Unique email address
+├── enrollment_date (DATE, DEFAULT) → Auto-fills with today's date
+└── gpa (DECIMAL(3,2), CHECK) → Number with constraint (0.0-4.0)
+                </pre>
+            </div>
+        </div>
+
+        <!-- Part 4: Core SQL Commands Introduction -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-code"></i> PART 4: CORE SQL COMMANDS INTRODUCTION</h2>
+            
+            <h3>SQL Command Categories</h3>
+            
+            <div class="command-grid">
+                <div class="command-card">
+                    <h4><i class="fas fa-cube"></i> DDL (Data Definition Language)</h4>
+                    <div class="code-block" style="font-size: 14px; padding: 15px;">
+                        <span class="comment">-- CREATE - Make new database objects</span><br>
+                        <span class="keyword">CREATE DATABASE</span> company_db;<br>
+                        <span class="keyword">CREATE TABLE</span> employees (...);<br><br>
+                        
+                        <span class="comment">-- ALTER - Modify existing objects</span><br>
+                        <span class="keyword">ALTER TABLE</span> students <span class="keyword">ADD COLUMN</span> phone <span class="keyword">VARCHAR</span>(15);<br><br>
+                        
+                        <span class="comment">-- DROP - Remove objects</span><br>
+                        <span class="keyword">DROP TABLE IF EXISTS</span> temp_data;
+                    </div>
+                </div>
+                
+                <div class="command-card">
+                    <h4><i class="fas fa-edit"></i> DML (Data Manipulation Language)</h4>
+                    <div class="code-block" style="font-size: 14px; padding: 15px;">
+                        <span class="comment">-- INSERT - Add new records</span><br>
+                        <span class="keyword">INSERT INTO</span> students (first_name, last_name, email)<br>
+                        <span class="keyword">VALUES</span> ('John', 'Doe', 'john@email.com');<br><br>
+                        
+                        <span class="comment">-- SELECT - Retrieve data</span><br>
+                        <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> students;<br><br>
+                        
+                        <span class="comment">-- UPDATE - Modify existing data</span><br>
+                        <span class="keyword">UPDATE</span> students <span class="keyword">SET</span> gpa = 3.8<br>
+                        <span class="keyword">WHERE</span> student_id = 1;
+                    </div>
+                </div>
+                
+                <div class="command-card">
+                    <h4><i class="fas fa-shield-alt"></i> DCL (Data Control Language)</h4>
+                    <div class="code-block" style="font-size: 14px; padding: 15px;">
+                        <span class="comment">-- GRANT - Give permissions</span><br>
+                        <span class="keyword">GRANT SELECT ON</span> students <span class="keyword">TO</span> analyst_role;<br><br>
+                        
+                        <span class="comment">-- REVOKE - Remove permissions</span><br>
+                        <span class="keyword">REVOKE DELETE ON</span> students <span class="keyword">FROM</span> intern_role;
+                    </div>
+                </div>
+                
+                <div class="command-card">
+                    <h4><i class="fas fa-exchange-alt"></i> TCL (Transaction Control Language)</h4>
+                    <div class="code-block" style="font-size: 14px; padding: 15px;">
+                        <span class="comment">-- BEGIN - Start transaction</span><br>
+                        <span class="keyword">BEGIN</span>;<br>
+                        <span class="keyword">INSERT INTO</span> students ...;<br>
+                        <span class="keyword">UPDATE</span> grades ...;<br>
+                        <span class="keyword">COMMIT</span>; <span class="comment">-- Save changes</span><br><br>
+                        
+                        <span class="comment">-- ROLLBACK - Undo changes</span><br>
+                        <span class="keyword">BEGIN</span>;<br>
+                        <span class="keyword">DELETE FROM</span> test_data;<br>
+                        <span class="keyword">ROLLBACK</span>;
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part 5: Practice Exercise -->
+        <div class="section exercise">
+            <h2 class="section-title"><i class="fas fa-laptop-code"></i> PART 5: PRACTICE EXERCISE</h2>
+            
+            <h3>Hands-On Activity</h3>
+            <p>Create a file called <code>school_setup.sql</code> with the following content:</p>
+            
+            <div class="code-block">
+                <span class="comment">-- school_setup.sql</span><br>
+                <span class="keyword">DROP DATABASE IF EXISTS</span> practice_db;<br>
+                <span class="keyword">CREATE DATABASE</span> practice_db;<br><br>
+                
+                \c practice_db;<br><br>
+                
+                <span class="comment">-- Create teachers table</span><br>
+                <span class="keyword">CREATE TABLE</span> teachers (<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;teacher_id <span class="keyword">SERIAL PRIMARY KEY</span>,<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;full_name <span class="keyword">VARCHAR</span>(100) <span class="keyword">NOT NULL</span>,<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;subject <span class="keyword">VARCHAR</span>(50),<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;hire_date <span class="keyword">DATE DEFAULT</span> <span class="function">CURRENT_DATE</span><br>
+                );<br><br>
+                
+                <span class="comment">-- Create courses table</span><br>
+                <span class="keyword">CREATE TABLE</span> courses (<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;course_id <span class="keyword">SERIAL PRIMARY KEY</span>,<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;course_name <span class="keyword">VARCHAR</span>(100) <span class="keyword">NOT NULL</span>,<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;teacher_id <span class="keyword">INT REFERENCES</span> teachers(teacher_id),<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;credits <span class="keyword">INT DEFAULT</span> 3<br>
+                );<br><br>
+                
+                <span class="comment">-- Insert sample data</span><br>
+                <span class="keyword">INSERT INTO</span> teachers (full_name, subject) <span class="keyword">VALUES</span><br>
+                ('Dr. Smith', 'Mathematics'),<br>
+                ('Prof. Johnson', 'Computer Science');<br><br>
+                
+                <span class="keyword">INSERT INTO</span> courses (course_name, teacher_id, credits) <span class="keyword">VALUES</span><br>
+                ('Calculus I', 1, 4),<br>
+                ('Database Design', 2, 3);<br><br>
+                
+                <span class="comment">-- View results</span><br>
+                <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> teachers;<br>
+                <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> courses;
+            </div>
+            
+            <div class="step">
+                <h3>Execute Your File</h3>
+                <div class="code-block">
+                    <span class="comment"># From terminal</span><br>
+                    psql -U postgres -f school_setup.sql<br><br>
+                    
+                    <span class="comment"># OR from within psql</span><br>
+                    \i school_setup.sql
+                </div>
+            </div>
+            
+            <div class="checklist">
+                <h4>Checklist for Success:</h4>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check1">
+                    <label for="check1">PostgreSQL installed and verified</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check2">
+                    <label for="check2">Successfully connected to psql</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check3">
+                    <label for="check3">Created database and tables</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check4">
+                    <label for="check4">Executed SQL file successfully</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cheat Sheet -->
+        <div class="section success-box">
+            <h2 class="section-title"><i class="fas fa-clipboard-check"></i> SUMMARY CHEAT SHEET</h2>
+            
+            <div class="code-block" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-2);">
+                <span class="comment" style="color: var(--success);">-- Installation Check</span><br>
+                psql --version<br><br>
+                
+                <span class="comment" style="color: var(--success);">-- Connection</span><br>
+                psql -U postgres<br><br>
+                
+                <span class="comment" style="color: var(--success);">-- Database Operations</span><br>
+                CREATE DATABASE db_name;<br>
+                DROP DATABASE db_name;<br>
+                \l  <span class="comment" style="color: var(--success);">-- List databases</span><br><br>
+                
+                <span class="comment" style="color: var(--success);">-- Table Operations</span><br>
+                CREATE TABLE table_name (...);<br>
+                \dt  <span class="comment" style="color: var(--success);">-- List tables</span><br>
+                \d table_name  <span class="comment" style="color: var(--success);">-- Describe table</span><br><br>
+                
+                <span class="comment" style="color: var(--success);">-- File Execution</span><br>
+                \i filename.sql<br><br>
+                
+                <span class="comment" style="color: var(--success);">-- Exit</span><br>
+                \q
+            </div>
+            
+            <div class="note-box" style="margin-top: 20px;">
+                <strong><i class="fas fa-exclamation-triangle"></i> SQL Syntax Rules:</strong>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>End with semicolon:</strong> Every SQL statement must end with <code>;</code></li>
+                    <li><strong>Case insensitive:</strong> <code>SELECT</code> = <code>select</code> = <code>Select</code></li>
+                    <li><strong>Single quotes for text:</strong> <code>'John'</code> not <code>"John"</code></li>
+                    <li><strong>Comments:</strong> Use <code>--</code> for single line, <code>/* */</code> for multi-line</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Homework & Next Steps -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-tasks"></i> HOMEWORK & NEXT STEPS</h2>
+            
+            <h3>Assignment:</h3>
+            <ol style="margin-left: 20px; margin-top: 10px;">
+                <li>Install PostgreSQL if not already installed</li>
+                <li>Create a database called <code>my_first_db</code></li>
+                <li>Create a table called <code>books</code> with required fields</li>
+                <li>Insert 3 sample books</li>
+                <li>Create a SQL file and execute it</li>
+            </ol>
+            
+            <div class="warning-box" style="margin-top: 20px;">
+                <strong><i class="fas fa-bug"></i> Common Issues & Solutions:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>"Password authentication failed":</strong> Check your installation password</li>
+                    <li><strong>"Command not found":</strong> Add PostgreSQL to your PATH or restart terminal</li>
+                    <li><strong>"Database does not exist":</strong> Use <code>\l</code> to check available databases</li>
+                </ul>
+            </div>
+            
+            <div class="note-box" style="margin-top: 20px;">
+                <strong><i class="fas fa-arrow-right"></i> Preview Next Lesson:</strong>
+                <p>In Lesson 2, we'll dive deeper into:</p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>INSERT and SELECT statements</li>
+                    <li>WHERE clauses and filtering</li>
+                    <li>ORDER BY and LIMIT</li>
+                    <li>Data types in detail</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Key Takeaways -->
+        <div class="section" style="background: linear-gradient(135deg, rgba(11, 95, 255, 0.1), rgba(11, 95, 255, 0.05));">
+            <h2 class="section-title"><i class="fas fa-key"></i> KEY TAKEAWAYS</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+                <div style="text-align: center; padding: 20px; background: white; border-radius: 10px;">
+                    <div style="font-size: 36px; color: var(--accent); margin-bottom: 10px;">1</div>
+                    <p>PostgreSQL is a powerful, open-source database system</p>
+                </div>
+                <div style="text-align: center; padding: 20px; background: white; border-radius: 10px;">
+                    <div style="font-size: 36px; color: var(--accent); margin-bottom: 10px;">2</div>
+                    <p><code>psql</code> is the command-line interface for PostgreSQL</p>
+                </div>
+                <div style="text-align: center; padding: 20px; background: white; border-radius: 10px;">
+                    <div style="font-size: 36px; color: var(--accent); margin-bottom: 10px;">3</div>
+                    <p>All SQL commands end with a semicolon</p>
+                </div>
+                <div style="text-align: center; padding: 20px; background: white; border-radius: 10px;">
+                    <div style="font-size: 36px; color: var(--accent); margin-bottom: 10px;">4</div>
+                    <p>CREATE TABLE defines your data structure</p>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px; padding: 20px; background: rgba(11, 95, 255, 0.08); border-radius: 10px; text-align: center;">
+                <p style="font-style: italic; color: var(--accent); font-size: 18px;">
+                    <i class="fas fa-lightbulb"></i> 
+                    <strong>MSEBETSI SOLUTIONS TIP:</strong> Always test your SQL commands in a development environment before using them in production. Practice makes perfect!
+                </p>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </button>
+            <button class="btn" onclick="markAsCompleted()">
+                Mark as Completed <i class="fas fa-check"></i>
+            </button>
+            <button class="btn" onclick="window.location.href='sql-lesson2.html'">
+                Next Lesson <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.1); color: var(--muted); font-size: 14px;">
+            <p><strong>Need help?</strong> Post questions in our learning hub forum or email support@msebetsisolutions.com</p>
+            <p>© 2024 MSEBETSI SOLUTIONS - Software Development Learning Hub</p>
+        </div>
+    </div>
+
+    <script>
+        // Simple completion tracking
+        function markAsCompleted() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            let allChecked = true;
+            
+            checkboxes.forEach(cb => {
+                if (!cb.checked) {
+                    allChecked = false;
+                }
+            });
+            
+            if (allChecked) {
+                alert('🎉 Congratulations! You have completed Lesson 1. Your progress has been saved.');
+                // In a real application, this would save to localStorage or backend
+                localStorage.setItem('sql-lesson1-completed', 'true');
+                
+                // Update the button
+                const completeBtn = document.querySelector('.btn:nth-child(2)');
+                completeBtn.innerHTML = '<i class="fas fa-check-circle"></i> Completed!';
+                completeBtn.style.background = 'var(--success)';
+                completeBtn.disabled = true;
+            } else {
+                alert('Please complete all checklist items before marking as completed.');
+            }
+        }
+        
+        // Check if already completed
+        window.addEventListener('load', function() {
+            if (localStorage.getItem('sql-lesson1-completed') === 'true') {
+                const completeBtn = document.querySelector('.btn:nth-child(2)');
+                completeBtn.innerHTML = '<i class="fas fa-check-circle"></i> Completed!';
+                completeBtn.style.background = 'var(--success)';
+                completeBtn.disabled = true;
+                
+                // Auto-check all checkboxes
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = true;
+                });
+            }
+        });
+        
+        // Checklist functionality
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    this.parentElement.style.color = 'var(--success)';
+                    this.parentElement.style.textDecoration = 'line-through';
+                } else {
+                    this.parentElement.style.color = '';
+                    this.parentElement.style.textDecoration = '';
+                }
+            });
+        });
+        
+        // Syntax highlighting simulation (basic)
+        document.querySelectorAll('.code-block').forEach(block => {
+            const html = block.innerHTML;
+            // This is a simplified version - in production, use a proper syntax highlighter
+            const highlighted = html
+                .replace(/--.*$/gm, '<span class="comment">$&</span>')
+                .replace(/\b(SELECT|FROM|WHERE|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|DATABASE|TABLE|DROP|IF|EXISTS|ALTER|ADD|COLUMN|GRANT|TO|REVOKE|FROM|BEGIN|COMMIT|ROLLBACK|SERIAL|PRIMARY|KEY|VARCHAR|NOT|NULL|UNIQUE|DATE|DEFAULT|DECIMAL|CHECK|AND|INT|REFERENCES)\b/gi, '<span class="keyword">$1</span>')
+                .replace(/'([^']*)'/g, '<span class="string">\'$1\'</span>')
+                .replace(/\b(CURRENT_DATE)\b/g, '<span class="function">$1</span>')
+                .replace(/\b(\d+(\.\d+)?)\b/g, '<span class="number">$1</span>');
+            block.innerHTML = highlighted;
+        });
+    </script>
+</body>
+</html>

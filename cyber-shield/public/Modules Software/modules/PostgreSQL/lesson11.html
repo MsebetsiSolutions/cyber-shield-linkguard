@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 11: ACID Transactions | MSEBETSI Security Academy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --gray-light: #e2e8f0;
+            --border-radius: 12px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .title {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--dark), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: var(--gray);
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+
+        /* Crisis Visualization */
+        .crisis-visualizer {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--danger);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { border-color: var(--danger); }
+            50% { border-color: #fca5a5; }
+        }
+
+        .crisis-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            color: var(--danger);
+        }
+
+        /* Transaction Flow */
+        .transaction-flow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-step {
+            width: 180px;
+            text-align: center;
+            position: relative;
+        }
+
+        .step-circle {
+            width: 70px;
+            height: 70px;
+            background: var(--gray-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 15px;
+            transition: all 0.3s ease;
+        }
+
+        .flow-arrow {
+            font-size: 24px;
+            color: var(--gray);
+        }
+
+        .flow-step.completed .step-circle {
+            background: var(--success);
+            color: white;
+        }
+
+        .flow-step.failed .step-circle {
+            background: var(--danger);
+            color: white;
+        }
+
+        .flow-step.active .step-circle {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        /* ACID Laboratory */
+        .acid-lab {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: var(--shadow);
+        }
+
+        .property-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .property-card {
+            background: var(--light);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .property-card.active {
+            border-color: var(--primary);
+            background: white;
+        }
+
+        .property-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        /* Interactive Code Editor */
+        .interactive-editor {
+            background: #1e293b;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin: 40px 0;
+            border: 1px solid #334155;
+        }
+
+        .editor-header {
+            background: #334155;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-title {
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 1px solid var(--gray-light);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-light);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .editor-body {
+            padding: 30px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            color: #e2e8f0;
+            line-height: 1.8;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .sql-keyword { color: #569cd6; }
+        .sql-string { color: #ce9178; }
+        .sql-number { color: #b5cea8; }
+        .sql-comment { color: #6a9955; }
+        .sql-table { color: #ffcc00; }
+        .sql-column { color: #9cdcfe; }
+        .sql-error { color: #f48771; }
+
+        /* Isolation Simulator */
+        .isolation-simulator {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: var(--shadow);
+        }
+
+        .concurrent-transactions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .transaction-track {
+            background: var(--light);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            min-height: 300px;
+        }
+
+        .transaction-step {
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid var(--gray);
+            transition: all 0.3s ease;
+        }
+
+        .transaction-step.active {
+            border-left-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .transaction-step.conflict {
+            border-left-color: var(--danger);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        /* File Upload */
+        .upload-area {
+            border: 3px dashed var(--gray-light);
+            border-radius: var(--border-radius);
+            padding: 50px;
+            text-align: center;
+            margin: 30px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.02);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        /* Validation Results */
+        .validation-result {
+            padding: 25px;
+            border-radius: var(--border-radius);
+            margin: 25px 0;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .validation-result.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+            display: block;
+        }
+
+        .validation-result.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            display: block;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        /* Progress Tracker */
+        .progress-tracker {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin: 40px 0;
+            box-shadow: var(--shadow);
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: var(--gray-light);
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 5px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        /* Module Navigation */
+        .module-nav {
+            display: flex;
+            gap: 10px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .module-tab {
+            padding: 15px 30px;
+            background: white;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .module-tab:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .module-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .module-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .module-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .title { font-size: 36px; }
+            .concurrent-transactions { grid-template-columns: 1fr; }
+            .transaction-flow { flex-direction: column; }
+            .flow-arrow { transform: rotate(90deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="badge">
+                <i class="fas fa-shield-alt"></i> TRANSACTION SECURITY ENGINEERING
+            </div>
+            <h1 class="title">ACID Transactions Mastery</h1>
+            <p class="subtitle">
+                Ensure threat intelligence integrity with atomic, consistent, isolated, and durable transactions. 
+                Master the critical skill of preventing security data corruption at Msebetsi Solutions.
+            </p>
+            
+            <div class="dashboard-cards">
+                <div class="dashboard-card">
+                    <div class="stat-value">0%</div>
+                    <div class="stat-label">Data Corruption Risk</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="stat-value">100%</div>
+                    <div class="stat-label">Transaction Success Rate</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="stat-value">3.2x</div>
+                    <div class="stat-label">Faster Recovery</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module Navigation -->
+        <div class="module-nav">
+            <div class="module-tab active" onclick="showModule(1)">
+                <i class="fas fa-exclamation-triangle"></i> Security Crisis
+            </div>
+            <div class="module-tab" onclick="showModule(2)">
+                <i class="fas fa-flask"></i> ACID Laboratory
+            </div>
+            <div class="module-tab" onclick="showModule(3)">
+                <i class="fas fa-code"></i> Implementation
+            </div>
+            <div class="module-tab" onclick="showModule(4)">
+                <i class="fas fa-chart-line"></i> Advanced Patterns
+            </div>
+            <div class="module-tab" onclick="showModule(5)">
+                <i class="fas fa-certificate"></i> Certification
+            </div>
+        </div>
+
+        <!-- Module 1: Security Crisis -->
+        <div id="module1" class="module-content active">
+            <div class="crisis-visualizer">
+                <div class="crisis-header">
+                    <i class="fas fa-skull-crossbones" style="font-size: 32px;"></i>
+                    <h2>SECURITY INTELLIGENCE CRISIS: Partial Data Corruption</h2>
+                </div>
+                
+                <p style="margin-bottom: 30px; color: var(--dark);">
+                    A zero-day vulnerability has been discovered. Without proper transactions, here's what happens:
+                </p>
+
+                <div class="transaction-flow">
+                    <div class="flow-step active">
+                        <div class="step-circle">1</div>
+                        <div>Log Threat<br><small>Success</small></div>
+                    </div>
+                    
+                    <div class="flow-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                    
+                    <div class="flow-step active">
+                        <div class="step-circle">2</div>
+                        <div>Tag Assets<br><small>Partial Success</small></div>
+                    </div>
+                    
+                    <div class="flow-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                    
+                    <div class="flow-step failed">
+                        <div class="step-circle">3</div>
+                        <div>Assign Owner<br><small>FAILED!</small></div>
+                    </div>
+                    
+                    <div class="flow-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                    
+                    <div class="flow-step">
+                        <div class="step-circle">4</div>
+                        <div>Database State<br><small>CORRUPTED</small></div>
+                    </div>
+                </div>
+
+                <div class="interactive-editor">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fas fa-bug"></i> The Problem: Flawed Security Logging
+                        </div>
+                        <div class="editor-actions">
+                            <button class="btn btn-danger" onclick="runBrokenTransaction()">
+                                <i class="fas fa-play"></i> Simulate Failure
+                            </button>
+                        </div>
+                    </div>
+                    <div class="editor-body">
+<span class="sql-comment">-- CURRENT (FLAWED) PROCESS AT MSEBETSI</span><br>
+<span class="sql-keyword">BEGIN</span>;<br>
+<br>
+<span class="sql-comment">-- Step 1: Log the zero-day threat</span><br>
+<span class="sql-keyword">INSERT INTO</span> <span class="sql-table">threats</span> (cve_id, name, severity) <br>
+<span class="sql-keyword">VALUES</span> (<span class="sql-string">'CVE-2024-1234'</span>, <span class="sql-string">'Zero-Day RCE'</span>, <span class="sql-string">'CRITICAL'</span>);<br>
+<span class="sql-comment">-- ✓ SUCCESS: Threat recorded</span><br><br>
+
+<span class="sql-comment">-- Step 2: Tag affected assets</span><br>
+<span class="sql-keyword">INSERT INTO</span> <span class="sql-table">affected_assets</span> (cve_id, asset_id) <br>
+<span class="sql-keyword">VALUES</span> <br>
+&nbsp;&nbsp;(<span class="sql-string">'CVE-2024-1234'</span>, <span class="sql-number">101</span>),  <span class="sql-comment">-- ✓ Success</span><br>
+&nbsp;&nbsp;(<span class="sql-string">'CVE-2024-1234'</span>, <span class="sql-number">102</span>),  <span class="sql-comment">-- ✓ Success</span><br>
+&nbsp;&nbsp;(<span class="sql-string">'CVE-2024-1234'</span>, <span class="sql-number">999</span>);  <span class="sql-error">-- ✗ FAILS! (invalid asset)</span><br><br>
+
+<span class="sql-comment">-- Step 3: Assign remediation owner</span><br>
+<span class="sql-keyword">INSERT INTO</span> <span class="sql-table">remediation</span> (cve_id, owner, deadline) <br>
+<span class="sql-keyword">VALUES</span> (<span class="sql-string">'CVE-2024-1234'</span>, <span class="sql-string">'john.doe'</span>, <span class="sql-string">'2024-02-15'</span>);<br>
+<span class="sql-comment">-- ✓ SUCCESS: Remediation logged</span><br><br>
+
+<span class="sql-keyword">COMMIT</span>;  <span class="sql-error">-- But wait! Step 2 partially failed!</span><br><br>
+
+<span class="sql-comment">-- 🚨 RESULT: Database shows CRITICAL threat with INCOMPLETE asset list</span><br>
+<span class="sql-comment">-- 🚨 SECURITY IMPACT: Analysts miss affected systems</span><br>
+<span class="sql-comment">-- 🚨 BUSINESS IMPACT: Incomplete risk assessment → $500K potential loss</span>
+                    </div>
+                </div>
+
+                <div id="crisisResult" class="validation-result error">
+                    <h4><i class="fas fa-exclamation-triangle"></i> CRISIS CONFIRMED</h4>
+                    <p>Partial transaction left database in inconsistent state!</p>
+                    <p><strong>Security Impact:</strong> Missing asset data for critical threat</p>
+                    <p><strong>Business Cost:</strong> Estimated $250,000 in risk exposure</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 2: ACID Laboratory -->
+        <div id="module2" class="module-content">
+            <div class="acid-lab">
+                <h2><i class="fas fa-flask"></i> ACID Properties Laboratory</h2>
+                <p style="color: var(--gray); margin: 20px 0;">
+                    Experience each ACID property through interactive simulations
+                </p>
+
+                <div class="property-cards">
+                    <div class="property-card active" onclick="explainProperty('atomicity')">
+                        <div class="property-icon">
+                            ⚛️
+                        </div>
+                        <h3>Atomicity</h3>
+                        <p style="color: var(--gray); margin: 10px 0;">
+                            "All or Nothing" - Complete success or complete rollback
+                        </p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%" id="atomicityProgress"></div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="demoAtomicity()" style="margin-top: 15px;">
+                            Run Simulation
+                        </button>
+                    </div>
+
+                    <div class="property-card" onclick="explainProperty('consistency')">
+                        <div class="property-icon">
+                            ⚖️
+                        </div>
+                        <h3>Consistency</h3>
+                        <p style="color: var(--gray); margin: 10px 0;">
+                            Maintains all database rules and constraints
+                        </p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%" id="consistencyProgress"></div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="demoConsistency()" style="margin-top: 15px;">
+                            Test Constraints
+                        </button>
+                    </div>
+
+                    <div class="property-card" onclick="explainProperty('isolation')">
+                        <div class="property-icon">
+                            🔒
+                        </div>
+                        <h3>Isolation</h3>
+                        <p style="color: var(--gray); margin: 10px 0;">
+                            Concurrent transactions don't interfere
+                        </p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%" id="isolationProgress"></div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="demoIsolation()" style="margin-top: 15px;">
+                            Simulate Concurrency
+                        </button>
+                    </div>
+
+                    <div class="property-card" onclick="explainProperty('durability')">
+                        <div class="property-icon">
+                            💾
+                        </div>
+                        <h3>Durability</h3>
+                        <p style="color: var(--gray); margin: 10px 0;">
+                            Committed data survives system failures
+                        </p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%" id="durabilityProgress"></div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="demoDurability()" style="margin-top: 15px;">
+                            Crash Test
+                        </button>
+                    </div>
+                </div>
+
+                <div id="propertyExplanation" style="background: var(--light); padding: 25px; border-radius: var(--border-radius); margin-top: 30px; display: none;">
+                    <h4 id="propertyTitle"></h4>
+                    <p id="propertyDescription" style="margin: 15px 0;"></p>
+                    <div id="propertyExample" class="editor-body" style="background: #1e293b; margin-top: 15px;"></div>
+                </div>
+
+                <div class="isolation-simulator" style="margin-top: 50px;">
+                    <h3><i class="fas fa-users"></i> Isolation Level Simulator</h3>
+                    <p style="color: var(--gray); margin: 20px 0;">
+                        Two security analysts updating the same threat simultaneously:
+                    </p>
+
+                    <div class="concurrent-transactions">
+                        <div class="transaction-track">
+                            <h4>Analyst A: Incident Response</h4>
+                            <div class="transaction-step" id="stepA1">BEGIN TRANSACTION</div>
+                            <div class="transaction-step" id="stepA2">READ threat severity: HIGH</div>
+                            <div class="transaction-step" id="stepA3">UPDATE severity: CRITICAL</div>
+                            <div class="transaction-step" id="stepA4">COMMIT</div>
+                        </div>
+                        
+                        <div class="transaction-track">
+                            <h4>Analyst B: Risk Assessment</h4>
+                            <div class="transaction-step" id="stepB1">BEGIN TRANSACTION</div>
+                            <div class="transaction-step" id="stepB2">READ threat severity: HIGH</div>
+                            <div class="transaction-step" id="stepB3">UPDATE severity: MEDIUM</div>
+                            <div class="transaction-step" id="stepB4">COMMIT</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px; align-items: center; margin-top: 30px;">
+                        <div style="flex: 1;">
+                            <label style="display: block; margin-bottom: 10px; font-weight: 600;">Isolation Level:</label>
+                            <select id="isolationLevel" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--gray-light);">
+                                <option value="read_uncommitted">READ UNCOMMITTED (Dirty Reads)</option>
+                                <option value="read_committed">READ COMMITTED (Default)</option>
+                                <option value="repeatable_read">REPEATABLE READ</option>
+                                <option value="serializable">SERIALIZABLE (Strict)</option>
+                            </select>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="runIsolationSimulation()">
+                            <i class="fas fa-play"></i> Run Simulation
+                        </button>
+                    </div>
+
+                    <div id="isolationResult" style="margin-top: 30px; display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 3: Implementation -->
+        <div id="module3" class="module-content">
+            <div class="acid-lab">
+                <div class="tool-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h2><i class="fas fa-code"></i> Transaction Implementation Workshop</h2>
+                    <div class="editor-actions">
+                        <button class="btn btn-secondary" onclick="downloadStarterKit()">
+                            <i class="fas fa-download"></i> Download Starter
+                        </button>
+                        <button class="btn btn-success" onclick="validateTransaction()">
+                            <i class="fas fa-check"></i> Validate Solution
+                        </button>
+                    </div>
+                </div>
+
+                <div class="interactive-editor">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fas fa-shield-alt"></i> Security Intelligence Transaction Template
+                        </div>
+                    </div>
+                    <div class="editor-body" id="transactionTemplate" contenteditable="true">
+<span class="sql-comment">-- MSEBETSI SECURITY TRANSACTION TEMPLATE</span><br>
+<span class="sql-comment">-- YOUR MISSION: Implement ACID-compliant threat logging</span><br><br>
+
+<span class="sql-keyword">-- Security Intelligence Schema</span><br>
+<span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">threats</span> (<br>
+&nbsp;&nbsp;cve_id <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">20</span>) <span class="sql-keyword">PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;name <span class="sql-keyword">TEXT NOT NULL</span>,<br>
+&nbsp;&nbsp;cvss_score <span class="sql-keyword">DECIMAL</span>(<span class="sql-number">3</span>,<span class="sql-number">1</span>),<br>
+&nbsp;&nbsp;discovery_date <span class="sql-keyword">DATE DEFAULT</span> <span class="sql-keyword">CURRENT_DATE</span>,<br>
+&nbsp;&nbsp;added_by <span class="sql-keyword">INTEGER REFERENCES</span> analysts(analyst_id)<br>
+);<br><br>
+
+<span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">affected_assets</span> (<br>
+&nbsp;&nbsp;record_id <span class="sql-keyword">SERIAL PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;cve_id <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">20</span>) <span class="sql-keyword">REFERENCES</span> threats(cve_id),<br>
+&nbsp;&nbsp;asset_id <span class="sql-keyword">INTEGER REFERENCES</span> assets(asset_id),<br>
+&nbsp;&nbsp;status <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">20</span>) <span class="sql-keyword">DEFAULT</span> <span class="sql-string">'VULNERABLE'</span><br>
+);<br><br>
+
+<span class="sql-comment">-- YOUR TRANSACTION IMPLEMENTATION BELOW</span><br>
+<span class="sql-keyword">DO</span> <span class="sql-string">$$</span><br>
+<span class="sql-keyword">DECLARE</span><br>
+&nbsp;&nbsp;<span class="sql-comment">-- Declare variables here</span><br>
+<span class="sql-keyword">BEGIN</span><br>
+&nbsp;&nbsp;<span class="sql-comment">-- Step 1: Log the threat</span><br>
+&nbsp;&nbsp;<span class="sql-comment">-- TODO: INSERT into threats table</span><br>
+<br>
+&nbsp;&nbsp;<span class="sql-comment">-- Step 2: Tag all affected assets</span><br>
+&nbsp;&nbsp;<span class="sql-comment">-- TODO: INSERT into affected_assets table</span><br>
+<br>
+&nbsp;&nbsp;<span class="sql-comment">-- Step 3: Handle errors properly</span><br>
+&nbsp;&nbsp;<span class="sql-comment">-- TODO: Add EXCEPTION block with RAISE and ROLLBACK</span><br>
+<br>
+&nbsp;&nbsp;<span class="sql-comment">-- On success: Raise notice</span><br>
+&nbsp;&nbsp;<span class="sql-comment">-- TODO: RAISE NOTICE 'Transaction complete'</span><br>
+<br>
+<span class="sql-keyword">EXCEPTION</span><br>
+&nbsp;&nbsp;<span class="sql-keyword">WHEN</span> <span class="sql-keyword">OTHERS</span> <span class="sql-keyword">THEN</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-comment">-- TODO: Error handling here</span><br>
+<span class="sql-keyword">END</span> <span class="sql-string">$$</span>;<br><br>
+
+<span class="sql-comment">-- REQUIREMENTS:</span><br>
+<span class="sql-comment">-- 1. All three inserts must succeed or all must roll back</span><br>
+<span class="sql-comment">-- 2. Proper error handling with descriptive messages</span><br>
+<span class="sql-comment">-- 3. Success notification when transaction completes</span><br>
+<span class="sql-comment">-- 4. Handle at least two specific error types</span>
+                    </div>
+                </div>
+
+                <div class="upload-area" id="transactionUpload" onclick="document.getElementById('transactionFileInput').click()">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: var(--gray); margin-bottom: 20px;"></i>
+                    <h3>Upload Your Transaction Solution</h3>
+                    <p>Drag & drop your .sql file here or click to browse</p>
+                    <p style="font-size: 14px; color: var(--gray); margin-top: 10px;">
+                        File should contain your complete DO $$ ... END $$ block
+                    </p>
+                    <input type="file" id="transactionFileInput" accept=".sql,.txt" style="display: none;" onchange="handleTransactionUpload(this.files[0])">
+                </div>
+
+                <div id="transactionValidation" class="validation-result"></div>
+
+                <div class="progress-tracker">
+                    <h3><i class="fas fa-tasks"></i> Implementation Progress</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="implementationProgress" style="width: 0%"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                        <div style="text-align: center;">
+                            <div style="font-weight: 600;">Atomicity</div>
+                            <div id="atomicityScore" style="color: var(--gray);">Not Tested</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-weight: 600;">Error Handling</div>
+                            <div id="errorHandlingScore" style="color: var(--gray);">Not Tested</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-weight: 600;">Isolation</div>
+                            <div id="isolationScore" style="color: var(--gray);">Not Tested</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-weight: 600;">Completeness</div>
+                            <div id="completenessScore" style="color: var(--gray);">Not Tested</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 4: Advanced Patterns -->
+        <div id="module4" class="module-content">
+            <div class="acid-lab">
+                <h2><i class="fas fa-chart-line"></i> Advanced Transaction Patterns</h2>
+                
+                <div class="dashboard-cards">
+                    <div class="dashboard-card">
+                        <h4><i class="fas fa-save"></i> Savepoints</h4>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            Partial rollback for multi-phase operations
+                        </p>
+                        <button class="btn btn-secondary" onclick="showPattern('savepoints')">
+                            Learn Pattern
+                        </button>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h4><i class="fas fa-network-wired"></i> Two-Phase Commit</h4>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            Distributed transaction coordination
+                        </p>
+                        <button class="btn btn-secondary" onclick="showPattern('twophase')">
+                            Learn Pattern
+                        </button>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h4><i class="fas fa-history"></i> MVCC</h4>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            Multi-Version Concurrency Control
+                        </p>
+                        <button class="btn btn-secondary" onclick="showPattern('mvcc')">
+                            Learn Pattern
+                        </button>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h4><i class="fas fa-exchange-alt"></i> Deadlock Handling</h4>
+                        <p style="color: var(--gray); margin: 15px 0;">
+                            Prevent and resolve deadlocks
+                        </p>
+                        <button class="btn btn-secondary" onclick="showPattern('deadlock')">
+                            Learn Pattern
+                        </button>
+                    </div>
+                </div>
+
+                <div id="patternContent" style="margin-top: 40px; display: none;">
+                    <!-- Content loaded dynamically -->
+                </div>
+
+                <div class="interactive-editor" style="margin-top: 40px;">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fas fa-puzzle-piece"></i> Many-to-Many Relationship Challenge
+                        </div>
+                        <button class="btn btn-primary" onclick="downloadManyToManyChallenge()">
+                            <i class="fas fa-download"></i> Get Challenge
+                        </button>
+                    </div>
+                    <div class="editor-body">
+<span class="sql-comment">-- BONUS CHALLENGE: Threat-Researcher Many-to-Many</span><br>
+<span class="sql-comment">-- A threat can be discovered by multiple researchers</span><br>
+<span class="sql-comment">-- A researcher can discover multiple threats</span><br><br>
+
+<span class="sql-keyword">-- Existing tables:</span><br>
+<span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">threats</span> (<br>
+&nbsp;&nbsp;cve_id <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">20</span>) <span class="sql-keyword">PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;name <span class="sql-keyword">TEXT NOT NULL</span><br>
+);<br><br>
+
+<span class="sql-keyword">CREATE TABLE</span> <span class="sql-table">researchers</span> (<br>
+&nbsp;&nbsp;researcher_id <span class="sql-keyword">SERIAL PRIMARY KEY</span>,<br>
+&nbsp;&nbsp;name <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">100</span>) <span class="sql-keyword">NOT NULL</span>,<br>
+&nbsp;&nbsp;organization <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">100</span>)<br>
+);<br><br>
+
+<span class="sql-comment">-- YOUR TASK:</span><br>
+<span class="sql-comment">-- 1. Design junction table for discoveries</span><br>
+<span class="sql-comment">-- 2. Create ACID transaction that:</span><br>
+<span class="sql-comment">--    - Adds new threat</span><br>
+<span class="sql-comment">--    - Adds multiple researchers</span><br>
+<span class="sql-comment">--    - Links them in junction table</span><br>
+<span class="sql-comment">--    - Handles partial failures</span><br>
+<span class="sql-comment">--    - Provides detailed error logging</span><br><br>
+
+<span class="sql-comment">-- Submit your solution via upload below</span>
+                    </div>
+                </div>
+
+                <div class="upload-area" style="margin-top: 30px;" onclick="document.getElementById('challengeFileInput').click()">
+                    <i class="fas fa-trophy" style="font-size: 48px; color: var(--warning); margin-bottom: 20px;"></i>
+                    <h3>Upload Bonus Challenge Solution</h3>
+                    <p>Submit your many-to-many relationship implementation</p>
+                    <input type="file" id="challengeFileInput" accept=".sql,.txt" style="display: none;" onchange="handleChallengeUpload(this.files[0])">
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 5: Certification -->
+        <div id="module5" class="module-content">
+            <div class="acid-lab">
+                <div style="text-align: center; margin-bottom: 40px;">
+                    <h2><i class="fas fa-certificate"></i> Transaction Security Engineer Certification</h2>
+                    <p style="color: var(--gray); max-width: 600px; margin: 20px auto;">
+                        Complete all modules to earn your PostgreSQL Transaction Security Engineer certification
+                    </p>
+                </div>
+
+                <div style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 40px; border-radius: var(--border-radius); text-align: center;">
+                    <h3 style="color: white; margin-bottom: 20px;">Your Certification Progress</h3>
+                    <div style="display: inline-block; background: rgba(255,255,255,0.2); padding: 20px 40px; border-radius: var(--border-radius);">
+                        <div style="font-size: 48px; font-weight: 700;" id="certScore">0%</div>
+                        <div style="opacity: 0.9;">Complete</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-cards" style="margin-top: 40px;">
+                    <div class="dashboard-card">
+                        <h4>Module 1: Security Crisis</h4>
+                        <div class="progress-bar" style="margin: 15px 0;">
+                            <div class="progress-fill" id="module1Progress" style="width: 0%"></div>
+                        </div>
+                        <div id="module1Status" style="color: var(--gray);">Not Started</div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h4>Module 2: ACID Laboratory</h4>
+                        <div class="progress-bar" style="margin: 15px 0;">
+                            <div class="progress-fill" id="module2Progress" style="width: 0%"></div>
+                        </div>
+                        <div id="module2Status" style="color: var(--gray);">Not Started</div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h4>Module 3: Implementation</h4>
+                        <div class="progress-bar" style="margin: 15px 0;">
+                            <div class="progress-fill" id="module3Progress" style="width: 0%"></div>
+                        </div>
+                        <div id="module3Status" style="color: var(--gray);">Not Started</div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h4>Module 4: Advanced</h4>
+                        <div class="progress-bar" style="margin: 15px 0;">
+                            <div class="progress-fill" id="module4Progress" style="width: 0%"></div>
+                        </div>
+                        <div id="module4Status" style="color: var(--gray);">Not Started</div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 50px;">
+                    <button class="btn btn-primary" style="padding: 15px 50px; font-size: 18px;" onclick="claimCertification()" id="claimButton" disabled>
+                        <i class="fas fa-graduation-cap"></i> Claim Certification
+                    </button>
+                    <p style="color: var(--gray); margin-top: 15px;">
+                        Available after completing all modules with 80%+ score
+                    </p>
+                </div>
+
+                <div id="certificationResult" style="margin-top: 30px; display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Module Navigation
+        function showModule(moduleNumber) {
+            // Hide all modules
+            document.querySelectorAll('.module-content').forEach(module => {
+                module.classList.remove('active');
+            });
+            
+            // Remove active from all tabs
+            document.querySelectorAll('.module-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected module
+            document.getElementById(`module${moduleNumber}`).classList.add('active');
+            
+            // Activate corresponding tab
+            document.querySelectorAll('.module-tab')[moduleNumber - 1].classList.add('active');
+        }
+
+        // Crisis Simulation
+        function runBrokenTransaction() {
+            const steps = document.querySelectorAll('.flow-step');
+            const resultDiv = document.getElementById('crisisResult');
+            
+            // Animate steps
+            steps.forEach((step, index) => {
+                setTimeout(() => {
+                    if (index === 2) { // Step 3 fails
+                        step.classList.add('failed');
+                        step.querySelector('.step-circle').innerHTML = '✗';
+                    } else if (index === 3) { // Step 4 shows corruption
+                        step.classList.add('failed');
+                        step.querySelector('.step-circle').innerHTML = '⚠️';
+                    } else {
+                        step.classList.add('completed');
+                    }
+                    
+                    if (index === steps.length - 1) {
+                        resultDiv.style.display = 'block';
+                        resultDiv.innerHTML = `
+                            <h4><i class="fas fa-exclamation-triangle"></i> CRISIS CONFIRMED</h4>
+                            <p>🚨 Partial transaction left database in inconsistent state!</p>
+                            <p><strong>Security Impact:</strong> 2/3 assets logged, critical system missing</p>
+                            <p><strong>Business Cost:</strong> Estimated $250,000 in risk exposure</p>
+                            <p><strong>Solution:</strong> ACID Atomicity prevents this!</p>
+                        `;
+                        
+                        // Update progress
+                        updateCertificationProgress(1, 100);
+                    }
+                }, index * 1000);
+            });
+        }
+
+        // ACID Property Demonstrations
+        function demoAtomicity() {
+            const progressBar = document.getElementById('atomicityProgress');
+            const resultDiv = document.getElementById('propertyExplanation');
+            
+            progressBar.style.width = '0%';
+            
+            // Animate progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = `
+                        <h4>⚛️ Atomicity Demonstrated</h4>
+                        <p>All operations succeed together or fail together. No partial commits!</p>
+                        <div class="editor-body" style="background: #1e293b; margin-top: 15px;">
+<span class="sql-keyword">BEGIN</span>;<br>
+<span class="sql-comment">-- ALL of these succeed...</span><br>
+<span class="sql-keyword">INSERT INTO</span> threats ...<br>
+<span class="sql-keyword">INSERT INTO</span> assets ...<br>
+<span class="sql-keyword">INSERT INTO</span> remediation ...<br>
+<span class="sql-comment">-- ...OR ALL roll back</span><br>
+<span class="sql-keyword">COMMIT</span>;<br>
+<br>
+<span class="sql-comment">-- Result: Database is always consistent</span>
+                        </div>
+                        <p style="margin-top: 15px;"><strong>Security Benefit:</strong> Complete threat intelligence or none at all</p>
+                    `;
+                    
+                    updateCertificationProgress(2, 25);
+                }
+            }, 100);
+        }
+
+        function demoConsistency() {
+            const progressBar = document.getElementById('consistencyProgress');
+            progressBar.style.width = '100%';
+            
+            updateCertificationProgress(2, 50);
+            alert('✅ Consistency Test Complete\n\nAll database constraints (PK, FK, CHECK) are maintained throughout transaction.');
+        }
+
+        function demoIsolation() {
+            const progressBar = document.getElementById('isolationProgress');
+            progressBar.style.width = '100%';
+            
+            updateCertificationProgress(2, 75);
+            alert('🔒 Isolation Demonstrated\n\nConcurrent transactions do not interfere with each other. Each sees a consistent snapshot of the database.');
+        }
+
+        function demoDurability() {
+            const progressBar = document.getElementById('durabilityProgress');
+            progressBar.style.width = '100%';
+            
+            updateCertificationProgress(2, 100);
+            alert('💾 Durability Test Complete\n\nCommitted transactions survive system crashes. Data is safely written to persistent storage.');
+        }
+
+        function explainProperty(property) {
+            const properties = {
+                atomicity: {
+                    title: '⚛️ Atomicity',
+                    description: 'Transactions are "all or nothing". If any part fails, the entire transaction is rolled back.',
+                    example: 'Threat logging either completes fully or not at all.'
+                },
+                consistency: {
+                    title: '⚖️ Consistency',
+                    description: 'Database transitions from one valid state to another. All constraints are maintained.',
+                    example: 'Foreign keys, check constraints, and business rules are always enforced.'
+                },
+                isolation: {
+                    title: '🔒 Isolation',
+                    description: 'Concurrent transactions do not interfere with each other.',
+                    example: 'Multiple analysts can work on different threats simultaneously.'
+                },
+                durability: {
+                    title: '💾 Durability',
+                    description: 'Once a transaction is committed, it remains committed even after system failure.',
+                    example: 'Logged threats survive power outages and system crashes.'
+                }
+            };
+            
+            const prop = properties[property];
+            const div = document.getElementById('propertyExplanation');
+            
+            div.innerHTML = `
+                <h4>${prop.title}</h4>
+                <p>${prop.description}</p>
+                <p><strong>Security Example:</strong> ${prop.example}</p>
+            `;
+            div.style.display = 'block';
+        }
+
+        // Isolation Simulation
+        function runIsolationSimulation() {
+            const isolationLevel = document.getElementById('isolationLevel').value;
+            const stepsA = ['stepA1', 'stepA2', 'stepA3', 'stepA4'];
+            const stepsB = ['stepB1', 'stepB2', 'stepB3', 'stepB4'];
+            
+            // Reset steps
+            stepsA.forEach(id => {
+                const step = document.getElementById(id);
+                step.classList.remove('active', 'conflict');
+            });
+            
+            stepsB.forEach(id => {
+                const step = document.getElementById(id);
+                step.classList.remove('active', 'conflict');
+            });
+            
+            // Animate transaction A
+            stepsA.forEach((id, index) => {
+                setTimeout(() => {
+                    document.getElementById(id).classList.add('active');
+                    
+                    if (index === stepsA.length - 1) {
+                        // Show result based on isolation level
+                        const resultDiv = document.getElementById('isolationResult');
+                        let result = '';
+                        
+                        switch(isolationLevel) {
+                            case 'read_uncommitted':
+                                result = '⚠️ Dirty Read: Analyst B might see uncommitted data from Analyst A';
+                                break;
+                            case 'read_committed':
+                                result = '✅ Read Committed: Each sees only committed data, but non-repeatable reads possible';
+                                break;
+                            case 'repeatable_read':
+                                result = '✅✅ Repeatable Read: Consistent snapshot throughout transaction';
+                                break;
+                            case 'serializable':
+                                result = '✅✅✅ Serializable: Complete isolation, one transaction waits for another';
+                                break;
+                        }
+                        
+                        resultDiv.innerHTML = `
+                            <div class="validation-result success">
+                                <h4><i class="fas fa-chart-bar"></i> Isolation Level: ${isolationLevel.replace('_', ' ').toUpperCase()}</h4>
+                                <p>${result}</p>
+                                <p><strong>Security Impact:</strong> Choose isolation level based on data criticality</p>
+                            </div>
+                        `;
+                        resultDiv.style.display = 'block';
+                    }
+                }, index * 800);
+            });
+            
+            // Animate transaction B with slight delay
+            stepsB.forEach((id, index) => {
+                setTimeout(() => {
+                    document.getElementById(id).classList.add('active');
+                    
+                    // Show conflict for certain isolation levels
+                    if (isolationLevel === 'serializable' && index === 2) {
+                        document.getElementById(id).classList.add('conflict');
+                    }
+                }, (index * 800) + 400);
+            });
+        }
+
+        // File Handling
+        function downloadStarterKit() {
+            const content = document.getElementById('transactionTemplate').textContent;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'acid_transaction_workshop.sql';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadManyToManyChallenge() {
+            const content = `-- MSEBETSI MANY-TO-MANY CHALLENGE
+-- Design a junction table for threat-researcher relationships
+
+-- Existing tables (DO NOT MODIFY):
+CREATE TABLE threats (
+    cve_id VARCHAR(20) PRIMARY KEY,
+    name TEXT NOT NULL,
+    cvss_score DECIMAL(3,1)
+);
+
+CREATE TABLE researchers (
+    researcher_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    organization VARCHAR(100)
+);
+
+-- YOUR SOLUTION BELOW:
+
+-- 1. Design the junction table
+-- CREATE TABLE discoveries (
+--     -- Your design here
+-- );
+
+-- 2. Create ACID transaction that:
+--    - Adds a new threat
+--    - Adds multiple researchers
+--    - Links them in the junction table
+--    - Includes proper error handling
+--    - Logs detailed error information
+
+-- 3. Test your transaction with sample data
+
+-- Upload your complete solution for validation`;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'many_to_many_challenge.sql';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function handleTransactionUpload(file) {
+            if (!file) return;
+            
+            const uploadArea = document.getElementById('transactionUpload');
+            uploadArea.innerHTML = `
+                <i class="fas fa-check-circle" style="color: var(--success); font-size: 48px; margin-bottom: 20px;"></i>
+                <h3>${file.name}</h3>
+                <p>Transaction file uploaded successfully!</p>
+                <p style="font-size: 14px; color: var(--gray); margin-top: 10px;">
+                    Click "Validate Solution" to check your ACID implementation
+                </p>
+            `;
+            
+            window.transactionFile = file;
+        }
+
+        function handleChallengeUpload(file) {
+            if (!file) return;
+            
+            alert(`Challenge file "${file.name}" uploaded!\n\nYour many-to-many solution will be validated.`);
+            window.challengeFile = file;
+        }
+
+        // Validation System
+        function validateTransaction() {
+            if (!window.transactionFile) {
+                alert('Please upload your transaction solution first!');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const solution = e.target.result;
+                const validation = validateTransactionSolution(solution);
+                
+                const resultDiv = document.getElementById('transactionValidation');
+                resultDiv.className = validation.passed ? 
+                    'validation-result success' : 'validation-result error';
+                resultDiv.innerHTML = validation.message;
+                
+                // Update progress bars
+                if (validation.passed) {
+                    document.getElementById('implementationProgress').style.width = '100%';
+                    document.getElementById('atomicityScore').innerHTML = '✅ 100%';
+                    document.getElementById('errorHandlingScore').innerHTML = '✅ 100%';
+                    document.getElementById('isolationScore').innerHTML = '✅ 100%';
+                    document.getElementById('completenessScore').innerHTML = '✅ 100%';
+                    
+                    updateCertificationProgress(3, 100);
+                    awardBadge('ACID Implementer');
+                }
+            };
+            
+            reader.readAsText(window.transactionFile);
+        }
+
+        function validateTransactionSolution(solution) {
+            // Basic validation checks
+            const checks = {
+                hasDoBlock: solution.includes('DO $$') || solution.includes('DO $'),
+                hasBeginEnd: solution.includes('BEGIN') && solution.includes('END'),
+                hasException: solution.includes('EXCEPTION'),
+                hasRollback: solution.includes('ROLLBACK'),
+                hasRaiseNotice: solution.includes('RAISE NOTICE'),
+                hasMultipleInserts: (solution.match(/INSERT INTO/g) || []).length >= 2
+            };
+            
+            const passed = Object.values(checks).every(check => check);
+            
+            if (passed) {
+                return {
+                    passed: true,
+                    message: `
+                        <h4><i class="fas fa-check-circle"></i> Excellent ACID Implementation!</h4>
+                        <p>Your transaction meets all ACID requirements:</p>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li>✓ Atomicity: All operations succeed or roll back together</li>
+                            <li>✓ Consistency: Constraints maintained</li>
+                            <li>✓ Isolation: Proper transaction boundaries</li>
+                            <li>✓ Durability: Committed data persists</li>
+                            <li>✓ Error Handling: Comprehensive exception management</li>
+                        </ul>
+                        <p style="margin-top: 15px;"><strong>Security Impact:</strong> Prevents partial threat intelligence</p>
+                        <p><strong>Business Value:</strong> Ensures complete risk assessment</p>
+                    `
+                };
+            } else {
+                const missing = [];
+                if (!checks.hasDoBlock) missing.push('DO $$ block');
+                if (!checks.hasBeginEnd) missing.push('BEGIN/END structure');
+                if (!checks.hasException) missing.push('EXCEPTION handling');
+                if (!checks.hasRollback) missing.push('ROLLBACK on error');
+                if (!checks.hasRaiseNotice) missing.push('RAISE NOTICE for logging');
+                if (!checks.hasMultipleInserts) missing.push('multiple INSERT statements');
+                
+                return {
+                    passed: false,
+                    message: `
+                        <h4><i class="fas fa-exclamation-triangle"></i> Needs Improvement</h4>
+                        <p>Your transaction is missing:</p>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            ${missing.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+                        <p style="margin-top: 15px;"><strong>Remember:</strong> A proper ACID transaction must:</p>
+                        <ol style="padding-left: 20px;">
+                            <li>Wrap all operations in BEGIN/END</li>
+                            <li>Handle exceptions with EXCEPTION block</li>
+                            <li>ROLLBACK on any error</li>
+                            <li>RAISE NOTICE for success/failure</li>
+                            <li>Ensure all or nothing execution</li>
+                        </ol>
+                    `
+                };
+            }
+        }
+
+        // Pattern Display
+        function showPattern(pattern) {
+            const patterns = {
+                savepoints: {
+                    title: '💾 Savepoints for Multi-Phase Operations',
+                    description: 'Allow partial rollback within a transaction',
+                    example: `BEGIN;
+    INSERT INTO threats (cve_id, name) VALUES ('CVE-2024-001', 'Threat A');
+    SAVEPOINT step1_complete;
+    
+    INSERT INTO affected_assets (cve_id, asset_id) 
+    VALUES ('CVE-2024-001', 101), ('CVE-2024-001', 102);
+    
+    -- If this fails, rollback just the assets
+    EXCEPTION WHEN OTHERS THEN
+        ROLLBACK TO step1_complete;
+        RAISE NOTICE 'Asset logging failed, threat still recorded';
+    
+    INSERT INTO remediation (cve_id, owner) 
+    VALUES ('CVE-2024-001', 'security-team');
+COMMIT;`
+                },
+                mvcc: {
+                    title: '🔄 MVCC (Multi-Version Concurrency Control)',
+                    description: 'PostgreSQL\'s approach to isolation',
+                    example: `-- Each transaction sees a snapshot of the database
+-- No locks for readers, writers don\'t block readers
+-- Automatic version management for concurrent access`
+                }
+            };
+            
+            const patternData = patterns[pattern] || {
+                title: 'Advanced Pattern',
+                description: 'Detailed pattern information',
+                example: 'Example code here'
+            };
+            
+            const div = document.getElementById('patternContent');
+            div.innerHTML = `
+                <div class="interactive-editor">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fas fa-puzzle-piece"></i> ${patternData.title}
+                        </div>
+                    </div>
+                    <div class="editor-body">
+                        <p>${patternData.description}</p>
+                        <pre style="margin-top: 20px;">${patternData.example}</pre>
+                    </div>
+                </div>
+            `;
+            div.style.display = 'block';
+            
+            updateCertificationProgress(4, 100);
+        }
+
+        // Certification System
+        let moduleProgress = {
+            module1: 0,
+            module2: 0,
+            module3: 0,
+            module4: 0
+        };
+
+        function updateCertificationProgress(module, score) {
+            moduleProgress[`module${module}`] = score;
+            
+            // Update progress bars
+            document.getElementById(`module${module}Progress`).style.width = `${score}%`;
+            document.getElementById(`module${module}Status`).textContent = `${score}%`;
+            
+            // Update overall score
+            const totalScore = Math.round(
+                (moduleProgress.module1 + 
+                 moduleProgress.module2 + 
+                 moduleProgress.module3 + 
+                 moduleProgress.module4) / 4
+            );
+            
+            document.getElementById('certScore').textContent = `${totalScore}%`;
+            
+            // Enable claim button if all modules completed
+            if (moduleProgress.module1 >= 80 && 
+                moduleProgress.module2 >= 80 && 
+                moduleProgress.module3 >= 80 && 
+                moduleProgress.module4 >= 80) {
+                document.getElementById('claimButton').disabled = false;
+            }
+        }
+
+        function awardBadge(badgeName) {
+            // In a real system, this would update user profile
+            console.log(`Badge awarded: ${badgeName}`);
+        }
+
+        function claimCertification() {
+            const certData = {
+                name: 'Transaction Security Engineer',
+                date: new Date().toLocaleDateString(),
+                score: document.getElementById('certScore').textContent,
+                id: 'MSEB-TXN-SEC-' + Date.now().toString().slice(-8)
+            };
+            
+            const certContent = `
+╔═══════════════════════════════════════════════╗
+║     MSEBETSI SOLUTIONS - CERTIFICATION        ║
+╠═══════════════════════════════════════════════╣
+║                                               ║
+║  TRANSACTION SECURITY ENGINEER               ║
+║  PostgreSQL ACID Compliance Specialist       ║
+║                                               ║
+║  Awarded to: Security Engineer               ║
+║  Date: ${certData.date.padEnd(30)} ║
+║  Score: ${certData.score.padEnd(30)} ║
+║  ID: ${certData.id.padEnd(31)} ║
+║                                               ║
+║  Skills Demonstrated:                         ║
+║  • ACID Properties Implementation            ║
+║  • Transaction Error Handling                ║
+║  • Isolation Level Management                ║
+║  • Security Data Integrity                   ║
+║  • Many-to-Many Relationship Design          ║
+║                                               ║
+║  Valid through: 2025-12-31                   ║
+║  Verification: verify.msebetsi.solutions     ║
+║                                               ║
+╚═══════════════════════════════════════════════╝
+            `;
+            
+            const blob = new Blob([certContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Msebetsi_Transaction_Engineer_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            const resultDiv = document.getElementById('certificationResult');
+            resultDiv.innerHTML = `
+                <div class="validation-result success">
+                    <h4><i class="fas fa-graduation-cap"></i> Certification Awarded!</h4>
+                    <p>Your PostgreSQL Transaction Security Engineer certificate has been downloaded.</p>
+                    <p><strong>Share your achievement:</strong> #PostgreSQL #ACID #TransactionSecurity #MsebetsiSolutions</p>
+                    <p style="margin-top: 15px;"><small>Certificate ID: ${certData.id}</small></p>
+                </div>
+            `;
+            resultDiv.style.display = 'block';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            showModule(1);
+            
+            // Setup drag and drop
+            const uploadAreas = document.querySelectorAll('.upload-area');
+            uploadAreas.forEach(area => {
+                area.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('dragover');
+                });
+                
+                area.addEventListener('dragleave', function() {
+                    this.classList.remove('dragover');
+                });
+                
+                area.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        if (this.id === 'transactionUpload') {
+                            handleTransactionUpload(files[0]);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

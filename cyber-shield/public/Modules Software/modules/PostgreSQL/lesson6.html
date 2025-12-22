@@ -1,0 +1,2173 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MSEBETSI PostgreSQL | Lesson 6: Schema & Seeds Implementation</title>
+  <meta name="description" content="Lesson 6: Master PostgreSQL Schema Creation and Data Seeding - Complete guide with real-world database projects">
+  
+  <!-- Performance hints -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <style>
+    /* CSS Custom Properties for Black & White Theme */
+    :root {
+      /* Light theme (default) */
+      --color-surface: #ffffff;
+      --color-background: #f8f9fa;
+      --color-card: #ffffff;
+      --color-text: #000000;
+      --color-text-secondary: #495057;
+      --color-border: #dee2e6;
+      --color-primary: #000000;
+      --color-secondary: #212529;
+      --color-accent: #000000;
+      --color-success: #28a745;
+      --color-warning: #ffc107;
+      --color-error: #dc3545;
+      --color-info: #17a2b8;
+      
+      /* UI Constants */
+      --border-radius-sm: 6px;
+      --border-radius-md: 10px;
+      --border-radius-lg: 16px;
+      --spacing-xs: 0.5rem;
+      --spacing-sm: 0.875rem;
+      --spacing-md: 1.25rem;
+      --spacing-lg: 1.75rem;
+      --spacing-xl: 2.5rem;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+    }
+
+    /* Dark theme */
+    [data-theme="dark"] {
+      --color-surface: #000000;
+      --color-background: #121212;
+      --color-card: #1a1a1a;
+      --color-text: #ffffff;
+      --color-text-secondary: #adb5bd;
+      --color-border: #343a40;
+      --color-primary: #ffffff;
+      --color-secondary: #e9ecef;
+      --color-accent: #ffffff;
+      --color-success: #20c997;
+      --color-warning: #ffd166;
+      --color-error: #ff6b6b;
+      --color-info: #4cc9f0;
+    }
+
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-body);
+      line-height: 1.6;
+      color: var(--color-text);
+      background-color: var(--color-background);
+      padding: var(--spacing-md);
+      max-width: 1400px;
+      margin: 0 auto;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    /* Background Pattern */
+    .background-pattern {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(to right, var(--color-border) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.1;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      background: var(--color-card);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      border: 2px solid var(--color-border);
+      box-shadow: var(--shadow-md);
+    }
+
+    .theme-toggle-btn {
+      background: var(--color-surface);
+      border: 2px solid var(--color-border);
+      border-radius: 50px;
+      width: 60px;
+      height: 30px;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--color-primary);
+    }
+
+    .theme-toggle-btn::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      background: var(--color-primary);
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    [data-theme="dark"] .theme-toggle-btn::after {
+      transform: translateX(30px);
+    }
+
+    .theme-label {
+      font-size: 0.9rem;
+      color: var(--color-text);
+      font-weight: 500;
+      min-width: 50px;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: var(--spacing-md);
+      color: var(--color-text);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      color: var(--color-primary);
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      border-bottom: 2px solid var(--color-border);
+      padding-bottom: var(--spacing-sm);
+      margin-top: var(--spacing-xl);
+    }
+
+    h3 {
+      font-size: 1.3rem;
+      color: var(--color-secondary);
+      margin-top: var(--spacing-lg);
+    }
+
+    p {
+      margin-bottom: var(--spacing-md);
+    }
+
+    a {
+      color: var(--color-primary);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-bottom: 1px solid transparent;
+    }
+
+    a:hover, a:focus {
+      color: var(--color-text);
+      border-bottom-color: var(--color-primary);
+    }
+
+    code, pre {
+      font-family: var(--font-mono);
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: var(--border-radius-sm);
+      padding: 0.2rem 0.4rem;
+      font-size: 0.9em;
+      color: var(--color-primary);
+    }
+
+    [data-theme="dark"] code,
+    [data-theme="dark"] pre {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    pre {
+      padding: var(--spacing-md);
+      overflow-x: auto;
+      margin: var(--spacing-md) 0;
+      border-left: 4px solid var(--color-primary);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+    }
+
+    /* Utility classes */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: var(--color-card);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+      border: 1px solid var(--color-border);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .success-card {
+      border-left: 4px solid var(--color-success);
+    }
+
+    .warning-card {
+      border-left: 4px solid var(--color-warning);
+    }
+
+    .error-card {
+      border-left: 4px solid var(--color-error);
+    }
+
+    .info-card {
+      border-left: 4px solid var(--color-info);
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .flex {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .flex-col {
+      flex-direction: column;
+    }
+
+    .grid {
+      display: grid;
+      gap: var(--spacing-md);
+    }
+
+    .grid-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .grid-3 {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      border-radius: var(--border-radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+      gap: var(--spacing-xs);
+      background-color: var(--color-surface);
+      color: var(--color-text);
+      border-color: var(--color-border);
+    }
+
+    .btn:hover, .btn:focus {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--color-primary);
+    }
+
+    .btn-primary {
+      background-color: var(--color-primary);
+      color: var(--color-surface);
+      border-color: var(--color-primary);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      border-color: var(--color-primary);
+    }
+
+    .btn-success {
+      background-color: var(--color-success);
+      color: white;
+      border-color: var(--color-success);
+    }
+
+    .btn-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Lesson Header */
+    .lesson-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+      padding-bottom: var(--spacing-lg);
+      border-bottom: 2px solid var(--color-border);
+    }
+
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--spacing-md);
+      flex-wrap: wrap;
+      margin-top: var(--spacing-md);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background-color: var(--color-surface);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+
+    .badge-success {
+      background-color: var(--color-success);
+      color: white;
+      border-color: transparent;
+    }
+
+    .badge-warning {
+      background-color: var(--color-warning);
+      color: black;
+      border-color: transparent;
+    }
+
+    .badge-info {
+      background-color: var(--color-info);
+      color: white;
+      border-color: transparent;
+    }
+
+    /* Tabs Navigation */
+    .tabs {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .tabs-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-xs);
+      border-bottom: 2px solid var(--color-border);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .tab-btn {
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+      position: relative;
+    }
+
+    .tab-btn:hover {
+      color: var(--color-primary);
+    }
+
+    .tab-btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Code editor simulation */
+    .code-editor {
+      background-color: var(--color-surface);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+      margin: var(--spacing-lg) 0;
+      border: 1px solid var(--color-border);
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    .code-header {
+      background-color: var(--color-card);
+      padding: var(--spacing-sm) var(--spacing-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--color-text);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--color-border);
+      box-sizing: border-box;
+    }
+
+    .code-body {
+      padding: var(--spacing-md);
+      overflow-x: auto;
+      background-color: var(--color-surface);
+      box-sizing: border-box;
+      min-height: 200px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .code-body code {
+      font-family: var(--font-mono);
+      background-color: transparent;
+      color: var(--color-text);
+      padding: 0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      box-sizing: border-box;
+    }
+
+    /* Database Schema Visualization */
+    .schema-visualization {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-lg);
+      margin: var(--spacing-lg) 0;
+      position: relative;
+    }
+
+    .schema-table {
+      margin-bottom: var(--spacing-xl);
+      padding: var(--spacing-md);
+      border: 2px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      background: var(--color-background);
+    }
+
+    .table-header {
+      background: var(--color-card);
+      padding: var(--spacing-sm);
+      border-radius: var(--border-radius-sm);
+      margin-bottom: var(--spacing-md);
+      font-weight: bold;
+      border-left: 4px solid var(--color-primary);
+    }
+
+    .table-column {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-sm);
+      border-bottom: 1px dashed var(--color-border);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+    }
+
+    .table-column:last-child {
+      border-bottom: none;
+    }
+
+    .column-name {
+      font-weight: bold;
+      width: 150px;
+      min-width: 150px;
+    }
+
+    .column-details {
+      display: flex;
+      gap: var(--spacing-sm);
+      flex-wrap: wrap;
+    }
+
+    .data-type-tag {
+      background: rgba(0, 0, 0, 0.08);
+      color: var(--color-primary);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      border: 1px solid var(--color-border);
+    }
+
+    [data-theme="dark"] .data-type-tag {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .constraint-tag {
+      background: rgba(255, 193, 7, 0.15);
+      color: var(--color-warning);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    /* File Structure */
+    .file-structure {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-lg);
+      margin: var(--spacing-lg) 0;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+    }
+
+    .file-item {
+      padding: var(--spacing-xs) var(--spacing-md);
+      margin: 2px 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-radius: var(--border-radius-sm);
+    }
+
+    .file-item:hover {
+      background: var(--color-background);
+    }
+
+    .file-item.folder::before {
+      content: '📁 ';
+    }
+
+    .file-item.file::before {
+      content: '📄 ';
+    }
+
+    .file-item.active {
+      background: var(--color-primary);
+      color: var(--color-surface);
+    }
+
+    /* Progress indicators */
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--color-border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: var(--spacing-sm) 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--color-success);
+      transition: width 0.3s ease;
+    }
+
+    /* Task list */
+    .task-list {
+      list-style-type: none;
+      counter-reset: task-counter;
+    }
+
+    .task-item {
+      counter-increment: task-counter;
+      margin-bottom: var(--spacing-lg);
+      padding-left: 3rem;
+      position: relative;
+    }
+
+    .task-item::before {
+      content: counter(task-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2rem;
+      height: 2rem;
+      background-color: var(--color-primary);
+      color: var(--color-surface);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .task-item.completed::before {
+      background-color: var(--color-success);
+      content: "✓";
+    }
+
+    /* Interactive areas */
+    .interactive-area {
+      background: var(--color-background);
+      border: 2px dashed var(--color-border);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-lg);
+      margin: var(--spacing-lg) 0;
+      text-align: center;
+    }
+
+    .drop-zone {
+      border: 2px dashed var(--color-primary);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-xl);
+      margin: var(--spacing-md) 0;
+      background: var(--color-surface);
+      transition: all 0.3s ease;
+    }
+
+    .drop-zone.drag-over {
+      background: var(--color-primary);
+      color: var(--color-surface);
+      border-style: solid;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: var(--spacing-xl);
+      padding-top: var(--spacing-lg);
+      border-top: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+      
+      .flex {
+        flex-direction: column;
+      }
+      
+      .tabs-nav {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 5px;
+      }
+      
+      .tab-btn {
+        white-space: nowrap;
+      }
+      
+      .theme-toggle {
+        top: 10px;
+        right: 10px;
+        padding: var(--spacing-xs) var(--spacing-sm);
+      }
+      
+      .card {
+        padding: var(--spacing-md);
+        margin-left: -10px;
+        margin-right: -10px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .code-editor {
+        max-width: 100%;
+        overflow: hidden;
+      }
+      
+      .code-body {
+        overflow-x: auto;
+        max-width: 100%;
+      }
+    }
+
+    /* Syntax highlighting */
+    .keyword { color: #d73a49; font-weight: bold; }
+    .string { color: #032f62; }
+    .comment { color: #6a737d; font-style: italic; }
+    .function { color: #6f42c1; }
+    .number { color: #005cc5; }
+    .type { color: #22863a; }
+    .constraint { color: #e36209; }
+  </style>
+</head>
+<body>
+  <!-- Background Pattern -->
+  <div class="background-pattern"></div>
+
+  <!-- Theme Toggle -->
+  <div class="theme-toggle">
+    <span class="theme-label" id="themeLabel">Light</span>
+    <button class="theme-toggle-btn" id="themeToggle" aria-label="Toggle theme">
+      <span class="visually-hidden">Toggle theme</span>
+    </button>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Header -->
+    <header class="lesson-header">
+      <h1>Lesson 6: PostgreSQL Schema & Seeds Implementation</h1>
+      <p class="subtitle">Master database schema design and data population with professional patterns</p>
+      
+      <div class="lesson-meta">
+        <span class="badge">PostgreSQL</span>
+        <span class="badge badge-success">Database Design</span>
+        <span class="badge badge-warning">SQL Scripting</span>
+        <span class="badge badge-info">Full-Stack Integration</span>
+        <span class="badge">Real-World Project</span>
+      </div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <nav class="tabs-nav">
+        <button class="tab-btn active" data-tab="overview">
+          📚 Overview
+        </button>
+        <button class="tab-btn" data-tab="schema">
+          🏗️ Schema Design
+        </button>
+        <button class="tab-btn" data-tab="seeds">
+          🌱 Data Seeding
+        </button>
+        <button class="tab-btn" data-tab="integration">
+          🔗 Full-Stack Integration
+        </button>
+        <button class="tab-btn" data-tab="project">
+          💻 Real Project
+        </button>
+        <button class="tab-btn" data-tab="assessment">
+          📊 Assessment
+        </button>
+      </nav>
+
+      <!-- Tab 1: Overview -->
+      <div class="tab-content active" id="overview">
+        <div class="card">
+          <h2>🎯 What You'll Learn</h2>
+          <p>In this lesson, you'll master professional database development patterns by creating complete schema and seeds files, then integrating them into a full-stack web application.</p>
+          
+          <div class="grid grid-3">
+            <div class="card">
+              <h3>🏗️ Schema Design</h3>
+              <ul>
+                <li>Create comprehensive schema.sql files</li>
+                <li>Design tables with proper constraints</li>
+                <li>Establish relationships (foreign keys)</li>
+                <li>Add indexes for performance</li>
+              </ul>
+            </div>
+            
+            <div class="card success-card">
+              <h3>🌱 Data Seeding</h3>
+              <ul>
+                <li>Create seeds.sql files with realistic data</li>
+                <li>Generate test data for development</li>
+                <li>Use INSERT statements effectively</li>
+                <li>Handle relationships in seed data</li>
+              </ul>
+            </div>
+            
+            <div class="card info-card">
+              <h3>🔗 Full-Stack Integration</h3>
+              <ul>
+                <li>Connect PostgreSQL with HTML/CSS/JS</li>
+                <li>Create proper project structure</li>
+                <li>Implement asset organization</li>
+                <li>Deploy complete applications</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📁 Project Structure Mastery</h2>
+          <p>Professional database projects follow specific organizational patterns. Here's what you'll create:</p>
+          
+          <div class="file-structure">
+            <div class="file-item folder">msebetsi-ecommerce/</div>
+            <div class="file-item file">index.html</div>
+            <div class="file-item folder">assets/</div>
+            <div class="file-item file" style="padding-left: 2rem;">style.css</div>
+            <div class="file-item file" style="padding-left: 2rem;">script.js</div>
+            <div class="file-item file" style="padding-left: 2rem;">images/</div>
+            <div class="file-item folder">database/</div>
+            <div class="file-item file" style="padding-left: 2rem;">schema.sql</div>
+            <div class="file-item file" style="padding-left: 2rem;">seeds.sql</div>
+            <div class="file-item file" style="padding-left: 2rem;">queries.sql</div>
+            <div class="file-item file">README.md</div>
+            <div class="file-item file">package.json</div>
+          </div>
+          
+          <div class="grid grid-2" style="margin-top: var(--spacing-lg);">
+            <div>
+              <h4>📝 schema.sql</h4>
+              <p>Contains all CREATE TABLE statements, constraints, indexes, and database structure definitions.</p>
+            </div>
+            
+            <div>
+              <h4>🌱 seeds.sql</h4>
+              <p>Contains INSERT statements to populate tables with initial/test data for development and testing.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card warning-card">
+          <h3>🎓 Prerequisites from Previous Lessons</h3>
+          <ul>
+            <li><strong>Lesson 5:</strong> Data Types & Constraints - You know how to create tables with proper data integrity</li>
+            <li><strong>Lesson 4:</strong> Basic SQL Operations - You understand INSERT, SELECT, UPDATE, DELETE</li>
+            <li><strong>Lesson 3:</strong> Table Creation - You can create and manage database tables</li>
+            <li><strong>HTML/CSS/JS:</strong> Basic web development skills for frontend integration</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Tab 2: Schema Design -->
+      <div class="tab-content" id="schema">
+        <div class="card">
+          <h2>🏗️ Professional Schema Design Patterns</h2>
+          <p>A well-designed schema is the foundation of any robust database application. Let's build an e-commerce database.</p>
+          
+          <div class="schema-visualization">
+            <h3>📊 E-Commerce Database Schema</h3>
+            <p>Visual representation of our database tables and relationships:</p>
+            
+            <div class="schema-table">
+              <div class="table-header">customers</div>
+              <div class="table-column">
+                <div class="column-name">customer_id</div>
+                <div class="column-details">
+                  <span class="data-type-tag">SERIAL</span>
+                  <span class="constraint-tag">PRIMARY KEY</span>
+                </div>
+              </div>
+              <div class="table-column">
+                <div class="column-name">first_name</div>
+                <div class="column-details">
+                  <span class="data-type-tag">VARCHAR(50)</span>
+                  <span class="constraint-tag">NOT NULL</span>
+                </div>
+              </div>
+              <div class="table-column">
+                <div class="column-name">email</div>
+                <div class="column-details">
+                  <span class="data-type-tag">VARCHAR(100)</span>
+                  <span class="constraint-tag">UNIQUE</span>
+                  <span class="constraint-tag">NOT NULL</span>
+                </div>
+              </div>
+              <div class="table-column">
+                <div class="column-name">created_at</div>
+                <div class="column-details">
+                  <span class="data-type-tag">TIMESTAMP</span>
+                  <span class="constraint-tag">DEFAULT NOW()</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="schema-table">
+              <div class="table-header">products</div>
+              <div class="table-column">
+                <div class="column-name">product_id</div>
+                <div class="column-details">
+                  <span class="data-type-tag">SERIAL</span>
+                  <span class="constraint-tag">PRIMARY KEY</span>
+                </div>
+              </div>
+              <div class="table-column">
+                <div class="column-name">name</div>
+                <div class="column-details">
+                  <span class="data-type-tag">VARCHAR(100)</span>
+                  <span class="constraint-tag">NOT NULL</span>
+                </div>
+              </div>
+              <div class="table-column">
+                <div class="column-name">price</div>
+                <div class="column-details">
+                  <span class="data-type-tag">DECIMAL(10,2)</span>
+                  <span class="constraint-tag">NOT NULL</span>
+                  <span class="constraint-tag">CHECK (price > 0)</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="schema-table">
+              <div class="table-header">orders</div>
+              <div class="table-column">
+                <div class="column-name">order_id</div>
+                <div class="column-details">
+                  <span class="data-type-tag">SERIAL</span>
+                  <span class="constraint-tag">PRIMARY KEY</span>
+                </div>
+              </div>
+              <div class="table-column">
+                <div class="column-name">customer_id</div>
+                <div class="column-details">
+                  <span class="data-type-tag">INTEGER</span>
+                  <span class="constraint-tag">FOREIGN KEY</span>
+                  <span style="color: var(--color-info);">→ customers.customer_id</span>
+                </div>
+              </div>
+              <div class="table-column">
+                <div class="column-name">order_date</div>
+                <div class="column-details">
+                  <span class="data-type-tag">TIMESTAMP</span>
+                  <span class="constraint-tag">DEFAULT NOW()</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📝 Complete schema.sql Example</h2>
+          <p>Here's the complete schema file for our e-commerce database:</p>
+          
+          <div class="code-editor">
+            <div class="code-header">
+              <span>database/schema.sql</span>
+              <span>Complete Database Schema</span>
+            </div>
+            <div class="code-body">
+              <pre><code><span class="comment">-- ============================================</span>
+<span class="comment">-- MSEBETSI E-COMMERCE DATABASE SCHEMA</span>
+<span class="comment">-- Created: <span id="schemaDate"></span></span>
+<span class="comment">-- Author: Student Name</span>
+<span class="comment">-- ============================================</span>
+
+<span class="comment">-- Drop existing tables (for development only)</span>
+<span class="keyword">DROP TABLE</span> <span class="keyword">IF EXISTS</span> order_items;
+<span class="keyword">DROP TABLE</span> <span class="keyword">IF EXISTS</span> orders;
+<span class="keyword">DROP TABLE</span> <span class="keyword">IF EXISTS</span> products;
+<span class="keyword">DROP TABLE</span> <span class="keyword">IF EXISTS</span> categories;
+<span class="keyword">DROP TABLE</span> <span class="keyword">IF EXISTS</span> customers;
+
+<span class="comment">-- ============================================</span>
+<span class="comment">-- TABLE: customers</span>
+<span class="comment">-- Stores customer information</span>
+<span class="comment">-- ============================================</span>
+<span class="keyword">CREATE TABLE</span> customers (
+    customer_id <span class="type">SERIAL</span> <span class="constraint">PRIMARY KEY</span>,
+    first_name <span class="type">VARCHAR</span>(50) <span class="constraint">NOT NULL</span>,
+    last_name <span class="type">VARCHAR</span>(50) <span class="constraint">NOT NULL</span>,
+    email <span class="type">VARCHAR</span>(100) <span class="constraint">UNIQUE NOT NULL</span>,
+    phone <span class="type">VARCHAR</span>(20),
+    address <span class="type">TEXT</span>,
+    city <span class="type">VARCHAR</span>(50),
+    country <span class="type">VARCHAR</span>(50) <span class="keyword">DEFAULT</span> <span class="string">'Ghana'</span>,
+    created_at <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="function">CURRENT_TIMESTAMP</span>,
+    updated_at <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="function">CURRENT_TIMESTAMP</span>
+);
+
+<span class="comment">-- ============================================</span>
+<span class="comment">-- TABLE: categories</span>
+<span class="comment">-- Product categories for organization</span>
+<span class="comment">-- ============================================</span>
+<span class="keyword">CREATE TABLE</span> categories (
+    category_id <span class="type">SERIAL</span> <span class="constraint">PRIMARY KEY</span>,
+    category_name <span class="type">VARCHAR</span>(50) <span class="constraint">UNIQUE NOT NULL</span>,
+    description <span class="type">TEXT</span>
+);
+
+<span class="comment">-- ============================================</span>
+<span class="comment">-- TABLE: products</span>
+<span class="comment">-- Store product information</span>
+<span class="comment">-- ============================================</span>
+<span class="keyword">CREATE TABLE</span> products (
+    product_id <span class="type">SERIAL</span> <span class="constraint">PRIMARY KEY</span>,
+    product_name <span class="type">VARCHAR</span>(100) <span class="constraint">NOT NULL</span>,
+    description <span class="type">TEXT</span>,
+    price <span class="type">DECIMAL</span>(10, 2) <span class="constraint">NOT NULL</span>,
+    stock_quantity <span class="type">INTEGER</span> <span class="keyword">DEFAULT</span> <span class="number">0</span>,
+    category_id <span class="type">INTEGER</span>,
+    image_url <span class="type">VARCHAR</span>(255),
+    created_at <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="function">CURRENT_TIMESTAMP</span>,
+    
+    <span class="comment">-- Table-level constraints</span>
+    <span class="keyword">CONSTRAINT</span> fk_category 
+        <span class="keyword">FOREIGN KEY</span> (category_id) 
+        <span class="keyword">REFERENCES</span> categories(category_id)
+        <span class="keyword">ON DELETE SET NULL</span>,
+    
+    <span class="keyword">CONSTRAINT</span> check_price_positive 
+        <span class="keyword">CHECK</span> (price > <span class="number">0</span>),
+    
+    <span class="keyword">CONSTRAINT</span> check_stock_non_negative 
+        <span class="keyword">CHECK</span> (stock_quantity >= <span class="number">0</span>)
+);
+
+<span class="comment">-- ============================================</span>
+<span class="comment">-- TABLE: orders</span>
+<span class="comment">-- Customer orders</span>
+<span class="comment">-- ============================================</span>
+<span class="keyword">CREATE TABLE</span> orders (
+    order_id <span class="type">SERIAL</span> <span class="constraint">PRIMARY KEY</span>,
+    customer_id <span class="type">INTEGER</span> <span class="constraint">NOT NULL</span>,
+    order_date <span class="type">TIMESTAMP</span> <span class="keyword">DEFAULT</span> <span class="function">CURRENT_TIMESTAMP</span>,
+    total_amount <span class="type">DECIMAL</span>(10, 2) <span class="constraint">NOT NULL</span>,
+    status <span class="type">VARCHAR</span>(20) <span class="keyword">DEFAULT</span> <span class="string">'pending'</span>,
+    shipping_address <span class="type">TEXT</span>,
+    
+    <span class="keyword">CONSTRAINT</span> fk_customer 
+        <span class="keyword">FOREIGN KEY</span> (customer_id) 
+        <span class="keyword">REFERENCES</span> customers(customer_id)
+        <span class="keyword">ON DELETE CASCADE</span>,
+    
+    <span class="keyword">CONSTRAINT</span> check_status 
+        <span class="keyword">CHECK</span> (status <span class="keyword">IN</span> (<span class="string">'pending'</span>, <span class="string">'processing'</span>, <span class="string">'shipped'</span>, <span class="string">'delivered'</span>, <span class="string">'cancelled'</span>))
+);
+
+<span class="comment">-- ============================================</span>
+<span class="comment">-- TABLE: order_items</span>
+<span class="comment">-- Individual items within each order</span>
+<span class="comment">-- ============================================</span>
+<span class="keyword">CREATE TABLE</span> order_items (
+    order_item_id <span class="type">SERIAL</span> <span class="constraint">PRIMARY KEY</span>,
+    order_id <span class="type">INTEGER</span> <span class="constraint">NOT NULL</span>,
+    product_id <span class="type">INTEGER</span> <span class="constraint">NOT NULL</span>,
+    quantity <span class="type">INTEGER</span> <span class="constraint">NOT NULL</span>,
+    unit_price <span class="type">DECIMAL</span>(10, 2) <span class="constraint">NOT NULL</span>,
+    
+    <span class="keyword">CONSTRAINT</span> fk_order 
+        <span class="keyword">FOREIGN KEY</span> (order_id) 
+        <span class="keyword">REFERENCES</span> orders(order_id)
+        <span class="keyword">ON DELETE CASCADE</span>,
+    
+    <span class="keyword">CONSTRAINT</span> fk_product 
+        <span class="keyword">FOREIGN KEY</span> (product_id) 
+        <span class="keyword">REFERENCES</span> products(product_id),
+    
+    <span class="keyword">CONSTRAINT</span> check_quantity_positive 
+        <span class="keyword">CHECK</span> (quantity > <span class="number">0</span>)
+);
+
+<span class="comment">-- ============================================</span>
+<span class="comment">-- INDEXES for performance optimization</span>
+<span class="comment">-- ============================================</span>
+<span class="keyword">CREATE INDEX</span> idx_customers_email <span class="keyword">ON</span> customers(email);
+<span class="keyword">CREATE INDEX</span> idx_products_category <span class="keyword">ON</span> products(category_id);
+<span class="keyword">CREATE INDEX</span> idx_orders_customer <span class="keyword">ON</span> orders(customer_id);
+<span class="keyword">CREATE INDEX</span> idx_orders_date <span class="keyword">ON</span> orders(order_date);
+<span class="keyword">CREATE INDEX</span> idx_order_items_order <span class="keyword">ON</span> order_items(order_id);
+
+<span class="comment">-- ============================================</span>
+<span class="comment">-- COMMENTS for documentation</span>
+<span class="comment">-- ============================================</span>
+<span class="keyword">COMMENT ON TABLE</span> customers <span class="keyword">IS</span> <span class="string">'Stores customer information and contact details'</span>;
+<span class="keyword">COMMENT ON TABLE</span> products <span class="keyword">IS</span> <span class="string">'Product catalog with pricing and inventory information'</span>;
+<span class="keyword">COMMENT ON TABLE</span> orders <span class="keyword">IS</span> <span class="string">'Customer orders with status tracking'</span>;
+<span class="keyword">COMMENT ON COLUMN</span> orders.status <span class="keyword">IS</span> <span class="string">'Order status: pending, processing, shipped, delivered, cancelled'</span>;
+
+<span class="comment">-- ============================================</span>
+<span class="comment">-- END OF SCHEMA</span>
+<span class="comment">-- ============================================</span></code></pre>
+            </div>
+          </div>
+          
+          <div class="flex" style="justify-content: center; gap: var(--spacing-md); margin-top: var(--spacing-lg);">
+            <button class="btn btn-primary" id="downloadSchema">
+              <i class="fas fa-download"></i> Download schema.sql
+            </button>
+            <button class="btn btn-secondary" id="runSchema">
+              <i class="fas fa-play"></i> Simulate Schema Execution
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Data Seeding -->
+      <div class="tab-content" id="seeds">
+        <div class="card">
+          <h2>🌱 Professional Data Seeding Patterns</h2>
+          <p>Seeds files populate your database with realistic data for development and testing.</p>
+          
+          <div class="grid grid-2">
+            <div>
+              <h3>✅ Why Seeds Matter</h3>
+              <ul>
+                <li>Provides realistic test data</li>
+                <li>Ensures consistent development environment</li>
+                <li>Tests database relationships</li>
+                <li>Demonstrates application functionality</li>
+                <li>Supports automated testing</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3>📊 Seed Data Principles</h3>
+              <ul>
+                <li>Use realistic but anonymized data</li>
+                <li>Maintain referential integrity</li>
+                <li>Include edge cases</li>
+                <li>Document data sources</li>
+                <li>Make data culturally relevant</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📝 Complete seeds.sql Example</h2>
+          <p>Here's a comprehensive seeds file with realistic African e-commerce data:</p>
+          
+          <div class="code-editor">
+            <div class="code-header">
+              <span>database/seeds.sql</span>
+              <span>Realistic Test Data</span>
+            </div>
+            <div class="code-body">
+              <pre><code><span class="comment">-- ============================================</span>
+<span class="comment">-- MSEBETSI E-COMMERCE SEED DATA</span>
+<span class="comment">-- Realistic data for African e-commerce platform</span>
+<span class="comment">-- ============================================</span>
+
+<span class="comment">-- Clear existing data (development only)</span>
+<span class="keyword">TRUNCATE TABLE</span> order_items, orders, products, categories, customers 
+    <span class="keyword">RESTART IDENTITY CASCADE</span>;
+
+<span class="comment">-- ============================================</span>
+<span class="comment">-- INSERT: customers</span>
+<span class="comment">-- Real African names and locations</span>
+<span class="comment">-- ============================================</span>
+<span class="keyword">INSERT INTO</span> customers (first_name, last_name, email, phone, address, city, country) <span class="keyword">VALUES</span>
+(<span class="string">'Kwame'</span>, <span class="string">'Appiah'</span>, <span class="string">'kwame.appiah@example.com'</span>, <span class="string">'+233201234567'</span>, <span class="string">'123 Independence Ave'</span>, <span class="string">'Accra'</span>, <span class="string">'Ghana'</span>),
+(<span class="string">'Amina'</span>, <span class="string">'Diallo'</span>, <span class="string">'amina.diallo@example.com'</span>, <span class="string">'+221771234567'</span>, <span class="string">'456 Almadies St'</span>, <span class="string">'Dakar'</span>, <span class="string">'Senegal'</span>),
+(<span class="string">'Chukwu'</span>, <span class="string">'Okoro'</span>, <span class="string">'chukwu.okoro@example.com'</span>, <span class="string">'+2348012345678'</span>, <span class="string">'789 Victoria Island Rd'</span>, <span class="string">'Lagos'</span>, <span class="string">'Nigeria'</span>),
+(<span class="string">'Fatima'</span>, <span class="string">'Mohamed'</span>, <span class="string">'fatima.mohamed@example.com'</span>, <span class="string">'+254712345678'</span>, <span class="string">'321 Mombasa Rd'</span>, <span class="string">'Nairobi'</span>, <span class="string">'Kenya'</span>),
+(<span class="string">'Thabo'</span>, <span class="string">'Mbeki'</span>, <span class="string">'thabo.mbeki@example.com'</span>, <span class="string">'+27111234567'</span>, <span class="string">'654 Pretoria St'</span>, <span class="string">'Johannesburg'</span>, <span class="string">'South Africa'</span>);
+
+<span class="comment">-- ============================================</span>
+<span class="comment">-- INSERT: categories</span>
+<span class="comment">-- Common e-commerce categories</span>
+<span class="comment">-- ============================================</span>
+<span class="keyword">INSERT INTO</span> categories (category_name, description) <span class="keyword">VALUES</span>
+(<span class="string">'Fashion'</span>, <span class="string">'Traditional and modern African clothing'</span>),
+(<span class="string">'Electronics'</span>, <span class="string">'Smartphones, laptops, and gadgets'</span>),
+(<span class="string">'Home & Living'</span>, <span class="string">'Home decor and furnishings'</span>),
+(<span class="string">'Beauty & Health'</span>, <span class="string">'Skincare, haircare, and wellness products'</span>),
+(<span class="string">'Food & Grocery'</span>, <span class="string">'Local and imported food items'</span>);
+
+<span class="comment">-- ============================================</span>
+<span class="comment">-- INSERT: products</span>
+<span class="comment">-- Real products with African context</span>
+<span class="comment">-- ============================================</span>
+<span class="keyword">INSERT INTO</span> products (product_name, description, price, stock_quantity, category_id, image_url) <span class="keyword">VALUES</span>
+(<span class="string">'Kente Cloth Scarf'</span>, <span class="string">'Handwoven traditional Ghanaian Kente scarf, perfect for special occasions.'</span>, <span class="number">45.99</span>, <span class="number">25</span>, <span class="number">1</span>, <span class="string">'/assets/images/kente-scarf.jpg'</span>),
+(<span class="string">'Infinix Hot 12'</span>, <span class="string">'Latest smartphone with 6.8" display, 128GB storage, perfect for African markets.'</span>, <span class="number">299.99</span>, <span class="number">50</span>, <span class="number">2</span>, <span class="string">'/assets/images/infinix-hot12.jpg'</span>),
+(<span class="string">'African Print Throw Pillow'</span>, <span class="string">'Colorful Ankara fabric pillow, adds African flair to any living space.'</span>, <span class="number">24.50</span>, <span class="number">100</span>, <span class="number">3</span>, <span class="string">'/assets/images/ankara-pillow.jpg'</span>),
+(<span class="string">'Shea Butter Cream'</span>, <span class="string">'100% natural shea butter from Ghana, perfect for skin and hair care.'</span>, <span class="number">12.75</span>, <span class="number">200</span>, <span class="number">4</span>, <span class="string">'/assets/images/shea-butter.jpg'</span>),
+(<span class="string">'Jollof Rice Mix'</span>, <span class="string">'Authentic West African jollof rice spice mix, makes cooking easier.'</span>, <span class="number">8.99</span>, <span class="number">150</span>, <span class="number">5</span>, <span class="string">'/assets/images/jollof-mix.jpg'</span>),
+(<span class="string">'Dashiki Shirt'</span>, <span class="string">'Traditional African dashiki shirt, available in various colors and patterns.'</span>, <span class="number">35.00</span>, <span class="number">75</span>, <span class="number">1</span>, <span class="string">'/assets/images/dashiki.jpg'</span>),
+(<span class="string">'Solar Power Bank'</span>, <span class="string">'10000mAh solar charger, essential for areas with unreliable electricity.'</span>, <span class="number">49.99</span>, <span class="number">60</span>, <span class="number">2</span>, <span class="string">'/assets/images/solar-powerbank.jpg'</span>);
+
+<span class="comment">-- ============================================</span>
+<span class="comment">-- INSERT: orders</span>
+<span class="comment">-- Sample customer orders</span>
+<span class="comment">-- ============================================</span>
+<span class="keyword">INSERT INTO</span> orders (customer_id, total_amount, status, shipping_address) <span class="keyword">VALUES</span>
+(<span class="number">1</span>, <span class="number">90.98</span>, <span class="string">'delivered'</span>, <span class="string">'123 Independence Ave, Accra, Ghana'</span>),
+(<span class="number">2</span>, <span class="number">299.99</span>, <span class="string">'processing'</span>, <span class="string">'456 Almadies St, Dakar, Senegal'</span>),
+(<span class="number">3</span>, <span class="number">60.50</span>, <span class="string">'shipped'</span>, <span class="string">'789 Victoria Island Rd, Lagos, Nigeria'</span>),
+(<span class="number">1</span>, <span class="number">49.99</span>, <span class="string">'pending'</span>, <span class="string">'123 Independence Ave, Accra, Ghana'</span>);
+
+<span class="comment">-- ============================================</span>
+<span class="comment">-- INSERT: order_items</span>
+<span class="comment">-- Order details (must match orders)</span>
+<span class="comment">-- ============================================</span>
+<span class="keyword">INSERT INTO</span> order_items (order_id, product_id, quantity, unit_price) <span class="keyword">VALUES</span>
+(<span class="comment">-- Order 1: Kwame's first order</span>
+(<span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">45.99</span>),  <span class="comment">-- 2 Kente scarves</span>
+
+(<span class="comment">-- Order 2: Amina's smartphone</span>
+(<span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">299.99</span>), <span class="comment">-- 1 Infinix phone</span>
+
+(<span class="comment">-- Order 3: Chukwu's home items</span>
+(<span class="number">3</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">24.50</span>),  <span class="comment">-- 2 throw pillows</span>
+(<span class="number">3</span>, <span class="number">4</span>, <span class="number">1</span>, <span class="number">11.50</span>),  <span class="comment">-- 1 shea butter (different price shows sale)</span>
+
+(<span class="comment">-- Order 4: Kwame's second order</span>
+(<span class="number">4</span>, <span class="number">7</span>, <span class="number">1</span>, <span class="number">49.99</span>);  <span class="comment">-- 1 solar power bank</span>
+
+<span class="comment">-- ============================================</span>
+<span class="comment">-- VERIFICATION QUERIES</span>
+<span class="comment">-- ============================================</span>
+<span class="keyword">SELECT</span> <span class="string">'Customers inserted:'</span> <span class="keyword">AS</span> info, <span class="function">COUNT</span>(*) <span class="keyword">AS</span> count <span class="keyword">FROM</span> customers
+<span class="keyword">UNION ALL</span>
+<span class="keyword">SELECT</span> <span class="string">'Products inserted:'</span>, <span class="function">COUNT</span>(*) <span class="keyword">FROM</span> products
+<span class="keyword">UNION ALL</span>
+<span class="keyword">SELECT</span> <span class="string">'Orders inserted:'</span>, <span class="function">COUNT</span>(*) <span class="keyword">FROM</span> orders
+<span class="keyword">UNION ALL</span>
+<span class="keyword">SELECT</span> <span class="string">'Order items inserted:'</span>, <span class="function">COUNT</span>(*) <span class="keyword">FROM</span> order_items;
+
+<span class="comment">-- ============================================</span>
+<span class="comment">-- SAMPLE QUERIES to verify relationships</span>
+<span class="comment">-- ============================================</span>
+<span class="comment">/*
+SELECT 
+    c.first_name || ' ' || c.last_name AS customer_name,
+    o.order_id,
+    o.order_date,
+    o.total_amount,
+    o.status,
+    COUNT(oi.order_item_id) AS items_count
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+JOIN order_items oi ON o.order_id = oi.order_id
+GROUP BY c.customer_id, o.order_id
+ORDER BY o.order_date DESC;
+*/</span>
+
+<span class="comment">-- ============================================</span>
+<span class="comment">-- END OF SEEDS</span>
+<span class="comment">-- ============================================</span></code></pre>
+            </div>
+          </div>
+          
+          <div class="flex" style="justify-content: center; gap: var(--spacing-md); margin-top: var(--spacing-lg);">
+            <button class="btn btn-primary" id="downloadSeeds">
+              <i class="fas fa-download"></i> Download seeds.sql
+            </button>
+            <button class="btn btn-secondary" id="runSeeds">
+              <i class="fas fa-seedling"></i> Simulate Data Seeding
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Full-Stack Integration -->
+      <div class="tab-content" id="integration">
+        <div class="card">
+          <h2>🔗 Connecting PostgreSQL with Web Applications</h2>
+          <p>Learn how to integrate your database with HTML, CSS, and JavaScript to create complete applications.</p>
+          
+          <div class="grid grid-2">
+            <div class="card">
+              <h3>📁 Project Structure</h3>
+              <div class="file-structure">
+                <div class="file-item folder">african-marketplace/</div>
+                <div class="file-item file">index.html</div>
+                <div class="file-item folder">assets/</div>
+                <div class="file-item file" style="padding-left: 2rem;">css/</div>
+                <div class="file-item file" style="padding-left: 4rem;">style.css</div>
+                <div class="file-item file" style="padding-left: 4rem;">responsive.css</div>
+                <div class="file-item file" style="padding-left: 2rem;">js/</div>
+                <div class="file-item file" style="padding-left: 4rem;">app.js</div>
+                <div class="file-item file" style="padding-left: 4rem;">database.js</div>
+                <div class="file-item file" style="padding-left: 2rem;">images/</div>
+                <div class="file-item folder">database/</div>
+                <div class="file-item file" style="padding-left: 2rem;">schema.sql</div>
+                <div class="file-item file" style="padding-left: 2rem;">seeds.sql</div>
+                <div class="file-item file" style="padding-left: 2rem;">config.js</div>
+                <div class="file-item file">package.json</div>
+                <div class="file-item file">README.md</div>
+              </div>
+            </div>
+            
+            <div class="card info-card">
+              <h3>⚡ Technology Stack</h3>
+              <ul>
+                <li><strong>Frontend:</strong> HTML5, CSS3, JavaScript (ES6+)</li>
+                <li><strong>Backend:</strong> Node.js with Express (simulated)</li>
+                <li><strong>Database:</strong> PostgreSQL</li>
+                <li><strong>API Communication:</strong> Fetch API / Axios</li>
+                <li><strong>Version Control:</strong> Git & GitHub</li>
+                <li><strong>Deployment:</strong> Vercel / Heroku / AWS</li>
+              </ul>
+              
+              <h4 style="margin-top: var(--spacing-lg);">🔌 Database Connection Flow</h4>
+              <ol>
+                <li>Frontend (HTML/JS) makes API request</li>
+                <li>Backend (Node.js) receives request</li>
+                <li>Backend queries PostgreSQL database</li>
+                <li>Database returns data</li>
+                <li>Backend sends JSON response</li>
+                <li>Frontend displays data</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📝 HTML Integration Example</h2>
+          <p>Here's how to create an HTML page that displays data from your PostgreSQL database:</p>
+          
+          <div class="code-editor">
+            <div class="code-header">
+              <span>index.html</span>
+              <span>E-Commerce Product Listing</span>
+            </div>
+            <div class="code-body">
+              <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;African Marketplace - MSEBETSI E-Commerce&lt;/title&gt;
+    &lt;link rel="stylesheet" href="assets/css/style.css"&gt;
+    &lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"&gt;
+    &lt;style&gt;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #000000 0%, #434343 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        .product-image {
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+        .product-info {
+            padding: 1.5rem;
+        }
+        .product-price {
+            color: #28a745;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+        .database-status {
+            background: white;
+            padding: 1rem;
+            margin: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #17a2b8;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;header class="header"&gt;
+        &lt;h1&gt;&lt;i class="fas fa-store"&gt;&lt;/i&gt; African Marketplace&lt;/h1&gt;
+        &lt;p&gt;Showcasing PostgreSQL database integration with web technologies&lt;/p&gt;
+    &lt;/header&gt;
+
+    &lt;div class="database-status" id="dbStatus"&gt;
+        &lt;i class="fas fa-database"&gt;&lt;/i&gt; 
+        PostgreSQL Database Status: &lt;span id="statusText"&gt;Loading...&lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;div class="products-grid" id="productsContainer"&gt;
+        &lt;!-- Products will be loaded here by JavaScript --&gt;
+        &lt;div class="product-card"&gt;
+            &lt;div class="product-image"&gt;
+                &lt;i class="fas fa-spinner fa-spin"&gt;&lt;/i&gt;
+            &lt;/div&gt;
+            &lt;div class="product-info"&gt;
+                &lt;h3&gt;Loading products...&lt;/h3&gt;
+                &lt;p&gt;Fetching data from PostgreSQL database&lt;/p&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div style="text-align: center; padding: 2rem; color: #666;"&gt;
+        &lt;h3&gt;&lt;i class="fas fa-project-diagram"&gt;&lt;/i&gt; Technology Stack&lt;/h3&gt;
+        &lt;div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem;"&gt;
+            &lt;span class="tech-badge"&gt;HTML5&lt;/span&gt;
+            &lt;span class="tech-badge"&gt;CSS3&lt;/span&gt;
+            &lt;span class="tech-badge"&gt;JavaScript&lt;/span&gt;
+            &lt;span class="tech-badge"&gt;PostgreSQL&lt;/span&gt;
+            &lt;span class="tech-badge"&gt;Node.js&lt;/span&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;script src="assets/js/database.js"&gt;&lt;/script&gt;
+    &lt;script src="assets/js/app.js"&gt;&lt;/script&gt;
+    &lt;script&gt;
+        // Simulated database interaction
+        document.addEventListener('DOMContentLoaded', function() {
+            // This simulates fetching data from a PostgreSQL database
+            setTimeout(() => {
+                document.getElementById('statusText').innerHTML = 
+                    '&lt;span style="color: #28a745;"&gt;Connected ✓&lt;/span&gt;';
+                document.getElementById('statusText').innerHTML += 
+                    ' &lt;small&gt;(5 tables loaded from schema.sql)&lt;/small&gt;';
+                
+                // Simulate loading products from database
+                loadSampleProducts();
+            }, 1500);
+        });
+
+        function loadSampleProducts() {
+            const products = [
+                { name: 'Kente Cloth Scarf', price: '$45.99', category: 'Fashion', icon: 'fas fa-tshirt' },
+                { name: 'Infinix Hot 12', price: '$299.99', category: 'Electronics', icon: 'fas fa-mobile-alt' },
+                { name: 'Shea Butter Cream', price: '$12.75', category: 'Beauty', icon: 'fas fa-spa' },
+                { name: 'Jollof Rice Mix', price: '$8.99', category: 'Food', icon: 'fas fa-utensils' },
+                { name: 'Solar Power Bank', price: '$49.99', category: 'Electronics', icon: 'fas fa-solar-panel' },
+                { name: 'African Print Pillow', price: '$24.50', category: 'Home', icon: 'fas fa-couch' }
+            ];
+
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = '';
+            
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    &lt;div class="product-image"&gt;
+                        &lt;i class="${product.icon}"&gt;&lt;/i&gt;
+                    &lt;/div&gt;
+                    &lt;div class="product-info"&gt;
+                        &lt;h3&gt;${product.name}&lt;/h3&gt;
+                        &lt;span class="product-category"&gt;${product.category}&lt;/span&gt;
+                        &lt;div class="product-price"&gt;${product.price}&lt;/div&gt;
+                        &lt;p&gt;Loaded from PostgreSQL database&lt;/p&gt;
+                        &lt;button onclick="addToCart('${product.name}')"&gt;
+                            &lt;i class="fas fa-cart-plus"&gt;&lt;/i&gt; Add to Cart
+                        &lt;/button&gt;
+                    &lt;/div&gt;
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function addToCart(productName) {
+            alert(`Added ${productName} to cart!\n\nThis would trigger:\n1. INSERT INTO cart_items\n2. UPDATE products stock\n3. Calculate total`);
+        }
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </div>
+          </div>
+          
+          <div class="flex" style="justify-content: center; gap: var(--spacing-md); margin-top: var(--spacing-lg);">
+            <button class="btn btn-primary" id="downloadHTML">
+              <i class="fas fa-download"></i> Download index.html
+            </button>
+            <button class="btn btn-secondary" id="previewApp">
+              <i class="fas fa-eye"></i> Preview Application
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 5: Real Project -->
+      <div class="tab-content" id="project">
+        <div class="card">
+          <h2>💻 Real-World Project: African Student Portal</h2>
+          <p>Apply everything you've learned by building a complete student management system.</p>
+          
+          <div class="grid grid-3">
+            <div class="card">
+              <h3>🎯 Project Requirements</h3>
+              <ul>
+                <li>Create database with 5+ tables</li>
+                <li>Implement proper constraints</li>
+                <li>Add realistic seed data</li>
+                <li>Create HTML interface</li>
+                <li>Add CSS styling</li>
+                <li>Implement JavaScript functionality</li>
+              </ul>
+            </div>
+            
+            <div class="card success-card">
+              <h3>📊 Database Schema</h3>
+              <ul>
+                <li>students table</li>
+                <li>courses table</li>
+                <li>enrollments table</li>
+                <li>instructors table</li>
+                <li>grades table</li>
+                <li>departments table</li>
+              </ul>
+            </div>
+            
+            <div class="card info-card">
+              <h3>🎨 Frontend Features</h3>
+              <ul>
+                <li>Student registration form</li>
+                <li>Course catalog</li>
+                <li>Grade viewing</li>
+                <li>Responsive design</li>
+                <li>Database status display</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📋 Your Task: Build Complete System</h2>
+          <p>Create a student portal system with the following components:</p>
+          
+          <div class="task-list">
+            <div class="task-item">
+              <h3>1. Create schema.sql</h3>
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>database/schema.sql</span>
+                  <span>Your task: Create student portal schema</span>
+                </div>
+                <div class="code-body" contenteditable="true" id="schemaEditor">
+-- ============================================
+-- AFRICAN STUDENT PORTAL DATABASE
+-- Your Name: [Enter Your Name Here]
+-- Date: <span id="currentDate"></span>
+-- ============================================
+
+-- TODO: Create tables for student portal
+-- 1. students table with: student_id, name, email, enrollment_date
+-- 2. courses table with: course_id, course_name, credits, department_id
+-- 3. enrollments table to connect students and courses
+-- 4. Add proper constraints (PRIMARY KEY, FOREIGN KEY, NOT NULL, etc.)
+-- 5. Add indexes for performance
+
+-- Your code here:
+
+
+
+
+                </div>
+              </div>
+              <button class="btn btn-secondary" onclick="validateSchema()" style="margin-top: var(--spacing-sm);">
+                <i class="fas fa-check"></i> Validate Schema
+              </button>
+              <div id="schemaValidation" style="margin-top: var(--spacing-sm);"></div>
+            </div>
+            
+            <div class="task-item">
+              <h3>2. Create seeds.sql</h3>
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>database/seeds.sql</span>
+                  <span>Your task: Add realistic student data</span>
+                </div>
+                <div class="code-body" contenteditable="true" id="seedsEditor">
+-- ============================================
+-- STUDENT PORTAL SEED DATA
+-- Add realistic African student data
+-- ============================================
+
+-- TODO: Insert data into all tables
+-- 1. Add at least 5 African students with realistic names
+-- 2. Add at least 3 courses (e.g., Math, Science, Programming)
+-- 3. Enroll students in courses
+-- 4. Use INSERT statements with proper syntax
+-- 5. Maintain referential integrity
+
+-- Your code here:
+
+
+
+
+                </div>
+              </div>
+              <button class="btn btn-secondary" onclick="validateSeeds()" style="margin-top: var(--spacing-sm);">
+                <i class="fas fa-check"></i> Validate Seeds
+              </button>
+              <div id="seedsValidation" style="margin-top: var(--spacing-sm);"></div>
+            </div>
+            
+            <div class="task-item">
+              <h3>3. Create index.html</h3>
+              <div class="code-editor">
+                <div class="code-header">
+                  <span>index.html</span>
+                  <span>Your task: Create student portal interface</span>
+                </div>
+                <div class="code-body" contenteditable="true" id="htmlEditor">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>African Student Portal</title>
+    <style>
+        /* TODO: Add your CSS styles here */
+        body { font-family: Arial, sans-serif; }
+        .header { background: #000; color: white; padding: 20px; }
+        .student-list { display: grid; gap: 20px; padding: 20px; }
+        .student-card { border: 1px solid #ccc; padding: 15px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>📚 African Student Portal</h1>
+        <p>Connected to PostgreSQL Database</p>
+    </header>
+
+    <main>
+        <section id="databaseInfo">
+            <!-- TODO: Display database connection status -->
+        </section>
+
+        <section class="student-list" id="studentsContainer">
+            <!-- TODO: Display students from database -->
+            <div class="student-card">
+                <h3>Student Name</h3>
+                <p>Email: student@example.com</p>
+                <p>Courses: Loading...</p>
+            </div>
+        </section>
+
+        <section id="addStudentForm">
+            <!-- TODO: Add form to insert new students -->
+        </section>
+    </main>
+
+    <script>
+        // TODO: Add JavaScript to:
+        // 1. Simulate database connection
+        // 2. Display student data
+        // 3. Handle form submission
+        // 4. Show database operations
+
+        console.log("Student Portal - PostgreSQL Integration");
+    </script>
+</body>
+</html>
+                </div>
+              </div>
+              <button class="btn btn-secondary" onclick="validateHTML()" style="margin-top: var(--spacing-sm);">
+                <i class="fas fa-check"></i> Validate HTML
+              </button>
+              <div id="htmlValidation" style="margin-top: var(--spacing-sm);"></div>
+            </div>
+          </div>
+          
+          <div class="interactive-area" style="margin-top: var(--spacing-xl);">
+            <h3>🚀 Ready to Submit Your Project?</h3>
+            <p>Create a folder with this structure and upload your files:</p>
+            
+            <div class="file-structure">
+              <div class="file-item folder">student-portal/</div>
+              <div class="file-item file">index.html</div>
+              <div class="file-item folder">assets/</div>
+              <div class="file-item file" style="padding-left: 2rem;">style.css</div>
+              <div class="file-item file" style="padding-left: 2rem;">script.js</div>
+              <div class="file-item folder">database/</div>
+              <div class="file-item file" style="padding-left: 2rem;">schema.sql</div>
+              <div class="file-item file" style="padding-left: 2rem;">seeds.sql</div>
+              <div class="file-item file">README.md</div>
+            </div>
+            
+            <div class="drop-zone" id="projectDropZone">
+              <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+              <h4>Drag & Drop Your Project Files Here</h4>
+              <p>or click to select files</p>
+              <input type="file" id="fileUpload" multiple style="display: none;">
+            </div>
+            
+            <div id="uploadedFiles" style="margin-top: var(--spacing-lg);"></div>
+            
+            <button class="btn btn-primary" id="submitProject" style="margin-top: var(--spacing-lg);" disabled>
+              <i class="fas fa-paper-plane"></i> Submit Project
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 6: Assessment -->
+      <div class="tab-content" id="assessment">
+        <div class="card">
+          <h2>📊 Lesson 6 Assessment</h2>
+          <p>Test your understanding of schema design, data seeding, and full-stack integration.</p>
+          
+          <div id="quizContainer">
+            <div class="card" style="margin-bottom: var(--spacing-md);">
+              <h3>Question 1: Schema Design</h3>
+              <p>What is the primary purpose of a schema.sql file?</p>
+              <div class="quiz-options">
+                <label><input type="radio" name="q1" value="a"> A) To insert test data into tables</label><br>
+                <label><input type="radio" name="q1" value="b"> B) To define database structure and relationships</label><br>
+                <label><input type="radio" name="q1" value="c"> C) To style the HTML interface</label><br>
+                <label><input type="radio" name="q1" value="d"> D) To write JavaScript functions</label>
+              </div>
+            </div>
+            
+            <div class="card" style="margin-bottom: var(--spacing-md);">
+              <h3>Question 2: Data Seeding</h3>
+              <p>Which SQL statement is used to add data in a seeds.sql file?</p>
+              <div class="quiz-options">
+                <label><input type="radio" name="q2" value="a"> A) CREATE TABLE</label><br>
+                <label><input type="radio" name="q2" value="b"> B) INSERT INTO</label><br>
+                <label><input type="radio" name="q2" value="c"> C) UPDATE SET</label><br>
+                <label><input type="radio" name="q2" value="d"> D) SELECT FROM</label>
+              </div>
+            </div>
+            
+            <div class="card" style="margin-bottom: var(--spacing-md);">
+              <h3>Question 3: Foreign Keys</h3>
+              <p>What is the purpose of a FOREIGN KEY constraint?</p>
+              <div class="quiz-options">
+                <label><input type="radio" name="q3" value="a"> A) To ensure data uniqueness</label><br>
+                <label><input type="radio" name="q3" value="b"> B) To link tables and maintain referential integrity</label><br>
+                <label><input type="radio" name="q3" value="c"> C) To improve query performance</label><br>
+                <label><input type="radio" name="q3" value="d"> D) To encrypt sensitive data</label>
+              </div>
+            </div>
+            
+            <div class="card" style="margin-bottom: var(--spacing-md);">
+              <h3>Question 4: Project Structure</h3>
+              <p>Which folder typically contains database schema and seeds files?</p>
+              <div class="quiz-options">
+                <label><input type="radio" name="q4" value="a"> A) assets/css/</label><br>
+                <label><input type="radio" name="q4" value="b"> B) database/</label><br>
+                <label><input type="radio" name="q4" value="c"> C) images/</label><br>
+                <label><input type="radio" name="q4" value="d"> D) node_modules/</label>
+              </div>
+            </div>
+            
+            <button class="btn btn-primary" id="submitQuiz">
+              <i class="fas fa-check-circle"></i> Submit Quiz
+            </button>
+            
+            <div id="quizResults" style="display: none; margin-top: var(--spacing-lg);">
+              <div class="card success-card">
+                <h3>🎉 Quiz Results</h3>
+                <p>Your Score: <span id="quizScore">0</span>/4</p>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="quizProgress" style="width: 0%;"></div>
+                </div>
+                <div id="quizFeedback" style="margin-top: var(--spacing-md);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📈 Learning Progress</h2>
+          <p>Track your progress through the PostgreSQL course:</p>
+          
+          <div class="progress-tracker">
+            <div class="progress-item">
+              <span>Lesson 1-3: Database Basics</span>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 100%;"></div>
+              </div>
+              <span>100%</span>
+            </div>
+            <div class="progress-item">
+              <span>Lesson 4: SQL Operations</span>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 100%;"></div>
+              </div>
+              <span>100%</span>
+            </div>
+            <div class="progress-item">
+              <span>Lesson 5: Data Types & Constraints</span>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 100%;"></div>
+              </div>
+              <span>100%</span>
+            </div>
+            <div class="progress-item">
+              <span>Lesson 6: Schema & Seeds (Current)</span>
+              <div class="progress-bar">
+                <div class="progress-fill" id="currentProgress" style="width: 25%;"></div>
+              </div>
+              <span id="currentPercent">25%</span>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin-top: var(--spacing-xl);">
+            <button class="btn btn-primary" id="completeLesson" disabled>
+              <i class="fas fa-graduation-cap"></i> Complete Lesson 6
+            </button>
+            <p style="margin-top: var(--spacing-sm); color: var(--color-text-secondary); font-size: 0.9rem;">
+              Complete all tasks and quiz to unlock
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>MSEBETSI PostgreSQL Course &copy; <span id="currentYear"></span> | Lesson 6: Schema & Seeds Implementation</p>
+      <p>Empowering African developers with professional database skills</p>
+      <div style="margin-top: var(--spacing-sm);">
+        <button class="btn btn-secondary" onclick="previousLesson()">
+          <i class="fas fa-arrow-left"></i> Lesson 5: Data Types
+        </button>
+        <button class="btn btn-secondary" onclick="nextLesson()" style="margin-left: var(--spacing-sm);">
+          Lesson 7: Advanced Queries <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Set current dates
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+    document.getElementById('schemaDate').textContent = new Date().toLocaleDateString();
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString();
+
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const themeLabel = document.getElementById('themeLabel');
+    const htmlElement = document.documentElement;
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme) {
+      htmlElement.setAttribute('data-theme', savedTheme);
+      themeLabel.textContent = savedTheme === 'dark' ? 'Dark' : 'Light';
+    } else if (prefersDark) {
+      htmlElement.setAttribute('data-theme', 'dark');
+      themeLabel.textContent = 'Dark';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = htmlElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      htmlElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      themeLabel.textContent = newTheme === 'dark' ? 'Dark' : 'Light';
+      showNotification(`Switched to ${newTheme} theme`, 'info');
+    });
+
+    // Tab functionality
+    document.querySelectorAll('.tab-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const tabId = button.getAttribute('data-tab');
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        button.classList.add('active');
+        
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    // Download functionality
+    document.getElementById('downloadSchema')?.addEventListener('click', () => {
+      downloadFile('schema.sql', document.querySelector('#schema .code-body pre').textContent);
+      showNotification('schema.sql downloaded!', 'success');
+    });
+
+    document.getElementById('downloadSeeds')?.addEventListener('click', () => {
+      downloadFile('seeds.sql', document.querySelector('#seeds .code-body pre').textContent);
+      showNotification('seeds.sql downloaded!', 'success');
+    });
+
+    document.getElementById('downloadHTML')?.addEventListener('click', () => {
+      downloadFile('index.html', document.querySelector('#integration .code-body pre').textContent);
+      showNotification('index.html downloaded!', 'success');
+    });
+
+    // Simulate schema execution
+    document.getElementById('runSchema')?.addEventListener('click', () => {
+      showNotification('Executing schema.sql... Creating 5 tables with constraints', 'info');
+      setTimeout(() => {
+        showNotification('✅ Schema executed successfully! Created: customers, products, categories, orders, order_items', 'success');
+      }, 1500);
+    });
+
+    // Simulate seeds execution
+    document.getElementById('runSeeds')?.addEventListener('click', () => {
+      showNotification('Executing seeds.sql... Inserting sample data', 'info');
+      setTimeout(() => {
+        showNotification('✅ Seeds executed! Inserted: 5 customers, 7 products, 4 orders, 5 order items', 'success');
+      }, 1500);
+    });
+
+    // Preview application
+    document.getElementById('previewApp')?.addEventListener('click', () => {
+      const html = document.querySelector('#integration .code-body pre').textContent;
+      const preview = window.open('', '_blank');
+      preview.document.write(html);
+      preview.document.close();
+      showNotification('Opening application preview in new tab', 'info');
+    });
+
+    // Project file upload
+    const dropZone = document.getElementById('projectDropZone');
+    const fileInput = document.getElementById('fileUpload');
+    const uploadedFiles = document.getElementById('uploadedFiles');
+    const submitBtn = document.getElementById('submitProject');
+    
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('drag-over');
+    });
+    
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('drag-over');
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      handleFiles(e.dataTransfer.files);
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(e.target.files);
+    });
+    
+    function handleFiles(files) {
+      uploadedFiles.innerHTML = '<h4>Uploaded Files:</h4>';
+      let fileCount = 0;
+      
+      for (let file of files) {
+        const div = document.createElement('div');
+        div.className = 'file-item';
+        div.innerHTML = `📄 ${file.name} (${formatFileSize(file.size)})`;
+        uploadedFiles.appendChild(div);
+        fileCount++;
+      }
+      
+      if (fileCount > 0) {
+        submitBtn.disabled = false;
+        showNotification(`Uploaded ${fileCount} file(s)`, 'success');
+      }
+    }
+    
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' bytes';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    // Project submission
+    document.getElementById('submitProject').addEventListener('click', () => {
+      showNotification('Project submitted successfully!', 'success');
+      updateProgress(100);
+      document.getElementById('completeLesson').disabled = false;
+    });
+
+    // Validation functions
+    function validateSchema() {
+      const content = document.getElementById('schemaEditor').textContent;
+      const validation = document.getElementById('schemaValidation');
+      
+      if (content.includes('CREATE TABLE') && content.includes('PRIMARY KEY')) {
+        validation.innerHTML = '<span style="color: var(--color-success);">✅ Valid schema! Contains CREATE TABLE and PRIMARY KEY</span>';
+        updateProgress(33);
+      } else {
+        validation.innerHTML = '<span style="color: var(--color-error);">❌ Add CREATE TABLE statements with PRIMARY KEY constraints</span>';
+      }
+    }
+
+    function validateSeeds() {
+      const content = document.getElementById('seedsEditor').textContent;
+      const validation = document.getElementById('seedsValidation');
+      
+      if (content.includes('INSERT INTO') && content.includes('VALUES')) {
+        validation.innerHTML = '<span style="color: var(--color-success);">✅ Valid seeds! Contains INSERT INTO statements</span>';
+        updateProgress(33);
+      } else {
+        validation.innerHTML = '<span style="color: var(--color-error);">❌ Add INSERT INTO statements with VALUES</span>';
+      }
+    }
+
+    function validateHTML() {
+      const content = document.getElementById('htmlEditor').textContent;
+      const validation = document.getElementById('htmlValidation');
+      
+      if (content.includes('<!DOCTYPE html>') && content.includes('<html')) {
+        validation.innerHTML = '<span style="color: var(--color-success);">✅ Valid HTML! Contains proper structure</span>';
+        updateProgress(33);
+      } else {
+        validation.innerHTML = '<span style="color: var(--color-error);">❌ Add proper HTML structure with DOCTYPE and html tags</span>';
+      }
+    }
+
+    // Progress tracking
+    let progress = 25;
+    function updateProgress(increment) {
+      progress = Math.min(100, progress + increment);
+      document.getElementById('currentProgress').style.width = progress + '%';
+      document.getElementById('currentPercent').textContent = progress + '%';
+      
+      if (progress >= 100) {
+        document.getElementById('completeLesson').disabled = false;
+      }
+    }
+
+    // Quiz functionality
+    document.getElementById('submitQuiz').addEventListener('click', () => {
+      const answers = {
+        q1: 'b',
+        q2: 'b',
+        q3: 'b',
+        q4: 'b'
+      };
+      
+      let score = 0;
+      for (let question in answers) {
+        const selected = document.querySelector(`input[name="${question}"]:checked`);
+        if (selected && selected.value === answers[question]) {
+          score++;
+        }
+      }
+      
+      const results = document.getElementById('quizResults');
+      const quizScore = document.getElementById('quizScore');
+      const quizProgress = document.getElementById('quizProgress');
+      const quizFeedback = document.getElementById('quizFeedback');
+      
+      quizScore.textContent = score;
+      quizProgress.style.width = (score / 4 * 100) + '%';
+      
+      let feedback = '';
+      if (score === 4) {
+        feedback = '🎉 Perfect! You have mastered schema and seeds concepts.';
+        updateProgress(25);
+      } else if (score >= 2) {
+        feedback = '👍 Good job! Review the lesson to improve your score.';
+      } else {
+        feedback = '📚 Review the lesson material and try again.';
+      }
+      
+      quizFeedback.innerHTML = feedback;
+      results.style.display = 'block';
+      showNotification(`Quiz submitted! Score: ${score}/4`, score === 4 ? 'success' : 'info');
+    });
+
+    // Complete lesson
+    document.getElementById('completeLesson').addEventListener('click', () => {
+      showNotification('🎉 Congratulations! You have completed Lesson 6', 'success');
+      alert('LESSON 6 COMPLETE!\n\nYou have mastered:\n✅ Schema design with constraints\n✅ Data seeding patterns\n✅ Full-stack integration\n✅ Professional project structure\n\nReady for Lesson 7: Advanced Queries!');
+    });
+
+    // Navigation
+    function previousLesson() {
+      window.location.href = 'lesson5.html';
+    }
+
+    function nextLesson() {
+      window.location.href = 'lesson7.html';
+    }
+
+    // Utility functions
+    function downloadFile(filename, content) {
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.textContent = message;
+      notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius-md);
+        background-color: ${type === 'success' ? 'var(--color-success)' : 
+                         type === 'error' ? 'var(--color-error)' : 
+                         type === 'info' ? 'var(--color-info)' :
+                         'var(--color-warning)'};
+        color: white;
+        font-weight: 500;
+        box-shadow: var(--shadow-lg);
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.style.animation = 'fadeOut 0.3s ease';
+          setTimeout(() => notification.remove(), 300);
+        }
+      }, 3000);
+    }
+
+    // Initialize
+    showNotification('Welcome to Lesson 6: Schema & Seeds Implementation', 'info');
+  </script>
+</body>
+</html>
