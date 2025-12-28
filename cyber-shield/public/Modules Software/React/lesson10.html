@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 10: useEffect & Msebetsi Solutions Homepage Data Flow | Msebetsi Solutions Engineering</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Netflix+Sans:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ===== MSEBETSI SOLUTIONS HOMEPAGE DESIGN SYSTEM ===== */
+        :root {
+            /* Msebetsi Solutions Colors */
+            --msebetsi-red: #E50914;
+            --msebetsi-red-dark: #B20710;
+            --msebetsi-black: #141414;
+            --msebetsi-dark-gray: #2D2D2D;
+            --msebetsi-gray: #737373;
+            --msebetsi-light-gray: #E5E5E5;
+            --msebetsi-white: #FFFFFF;
+            --msebetsi-bg: #0F0F0F;
+            
+            /* Hook Colors */
+            --hook-purple: #8A2BE2;
+            --hook-blue: #00B4D8;
+            --hook-green: #00FF88;
+            --hook-yellow: #FFD700;
+            --hook-pink: #FF6B9D;
+            
+            /* Category Colors */
+            --trending-color: #E50914;
+            --continue-color: #00FF88;
+            --top10-color: #FFD700;
+            --new-color: #00B4D8;
+            --my-list-color: #8A2BE2;
+            
+            /* Gradients */
+            --gradient-hero: linear-gradient(180deg, rgba(20,20,20,0.7) 0%, rgba(20,20,20,0.9) 50%, #141414 100%);
+            --gradient-hook: linear-gradient(135deg, #8A2BE2 0%, #00B4D8 100%);
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-xxl: 48px;
+            --space-xxxl: 64px;
+            
+            /* Shadows */
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.9);
+            --shadow-hook: 0 0 40px rgba(138,43,226,0.5);
+            
+            /* Transitions */
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Z-index */
+            --z-header: 1000;
+            --z-hero: 10;
+            --z-category: 20;
+            --z-modal: 1002;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--msebetsi-bg);
+            color: var(--msebetsi-white);
+            font-family: 'Netflix Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--msebetsi-dark-gray);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--hook-purple);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--hook-blue);
+        }
+        
+        /* Msebetsi Solutions Header */
+        .msebetsi-header {
+            background: linear-gradient(180deg, 
+                rgba(20,20,20,0.95) 0%, 
+                rgba(20,20,20,0.9) 50%, 
+                rgba(20,20,20,0.8) 100%);
+            padding: var(--space-lg) var(--space-xl);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: var(--z-header);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: all var(--transition-normal);
+        }
+        
+        .msebetsi-header.scrolled {
+            background: rgba(20,20,20,0.98);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xl);
+        }
+        
+        .msebetsi-logo {
+            color: var(--msebetsi-red);
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            text-decoration: none;
+            transition: all var(--transition-normal);
+        }
+        
+        .msebetsi-logo:hover {
+            text-shadow: 0 0 40px rgba(229,9,20,0.5);
+            transform: scale(1.05);
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: var(--space-lg);
+        }
+        
+        .nav-item {
+            color: var(--msebetsi-light-gray);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            color: white;
+        }
+        
+        .hook-badge {
+            background: var(--gradient-hook);
+            color: white;
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            position: relative;
+            height: 85vh;
+            min-height: 600px;
+            margin-bottom: var(--space-xxxl);
+            overflow: hidden;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9));
+            display: flex;
+            align-items: flex-end;
+        }
+        
+        .hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        
+        .hero-background.active {
+            opacity: 1;
+        }
+        
+        .hero-content {
+            padding: var(--space-xxxl);
+            max-width: 800px;
+            z-index: var(--z-hero);
+            background: var(--gradient-hero);
+            width: 100%;
+        }
+        
+        .hero-badge {
+            background: var(--trending-color);
+            color: white;
+            padding: var(--space-sm) var(--space-md);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: var(--space-lg);
+            line-height: 1.1;
+        }
+        
+        .hero-description {
+            font-size: 1.2rem;
+            color: var(--msebetsi-light-gray);
+            margin-bottom: var(--space-xl);
+            max-width: 600px;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+        
+        .hero-info {
+            display: flex;
+            gap: var(--space-xl);
+            color: var(--msebetsi-gray);
+            font-size: 0.9rem;
+        }
+        
+        /* Lesson Intro */
+        .lesson-intro {
+            background: rgba(20,20,20,0.95);
+            padding: var(--space-xxxl) var(--space-xl);
+            margin: var(--space-xxxl) auto;
+            max-width: 1200px;
+            border-radius: 24px;
+            border: 2px solid var(--hook-purple);
+        }
+        
+        .lesson-title {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: var(--space-lg);
+            background: linear-gradient(45deg, var(--hook-purple), var(--hook-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .lesson-subtitle {
+            font-size: 1.5rem;
+            color: var(--msebetsi-light-gray);
+            margin-bottom: var(--space-xl);
+            line-height: 1.6;
+        }
+        
+        .mission-card {
+            background: rgba(30,30,30,0.9);
+            border-radius: 16px;
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            border-left: 4px solid var(--hook-green);
+        }
+        
+        .mission-title {
+            color: var(--hook-green);
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        /* Data Flow Dashboard */
+        .data-flow-dashboard {
+            padding: var(--space-xl);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Category Row */
+        .category-row {
+            margin-bottom: var(--space-xxxl);
+        }
+        
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+            padding: 0 var(--space-md);
+        }
+        
+        .category-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .category-controls {
+            display: flex;
+            gap: var(--space-md);
+            align-items: center;
+        }
+        
+        .category-badge {
+            padding: var(--space-xs) var(--space-md);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+        
+        .trending-badge { background: rgba(229,9,20,0.2); color: var(--trending-color); }
+        .continue-badge { background: rgba(0,255,136,0.2); color: var(--continue-color); }
+        .top10-badge { background: rgba(255,215,0,0.2); color: var(--top10-color); }
+        .new-badge { background: rgba(0,180,216,0.2); color: var(--new-color); }
+        
+        /* Movies Grid */
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--space-md);
+            padding: var(--space-md);
+        }
+        
+        .movie-card {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all var(--transition-normal);
+            cursor: pointer;
+            aspect-ratio: 2/3;
+            background: var(--msebetsi-dark-gray);
+        }
+        
+        .movie-card:hover {
+            transform: scale(1.05);
+            z-index: 30;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .movie-poster {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--transition-normal);
+        }
+        
+        .movie-card:hover .movie-poster {
+            transform: scale(1.1);
+        }
+        
+        .movie-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: var(--space-lg);
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+        }
+        
+        .movie-card:hover .movie-overlay {
+            opacity: 1;
+        }
+        
+        .movie-title {
+            font-weight: 700;
+            margin-bottom: var(--space-xs);
+            font-size: 0.9rem;
+        }
+        
+        .movie-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--msebetsi-gray);
+            font-size: 0.8rem;
+        }
+        
+        /* Loading States */
+        .loading-skeleton {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--space-md);
+            padding: var(--space-md);
+        }
+        
+        .skeleton-card {
+            background: linear-gradient(90deg, #2D2D2D 25%, #3D3D3D 50%, #2D2D2D 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+            aspect-ratio: 2/3;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* useEffect Controls */
+        .use-effect-controls {
+            background: rgba(20,20,20,0.95);
+            border-radius: 24px;
+            padding: var(--space-xxxl);
+            margin: var(--space-xxxl) auto;
+            max-width: 1200px;
+            border: 2px solid var(--hook-blue);
+        }
+        
+        .controls-header {
+            text-align: center;
+            margin-bottom: var(--space-xxl);
+        }
+        
+        .controls-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--hook-blue);
+            margin-bottom: var(--space-md);
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-lg);
+        }
+        
+        .control-group {
+            background: rgba(30,30,30,0.9);
+            border-radius: 12px;
+            padding: var(--space-xl);
+        }
+        
+        .control-group-title {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .control-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        
+        /* Code Visualization */
+        .code-visualization {
+            background: rgba(20,20,20,0.95);
+            border-radius: 24px;
+            padding: var(--space-xxxl);
+            margin: var(--space-xxxl) auto;
+            max-width: 1200px;
+            border: 2px solid var(--hook-purple);
+        }
+        
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xxl);
+        }
+        
+        .code-title {
+            font-size: 2rem;
+            font-weight: 900;
+            color: white;
+        }
+        
+        .code-tabs {
+            display: flex;
+            gap: var(--space-sm);
+            background: rgba(0,0,0,0.5);
+            padding: var(--space-sm);
+            border-radius: 8px;
+        }
+        
+        .code-tab {
+            padding: var(--space-sm) var(--space-lg);
+            background: none;
+            border: none;
+            color: var(--msebetsi-gray);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all var(--transition-fast);
+        }
+        
+        .code-tab.active {
+            background: var(--hook-purple);
+            color: white;
+        }
+        
+        .code-block {
+            background: #0d1117;
+            border-radius: 12px;
+            padding: var(--space-xl);
+            font-family: 'SF Mono', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            min-height: 400px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .code-line {
+            margin-bottom: 2px;
+        }
+        
+        .code-comment { color: #8b949e; }
+        .code-keyword { color: #ff7b72; }
+        .code-string { color: #a5d6ff; }
+        .code-function { color: #d2a8ff; }
+        .code-hook { color: #00ff88; font-weight: bold; }
+        
+        /* Quiz Section */
+        .quiz-section {
+            background: rgba(20,20,20,0.95);
+            border-radius: 24px;
+            padding: var(--space-xxxl);
+            margin: var(--space-xxxl) auto;
+            max-width: 1200px;
+            border: 2px solid var(--hook-yellow);
+        }
+        
+        .quiz-header {
+            text-align: center;
+            margin-bottom: var(--space-xxl);
+        }
+        
+        .quiz-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--hook-yellow);
+            margin-bottom: var(--space-md);
+        }
+        
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .question-card {
+            background: rgba(30,30,30,0.9);
+            border-radius: 12px;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .question-text {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: var(--space-lg);
+            line-height: 1.6;
+        }
+        
+        .options-grid {
+            display: grid;
+            gap: var(--space-sm);
+        }
+        
+        .option-button {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: var(--space-md) var(--space-lg);
+            color: var(--msebetsi-light-gray);
+            text-align: left;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-size: 0.95rem;
+        }
+        
+        .option-button:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--hook-purple);
+        }
+        
+        .option-button.selected {
+            background: rgba(138,43,226,0.2);
+            border-color: var(--hook-purple);
+            color: white;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: var(--space-md) var(--space-xl);
+            border: none;
+            border-radius: 4px;
+            font-family: 'Netflix Sans';
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+        
+        .btn-primary {
+            background: var(--msebetsi-red);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--msebetsi-red-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .btn-hook {
+            background: var(--gradient-hook);
+            color: white;
+        }
+        
+        .btn-hook:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hook);
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: rgba(20,20,20,0.95);
+            border-left: 4px solid var(--hook-purple);
+            padding: var(--space-lg) var(--space-xl);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+            backdrop-filter: blur(20px);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .hero-title {
+                font-size: 3rem;
+            }
+            
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .msebetsi-header {
+                flex-direction: column;
+                gap: var(--space-md);
+                padding: var(--space-md);
+            }
+            
+            .header-left {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .nav-menu {
+                display: none;
+            }
+            
+            .hero-section {
+                height: 70vh;
+                min-height: 500px;
+            }
+            
+            .hero-content {
+                padding: var(--space-xl);
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .lesson-title {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .category-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Msebetsi Solutions Header -->
+    <header class="msebetsi-header" id="mainHeader">
+        <div class="header-left">
+            <a href="#" class="msebetsi-logo">MSEBETSI SOLUTIONS</a>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active">Home</a>
+                <a href="#" class="nav-item">TV Shows</a>
+                <a href="#" class="nav-item">Movies</a>
+                <a href="#" class="nav-item">New & Popular</a>
+                <a href="#" class="nav-item">My List</a>
+            </nav>
+        </div>
+        <div class="hook-badge">
+            <i class="fas fa-code"></i> Lesson 10: useEffect Data Flow
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <!-- Multiple hero backgrounds for rotation -->
+        <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1600&q=80" 
+             class="hero-background active" alt="Msebetsi Solutions Hero" id="hero1">
+        <img src="https://images.unsplash.com/photo-1574267432553-4b4628081c31?w=1600&q=80" 
+             class="hero-background" alt="Cinema" id="hero2">
+        <img src="https://images.unsplash.com/photo-1595769812725-4c6564f7528b?w=1600&q=80" 
+             class="hero-background" alt="Movie Theater" id="hero3">
+        
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fas fa-fire"></i> TRENDING NOW
+            </div>
+            <h1 class="hero-title" id="heroTitle">Stranger Things</h1>
+            <p class="hero-description" id="heroDescription">
+                When a young boy vanishes, a small town uncovers a mystery involving secret experiments, 
+                terrifying supernatural forces and one strange little girl.
+            </p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="playHeroContent()">
+                    <i class="fas fa-play"></i> Play
+                </button>
+                <button class="btn btn-secondary" onclick="showMoreInfo()">
+                    <i class="fas fa-info-circle"></i> More Info
+                </button>
+            </div>
+            <div class="hero-info">
+                <span><i class="fas fa-star" style="color: var(--hook-yellow);"></i> 95% Match</span>
+                <span>2022</span>
+                <span>4 Seasons</span>
+                <span>HD</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lesson Introduction -->
+    <section class="lesson-intro fade-in">
+        <h1 class="lesson-title">Mastering useEffect & Msebetsi Solutions Data Flow</h1>
+        <p class="lesson-subtitle">
+            Learn how Msebetsi Solutions' homepage dynamically fetches and manages data using React's useEffect hook. 
+            Understand dependency arrays, cleanup functions, and real-time data synchronization.
+        </p>
+        
+        <div class="mission-card">
+            <h2 class="mission-title">
+                <i class="fas fa-bullseye"></i> ENGINEERING MISSION
+            </h2>
+            <p style="color: var(--msebetsi-light-gray); line-height: 1.7; font-size: 1.1rem;">
+                <strong>Task:</strong> Simulate Msebetsi Solutions' homepage data fetching system. Implement useEffect hooks 
+                to load trending content, continue watching, personalized recommendations, and real-time updates 
+                while managing loading states, errors, and memory cleanup.
+            </p>
+            <p style="color: var(--msebetsi-gray); margin-top: var(--space-md);">
+                <i class="fas fa-lightbulb"></i> <strong>Key Insight:</strong> Msebetsi Solutions uses multiple useEffect hooks 
+                with different dependency arrays to optimize data fetching and prevent unnecessary API calls.
+            </p>
+        </div>
+    </section>
+
+    <!-- Data Flow Dashboard -->
+    <section class="data-flow-dashboard">
+        <!-- Trending Now -->
+        <div class="category-row" id="trendingSection">
+            <div class="category-header">
+                <h2 class="category-title">
+                    <i class="fas fa-fire" style="color: var(--trending-color);"></i>
+                    Trending Now
+                    <span class="category-badge trending-badge" id="trendingStatus">
+                        <i class="fas fa-sync-alt fa-spin"></i> Loading...
+                    </span>
+                </h2>
+                <div class="category-controls">
+                    <button class="btn btn-secondary" onclick="refreshTrending()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="movies-grid" id="trendingGrid">
+                <!-- Trending movies will load here -->
+            </div>
+        </div>
+
+        <!-- Continue Watching -->
+        <div class="category-row" id="continueSection">
+            <div class="category-header">
+                <h2 class="category-title">
+                    <i class="fas fa-play-circle" style="color: var(--continue-color);"></i>
+                    Continue Watching
+                    <span class="category-badge continue-badge" id="continueStatus">
+                        <i class="fas fa-sync-alt fa-spin"></i> Loading...
+                    </span>
+                </h2>
+                <div class="category-controls">
+                    <div style="color: var(--msebetsi-gray); font-size: 0.9rem;">
+                        <span id="continueCount">0</span> items
+                    </div>
+                </div>
+            </div>
+            <div class="movies-grid" id="continueGrid">
+                <!-- Continue watching will load here -->
+            </div>
+        </div>
+
+        <!-- Top 10 Today -->
+        <div class="category-row" id="top10Section">
+            <div class="category-header">
+                <h2 class="category-title">
+                    <i class="fas fa-crown" style="color: var(--top10-color);"></i>
+                    Top 10 Today
+                    <span class="category-badge top10-badge" id="top10Status">
+                        <i class="fas fa-sync-alt fa-spin"></i> Loading...
+                    </span>
+                </h2>
+                <div class="category-controls">
+                    <button class="btn btn-secondary" onclick="simulateRankingChange()">
+                        <i class="fas fa-random"></i> Simulate Ranking Change
+                    </button>
+                </div>
+            </div>
+            <div class="movies-grid" id="top10Grid">
+                <!-- Top 10 will load here -->
+            </div>
+        </div>
+
+        <!-- New Releases -->
+        <div class="category-row" id="newReleasesSection">
+            <div class="category-header">
+                <h2 class="category-title">
+                    <i class="fas fa-star" style="color: var(--new-color);"></i>
+                    New Releases
+                    <span class="category-badge new-badge" id="newReleasesStatus">
+                        <i class="fas fa-sync-alt fa-spin"></i> Loading...
+                    </span>
+                </h2>
+                <div class="category-controls">
+                    <button class="btn btn-secondary" onclick="addNewRelease()">
+                        <i class="fas fa-plus"></i> Add New Release
+                    </button>
+                </div>
+            </div>
+            <div class="movies-grid" id="newReleasesGrid">
+                <!-- New releases will load here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- useEffect Controls -->
+    <section class="use-effect-controls fade-in">
+        <div class="controls-header">
+            <h2 class="controls-title">
+                <i class="fas fa-sliders-h"></i> useEffect Simulation Controls
+            </h2>
+            <p style="color: var(--msebetsi-gray); max-width: 600px; margin: 0 auto;">
+                Experiment with different useEffect scenarios to understand how Msebetsi Solutions manages data fetching
+            </p>
+        </div>
+        
+        <div class="controls-grid">
+            <div class="control-group">
+                <h3 class="control-group-title">
+                    <i class="fas fa-rocket"></i> Component Lifecycle
+                </h3>
+                <div class="control-buttons">
+                    <button class="btn btn-hook" onclick="simulateComponentMount()">
+                        Simulate Component Mount
+                    </button>
+                    <button class="btn btn-hook" onclick="simulateComponentUnmount()">
+                        Simulate Component Unmount
+                    </button>
+                    <button class="btn btn-hook" onclick="simulatePropsChange()">
+                        Simulate Props Change
+                    </button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3 class="control-group-title">
+                    <i class="fas fa-database"></i> Data Fetching Scenarios
+                </h3>
+                <div class="control-buttons">
+                    <button class="btn btn-hook" onclick="simulateSlowAPI()">
+                        Simulate Slow API (3s)
+                    </button>
+                    <button class="btn btn-hook" onclick="simulateAPIError()">
+                        Simulate API Error
+                    </button>
+                    <button class="btn btn-hook" onclick="simulateEmptyResponse()">
+                        Simulate Empty Response
+                    </button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3 class="control-group-title">
+                    <i class="fas fa-broom"></i> Cleanup Tests
+                </h3>
+                <div class="control-buttons">
+                    <button class="btn btn-hook" onclick="startIntervalTimer()">
+                        Start Interval Timer
+                    </button>
+                    <button class="btn btn-hook" onclick="testCleanup()">
+                        Test Cleanup Function
+                    </button>
+                    <button class="btn btn-hook" onclick="resetAllData()">
+                        Reset All Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Code Visualization -->
+    <section class="code-visualization fade-in">
+        <div class="code-header">
+            <h2 class="code-title">
+                <i class="fas fa-code"></i> Msebetsi Solutions' useEffect Implementation
+            </h2>
+            <div class="code-tabs">
+                <button class="code-tab active" onclick="showCodeTab('basic')">Basic useEffect</button>
+                <button class="code-tab" onclick="showCodeTab('deps')">With Dependencies</button>
+                <button class="code-tab" onclick="showCodeTab('cleanup')">With Cleanup</button>
+                <button class="code-tab" onclick="showCodeTab('real')">Real Msebetsi Solutions Example</button>
+            </div>
+        </div>
+        
+        <div class="code-block" id="codeContent">
+            <!-- Code will be dynamically inserted here -->
+        </div>
+    </section>
+
+    <!-- Quiz Section -->
+    <section class="quiz-section fade-in">
+        <div class="quiz-header">
+            <h2 class="quiz-title">
+                <i class="fas fa-graduation-cap"></i> useEffect Lifecycle Quiz
+            </h2>
+            <p style="color: var(--msebetsi-gray); max-width: 600px; margin: 0 auto;">
+                Test your understanding of useEffect hooks with these Msebetsi Solutions-themed questions
+            </p>
+        </div>
+        
+        <div class="quiz-container" id="quizContainer">
+            <!-- Quiz questions will be dynamically inserted here -->
+        </div>
+        
+        <div style="text-align: center; margin-top: var(--space-xxl);">
+            <button class="btn btn-primary" onclick="submitQuiz()" 
+                    style="padding: var(--space-lg) var(--space-xxl); font-size: 1.2rem;">
+                <i class="fas fa-paper-plane"></i> Submit Quiz
+            </button>
+        </div>
+        
+        <div id="quizResults" style="display: none; text-align: center; margin-top: var(--space-xl);">
+            <h3 style="color: var(--hook-green); font-size: 2rem; margin-bottom: var(--space-lg);">
+                Quiz Results: <span id="quizScore">0</span>/5
+            </h3>
+            <button class="btn btn-hook" onclick="resetQuiz()">
+                <i class="fas fa-redo"></i> Try Again
+            </button>
+        </div>
+    </section>
+    
+    <!-- Lesson Completion -->
+    <div style="text-align: center; padding: var(--space-xxxl);">
+        <button class="btn btn-primary" onclick="completeLesson()" 
+                style="padding: var(--space-xl) var(--space-xxxl); font-size: 1.2rem;">
+            <i class="fas fa-graduation-cap"></i> Complete Lesson 10
+        </button>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // ===== MSEBETSI SOLUTIONS HOMEPAGE DATA FLOW SIMULATION =====
+        class MsebetsiHomepageDataFlow {
+            constructor() {
+                this.state = {
+                    // Hero rotation
+                    heroIndex: 0,
+                    heroInterval: null,
+                    
+                    // Category states
+                    trending: { data: [], loading: true, error: false },
+                    continueWatching: { data: [], loading: true, error: false },
+                    top10: { data: [], loading: true, error: false },
+                    newReleases: { data: [], loading: true, error: false },
+                    
+                    // Simulation state
+                    simulationMode: 'normal',
+                    fetchCount: 0,
+                    activeIntervals: [],
+                    quizAnswers: {},
+                    quizSubmitted: false
+                };
+                
+                // Sample data
+                this.sampleMovies = this.generateSampleMovies();
+                this.heroContents = this.generateHeroContents();
+                this.quizQuestions = this.generateQuizQuestions();
+                
+                // Initialize
+                this.init();
+            }
+            
+            generateSampleMovies() {
+                return [
+                    // Trending
+                    { id: 1, title: "Stranger Things", year: 2022, rating: "95%", category: "trending", 
+                      image: "https://images.unsplash.com/photo-1531259683007-016a7b628fc3?w=400&q=80" },
+                    { id: 2, title: "The Crown", year: 2022, rating: "92%", category: "trending", 
+                      image: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=400&q=80" },
+                    { id: 3, title: "Wednesday", year: 2022, rating: "89%", category: "trending", 
+                      image: "https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&q=80" },
+                    { id: 4, title: "Squid Game", year: 2021, rating: "94%", category: "trending", 
+                      image: "https://images.unsplash.com/photo-1635805737707-575885ab0820?w=400&q=80" },
+                    { id: 5, title: "Bird Box", year: 2018, rating: "87%", category: "trending", 
+                      image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&q=80" },
+                    
+                    // Continue Watching
+                    { id: 6, title: "Breaking Bad", progress: 65, episode: "S5E14", category: "continue", 
+                      image: "https://images.unsplash.com/photo-1551029506-0807df4e2031?w=400&q=80" },
+                    { id: 7, title: "The Witcher", progress: 40, episode: "S2E5", category: "continue", 
+                      image: "https://images.unsplash.com/photo-1595769812725-4c6564f7528b?w=400&q=80" },
+                    { id: 8, title: "Money Heist", progress: 82, episode: "S3E7", category: "continue", 
+                      image: "https://images.unsplash.com/photo-1574267432553-4b4628081c31?w=400&q=80" },
+                    { id: 9, title: "Dark", progress: 30, episode: "S2E3", category: "continue", 
+                      image: "https://images.unsplash.com/photo-1489599809516-9827b6d1cf13?w=400&q=80" },
+                    
+                    // Top 10
+                    { id: 10, title: "1. All Quiet", rank: 1, trend: "up", category: "top10", 
+                      image: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&q=80" },
+                    { id: 11, title: "2. Glass Onion", rank: 2, trend: "new", category: "top10", 
+                      image: "https://images.unsplash.com/photo-1535016120720-40c646be5580?w=400&q=80" },
+                    { id: 12, title: "3. Avatar 2", rank: 3, trend: "up", category: "top10", 
+                      image: "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=400&q=80" },
+                    { id: 13, title: "4. The Menu", rank: 4, trend: "down", category: "top10", 
+                      image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&q=80" },
+                    
+                    // New Releases
+                    { id: 14, title: "New: You People", days: 2, category: "new", 
+                      image: "https://images.unsplash.com/photo-1489599809516-9827b6d1cf13?w=400&q=80" },
+                    { id: 15, title: "New: Knives Out 2", days: 7, category: "new", 
+                      image: "https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&q=80" },
+                    { id: 16, title: "New: White Noise", days: 14, category: "new", 
+                      image: "https://images.unsplash.com/photo-1531259683007-016a7b628fc3?w=400&q=80" }
+                ];
+            }
+            
+            generateHeroContents() {
+                return [
+                    {
+                        title: "Stranger Things",
+                        description: "When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces and one strange little girl.",
+                        badge: "TRENDING NOW"
+                    },
+                    {
+                        title: "The Crown",
+                        description: "Follows the political rivalries and romance of Queen Elizabeth II's reign and the events that shaped the second half of the twentieth century.",
+                        badge: "AWARD WINNING"
+                    },
+                    {
+                        title: "Wednesday",
+                        description: "Follows Wednesday Addams' years as a student, when she attempts to master her emerging psychic ability, thwart a killing spree, and solve the mystery.",
+                        badge: "NEW SERIES"
+                    }
+                ];
+            }
+            
+            generateQuizQuestions() {
+                return [
+                    {
+                        question: "When does useEffect with [] dependency array run in Msebetsi Solutions' homepage?",
+                        options: [
+                            "A) On every user interaction",
+                            "B) Only when component mounts",
+                            "C) When any prop changes",
+                            "D) Every 5 minutes automatically"
+                        ],
+                        correct: "B",
+                        explanation: "useEffect with [] runs only on component mount, perfect for initial data fetching like loading Msebetsi Solutions' hero content."
+                    },
+                    {
+                        question: "How does Msebetsi Solutions prevent memory leaks with real-time data updates?",
+                        options: [
+                            "A) They don't use useEffect for real-time data",
+                            "B) By using cleanup functions in useEffect",
+                            "C) By refreshing the page every minute",
+                            "D) Memory leaks are React's problem, not Msebetsi Solutions'"
+                        ],
+                        correct: "B",
+                        explanation: "Msebetsi Solutions uses cleanup functions to cancel timers, subscriptions, and API calls when components unmount."
+                    },
+                    {
+                        question: "What happens when dependency array has [userId] in Msebetsi Solutions' personalized recommendations?",
+                        options: [
+                            "A) useEffect runs only once",
+                            "B) It runs when userId changes",
+                            "C) It causes an infinite loop",
+                            "D) Msebetsi Solutions doesn't use dependency arrays"
+                        ],
+                        correct: "B",
+                        explanation: "With [userId], useEffect runs on mount AND whenever userId changes, ensuring personalized recommendations update."
+                    },
+                    {
+                        question: "How does Msebetsi Solutions optimize multiple data fetches on homepage?",
+                        options: [
+                            "A) They fetch all data in one useEffect",
+                            "B) Separate useEffects for different data types",
+                            "C) They use setState for everything",
+                            "D) Msebetsi Solutions homepage doesn't fetch data"
+                        ],
+                        correct: "B",
+                        explanation: "Msebetsi Solutions uses separate useEffect hooks for different data categories to optimize loading and error handling."
+                    },
+                    {
+                        question: "What's the purpose of abort controller in Msebetsi Solutions' useEffect?",
+                        options: [
+                            "A) To improve animation performance",
+                            "B) To cancel API calls on unmount",
+                            "C) To encrypt user data",
+                            "D) To track user clicks"
+                        ],
+                        correct: "B",
+                        explanation: "AbortController allows Msebetsi Solutions to cancel fetch requests when users navigate away, preventing memory leaks."
+                    }
+                ];
+            }
+            
+            init() {
+                // Start hero rotation
+                this.startHeroRotation();
+                
+                // Simulate initial data fetching (like Msebetsi Solutions homepage)
+                this.simulateDataFetching();
+                
+                // Initialize quiz
+                this.renderQuiz();
+                
+                // Render code examples
+                this.renderCodeExample('basic');
+            }
+            
+            // ===== HERO ROTATION (useEffect with interval) =====
+            startHeroRotation() {
+                // Clear existing interval
+                if (this.state.heroInterval) {
+                    clearInterval(this.state.heroInterval);
+                }
+                
+                // Start new interval (like Msebetsi Solutions' hero rotation)
+                this.state.heroInterval = setInterval(() => {
+                    this.rotateHero();
+                }, 8000); // Rotate every 8 seconds
+                
+                showNotification('🔄 Hero rotation started (useEffect with setInterval)', 'info');
+            }
+            
+            rotateHero() {
+                const heroes = document.querySelectorAll('.hero-background');
+                const currentHero = this.state.heroIndex;
+                
+                // Hide current hero
+                if (heroes[currentHero]) {
+                    heroes[currentHero].classList.remove('active');
+                }
+                
+                // Update index
+                this.state.heroIndex = (this.state.heroIndex + 1) % this.heroContents.length;
+                
+                // Show next hero
+                if (heroes[this.state.heroIndex]) {
+                    heroes[this.state.heroIndex].classList.add('active');
+                }
+                
+                // Update hero content
+                const content = this.heroContents[this.state.heroIndex];
+                document.getElementById('heroTitle').textContent = content.title;
+                document.getElementById('heroDescription').textContent = content.description;
+                
+                // Update badge
+                document.querySelector('.hero-badge').innerHTML = `<i class="fas fa-fire"></i> ${content.badge}`;
+            }
+            
+            // ===== DATA FETCHING SIMULATION =====
+            simulateDataFetching() {
+                // Simulate different loading times for each category
+                // (like Msebetsi Solutions' prioritized loading)
+                
+                // Trending - loads first (priority)
+                setTimeout(() => {
+                    this.fetchTrending();
+                }, 500);
+                
+                // Continue Watching - loads next
+                setTimeout(() => {
+                    this.fetchContinueWatching();
+                }, 1000);
+                
+                // Top 10 - loads with slight delay
+                setTimeout(() => {
+                    this.fetchTop10();
+                }, 1500);
+                
+                // New Releases - loads last
+                setTimeout(() => {
+                    this.fetchNewReleases();
+                }, 2000);
+            }
+            
+            async fetchTrending() {
+                this.state.trending.loading = true;
+                this.updateCategoryUI('trending');
+                
+                showNotification('📡 Fetching trending content...', 'info');
+                
+                try {
+                    await this.simulateAPICall(1200);
+                    
+                    if (this.state.simulationMode === 'error') {
+                        throw new Error('Failed to fetch trending');
+                    }
+                    
+                    this.state.trending.data = this.sampleMovies.filter(m => m.category === 'trending');
+                    this.state.trending.loading = false;
+                    this.state.fetchCount++;
+                    
+                    this.updateCategoryUI('trending');
+                    showNotification('🔥 Trending content loaded!', 'success');
+                    
+                } catch (error) {
+                    this.state.trending.error = true;
+                    this.state.trending.loading = false;
+                    this.updateCategoryUI('trending');
+                }
+            }
+            
+            async fetchContinueWatching() {
+                this.state.continueWatching.loading = true;
+                this.updateCategoryUI('continue');
+                
+                showNotification('🎬 Fetching continue watching...', 'info');
+                
+                try {
+                    await this.simulateAPICall(800);
+                    
+                    this.state.continueWatching.data = this.sampleMovies.filter(m => m.category === 'continue');
+                    this.state.continueWatching.loading = false;
+                    
+                    this.updateCategoryUI('continue');
+                    document.getElementById('continueCount').textContent = this.state.continueWatching.data.length;
+                    showNotification('⏯️ Continue watching loaded!', 'success');
+                    
+                } catch (error) {
+                    this.state.continueWatching.error = true;
+                    this.state.continueWatching.loading = false;
+                    this.updateCategoryUI('continue');
+                }
+            }
+            
+            async fetchTop10() {
+                this.state.top10.loading = true;
+                this.updateCategoryUI('top10');
+                
+                showNotification('👑 Fetching top 10...', 'info');
+                
+                try {
+                    await this.simulateAPICall(1000);
+                    
+                    this.state.top10.data = this.sampleMovies.filter(m => m.category === 'top10');
+                    this.state.top10.loading = false;
+                    
+                    this.updateCategoryUI('top10');
+                    showNotification('🏆 Top 10 loaded!', 'success');
+                    
+                } catch (error) {
+                    this.state.top10.error = true;
+                    this.state.top10.loading = false;
+                    this.updateCategoryUI('top10');
+                }
+            }
+            
+            async fetchNewReleases() {
+                this.state.newReleases.loading = true;
+                this.updateCategoryUI('newReleases');
+                
+                showNotification('✨ Fetching new releases...', 'info');
+                
+                try {
+                    await this.simulateAPICall(600);
+                    
+                    this.state.newReleases.data = this.sampleMovies.filter(m => m.category === 'new');
+                    this.state.newReleases.loading = false;
+                    
+                    this.updateCategoryUI('newReleases');
+                    showNotification('🎉 New releases loaded!', 'success');
+                    
+                } catch (error) {
+                    this.state.newReleases.error = true;
+                    this.state.newReleases.loading = false;
+                    this.updateCategoryUI('newReleases');
+                }
+            }
+            
+            simulateAPICall(delay) {
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        if (this.state.simulationMode === 'error') {
+                            reject(new Error('Simulated API Error'));
+                        } else {
+                            resolve();
+                        }
+                    }, delay);
+                });
+            }
+            
+            updateCategoryUI(category) {
+                const state = this.state[category];
+                const container = document.getElementById(`${category}Grid`);
+                const status = document.getElementById(`${category}Status`);
+                
+                // Update status badge
+                if (status) {
+                    if (state.loading) {
+                        status.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Loading...';
+                        status.className = `category-badge ${category}-badge`;
+                    } else if (state.error) {
+                        status.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                        status.className = `category-badge ${category}-badge`;
+                    } else {
+                        status.innerHTML = `<i class="fas fa-check"></i> ${state.data.length} items`;
+                        status.className = `category-badge ${category}-badge`;
+                    }
+                }
+                
+                // Render content
+                if (container) {
+                    if (state.loading) {
+                        container.innerHTML = `
+                            <div class="loading-skeleton">
+                                ${Array(5).fill().map(() => `
+                                    <div class="skeleton-card"></div>
+                                `).join('')}
+                            </div>
+                        `;
+                    } else if (state.error) {
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: var(--space-xxl); color: var(--msebetsi-gray);">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: var(--space-md);"></i>
+                                <p>Failed to load content. <a href="#" onclick="msebetsiDataFlow.retryFetch('${category}')" 
+                                   style="color: var(--hook-purple);">Try again</a></p>
+                            </div>
+                        `;
+                    } else if (state.data.length === 0) {
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: var(--space-xxl); color: var(--msebetsi-gray);">
+                                <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: var(--space-md);"></i>
+                                <p>No content available</p>
+                            </div>
+                        `;
+                    } else {
+                        container.innerHTML = state.data.map(item => `
+                            <div class="movie-card" onclick="playMovie('${item.title}')">
+                                <img src="${item.image}" alt="${item.title}" class="movie-poster">
+                                <div class="movie-overlay">
+                                    <div class="movie-title">${item.title}</div>
+                                    <div class="movie-meta">
+                                        <span>${item.year || item.episode || `Rank ${item.rank}`}</span>
+                                        <span>${item.rating || (item.progress ? `${item.progress}%` : `${item.days} days ago`)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            }
+            
+            retryFetch(category) {
+                const fetchMethods = {
+                    trending: () => this.fetchTrending(),
+                    continue: () => this.fetchContinueWatching(),
+                    top10: () => this.fetchTop10(),
+                    newReleases: () => this.fetchNewReleases()
+                };
+                
+                if (fetchMethods[category]) {
+                    fetchMethods[category]();
+                }
+            }
+            
+            // ===== SIMULATION CONTROLS =====
+            simulateComponentMount() {
+                showNotification('🚀 Simulating component mount...', 'info');
+                showNotification('📡 useEffect with [] runs - fetching initial data', 'success');
+                
+                // Reset and fetch all data
+                this.state.trending.loading = true;
+                this.state.continueWatching.loading = true;
+                this.state.top10.loading = true;
+                this.state.newReleases.loading = true;
+                
+                this.updateCategoryUI('trending');
+                this.updateCategoryUI('continue');
+                this.updateCategoryUI('top10');
+                this.updateCategoryUI('newReleases');
+                
+                setTimeout(() => this.simulateDataFetching(), 500);
+            }
+            
+            simulateComponentUnmount() {
+                showNotification('🗑️ Simulating component unmount...', 'warning');
+                showNotification('🧹 Cleanup functions run - intervals cleared, requests canceled', 'info');
+                
+                // Clear hero rotation
+                if (this.state.heroInterval) {
+                    clearInterval(this.state.heroInterval);
+                    this.state.heroInterval = null;
+                }
+                
+                // Clear any active intervals
+                this.state.activeIntervals.forEach(id => clearInterval(id));
+                this.state.activeIntervals = [];
+            }
+            
+            simulatePropsChange() {
+                showNotification('🔄 Simulating props change...', 'info');
+                showNotification('⚡ useEffect with dependencies re-runs', 'success');
+                
+                // Simulate user profile change
+                const profiles = ['Adult', 'Kids', 'Spanish', 'French'];
+                const randomProfile = profiles[Math.floor(Math.random() * profiles.length)];
+                
+                showNotification(`👤 User profile changed to: ${randomProfile}`, 'info');
+                showNotification('🎬 Fetching personalized recommendations...', 'info');
+            }
+            
+            simulateSlowAPI() {
+                this.state.simulationMode = 'slow';
+                showNotification('🐢 Simulating slow API response (3 seconds)...', 'warning');
+                
+                // Reset trending to show loading
+                this.state.trending.loading = true;
+                this.updateCategoryUI('trending');
+                
+                // Simulate slow fetch
+                setTimeout(() => {
+                    this.state.trending.loading = false;
+                    this.updateCategoryUI('trending');
+                    showNotification('✅ Slow API request completed!', 'success');
+                    this.state.simulationMode = 'normal';
+                }, 3000);
+            }
+            
+            simulateAPIError() {
+                this.state.simulationMode = 'error';
+                showNotification('💥 Simulating API error...', 'error');
+                
+                // Trigger error in trending
+                this.fetchTrending();
+                
+                // Reset mode after error
+                setTimeout(() => {
+                    this.state.simulationMode = 'normal';
+                }, 2000);
+            }
+            
+            simulateEmptyResponse() {
+                showNotification('📭 Simulating empty API response...', 'info');
+                
+                // Save current data
+                const originalData = [...this.state.continueWatching.data];
+                
+                // Clear data
+                this.state.continueWatching.data = [];
+                this.updateCategoryUI('continue');
+                
+                showNotification('🎬 Continue watching is empty', 'info');
+                
+                // Restore after 3 seconds
+                setTimeout(() => {
+                    this.state.continueWatching.data = originalData;
+                    this.updateCategoryUI('continue');
+                    showNotification('✅ Data restored!', 'success');
+                }, 3000);
+            }
+            
+            startIntervalTimer() {
+                showNotification('⏱️ Starting interval timer...', 'info');
+                showNotification('⚠️ This would cause memory leak without cleanup!', 'warning');
+                
+                let seconds = 0;
+                const timerId = setInterval(() => {
+                    seconds++;
+                    if (seconds % 5 === 0) {
+                        showNotification(`⏰ Timer running: ${seconds}s`, 'info', 2000);
+                    }
+                }, 1000);
+                
+                this.state.activeIntervals.push(timerId);
+            }
+            
+            testCleanup() {
+                this.simulateComponentUnmount();
+                showNotification('✅ Cleanup tested! All intervals cleared.', 'success');
+            }
+            
+            resetAllData() {
+                showNotification('🔄 Resetting all data...', 'info');
+                
+                // Reset all states
+                this.state = {
+                    heroIndex: 0,
+                    heroInterval: this.state.heroInterval,
+                    
+                    trending: { data: [], loading: true, error: false },
+                    continueWatching: { data: [], loading: true, error: false },
+                    top10: { data: [], loading: true, error: false },
+                    newReleases: { data: [], loading: true, error: false },
+                    
+                    simulationMode: 'normal',
+                    fetchCount: 0,
+                    activeIntervals: [],
+                    quizAnswers: this.state.quizAnswers,
+                    quizSubmitted: this.state.quizSubmitted
+                };
+                
+                // Update all UIs
+                this.updateCategoryUI('trending');
+                this.updateCategoryUI('continue');
+                this.updateCategoryUI('top10');
+                this.updateCategoryUI('newReleases');
+                
+                // Restart data fetching
+                setTimeout(() => this.simulateDataFetching(), 1000);
+            }
+            
+            // ===== UI CONTROLS =====
+            refreshTrending() {
+                showNotification('🔄 Refreshing trending content...', 'info');
+                this.fetchTrending();
+            }
+            
+            simulateRankingChange() {
+                showNotification('🔄 Simulating ranking change...', 'info');
+                
+                // Shuffle top 10
+                if (this.state.top10.data.length > 0) {
+                    const shuffled = [...this.state.top10.data].sort(() => Math.random() - 0.5);
+                    shuffled.forEach((item, index) => {
+                        item.rank = index + 1;
+                    });
+                    this.state.top10.data = shuffled;
+                    this.updateCategoryUI('top10');
+                    
+                    showNotification('🏆 Top 10 rankings updated!', 'success');
+                }
+            }
+            
+            addNewRelease() {
+                showNotification('✨ Adding new release...', 'info');
+                
+                const newMovie = {
+                    id: Date.now(),
+                    title: `New Release ${this.state.newReleases.data.length + 1}`,
+                    days: 1,
+                    category: 'new',
+                    image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&q=80'
+                };
+                
+                this.state.newReleases.data.unshift(newMovie);
+                this.updateCategoryUI('newReleases');
+                
+                showNotification(`🎉 "${newMovie.title}" added to new releases!`, 'success');
+            }
+            
+            // ===== CODE VISUALIZATION =====
+            renderCodeExample(type) {
+                const codeContent = document.getElementById('codeContent');
+                const tabs = document.querySelectorAll('.code-tab');
+                
+                // Update active tab
+                tabs.forEach(tab => tab.classList.remove('active'));
+                document.querySelector(`.code-tab[onclick*="${type}"]`).classList.add('active');
+                
+                const examples = {
+                    basic: `
+<span class="code-keyword">import</span> { <span class="code-hook">useEffect</span>, useState } <span class="code-keyword">from</span> <span class="code-string">'react'</span>;
+
+<span class="code-keyword">const</span> MsebetsiHero = () => {
+  <span class="code-keyword">const</span> [heroData, setHeroData] = <span class="code-function">useState</span>(<span class="code-keyword">null</span>);
+  <span class="code-keyword">const</span> [loading, setLoading] = <span class="code-function">useState</span>(<span class="code-keyword">true</span>);
+
+  <span class="code-comment">// Basic useEffect - runs on component mount</span>
+  <span class="code-function"><span class="code-hook">useEffect</span></span>(() => {
+    <span class="code-keyword">const</span> fetchHeroContent = <span class="code-keyword">async</span> () => {
+      <span class="code-keyword">try</span> {
+        setLoading(<span class="code-keyword">true</span>);
+        <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> fetch(<span class="code-string">'/api/hero-content'</span>);
+        <span class="code-keyword">const</span> data = <span class="code-keyword">await</span> response.json();
+        setHeroData(data);
+      } <span class="code-keyword">catch</span> (error) {
+        console.error(<span class="code-string">'Failed to fetch hero:'</span>, error);
+      } <span class="code-keyword">finally</span> {
+        setLoading(<span class="code-keyword">false</span>);
+      }
+    };
+
+    fetchHeroContent();
+  }, []); <span class="code-comment">// Empty array = runs once on mount</span>
+
+  <span class="code-keyword">if</span> (loading) <span class="code-keyword">return</span> <span class="code-string">&lt;LoadingSkeleton /&gt;</span>;
+  <span class="code-keyword">return</span> <span class="code-string">&lt;HeroContent data={heroData} /&gt;</span>;
+};`,
+                    
+                    deps: `
+<span class="code-keyword">import</span> { <span class="code-hook">useEffect</span>, useState } <span class="code-keyword">from</span> <span class="code-string">'react'</span>;
+
+<span class="code-keyword">const</span> PersonalizedRow = ({ userId, category }) => {
+  <span class="code-keyword">const</span> [movies, setMovies] = <span class="code-function">useState</span>([]);
+  <span class="code-keyword">const</span> [loading, setLoading] = <span class="code-function">useState</span>(<span class="code-keyword">true</span>);
+
+  <span class="code-comment">// useEffect with dependencies</span>
+  <span class="code-function"><span class="code-hook">useEffect</span></span>(() => {
+    <span class="code-keyword">const</span> fetchPersonalized = <span class="code-keyword">async</span> () => {
+      setLoading(<span class="code-keyword">true</span>);
+      
+      <span class="code-comment">// Msebetsi Solutions uses both userId and category for personalized content</span>
+      <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> fetch(
+        <span class="code-string">\`/api/recommendations?userId=\${userId}&category=\${category}\`</span>
+      );
+      
+      <span class="code-keyword">const</span> data = <span class="code-keyword">await</span> response.json();
+      setMovies(data);
+      setLoading(<span class="code-keyword">false</span>);
+    };
+
+    fetchPersonalized();
+    
+    <span class="code-comment">// Cleanup: Cancel if userId or category changes before request completes</span>
+    <span class="code-keyword">return</span> () => {
+      <span class="code-comment">// AbortController would be used here in production</span>
+    };
+  }, [userId, category]); <span class="code-comment">// Runs when userId OR category changes</span>
+
+  <span class="code-keyword">return</span> <span class="code-string">&lt;MovieRow movies={movies} loading={loading} /&gt;</span>;
+};`,
+                    
+                    cleanup: `
+<span class="code-keyword">import</span> { <span class="code-hook">useEffect</span>, useState, useRef } <span class="code-keyword">from</span> <span class="code-string">'react'</span>;
+
+<span class="code-keyword">const</span> RealTimeViewerCount = ({ movieId }) => {
+  <span class="code-keyword">const</span> [viewerCount, setViewerCount] = <span class="code-function">useState</span>(0);
+  <span class="code-keyword">const</span> intervalRef = <span class="code-function">useRef</span>(<span class="code-keyword">null</span>);
+  <span class="code-keyword">const</span> abortControllerRef = <span class="code-function">useRef</span>(<span class="code-keyword">new</span> AbortController());
+
+  <span class="code-function"><span class="code-hook">useEffect</span></span>(() => {
+    <span class="code-keyword">const</span> fetchInitialViewers = <span class="code-keyword">async</span> () => {
+      <span class="code-keyword">try</span> {
+        <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> fetch(
+          <span class="code-string">\`/api/movies/\${movieId}/viewers\`</span>,
+          { signal: abortControllerRef.current.signal }
+        );
+        <span class="code-keyword">const</span> data = <span class="code-keyword">await</span> response.json();
+        setViewerCount(data.count);
+      } <span class="code-keyword">catch</span> (error) {
+        <span class="code-keyword">if</span> (error.name !== <span class="code-string">'AbortError'</span>) {
+          console.error(<span class="code-string">'Failed to fetch viewers:'</span>, error);
+        }
+      }
+    };
+
+    fetchInitialViewers();
+
+    <span class="code-comment">// Real-time updates every 10 seconds</span>
+    intervalRef.current = setInterval(() => {
+      fetch(<span class="code-string">\`/api/movies/\${movieId}/viewers/live\`</span>)
+        .then(res => res.json())
+        .then(data => setViewerCount(data.count));
+    }, 10000);
+
+    <span class="code-comment">// CLEANUP FUNCTION - Prevents memory leaks</span>
+    <span class="code-keyword">return</span> () => {
+      <span class="code-comment">// 1. Clear the interval</span>
+      <span class="code-keyword">if</span> (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      
+      <span class="code-comment">// 2. Abort ongoing fetch requests</span>
+      abortControllerRef.current.abort();
+      
+      <span class="code-comment">// 3. Create new controller for next effect run</span>
+      abortControllerRef.current = <span class="code-keyword">new</span> AbortController();
+      
+      console.log(<span class="code-string">'Cleanup executed for movieId:'</span>, movieId);
+    };
+  }, [movieId]); <span class="code-comment">// Re-run when movieId changes</span>
+
+  <span class="code-keyword">return</span> <span class="code-string">&lt;div&gt;👥 {viewerCount.toLocaleString()} watching now&lt;/div&gt;</span>;
+};`,
+                    
+                    real: `
+<span class="code-keyword">import</span> { <span class="code-hook">useEffect</span>, useState, useCallback } <span class="code-keyword">from</span> <span class="code-string">'react'</span>;
+<span class="code-keyword">import</span> { debounce } <span class="code-keyword">from</span> <span class="code-string">'lodash'</span>;
+
+<span class="code-comment">// Msebetsi Solutions' real homepage data fetching strategy</span>
+<span class="code-keyword">const</span> useMsebetsiHomepageData = (userId, userPreferences) => {
+  <span class="code-keyword">const</span> [state, setState] = <span class="code-function">useState</span>({
+    hero: <span class="code-keyword">null</span>,
+    trending: [],
+    continueWatching: [],
+    myList: [],
+    recommendations: [],
+    isLoading: <span class="code-keyword">true</span>,
+    errors: {}
+  });
+
+  <span class="code-comment">// 1. Initial load - runs once on mount</span>
+  <span class="code-function"><span class="code-hook">useEffect</span></span>(() => {
+    <span class="code-keyword">const</span> controller = <span class="code-keyword">new</span> AbortController();
+    <span class="code-keyword">let</span> isMounted = <span class="code-keyword">true</span>;
+
+    <span class="code-keyword">const</span> loadInitialData = <span class="code-keyword">async</span> () => {
+      <span class="code-keyword">try</span> {
+        <span class="code-comment">// Parallel fetching for better performance</span>
+        <span class="code-keyword">const</span> [heroRes, trendingRes] = <span class="code-keyword">await</span> Promise.all([
+          fetch(<span class="code-string">'/api/hero'</span>, { signal: controller.signal }),
+          fetch(<span class="code-string">'/api/trending'</span>, { signal: controller.signal })
+        ]);
+
+        <span class="code-keyword">if</span> (isMounted) {
+          setState(prev => ({
+            ...prev,
+            hero: <span class="code-keyword">await</span> heroRes.json(),
+            trending: <span class="code-keyword">await</span> trendingRes.json(),
+            isLoading: <span class="code-keyword">false</span>
+          }));
+        }
+      } <span class="code-keyword">catch</span> (error) {
+        <span class="code-keyword">if</span> (isMounted && error.name !== <span class="code-string">'AbortError'</span>) {
+          setState(prev => ({ ...prev, errors: { initial: error.message } }));
+        }
+      }
+    };
+
+    loadInitialData();
+
+    <span class="code-keyword">return</span> () => {
+      isMounted = <span class="code-keyword">false</span>;
+      controller.abort();
+    };
+  }, []); <span class="code-comment">// Empty array = initial load only</span>
+
+  <span class="code-comment">// 2. User-specific data - runs when userId changes</span>
+  <span class="code-function"><span class="code-hook">useEffect</span></span>(() => {
+    <span class="code-keyword">if</span> (!userId) <span class="code-keyword">return</span>;
+
+    <span class="code-keyword">const</span> controller = <span class="code-keyword">new</span> AbortController();
+
+    <span class="code-keyword">const</span> fetchUserData = <span class="code-keyword">async</span> () => {
+      <span class="code-keyword">try</span> {
+        <span class="code-keyword">const</span> [continueRes, myListRes] = <span class="code-keyword">await</span> Promise.all([
+          fetch(<span class="code-string">\`/api/users/\${userId}/continue-watching\`</span>, 
+                { signal: controller.signal }),
+          fetch(<span class="code-string">\`/api/users/\${userId}/my-list\`</span>, 
+                { signal: controller.signal })
+        ]);
+
+        setState(prev => ({
+          ...prev,
+          continueWatching: <span class="code-keyword">await</span> continueRes.json(),
+          myList: <span class="code-keyword">await</span> myListRes.json()
+        }));
+      } <span class="code-keyword">catch</span> (error) {
+        <span class="code-keyword">if</span> (error.name !== <span class="code-string">'AbortError'</span>) {
+          console.error(<span class="code-string">'User data fetch failed:'</span>, error);
+        }
+      }
+    };
+
+    fetchUserData();
+
+    <span class="code-keyword">return</span> () => controller.abort();
+  }, [userId]); <span class="code-comment">// Re-fetch when userId changes</span>
+
+  <span class="code-comment">// 3. Real-time updates with debounce</span>
+  <span class="code-function"><span class="code-hook">useEffect</span></span>(() => {
+    <span class="code-keyword">const</span> updateLiveData = debounce(() => {
+      <span class="code-comment">// Fetch real-time viewer counts, new releases, etc.</span>
+      fetch(<span class="code-string">'/api/live-updates'</span>)
+        .then(res => res.json())
+        .then(data => {
+          setState(prev => ({ ...prev, liveData: data }));
+        });
+    }, 5000); <span class="code-comment">// Debounce to avoid too many requests</span>
+
+    <span class="code-keyword">const</span> interval = setInterval(updateLiveData, 30000); <span class="code-comment">// Every 30s</span>
+    updateLiveData(); <span class="code-comment">// Initial call</span>
+
+    <span class="code-keyword">return</span> () => {
+      clearInterval(interval);
+      updateLiveData.cancel();
+    };
+  }, []);
+
+  <span class="code-keyword">return</span> state;
+};
+
+<span class="code-comment">// Usage in Msebetsi Solutions homepage component</span>
+<span class="code-keyword">const</span> MsebetsiHomepage = ({ user }) => {
+  <span class="code-keyword">const</span> homepageData = <span class="code-function">useMsebetsiHomepageData</span>(user.id, user.preferences);
+
+  <span class="code-keyword">if</span> (homepageData.isLoading) {
+    <span class="code-keyword">return</span> <span class="code-string">&lt;HomepageSkeleton /&gt;</span>;
+  }
+
+  <span class="code-keyword">return</span> (
+    <span class="code-string">&lt;&gt;</span>
+      <span class="code-string">&lt;HeroSection data={homepageData.hero} /&gt;</span>
+      <span class="code-string">&lt;CategoryRow title="Trending Now" movies={homepageData.trending} /&gt;</span>
+      <span class="code-string">&lt;CategoryRow title="Continue Watching" movies={homepageData.continueWatching} /&gt;</span>
+      <span class="code-string">&lt;CategoryRow title="My List" movies={homepageData.myList} /&gt;</span>
+    <span class="code-string">&lt;/&gt;</span>
+  );
+};`
+                };
+                
+                codeContent.innerHTML = `<div class="code-line">${examples[type]}</div>`;
+            }
+            
+            // ===== QUIZ =====
+            renderQuiz() {
+                const container = document.getElementById('quizContainer');
+                
+                container.innerHTML = this.quizQuestions.map((q, index) => `
+                    <div class="question-card" id="quizQuestion${index}">
+                        <div class="question-text">${index + 1}. ${q.question}</div>
+                        <div class="options-grid">
+                            ${q.options.map((option, optIndex) => `
+                                <button class="option-button" onclick="selectAnswer(${index}, '${String.fromCharCode(97 + optIndex)}')">
+                                    ${option}
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div class="explanation" id="explanation${index}" style="display: none; margin-top: var(--space-md); 
+                             padding: var(--space-md); background: rgba(0,0,0,0.3); border-radius: 8px; color: var(--msebetsi-gray);">
+                            <strong>Explanation:</strong> ${q.explanation}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            selectAnswer(questionIndex, answer) {
+                if (this.quizSubmitted) return;
+                
+                this.quizAnswers[questionIndex] = answer;
+                
+                // Update UI
+                const questionCard = document.getElementById(`quizQuestion${questionIndex}`);
+                const buttons = questionCard.querySelectorAll('.option-button');
+                
+                // Remove selected class from all buttons in this question
+                buttons.forEach(btn => btn.classList.remove('selected'));
+                
+                // Add selected class to clicked button
+                const selectedButton = Array.from(buttons).find(btn => 
+                    btn.textContent.trim().startsWith(answer.toUpperCase())
+                );
+                if (selectedButton) {
+                    selectedButton.classList.add('selected');
+                }
+            }
+            
+            submitQuiz() {
+                if (this.quizSubmitted) return;
+                
+                this.quizSubmitted = true;
+                let correctCount = 0;
+                
+                // Check answers
+                this.quizQuestions.forEach((q, index) => {
+                    const userAnswer = this.quizAnswers[index];
+                    const isCorrect = userAnswer === q.correct;
+                    const questionCard = document.getElementById(`quizQuestion${index}`);
+                    const explanation = document.getElementById(`explanation${index}`);
+                    const buttons = questionCard.querySelectorAll('.option-button');
+                    
+                    // Show explanation
+                    if (explanation) {
+                        explanation.style.display = 'block';
+                    }
+                    
+                    // Mark correct/incorrect
+                    if (isCorrect) {
+                        correctCount++;
+                        questionCard.style.borderColor = 'var(--hook-green)';
+                    } else {
+                        questionCard.style.borderColor = 'var(--msebetsi-red)';
+                    }
+                    
+                    // Mark correct answer
+                    const correctButton = Array.from(buttons).find(btn => 
+                        btn.textContent.trim().startsWith(q.correct.toUpperCase())
+                    );
+                    if (correctButton) {
+                        correctButton.style.backgroundColor = 'rgba(0,255,136,0.2)';
+                        correctButton.style.borderColor = 'var(--hook-green)';
+                    }
+                    
+                    // Mark user's wrong answer if any
+                    if (userAnswer && !isCorrect) {
+                        const userButton = Array.from(buttons).find(btn => 
+                            btn.textContent.trim().startsWith(userAnswer.toUpperCase())
+                        );
+                        if (userButton) {
+                            userButton.style.backgroundColor = 'rgba(229,9,20,0.2)';
+                            userButton.style.borderColor = 'var(--msebetsi-red)';
+                        }
+                    }
+                });
+                
+                // Show results
+                document.getElementById('quizScore').textContent = `${correctCount}/${this.quizQuestions.length}`;
+                document.getElementById('quizResults').style.display = 'block';
+                
+                // Show notification
+                if (correctCount === this.quizQuestions.length) {
+                    showNotification('🏆 Perfect score! You mastered useEffect!', 'success');
+                } else if (correctCount >= 3) {
+                    showNotification(`✅ ${correctCount}/5 correct - Good job!`, 'info');
+                } else {
+                    showNotification('📚 Review the explanations and try again!', 'warning');
+                }
+            }
+            
+            resetQuiz() {
+                this.quizAnswers = {};
+                this.quizSubmitted = false;
+                
+                // Reset UI
+                this.quizQuestions.forEach((_, index) => {
+                    const questionCard = document.getElementById(`quizQuestion${index}`);
+                    const buttons = questionCard.querySelectorAll('.option-button');
+                    const explanation = document.getElementById(`explanation${index}`);
+                    
+                    questionCard.style.borderColor = '';
+                    
+                    buttons.forEach(btn => {
+                        btn.classList.remove('selected');
+                        btn.style.backgroundColor = '';
+                        btn.style.borderColor = '';
+                    });
+                    
+                    if (explanation) {
+                        explanation.style.display = 'none';
+                    }
+                });
+                
+                document.getElementById('quizResults').style.display = 'none';
+                showNotification('🔄 Quiz reset. Try again!', 'info');
+            }
+        }
+
+        // ===== GLOBAL FUNCTIONS =====
+        const msebetsiDataFlow = new MsebetsiHomepageDataFlow();
+
+        // DOM Ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle scroll for header
+            window.addEventListener('scroll', function() {
+                const header = document.getElementById('mainHeader');
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+            
+            // Welcome notification
+            setTimeout(() => {
+                showNotification('🎬 Welcome to Msebetsi Solutions Homepage Data Flow Simulation!', 'info');
+                showNotification('⚡ Experiment with useEffect controls to see how Msebetsi Solutions manages data', 'info', 3000);
+            }, 1500);
+        });
+
+        // Public functions for onclick handlers
+        function showCodeTab(type) {
+            msebetsiDataFlow.renderCodeExample(type);
+        }
+        
+        function playHeroContent() {
+            const title = document.getElementById('heroTitle').textContent;
+            showNotification(`▶️ Playing "${title}"`, 'success');
+        }
+        
+        function showMoreInfo() {
+            const title = document.getElementById('heroTitle').textContent;
+            showNotification(`ℹ️ More info about "${title}"`, 'info');
+        }
+        
+        function playMovie(title) {
+            showNotification(`▶️ Playing "${title}"`, 'success');
+        }
+        
+        // Simulation controls
+        function simulateComponentMount() { msebetsiDataFlow.simulateComponentMount(); }
+        function simulateComponentUnmount() { msebetsiDataFlow.simulateComponentUnmount(); }
+        function simulatePropsChange() { msebetsiDataFlow.simulatePropsChange(); }
+        function simulateSlowAPI() { msebetsiDataFlow.simulateSlowAPI(); }
+        function simulateAPIError() { msebetsiDataFlow.simulateAPIError(); }
+        function simulateEmptyResponse() { msebetsiDataFlow.simulateEmptyResponse(); }
+        function startIntervalTimer() { msebetsiDataFlow.startIntervalTimer(); }
+        function testCleanup() { msebetsiDataFlow.testCleanup(); }
+        function resetAllData() { msebetsiDataFlow.resetAllData(); }
+        function refreshTrending() { msebetsiDataFlow.refreshTrending(); }
+        function simulateRankingChange() { msebetsiDataFlow.simulateRankingChange(); }
+        function addNewRelease() { msebetsiDataFlow.addNewRelease(); }
+        
+        // Quiz functions
+        function selectAnswer(index, answer) { msebetsiDataFlow.selectAnswer(index, answer); }
+        function submitQuiz() { msebetsiDataFlow.submitQuiz(); }
+        function resetQuiz() { msebetsiDataFlow.resetQuiz(); }
+        
+        function completeLesson() {
+            // Confetti celebration
+            createConfetti();
+            
+            showNotification('🏆 Lesson 10 Completed! You mastered Msebetsi Solutions Data Flow!', 'success');
+            
+            setTimeout(() => {
+                alert('🎉 CONGRATULATIONS!\n\nYou have successfully completed Lesson 10:\n\n✅ Mastered useEffect hooks and dependency arrays\n✅ Simulated Msebetsi Solutions homepage data fetching\n✅ Implemented proper cleanup functions\n✅ Learned Msebetsi Solutions production patterns\n✅ Completed interactive quiz\n✅ Built Msebetsi Solutions-style data flow system\n\nYou are now ready to build production-ready React applications!');
+                
+                // Save completion
+                localStorage.setItem('lesson10Completed', 'true');
+            }, 1000);
+        }
+
+        // Helper functions
+        function showNotification(message, type = 'info', duration = 4000) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: var(--space-md);">
+                    <div style="font-size: 1.5rem;">${icon}</div>
+                    <div style="flex: 1; font-size: 0.9rem; color: var(--msebetsi-light-gray);">
+                        ${message}
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="background: none; border: none; color: var(--msebetsi-gray); cursor: pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100px)';
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, duration);
+        }
+
+        function createConfetti() {
+            const colors = ['#8A2BE2', '#00B4D8', '#00FF88', '#FFD700', '#E50914'];
+            
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: ${Math.random() * 12 + 6}px;
+                    height: ${Math.random() * 12 + 6}px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                    top: -20px;
+                    left: ${Math.random() * 100}vw;
+                    animation: fall ${Math.random() * 3 + 2}s linear forwards;
+                    z-index: 9997;
+                    transform: rotate(${Math.random() * 360}deg);
+                `;
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    if (confetti.parentElement) {
+                        confetti.remove();
+                    }
+                }, 5000);
+            }
+            
+            // Add animation if not exists
+            if (!document.querySelector('style[data-confetti]')) {
+                const style = document.createElement('style');
+                style.setAttribute('data-confetti', 'true');
+                style.textContent = `
+                    @keyframes fall {
+                        to {
+                            transform: translateY(100vh) rotate(${Math.random() * 720}deg);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+    </script>
+</body>
+</html>

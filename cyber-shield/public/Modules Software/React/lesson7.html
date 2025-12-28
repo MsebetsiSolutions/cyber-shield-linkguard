@@ -1,0 +1,2061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 7: Advanced State Management | Msebetsi Solutions Bootcamp</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* MSEBETSI SOLUTIONS ADVANCED STATE MANAGEMENT SYSTEM */
+        :root {
+            /* Msebetsi Solutions Colors - Extended Palette */
+            --msebetsi-red: #E50914;
+            --msebetsi-red-dark: #B20710;
+            --msebetsi-black: #141414;
+            --msebetsi-dark-gray: #2D2D2D;
+            --msebetsi-gray: #B3B3B3;
+            --msebetsi-light-gray: #F5F5F5;
+            --msebetsi-white: #FFFFFF;
+            
+            /* Profile Colors */
+            --profile-red: #E50914;
+            --profile-blue: #0072D2;
+            --profile-green: #46D369;
+            --profile-purple: #9C27B0;
+            --profile-yellow: #FFD700;
+            --profile-teal: #00B4D8;
+            
+            /* State Colors */
+            --state-active: #46D369;
+            --state-warning: #FFD700;
+            --state-error: #FF6B6B;
+            --state-info: #4D9FFF;
+            
+            /* Gradients */
+            --gradient-msebetsi: linear-gradient(135deg, #E50914 0%, #FF3333 100%);
+            --gradient-dark: linear-gradient(135deg, #141414 0%, #2D2D2D 100%);
+            --gradient-profile: linear-gradient(135deg, var(--profile-blue), var(--profile-teal));
+            --gradient-state: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-glow: linear-gradient(135deg, rgba(229, 9, 20, 0.2), rgba(70, 211, 105, 0.2));
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-xxl: 48px;
+            
+            /* Shadows */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 40px rgba(229, 9, 20, 0.3);
+            
+            /* Transitions */
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: var(--msebetsi-white);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--msebetsi-black);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--msebetsi-red);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--msebetsi-red-dark);
+        }
+        
+        /* Header - Advanced */
+        .header {
+            background: rgba(20, 20, 20, 0.95);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: var(--space-lg) var(--space-xl);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+        
+        .state-badge {
+            background: var(--gradient-state);
+            color: var(--msebetsi-white);
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            box-shadow: var(--shadow-glow);
+            animation: glow-pulse 3s infinite alternate;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .msebetsi-logo {
+            color: var(--msebetsi-red);
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 10px rgba(229, 9, 20, 0.3);
+        }
+        
+        .lesson-badge {
+            background: var(--gradient-state);
+            color: white;
+            padding: var(--space-xs) var(--space-md);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: var(--space-sm);
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+        }
+        
+        .progress-bar-wrapper {
+            width: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            height: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-bar {
+            width: 60%;
+            height: 100%;
+            background: var(--gradient-msebetsi);
+            border-radius: 20px;
+            transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        /* Main Layout */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-xl);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-xxl);
+        }
+        
+        @media (min-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, 
+                rgba(20, 20, 20, 0.95) 0%, 
+                rgba(40, 40, 40, 0.8) 100%);
+            border-radius: 24px;
+            padding: var(--space-xxl);
+            margin: var(--space-lg) 0;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(
+                circle at 20% 50%,
+                rgba(229, 9, 20, 0.15) 0%,
+                transparent 50%
+            );
+            pointer-events: none;
+        }
+        
+        .hero-title {
+            font-size: clamp(32px, 5vw, 56px);
+            font-weight: 900;
+            margin-bottom: var(--space-lg);
+            line-height: 1.1;
+            background: linear-gradient(45deg, #fff 30%, var(--state-info) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+        }
+        
+        .hero-subtitle {
+            font-size: 18px;
+            color: var(--msebetsi-gray);
+            margin-bottom: var(--space-xl);
+            line-height: 1.6;
+            max-width: 600px;
+        }
+        
+        /* Module Badge */
+        .module-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            background: var(--gradient-state);
+            padding: var(--space-md) var(--space-xl);
+            border-radius: 40px;
+            font-weight: 800;
+            font-size: 14px;
+            margin-bottom: var(--space-xl);
+            box-shadow: var(--shadow-glow);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        /* Concept Cards */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-xl);
+            margin: var(--space-xxl) 0;
+        }
+        
+        .concept-card {
+            background: linear-gradient(135deg, 
+                rgba(30, 30, 30, 0.9) 0%, 
+                rgba(40, 40, 40, 0.8) 100%);
+            border-radius: 20px;
+            padding: var(--space-xl);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .concept-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--state-info);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4),
+                        0 0 40px rgba(77, 159, 255, 0.2);
+        }
+        
+        .concept-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-msebetsi);
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+        }
+        
+        .concept-card:hover::before {
+            opacity: 1;
+        }
+        
+        .concept-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-state);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: var(--space-lg);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .concept-title {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            color: white;
+        }
+        
+        .concept-description {
+            color: var(--msebetsi-gray);
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: var(--space-lg);
+        }
+        
+        /* Code Snippet */
+        .code-snippet {
+            background: #1a1a2e;
+            border-radius: 16px;
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .code-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--state-info);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .code-language {
+            background: rgba(77, 159, 255, 0.2);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--state-info);
+        }
+        
+        .code-content {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+        
+        .code-line {
+            padding: 4px 0;
+            white-space: pre-wrap;
+            position: relative;
+            padding-left: 48px;
+        }
+        
+        .code-line::before {
+            content: attr(data-line);
+            position: absolute;
+            left: 0;
+            color: var(--msebetsi-gray);
+            opacity: 0.5;
+            font-size: 12px;
+            width: 40px;
+            text-align: right;
+        }
+        
+        .code-keyword { color: #FF6B6B; }
+        .code-function { color: #4D9FFF; }
+        .code-string { color: #46D369; }
+        .code-number { color: #FFD700; }
+        .code-comment { color: #888; opacity: 0.7; }
+        .code-jsx { color: #9C27B0; }
+        
+        /* State Visualization */
+        .state-visualization {
+            background: linear-gradient(135deg, 
+                rgba(20, 20, 40, 0.9) 0%, 
+                rgba(30, 30, 60, 0.8) 100%);
+            border-radius: 24px;
+            padding: var(--space-xxl);
+            margin: var(--space-xxl) 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .state-diagram {
+            position: relative;
+            height: 300px;
+            margin: var(--space-xl) 0;
+        }
+        
+        .state-node {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: var(--gradient-state);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            transition: all var(--transition-normal);
+            cursor: pointer;
+            z-index: 2;
+        }
+        
+        .state-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
+        }
+        
+        .state-connection {
+            position: absolute;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                rgba(102, 126, 234, 0.8), 
+                rgba(118, 75, 162, 0.8));
+            transform-origin: 0 50%;
+            z-index: 1;
+        }
+        
+        /* Profile System - Main Feature */
+        .profile-system {
+            background: linear-gradient(135deg, 
+                rgba(20, 20, 20, 0.95) 0%, 
+                rgba(30, 30, 30, 0.9) 100%);
+            border-radius: 28px;
+            padding: var(--space-xxl);
+            margin: var(--space-xxl) 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .profile-system::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(229, 9, 20, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 114, 210, 0.1) 0%, transparent 40%);
+            pointer-events: none;
+        }
+        
+        .system-title {
+            font-size: 36px;
+            font-weight: 900;
+            margin-bottom: var(--space-xl);
+            background: linear-gradient(45deg, #fff, var(--state-info));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+        
+        /* Profile Grid */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-xl);
+            margin: var(--space-xxl) 0;
+        }
+        
+        .profile-card {
+            background: linear-gradient(135deg, 
+                rgba(40, 40, 40, 0.8) 0%, 
+                rgba(50, 50, 50, 0.6) 100%);
+            border-radius: 20px;
+            padding: var(--space-xl);
+            border: 2px solid transparent;
+            transition: all var(--transition-normal);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .profile-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .profile-card.active {
+            border-color: var(--state-active);
+            box-shadow: 0 20px 40px rgba(70, 211, 105, 0.2);
+            animation: pulse-active 2s infinite;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto var(--space-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: 900;
+            color: white;
+            position: relative;
+            transition: all var(--transition-normal);
+        }
+        
+        .profile-card:hover .profile-avatar {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .profile-active-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--state-active);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all var(--transition-normal);
+        }
+        
+        .profile-card.active .profile-active-badge {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .profile-name {
+            font-size: 22px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: var(--space-sm);
+            color: white;
+        }
+        
+        .profile-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: var(--space-lg);
+            padding-top: var(--space-md);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--state-info);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--msebetsi-gray);
+            margin-top: 2px;
+        }
+        
+        /* State Control Panel */
+        .state-control-panel {
+            background: rgba(20, 20, 30, 0.8);
+            border-radius: 20px;
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .control-group {
+            margin-bottom: var(--space-xl);
+        }
+        
+        .control-label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: var(--space-md);
+            color: white;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .state-slider {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .state-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            background: var(--gradient-msebetsi);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3);
+        }
+        
+        /* LocalStorage Demo */
+        .localstorage-demo {
+            background: linear-gradient(135deg, 
+                rgba(30, 30, 50, 0.9) 0%, 
+                rgba(40, 40, 70, 0.8) 100%);
+            border-radius: 24px;
+            padding: var(--space-xxl);
+            margin: var(--space-xxl) 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .storage-visual {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            font-family: 'SF Mono', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            min-height: 200px;
+            position: relative;
+        }
+        
+        .storage-key {
+            color: var(--state-info);
+        }
+        
+        .storage-value {
+            color: var(--state-active);
+        }
+        
+        /* Animations */
+        @keyframes glow-pulse {
+            0% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.3); }
+            100% { box-shadow: 0 0 40px rgba(102, 126, 234, 0.6); }
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse-active {
+            0%, 100% { box-shadow: 0 20px 40px rgba(70, 211, 105, 0.2); }
+            50% { box-shadow: 0 20px 50px rgba(70, 211, 105, 0.4); }
+        }
+        
+        @keyframes slide-in {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-in {
+            animation: slide-in 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-lg);
+            margin: var(--space-xxl) 0;
+        }
+        
+        .action-btn {
+            padding: var(--space-lg) var(--space-xl);
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-md);
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.1), 
+                transparent);
+            transition: left 0.5s;
+        }
+        
+        .action-btn:hover::before {
+            left: 100%;
+        }
+        
+        .action-btn-primary {
+            background: var(--gradient-msebetsi);
+            color: white;
+        }
+        
+        .action-btn-primary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(229, 9, 20, 0.3);
+        }
+        
+        .action-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .action-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: linear-gradient(135deg, 
+                rgba(30, 30, 30, 0.95) 0%, 
+                rgba(40, 40, 40, 0.9) 100%);
+            padding: var(--space-lg) var(--space-xl);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid var(--state-active);
+            z-index: 9999;
+            animation: slide-in 0.3s ease;
+            max-width: 400px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-md);
+            }
+            
+            .hero-section {
+                padding: var(--space-xl);
+            }
+            
+            .profile-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+            
+            .concept-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .state-diagram {
+                height: 200px;
+            }
+            
+            .state-node {
+                width: 80px;
+                height: 80px;
+                font-size: 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-md);
+            }
+            
+            .progress-container {
+                width: 100%;
+            }
+            
+            .hero-title {
+                font-size: 28px;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Utility Classes */
+        .text-gradient {
+            background: var(--gradient-msebetsi);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .mb-sm { margin-bottom: var(--space-sm); }
+        .mb-md { margin-bottom: var(--space-md); }
+        .mb-lg { margin-bottom: var(--space-lg); }
+        .mb-xl { margin-bottom: var(--space-xl); }
+        .mb-xxl { margin-bottom: var(--space-xxl); }
+        
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-container">
+            <div class="state-badge">
+                <i class="fas fa-database"></i> ADVANCED STATE MANAGEMENT
+            </div>
+            <div>
+                <div class="msebetsi-logo">MSEBETSI SOLUTIONS</div>
+                <div style="display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap;">
+                    <div style="color: var(--msebetsi-gray); font-weight: 700; font-size: 14px;">
+                        Professional Profile System
+                    </div>
+                    <div class="lesson-badge">Lesson 7</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="progress-container">
+            <div style="font-weight: 700; color: var(--msebetsi-white); font-size: 14px;">
+                <i class="fas fa-layer-group" style="color: var(--msebetsi-red); margin-right: 6px;"></i>
+                Module 2, Lesson 2 of 4
+            </div>
+            <div class="progress-bar-wrapper">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div style="color: var(--msebetsi-red); font-weight: 800; font-size: 18px;" id="progressText">60%</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Left Column: Theory & Concepts -->
+        <div>
+            <!-- Hero Section -->
+            <section class="hero-section slide-in">
+                <div class="module-badge">
+                    <i class="fas fa-network-wired"></i> ENTERPRISE STATE MANAGEMENT
+                </div>
+                <h1 class="hero-title">
+                    Mastering useState &<br>
+                    <span class="text-gradient">Lifting State Up</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Learn how Msebetsi Solutions manages state for enterprise applications. 
+                    Build professional profile systems with persistent state, 
+                    real-time updates, and enterprise-grade architecture.
+                </p>
+                
+                <div style="display: flex; gap: var(--space-md); flex-wrap: wrap; margin-top: var(--space-xl);">
+                    <button class="action-btn action-btn-primary" onclick="startAdvancedDemo()">
+                        <i class="fas fa-rocket"></i> Launch Enterprise Demo
+                    </button>
+                    <button class="action-btn action-btn-secondary" onclick="showArchitecture()">
+                        <i class="fas fa-sitemap"></i> View System Architecture
+                    </button>
+                </div>
+            </section>
+
+            <!-- Teacher Introduction -->
+            <div class="concept-card slide-in" style="border-left: 4px solid var(--state-info);">
+                <div style="display: flex; gap: var(--space-lg); align-items: flex-start;">
+                    <div style="width: 70px; height: 70px; background: var(--gradient-state); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; font-weight: bold; flex-shrink: 0;">
+                        TN
+                    </div>
+                    <div>
+                        <h3 style="color: var(--state-info); margin-bottom: var(--space-sm); font-size: 20px;">
+                            <i class="fas fa-user-tie"></i> Tshepho Nkoe, Msebetsi Solutions State Architect:
+                        </h3>
+                        <p style="font-size: 16px; color: var(--msebetsi-gray); line-height: 1.7;">
+                            "Msebetsi Solutions handles complex state updates across enterprise applications. Our profile system uses 
+                            <strong>useState with lifting state up</strong> to manage user sessions across 
+                            devices. Today, you'll build a production-ready profile switcher that 
+                            enterprise engineers would deploy."
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Core Concepts -->
+            <div class="concept-grid">
+                <!-- useState Concept -->
+                <div class="concept-card slide-in" onclick="explainUseState()">
+                    <div class="concept-icon">
+                        <i class="fas fa-state-diagram"></i>
+                    </div>
+                    <h3 class="concept-title">useState Hook</h3>
+                    <p class="concept-description">
+                        Local component state management with automatic re-renders. 
+                        Msebetsi Solutions uses this for real-time UI updates without page reloads.
+                    </p>
+                    <div class="code-snippet" style="margin: 0; padding: var(--space-lg);">
+                        <div class="code-content">
+                            <div class="code-line" data-line="1"><span class="code-keyword">const</span> [profile, setProfile] = <span class="code-function">useState</span>(<span class="code-string">'default'</span>);</div>
+                            <div class="code-line" data-line="2"><span class="code-comment">// State updates trigger re-render</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lifting State Up -->
+                <div class="concept-card slide-in" onclick="explainLiftingState()">
+                    <div class="concept-icon" style="background: linear-gradient(135deg, var(--profile-green), var(--profile-teal));">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <h3 class="concept-title">Lifting State Up</h3>
+                    <p class="concept-description">
+                        Share state between components by moving it to their 
+                        closest common ancestor. Essential for synchronized UI in enterprise applications.
+                    </p>
+                    <div class="code-snippet" style="margin: 0; padding: var(--space-lg);">
+                        <div class="code-content">
+                            <div class="code-line" data-line="1"><span class="code-keyword">const</span> [selectedProfile, setSelectedProfile] = <span class="code-function">useState</span>(null);</div>
+                            <div class="code-line" data-line="2"><span class="code-comment">// Share with child components via props</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- State Flow Diagram -->
+            <div class="state-visualization slide-in">
+                <h2 style="font-size: 28px; font-weight: 800; margin-bottom: var(--space-xl); color: white;">
+                    <i class="fas fa-project-diagram"></i> Msebetsi Solutions State Flow Architecture
+                </h2>
+                
+                <div class="state-diagram" id="stateDiagram">
+                    <!-- State nodes will be dynamically positioned -->
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-lg); margin-top: var(--space-xl);">
+                    <div style="text-align: center; padding: var(--space-lg); background: rgba(0,0,0,0.3); border-radius: 12px;">
+                        <div style="font-size: 24px; font-weight: 800; color: var(--state-info);">1</div>
+                        <div style="font-size: 14px; color: var(--msebetsi-gray); margin-top: var(--space-sm);">User Action</div>
+                    </div>
+                    <div style="text-align: center; padding: var(--space-lg); background: rgba(0,0,0,0.3); border-radius: 12px;">
+                        <div style="font-size: 24px; font-weight: 800; color: var(--state-info);">2</div>
+                        <div style="font-size: 14px; color: var(--msebetsi-gray); margin-top: var(--space-sm);">State Update</div>
+                    </div>
+                    <div style="text-align: center; padding: var(--space-lg); background: rgba(0,0,0,0.3); border-radius: 12px;">
+                        <div style="font-size: 24px; font-weight: 800; color: var(--state-info);">3</div>
+                        <div style="font-size: 14px; color: var(--msebetsi-gray); margin-top: var(--space-sm);">UI Re-render</div>
+                    </div>
+                    <div style="text-align: center; padding: var(--space-lg); background: rgba(0,0,0,0.3); border-radius: 12px;">
+                        <div style="font-size: 24px; font-weight: 800; color: var(--state-info);">4</div>
+                        <div style="font-size: 14px; color: var(--msebetsi-gray); margin-top: var(--space-sm);">Persist State</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced useState Patterns -->
+            <div class="code-snippet slide-in">
+                <div class="code-header">
+                    <div class="code-title">
+                        <i class="fas fa-code"></i> Professional useState Patterns
+                    </div>
+                    <span class="code-language">React 18+</span>
+                </div>
+                <div class="code-content">
+                    <div class="code-line" data-line="1"><span class="code-comment">// 1. Functional updates for complex state</span></div>
+                    <div class="code-line" data-line="2"><span class="code-keyword">const</span> [profiles, setProfiles] = <span class="code-function">useState</span>(initialProfiles);</div>
+                    <div class="code-line" data-line="3"><span class="code-keyword">const</span> addProfile = (newProfile) => {</div>
+                    <div class="code-line" data-line="4">&nbsp;&nbsp;setProfiles(<span class="code-function">prev</span> => [...prev, newProfile]);</div>
+                    <div class="code-line" data-line="5">};</div>
+                    <div class="code-line" data-line="6"></div>
+                    <div class="code-line" data-line="7"><span class="code-comment">// 2. Lazy initialization for expensive computations</span></div>
+                    <div class="code-line" data-line="8"><span class="code-keyword">const</span> [complexState, setComplexState] = <span class="code-function">useState</span>(() => {</div>
+                    <div class="code-line" data-line="9">&nbsp;&nbsp;<span class="code-keyword">const</span> expensiveResult = <span class="code-function">calculateExpensiveValue</span>();</div>
+                    <div class="code-line" data-line="10">&nbsp;&nbsp;<span class="code-keyword">return</span> expensiveResult;</div>
+                    <div class="code-line" data-line="11">});</div>
+                    <div class="code-line" data-line="12"></div>
+                    <div class="code-line" data-line="13"><span class="code-comment">// 3. State batching for performance</span></div>
+                    <div class="code-line" data-line="14"><span class="code-function">setProfile</span>(newProfile);</div>
+                    <div class="code-line" data-line="15"><span class="code-function">setIsLoading</span>(false);</div>
+                    <div class="code-line" data-line="16"><span class="code-comment">// React batches these updates</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Interactive Builder -->
+        <div>
+            <!-- Profile System Demo -->
+            <section class="profile-system slide-in">
+                <h2 class="system-title">
+                    <i class="fas fa-users"></i> Msebetsi Solutions Profile System
+                    <span style="font-size: 14px; color: var(--msebetsi-gray); margin-left: auto;">
+                        Production-Ready Implementation
+                    </span>
+                </h2>
+                
+                <!-- Selected Profile Display -->
+                <div id="selectedProfileDisplay" style="background: linear-gradient(135deg, rgba(70, 211, 105, 0.1), rgba(77, 159, 255, 0.1)); padding: var(--space-xl); border-radius: 20px; margin-bottom: var(--space-xl); border: 2px solid rgba(70, 211, 105, 0.3);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-lg);">
+                        <div>
+                            <div style="font-size: 14px; color: var(--msebetsi-gray); margin-bottom: var(--space-sm);">
+                                ACTIVE PROFILE
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--space-lg);">
+                                <div id="activeProfileAvatar" style="width: 60px; height: 60px; border-radius: 50%; background: var(--gradient-msebetsi); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; color: white;">
+                                    Y
+                                </div>
+                                <div>
+                                    <div id="activeProfileName" style="font-size: 28px; font-weight: 900; color: white;">
+                                        Your Profile
+                                    </div>
+                                    <div id="activeProfileStatus" style="font-size: 14px; color: var(--state-active); display: flex; align-items: center; gap: var(--space-sm);">
+                                        <i class="fas fa-circle" style="font-size: 8px;"></i> Currently Active
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 14px; color: var(--msebetsi-gray); margin-bottom: var(--space-sm);">
+                                STATE UPDATES
+                            </div>
+                            <div id="stateUpdateCount" style="font-size: 36px; font-weight: 900; color: var(--state-info);">
+                                0
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Grid -->
+                <div class="profile-grid" id="profileGrid">
+                    <!-- Profiles will be dynamically generated -->
+                </div>
+
+                <!-- State Control Panel -->
+                <div class="state-control-panel slide-in">
+                    <h3 style="font-size: 20px; font-weight: 800; margin-bottom: var(--space-xl); color: white;">
+                        <i class="fas fa-sliders-h"></i> Advanced State Controls
+                    </h3>
+                    
+                    <div class="control-group">
+                        <label class="control-label">
+                            <i class="fas fa-sync-alt"></i> State Update Speed
+                        </label>
+                        <input type="range" class="state-slider" id="updateSpeed" min="0" max="100" value="50" oninput="updateStateSpeed(this.value)">
+                        <div style="display: flex; justify-content: space-between; margin-top: var(--space-sm);">
+                            <span style="font-size: 12px; color: var(--msebetsi-gray);">Slow</span>
+                            <span id="speedValue" style="font-size: 14px; color: var(--state-info); font-weight: 600;">Normal</span>
+                            <span style="font-size: 12px; color: var(--msebetsi-gray);">Fast</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">
+                            <i class="fas fa-memory"></i> State Complexity
+                        </label>
+                        <div style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+                            <button class="action-btn action-btn-secondary" onclick="setComplexity('simple')" style="flex: 1;">
+                                Simple State
+                            </button>
+                            <button class="action-btn action-btn-secondary" onclick="setComplexity('nested')" style="flex: 1;">
+                                Nested State
+                            </button>
+                            <button class="action-btn action-btn-secondary" onclick="setComplexity('complex')" style="flex: 1;">
+                                Complex State
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">
+                            <i class="fas fa-history"></i> State History
+                        </label>
+                        <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: var(--space-md); max-height: 150px; overflow-y: auto;">
+                            <div id="stateHistory" style="font-family: 'SF Mono', monospace; font-size: 12px;">
+                                <!-- State history will appear here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LocalStorage Demo -->
+                <div class="localstorage-demo slide-in">
+                    <h3 style="font-size: 24px; font-weight: 800; margin-bottom: var(--space-xl); color: white;">
+                        <i class="fas fa-database"></i> Persistent State with localStorage
+                    </h3>
+                    
+                    <div class="storage-visual" id="storageVisual">
+                        <div style="color: var(--msebetsi-gray); margin-bottom: var(--space-md);">
+                            <i class="fas fa-browser"></i> Browser Storage
+                        </div>
+                        <div>
+                            <span class="storage-key">"msebetsi_profile"</span>: 
+                            <span class="storage-value" id="storedProfile">null</span>
+                        </div>
+                        <div>
+                            <span class="storage-key">"last_updated"</span>: 
+                            <span class="storage-value" id="lastUpdated">null</span>
+                        </div>
+                        <div>
+                            <span class="storage-key">"state_version"</span>: 
+                            <span class="storage-value">"1.0.0"</span>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: var(--space-md); flex-wrap: wrap; margin-top: var(--space-xl);">
+                        <button class="action-btn action-btn-primary" onclick="saveToLocalStorage()">
+                            <i class="fas fa-save"></i> Save State
+                        </button>
+                        <button class="action-btn action-btn-secondary" onclick="loadFromLocalStorage()">
+                            <i class="fas fa-download"></i> Load State
+                        </button>
+                        <button class="action-btn action-btn-secondary" onclick="clearLocalStorage()">
+                            <i class="fas fa-trash"></i> Clear State
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons slide-in">
+                <button class="action-btn action-btn-primary" onclick="completeLesson()">
+                    <i class="fas fa-check-double"></i> Complete Lesson 7
+                </button>
+                <button class="action-btn action-btn-secondary" onclick="exportProfileSystem()">
+                    <i class="fas fa-file-export"></i> Export Profile System
+                </button>
+                <button class="action-btn action-btn-secondary" onclick="runPerformanceTest()">
+                    <i class="fas fa-tachometer-alt"></i> Performance Test
+                </button>
+            </div>
+
+            <!-- Homework Assignment -->
+            <div class="concept-card slide-in" style="background: linear-gradient(135deg, rgba(30, 30, 50, 0.9), rgba(40, 40, 70, 0.8));">
+                <div class="concept-icon" style="background: linear-gradient(135deg, var(--profile-yellow), var(--profile-red));">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h3 class="concept-title">Homework Assignment</h3>
+                <p class="concept-description">
+                    Build a Msebetsi Solutions-style profile manager with persistent state, 
+                    real-time updates, and profile-specific preferences.
+                </p>
+                
+                <div style="margin-top: var(--space-lg);">
+                    <div style="display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md);">
+                        <div style="width: 24px; height: 24px; background: var(--state-active); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">1</div>
+                        <div style="color: var(--msebetsi-gray);">Implement useState for 4 profiles</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md);">
+                        <div style="width: 24px; height: 24px; background: var(--state-active); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">2</div>
+                        <div style="color: var(--msebetsi-gray);">Lift state to parent component</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md);">
+                        <div style="width: 24px; height: 24px; background: var(--state-active); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">3</div>
+                        <div style="color: var(--msebetsi-gray);">Persist selected profile to localStorage</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: var(--space-md);">
+                        <div style="width: 24px; height: 24px; background: var(--state-active); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">4</div>
+                        <div style="color: var(--msebetsi-gray);">Add profile-specific settings</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: var(--space-xl); padding-top: var(--space-lg); border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                    <button class="action-btn action-btn-secondary" onclick="downloadHomework()" style="width: 100%;">
+                        <i class="fas fa-download"></i> Download Starter Code
+                    </button>
+                </div>
+            </div>
+
+            <!-- Next Lesson Preview -->
+            <div style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); padding: var(--space-xl); border-radius: 20px; margin-top: var(--space-xxl); border: 1px solid rgba(102, 126, 234, 0.3);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-lg);">
+                    <div>
+                        <div style="font-size: 12px; color: var(--state-info); font-weight: 700; margin-bottom: var(--space-sm);">
+                            COMING SOON: ENTERPRISE GRADE
+                        </div>
+                        <div style="font-size: 24px; font-weight: 900; color: white; margin-bottom: var(--space-sm);">
+                            Lesson 8: Context API & Global State
+                        </div>
+                        <div style="color: var(--msebetsi-gray);">
+                            Manage state across entire enterprise applications with Context API
+                        </div>
+                    </div>
+                    <button class="action-btn action-btn-primary" onclick="previewNextLesson()" style="min-width: 200px;">
+                        <i class="fas fa-forward"></i> Preview Lesson 8
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Advanced State Management System
+        class MsebetsiStateManager {
+            constructor() {
+                this.state = {
+                    selectedProfile: null,
+                    profiles: this.getDefaultProfiles(),
+                    stateUpdates: 0,
+                    complexity: 'simple',
+                    speed: 'normal',
+                    stateHistory: [],
+                    localStorageEnabled: false
+                };
+                
+                this.observers = [];
+                this.isInitialized = false;
+                this.progress = localStorage.getItem('lesson7Progress') || 60;
+            }
+            
+            getDefaultProfiles() {
+                return [
+                    {
+                        id: 1,
+                        name: "Your Profile",
+                        avatar: "Y",
+                        color: "linear-gradient(135deg, #E50914, #FF3333)",
+                        isActive: true,
+                        stats: {
+                            watchTime: "45h",
+                            shows: "28",
+                            continueWatching: "5"
+                        }
+                    },
+                    {
+                        id: 2,
+                        name: "Kids",
+                        avatar: "K",
+                        color: "linear-gradient(135deg, #0072D2, #00B4D8)",
+                        isActive: false,
+                        stats: {
+                            watchTime: "12h",
+                            shows: "15",
+                            continueWatching: "3"
+                        }
+                    },
+                    {
+                        id: 3,
+                        name: "Family",
+                        avatar: "F",
+                        color: "linear-gradient(135deg, #46D369, #2E7D32)",
+                        isActive: false,
+                        stats: {
+                            watchTime: "68h",
+                            shows: "42",
+                            continueWatching: "8"
+                        }
+                    },
+                    {
+                        id: 4,
+                        name: "Guest",
+                        avatar: "G",
+                        color: "linear-gradient(135deg, #9C27B0, #673AB7)",
+                        isActive: false,
+                        stats: {
+                            watchTime: "5h",
+                            shows: "8",
+                            continueWatching: "2"
+                        }
+                    }
+                ];
+            }
+            
+            subscribe(observer) {
+                this.observers.push(observer);
+            }
+            
+            notify() {
+                this.observers.forEach(observer => observer(this.state));
+            }
+            
+            // Core useState-like functionality
+            setState(newState) {
+                const oldState = {...this.state};
+                this.state = {...this.state, ...newState};
+                this.state.stateUpdates++;
+                
+                // Add to history (limited to last 10)
+                this.state.stateHistory.unshift({
+                    timestamp: new Date().toISOString(),
+                    action: 'STATE_UPDATE',
+                    from: oldState.selectedProfile?.name,
+                    to: newState.selectedProfile?.name,
+                    stateUpdates: this.state.stateUpdates
+                });
+                
+                if (this.state.stateHistory.length > 10) {
+                    this.state.stateHistory.pop();
+                }
+                
+                this.notify();
+                this.updateUI();
+                this.saveToLocalStorage();
+                
+                console.log('State updated:', newState);
+            }
+            
+            // Select profile (lifting state up demo)
+            selectProfile(profileId) {
+                const profiles = this.state.profiles.map(profile => ({
+                    ...profile,
+                    isActive: profile.id === profileId
+                }));
+                
+                const selectedProfile = profiles.find(p => p.id === profileId);
+                
+                this.setState({
+                    selectedProfile,
+                    profiles
+                });
+                
+                showNotification(`👤 Profile switched to: ${selectedProfile.name}`, 'success');
+            }
+            
+            // Update profile (mutable state pattern)
+            updateProfile(profileId, updates) {
+                const profiles = this.state.profiles.map(profile => 
+                    profile.id === profileId ? {...profile, ...updates} : profile
+                );
+                
+                this.setState({ profiles });
+            }
+            
+            // Add new profile (functional update pattern)
+            addProfile(profile) {
+                this.setState(prevState => ({
+                    profiles: [...prevState.profiles, {
+                        ...profile,
+                        id: Date.now()
+                    }]
+                }));
+            }
+            
+            // Initialize
+            initialize() {
+                if (this.isInitialized) return;
+                
+                // Load from localStorage
+                this.loadFromLocalStorage();
+                
+                // Set initial selected profile
+                const activeProfile = this.state.profiles.find(p => p.isActive);
+                if (activeProfile) {
+                    this.state.selectedProfile = activeProfile;
+                }
+                
+                this.updateUI();
+                this.isInitialized = true;
+                console.log('State Manager initialized');
+            }
+            
+            // LocalStorage integration
+            saveToLocalStorage() {
+                try {
+                    const stateToSave = {
+                        selectedProfile: this.state.selectedProfile,
+                        profiles: this.state.profiles,
+                        lastUpdated: new Date().toISOString()
+                    };
+                    
+                    localStorage.setItem('msebetsi_profiles', JSON.stringify(stateToSave));
+                    this.state.localStorageEnabled = true;
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Failed to save to localStorage:', error);
+                    return false;
+                }
+            }
+            
+            loadFromLocalStorage() {
+                try {
+                    const saved = localStorage.getItem('msebetsi_profiles');
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        
+                        // Merge with current profiles
+                        const profiles = this.state.profiles.map(profile => {
+                            const savedProfile = parsed.profiles?.find(p => p.id === profile.id);
+                            return savedProfile ? {...profile, ...savedProfile} : profile;
+                        });
+                        
+                        this.setState({
+                            profiles,
+                            selectedProfile: parsed.selectedProfile || this.state.selectedProfile
+                        });
+                        
+                        return true;
+                    }
+                } catch (error) {
+                    console.error('Failed to load from localStorage:', error);
+                }
+                return false;
+            }
+            
+            clearLocalStorage() {
+                localStorage.removeItem('msebetsi_profiles');
+                this.state.localStorageEnabled = false;
+                this.updateUI();
+            }
+            
+            // UI Updates
+            updateUI() {
+                // Update selected profile display
+                if (this.state.selectedProfile) {
+                    document.getElementById('activeProfileName').textContent = this.state.selectedProfile.name;
+                    document.getElementById('activeProfileAvatar').textContent = this.state.selectedProfile.avatar;
+                    document.getElementById('activeProfileAvatar').style.background = this.state.selectedProfile.color;
+                }
+                
+                // Update state update counter
+                document.getElementById('stateUpdateCount').textContent = this.state.stateUpdates;
+                
+                // Update profiles grid
+                this.renderProfiles();
+                
+                // Update localStorage display
+                this.updateStorageDisplay();
+                
+                // Update state history
+                this.updateStateHistory();
+                
+                // Update progress
+                this.updateProgress();
+            }
+            
+            renderProfiles() {
+                const profileGrid = document.getElementById('profileGrid');
+                profileGrid.innerHTML = '';
+                
+                this.state.profiles.forEach(profile => {
+                    const profileCard = document.createElement('div');
+                    profileCard.className = `profile-card ${profile.isActive ? 'active' : ''}`;
+                    profileCard.onclick = () => this.selectProfile(profile.id);
+                    
+                    profileCard.innerHTML = `
+                        <div class="profile-avatar" style="background: ${profile.color}">
+                            ${profile.avatar}
+                        </div>
+                        <div class="profile-active-badge">
+                            <i class="fas fa-check"></i> Active
+                        </div>
+                        <div class="profile-name">${profile.name}</div>
+                        <div class="profile-stats">
+                            <div class="stat">
+                                <div class="stat-value">${profile.stats.watchTime}</div>
+                                <div class="stat-label">Watch Time</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">${profile.stats.shows}</div>
+                                <div class="stat-label">Shows</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">${profile.stats.continueWatching}</div>
+                                <div class="stat-label">Continue</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    profileGrid.appendChild(profileCard);
+                });
+            }
+            
+            updateStorageDisplay() {
+                const saved = localStorage.getItem('msebetsi_profiles');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    document.getElementById('storedProfile').textContent = `"${parsed.selectedProfile?.name || 'None'}"`;
+                    document.getElementById('lastUpdated').textContent = `"${new Date(parsed.lastUpdated).toLocaleTimeString()}"`;
+                } else {
+                    document.getElementById('storedProfile').textContent = 'null';
+                    document.getElementById('lastUpdated').textContent = 'null';
+                }
+            }
+            
+            updateStateHistory() {
+                const historyEl = document.getElementById('stateHistory');
+                historyEl.innerHTML = this.state.stateHistory.map(entry => 
+                    `<div style="margin-bottom: 4px; padding: 4px; background: rgba(0,0,0,0.2); border-radius: 4px;">
+                        <span style="color: var(--msebetsi-gray);">[${new Date(entry.timestamp).toLocaleTimeString()}]</span>
+                        <span style="color: var(--state-info);"> ${entry.action}</span>
+                        ${entry.from ? `<span style="color: var(--msebetsi-gray);"> ${entry.from} → ${entry.to}</span>` : ''}
+                    </div>`
+                ).join('');
+            }
+            
+            updateProgress() {
+                const progress = Math.min(60 + (this.state.stateUpdates * 2), 100);
+                this.progress = progress;
+                document.getElementById('progressBar').style.width = progress + '%';
+                document.getElementById('progressText').textContent = progress + '%';
+                localStorage.setItem('lesson7Progress', progress);
+            }
+            
+            // Performance testing
+            async runPerformanceTest() {
+                const startTime = performance.now();
+                const iterations = 1000;
+                
+                for (let i = 0; i < iterations; i++) {
+                    this.setState({ testIteration: i });
+                }
+                
+                const endTime = performance.now();
+                const duration = endTime - startTime;
+                const opsPerSecond = (iterations / duration * 1000).toFixed(2);
+                
+                showNotification(`⚡ Performance: ${opsPerSecond} state updates/second`, 'success');
+                
+                return { duration, opsPerSecond, iterations };
+            }
+            
+            // Export system
+            exportProfileSystem() {
+                const code = `// Msebetsi Solutions Profile System - Production Ready
+import React, { useState, useEffect } from 'react';
+
+export const useMsebetsiProfiles = () => {
+  const [profiles, setProfiles] = useState(() => {
+    // Load from localStorage on initial render
+    const saved = localStorage.getItem('msebetsi_profiles');
+    return saved ? JSON.parse(saved).profiles : defaultProfiles;
+  });
+  
+  const [selectedProfile, setSelectedProfile] = useState(null);
+  const [stateUpdates, setStateUpdates] = useState(0);
+
+  // Lift state up: Profile selection
+  const selectProfile = (profileId) => {
+    const updatedProfiles = profiles.map(profile => ({
+      ...profile,
+      isActive: profile.id === profileId
+    }));
+    
+    const newSelectedProfile = updatedProfiles.find(p => p.id === profileId);
+    
+    setProfiles(updatedProfiles);
+    setSelectedProfile(newSelectedProfile);
+    setStateUpdates(prev => prev + 1);
+    
+    // Persist to localStorage
+    localStorage.setItem('msebetsi_profiles', JSON.stringify({
+      profiles: updatedProfiles,
+      selectedProfile: newSelectedProfile,
+      lastUpdated: new Date().toISOString()
+    }));
+  };
+
+  // Add new profile with functional update
+  const addProfile = (newProfile) => {
+    setProfiles(prevProfiles => [...prevProfiles, {
+      ...newProfile,
+      id: Date.now(),
+      isActive: false
+    }]);
+    setStateUpdates(prev => prev + 1);
+  };
+
+  // Update profile
+  const updateProfile = (profileId, updates) => {
+    setProfiles(prevProfiles => 
+      prevProfiles.map(profile => 
+        profile.id === profileId ? { ...profile, ...updates } : profile
+      )
+    );
+    setStateUpdates(prev => prev + 1);
+  };
+
+  return {
+    profiles,
+    selectedProfile,
+    stateUpdates,
+    selectProfile,
+    addProfile,
+    updateProfile
+  };
+};
+
+// Example usage in MsebetsiProfileSwitcher component
+export const MsebetsiProfileSwitcher = () => {
+  const {
+    profiles,
+    selectedProfile,
+    selectProfile
+  } = useMsebetsiProfiles();
+
+  return (
+    <div className="profile-system">
+      {profiles.map(profile => (
+        <ProfileCard
+          key={profile.id}
+          profile={profile}
+          isActive={profile.id === selectedProfile?.id}
+          onClick={() => selectProfile(profile.id)}
+        />
+      ))}
+    </div>
+  );
+};`;
+
+                const blob = new Blob([code], { type: 'text/javascript' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'MsebetsiProfileSystem.jsx';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showNotification('📁 Profile System exported!', 'success');
+            }
+        }
+
+        // Initialize State Manager
+        const stateManager = new MsebetsiStateManager();
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize state manager
+            stateManager.initialize();
+            
+            // Render state diagram
+            renderStateDiagram();
+            
+            // Set initial progress
+            document.getElementById('progressBar').style.width = stateManager.progress + '%';
+            document.getElementById('progressText').textContent = stateManager.progress + '%';
+            
+            // Subscribe to state changes
+            stateManager.subscribe((state) => {
+                console.log('State changed:', state);
+            });
+            
+            // Start with a notification
+            setTimeout(() => {
+                showNotification('🚀 Advanced State Manager Initialized', 'success');
+            }, 1000);
+        });
+
+        // UI Functions
+        function startAdvancedDemo() {
+            showNotification('🏢 Enterprise Demo Started - Try switching profiles!', 'info');
+            
+            // Highlight interactive elements
+            const profileCards = document.querySelectorAll('.profile-card');
+            profileCards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.boxShadow = '0 0 30px rgba(70, 211, 105, 0.3)';
+                    setTimeout(() => {
+                        card.style.boxShadow = '';
+                    }, 500);
+                }, index * 300);
+            });
+            
+            // Update progress
+            updateProgress(65);
+        }
+
+        function showArchitecture() {
+            showNotification('🏛️ Displaying Msebetsi Solutions State Architecture', 'info');
+            
+            // Animate state diagram
+            const diagram = document.getElementById('stateDiagram');
+            diagram.style.animation = 'pulse-active 2s';
+            setTimeout(() => {
+                diagram.style.animation = '';
+            }, 2000);
+            
+            // Show modal with architecture details
+            setTimeout(() => {
+                alert('MSEBETSI SOLUTIONS STATE ARCHITECTURE:\n\n• Multi-layer state management\n• Real-time synchronization across devices\n• Optimistic updates for better UX\n• State persistence with versioning\n• Automatic conflict resolution\n• Performance monitoring & analytics\n\nHandles enterprise-scale state updates!');
+            }, 500);
+        }
+
+        function explainUseState() {
+            showNotification('🎯 useState: Local component state with automatic re-renders', 'info');
+            
+            const codeBlock = document.querySelectorAll('.code-snippet')[0];
+            codeBlock.style.borderColor = 'var(--state-info)';
+            codeBlock.style.boxShadow = '0 0 40px rgba(77, 159, 255, 0.3)';
+            
+            setTimeout(() => {
+                codeBlock.style.borderColor = '';
+                codeBlock.style.boxShadow = '';
+            }, 3000);
+        }
+
+        function explainLiftingState() {
+            showNotification('⬆️ Lifting State: Share state between sibling components', 'info');
+            
+            // Animate state connections
+            const connections = document.querySelectorAll('.state-connection');
+            connections.forEach(conn => {
+                conn.style.animation = 'glow-pulse 1s 3';
+            });
+            
+            setTimeout(() => {
+                connections.forEach(conn => {
+                    conn.style.animation = '';
+                });
+            }, 3000);
+        }
+
+        function updateStateSpeed(value) {
+            const speedMap = {
+                0: 'Very Slow',
+                25: 'Slow',
+                50: 'Normal',
+                75: 'Fast',
+                100: 'Very Fast'
+            };
+            
+            const closest = Object.keys(speedMap).reduce((prev, curr) => {
+                return Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev;
+            });
+            
+            document.getElementById('speedValue').textContent = speedMap[closest];
+            stateManager.setState({ speed: speedMap[closest].toLowerCase() });
+        }
+
+        function setComplexity(complexity) {
+            stateManager.setState({ complexity });
+            
+            let message = '';
+            switch(complexity) {
+                case 'simple':
+                    message = '📊 Simple State: Single values (strings, numbers)';
+                    break;
+                case 'nested':
+                    message = '📈 Nested State: Objects with multiple levels';
+                    break;
+                case 'complex':
+                    message = '🏗️ Complex State: Arrays of objects with relationships';
+                    break;
+            }
+            
+            showNotification(message, 'info');
+        }
+
+        function saveToLocalStorage() {
+            const success = stateManager.saveToLocalStorage();
+            if (success) {
+                showNotification('💾 State saved to localStorage!', 'success');
+                stateManager.updateStorageDisplay();
+            } else {
+                showNotification('❌ Failed to save state', 'error');
+            }
+        }
+
+        function loadFromLocalStorage() {
+            const success = stateManager.loadFromLocalStorage();
+            if (success) {
+                showNotification('📂 State loaded from localStorage!', 'success');
+            } else {
+                showNotification('❌ No saved state found', 'warning');
+            }
+        }
+
+        function clearLocalStorage() {
+            stateManager.clearLocalStorage();
+            showNotification('🗑️ localStorage cleared!', 'info');
+        }
+
+        function completeLesson() {
+            updateProgress(100);
+            
+            // Confetti celebration
+            createConfetti();
+            
+            // Show completion modal
+            setTimeout(() => {
+                alert('🎉 LESSON 7 COMPLETED!\n\nMastered Skills:\n✅ Advanced useState patterns\n✅ Lifting state up in complex apps\n✅ Professional profile system\n✅ Persistent state with localStorage\n✅ State performance optimization\n✅ Enterprise architecture patterns\n\nYou\'re now ready for enterprise-scale state management!');
+                
+                showNotification('🏆 Lesson 7 Completed! You\'re a State Management Pro!', 'success');
+                
+                // Save completion
+                localStorage.setItem('lesson7Completed', 'true');
+            }, 1000);
+        }
+
+        function exportProfileSystem() {
+            stateManager.exportProfileSystem();
+        }
+
+        function runPerformanceTest() {
+            showNotification('⚡ Running performance test...', 'info');
+            
+            setTimeout(() => {
+                stateManager.runPerformanceTest();
+            }, 500);
+        }
+
+        function downloadHomework() {
+            const homework = `// HOMEWORK: Msebetsi Solutions Profile System with Persistent State
+// Complete the following tasks:
+
+// 1. Implement useState for 4 profiles
+const [profiles, setProfiles] = useState([
+  { id: 1, name: "Your Profile", isActive: true },
+  { id: 2, name: "Kids", isActive: false },
+  { id: 3, name: "Family", isActive: false },
+  { id: 4, name: "Guest", isActive: false }
+]);
+
+// 2. Lift state up to parent component
+const ProfileSwitcher = ({ profiles, onProfileSelect }) => {
+  return profiles.map(profile => (
+    <button key={profile.id} onClick={() => onProfileSelect(profile.id)}>
+      {profile.name}
+    </button>
+  ));
+};
+
+// 3. Persist selected profile to localStorage
+useEffect(() => {
+  localStorage.setItem('selectedProfile', JSON.stringify(selectedProfile));
+}, [selectedProfile]);
+
+// 4. Add profile-specific settings (extra credit)
+const [profileSettings, setProfileSettings] = useState({
+  autoplay: true,
+  maturityLevel: 'PG-13',
+  subtitleLanguage: 'English'
+});
+
+// TODO: Implement the complete profile system
+// Due: End of Module 2`;
+
+            const blob = new Blob([homework], { type: 'text/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Homework_Lesson7.jsx';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('📝 Homework downloaded! Good luck!', 'success');
+        }
+
+        function previewNextLesson() {
+            showNotification('🔜 Lesson 8 Preview: Context API & Global State', 'info');
+            
+            setTimeout(() => {
+                alert('LESSON 8 PREVIEW: CONTEXT API\n\n• Global state management\n• Avoiding prop drilling\n• Performance optimization\n• Multi-context patterns\n• Enterprise-scale architecture\n• Real-world implementation');
+            }, 500);
+        }
+
+        function renderStateDiagram() {
+            const diagram = document.getElementById('stateDiagram');
+            
+            // Create state nodes
+            const nodes = [
+                { id: 1, text: 'User\nAction', top: '20%', left: '10%' },
+                { id: 2, text: 'useState\nHook', top: '20%', left: '40%' },
+                { id: 3, text: 'Component\nState', top: '50%', left: '40%' },
+                { id: 4, text: 'UI\nRe-render', top: '80%', left: '40%' },
+                { id: 5, text: 'localStorage', top: '50%', left: '70%' }
+            ];
+            
+            // Add connections
+            const connections = [
+                { from: 1, to: 2 },
+                { from: 2, to: 3 },
+                { from: 3, to: 4 },
+                { from: 3, to: 5 },
+                { from: 5, to: 3 }
+            ];
+            
+            // Create connections
+            connections.forEach(conn => {
+                const fromNode = nodes.find(n => n.id === conn.from);
+                const toNode = nodes.find(n => n.id === conn.to);
+                
+                if (fromNode && toNode) {
+                    const connection = document.createElement('div');
+                    connection.className = 'state-connection';
+                    
+                    // Calculate position and rotation
+                    const fromX = parseFloat(fromNode.left);
+                    const fromY = parseFloat(fromNode.top);
+                    const toX = parseFloat(toNode.left);
+                    const toY = parseFloat(toNode.top);
+                    
+                    const length = Math.sqrt(Math.pow(toX - fromX, 2) + Math.pow(toY - fromY, 2));
+                    const angle = Math.atan2(toY - fromY, toX - fromX) * (180 / Math.PI);
+                    
+                    connection.style.width = `${length}%`;
+                    connection.style.left = `${fromX}%`;
+                    connection.style.top = `${fromY}%`;
+                    connection.style.transform = `rotate(${angle}deg)`;
+                    
+                    diagram.appendChild(connection);
+                }
+            });
+            
+            // Create nodes
+            nodes.forEach(node => {
+                const nodeEl = document.createElement('div');
+                nodeEl.className = 'state-node';
+                nodeEl.style.left = node.left;
+                nodeEl.style.top = node.top;
+                nodeEl.textContent = node.text;
+                nodeEl.onclick = () => {
+                    showNotification(`🎯 ${node.text.split('\n')[0]} clicked!`, 'info');
+                    nodeEl.style.animation = 'pulse-active 1s';
+                    setTimeout(() => {
+                        nodeEl.style.animation = '';
+                    }, 1000);
+                };
+                diagram.appendChild(nodeEl);
+            });
+        }
+
+        function updateProgress(newProgress) {
+            if (newProgress > stateManager.progress) {
+                stateManager.progress = newProgress;
+                document.getElementById('progressBar').style.width = newProgress + '%';
+                document.getElementById('progressText').textContent = newProgress + '%';
+                localStorage.setItem('lesson7Progress', newProgress);
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            const color = type === 'success' ? 'var(--state-active)' : 
+                         type === 'error' ? 'var(--state-error)' : 
+                         type === 'warning' ? 'var(--state-warning)' : 'var(--state-info)';
+            
+            notification.innerHTML = `
+                <div style="width: 40px; height: 40px; background: ${color}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                    ${icon}
+                </div>
+                <div>
+                    <div style="font-weight: 800; font-size: 14px; margin-bottom: 4px;">
+                        ${type === 'success' ? 'Success!' : type === 'error' ? 'Error' : type === 'warning' ? 'Warning' : 'Info'}
+                    </div>
+                    <div style="font-size: 13px; color: var(--msebetsi-gray);">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100px)';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+
+        function createConfetti() {
+            const colors = ['#E50914', '#0072D2', '#46D369', '#9C27B0', '#FFD700', '#00B4D8'];
+            
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: ${Math.random() * 10 + 5}px;
+                    height: ${Math.random() * 10 + 5}px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                    top: -20px;
+                    left: ${Math.random() * 100}vw;
+                    animation: fall ${Math.random() * 3 + 2}s linear forwards;
+                    z-index: 9998;
+                    transform: rotate(${Math.random() * 360}deg);
+                `;
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 5000);
+            }
+            
+            // Add fall animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fall {
+                    to {
+                        transform: translateY(100vh) rotate(${Math.random() * 720}deg);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    </script>
+</body>
+</html>

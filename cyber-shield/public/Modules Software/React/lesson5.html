@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 5: Msebetsi Solutions Architecture & MovieRow System | Msebetsi Solutions Bootcamp</title>
+    <!-- Monaco Editor -->
+    <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs/editor/editor.main.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Dragula for drag & drop -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.css">
+    <style>
+        /* MSEBETSI SOLUTIONS DESIGN SYSTEM - Enhanced for Drag & Drop */
+        :root {
+            /* Msebetsi Solutions Colors */
+            --msebetsi-red: #E50914;
+            --msebetsi-red-dark: #B20710;
+            --msebetsi-black: #141414;
+            --msebetsi-dark-gray: #2D2D2D;
+            --msebetsi-gray: #B3B3B3;
+            --msebetsi-light-gray: #F5F5F5;
+            --msebetsi-white: #FFFFFF;
+            
+            /* Drag & Drop Colors */
+            --drag-blue: #4285F4;
+            --drag-green: #34A853;
+            --drag-yellow: #FBBC05;
+            --drag-red: #EA4335;
+            --drag-purple: #9C27B0;
+            
+            /* Gradients */
+            --gradient-red: linear-gradient(135deg, #E50914, #FF3333);
+            --gradient-blue: linear-gradient(135deg, #4285F4, #669DF6);
+            --gradient-dark: linear-gradient(135deg, #141414, #2D2D2D);
+            --gradient-drag: linear-gradient(135deg, #4285F4, #9C27B0);
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 12px;
+            --space-lg: 16px;
+            --space-xl: 20px;
+            --space-xxl: 32px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            color: var(--msebetsi-black);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--msebetsi-white);
+            border-bottom: 3px solid var(--msebetsi-red);
+            padding: var(--space-lg) var(--space-xl);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            gap: var(--space-md);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+        }
+        
+        .msebetsi-badge {
+            background: var(--gradient-red);
+            color: var(--msebetsi-white);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(229, 9, 20, 0.25);
+        }
+        
+        .msebetsi-logo {
+            color: var(--msebetsi-red);
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+        
+        .drag-drop-badge {
+            background: var(--gradient-drag);
+            color: white;
+            padding: var(--space-xs) var(--space-md);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: var(--space-sm);
+            animation: pulse 2s infinite;
+        }
+        
+        /* Progress */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+        }
+        
+        .progress-bar-wrapper {
+            width: 200px;
+            background: var(--msebetsi-light-gray);
+            border-radius: 20px;
+            height: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            width: 35%;
+            height: 100%;
+            background: var(--gradient-drag);
+            border-radius: 20px;
+            transition: width 0.7s ease;
+        }
+        
+        /* Main Layout */
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: var(--space-xl);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-xl);
+        }
+        
+        /* MovieRow Preview */
+        .movierow-preview-container {
+            background: var(--msebetsi-black);
+            border-radius: 10px;
+            padding: var(--space-xl);
+            margin: var(--space-lg) 0;
+            color: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            border: 1px solid #333;
+            overflow: hidden;
+        }
+        
+        .movierow-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+            flex-wrap: wrap;
+            gap: var(--space-md);
+        }
+        
+        .movierow-title {
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .see-all-btn {
+            background: transparent;
+            border: none;
+            color: var(--msebetsi-red);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            white-space: nowrap;
+        }
+        
+        .movie-cards-container {
+            display: flex;
+            gap: var(--space-md);
+            overflow-x: auto;
+            padding: var(--space-sm) 0;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .movie-card-preview {
+            min-width: 160px;
+            background: var(--msebetsi-dark-gray);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .movie-card-preview:hover {
+            transform: scale(1.03);
+        }
+        
+        .movie-thumbnail {
+            height: 90px;
+            background: linear-gradient(135deg, #666, #444);
+            position: relative;
+        }
+        
+        .msebetsi-badge-small {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: var(--msebetsi-red);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: 900;
+        }
+        
+        .movie-info {
+            padding: var(--space-md);
+        }
+        
+        .movie-title {
+            font-weight: 700;
+            margin-bottom: var(--space-xs);
+            font-size: 13px;
+        }
+        
+        .movie-meta {
+            font-size: 11px;
+            color: var(--msebetsi-gray);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        /* Drag & Drop Workspace */
+        .drag-drop-workspace {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin: var(--space-lg) 0;
+            border: 2px solid rgba(66, 133, 244, 0.1);
+        }
+        
+        .workspace-header {
+            background: var(--gradient-dark);
+            color: white;
+            padding: var(--space-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--space-md);
+        }
+        
+        .workspace-tabs {
+            display: flex;
+            gap: var(--space-xs);
+            background: rgba(255,255,255,0.1);
+            padding: var(--space-xs);
+            border-radius: 6px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: var(--space-sm) var(--space-md);
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--msebetsi-gray);
+            font-weight: 600;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        
+        .tab.active {
+            background: var(--drag-blue);
+            color: white;
+        }
+        
+        .workspace-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            height: auto;
+            min-height: 500px;
+        }
+        
+        /* Component Palette */
+        .component-palette {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            padding: var(--space-lg);
+            overflow-x: auto;
+        }
+        
+        .palette-title {
+            color: var(--msebetsi-black);
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .palette-components {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: var(--space-md);
+        }
+        
+        .component-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: var(--space-md);
+            cursor: move;
+            transition: all 0.2s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-height: 120px;
+        }
+        
+        .component-item:hover {
+            border-color: var(--drag-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.1);
+        }
+        
+        .component-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--gradient-blue);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .component-name {
+            font-weight: 600;
+            color: var(--msebetsi-black);
+            margin-bottom: var(--space-xs);
+            font-size: 14px;
+        }
+        
+        .component-desc {
+            font-size: 11px;
+            color: var(--msebetsi-gray);
+            line-height: 1.3;
+        }
+        
+        /* Build Area */
+        .build-area {
+            padding: var(--space-lg);
+            background: #f8fbff;
+            min-height: 300px;
+            position: relative;
+        }
+        
+        .build-area-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--msebetsi-gray);
+            text-align: center;
+            padding: var(--space-xl);
+        }
+        
+        .component-dropzone {
+            min-height: 300px;
+            border: 3px dashed #cfe2ff;
+            border-radius: 10px;
+            padding: var(--space-lg);
+            transition: all 0.3s ease;
+        }
+        
+        .component-dropzone.drag-over {
+            border-color: var(--drag-blue);
+            background: rgba(66, 133, 244, 0.05);
+        }
+        
+        .component-instance {
+            background: white;
+            border: 2px solid var(--drag-blue);
+            border-radius: 8px;
+            padding: var(--space-md);
+            margin-bottom: var(--space-md);
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .component-instance:hover .component-controls {
+            opacity: 1;
+        }
+        
+        .component-controls {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            display: flex;
+            gap: var(--space-xs);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .control-btn {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: none;
+            background: var(--drag-blue);
+            color: white;
+            font-size: 11px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Props Panel */
+        .props-panel {
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            padding: var(--space-lg);
+        }
+        
+        .props-title {
+            color: var(--msebetsi-black);
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .prop-control {
+            background: white;
+            border-radius: 6px;
+            padding: var(--space-md);
+            margin-bottom: var(--space-md);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .prop-label {
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            color: var(--msebetsi-black);
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            font-size: 14px;
+        }
+        
+        .prop-input {
+            width: 100%;
+            padding: var(--space-sm);
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        /* Code Preview */
+        .code-preview {
+            background: #1e1e1e;
+            color: #e0e0e0;
+            padding: var(--space-lg);
+            border-radius: 8px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            overflow-x: auto;
+            margin: var(--space-lg) 0;
+            max-width: 100%;
+        }
+        
+        .code-line {
+            padding: 2px 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-md) var(--space-lg);
+            background: var(--gradient-red);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(229, 9, 20, 0.25);
+        }
+        
+        .btn-blue {
+            background: var(--gradient-blue);
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        /* Responsive */
+        @media (min-width: 768px) {
+            .container {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .workspace-content {
+                grid-template-columns: 250px 1fr 250px;
+                height: 600px;
+            }
+            
+            .component-palette {
+                border-right: 1px solid #e9ecef;
+                border-bottom: none;
+                overflow-y: auto;
+            }
+            
+            .props-panel {
+                border-left: 1px solid #e9ecef;
+                border-top: none;
+                overflow-y: auto;
+            }
+            
+            .palette-components {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+            
+            .workspace-content {
+                grid-template-columns: 280px 1fr 300px;
+                height: 650px;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-md);
+            }
+            
+            .progress-container {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .progress-bar-wrapper {
+                flex-grow: 1;
+            }
+            
+            h1 {
+                font-size: 28px !important;
+            }
+            
+            .movierow-preview-container {
+                padding: var(--space-lg);
+            }
+            
+            .movie-card-preview {
+                min-width: 140px;
+            }
+            
+            .movie-thumbnail {
+                height: 80px;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        /* Ensure everything fits */
+        img, video, iframe {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Fix for very small screens */
+        @media (max-width: 480px) {
+            :root {
+                --space-xl: 16px;
+                --space-lg: 12px;
+                --space-md: 10px;
+            }
+            
+            .container {
+                padding: var(--space-md);
+            }
+            
+            .header {
+                padding: var(--space-md);
+            }
+            
+            .movie-card-preview {
+                min-width: 120px;
+            }
+            
+            .movie-thumbnail {
+                height: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-container">
+            <div class="msebetsi-badge">
+                <i class="fas fa-puzzle-piece"></i> DRAG & DROP BUILDER
+            </div>
+            <div>
+                <div class="msebetsi-logo">MSEBETSI SOLUTIONS</div>
+                <div style="display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap;">
+                    <div style="color: var(--msebetsi-dark-gray); font-weight: 700; font-size: 14px;">
+                        MovieRow Component System
+                    </div>
+                    <div class="drag-drop-badge">Lesson 5</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="progress-container">
+            <div style="font-weight: 700; color: var(--msebetsi-black); font-size: 14px;">
+                <i class="fas fa-film" style="color: var(--msebetsi-red); margin-right: 6px;"></i>
+                Lesson 5 of 15
+            </div>
+            <div class="progress-bar-wrapper">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div style="color: var(--msebetsi-red); font-weight: 800; font-size: 18px;" id="progressText">35%</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Left Column: Theory & Preview -->
+        <div>
+            <h1 style="color: var(--msebetsi-red); font-size: 32px; margin-bottom: var(--space-lg);">
+                <i class="fas fa-sitemap"></i> Msebetsi Solutions MovieRow System
+            </h1>
+            
+            <!-- Teacher Message -->
+            <div style="background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%); padding: var(--space-lg); border-radius: 12px; margin-bottom: var(--space-xl); border-left: 4px solid var(--msebetsi-red);">
+                <div style="display: flex; gap: var(--space-lg); align-items: flex-start;">
+                    <div style="width: 60px; height: 60px; background: var(--gradient-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; flex-shrink: 0;">
+                        TN
+                    </div>
+                    <div>
+                        <h3 style="color: var(--msebetsi-red); margin-bottom: var(--space-sm); font-size: 16px;">
+                            <i class="fas fa-user-tie"></i> Tshepho Nkoe, Msebetsi Solutions UI Architect:
+                        </h3>
+                        <p style="font-size: 14px;">"Msebetsi Solutions' homepage is built entirely from MovieRow components. Each row receives different props and renders a unique set of movies. Today, you'll build this system using drag-and-drop!"</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MovieRow Preview -->
+            <div class="movierow-preview-container">
+                <div class="movierow-header">
+                    <div class="movierow-title">🎬 Trending Now</div>
+                    <button class="see-all-btn">
+                        SEE ALL <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <div class="movie-cards-container">
+                    <!-- Movie Cards (same as before but now responsive) -->
+                    <div class="movie-card-preview">
+                        <div class="movie-thumbnail">
+                            <div class="msebetsi-badge-small">MSEBETSI</div>
+                        </div>
+                        <div class="movie-info">
+                            <div class="movie-title">Stranger Things</div>
+                            <div class="movie-meta">
+                                <span>2016</span>
+                                <span>TV-14</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="movie-card-preview">
+                        <div class="movie-thumbnail">
+                            <div class="msebetsi-badge-small">MSEBETSI</div>
+                        </div>
+                        <div class="movie-info">
+                            <div class="movie-title">The Crown</div>
+                            <div class="movie-meta">
+                                <span>2016</span>
+                                <span>TV-MA</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="movie-card-preview">
+                        <div class="movie-thumbnail">
+                            <div class="msebetsi-badge-small">MSEBETSI</div>
+                        </div>
+                        <div class="movie-info">
+                            <div class="movie-title">Bird Box</div>
+                            <div class="movie-meta">
+                                <span>2018</span>
+                                <span>TV-MA</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="movie-card-preview">
+                        <div class="movie-thumbnail">
+                            <div class="msebetsi-badge-small">MSEBETSI</div>
+                        </div>
+                        <div class="movie-info">
+                            <div class="movie-title">Red Notice</div>
+                            <div class="movie-meta">
+                                <span>2021</span>
+                                <span>PG-13</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Component Hierarchy -->
+            <div style="background: white; padding: var(--space-lg); border-radius: 12px; margin: var(--space-xl) 0; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
+                <h2 style="color: var(--msebetsi-black); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); font-size: 20px;">
+                    <i class="fas fa-project-diagram" style="color: var(--drag-blue);"></i> Component Hierarchy
+                </h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--space-md); margin: var(--space-lg) 0;">
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background: var(--gradient-red); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold; margin: 0 auto var(--space-sm);">
+                            A
+                        </div>
+                        <div style="font-weight: 700; font-size: 13px;">App.jsx</div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; justify-content: center;">
+                        <div style="font-size: 20px; color: var(--drag-blue);">→</div>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background: var(--gradient-blue); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold; margin: 0 auto var(--space-sm);">
+                            H
+                        </div>
+                        <div style="font-weight: 700; font-size: 13px;">HomePage.jsx</div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; justify-content: center;">
+                        <div style="font-size: 20px; color: var(--drag-blue);">→</div>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background: var(--gradient-drag); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold; margin: 0 auto var(--space-sm);">
+                            MR
+                        </div>
+                        <div style="font-weight: 700; font-size: 13px;">MovieRow.jsx</div>
+                        <div style="font-size: 11px; color: var(--msebetsi-gray); margin-top: var(--space-xs);">
+                            props: category, movies
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; justify-content: center;">
+                        <div style="font-size: 20px; color: var(--drag-blue);">→</div>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--drag-green), #2E7D32); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold; margin: 0 auto var(--space-sm);">
+                            MC
+                        </div>
+                        <div style="font-weight: 700; font-size: 13px;">MovieCard.jsx</div>
+                        <div style="font-size: 11px; color: var(--msebetsi-gray); margin-top: var(--space-xs);">
+                            props: title, year, rating
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: var(--space-md); border-radius: 10px; margin-top: var(--space-lg);">
+                    <h4 style="color: var(--msebetsi-black); margin-bottom: var(--space-sm); font-size: 16px;">
+                        <i class="fas fa-lightbulb"></i> How Props Flow:
+                    </h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-md);">
+                        <div style="background: white; padding: var(--space-md); border-radius: 8px; border-left: 3px solid var(--drag-blue);">
+                            <div style="font-weight: 700; color: var(--drag-blue); font-size: 14px;">Parent → Child</div>
+                            <div style="font-size: 12px; color: var(--msebetsi-gray);">Data flows down through props</div>
+                        </div>
+                        <div style="background: white; padding: var(--space-md); border-radius: 8px; border-left: 3px solid var(--drag-green);">
+                            <div style="font-weight: 700; color: var(--drag-green); font-size: 14px;">Child → Parent</div>
+                            <div style="font-size: 12px; color: var(--msebetsi-gray);">Events bubble up with callbacks</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Interactive Builder -->
+        <div>
+            <!-- Drag & Drop Workspace -->
+            <div class="drag-drop-workspace">
+                <div class="workspace-header">
+                    <div>
+                        <span style="font-weight: 800; font-size: 18px;">🏗️ Drag & Drop MovieRow Builder</span>
+                        <span style="color: var(--msebetsi-gray); margin-left: 10px; font-size: 13px; display: block; margin-top: 4px;">Build Msebetsi Solutions homepage interactively</span>
+                    </div>
+                    <div class="workspace-tabs">
+                        <div class="tab active" onclick="switchTab('build')">
+                            <i class="fas fa-cube"></i> Build
+                        </div>
+                        <div class="tab" onclick="switchTab('code')">
+                            <i class="fas fa-code"></i> Code
+                        </div>
+                        <div class="tab" onclick="switchTab('preview')">
+                            <i class="fas fa-eye"></i> Preview
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="workspace-content">
+                    <!-- Component Palette -->
+                    <div class="component-palette">
+                        <div class="palette-title">
+                            <i class="fas fa-shapes"></i> Components
+                        </div>
+                        
+                        <div class="palette-components">
+                            <div class="component-item" draggable="true" data-component="MovieRow">
+                                <div class="component-icon">
+                                    <i class="fas fa-film"></i>
+                                </div>
+                                <div class="component-name">MovieRow</div>
+                                <div class="component-desc">Container for movie cards</div>
+                            </div>
+                            
+                            <div class="component-item" draggable="true" data-component="MovieCard">
+                                <div class="component-icon" style="background: linear-gradient(135deg, var(--drag-green), #2E7D32);">
+                                    <i class="fas fa-video"></i>
+                                </div>
+                                <div class="component-name">MovieCard</div>
+                                <div class="component-desc">Individual movie display</div>
+                            </div>
+                            
+                            <div class="component-item" draggable="true" data-component="HeroSection">
+                                <div class="component-icon" style="background: var(--gradient-red);">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <div class="component-name">HeroSection</div>
+                                <div class="component-desc">Featured content banner</div>
+                            </div>
+                            
+                            <div class="component-item" draggable="true" data-component="Navbar">
+                                <div class="component-icon" style="background: linear-gradient(135deg, #666, #444);">
+                                    <i class="fas fa-bars"></i>
+                                </div>
+                                <div class="component-name">Navbar</div>
+                                <div class="component-desc">Navigation header</div>
+                            </div>
+                            
+                            <div class="component-item" draggable="true" data-component="Footer">
+                                <div class="component-icon" style="background: linear-gradient(135deg, #333, #000);">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+                                <div class="component-name">Footer</div>
+                                <div class="component-desc">Bottom information</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: var(--space-xl); padding: var(--space-md); background: rgba(66, 133, 244, 0.1); border-radius: 8px;">
+                            <div style="font-weight: 700; color: var(--drag-blue); margin-bottom: var(--space-xs); font-size: 14px;">
+                                <i class="fas fa-graduation-cap"></i> How to Build:
+                            </div>
+                            <ol style="margin-left: var(--space-md); font-size: 12px; color: var(--msebetsi-dark-gray);">
+                                <li>Drag components to the Build Area</li>
+                                <li>Arrange them in hierarchy order</li>
+                                <li>Configure props in the right panel</li>
+                                <li>Generate code automatically</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <!-- Build Area -->
+                    <div class="build-area" id="buildArea">
+                        <div class="component-dropzone" id="dropZone">
+                            <div class="build-area-empty" id="emptyMessage">
+                                <div style="font-size: 40px; color: #cfe2ff; margin-bottom: var(--space-md);">
+                                    <i class="fas fa-hand-pointer"></i>
+                                </div>
+                                <div style="font-size: 16px; font-weight: 700; color: var(--drag-blue); margin-bottom: var(--space-sm);">
+                                    Drag components here
+                                </div>
+                                <div style="color: var(--msebetsi-gray); max-width: 300px; font-size: 14px;">
+                                    Start building your Msebetsi Solutions homepage by dragging components from the left panel
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Props Panel -->
+                    <div class="props-panel" id="propsPanel">
+                        <div class="props-title">
+                            <i class="fas fa-sliders-h"></i> Component Props
+                        </div>
+                        
+                        <div id="propsContent">
+                            <div style="text-align: center; color: var(--msebetsi-gray); padding: var(--space-xl);">
+                                <i class="fas fa-mouse-pointer" style="font-size: 28px; margin-bottom: var(--space-md);"></i>
+                                <div style="font-size: 14px;">Select a component to edit its props</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generated Code Preview -->
+            <div id="codePreview" style="display: none;">
+                <div style="background: white; padding: var(--space-lg); border-radius: 12px; margin: var(--space-lg) 0; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
+                    <h2 style="color: var(--msebetsi-black); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); font-size: 20px;">
+                        <i class="fas fa-code" style="color: var(--drag-blue);"></i> Generated Code
+                    </h2>
+                    
+                    <div class="code-preview" id="generatedCode">
+                        // Your generated code will appear here
+                    </div>
+                    
+                    <div style="display: flex; gap: var(--space-md); margin-top: var(--space-lg); flex-wrap: wrap;">
+                        <button class="btn" onclick="copyCode()" style="flex: 1; min-width: 120px;">
+                            <i class="fas fa-copy"></i> Copy Code
+                        </button>
+                        <button class="btn btn-blue" onclick="downloadCode()" style="flex: 1; min-width: 120px;">
+                            <i class="fas fa-download"></i> Download Files
+                        </button>
+                        <button class="btn" style="background: linear-gradient(135deg, var(--drag-green), #2E7D32); flex: 1; min-width: 120px;" onclick="runCode()">
+                            <i class="fas fa-play"></i> Run Preview
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Preview -->
+            <div id="livePreview" style="display: none;">
+                <div style="background: white; padding: var(--space-lg); border-radius: 12px; margin: var(--space-lg) 0; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
+                    <h2 style="color: var(--msebetsi-black); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); font-size: 20px;">
+                        <i class="fas fa-eye" style="color: var(--drag-green);"></i> Live Preview
+                    </h2>
+                    
+                    <div id="previewContainer" style="min-height: 300px; background: #f8f9fa; border-radius: 10px; padding: var(--space-lg);">
+                        <!-- Preview will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step-by-Step Guide -->
+            <div style="background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%); padding: var(--space-lg); border-radius: 12px; margin: var(--space-lg) 0; border: 2px solid #e3f2fd;">
+                <h2 style="color: var(--msebetsi-black); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); font-size: 20px;">
+                    <i class="fas fa-map" style="color: var(--drag-purple);"></i> Build Msebetsi Solutions Homepage: Step-by-Step
+                </h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-lg);">
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background: var(--gradient-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold; margin: 0 auto var(--space-md);">
+                            1
+                        </div>
+                        <div style="font-weight: 700; margin-bottom: var(--space-xs); font-size: 14px;">Drag Navbar</div>
+                        <div style="font-size: 12px; color: var(--msebetsi-gray);">Start with navigation header</div>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background: var(--gradient-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold; margin: 0 auto var(--space-md);">
+                            2
+                        </div>
+                        <div style="font-weight: 700; margin-bottom: var(--space-xs); font-size: 14px;">Add HeroSection</div>
+                        <div style="font-size: 12px; color: var(--msebetsi-gray);">Featured movie banner</div>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background: var(--gradient-drag); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold; margin: 0 auto var(--space-md);">
+                            3
+                        </div>
+                        <div style="font-weight: 700; margin-bottom: var(--space-xs); font-size: 14px;">Add MovieRows</div>
+                        <div style="font-size: 12px; color: var(--msebetsi-gray);">Multiple rows with props</div>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--drag-green), #2E7D32); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold; margin: 0 auto var(--space-md);">
+                            4
+                        </div>
+                        <div style="font-weight: 700; margin-bottom: var(--space-xs); font-size: 14px;">Finish with Footer</div>
+                        <div style="font-size: 12px; color: var(--msebetsi-gray);">Bottom information</div>
+                    </div>
+                </div>
+                
+                <div style="background: white; padding: var(--space-md); border-radius: 10px; margin-top: var(--space-lg);">
+                    <h4 style="color: var(--msebetsi-black); margin-bottom: var(--space-sm); font-size: 16px;">
+                        <i class="fas fa-magic"></i> Pro Tip:
+                    </h4>
+                    <p style="font-size: 14px;">Each MovieRow can have different props: "Trending Now", "Continue Watching", "Msebetsi Solutions Originals". Try creating multiple rows with different movie data!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript (same as before but will work with new structure) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js"></script>
+    <script>
+        // State management
+        let components = [];
+        let selectedComponent = null;
+        let progress = localStorage.getItem('lesson5Progress') || 35;
+        
+        // Msebetsi Solutions movie data
+        const movieData = {
+            trending: [
+                { id: 1, title: "Stranger Things", year: 2016, rating: "TV-14", isMsebetsiOriginal: true },
+                { id: 2, title: "The Crown", year: 2016, rating: "TV-MA", isMsebetsiOriginal: true },
+                { id: 3, title: "Bird Box", year: 2018, rating: "TV-MA", isMsebetsiOriginal: true },
+                { id: 4, title: "Red Notice", year: 2021, rating: "PG-13", isMsebetsiOriginal: true }
+            ],
+            continueWatching: [
+                { id: 5, title: "Ozark", year: 2017, rating: "TV-MA", isMsebetsiOriginal: true },
+                { id: 6, title: "The Queen's Gambit", year: 2020, rating: "TV-MA", isMsebetsiOriginal: true },
+                { id: 7, title: "Wednesday", year: 2022, rating: "TV-14", isMsebetsiOriginal: true }
+            ],
+            originals: [
+                { id: 8, title: "Squid Game", year: 2021, rating: "TV-MA", isMsebetsiOriginal: true },
+                { id: 9, title: "The Witcher", year: 2019, rating: "TV-MA", isMsebetsiOriginal: true },
+                { id: 10, title: "Bridgerton", year: 2020, rating: "TV-MA", isMsebetsiOriginal: true }
+            ]
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set progress
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = progress + '%';
+            
+            // Setup drag and drop
+            setupDragAndDrop();
+            
+            // Make component palette items draggable
+            setupComponentPalette();
+            
+            // Load saved state
+            loadState();
+        });
+        
+        // Setup drag and drop
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('dropZone');
+            
+            // Allow drop
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('drag-over');
+            });
+            
+            dropZone.addEventListener('dragleave', function() {
+                this.classList.remove('drag-over');
+            });
+            
+            // Handle drop
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+                
+                const componentType = e.dataTransfer.getData('component');
+                if (componentType) {
+                    addComponent(componentType);
+                }
+            });
+            
+            // Make components in palette draggable
+            document.querySelectorAll('.component-item').forEach(item => {
+                item.addEventListener('dragstart', function(e) {
+                    e.dataTransfer.setData('component', this.dataset.component);
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+            });
+        }
+        
+        // Setup component palette
+        function setupComponentPalette() {
+            // Add drag event listeners
+            const componentItems = document.querySelectorAll('.component-item');
+            componentItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    addComponent(this.dataset.component);
+                });
+            });
+        }
+        
+        // Add component to build area
+        function addComponent(type) {
+            const dropZone = document.getElementById('dropZone');
+            const emptyMessage = document.getElementById('emptyMessage');
+            
+            // Hide empty message
+            if (emptyMessage) {
+                emptyMessage.style.display = 'none';
+            }
+            
+            // Create component instance
+            const componentId = 'comp_' + Date.now();
+            const component = {
+                id: componentId,
+                type: type,
+                props: getDefaultProps(type),
+                children: []
+            };
+            
+            // Add to state
+            components.push(component);
+            
+            // Create HTML element
+            const element = createComponentElement(component);
+            dropZone.appendChild(element);
+            
+            // Update progress
+            updateProgress(40);
+            
+            // Save state
+            saveState();
+            
+            // Show notification
+            showNotification(`Added ${type} component`, 'success');
+        }
+        
+        // Get default props for component type
+        function getDefaultProps(type) {
+            switch(type) {
+                case 'MovieRow':
+                    return {
+                        category: 'Trending Now',
+                        movies: movieData.trending,
+                        isCompact: false,
+                        showCount: true
+                    };
+                case 'MovieCard':
+                    return {
+                        title: 'Movie Title',
+                        year: 2023,
+                        rating: 'PG-13',
+                        isMsebetsiOriginal: true,
+                        isInMyList: false
+                    };
+                case 'HeroSection':
+                    return {
+                        title: 'Featured Movie',
+                        description: 'An amazing description here',
+                        year: 2023,
+                        rating: 'TV-MA',
+                        backgroundImage: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1'
+                    };
+                case 'Navbar':
+                    return {
+                        logo: 'MSEBETSI SOLUTIONS',
+                        menuItems: ['Home', 'TV Shows', 'Movies', 'New & Popular', 'My List'],
+                        showSearch: true
+                    };
+                case 'Footer':
+                    return {
+                        copyright: '© 2024 Msebetsi Solutions, Inc.',
+                        links: ['FAQ', 'Help Center', 'Account', 'Media Center']
+                    };
+                default:
+                    return {};
+            }
+        }
+        
+        // Create component HTML element
+        function createComponentElement(component) {
+            const element = document.createElement('div');
+            element.className = 'component-instance';
+            element.id = component.id;
+            element.dataset.componentId = component.id;
+            
+            // Create element content based on type
+            let content = '';
+            switch(component.type) {
+                case 'MovieRow':
+                    content = `
+                        <div style="display: flex; align-items: center; gap: ${component.props.isCompact ? '8px' : '12px'};">
+                            <div style="width: 36px; height: 36px; background: var(--gradient-drag); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white;">
+                                <i class="fas fa-film"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 700; color: var(--msebetsi-black); font-size: 14px;">MovieRow: ${component.props.category}</div>
+                                <div style="font-size: 11px; color: var(--msebetsi-gray);">${component.props.movies.length} movies</div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'MovieCard':
+                    content = `
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 36px; height: 36px; background: linear-gradient(135deg, var(--drag-green), #2E7D32); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white;">
+                                <i class="fas fa-video"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 700; color: var(--msebetsi-black); font-size: 14px;">MovieCard: ${component.props.title}</div>
+                                <div style="font-size: 11px; color: var(--msebetsi-gray);">${component.props.year} • ${component.props.rating}</div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                default:
+                    content = `
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 36px; height: 36px; background: var(--drag-blue); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white;">
+                                <i class="fas fa-cube"></i>
+                            </div>
+                            <div style="font-weight: 700; color: var(--msebetsi-black); font-size: 14px;">${component.type}</div>
+                        </div>
+                    `;
+            }
+            
+            element.innerHTML = content + `
+                <div class="component-controls">
+                    <button class="control-btn" onclick="editComponent('${component.id}')" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="control-btn" onclick="deleteComponent('${component.id}')" title="Delete" style="background: var(--drag-red);">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            // Add click handler
+            element.addEventListener('click', (e) => {
+                if (!e.target.closest('.component-controls')) {
+                    editComponent(component.id);
+                }
+            });
+            
+            return element;
+        }
+        
+        // Edit component
+        function editComponent(componentId) {
+            const component = components.find(c => c.id === componentId);
+            if (!component) return;
+            
+            selectedComponent = component;
+            showPropsPanel(component);
+        }
+        
+        // Show props panel for component
+        function showPropsPanel(component) {
+            const propsContent = document.getElementById('propsContent');
+            let propsHTML = '';
+            
+            switch(component.type) {
+                case 'MovieRow':
+                    propsHTML = `
+                        <h3 style="color: var(--msebetsi-black); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); font-size: 16px;">
+                            <i class="fas fa-film"></i> MovieRow Props
+                        </h3>
+                        
+                        <div class="prop-control">
+                            <div class="prop-label">
+                                <i class="fas fa-heading"></i> Category Title
+                            </div>
+                            <input type="text" class="prop-input" value="${component.props.category}" 
+                                   onchange="updateProp('category', this.value)" 
+                                   placeholder="e.g., Trending Now">
+                        </div>
+                        
+                        <div class="prop-control">
+                            <div class="prop-label">
+                                <i class="fas fa-list"></i> Movie Data
+                            </div>
+                            <select class="prop-input" onchange="updateMovieData(this.value)">
+                                <option value="trending" ${component.props.movies === movieData.trending ? 'selected' : ''}>Trending Movies</option>
+                                <option value="continueWatching" ${component.props.movies === movieData.continueWatching ? 'selected' : ''}>Continue Watching</option>
+                                <option value="originals" ${component.props.movies === movieData.originals ? 'selected' : ''}>Msebetsi Solutions Originals</option>
+                            </select>
+                        </div>
+                        
+                        <div class="prop-control">
+                            <div class="prop-label">
+                                <i class="fas fa-compress"></i> Compact Layout
+                            </div>
+                            <label style="display: flex; align-items: center; gap: var(--space-sm);">
+                                <input type="checkbox" ${component.props.isCompact ? 'checked' : ''} 
+                                       onchange="updateProp('isCompact', this.checked)">
+                                <span style="font-size: 13px;">Use compact layout for mobile</span>
+                            </label>
+                        </div>
+                        
+                        <div class="prop-control">
+                            <div class="prop-label">
+                                <i class="fas fa-hashtag"></i> Show Count
+                            </div>
+                            <label style="display: flex; align-items: center; gap: var(--space-sm);">
+                                <input type="checkbox" ${component.props.showCount ? 'checked' : ''} 
+                                       onchange="updateProp('showCount', this.checked)">
+                                <span style="font-size: 13px;">Show movie count in title</span>
+                            </label>
+                        </div>
+                        
+                        <div style="background: rgba(66, 133, 244, 0.1); padding: var(--space-md); border-radius: 8px; margin-top: var(--space-xl);">
+                            <div style="font-weight: 700; color: var(--drag-blue); margin-bottom: var(--space-xs); font-size: 14px;">
+                                <i class="fas fa-info-circle"></i> About MovieRow:
+                            </div>
+                            <div style="font-size: 12px; color: var(--msebetsi-dark-gray);">
+                                The MovieRow component is reusable. Msebetsi Solutions uses it for different categories like "Trending Now", "Continue Watching", and "Msebetsi Solutions Originals".
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'MovieCard':
+                    propsHTML = `
+                        <h3 style="color: var(--msebetsi-black); margin-bottom: var(--space-lg); font-size: 16px;">
+                            <i class="fas fa-video"></i> MovieCard Props
+                        </h3>
+                        
+                        <div class="prop-control">
+                            <div class="prop-label">
+                                <i class="fas fa-font"></i> Title
+                            </div>
+                            <input type="text" class="prop-input" value="${component.props.title}" 
+                                   onchange="updateProp('title', this.value)">
+                        </div>
+                        
+                        <div class="prop-control">
+                            <div class="prop-label">
+                                <i class="fas fa-calendar"></i> Year
+                            </div>
+                            <input type="number" class="prop-input" value="${component.props.year}" 
+                                   onchange="updateProp('year', parseInt(this.value))">
+                        </div>
+                        
+                        <div class="prop-control">
+                            <div class="prop-label">
+                                <i class="fas fa-certificate"></i> Rating
+                            </div>
+                            <select class="prop-input" onchange="updateProp('rating', this.value)">
+                                <option value="G" ${component.props.rating === 'G' ? 'selected' : ''}>G</option>
+                                <option value="PG" ${component.props.rating === 'PG' ? 'selected' : ''}>PG</option>
+                                <option value="PG-13" ${component.props.rating === 'PG-13' ? 'selected' : ''}>PG-13</option>
+                                <option value="R" ${component.props.rating === 'R' ? 'selected' : ''}>R</option>
+                                <option value="TV-MA" ${component.props.rating === 'TV-MA' ? 'selected' : ''}>TV-MA</option>
+                                <option value="TV-14" ${component.props.rating === 'TV-14' ? 'selected' : ''}>TV-14</option>
+                            </select>
+                        </div>
+                        
+                        <div class="prop-control">
+                            <div class="prop-label">
+                                <i class="fas fa-star"></i> Msebetsi Solutions Original
+                            </div>
+                            <label style="display: flex; align-items: center; gap: var(--space-sm);">
+                                <input type="checkbox" ${component.props.isMsebetsiOriginal ? 'checked' : ''} 
+                                       onchange="updateProp('isMsebetsiOriginal', this.checked)">
+                                <span style="font-size: 13px;">Show Msebetsi Solutions Original badge</span>
+                            </label>
+                        </div>
+                    `;
+                    break;
+                    
+                default:
+                    propsHTML = `
+                        <div style="text-align: center; padding: var(--space-xl); color: var(--msebetsi-gray);">
+                            <i class="fas fa-cogs" style="font-size: 28px; margin-bottom: var(--space-md);"></i>
+                            <div style="font-size: 14px;">Props editing for ${component.type} coming soon!</div>
+                        </div>
+                    `;
+            }
+            
+            propsContent.innerHTML = propsHTML;
+        }
+        
+        // Update component prop
+        function updateProp(propName, value) {
+            if (!selectedComponent) return;
+            
+            selectedComponent.props[propName] = value;
+            
+            // Update component display
+            updateComponentDisplay(selectedComponent.id);
+            
+            // Save state
+            saveState();
+            
+            // Update progress
+            updateProgress(45);
+        }
+        
+        // Update movie data
+        function updateMovieData(dataSet) {
+            if (!selectedComponent) return;
+            
+            selectedComponent.props.movies = movieData[dataSet];
+            updateComponentDisplay(selectedComponent.id);
+            saveState();
+            updateProgress(50);
+        }
+        
+        // Update component display
+        function updateComponentDisplay(componentId) {
+            const element = document.getElementById(componentId);
+            if (!element) return;
+            
+            const component = components.find(c => c.id === componentId);
+            if (!component) return;
+            
+            // Create new content
+            const newElement = createComponentElement(component);
+            
+            // Replace element
+            element.outerHTML = newElement.outerHTML;
+        }
+        
+        // Delete component
+        function deleteComponent(componentId) {
+            if (!confirm('Delete this component?')) return;
+            
+            // Remove from state
+            components = components.filter(c => c.id !== componentId);
+            
+            // Remove from DOM
+            const element = document.getElementById(componentId);
+            if (element) {
+                element.remove();
+            }
+            
+            // Clear props panel if this was selected
+            if (selectedComponent && selectedComponent.id === componentId) {
+                selectedComponent = null;
+                document.getElementById('propsContent').innerHTML = `
+                    <div style="text-align: center; color: var(--msebetsi-gray); padding: var(--space-xl);">
+                        <i class="fas fa-mouse-pointer" style="font-size: 28px; margin-bottom: var(--space-md);"></i>
+                        <div style="font-size: 14px;">Select a component to edit its props</div>
+                    </div>
+                `;
+            }
+            
+            // Show empty message if no components
+            if (components.length === 0) {
+                document.getElementById('emptyMessage').style.display = 'flex';
+            }
+            
+            saveState();
+        }
+        
+        // Tab switching
+        function switchTab(tabName) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show/hide content
+            if (tabName === 'build') {
+                document.querySelector('.workspace-content').style.display = 'grid';
+                document.getElementById('codePreview').style.display = 'none';
+                document.getElementById('livePreview').style.display = 'none';
+            } else if (tabName === 'code') {
+                document.querySelector('.workspace-content').style.display = 'none';
+                document.getElementById('codePreview').style.display = 'block';
+                document.getElementById('livePreview').style.display = 'none';
+                generateCode();
+            } else if (tabName === 'preview') {
+                document.querySelector('.workspace-content').style.display = 'none';
+                document.getElementById('codePreview').style.display = 'none';
+                document.getElementById('livePreview').style.display = 'block';
+                renderPreview();
+            }
+        }
+        
+        // Generate React code
+        function generateCode() {
+            let code = '';
+            
+            // Import statements
+            code += `// Msebetsi Solutions Homepage - Generated by Drag & Drop Builder\n`;
+            code += `import React from 'react';\n`;
+            code += `import './App.css';\n\n`;
+            
+            // Movie data
+            code += `// Movie Data\n`;
+            code += `const movieData = ${JSON.stringify(movieData, null, 2)};\n\n`;
+            
+            // Component definitions
+            components.forEach(component => {
+                code += generateComponentCode(component);
+            });
+            
+            // Main App component
+            code += `// Main App Component\n`;
+            code += `function App() {\n`;
+            code += `  return (\n`;
+            code += `    <div className="msebetsi-app">\n`;
+            
+            components.forEach(component => {
+                code += `      ${generateComponentJSX(component)}\n`;
+            });
+            
+            code += `    </div>\n`;
+            code += `  );\n`;
+            code += `}\n\n`;
+            code += `export default App;\n`;
+            
+            // Display code
+            document.getElementById('generatedCode').textContent = code;
+            updateProgress(60);
+        }
+        
+        // Generate component code
+        function generateComponentCode(component) {
+            switch(component.type) {
+                case 'MovieRow':
+                    return `
+// MovieRow Component
+function MovieRow({ category = "${component.props.category}", movies = ${JSON.stringify(component.props.movies)}, isCompact = ${component.props.isCompact} }) {
+  return (
+    <div className={\`movie-row \${isCompact ? 'compact' : ''}\`}>
+      <div className="movie-row-header">
+        <h2 className="movie-row-title">{category}</h2>
+        <button className="see-all-btn">See All</button>
+      </div>
+      <div className="movie-cards-container">
+        {movies.map(movie => (
+          <MovieCard
+            key={movie.id}
+            title={movie.title}
+            year={movie.year}
+            rating={movie.rating}
+            isMsebetsiOriginal={movie.isMsebetsiOriginal}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+`;
+                    
+                case 'MovieCard':
+                    return `
+// MovieCard Component
+function MovieCard({ 
+  title = "${component.props.title}", 
+  year = ${component.props.year}, 
+  rating = "${component.props.rating}",
+  isMsebetsiOriginal = ${component.props.isMsebetsiOriginal}
+}) {
+  return (
+    <div className="movie-card">
+      <div className="movie-card-thumbnail">
+        {isMsebetsiOriginal && <span className="msebetsi-badge">MSEBETSI</span>}
+      </div>
+      <div className="movie-card-info">
+        <h3 className="movie-card-title">{title}</h3>
+        <div className="movie-card-meta">
+          <span className="movie-year">{year}</span>
+          <span className="movie-rating">{rating}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+`;
+                    
+                default:
+                    return `
+// ${component.type} Component
+function ${component.type}() {
+  return (
+    <div className="${component.type.toLowerCase()}">
+      {/* ${component.type} content */}
+    </div>
+  );
+}
+
+`;
+            }
+        }
+        
+        // Generate JSX for component
+        function generateComponentJSX(component) {
+            switch(component.type) {
+                case 'MovieRow':
+                    return `<MovieRow category="${component.props.category}" movies={movieData.${getMovieDataSet(component.props.movies)}} isCompact={${component.props.isCompact}} />`;
+                case 'MovieCard':
+                    return `<MovieCard title="${component.props.title}" year={${component.props.year}} rating="${component.props.rating}" />`;
+                default:
+                    return `<${component.type} />`;
+            }
+        }
+        
+        // Get movie dataset name
+        function getMovieDataSet(movies) {
+            if (movies === movieData.trending) return 'trending';
+            if (movies === movieData.continueWatching) return 'continueWatching';
+            if (movies === movieData.originals) return 'originals';
+            return 'trending';
+        }
+        
+        // Render preview
+        function renderPreview() {
+            const previewContainer = document.getElementById('previewContainer');
+            let previewHTML = `
+                <style>
+                    .preview-movie-row {
+                        background: #141414;
+                        border-radius: 10px;
+                        padding: 20px;
+                        margin-bottom: 24px;
+                        color: white;
+                    }
+                    .preview-movie-row-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 16px;
+                        flex-wrap: wrap;
+                    }
+                    .preview-movie-row-title {
+                        color: white;
+                        font-size: 20px;
+                        font-weight: 700;
+                    }
+                    .preview-see-all {
+                        background: transparent;
+                        border: none;
+                        color: #e50914;
+                        font-size: 13px;
+                        font-weight: 600;
+                        cursor: pointer;
+                    }
+                    .preview-movie-cards {
+                        display: flex;
+                        gap: 12px;
+                        overflow-x: auto;
+                        padding: 8px 0;
+                        -webkit-overflow-scrolling: touch;
+                    }
+                    .preview-movie-card {
+                        min-width: 150px;
+                        background: #2d2d2d;
+                        border-radius: 6px;
+                        overflow: hidden;
+                        flex-shrink: 0;
+                    }
+                    .preview-movie-thumbnail {
+                        height: 80px;
+                        background: #666;
+                        position: relative;
+                    }
+                    .preview-msebetsi-badge {
+                        position: absolute;
+                        top: 8px;
+                        left: 8px;
+                        background: #e50914;
+                        color: white;
+                        padding: 2px 6px;
+                        border-radius: 3px;
+                        font-size: 9px;
+                        font-weight: 900;
+                    }
+                    .preview-movie-info {
+                        padding: 12px;
+                    }
+                    .preview-movie-title {
+                        font-weight: 700;
+                        margin-bottom: 6px;
+                        font-size: 13px;
+                    }
+                    .preview-movie-meta {
+                        font-size: 11px;
+                        color: #b3b3b3;
+                        display: flex;
+                        justify-content: space-between;
+                    }
+                </style>
+            `;
+            
+            // Add each component to preview
+            components.forEach(component => {
+                if (component.type === 'MovieRow') {
+                    previewHTML += `
+                        <div class="preview-movie-row">
+                            <div class="preview-movie-row-header">
+                                <div class="preview-movie-row-title">${component.props.category}</div>
+                                <button class="preview-see-all">SEE ALL →</button>
+                            </div>
+                            <div class="preview-movie-cards">
+                    `;
+                    
+                    component.props.movies.forEach(movie => {
+                        previewHTML += `
+                            <div class="preview-movie-card">
+                                <div class="preview-movie-thumbnail">
+                                    ${movie.isMsebetsiOriginal ? '<div class="preview-msebetsi-badge">MSEBETSI</div>' : ''}
+                                </div>
+                                <div class="preview-movie-info">
+                                    <div class="preview-movie-title">${movie.title}</div>
+                                    <div class="preview-movie-meta">
+                                        <span>${movie.year}</span>
+                                        <span>${movie.rating}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    previewHTML += `
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            previewContainer.innerHTML = previewHTML;
+            updateProgress(70);
+        }
+        
+        // Copy code to clipboard
+        function copyCode() {
+            const code = document.getElementById('generatedCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showNotification('Code copied to clipboard!', 'success');
+            });
+        }
+        
+        // Download code
+        function downloadCode() {
+            const code = document.getElementById('generatedCode').textContent;
+            const blob = new Blob([code], { type: 'text/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'MsebetsiSolutionsHomepage.jsx';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('File downloaded as MsebetsiSolutionsHomepage.jsx', 'success');
+            updateProgress(80);
+        }
+        
+        // Run preview
+        function runCode() {
+            showNotification('Running live preview... Check the Preview tab!', 'info');
+            switchTab('preview');
+        }
+        
+        // Save state to localStorage
+        function saveState() {
+            const state = {
+                components: components,
+                progress: progress
+            };
+            localStorage.setItem('msebetsiBuilderState', JSON.stringify(state));
+        }
+        
+        // Load state from localStorage
+        function loadState() {
+            const saved = localStorage.getItem('msebetsiBuilderState');
+            if (saved) {
+                try {
+                    const state = JSON.parse(saved);
+                    components = state.components || [];
+                    progress = state.progress || 35;
+                    
+                    // Rebuild UI
+                    components.forEach(component => {
+                        const element = createComponentElement(component);
+                        document.getElementById('dropZone').appendChild(element);
+                    });
+                    
+                    // Hide empty message if components exist
+                    if (components.length > 0) {
+                        document.getElementById('emptyMessage').style.display = 'none';
+                    }
+                    
+                    // Update progress display
+                    document.getElementById('progressBar').style.width = progress + '%';
+                    document.getElementById('progressText').textContent = progress + '%';
+                    
+                } catch (e) {
+                    console.error('Failed to load state:', e);
+                }
+            }
+        }
+        
+        // Update progress
+        function updateProgress(newProgress) {
+            if (newProgress > progress) {
+                progress = newProgress;
+                document.getElementById('progressBar').style.width = progress + '%';
+                document.getElementById('progressText').textContent = progress + '%';
+                localStorage.setItem('lesson5Progress', progress);
+                
+                if (progress >= 100) {
+                    showNotification('🎉 Lesson completed! You built a Msebetsi Solutions homepage!', 'success');
+                }
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'success') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: white;
+                padding: 16px;
+                border-radius: 10px;
+                box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+                border-left: 5px solid ${type === 'success' ? '#34A853' : type === 'error' ? '#EA4335' : '#4285F4'};
+                max-width: 300px;
+                z-index: 9999;
+                animation: fadeIn 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            `;
+            
+            notification.innerHTML = `
+                <div style="width: 36px; height: 36px; background: ${type === 'success' ? '#34A853' : type === 'error' ? '#EA4335' : '#4285F4'}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info'}"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 800; color: #141414; font-size: 14px;">${type === 'success' ? 'Success!' : type === 'error' ? 'Error' : 'Notice'}</div>
+                    <div style="color: #666; font-size: 13px;">${message}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

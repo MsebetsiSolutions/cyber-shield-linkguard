@@ -1,0 +1,2357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 11: Fetching Data & Msebetsi Solutions API Integration | Msebetsi Solutions Engineering</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ===== MSEBETSI SOLUTIONS API ENGINEERING DESIGN SYSTEM ===== */
+        :root {
+            /* Msebetsi Solutions Colors */
+            --msebetsi-red: #E50914;
+            --msebetsi-red-dark: #B20710;
+            --msebetsi-black: #141414;
+            --msebetsi-dark-gray: #2D2D2D;
+            --msebetsi-gray: #737373;
+            --msebetsi-light-gray: #E5E5E5;
+            --msebetsi-white: #FFFFFF;
+            --msebetsi-bg: #0F0F0F;
+            
+            /* API Status Colors */
+            --api-success: #00FF88;
+            --api-error: #FF6B6B;
+            --api-warning: #FFD700;
+            --api-loading: #4D9FFF;
+            --api-idle: #8A2BE2;
+            
+            /* Category Colors */
+            --category-action: #E50914;
+            --category-comedy: #FFD700;
+            --category-drama: #00B4D8;
+            --category-sci-fi: #00FF88;
+            --category-horror: #8A2BE2;
+            --category-documentary: #FF6B9D;
+            
+            /* Gradients */
+            --gradient-api: linear-gradient(135deg, #E50914 0%, #8A2BE2 100%);
+            --gradient-success: linear-gradient(135deg, #00FF88 0%, #00B4D8 100%);
+            --gradient-error: linear-gradient(135deg, #FF6B6B 0%, #FFD700 100%);
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-xxl: 48px;
+            --space-xxxl: 64px;
+            
+            /* Shadows */
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.9);
+            --shadow-api: 0 0 40px rgba(229,9,20,0.5);
+            --shadow-success: 0 0 40px rgba(0,255,136,0.5);
+            
+            /* Transitions */
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Border Radius */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--msebetsi-bg);
+            color: var(--msebetsi-white);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(229,9,20,0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 20%, rgba(138,43,226,0.1) 0%, transparent 40%);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--msebetsi-dark-gray);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--msebetsi-red);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--api-idle);
+        }
+        
+        /* Msebetsi Solutions API Header */
+        .api-header {
+            background: linear-gradient(135deg, rgba(20,20,20,0.98), rgba(10,10,10,0.98));
+            padding: var(--space-xxxl) var(--space-xl);
+            border-bottom: 3px solid var(--msebetsi-red);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .api-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1600&q=80');
+            background-size: cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        .api-badge {
+            background: var(--gradient-api);
+            color: white;
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: var(--space-lg);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+        }
+        
+        .api-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(45deg, var(--msebetsi-red), var(--api-idle));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .api-subtitle {
+            font-size: 1.5rem;
+            color: var(--msebetsi-light-gray);
+            max-width: 800px;
+            margin: 0 auto var(--space-xl);
+            line-height: 1.6;
+        }
+        
+        /* Mission Card */
+        .mission-card {
+            background: rgba(20,20,20,0.95);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) auto;
+            max-width: 900px;
+            border-left: 4px solid var(--api-success);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .mission-title {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            color: var(--api-success);
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: var(--space-lg);
+        }
+        
+        /* Concepts Grid */
+        .concepts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin: var(--space-xxl) auto;
+            max-width: 1200px;
+            padding: 0 var(--space-xl);
+        }
+        
+        .concept-card {
+            background: rgba(30,30,30,0.95);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            transition: all var(--transition-normal);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .concept-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--msebetsi-red);
+            box-shadow: var(--shadow-api);
+        }
+        
+        .concept-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-api);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-lg);
+            font-size: 1.5rem;
+        }
+        
+        .concept-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+        }
+        
+        .concept-description {
+            color: var(--msebetsi-gray);
+            line-height: 1.6;
+            margin-bottom: var(--space-lg);
+        }
+        
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-xl);
+        }
+        
+        /* API Console */
+        .api-console {
+            background: rgba(20,20,20,0.95);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xxxl);
+            margin-bottom: var(--space-xxxl);
+            border: 2px solid rgba(229,9,20,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .api-console::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-api);
+        }
+        
+        .console-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xxl);
+        }
+        
+        .console-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+        
+        .console-status {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--api-success);
+            animation: status-pulse 2s infinite;
+        }
+        
+        .status-indicator.error {
+            background: var(--api-error);
+            animation: error-pulse 1s infinite;
+        }
+        
+        .status-indicator.loading {
+            background: var(--api-loading);
+            animation: loading-spin 1s infinite;
+        }
+        
+        @keyframes status-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes error-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        @keyframes loading-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* API Controls */
+        .api-controls {
+            background: rgba(30,30,30,0.9);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xxl);
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-lg);
+        }
+        
+        .endpoint-card {
+            background: rgba(40,40,40,0.9);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .endpoint-title {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .endpoint-url {
+            background: rgba(0,0,0,0.5);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-sm);
+            font-family: 'SF Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--api-success);
+            margin-bottom: var(--space-md);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .endpoint-buttons {
+            display: flex;
+            gap: var(--space-sm);
+        }
+        
+        /* Query Builder */
+        .query-builder {
+            background: rgba(30,30,30,0.9);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xxl);
+        }
+        
+        .query-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .query-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .query-option {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        
+        .query-label {
+            color: var(--msebetsi-light-gray);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .query-select, .query-input {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: var(--radius-sm);
+            padding: var(--space-sm) var(--space-md);
+            color: white;
+            font-family: 'Inter';
+            font-size: 0.95rem;
+        }
+        
+        .query-select:focus, .query-input:focus {
+            outline: none;
+            border-color: var(--msebetsi-red);
+        }
+        
+        /* Response Panel */
+        .response-panel {
+            background: rgba(20,20,20,0.95);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xxl);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .response-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .response-stats {
+            display: flex;
+            gap: var(--space-lg);
+            color: var(--msebetsi-gray);
+            font-size: 0.9rem;
+        }
+        
+        .response-content {
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+            background: #0d1117;
+            border-radius: var(--radius-md);
+            padding: var(--space-xl);
+            font-family: 'SF Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* Movies Grid */
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--space-lg);
+            margin-top: var(--space-xl);
+        }
+        
+        .movie-card {
+            background: var(--msebetsi-dark-gray);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: all var(--transition-normal);
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .movie-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--msebetsi-red);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .movie-poster {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            background: linear-gradient(45deg, #333, #444);
+        }
+        
+        .movie-info {
+            padding: var(--space-lg);
+        }
+        
+        .movie-title {
+            font-weight: 800;
+            margin-bottom: var(--space-xs);
+            color: white;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+        
+        .movie-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--msebetsi-gray);
+            font-size: 0.9rem;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .movie-genres {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-xs);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .genre-tag {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: var(--msebetsi-light-gray);
+        }
+        
+        .movie-rating {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            color: var(--api-warning);
+            font-weight: 700;
+        }
+        
+        /* Code Block */
+        .code-block {
+            background: #0d1117;
+            border-radius: var(--radius-md);
+            padding: var(--space-xl);
+            font-family: 'SF Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: var(--space-lg) 0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .code-line {
+            margin-bottom: 2px;
+        }
+        
+        .code-comment { color: #8b949e; }
+        .code-keyword { color: #ff7b72; }
+        .code-string { color: #a5d6ff; }
+        .code-function { color: #d2a8ff; }
+        .code-number { color: #79c0ff; }
+        .code-operator { color: #ff7b72; }
+        
+        /* Loading States */
+        .loading-state {
+            text-align: center;
+            padding: var(--space-xxl);
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: var(--api-loading);
+            border-radius: 50%;
+            margin: 0 auto var(--space-lg);
+            animation: loading-spin 1s linear infinite;
+        }
+        
+        .loading-text {
+            color: var(--api-loading);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        /* Error State */
+        .error-state {
+            text-align: center;
+            padding: var(--space-xxl);
+            background: rgba(255,107,107,0.1);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255,107,107,0.3);
+        }
+        
+        .error-icon {
+            font-size: 4rem;
+            color: var(--api-error);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .error-text {
+            color: var(--api-error);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .error-details {
+            background: rgba(0,0,0,0.5);
+            padding: var(--space-md);
+            border-radius: var(--radius-sm);
+            margin-top: var(--space-md);
+            text-align: left;
+            font-size: 0.9rem;
+            color: var(--msebetsi-gray);
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: var(--space-md) var(--space-xl);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: 'Inter';
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+        
+        .btn-primary {
+            background: var(--msebetsi-red);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--msebetsi-red-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-api);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: var(--api-success);
+            color: var(--msebetsi-black);
+            font-weight: 800;
+        }
+        
+        .btn-success:hover {
+            background: #00e676;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-success);
+        }
+        
+        .btn-small {
+            padding: var(--space-sm) var(--space-md);
+            font-size: 0.9rem;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 120px;
+            right: 20px;
+            background: rgba(20,20,20,0.98);
+            border-left: 4px solid var(--msebetsi-red);
+            padding: var(--space-lg) var(--space-xl);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* API Methods */
+        .method-get { color: #61affe; background: rgba(97,175,254,0.1); border-left: 4px solid #61affe; }
+        .method-post { color: #49cc90; background: rgba(73,204,144,0.1); border-left: 4px solid #49cc90; }
+        .method-put { color: #fca130; background: rgba(252,161,48,0.1); border-left: 4px solid #fca130; }
+        .method-delete { color: #f93e3e; background: rgba(249,62,62,0.1); border-left: 4px solid #f93e3e; }
+        
+        /* Fade In Animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .api-title {
+                font-size: 3rem;
+            }
+            
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .api-title {
+                font-size: 2.5rem;
+            }
+            
+            .api-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .concepts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .console-header {
+                flex-direction: column;
+                gap: var(--space-lg);
+                align-items: flex-start;
+            }
+            
+            .response-stats {
+                flex-direction: column;
+                gap: var(--space-sm);
+            }
+            
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .api-title {
+                font-size: 2rem;
+            }
+            
+            .console-title {
+                font-size: 1.8rem;
+            }
+            
+            .movies-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .query-options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Msebetsi Solutions API Header -->
+    <header class="api-header fade-in">
+        <div class="api-badge">
+            <i class="fas fa-plug"></i> API ENGINEERING
+        </div>
+        <h1 class="api-title">Fetching Data & Msebetsi Solutions API Integration</h1>
+        <p class="api-subtitle">
+            Master professional data fetching techniques by integrating with Msebetsi Solutions' movie database.
+            Learn fetch API, async/await, error handling, and real API integration patterns.
+        </p>
+        
+        <div class="mission-card">
+            <h2 class="mission-title">
+                <i class="fas fa-bullseye"></i> ENGINEERING MISSION
+            </h2>
+            <p style="color: var(--msebetsi-light-gray); line-height: 1.7; font-size: 1.1rem;">
+                <strong>Task:</strong> Connect to a Msebetsi Solutions-like movie database API using professional fetching patterns.
+                Implement real API calls, handle responses, manage loading states, and create error boundaries—exactly 
+                how Msebetsi Solutions engineers work with external data sources.
+            </p>
+            <p style="color: var(--msebetsi-gray); margin-top: var(--space-md);">
+                <i class="fas fa-lightbulb"></i> <strong>Real API:</strong> Using TMDB API (The Movie Database) with 
+                Msebetsi Solutions-style data structures. Learn authentication, pagination, and rate limiting.
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Core Concepts -->
+        <section class="concepts-grid">
+            <div class="concept-card fade-in">
+                <div class="concept-icon">
+                    <i class="fas fa-cloud-download-alt"></i>
+                </div>
+                <h3 class="concept-title">fetch API</h3>
+                <p class="concept-description">
+                    Modern JavaScript API for making HTTP requests. Msebetsi Solutions uses fetch for all 
+                    external API calls with proper headers, authentication, and error handling.
+                </p>
+                <div class="code-block">
+                    <span class="code-comment">// Basic fetch request</span><br>
+                    <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(<span class="code-string">'https://api.msebetsisolutions.com/movies'</span>);<br>
+                    <span class="code-keyword">const</span> data = <span class="code-keyword">await</span> response.<span class="code-function">json</span>();<br><br>
+                    
+                    <span class="code-comment">// With options (headers, auth, etc.)</span><br>
+                    <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(<span class="code-string">'https://api.msebetsisolutions.com/movies'</span>, {<br>
+                    &nbsp;&nbsp;method: <span class="code-string">'GET'</span>,<br>
+                    &nbsp;&nbsp;headers: {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">'Authorization'</span>: <span class="code-string">'Bearer YOUR_API_KEY'</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">'Content-Type'</span>: <span class="code-string">'application/json'</span><br>
+                    &nbsp;&nbsp;}<br>
+                    });
+                </div>
+            </div>
+            
+            <div class="concept-card fade-in">
+                <div class="concept-icon">
+                    <i class="fas fa-sync-alt"></i>
+                </div>
+                <h3 class="concept-title">async/await</h3>
+                <p class="concept-description">
+                    Clean, readable way to handle asynchronous operations. Msebetsi Solutions' codebase 
+                    uses async/await extensively for API calls, making complex data flows manageable.
+                </p>
+                <div class="code-block">
+                    <span class="code-comment">// Traditional promises vs async/await</span><br>
+                    <span class="code-comment">// Promise chain (old way)</span><br>
+                    <span class="code-function">fetch</span>(<span class="code-string">'/api/movies'</span>)<br>
+                    &nbsp;&nbsp;.<span class="code-function">then</span>(response => response.<span class="code-function">json</span>())<br>
+                    &nbsp;&nbsp;.<span class="code-function">then</span>(data => <span class="code-keyword">console</span>.<span class="code-function">log</span>(data))<br>
+                    &nbsp;&nbsp;.<span class="code-function">catch</span>(error => <span class="code-keyword">console</span>.<span class="code-function">error</span>(error));<br><br>
+                    
+                    <span class="code-comment">// async/await (Msebetsi Solutions way)</span><br>
+                    <span class="code-keyword">const</span> fetchMovies = <span class="code-keyword">async</span> () => {<br>
+                    &nbsp;&nbsp;<span class="code-keyword">try</span> {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(<span class="code-string">'/api/movies'</span>);<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">const</span> data = <span class="code-keyword">await</span> response.<span class="code-function">json</span>();<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> data;<br>
+                    &nbsp;&nbsp;} <span class="code-keyword">catch</span> (error) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">console</span>.<span class="code-function">error</span>(<span class="code-string">'Failed to fetch movies:'</span>, error);<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">throw</span> error;<br>
+                    &nbsp;&nbsp;}<br>
+                    };
+                </div>
+            </div>
+            
+            <div class="concept-card fade-in">
+                <div class="concept-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 class="concept-title">Error Handling</h3>
+                <p class="concept-description">
+                    Professional error handling for network failures, API errors, and edge cases. 
+                    Msebetsi Solutions implements multiple fallback strategies and user-friendly error messages.
+                </p>
+                <div class="code-block">
+                    <span class="code-comment">// Comprehensive error handling</span><br>
+                    <span class="code-keyword">const</span> fetchWithRetry = <span class="code-keyword">async</span> (url, options = {}, retries = 3) => {<br>
+                    &nbsp;&nbsp;<span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = <span class="code-number">0</span>; i < retries; i++) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">try</span> {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(url, options);<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">if</span> (!response.ok) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">throw</span> <span class="code-keyword">new</span> <span class="code-function">Error</span>(<span class="code-string">\`HTTP \${response.status}: \${response.statusText}\`</span>);<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> <span class="code-keyword">await</span> response.<span class="code-function">json</span>();<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;} <span class="code-keyword">catch</span> (error) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">if</span> (i === retries - <span class="code-number">1</span>) <span class="code-keyword">throw</span> error;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">await</span> <span class="code-keyword">new</span> <span class="code-function">Promise</span>(resolve => <span class="code-function">setTimeout</span>(resolve, <span class="code-number">1000</span> * (<span class="code-number">i</span> + <span class="code-number">1</span>)));<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;}<br>
+                    };
+                </div>
+            </div>
+        </section>
+
+        <!-- API Console -->
+        <section class="api-console fade-in">
+            <div class="console-header">
+                <h2 class="console-title">
+                    <i class="fas fa-terminal"></i> Msebetsi Solutions API Console
+                    <span class="status-indicator" id="apiStatus"></span>
+                </h2>
+                <div class="console-status">
+                    <span style="color: var(--msebetsi-gray);" id="apiStatusText">Ready to connect</span>
+                    <span style="color: var(--msebetsi-gray); font-size: 0.9rem;">
+                        Requests: <span id="requestCount">0</span>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- API Controls -->
+            <div class="api-controls">
+                <div class="controls-grid">
+                    <div class="endpoint-card method-get">
+                        <div class="endpoint-title">
+                            <i class="fas fa-film"></i> Get Trending Movies
+                        </div>
+                        <div class="endpoint-url" id="endpointTrending">
+                            GET /api/trending
+                        </div>
+                        <div class="endpoint-buttons">
+                            <button class="btn btn-primary btn-small" onclick="fetchTrending()">
+                                <i class="fas fa-play"></i> Test Endpoint
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="showCode('trending')">
+                                <i class="fas fa-code"></i> View Code
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="endpoint-card method-get">
+                        <div class="endpoint-title">
+                            <i class="fas fa-search"></i> Search Movies
+                        </div>
+                        <div class="endpoint-url" id="endpointSearch">
+                            GET /api/search?query=action
+                        </div>
+                        <div class="endpoint-buttons">
+                            <button class="btn btn-primary btn-small" onclick="fetchSearch()">
+                                <i class="fas fa-play"></i> Test Endpoint
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="showCode('search')">
+                                <i class="fas fa-code"></i> View Code
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="endpoint-card method-get">
+                        <div class="endpoint-title">
+                            <i class="fas fa-list"></i> Get by Genre
+                        </div>
+                        <div class="endpoint-url" id="endpointGenre">
+                            GET /api/genre/28
+                        </div>
+                        <div class="endpoint-buttons">
+                            <button class="btn btn-primary btn-small" onclick="fetchByGenre()">
+                                <i class="fas fa-play"></i> Test Endpoint
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="showCode('genre')">
+                                <i class="fas fa-code"></i> View Code
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Query Builder -->
+            <div class="query-builder">
+                <h3 class="query-title">
+                    <i class="fas fa-sliders-h"></i> Query Builder
+                </h3>
+                <div class="query-options">
+                    <div class="query-option">
+                        <label class="query-label">Search Query</label>
+                        <input type="text" class="query-input" id="searchQuery" 
+                               placeholder="Enter movie title..." value="action">
+                    </div>
+                    
+                    <div class="query-option">
+                        <label class="query-label">Genre</label>
+                        <select class="query-select" id="genreSelect">
+                            <option value="28">Action</option>
+                            <option value="35">Comedy</option>
+                            <option value="18">Drama</option>
+                            <option value="878">Science Fiction</option>
+                            <option value="27">Horror</option>
+                            <option value="99">Documentary</option>
+                        </select>
+                    </div>
+                    
+                    <div class="query-option">
+                        <label class="query-label">Results Limit</label>
+                        <select class="query-select" id="limitSelect">
+                            <option value="6">6 results</option>
+                            <option value="12" selected>12 results</option>
+                            <option value="20">20 results</option>
+                        </select>
+                    </div>
+                    
+                    <div class="query-option">
+                        <label class="query-label">Sort By</label>
+                        <select class="query-select" id="sortSelect">
+                            <option value="popularity.desc">Popularity</option>
+                            <option value="vote_average.desc">Rating</option>
+                            <option value="release_date.desc">Release Date</option>
+                            <option value="revenue.desc">Revenue</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: var(--space-lg);">
+                    <button class="btn btn-success" onclick="fetchCustomQuery()">
+                        <i class="fas fa-bolt"></i> Execute Custom Query
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Response Panel -->
+            <div class="response-panel">
+                <div class="response-header">
+                    <h3 class="response-title">
+                        <i class="fas fa-database"></i> API Response
+                    </h3>
+                    <div class="response-stats">
+                        <span>Status: <span id="responseStatus">-</span></span>
+                        <span>Time: <span id="responseTime">-</span>ms</span>
+                        <span>Results: <span id="responseCount">0</span></span>
+                    </div>
+                </div>
+                
+                <div class="response-content" id="responseContent">
+                    <div style="text-align: center; padding: var(--space-xxl); color: var(--msebetsi-gray);">
+                        <i class="fas fa-code" style="font-size: 3rem; margin-bottom: var(--space-md);"></i>
+                        <p>API response will appear here</p>
+                        <p style="font-size: 0.9rem; margin-top: var(--space-sm);">
+                            Click on any endpoint above to start fetching data
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Movies Display -->
+            <div id="moviesDisplay" style="display: none;">
+                <h3 style="color: white; font-size: 1.8rem; margin-bottom: var(--space-lg);">
+                    <i class="fas fa-film"></i> Movies
+                </h3>
+                <div class="movies-grid" id="moviesGrid">
+                    <!-- Movies will be rendered here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Code Examples Section -->
+        <section class="api-console fade-in" style="border-color: rgba(0,180,216,0.3);">
+            <div class="console-header">
+                <h2 class="console-title">
+                    <i class="fas fa-code"></i> Code Examples
+                </h2>
+                <div class="console-status">
+                    <span style="color: var(--msebetsi-gray);">Professional fetching patterns used by Msebetsi Solutions</span>
+                </div>
+            </div>
+            
+            <div class="code-tabs" style="display: flex; gap: var(--space-sm); margin-bottom: var(--space-xl); 
+                  background: rgba(0,0,0,0.5); padding: var(--space-sm); border-radius: var(--radius-md);">
+                <button class="btn btn-secondary btn-small" onclick="showExample('basic')">
+                    Basic Fetch
+                </button>
+                <button class="btn btn-secondary btn-small" onclick="showExample('advanced')">
+                    Advanced Fetch
+                </button>
+                <button class="btn btn-secondary btn-small" onclick="showExample('error')">
+                    Error Handling
+                </button>
+                <button class="btn btn-secondary btn-small" onclick="showExample('real')">
+                    Real Msebetsi Solutions Example
+                </button>
+            </div>
+            
+            <div class="code-block" id="codeExample">
+                <!-- Code examples will be inserted here -->
+            </div>
+        </section>
+
+        <!-- API Challenge -->
+        <section class="api-console fade-in" style="border-color: rgba(255,215,0,0.3);">
+            <div class="console-header">
+                <h2 class="console-title">
+                    <i class="fas fa-gamepad"></i> API Challenge
+                </h2>
+                <div class="console-status">
+                    <span style="color: var(--msebetsi-gray);">Test your API skills</span>
+                </div>
+            </div>
+            
+            <div style="text-align: center; padding: var(--space-xxl);">
+                <h3 style="color: white; font-size: 1.8rem; margin-bottom: var(--space-lg);">
+                    Complete these API tasks:
+                </h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+                     gap: var(--space-lg); margin-bottom: var(--space-xxl);">
+                    <div class="endpoint-card" style="background: rgba(0,0,0,0.3);">
+                        <div class="endpoint-title">
+                            <i class="fas fa-tasks"></i> Challenge 1
+                        </div>
+                        <p style="color: var(--msebetsi-light-gray); margin-bottom: var(--space-md);">
+                            Fetch trending movies and display them
+                        </p>
+                        <div class="endpoint-buttons">
+                            <button class="btn btn-primary btn-small" onclick="completeChallenge(1)">
+                                Complete
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="showHint(1)">
+                                Hint
+                            </button>
+                        </div>
+                        <div class="challenge-status" id="challenge1Status" 
+                             style="margin-top: var(--space-md); font-size: 0.9rem; color: var(--msebetsi-gray);">
+                            <i class="far fa-circle"></i> Not started
+                        </div>
+                    </div>
+                    
+                    <div class="endpoint-card" style="background: rgba(0,0,0,0.3);">
+                        <div class="endpoint-title">
+                            <i class="fas fa-tasks"></i> Challenge 2
+                        </div>
+                        <p style="color: var(--msebetsi-light-gray); margin-bottom: var(--space-md);">
+                            Search for movies with error handling
+                        </p>
+                        <div class="endpoint-buttons">
+                            <button class="btn btn-primary btn-small" onclick="completeChallenge(2)">
+                                Complete
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="showHint(2)">
+                                Hint
+                            </button>
+                        </div>
+                        <div class="challenge-status" id="challenge2Status" 
+                             style="margin-top: var(--space-md); font-size: 0.9rem; color: var(--msebetsi-gray);">
+                            <i class="far fa-circle"></i> Not started
+                        </div>
+                    </div>
+                    
+                    <div class="endpoint-card" style="background: rgba(0,0,0,0.3);">
+                        <div class="endpoint-title">
+                            <i class="fas fa-tasks"></i> Challenge 3
+                        </div>
+                        <p style="color: var(--msebetsi-light-gray); margin-bottom: var(--space-md);">
+                            Implement retry logic for failed requests
+                        </p>
+                        <div class="endpoint-buttons">
+                            <button class="btn btn-primary btn-small" onclick="completeChallenge(3)">
+                                Complete
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="showHint(3)">
+                                Hint
+                            </button>
+                        </div>
+                        <div class="challenge-status" id="challenge3Status" 
+                             style="margin-top: var(--space-md); font-size: 0.9rem; color: var(--msebetsi-gray);">
+                            <i class="far fa-circle"></i> Not started
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="challengeProgress" style="display: none; margin-top: var(--space-xl);">
+                    <h4 style="color: var(--api-success); margin-bottom: var(--space-md);">
+                        <i class="fas fa-trophy"></i> Progress: 
+                        <span id="completedChallenges">0</span>/3 challenges completed
+                    </h4>
+                    <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                        <div id="progressBar" style="height: 100%; background: var(--api-success); width: 0%; 
+                             transition: width var(--transition-slow);"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Lesson Completion -->
+        <div style="text-align: center; padding: var(--space-xxxl);">
+            <button class="btn btn-primary" onclick="completeLesson()" 
+                    style="padding: var(--space-xl) var(--space-xxxl); font-size: 1.2rem;">
+                <i class="fas fa-graduation-cap"></i> Complete Lesson 11
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // ===== MSEBETSI SOLUTIONS API INTEGRATION ENGINE =====
+        class MsebetsiAPIEngine {
+            constructor() {
+                // API Configuration
+                this.config = {
+                    baseURL: 'https://api.themoviedb.org/3',
+                    apiKey: '1cc28d7cb8202fa7566afa90c4a8b9f4', // Public demo key
+                    imageBaseURL: 'https://image.tmdb.org/t/p/w500',
+                    mockMode: false, // Set to true to use mock data
+                    rateLimit: 1000 // ms between requests
+                };
+                
+                // Application State
+                this.state = {
+                    requestCount: 0,
+                    lastRequestTime: null,
+                    apiStatus: 'idle', // 'idle', 'loading', 'success', 'error'
+                    responseData: null,
+                    challenges: {
+                        1: { completed: false, attempts: 0 },
+                        2: { completed: false, attempts: 0 },
+                        3: { completed: false, attempts: 0 }
+                    }
+                };
+                
+                // Mock data for demonstration
+                this.mockData = this.generateMockData();
+                
+                // Initialize
+                this.init();
+            }
+            
+            generateMockData() {
+                return {
+                    trending: {
+                        page: 1,
+                        results: [
+                            {
+                                id: 1,
+                                title: "Stranger Things",
+                                poster_path: "/56v2KjBlU4XaOv9rVYEQypROD7P.jpg",
+                                vote_average: 8.7,
+                                release_date: "2016-07-15",
+                                overview: "When a young boy vanishes, a small town uncovers a mystery involving secret experiments...",
+                                genre_ids: [18, 9648, 10765]
+                            },
+                            {
+                                id: 2,
+                                title: "The Crown",
+                                poster_path: "/drWqJyteMdp1QqszCtM6bQdM7q7.jpg",
+                                vote_average: 8.6,
+                                release_date: "2016-11-04",
+                                overview: "Follows the political rivalries and romance of Queen Elizabeth II's reign...",
+                                genre_ids: [18]
+                            },
+                            {
+                                id: 3,
+                                title: "Wednesday",
+                                poster_path: "/9PFonBhy4cQy7Jz20NpMygczOkv.jpg",
+                                vote_average: 8.4,
+                                release_date: "2022-11-23",
+                                overview: "Follows Wednesday Addams' years as a student...",
+                                genre_ids: [35, 9648, 10765]
+                            }
+                        ],
+                        total_pages: 100,
+                        total_results: 2000
+                    },
+                    search: {
+                        page: 1,
+                        results: [
+                            {
+                                id: 4,
+                                title: "John Wick: Chapter 4",
+                                poster_path: "/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg",
+                                vote_average: 8.1,
+                                release_date: "2023-03-22",
+                                overview: "John Wick uncovers a path to defeating The High Table...",
+                                genre_ids: [28, 53, 80]
+                            },
+                            {
+                                id: 5,
+                                title: "Mission: Impossible - Dead Reckoning Part One",
+                                poster_path: "/NNxYkU70HPurnNCSiCjYAmacwm.jpg",
+                                vote_average: 7.8,
+                                release_date: "2023-07-08",
+                                overview: "Ethan Hunt and his IMF team must track down a dangerous weapon...",
+                                genre_ids: [28, 53, 12]
+                            }
+                        ]
+                    }
+                };
+            }
+            
+            init() {
+                // Update status indicator
+                this.updateAPIStatus('idle');
+                
+                // Load initial code example
+                this.showExample('basic');
+                
+                // Initialize challenge progress
+                this.updateChallengeProgress();
+            }
+            
+            // ===== API FETCHING METHODS =====
+            async fetchTrending() {
+                this.updateAPIStatus('loading');
+                this.state.requestCount++;
+                this.updateUI();
+                
+                const startTime = Date.now();
+                
+                try {
+                    let data;
+                    
+                    if (this.config.mockMode) {
+                        // Use mock data for demonstration
+                        await this.simulateNetworkDelay();
+                        data = this.mockData.trending;
+                    } else {
+                        // Real API call to TMDB
+                        const response = await fetch(
+                            `${this.config.baseURL}/trending/movie/week?api_key=${this.config.apiKey}`
+                        );
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        data = await response.json();
+                    }
+                    
+                    const endTime = Date.now();
+                    const duration = endTime - startTime;
+                    
+                    this.state.responseData = data;
+                    this.updateAPIStatus('success');
+                    this.displayResponse(data, duration);
+                    this.displayMovies(data.results);
+                    
+                    showNotification('🔥 Trending movies fetched successfully!', 'success');
+                    
+                } catch (error) {
+                    this.updateAPIStatus('error');
+                    this.displayError(error);
+                    showNotification(`❌ Failed to fetch trending: ${error.message}`, 'error');
+                }
+            }
+            
+            async fetchSearch(query = null) {
+                this.updateAPIStatus('loading');
+                this.state.requestCount++;
+                this.updateUI();
+                
+                const searchQuery = query || document.getElementById('searchQuery').value;
+                const startTime = Date.now();
+                
+                try {
+                    let data;
+                    
+                    if (this.config.mockMode) {
+                        await this.simulateNetworkDelay();
+                        data = this.mockData.search;
+                    } else {
+                        const response = await fetch(
+                            `${this.config.baseURL}/search/movie?api_key=${this.config.apiKey}&query=${encodeURIComponent(searchQuery)}`
+                        );
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        data = await response.json();
+                    }
+                    
+                    const endTime = Date.now();
+                    const duration = endTime - startTime;
+                    
+                    this.state.responseData = data;
+                    this.updateAPIStatus('success');
+                    this.displayResponse(data, duration);
+                    this.displayMovies(data.results);
+                    
+                    showNotification(`🔍 Search results for "${searchQuery}" loaded!`, 'success');
+                    
+                } catch (error) {
+                    this.updateAPIStatus('error');
+                    this.displayError(error);
+                    showNotification(`❌ Search failed: ${error.message}`, 'error');
+                }
+            }
+            
+            async fetchByGenre(genreId = null) {
+                this.updateAPIStatus('loading');
+                this.state.requestCount++;
+                this.updateUI();
+                
+                const genre = genreId || document.getElementById('genreSelect').value;
+                const startTime = Date.now();
+                
+                try {
+                    let data;
+                    
+                    if (this.config.mockMode) {
+                        await this.simulateNetworkDelay();
+                        data = this.mockData.trending;
+                    } else {
+                        const response = await fetch(
+                            `${this.config.baseURL}/discover/movie?api_key=${this.config.apiKey}&with_genres=${genre}`
+                        );
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        data = await response.json();
+                    }
+                    
+                    const endTime = Date.now();
+                    const duration = endTime - startTime;
+                    
+                    this.state.responseData = data;
+                    this.updateAPIStatus('success');
+                    this.displayResponse(data, duration);
+                    this.displayMovies(data.results);
+                    
+                    const genreName = this.getGenreName(genre);
+                    showNotification(`🎬 ${genreName} movies loaded!`, 'success');
+                    
+                } catch (error) {
+                    this.updateAPIStatus('error');
+                    this.displayError(error);
+                    showNotification(`❌ Failed to fetch genre: ${error.message}`, 'error');
+                }
+            }
+            
+            async fetchCustomQuery() {
+                const query = document.getElementById('searchQuery').value;
+                const genre = document.getElementById('genreSelect').value;
+                const limit = document.getElementById('limitSelect').value;
+                const sort = document.getElementById('sortSelect').value;
+                
+                this.updateAPIStatus('loading');
+                this.state.requestCount++;
+                this.updateUI();
+                
+                const startTime = Date.now();
+                
+                try {
+                    // Build query parameters
+                    let url = `${this.config.baseURL}/discover/movie?api_key=${this.config.apiKey}`;
+                    
+                    if (genre) {
+                        url += `&with_genres=${genre}`;
+                    }
+                    
+                    if (query) {
+                        url += `&with_keywords=${encodeURIComponent(query)}`;
+                    }
+                    
+                    url += `&sort_by=${sort}&page=1`;
+                    
+                    const response = await fetch(url);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    let data = await response.json();
+                    
+                    // Apply limit
+                    if (limit) {
+                        data.results = data.results.slice(0, parseInt(limit));
+                        data.total_results = data.results.length;
+                    }
+                    
+                    const endTime = Date.now();
+                    const duration = endTime - startTime;
+                    
+                    this.state.responseData = data;
+                    this.updateAPIStatus('success');
+                    this.displayResponse(data, duration);
+                    this.displayMovies(data.results);
+                    
+                    showNotification('🚀 Custom query executed successfully!', 'success');
+                    
+                } catch (error) {
+                    this.updateAPIStatus('error');
+                    this.displayError(error);
+                    showNotification(`❌ Custom query failed: ${error.message}`, 'error');
+                }
+            }
+            
+            // ===== DISPLAY METHODS =====
+            updateAPIStatus(status) {
+                this.state.apiStatus = status;
+                const indicator = document.getElementById('apiStatus');
+                const statusText = document.getElementById('apiStatusText');
+                
+                indicator.className = 'status-indicator';
+                indicator.classList.add(status);
+                
+                const statusMessages = {
+                    'idle': 'Ready to connect',
+                    'loading': 'Fetching data...',
+                    'success': 'Connected successfully',
+                    'error': 'Connection error'
+                };
+                
+                statusText.textContent = statusMessages[status] || status;
+            }
+            
+            updateUI() {
+                document.getElementById('requestCount').textContent = this.state.requestCount;
+            }
+            
+            displayResponse(data, duration) {
+                const responseContent = document.getElementById('responseContent');
+                const responseStatus = document.getElementById('responseStatus');
+                const responseTime = document.getElementById('responseTime');
+                const responseCount = document.getElementById('responseCount');
+                
+                // Update stats
+                responseStatus.textContent = '200 OK';
+                responseTime.textContent = duration;
+                responseCount.textContent = data.results ? data.results.length : 0;
+                
+                // Format and display JSON
+                const formattedJSON = JSON.stringify(data, null, 2);
+                responseContent.innerHTML = `<pre style="color: #c9d1d9;">${this.syntaxHighlight(formattedJSON)}</pre>`;
+                
+                // Show movies display
+                document.getElementById('moviesDisplay').style.display = 'block';
+            }
+            
+            displayError(error) {
+                const responseContent = document.getElementById('responseContent');
+                const responseStatus = document.getElementById('responseStatus');
+                const responseTime = document.getElementById('responseTime');
+                const responseCount = document.getElementById('responseCount');
+                
+                // Update stats
+                responseStatus.textContent = 'Error';
+                responseTime.textContent = '-';
+                responseCount.textContent = '0';
+                
+                // Display error
+                responseContent.innerHTML = `
+                    <div class="error-state">
+                        <div class="error-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="error-text">API Request Failed</div>
+                        <p style="color: var(--msebetsi-gray); margin-bottom: var(--space-lg);">
+                            ${error.message}
+                        </p>
+                        <div class="error-details">
+                            <strong>Error Details:</strong><br>
+                            ${error.stack || 'No additional details available'}
+                        </div>
+                        <button class="btn btn-primary" onclick="msebetsiAPI.fetchTrending()" style="margin-top: var(--space-lg);">
+                            <i class="fas fa-redo"></i> Try Again
+                        </button>
+                    </div>
+                `;
+                
+                // Hide movies display
+                document.getElementById('moviesDisplay').style.display = 'none';
+            }
+            
+            displayMovies(movies) {
+                const moviesGrid = document.getElementById('moviesGrid');
+                
+                if (!movies || movies.length === 0) {
+                    moviesGrid.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: var(--space-xxl); color: var(--msebetsi-gray);">
+                            <i class="fas fa-film" style="font-size: 3rem; margin-bottom: var(--space-md);"></i>
+                            <p>No movies found</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                moviesGrid.innerHTML = movies.map(movie => `
+                    <div class="movie-card" onclick="showMovieDetails(${movie.id})">
+                        <img src="${movie.poster_path ? this.config.imageBaseURL + movie.poster_path : 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&q=80'}" 
+                             alt="${movie.title}" 
+                             class="movie-poster"
+                             onerror="this.src='https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&q=80'">
+                        <div class="movie-info">
+                            <div class="movie-title">${movie.title}</div>
+                            <div class="movie-meta">
+                                <span>${movie.release_date ? movie.release_date.substring(0,4) : 'N/A'}</span>
+                                <div class="movie-rating">
+                                    <i class="fas fa-star"></i>
+                                    ${movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'}
+                                </div>
+                            </div>
+                            <div class="movie-genres">
+                                ${movie.genre_ids ? movie.genre_ids.slice(0,3).map(genreId => `
+                                    <span class="genre-tag">${this.getGenreName(genreId)}</span>
+                                `).join('') : ''}
+                            </div>
+                            <p style="color: var(--msebetsi-gray); font-size: 0.85rem; margin-top: var(--space-sm); line-height: 1.4;">
+                                ${movie.overview ? movie.overview.substring(0, 100) + '...' : 'No description available'}
+                            </p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // ===== CODE EXAMPLES =====
+            showExample(type) {
+                const codeExample = document.getElementById('codeExample');
+                
+                const examples = {
+                    basic: `
+<span class="code-comment">// Basic fetch with async/await</span>
+<span class="code-keyword">const</span> fetchMovies = <span class="code-keyword">async</span> () => {
+  <span class="code-keyword">try</span> {
+    <span class="code-comment">// 1. Make the request</span>
+    <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(
+      <span class="code-string">'https://api.themoviedb.org/3/trending/movie/week?api_key=YOUR_API_KEY'</span>
+    );
+    
+    <span class="code-comment">// 2. Check if response is OK</span>
+    <span class="code-keyword">if</span> (!response.ok) {
+      <span class="code-keyword">throw</span> <span class="code-keyword">new</span> <span class="code-function">Error</span>(
+        <span class="code-string">\`HTTP \${response.status}: \${response.statusText}\`</span>
+      );
+    }
+    
+    <span class="code-comment">// 3. Parse JSON response</span>
+    <span class="code-keyword">const</span> data = <span class="code-keyword">await</span> response.<span class="code-function">json</span>();
+    
+    <span class="code-comment">// 4. Use the data</span>
+    <span class="code-keyword">console</span>.<span class="code-function">log</span>(<span class="code-string">'Movies:'</span>, data.results);
+    <span class="code-keyword">return</span> data;
+    
+  } <span class="code-keyword">catch</span> (error) {
+    <span class="code-comment">// 5. Handle errors</span>
+    <span class="code-keyword">console</span>.<span class="code-function">error</span>(<span class="code-string">'Failed to fetch movies:'</span>, error);
+    <span class="code-keyword">throw</span> error;
+  }
+};
+
+<span class="code-comment">// Usage</span>
+<span class="code-function">fetchMovies</span>()
+  .<span class="code-function">then</span>(data => {
+    <span class="code-comment">// Update UI with movies</span>
+    <span class="code-function">renderMovies</span>(data.results);
+  })
+  .<span class="code-function">catch</span>(error => {
+    <span class="code-comment">// Show error message to user</span>
+    <span class="code-function">showError</span>(<span class="code-string">'Failed to load movies'</span>);
+  });`,
+                    
+                    advanced: `
+<span class="code-comment">// Advanced fetch with headers, timeout, and abort controller</span>
+<span class="code-keyword">const</span> fetchWithTimeout = <span class="code-keyword">async</span> (url, options = {}, timeout = 5000) => {
+  <span class="code-keyword">const</span> controller = <span class="code-keyword">new</span> AbortController();
+  <span class="code-keyword">const</span> timeoutId = <span class="code-function">setTimeout</span>(() => controller.<span class="code-function">abort</span>(), timeout);
+  
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(url, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        <span class="code-string">'Authorization'</span>: <span class="code-string">'Bearer YOUR_API_KEY'</span>,
+        <span class="code-string">'Content-Type'</span>: <span class="code-string">'application/json'</span>,
+        ...options.headers
+      }
+    });
+    
+    <span class="code-function">clearTimeout</span>(timeoutId);
+    
+    <span class="code-keyword">if</span> (!response.ok) {
+      <span class="code-keyword">const</span> error = <span class="code-keyword">await</span> response.<span class="code-function">json</span>();
+      <span class="code-keyword">throw</span> <span class="code-keyword">new</span> <span class="code-function">Error</span>(error.message || <span class="code-string">'Request failed'</span>);
+    }
+    
+    <span class="code-keyword">return</span> <span class="code-keyword">await</span> response.<span class="code-function">json</span>();
+    
+  } <span class="code-keyword">catch</span> (error) {
+    <span class="code-function">clearTimeout</span>(timeoutId);
+    
+    <span class="code-keyword">if</span> (error.name === <span class="code-string">'AbortError'</span>) {
+      <span class="code-keyword">throw</span> <span class="code-keyword">new</span> <span class="code-function">Error</span>(<span class="code-string">'Request timeout'</span>);
+    }
+    
+    <span class="code-keyword">throw</span> error;
+  }
+};
+
+<span class="code-comment">// Msebetsi Solutions-style API service</span>
+<span class="code-keyword">class</span> MsebetsiAPIService {
+  <span class="code-function">constructor</span>(apiKey) {
+    <span class="code-keyword">this</span>.apiKey = apiKey;
+    <span class="code-keyword">this</span>.baseURL = <span class="code-string">'https://api.themoviedb.org/3'</span>;
+    <span class="code-keyword">this</span>.cache = <span class="code-keyword">new</span> <span class="code-function">Map</span>();
+  }
+  
+  <span class="code-keyword">async</span> <span class="code-function">getTrending</span>(mediaType = <span class="code-string">'movie'</span>, timeWindow = <span class="code-string">'week'</span>) {
+    <span class="code-keyword">const</span> cacheKey = <span class="code-string">\`trending-\${mediaType}-\${timeWindow}\`</span>;
+    
+    <span class="code-comment">// Check cache first</span>
+    <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.cache.<span class="code-function">has</span>(cacheKey)) {
+      <span class="code-keyword">return</span> <span class="code-keyword">this</span>.cache.<span class="code-function">get</span>(cacheKey);
+    }
+    
+    <span class="code-keyword">const</span> url = <span class="code-string">\`\${this.baseURL}/trending/\${mediaType}/\${timeWindow}?api_key=\${this.apiKey}\`</span>;
+    
+    <span class="code-keyword">try</span> {
+      <span class="code-keyword">const</span> data = <span class="code-keyword">await</span> <span class="code-function">fetchWithTimeout</span>(url);
+      <span class="code-keyword">this</span>.cache.<span class="code-function">set</span>(cacheKey, data);
+      <span class="code-keyword">return</span> data;
+    } <span class="code-keyword">catch</span> (error) {
+      <span class="code-comment">// Fallback to mock data or cached data</span>
+      <span class="code-keyword">console</span>.<span class="code-function">error</span>(<span class="code-string">'Failed to fetch trending:'</span>, error);
+      <span class="code-keyword">throw</span> error;
+    }
+  }
+  
+  <span class="code-keyword">async</span> <span class="code-function">searchMovies</span>(query, page = 1) {
+    <span class="code-keyword">const</span> url = <span class="code-string">\`\${this.baseURL}/search/movie?api_key=\${this.apiKey}&query=\${encodeURIComponent(query)}&page=\${page}\`</span>;
+    
+    <span class="code-keyword">return</span> <span class="code-keyword">await</span> <span class="code-function">fetchWithTimeout</span>(url);
+  }
+};`,
+                    
+                    error: `
+<span class="code-comment">// Comprehensive error handling for production</span>
+<span class="code-keyword">class</span> APIError <span class="code-keyword">extends</span> Error {
+  <span class="code-function">constructor</span>(message, statusCode, data = null) {
+    <span class="code-keyword">super</span>(message);
+    <span class="code-keyword">this</span>.name = <span class="code-string">'APIError'</span>;
+    <span class="code-keyword">this</span>.statusCode = statusCode;
+    <span class="code-keyword">this</span>.data = data;
+  }
+}
+
+<span class="code-keyword">const</span> fetchWithRetry = <span class="code-keyword">async</span> (url, options = {}, maxRetries = 3) => {
+  <span class="code-keyword">let</span> lastError;
+  
+  <span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = <span class="code-number">0</span>; i < maxRetries; i++) {
+    <span class="code-keyword">try</span> {
+      <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(url, options);
+      
+      <span class="code-keyword">if</span> (!response.ok) {
+        <span class="code-keyword">let</span> errorData;
+        <span class="code-keyword">try</span> {
+          errorData = <span class="code-keyword">await</span> response.<span class="code-function">json</span>();
+        } <span class="code-keyword">catch</span> {
+          errorData = { message: response.statusText };
+        }
+        
+        <span class="code-keyword">throw</span> <span class="code-keyword">new</span> <span class="code-function">APIError</span>(
+          errorData.message || <span class="code-string">'Request failed'</span>,
+          response.status,
+          errorData
+        );
+      }
+      
+      <span class="code-keyword">return</span> <span class="code-keyword">await</span> response.<span class="code-function">json</span>();
+      
+    } <span class="code-keyword">catch</span> (error) {
+      lastError = error;
+      
+      <span class="code-comment">// Don't retry on 4xx errors (client errors)</span>
+      <span class="code-keyword">if</span> (error.statusCode && error.statusCode >= <span class="code-number">400</span> && error.statusCode < <span class="code-number">500</span>) {
+        <span class="code-keyword">break</span>;
+      }
+      
+      <span class="code-comment">// Exponential backoff</span>
+      <span class="code-keyword">if</span> (i < maxRetries - <span class="code-number">1</span>) {
+        <span class="code-keyword">const</span> delay = <span class="code-number">1000</span> * <span class="code-function">Math</span>.<span class="code-function">pow</span>(<span class="code-number">2</span>, i); <span class="code-comment">// 1s, 2s, 4s</span>
+        <span class="code-keyword">await</span> <span class="code-keyword">new</span> <span class="code-function">Promise</span>(resolve => <span class="code-function">setTimeout</span>(resolve, delay));
+      }
+    }
+  }
+  
+  <span class="code-keyword">throw</span> lastError;
+};
+
+<span class="code-comment">// Error boundary component (React example)</span>
+<span class="code-keyword">class</span> ErrorBoundary <span class="code-keyword">extends</span> React.Component {
+  <span class="code-function">constructor</span>(props) {
+    <span class="code-keyword">super</span>(props);
+    <span class="code-keyword">this</span>.state = { hasError: false, error: null };
+  }
+  
+  <span class="code-keyword">static</span> <span class="code-function">getDerivedStateFromError</span>(error) {
+    <span class="code-keyword">return</span> { hasError: true, error };
+  }
+  
+  <span class="code-function">render</span>() {
+    <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.state.hasError) {
+      <span class="code-keyword">return</span> (
+        <span class="code-string">&lt;div className="error-state"&gt;</span>
+          <span class="code-string">&lt;h3&gt;Something went wrong&lt;/h3&gt;</span>
+          <span class="code-string">&lt;p&gt;{\`\${this.state.error.message}\`}&lt;/p&gt;</span>
+          <span class="code-string">&lt;button onClick={() => window.location.reload()}&gt;</span>
+            Reload Page
+          <span class="code-string">&lt;/button&gt;</span>
+        <span class="code-string">&lt;/div&gt;</span>
+      );
+    }
+    
+    <span class="code-keyword">return</span> <span class="code-keyword">this</span>.props.children;
+  }
+}
+
+<span class="code-comment">// Usage in Msebetsi Solutions components</span>
+<span class="code-keyword">const</span> MovieList = () => {
+  <span class="code-keyword">const</span> [movies, setMovies] = <span class="code-function">useState</span>([]);
+  <span class="code-keyword">const</span> [loading, setLoading] = <span class="code-function">useState</span>(true);
+  <span class="code-keyword">const</span> [error, setError] = <span class="code-function">useState</span>(null);
+  
+  <span class="code-function">useEffect</span>(() => {
+    <span class="code-keyword">const</span> loadMovies = <span class="code-keyword">async</span> () => {
+      <span class="code-keyword">try</span> {
+        setLoading(true);
+        setError(null);
+        
+        <span class="code-keyword">const</span> data = <span class="code-keyword">await</span> <span class="code-function">fetchWithRetry</span>(
+          <span class="code-string">'https://api.themoviedb.org/3/trending/movie/week?api_key=YOUR_KEY'</span>,
+          {},
+          <span class="code-number">3</span> <span class="code-comment">// 3 retries</span>
+        );
+        
+        setMovies(data.results);
+      } <span class="code-keyword">catch</span> (error) {
+        setError(error);
+        <span class="code-comment">// Log to monitoring service (e.g., Sentry)</span>
+        <span class="code-function">logError</span>(error);
+      } <span class="code-keyword">finally</span> {
+        setLoading(false);
+      }
+    };
+    
+    <span class="code-function">loadMovies</span>();
+  }, []);
+  
+  <span class="code-keyword">if</span> (loading) <span class="code-keyword">return</span> <span class="code-string">&lt;LoadingSkeleton /&gt;</span>;
+  <span class="code-keyword">if</span> (error) <span class="code-keyword">return</span> <span class="code-string">&lt;ErrorDisplay error={error} /&gt;</span>;
+  
+  <span class="code-keyword">return</span> <span class="code-string">&lt;MovieGrid movies={movies} /&gt;</span>;
+};`,
+                    
+                    real: `
+<span class="code-comment">// Msebetsi Solutions' production API integration pattern</span>
+<span class="code-keyword">import</span> { createApi, fetchBaseQuery } <span class="code-keyword">from</span> <span class="code-string">'@reduxjs/toolkit/query/react'</span>;
+
+<span class="code-comment">// Create Msebetsi Solutions API service using Redux Toolkit Query</span>
+<span class="code-keyword">export</span> <span class="code-keyword">const</span> msebetsiApi = <span class="code-function">createApi</span>({
+  reducerPath: <span class="code-string">'msebetsiApi'</span>,
+  baseQuery: <span class="code-function">fetchBaseQuery</span>({ 
+    baseUrl: <span class="code-string">'https://api.msebetsisolutions.com/v1/'</span>,
+    prepareHeaders: (headers) => {
+      <span class="code-comment">// Add authentication headers</span>
+      headers.<span class="code-function">set</span>(<span class="code-string">'Authorization'</span>, <span class="code-string">\`Bearer \${getToken()}\`</span>);
+      headers.<span class="code-function">set</span>(<span class="code-string">'X-Msebetsi-Client'</span>, <span class="code-string">'web'</span>);
+      <span class="code-keyword">return</span> headers;
+    },
+  }),
+  tagTypes: [<span class="code-string">'Movie'</span>, <span class="code-string">'TVShow'</span>, <span class="code-string">'User'</span>, <span class="code-string">'WatchHistory'</span>],
+  endpoints: (builder) => ({
+    
+    <span class="code-comment">// Get trending content</span>
+    getTrending: builder.<span class="code-function">query</span>({
+      query: ({ country = <span class="code-string">'US'</span>, limit = <span class="code-number">20</span> }) => ({
+        url: <span class="code-string">'trending'</span>,
+        params: { country, limit },
+      }),
+      providesTags: [<span class="code-string">'Movie'</span>],
+    }),
+    
+    <span class="code-comment">// Search across movies and TV shows</span>
+    search: builder.<span class="code-function">query</span>({
+      query: ({ query, type = <span class="code-string">'all'</span>, page = <span class="code-number">1</span> }) => ({
+        url: <span class="code-string">'search'</span>,
+        params: { q: query, type, page },
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.movies.<span class="code-function">map</span>(({ id }) => ({ type: <span class="code-string">'Movie'</span>, id })),
+              ...result.shows.<span class="code-function">map</span>(({ id }) => ({ type: <span class="code-string">'TVShow'</span>, id })),
+            ]
+          : [<span class="code-string">'Movie'</span>, <span class="code-string">'TVShow'</span>],
+    }),
+    
+    <span class="code-comment">// Get user's watch history</span>
+    getWatchHistory: builder.<span class="code-function">query</span>({
+      query: ({ userId, limit = <span class="code-number">50</span> }) => ({
+        url: <span class="code-string">\`users/\${userId}/watch-history\`</span>,
+        params: { limit },
+      }),
+      providesTags: [<span class="code-string">'WatchHistory'</span>],
+    }),
+    
+    <span class="code-comment">// Add to watch list</span>
+    addToWatchList: builder.<span class="code-function">mutation</span>({
+      query: ({ userId, contentId, contentType }) => ({
+        url: <span class="code-string">\`users/\${userId}/watchlist\`</span>,
+        method: <span class="code-string">'POST'</span>,
+        body: { contentId, contentType },
+      }),
+      invalidatesTags: [<span class="code-string">'User'</span>],
+    }),
+    
+    <span class="code-comment">// Msebetsi Solutions' real-time recommendations</span>
+    getRecommendations: builder.<span class="code-function">query</span>({
+      query: ({ userId, context = <span class="code-string">'homepage'</span> }) => ({
+        url: <span class="code-string">\`users/\${userId}/recommendations\`</span>,
+        params: { context },
+      }),
+      <span class="code-comment">// Cache for 5 minutes, but invalidate on user interaction</span>
+      keepUnusedDataFor: <span class="code-number">300</span>,
+      providesTags: [<span class="code-string">'User'</span>],
+    }),
+  }),
+});
+
+<span class="code-comment">// Export hooks for usage in components</span>
+<span class="code-keyword">export</span> <span class="code-keyword">const</span> {
+  useGetTrendingQuery,
+  useSearchQuery,
+  useGetWatchHistoryQuery,
+  useAddToWatchListMutation,
+  useGetRecommendationsQuery,
+} = msebetsiApi;
+
+<span class="code-comment">// Usage in a React component</span>
+<span class="code-keyword">const</span> MsebetsiHomepage = ({ userId }) => {
+  <span class="code-comment">// Auto-fetches, caches, and refetches when needed</span>
+  <span class="code-keyword">const</span> { 
+    data: trending, 
+    isLoading: trendingLoading, 
+    error: trendingError 
+  } = <span class="code-function">useGetTrendingQuery</span>({ country: <span class="code-string">'US'</span> });
+  
+  <span class="code-keyword">const</span> { 
+    data: recommendations,
+    isLoading: recLoading
+  } = <span class="code-function">useGetRecommendationsQuery</span>({ userId });
+  
+  <span class="code-keyword">const</span> [addToWatchList, { isLoading: adding }] = <span class="code-function">useAddToWatchListMutation</span>();
+  
+  <span class="code-keyword">const</span> handleAddToWatchList = <span class="code-keyword">async</span> (contentId) => {
+    <span class="code-keyword">try</span> {
+      <span class="code-keyword">await</span> <span class="code-function">addToWatchList</span>({ userId, contentId, contentType: <span class="code-string">'movie'</span> }).<span class="code-function">unwrap</span>();
+      showNotification(<span class="code-string">'Added to your list!'</span>);
+    } <span class="code-keyword">catch</span> (error) {
+      showNotification(<span class="code-string">'Failed to add to list'</span>, <span class="code-string">'error'</span>);
+    }
+  };
+  
+  <span class="code-keyword">if</span> (trendingLoading || recLoading) {
+    <span class="code-keyword">return</span> <span class="code-string">&lt;HomepageSkeleton /&gt;</span>;
+  }
+  
+  <span class="code-keyword">if</span> (trendingError) {
+    <span class="code-keyword">return</span> <span class="code-string">&lt;ErrorFallback error={trendingError} /&gt;</span>;
+  }
+  
+  <span class="code-keyword">return</span> (
+    <span class="code-string">&lt;&gt;</span>
+      <span class="code-string">&lt;HeroSection content={trending[0]} /&gt;</span>
+      <span class="code-string">&lt;CategoryRow </span>
+        <span class="code-string">title="Trending Now"</span>
+        <span class="code-string">movies={trending}</span>
+        <span class="code-string">onAddToWatchList={handleAddToWatchList}</span>
+      <span class="code-string">/&gt;</span>
+      <span class="code-string">&lt;CategoryRow </span>
+        <span class="code-string">title="Recommended For You"</span>
+        <span class="code-string">movies={recommendations.movies}</span>
+      <span class="code-string">/&gt;</span>
+    <span class="code-string">&lt;/&gt;</span>
+  );
+};`
+                };
+                
+                codeExample.innerHTML = `<div class="code-line">${examples[type]}</div>`;
+            }
+            
+            showCode(type) {
+                const examples = {
+                    trending: `
+<span class="code-comment">// Fetch trending movies from TMDB API</span>
+<span class="code-keyword">const</span> fetchTrendingMovies = <span class="code-keyword">async</span> () => {
+  <span class="code-keyword">const</span> API_KEY = <span class="code-string">'1cc28d7cb8202fa7566afa90c4a8b9f4'</span>;
+  <span class="code-keyword">const</span> url = <span class="code-string">\`https://api.themoviedb.org/3/trending/movie/week?api_key=\${API_KEY}\`</span>;
+  
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(url);
+    
+    <span class="code-keyword">if</span> (!response.ok) {
+      <span class="code-keyword">throw</span> <span class="code-keyword">new</span> <span class="code-function">Error</span>(<span class="code-string">\`HTTP \${response.status}\`</span>);
+    }
+    
+    <span class="code-keyword">const</span> data = <span class="code-keyword">await</span> response.<span class="code-function">json</span>();
+    <span class="code-keyword">console</span>.<span class="code-function">log</span>(<span class="code-string">'Trending movies:'</span>, data.results);
+    <span class="code-keyword">return</span> data;
+    
+  } <span class="code-keyword">catch</span> (error) {
+    <span class="code-keyword">console</span>.<span class="code-function">error</span>(<span class="code-string">'Error fetching trending:'</span>, error);
+    <span class="code-keyword">throw</span> error;
+  }
+};`,
+                    
+                    search: `
+<span class="code-comment">// Search movies with query and pagination</span>
+<span class="code-keyword">const</span> searchMovies = <span class="code-keyword">async</span> (query, page = 1) => {
+  <span class="code-keyword">const</span> API_KEY = <span class="code-string">'1cc28d7cb8202fa7566afa90c4a8b9f4'</span>;
+  <span class="code-keyword">const</span> encodedQuery = <span class="code-function">encodeURIComponent</span>(query);
+  <span class="code-keyword">const</span> url = <span class="code-string">\`https://api.themoviedb.org/3/search/movie?api_key=\${API_KEY}&query=\${encodedQuery}&page=\${page}\`</span>;
+  
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(url);
+    
+    <span class="code-keyword">if</span> (!response.ok) {
+      <span class="code-comment">// Handle specific HTTP errors</span>
+      <span class="code-keyword">if</span> (response.status === <span class="code-number">404</span>) {
+        <span class="code-keyword">throw</span> <span class="code-keyword">new</span> <span class="code-function">Error</span>(<span class="code-string">'No movies found for your search'</span>);
+      }
+      <span class="code-keyword">if</span> (response.status === <span class="code-number">429</span>) {
+        <span class="code-keyword">throw</span> <span class="code-keyword">new</span> <span class="code-function">Error</span>(<span class="code-string">'Too many requests. Please try again later.'</span>);
+      }
+      <span class="code-keyword">throw</span> <span class="code-keyword">new</span> <span class="code-function">Error</span>(<span class="code-string">\`HTTP \${response.status}: \${response.statusText}\`</span>);
+    }
+    
+    <span class="code-keyword">const</span> data = <span class="code-keyword">await</span> response.<span class="code-function">json</span>();
+    
+    <span class="code-keyword">if</span> (data.results.length === <span class="code-number">0</span>) {
+      <span class="code-keyword">throw</span> <span class="code-keyword">new</span> <span class="code-function">Error</span>(<span class="code-string">'No results found'</span>);
+    }
+    
+    <span class="code-keyword">return</span> data;
+    
+  } <span class="code-keyword">catch</span> (error) {
+    <span class="code-comment">// Log error for monitoring</span>
+    <span class="code-function">logError</span>(<span class="code-string">'searchMovies'</span>, error);
+    <span class="code-keyword">throw</span> error;
+  }
+};`,
+                    
+                    genre: `
+<span class="code-comment">// Fetch movies by genre with filtering options</span>
+<span class="code-keyword">const</span> fetchMoviesByGenre = <span class="code-keyword">async</span> (genreId, options = {}) => {
+  <span class="code-keyword">const</span> {
+    sortBy = <span class="code-string">'popularity.desc'</span>,
+    minRating = <span class="code-number">0</span>,
+    year = <span class="code-keyword">null</span>,
+    page = <span class="code-number">1</span>
+  } = options;
+  
+  <span class="code-keyword">const</span> API_KEY = <span class="code-string">'1cc28d7cb8202fa7566afa90c4a8b9f4'</span>;
+  
+  <span class="code-comment">// Build query parameters</span>
+  <span class="code-keyword">const</span> params = <span class="code-keyword">new</span> <span class="code-function">URLSearchParams</span>({
+    api_key: API_KEY,
+    with_genres: genreId,
+    sort_by: sortBy,
+    <span class="code-string">'vote_average.gte'</span>: minRating,
+    page: page
+  });
+  
+  <span class="code-keyword">if</span> (year) {
+    params.<span class="code-function">append</span>(<span class="code-string">'primary_release_year'</span>, year);
+  }
+  
+  <span class="code-keyword">const</span> url = <span class="code-string">\`https://api.themoviedb.org/3/discover/movie?\${params}\`</span>;
+  
+  <span class="code-keyword">try</span> {
+    <span class="code-comment">// Add timeout and abort controller</span>
+    <span class="code-keyword">const</span> controller = <span class="code-keyword">new</span> AbortController();
+    <span class="code-keyword">const</span> timeoutId = <span class="code-function">setTimeout</span>(() => controller.<span class="code-function">abort</span>(), <span class="code-number">10000</span>);
+    
+    <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(url, {
+      signal: controller.signal
+    });
+    
+    <span class="code-function">clearTimeout</span>(timeoutId);
+    
+    <span class="code-keyword">if</span> (!response.ok) {
+      <span class="code-keyword">throw</span> <span class="code-keyword">new</span> <span class="code-function">Error</span>(<span class="code-string">\`HTTP \${response.status}\`</span>);
+    }
+    
+    <span class="code-keyword">const</span> data = <span class="code-keyword">await</span> response.<span class="code-function">json</span>();
+    <span class="code-keyword">return</span> data;
+    
+  } <span class="code-keyword">catch</span> (error) {
+    <span class="code-keyword">if</span> (error.name === <span class="code-string">'AbortError'</span>) {
+      <span class="code-keyword">throw</span> <span class="code-keyword">new</span> <span class="code-function">Error</span>(<span class="code-string">'Request timeout. Please try again.'</span>);
+    }
+    <span class="code-keyword">throw</span> error;
+  }
+};`
+                };
+                
+                const responseContent = document.getElementById('responseContent');
+                responseContent.innerHTML = `<pre style="color: #c9d1d9;">${this.syntaxHighlight(examples[type])}</pre>`;
+                
+                showNotification('📝 Code example displayed in response panel', 'info');
+            }
+            
+            // ===== CHALLENGES =====
+            completeChallenge(challengeNumber) {
+                if (this.state.challenges[challengeNumber].completed) {
+                    showNotification('✅ Challenge already completed!', 'info');
+                    return;
+                }
+                
+                this.state.challenges[challengeNumber].attempts++;
+                
+                switch(challengeNumber) {
+                    case 1:
+                        this.fetchTrending();
+                        showNotification('🎯 Challenge 1: Fetching trending movies...', 'info');
+                        break;
+                    case 2:
+                        this.fetchSearch('action');
+                        showNotification('🎯 Challenge 2: Searching with error handling...', 'info');
+                        break;
+                    case 3:
+                        this.testRetryLogic();
+                        break;
+                }
+                
+                // Mark as completed if API call was successful
+                setTimeout(() => {
+                    if (this.state.apiStatus === 'success') {
+                        this.state.challenges[challengeNumber].completed = true;
+                        this.updateChallengeProgress();
+                        showNotification(`🏆 Challenge ${challengeNumber} completed!`, 'success');
+                    }
+                }, 2000);
+            }
+            
+            showHint(challengeNumber) {
+                const hints = {
+                    1: 'Use the fetchTrending() function with proper error handling.',
+                    2: 'Implement try/catch block and check response.ok before parsing JSON.',
+                    3: 'Create a function that retries failed requests with exponential backoff.'
+                };
+                
+                showNotification(`💡 Hint: ${hints[challengeNumber]}`, 'info');
+            }
+            
+            updateChallengeProgress() {
+                const completed = Object.values(this.state.challenges).filter(c => c.completed).length;
+                const total = Object.keys(this.state.challenges).length;
+                
+                if (completed > 0) {
+                    document.getElementById('challengeProgress').style.display = 'block';
+                    document.getElementById('completedChallenges').textContent = completed;
+                    document.getElementById('progressBar').style.width = `${(completed / total) * 100}%`;
+                    
+                    // Update challenge status indicators
+                    Object.keys(this.state.challenges).forEach(num => {
+                        const status = document.getElementById(`challenge${num}Status`);
+                        if (this.state.challenges[num].completed) {
+                            status.innerHTML = '<i class="fas fa-check-circle" style="color: var(--api-success);"></i> Completed';
+                        } else {
+                            status.innerHTML = `<i class="far fa-circle"></i> ${this.state.challenges[num].attempts} attempts`;
+                        }
+                    });
+                }
+            }
+            
+            async testRetryLogic() {
+                showNotification('🔄 Testing retry logic with simulated failures...', 'info');
+                
+                // Simulate a retry scenario
+                let attempts = 0;
+                const maxAttempts = 3;
+                
+                for (let i = 0; i < maxAttempts; i++) {
+                    attempts++;
+                    showNotification(`Attempt ${attempts}/${maxAttempts}...`, 'info', 1500);
+                    
+                    // Simulate random success/failure
+                    const success = Math.random() > 0.5 || i === maxAttempts - 1;
+                    
+                    if (success) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        showNotification('✅ Request succeeded after retry!', 'success');
+                        this.state.challenges[3].completed = true;
+                        this.updateChallengeProgress();
+                        return;
+                    } else {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        showNotification(`❌ Attempt ${attempts} failed, retrying...`, 'warning', 1500);
+                    }
+                }
+                
+                showNotification('💥 All retry attempts failed', 'error');
+            }
+            
+            // ===== HELPER METHODS =====
+            simulateNetworkDelay() {
+                return new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+            }
+            
+            getGenreName(genreId) {
+                const genres = {
+                    28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy',
+                    80: 'Crime', 99: 'Documentary', 18: 'Drama', 10751: 'Family',
+                    14: 'Fantasy', 36: 'History', 27: 'Horror', 10402: 'Music',
+                    9648: 'Mystery', 10749: 'Romance', 878: 'Science Fiction',
+                    10770: 'TV Movie', 53: 'Thriller', 10752: 'War', 37: 'Western'
+                };
+                return genres[genreId] || 'Unknown';
+            }
+            
+            syntaxHighlight(json) {
+                json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return json.replace(
+                    /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+                    match => {
+                        let cls = 'code-number';
+                        if (/^"/.test(match)) {
+                            if (/:$/.test(match)) {
+                                cls = 'code-keyword';
+                            } else {
+                                cls = 'code-string';
+                            }
+                        } else if (/true|false/.test(match)) {
+                            cls = 'code-keyword';
+                        } else if (/null/.test(match)) {
+                            cls = 'code-comment';
+                        }
+                        return `<span class="${cls}">${match}</span>`;
+                    }
+                );
+            }
+            
+            showMovieDetails(movieId) {
+                showNotification(`🎬 Fetching details for movie ID: ${movieId}`, 'info');
+                // In a real app, this would fetch detailed movie info
+            }
+        }
+
+        // ===== GLOBAL FUNCTIONS =====
+        const msebetsiAPI = new MsebetsiAPIEngine();
+
+        // DOM Ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Welcome notification
+            setTimeout(() => {
+                showNotification('🚀 Welcome to Msebetsi Solutions API Integration!', 'info');
+                showNotification('🔑 Using real TMDB API with demo key', 'info', 3000);
+            }, 1500);
+        });
+
+        // Public functions for onclick handlers
+        function fetchTrending() { msebetsiAPI.fetchTrending(); }
+        function fetchSearch() { msebetsiAPI.fetchSearch(); }
+        function fetchByGenre() { msebetsiAPI.fetchByGenre(); }
+        function fetchCustomQuery() { msebetsiAPI.fetchCustomQuery(); }
+        function showExample(type) { msebetsiAPI.showExample(type); }
+        function showCode(type) { msebetsiAPI.showCode(type); }
+        function completeChallenge(num) { msebetsiAPI.completeChallenge(num); }
+        function showHint(num) { msebetsiAPI.showHint(num); }
+        function showMovieDetails(id) { msebetsiAPI.showMovieDetails(id); }
+
+        function completeLesson() {
+            // Confetti celebration
+            createConfetti();
+            
+            showNotification('🏆 Lesson 11 Completed! You mastered API Integration!', 'success');
+            
+            setTimeout(() => {
+                alert('🎉 CONGRATULATIONS!\n\nYou have successfully completed Lesson 11:\n\n✅ Mastered fetch API and async/await\n✅ Integrated with real TMDB API\n✅ Implemented professional error handling\n✅ Built Msebetsi Solutions-style API console\n✅ Completed API challenges\n✅ Learned production fetching patterns\n\nYou are now ready to build real-world API integrations!');
+                
+                // Save completion
+                localStorage.setItem('lesson11Completed', 'true');
+            }, 1000);
+        }
+
+        // Helper functions
+        function showNotification(message, type = 'info', duration = 4000) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: var(--space-md);">
+                    <div style="font-size: 1.5rem;">${icon}</div>
+                    <div style="flex: 1; font-size: 0.9rem; color: var(--msebetsi-light-gray);">
+                        ${message}
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="background: none; border: none; color: var(--msebetsi-gray); cursor: pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100px)';
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, duration);
+        }
+
+        function createConfetti() {
+            const colors = ['#E50914', '#8A2BE2', '#00B4D8', '#00FF88', '#FFD700'];
+            
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: ${Math.random() * 12 + 6}px;
+                    height: ${Math.random() * 12 + 6}px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                    top: -20px;
+                    left: ${Math.random() * 100}vw;
+                    animation: fall ${Math.random() * 3 + 2}s linear forwards;
+                    z-index: 9997;
+                    transform: rotate(${Math.random() * 360}deg);
+                `;
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    if (confetti.parentElement) {
+                        confetti.remove();
+                    }
+                }, 5000);
+            }
+            
+            // Add animation if not exists
+            if (!document.querySelector('style[data-confetti]')) {
+                const style = document.createElement('style');
+                style.setAttribute('data-confetti', 'true');
+                style.textContent = `
+                    @keyframes fall {
+                        to {
+                            transform: translateY(100vh) rotate(${Math.random() * 720}deg);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SportsLive - Real YouTube Sports Streams</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Modern Streaming Theme */
+            --primary: #FF0000; /* YouTube Red */
+            --secondary: #282828;
+            --accent: #3EA6FF;
+            --success: #00D12D;
+            --live: #FF3333;
+            --bg-primary: #0F0F0F;
+            --bg-secondary: #1F1F1F;
+            --bg-card: #272727;
+            --text-primary: #FFFFFF;
+            --text-secondary: #AAAAAA;
+            --border-color: #3F3F3F;
+            
+            /* Gradients */
+            --gradient-red: linear-gradient(135deg, #FF0000, #CC0000);
+            --gradient-blue: linear-gradient(135deg, #3EA6FF, #0066CC);
+            --gradient-live: linear-gradient(135deg, #FF3333, #FF6B6B);
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-xxl: 48px;
+            
+            /* Shadows */
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.3);
+            --shadow-xl: 0 16px 48px rgba(0,0,0,0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: var(--bg-secondary);
+            padding: var(--space-md) var(--space-xl);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(20px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .logo-icon {
+            color: var(--primary);
+            font-size: 2.5rem;
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: var(--gradient-red);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .search-container {
+            flex: 0 1 600px;
+            position: relative;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: var(--space-md) var(--space-lg);
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 40px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: var(--space-md);
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--gradient-red);
+            border: none;
+            color: white;
+            padding: var(--space-sm) var(--space-md);
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Main Layout */
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: var(--space-lg);
+            padding: var(--space-lg);
+            max-width: 2000px;
+            margin: 0 auto;
+        }
+
+        /* Main Video Player */
+        .video-player-section {
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+        }
+
+        .player-header {
+            padding: var(--space-lg);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .live-badge {
+            background: var(--gradient-live);
+            color: white;
+            padding: var(--space-xs) var(--space-md);
+            border-radius: 20px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .player-container {
+            width: 100%;
+            height: 70vh;
+            position: relative;
+            background: #000;
+        }
+
+        #youtubePlayer {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .player-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: var(--space-lg);
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            color: white;
+        }
+
+        .video-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+            line-height: 1.3;
+        }
+
+        .video-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Sports Categories */
+        .sports-categories {
+            display: flex;
+            gap: var(--space-md);
+            padding: var(--space-md) var(--space-lg);
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: var(--space-lg);
+            overflow-x: auto;
+        }
+
+        .category-btn {
+            background: var(--bg-card);
+            border: none;
+            color: var(--text-primary);
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 24px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .category-btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .category-btn.active {
+            background: var(--gradient-red);
+            box-shadow: 0 4px 20px rgba(255, 0, 0, 0.3);
+        }
+
+        /* Videos Grid */
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--space-md);
+            padding: var(--space-lg);
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .video-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .video-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .video-card.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2);
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            position: relative;
+        }
+
+        .video-duration {
+            position: absolute;
+            bottom: var(--space-sm);
+            right: var(--space-sm);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .video-info {
+            padding: var(--space-md);
+        }
+
+        .video-card-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-card-meta {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Top Teams Section */
+        .teams-section {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .refresh-btn {
+            background: var(--gradient-blue);
+            border: none;
+            color: white;
+            padding: var(--space-sm) var(--space-md);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(62, 166, 255, 0.3);
+        }
+
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: var(--space-md);
+        }
+
+        .team-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: var(--space-md);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .team-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+        }
+
+        .team-logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto var(--space-sm);
+            background: var(--gradient-red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.5rem;
+        }
+
+        .team-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: var(--space-xs);
+        }
+
+        .team-sport {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        /* Live Chat */
+        .live-chat {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            height: 70vh;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .chat-header {
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--border-color);
+            background: var(--gradient-red);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: var(--space-lg);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+        }
+
+        .message {
+            display: flex;
+            gap: var(--space-md);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--gradient-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+        }
+
+        .message-content {
+            background: var(--bg-card);
+            padding: var(--space-md);
+            border-radius: 12px;
+            max-width: 280px;
+        }
+
+        .chat-input-container {
+            padding: var(--space-lg);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .chat-input {
+            display: flex;
+            gap: var(--space-md);
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: var(--space-md);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        /* Loading States */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-xxl);
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: var(--space-md);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .live-chat {
+                height: 400px;
+                margin-top: var(--space-lg);
+            }
+            
+            .videos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: var(--space-md);
+                padding: var(--space-md);
+            }
+            
+            .search-container {
+                width: 100%;
+            }
+            
+            .container {
+                padding: var(--space-md);
+                gap: var(--space-md);
+            }
+            
+            .player-container {
+                height: 50vh;
+            }
+            
+            .teams-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fab fa-youtube"></i>
+            </div>
+            <div class="logo-text">SportsLive</div>
+        </div>
+        
+        <div class="search-container">
+            <input type="text" 
+                   class="search-box" 
+                   id="searchInput"
+                   placeholder="Search for sports matches (e.g., 'Manchester United vs Liverpool highlights')"
+                   onkeypress="if(event.key === 'Enter') searchVideos()">
+            <button class="search-btn" onclick="searchVideos()">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <button class="refresh-btn" onclick="refreshAllContent()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <div class="live-badge">
+                <i class="fas fa-circle"></i> LIVE SPORTS
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Left Column: Video Player & Content -->
+        <div>
+            <!-- Video Player -->
+            <div class="video-player-section">
+                <div class="player-header">
+                    <div style="display: flex; align-items: center; gap: var(--space-md);">
+                        <div class="live-badge" id="liveStatus">
+                            <i class="fas fa-circle"></i> LIVE
+                        </div>
+                        <div id="currentSport">FOOTBALL</div>
+                    </div>
+                    <div style="color: var(--text-secondary);">
+                        <i class="fas fa-eye"></i> <span id="viewerCount">Loading...</span>
+                    </div>
+                </div>
+                
+                <div class="player-container" id="playerContainer">
+                    <div class="loading" id="playerLoading">
+                        <div class="spinner"></div>
+                        <div>Loading sports stream...</div>
+                    </div>
+                    <iframe id="youtubePlayer" style="display: none;"></iframe>
+                </div>
+                
+                <div class="player-overlay">
+                    <div class="video-title" id="videoTitle">Select a match to begin streaming</div>
+                    <div class="video-meta">
+                        <span id="videoChannel">SportsLive Network</span>
+                        <span id="videoViews">• Loading views...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sports Categories -->
+            <div class="sports-categories" id="categories">
+                <!-- Categories will be loaded here -->
+            </div>
+
+            <!-- Top Teams Section -->
+            <div class="teams-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-trophy"></i> Top Teams & Matches
+                    </div>
+                    <button class="refresh-btn" onclick="refreshTopTeams()">
+                        <i class="fas fa-redo"></i> Refresh Teams
+                    </button>
+                </div>
+                
+                <div class="teams-grid" id="teamsGrid">
+                    <!-- Teams will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Videos & Chat -->
+        <div>
+            <!-- Videos Grid -->
+            <div class="videos-grid" id="videosGrid">
+                <!-- Videos will be loaded here -->
+            </div>
+
+            <!-- Live Chat -->
+            <div class="live-chat">
+                <div class="chat-header">
+                    <h3 style="display: flex; align-items: center; gap: var(--space-sm);">
+                        <i class="fas fa-comments"></i>
+                        Live Match Chat
+                        <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 0.9rem;" id="chatCount">42</span>
+                    </h3>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Chat messages will be loaded here -->
+                </div>
+                
+                <div class="chat-input-container">
+                    <div class="chat-input">
+                        <input type="text" 
+                               id="chatInput" 
+                               placeholder="Discuss the match... (Press Enter to send)"
+                               onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                        <button class="refresh-btn" onclick="sendChatMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // SportsLive Streaming Platform
+        class SportsLive {
+            constructor() {
+                this.currentVideoId = null;
+                this.currentCategory = 'football';
+                this.isLoading = false;
+                this.videos = [];
+                this.chatMessages = [];
+                this.categories = [
+                    { id: 'football', name: '⚽ Football', icon: 'futbol' },
+                    { id: 'basketball', name: '🏀 Basketball', icon: 'basketball' },
+                    { id: 'tennis', name: '🎾 Tennis', icon: 'baseball' },
+                    { id: 'formula1', name: '🏎️ Formula 1', icon: 'car' },
+                    { id: 'cricket', name: '🏏 Cricket', icon: 'baseball' },
+                    { id: 'baseball', name: '⚾ Baseball', icon: 'baseball' },
+                    { id: 'rugby', name: '🏉 Rugby', icon: 'football' },
+                    { id: 'hockey', name: '🏒 Hockey', icon: 'hockey-puck' },
+                    { id: 'golf', name: '⛳ Golf', icon: 'golf-ball' },
+                    { id: 'boxing', name: '🥊 Boxing', icon: 'fist-raised' }
+                ];
+                
+                this.topTeams = [
+                    // Football
+                    { name: 'Real Madrid', sport: 'football', keywords: 'real madrid match' },
+                    { name: 'Barcelona', sport: 'football', keywords: 'barcelona match' },
+                    { name: 'Manchester Utd', sport: 'football', keywords: 'manchester united match' },
+                    { name: 'Liverpool', sport: 'football', keywords: 'liverpool match' },
+                    { name: 'Bayern Munich', sport: 'football', keywords: 'bayern munich match' },
+                    
+                    // Basketball
+                    { name: 'Lakers', sport: 'basketball', keywords: 'lakers game' },
+                    { name: 'Warriors', sport: 'basketball', keywords: 'golden state warriors' },
+                    { name: 'Bulls', sport: 'basketball', keywords: 'chicago bulls' },
+                    { name: 'Celtics', sport: 'basketball', keywords: 'boston celtics' },
+                    { name: 'Heat', sport: 'basketball', keywords: 'miami heat' },
+                    
+                    // Tennis
+                    { name: 'Djokovic', sport: 'tennis', keywords: 'djokovic match' },
+                    { name: 'Nadal', sport: 'tennis', keywords: 'rafael nadal match' },
+                    { name: 'Federer', sport: 'tennis', keywords: 'roger federer match' },
+                    { name: 'Alcaraz', sport: 'tennis', keywords: 'carlos alcaraz match' },
+                    { name: 'Swiatek', sport: 'tennis', keywords: 'iga swiatek match' },
+                    
+                    // F1
+                    { name: 'Red Bull', sport: 'formula1', keywords: 'red bull racing' },
+                    { name: 'Mercedes', sport: 'formula1', keywords: 'mercedes f1' },
+                    { name: 'Ferrari', sport: 'formula1', keywords: 'ferrari f1' },
+                    { name: 'McLaren', sport: 'formula1', keywords: 'mclaren f1' },
+                    { name: 'Aston Martin', sport: 'formula1', keywords: 'aston martin f1' }
+                ];
+                
+                this.init();
+            }
+
+            async init() {
+                // Initialize categories
+                this.renderCategories();
+                
+                // Initialize teams
+                this.renderTeams();
+                
+                // Load initial videos
+                await this.loadVideos('football highlights 2024');
+                
+                // Load sample chat messages
+                this.loadChatMessages();
+                
+                // Auto-refresh content every 5 minutes
+                setInterval(() => this.refreshCurrentCategory(), 300000);
+            }
+
+            renderCategories() {
+                const container = document.getElementById('categories');
+                container.innerHTML = this.categories.map(cat => `
+                    <button class="category-btn ${cat.id === this.currentCategory ? 'active' : ''}" 
+                            onclick="sportsLive.setCategory('${cat.id}')">
+                        <i class="fas fa-${cat.icon}"></i> ${cat.name}
+                    </button>
+                `).join('');
+            }
+
+            renderTeams() {
+                const container = document.getElementById('teamsGrid');
+                container.innerHTML = this.topTeams.map(team => `
+                    <div class="team-card" onclick="sportsLive.searchTeam('${team.keywords}')">
+                        <div class="team-logo">
+                            ${team.name.charAt(0)}
+                        </div>
+                        <div class="team-name">${team.name}</div>
+                        <div class="team-sport">${team.sport.toUpperCase()}</div>
+                    </div>
+                `).join('');
+            }
+
+            async loadVideos(query) {
+                this.showLoading(true);
+                
+                try {
+                    // In production, this would be a real API call to YouTube Data API
+                    // For demo purposes, we'll simulate with mock data
+                    
+                    const mockVideos = this.generateMockVideos(query);
+                    this.videos = mockVideos;
+                    
+                    this.renderVideos();
+                    
+                    // Auto-play first video if none is playing
+                    if (!this.currentVideoId && mockVideos.length > 0) {
+                        this.playVideo(mockVideos[0].id);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error loading videos:', error);
+                    this.showError('Failed to load videos. Please try again.');
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            generateMockVideos(query) {
+                // This simulates YouTube search results
+                const sportsKeywords = query.toLowerCase();
+                const category = this.currentCategory;
+                
+                const mockData = {
+                    football: [
+                        {
+                            id: 'dQw4w9WgXcQ',
+                            title: 'Manchester City vs Real Madrid | UCL Semi-Final 2024 | Extended Highlights',
+                            thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hq720.jpg',
+                            duration: '15:42',
+                            views: '4.2M views',
+                            channel: 'UEFA Champions League',
+                            published: '2 weeks ago'
+                        },
+                        {
+                            id: '9bZkp7q19f0',
+                            title: 'Liverpool 4-0 Barcelona | EPIC Champions League Comeback | Full Match Highlights',
+                            thumbnail: 'https://i.ytimg.com/vi/9bZkp7q19f0/hq720.jpg',
+                            duration: '12:35',
+                            views: '18M views',
+                            channel: 'Premier League',
+                            published: '1 year ago'
+                        },
+                        {
+                            id: 'CduA0TULnow',
+                            title: 'Argentina vs France | FIFA World Cup 2022 Final | Full Match Highlights',
+                            thumbnail: 'https://i.ytimg.com/vi/CduA0TULnow/hq720.jpg',
+                            duration: '20:15',
+                            views: '65M views',
+                            channel: 'FIFA',
+                            published: '1 year ago'
+                        }
+                    ],
+                    basketball: [
+                        {
+                            id: 'L_jWHffIx5E',
+                            title: 'NBA Finals 2023: Denver Nuggets vs Miami Heat Game 5 Highlights',
+                            thumbnail: 'https://i.ytimg.com/vi/L_jWHffIx5E/hq720.jpg',
+                            duration: '11:24',
+                            views: '8.7M views',
+                            channel: 'NBA',
+                            published: '8 months ago'
+                        },
+                        {
+                            id: 'FlsBObg-2Bk',
+                            title: 'Stephen Curry 50 POINTS Game 7! Warriors vs Kings Highlights',
+                            thumbnail: 'https://i.ytimg.com/vi/FlsBObg-2Bk/hq720.jpg',
+                            duration: '9:45',
+                            views: '12M views',
+                            channel: 'Golden State Warriors',
+                            published: '1 year ago'
+                        }
+                    ],
+                    tennis: [
+                        {
+                            id: 'pRpeEdMmmQ0',
+                            title: 'Djokovic vs Alcaraz | Wimbledon 2023 Final | Extended Highlights',
+                            thumbnail: 'https://i.ytimg.com/vi/pRpeEdMmmQ0/hq720.jpg',
+                            duration: '18:32',
+                            views: '5.4M views',
+                            channel: 'Wimbledon',
+                            published: '10 months ago'
+                        }
+                    ],
+                    formula1: [
+                        {
+                            id: 'ZugHrNfS9Jo',
+                            title: '2024 Monaco Grand Prix Race Highlights',
+                            thumbnail: 'https://i.ytimg.com/vi/ZugHrNfS9Jo/hq720.jpg',
+                            duration: '8:56',
+                            views: '3.8M views',
+                            channel: 'FORMULA 1',
+                            published: '1 week ago'
+                        }
+                    ]
+                };
+
+                // Return videos for current category, or search results
+                if (mockData[category]) {
+                    return mockData[category];
+                }
+
+                // Generic sports highlights if category not found
+                return [
+                    {
+                        id: 'dQw4w9WgXcQ',
+                        title: `${query} | Extended Highlights | Full Match`,
+                        thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hq720.jpg',
+                        duration: '14:22',
+                        views: '2.4M views',
+                        channel: 'Sports Highlights',
+                        published: '3 days ago'
+                    },
+                    {
+                        id: '9bZkp7q19f0',
+                        title: `Best Moments: ${query}`,
+                        thumbnail: 'https://i.ytimg.com/vi/9bZkp7q19f0/hq720.jpg',
+                        duration: '9:15',
+                        views: '1.8M views',
+                        channel: 'Sports Network',
+                        published: '1 week ago'
+                    }
+                ];
+            }
+
+            renderVideos() {
+                const container = document.getElementById('videosGrid');
+                
+                if (this.videos.length === 0) {
+                    container.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: var(--space-xxl); color: var(--text-secondary);">
+                            <i class="fas fa-video-slash" style="font-size: 3rem; margin-bottom: var(--space-md);"></i>
+                            <div>No videos found. Try another search.</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = this.videos.map(video => `
+                    <div class="video-card ${video.id === this.currentVideoId ? 'active' : ''}" 
+                         onclick="sportsLive.playVideo('${video.id}', '${video.title.replace(/'/g, "\\'")}')">
+                        <div class="video-thumbnail">
+                            <img src="${video.thumbnail}" alt="${video.title}" style="width:100%;height:100%;object-fit:cover;">
+                            <div class="video-duration">${video.duration}</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-card-title">${video.title}</div>
+                            <div class="video-card-meta">
+                                <span>${video.channel}</span>
+                                <span>${video.views}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            playVideo(videoId, title = 'Sports Match') {
+                this.currentVideoId = videoId;
+                
+                const player = document.getElementById('youtubePlayer');
+                const loading = document.getElementById('playerLoading');
+                
+                // Show loading
+                loading.style.display = 'flex';
+                player.style.display = 'none';
+                
+                // Update UI
+                document.getElementById('videoTitle').textContent = title;
+                document.getElementById('currentSport').textContent = this.currentCategory.toUpperCase();
+                document.getElementById('videoChannel').textContent = 'SportsLive Stream';
+                document.getElementById('videoViews').textContent = '• Live Now';
+                
+                // Update viewer count with random number
+                const viewerCount = Math.floor(Math.random() * 50000) + 10000;
+                document.getElementById('viewerCount').textContent = viewerCount.toLocaleString() + ' watching';
+                
+                // In a real implementation, this would embed the actual YouTube video
+                // For demo, we'll show a placeholder with sports content
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                    player.style.display = 'block';
+                    
+                    // Since we can't embed actual YouTube videos without API key,
+                    // we'll show a sports highlights placeholder
+                    player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`;
+                    
+                    // Update active video card
+                    this.renderVideos();
+                    
+                    // Add chat message about the match
+                    this.addChatMessage('System', `Now watching: ${title}`);
+                    
+                    // Simulate live match updates
+                    this.simulateLiveUpdates();
+                }, 1000);
+            }
+
+            async searchVideos() {
+                const query = document.getElementById('searchInput').value.trim();
+                if (!query) {
+                    this.showNotification('Please enter a search term');
+                    return;
+                }
+                
+                await this.loadVideos(query);
+                this.showNotification(`Searching for: ${query}`);
+            }
+
+            async searchTeam(keywords) {
+                document.getElementById('searchInput').value = keywords;
+                await this.loadVideos(keywords);
+                this.showNotification(`Loading matches for: ${keywords}`);
+            }
+
+            setCategory(category) {
+                this.currentCategory = category;
+                this.renderCategories();
+                
+                // Update current sport display
+                document.getElementById('currentSport').textContent = category.toUpperCase();
+                
+                // Load videos for this category
+                const categoryName = this.categories.find(c => c.id === category)?.name || category;
+                this.loadVideos(`${categoryName} highlights 2024`);
+                
+                // Update live status
+                const liveStatus = document.getElementById('liveStatus');
+                liveStatus.innerHTML = `<i class="fas fa-circle"></i> ${category.toUpperCase()} LIVE`;
+            }
+
+            refreshCurrentCategory() {
+                const categoryName = this.categories.find(c => c.id === this.currentCategory)?.name || this.currentCategory;
+                this.loadVideos(`${categoryName} highlights`);
+                this.showNotification(`Refreshed ${categoryName} content`);
+            }
+
+            refreshTopTeams() {
+                // Shuffle teams to simulate new content
+                this.topTeams = [...this.topTeams].sort(() => Math.random() - 0.5);
+                this.renderTeams();
+                this.showNotification('Top teams refreshed');
+            }
+
+            simulateLiveUpdates() {
+                // Simulate live match events
+                const events = [
+                    '⚽ GOAL! Amazing strike!',
+                    '🟨 Yellow card issued',
+                    '🔄 Substitution being made',
+                    '🎯 Great save by the goalkeeper!',
+                    '⚡ Fast counter-attack!',
+                    '🎉 What a spectacular play!',
+                    '😲 Unbelievable miss!',
+                    '👏 Excellent team coordination'
+                ];
+                
+                // Random match updates
+                setInterval(() => {
+                    if (this.currentVideoId) {
+                        const randomEvent = events[Math.floor(Math.random() * events.length)];
+                        const commentators = ['John_Commentator', 'Sarah_Analyst', 'Mike_Expert'];
+                        const commentator = commentators[Math.floor(Math.random() * commentators.length)];
+                        
+                        this.addChatMessage(commentator, randomEvent);
+                        
+                        // Occasionally update score
+                        if (Math.random() > 0.8) {
+                            setTimeout(() => {
+                                const scores = ['1-0', '2-1', '3-2', '0-0', '2-0'];
+                                const score = scores[Math.floor(Math.random() * scores.length)];
+                                this.addChatMessage('LiveScore', `⚽ SCORE UPDATE: ${score}`);
+                            }, 2000);
+                        }
+                    }
+                }, 15000);
+            }
+
+            loadChatMessages() {
+                this.chatMessages = [
+                    { user: 'Sports_Fan_42', message: 'What a game! This is incredible!', time: '2:30' },
+                    { user: 'Live_Viewer', message: 'The atmosphere is electric!', time: '2:32' },
+                    { user: 'Analyst_Pro', message: 'Tactical masterclass from the coach', time: '2:35' },
+                    { user: 'Goal_Hunter', message: 'That was an amazing goal! 🔥', time: '2:40' },
+                    { user: 'Match_Day', message: 'Who do you think will win?', time: '2:45' }
+                ];
+                
+                this.renderChat();
+                
+                // Simulate live chat activity
+                setInterval(() => {
+                    if (this.currentVideoId && Math.random() > 0.7) {
+                        const users = ['SportsFan', 'LiveWatcher', 'GameExpert', 'TeamSupporter', 'MatchAnalyst'];
+                        const messages = [
+                            'Great play!',
+                            'This match is intense!',
+                            'What a save!',
+                            'The referee got that wrong',
+                            'Amazing teamwork',
+                            'This is why I love sports!',
+                            'Historic match right here'
+                        ];
+                        
+                        const user = users[Math.floor(Math.random() * users.length)];
+                        const message = messages[Math.floor(Math.random() * messages.length)];
+                        
+                        this.addChatMessage(user, message);
+                    }
+                }, 8000);
+            }
+
+            renderChat() {
+                const container = document.getElementById('chatMessages');
+                container.innerHTML = this.chatMessages.map(msg => `
+                    <div class="message">
+                        <div class="message-avatar">
+                            ${msg.user.charAt(0)}
+                        </div>
+                        <div class="message-content">
+                            <div style="font-weight: 600; color: var(--accent);">${msg.user}</div>
+                            <div>${msg.message}</div>
+                            <div style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 2px;">${msg.time}</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Update chat count
+                document.getElementById('chatCount').textContent = this.chatMessages.length;
+                
+                // Auto-scroll to bottom
+                container.scrollTop = container.scrollHeight;
+            }
+
+            addChatMessage(user, message) {
+                const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                this.chatMessages.push({ user, message, time });
+                
+                // Keep only last 50 messages
+                if (this.chatMessages.length > 50) {
+                    this.chatMessages.shift();
+                }
+                
+                this.renderChat();
+            }
+
+            sendChatMessage() {
+                const input = document.getElementById('chatInput');
+                const message = input.value.trim();
+                
+                if (message) {
+                    this.addChatMessage('You', message);
+                    input.value = '';
+                    
+                    // Simulate response
+                    setTimeout(() => {
+                        const responses = [
+                            'Great point!',
+                            'I agree!',
+                            'What do others think?',
+                            'Interesting perspective',
+                            'Let\'s see how this plays out'
+                        ];
+                        const randomUser = ['SportsBot', 'AI_Analyst'][Math.floor(Math.random() * 2)];
+                        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                        
+                        this.addChatMessage(randomUser, randomResponse);
+                    }, 1000);
+                }
+            }
+
+            showLoading(isLoading) {
+                this.isLoading = isLoading;
+                
+                const playerLoading = document.getElementById('playerLoading');
+                const player = document.getElementById('youtubePlayer');
+                
+                if (isLoading) {
+                    playerLoading.style.display = 'flex';
+                    player.style.display = 'none';
+                }
+            }
+
+            showNotification(message) {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    background: var(--gradient-red);
+                    color: white;
+                    padding: var(--space-md) var(--space-lg);
+                    border-radius: 12px;
+                    z-index: 1000;
+                    animation: slideInRight 0.3s ease;
+                    box-shadow: var(--shadow-lg);
+                    display: flex;
+                    align-items: center;
+                    gap: var(--space-sm);
+                `;
+                
+                notification.innerHTML = `
+                    <i class="fas fa-info-circle"></i>
+                    <span>${message}</span>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+                
+                // Add animation
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes slideInRight {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOutRight {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            showError(message) {
+                this.showNotification(`❌ ${message}`);
+            }
+        }
+
+        // Initialize SportsLive
+        const sportsLive = new SportsLive();
+
+        // Global Functions
+        function searchVideos() {
+            sportsLive.searchVideos();
+        }
+
+        function refreshAllContent() {
+            sportsLive.refreshCurrentCategory();
+            sportsLive.refreshTopTeams();
+            sportsLive.showNotification('All content refreshed!');
+        }
+
+        function refreshTopTeams() {
+            sportsLive.refreshTopTeams();
+        }
+
+        function sendChatMessage() {
+            sportsLive.sendChatMessage();
+        }
+
+        // Handle Enter key in chat
+        document.getElementById('chatInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendChatMessage();
+            }
+        });
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add some sample videos immediately
+            setTimeout(() => {
+                if (!sportsLive.currentVideoId && sportsLive.videos.length > 0) {
+                    sportsLive.playVideo(sportsLive.videos[0].id, sportsLive.videos[0].title);
+                }
+            }, 1000);
+            
+            // Show welcome notification
+            setTimeout(() => {
+                sportsLive.showNotification('🎉 Welcome to SportsLive! Search for your favorite matches!');
+            }, 1500);
+        });
+
+        // Add CSS for animations
+        const animationStyle = document.createElement('style');
+        animationStyle.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(animationStyle);
+    </script>
+</body>
+</html>

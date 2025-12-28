@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 14: Deploy Your Msebetsi Solutions Clone | Msebetsi Solutions Engineering</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ===== MSEBETSI SOLUTIONS DEPLOYMENT DESIGN SYSTEM ===== */
+        :root {
+            /* Msebetsi Colors */
+            --msebetsi-red: #E50914;
+            --msebetsi-red-dark: #B20710;
+            --msebetsi-black: #141414;
+            --msebetsi-dark-gray: #2D2D2D;
+            --msebetsi-gray: #737373;
+            --msebetsi-light-gray: #E5E5E5;
+            --msebetsi-white: #FFFFFF;
+            --msebetsi-bg: #0F0F0F;
+            
+            /* Deployment Status Colors */
+            --status-success: #00FF88;
+            --status-warning: #FFD700;
+            --status-error: #FF6B6B;
+            --status-deploying: #00B4D8;
+            --status-pending: #8A2BE2;
+            
+            /* Platform Colors */
+            --vercel: #000000;
+            --netlify: #00AD9F;
+            --github: #24292E;
+            --gitlab: #FC6D26;
+            
+            /* Gradients */
+            --gradient-deploy: linear-gradient(135deg, #E50914 0%, #00B4D8 100%);
+            --gradient-success: linear-gradient(135deg, #00FF88 0%, #00B4D8 100%);
+            --gradient-error: linear-gradient(135deg, #FF6B6B 0%, #FFD700 100%);
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-xxl: 48px;
+            --space-xxxl: 64px;
+            
+            /* Shadows */
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.9);
+            --shadow-xl: 0 16px 64px rgba(0,0,0,0.95);
+            --shadow-deploy: 0 0 40px rgba(229,9,20,0.5);
+            --shadow-glow: 0 0 60px rgba(0,180,216,0.6);
+            
+            /* Transitions */
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            
+            /* Border Radius */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-round: 50%;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--msebetsi-bg);
+            color: var(--msebetsi-white);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(229,9,20,0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 20%, rgba(0,180,216,0.1) 0%, transparent 40%);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--msebetsi-dark-gray);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--msebetsi-red);
+            border-radius: 5px;
+        }
+        
+        /* Deployment Header */
+        .deployment-header {
+            background: linear-gradient(135deg, rgba(20,20,20,0.98), rgba(10,10,10,0.98));
+            padding: var(--space-xxxl) var(--space-xl);
+            border-bottom: 3px solid var(--msebetsi-red);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .deployment-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1600&q=80');
+            background-size: cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        .deployment-badge {
+            background: var(--gradient-deploy);
+            color: white;
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: var(--space-lg);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+        }
+        
+        .deployment-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(45deg, var(--msebetsi-red), var(--status-deploying));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .deployment-subtitle {
+            font-size: 1.5rem;
+            color: var(--msebetsi-light-gray);
+            max-width: 800px;
+            margin: 0 auto var(--space-xl);
+            line-height: 1.6;
+        }
+        
+        /* Mission Card */
+        .mission-card {
+            background: rgba(20,20,20,0.95);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) auto;
+            max-width: 900px;
+            border-left: 4px solid var(--status-success);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .mission-title {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            color: var(--status-success);
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: var(--space-lg);
+        }
+        
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-xl);
+        }
+        
+        /* Deployment Console */
+        .deployment-console {
+            background: rgba(20,20,20,0.95);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xxxl);
+            margin-bottom: var(--space-xxxl);
+            border: 2px solid rgba(229,9,20,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .deployment-console::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-deploy);
+        }
+        
+        .console-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xxl);
+        }
+        
+        .console-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+        
+        .console-status {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: var(--radius-round);
+            background: var(--status-success);
+            animation: status-pulse 2s infinite;
+        }
+        
+        .status-indicator.deploying {
+            background: var(--status-deploying);
+            animation: spin 1s linear infinite;
+        }
+        
+        .status-indicator.error {
+            background: var(--status-error);
+            animation: error-pulse 1s infinite;
+        }
+        
+        @keyframes status-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes error-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Deployment Steps */
+        .deployment-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-xl);
+            margin-bottom: var(--space-xxl);
+        }
+        
+        .step-card {
+            background: rgba(30,30,30,0.9);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            transition: all var(--transition-normal);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .step-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--msebetsi-red);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .step-number {
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-deploy);
+            border-radius: var(--radius-round);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: white;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .step-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            color: white;
+            margin-top: var(--space-md);
+        }
+        
+        .step-description {
+            color: var(--msebetsi-gray);
+            line-height: 1.6;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .step-commands {
+            background: rgba(0,0,0,0.7);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            font-family: 'SF Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            overflow-x: auto;
+            margin-bottom: var(--space-lg);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .step-button {
+            width: 100%;
+            padding: var(--space-md);
+            background: var(--msebetsi-red);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: 'Inter';
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+        
+        .step-button:hover {
+            background: var(--msebetsi-red-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-deploy);
+        }
+        
+        .step-button.completed {
+            background: var(--status-success);
+            color: var(--msebetsi-black);
+            font-weight: 800;
+        }
+        
+        /* Platform Selection */
+        .platform-selection {
+            background: rgba(30,30,30,0.9);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xxl);
+        }
+        
+        .platform-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-lg);
+        }
+        
+        .platform-card {
+            background: rgba(40,40,40,0.9);
+            border-radius: var(--radius-md);
+            padding: var(--space-xl);
+            border: 2px solid transparent;
+            transition: all var(--transition-normal);
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .platform-card:hover {
+            transform: translateY(-5px);
+            border-color: currentColor;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .platform-card.vercel {
+            color: var(--vercel);
+            border-color: var(--vercel);
+        }
+        
+        .platform-card.netlify {
+            color: var(--netlify);
+            border-color: var(--netlify);
+        }
+        
+        .platform-icon {
+            font-size: 3rem;
+            margin-bottom: var(--space-md);
+        }
+        
+        .platform-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .platform-description {
+            color: var(--msebetsi-gray);
+            font-size: 0.9rem;
+            margin-bottom: var(--space-lg);
+        }
+        
+        /* Troubleshooting Section */
+        .troubleshooting-section {
+            background: rgba(30,30,30,0.9);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xxl);
+        }
+        
+        .troubleshooting-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+        }
+        
+        .problem-card {
+            background: rgba(40,40,40,0.9);
+            border-radius: var(--radius-md);
+            padding: var(--space-xl);
+            border-left: 4px solid var(--status-error);
+        }
+        
+        .problem-title {
+            color: var(--status-error);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .problem-description {
+            color: var(--msebetsi-gray);
+            line-height: 1.6;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .solution-code {
+            background: #0d1117;
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            font-family: 'SF Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            overflow-x: auto;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .code-comment { color: #8b949e; }
+        .code-keyword { color: #ff7b72; }
+        .code-string { color: #a5d6ff; }
+        .code-function { color: #d2a8ff; }
+        
+        /* Student Task */
+        .student-task {
+            background: rgba(20,20,20,0.95);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xxxl);
+            border: 2px solid rgba(0,255,136,0.3);
+        }
+        
+        .task-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: var(--space-lg);
+            color: white;
+        }
+        
+        .task-checklist {
+            background: rgba(30,30,30,0.9);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xxl);
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            padding: var(--space-md);
+            background: rgba(0,0,0,0.3);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-normal);
+        }
+        
+        .checklist-item:hover {
+            background: rgba(0,0,0,0.5);
+        }
+        
+        .checklist-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--msebetsi-gray);
+            border-radius: var(--radius-round);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+        
+        .checklist-checkbox.checked {
+            background: var(--status-success);
+            border-color: var(--status-success);
+        }
+        
+        .checklist-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+        }
+        
+        .checklist-label {
+            flex: 1;
+            font-weight: 600;
+        }
+        
+        /* Deployment Demo */
+        .deployment-demo {
+            background: rgba(30,30,30,0.9);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xxl);
+            text-align: center;
+        }
+        
+        .demo-terminal {
+            background: #0d1117;
+            border-radius: var(--radius-md);
+            padding: var(--space-xl);
+            font-family: 'SF Mono', monospace;
+            font-size: 0.9rem;
+            text-align: left;
+            margin: var(--space-xl) 0;
+            border: 1px solid rgba(255,255,255,0.1);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .terminal-line {
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .terminal-prompt {
+            color: var(--status-success);
+        }
+        
+        .terminal-command {
+            color: white;
+        }
+        
+        .terminal-output {
+            color: var(--msebetsi-gray);
+            padding-left: 20px;
+        }
+        
+        .deploy-button {
+            padding: var(--space-lg) var(--space-xxl);
+            background: var(--gradient-deploy);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1.2rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+        
+        .deploy-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        /* Progress Bar */
+        .deployment-progress {
+            margin: var(--space-xxl) 0;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--space-md);
+        }
+        
+        .progress-label {
+            color: white;
+            font-weight: 600;
+        }
+        
+        .progress-percentage {
+            color: var(--status-success);
+            font-weight: 800;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-deploy);
+            width: 0%;
+            transition: width var(--transition-slow);
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: var(--space-md) var(--space-xl);
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: 'Inter';
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+        
+        .btn-primary {
+            background: var(--msebetsi-red);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--msebetsi-red-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-deploy);
+        }
+        
+        .btn-success {
+            background: var(--status-success);
+            color: var(--msebetsi-black);
+            font-weight: 800;
+        }
+        
+        .btn-success:hover {
+            background: #00e676;
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(0,255,136,0.5);
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 120px;
+            right: 20px;
+            background: rgba(20,20,20,0.98);
+            border-left: 4px solid var(--msebetsi-red);
+            padding: var(--space-lg) var(--space-xl);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-xl);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .deployment-title {
+                font-size: 3rem;
+            }
+            
+            .deployment-steps {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .deployment-title {
+                font-size: 2.5rem;
+            }
+            
+            .deployment-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .deployment-steps {
+                grid-template-columns: 1fr;
+            }
+            
+            .platform-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .problem-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .console-header {
+                flex-direction: column;
+                gap: var(--space-lg);
+                align-items: flex-start;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .deployment-title {
+                font-size: 2rem;
+            }
+            
+            .console-title {
+                font-size: 1.8rem;
+            }
+            
+            .step-commands {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Deployment Header -->
+    <header class="deployment-header fade-in">
+        <div class="deployment-badge">
+            <i class="fas fa-rocket"></i> DEPLOYMENT ENGINEERING
+        </div>
+        <h1 class="deployment-title">Deploy Your Msebetsi Solutions Clone</h1>
+        <p class="deployment-subtitle">
+            Master professional deployment techniques by taking your Msebetsi Solutions clone from 
+            localhost to production. Learn Git workflows, platform deployment, and CI/CD pipelines.
+        </p>
+        
+        <div class="mission-card">
+            <h2 class="mission-title">
+                <i class="fas fa-bullseye"></i> ENGINEERING MISSION
+            </h2>
+            <p style="color: var(--msebetsi-light-gray); line-height: 1.7; font-size: 1.1rem;">
+                <strong>Task:</strong> Deploy your Msebetsi Solutions clone to production using industry-standard 
+                platforms. Implement proper Git workflow, configure environment variables, set up CI/CD pipelines, 
+                and monitor your live application—exactly how Msebetsi Solutions engineers deploy production applications.
+            </p>
+            <p style="color: var(--msebetsi-gray); margin-top: var(--space-md);">
+                <i class="fas fa-lightbulb"></i> <strong>Platforms:</strong> Deploy to Vercel or Netlify with GitHub 
+                integration. Learn production environment setup, routing configuration, and performance optimization.
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Deployment Console -->
+        <section class="deployment-console fade-in">
+            <div class="console-header">
+                <h2 class="console-title">
+                    <i class="fas fa-terminal"></i> Deployment Console
+                    <span class="status-indicator" id="deployStatus"></span>
+                </h2>
+                <div class="console-status">
+                    <span style="color: var(--msebetsi-gray);" id="deployStatusText">Ready to deploy</span>
+                    <span style="color: var(--msebetsi-gray); font-size: 0.9rem;">
+                        Steps: <span id="stepCount">0</span>/4
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Deployment Progress -->
+            <div class="deployment-progress">
+                <div class="progress-header">
+                    <span class="progress-label">Deployment Progress</span>
+                    <span class="progress-percentage" id="progressPercentage">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+            
+            <!-- Deployment Steps -->
+            <div class="deployment-steps">
+                <div class="step-card" id="step1">
+                    <div class="step-number">1</div>
+                    <h3 class="step-title">Prepare Your Code</h3>
+                    <p class="step-description">
+                        Build your application and fix any errors before deployment.
+                    </p>
+                    <div class="step-commands" id="step1Commands">
+                        <span style="color: var(--status-success);">$</span> cd msebetsi-clone<br>
+                        <span style="color: var(--status-success);">$</span> npm run build<br>
+                        <span style="color: var(--msebetsi-gray);"># Fix any errors that appear</span>
+                    </div>
+                    <button class="step-button" onclick="completeStep(1)">
+                        <i class="fas fa-play"></i> Execute Step 1
+                    </button>
+                </div>
+                
+                <div class="step-card" id="step2">
+                    <div class="step-number">2</div>
+                    <h3 class="step-title">Push to GitHub</h3>
+                    <p class="step-description">
+                        Initialize Git repository and push to GitHub.
+                    </p>
+                    <div class="step-commands" id="step2Commands">
+                        <span style="color: var(--status-success);">$</span> git init<br>
+                        <span style="color: var(--status-success);">$</span> git add .<br>
+                        <span style="color: var(--status-success);">$</span> git commit -m "Initial commit"<br>
+                        <span style="color: var(--status-success);">$</span> git branch -M main<br>
+                        <span style="color: var(--status-success);">$</span> git remote add origin [repo-url]<br>
+                        <span style="color: var(--status-success);">$</span> git push -u origin main
+                    </div>
+                    <button class="step-button" onclick="completeStep(2)">
+                        <i class="fas fa-play"></i> Execute Step 2
+                    </button>
+                </div>
+                
+                <div class="step-card" id="step3">
+                    <div class="step-number">3</div>
+                    <h3 class="step-title">Deploy to Vercel</h3>
+                    <p class="step-description">
+                        Deploy your application to Vercel with GitHub integration.
+                    </p>
+                    <div class="step-commands" id="step3Commands">
+                        1. Go to vercel.com<br>
+                        2. Click "Import Project"<br>
+                        3. Select GitHub repository<br>
+                        4. Click "Deploy"<br>
+                        5. Wait 1-2 minutes<br>
+                        6. 🎉 Your site is live!
+                    </div>
+                    <button class="step-button" onclick="completeStep(3)">
+                        <i class="fas fa-play"></i> Execute Step 3
+                    </button>
+                </div>
+                
+                <div class="step-card" id="step4">
+                    <div class="step-number">4</div>
+                    <h3 class="step-title">Deploy to Netlify</h3>
+                    <p class="step-description">
+                        Alternative deployment option with Netlify.
+                    </p>
+                    <div class="step-commands" id="step4Commands">
+                        1. Go to netlify.com<br>
+                        2. Drag & drop build folder<br>
+                        3. Or connect GitHub repo<br>
+                        4. Add build settings if needed<br>
+                        5. Deploy!
+                    </div>
+                    <button class="step-button" onclick="completeStep(4)">
+                        <i class="fas fa-play"></i> Execute Step 4
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Platform Selection -->
+            <div class="platform-selection">
+                <h3 class="platform-title">
+                    <i class="fas fa-cloud-upload-alt"></i> Choose Deployment Platform
+                </h3>
+                <div class="platform-grid">
+                    <div class="platform-card vercel" onclick="selectPlatform('vercel')">
+                        <div class="platform-icon">
+                            <i class="fab fa-vercel"></i>
+                        </div>
+                        <h4 class="platform-name">Vercel</h4>
+                        <p class="platform-description">
+                            Best for React applications. Automatic deployments from GitHub.
+                        </p>
+                        <div class="btn" style="background: var(--vercel); color: white;">
+                            Recommended
+                        </div>
+                    </div>
+                    
+                    <div class="platform-card netlify" onclick="selectPlatform('netlify')">
+                        <div class="platform-icon">
+                            <i class="fab fa-netlify"></i>
+                        </div>
+                        <h4 class="platform-name">Netlify</h4>
+                        <p class="platform-description">
+                            Great for static sites. Easy drag & drop deployment.
+                        </p>
+                        <div class="btn" style="background: var(--netlify); color: white;">
+                            Alternative
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Troubleshooting Section -->
+            <div class="troubleshooting-section">
+                <h3 class="troubleshooting-title">
+                    <i class="fas fa-wrench"></i> Troubleshooting Common Issues
+                </h3>
+                <div class="problem-grid">
+                    <div class="problem-card">
+                        <div class="problem-title">
+                            <i class="fas fa-exclamation-triangle"></i> White Screen on Deployment
+                        </div>
+                        <p class="problem-description">
+                            Common issue caused by wrong paths in index.html
+                        </p>
+                        <div class="solution-code">
+<span class="code-comment">&lt;!-- Change this --&gt;</span><br>
+&lt;link rel="stylesheet" href=<span class="code-string">"/static/css/main.css"</span>&gt;<br>
+<span class="code-comment">&lt;!-- To this --&gt;</span><br>
+&lt;link rel="stylesheet" href=<span class="code-string">"./static/css/main.css"</span>&gt;
+                        </div>
+                    </div>
+                    
+                    <div class="problem-card">
+                        <div class="problem-title">
+                            <i class="fas fa-exclamation-triangle"></i> API Calls Fail After Deployment
+                        </div>
+                        <p class="problem-description">
+                            Environment variables not configured properly
+                        </p>
+                        <div class="solution-code">
+<span class="code-comment">// .env.local (development)</span><br>
+REACT_APP_API_KEY=<span class="code-string">your_key_here</span><br>
+REACT_APP_API_URL=<span class="code-string">http://localhost:3000</span><br><br>
+<span class="code-comment">// In Vercel/Netlify dashboard, add:</span><br>
+REACT_APP_API_KEY=<span class="code-string">production_key_here</span><br>
+REACT_APP_API_URL=<span class="code-string">https://api.msebetsisolutions.com</span>
+                        </div>
+                    </div>
+                    
+                    <div class="problem-card">
+                        <div class="problem-title">
+                            <i class="fas fa-exclamation-triangle"></i> Routing Issues (404 on Refresh)
+                        </div>
+                        <p class="problem-description">
+                            Single Page Application routing needs configuration
+                        </p>
+                        <div class="solution-code">
+<span class="code-comment">// Create src/_redirects (Netlify)</span><br>
+/*    /index.html   200<br><br>
+<span class="code-comment">// Or configure in vercel.json</span><br>
+{<br>
+&nbsp;&nbsp;<span class="code-string">"rewrites"</span>: [{ <span class="code-string">"source"</span>: <span class="code-string">"/(.*)"</span>, <span class="code-string">"destination"</span>: <span class="code-string">"/index.html"</span> }]<br>
+}
+                        </div>
+                    </div>
+                    
+                    <div class="problem-card">
+                        <div class="problem-title">
+                            <i class="fas fa-exclamation-triangle"></i> Build Fails
+                        </div>
+                        <p class="problem-description">
+                            Clear cache and rebuild to fix dependency issues
+                        </p>
+                        <div class="solution-code">
+<span class="code-comment"># Clear cache and rebuild</span><br>
+rm -rf node_modules<br>
+rm -rf build<br>
+npm cache clean --force<br>
+npm install<br>
+npm run build
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Student Task -->
+        <section class="student-task fade-in">
+            <h2 class="task-title">
+                <i class="fas fa-graduation-cap"></i> Student Task: Deploy Msebetsi Solutions Clone
+            </h2>
+            
+            <div class="task-checklist">
+                <h3 style="color: white; margin-bottom: var(--space-lg); font-size: 1.5rem;">
+                    <i class="fas fa-clipboard-check"></i> Assignment Requirements
+                </h3>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(1)">
+                    <div class="checklist-checkbox" id="check1"></div>
+                    <div class="checklist-label">Clean Git history with meaningful commit messages</div>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(2)">
+                    <div class="checklist-checkbox" id="check2"></div>
+                    <div class="checklist-label">README.md with project description and screenshots</div>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(3)">
+                    <div class="checklist-checkbox" id="check3"></div>
+                    <div class="checklist-label">.gitignore file properly configured</div>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(4)">
+                    <div class="checklist-checkbox" id="check4"></div>
+                    <div class="checklist-label">No API keys in code (use environment variables)</div>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(5)">
+                    <div class="checklist-checkbox" id="check5"></div>
+                    <div class="checklist-label">Site must be publicly accessible</div>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(6)">
+                    <div class="checklist-checkbox" id="check6"></div>
+                    <div class="checklist-label">All features working (navigation, search, etc.)</div>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(7)">
+                    <div class="checklist-checkbox" id="check7"></div>
+                    <div class="checklist-label">Mobile responsive verified</div>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(8)">
+                    <div class="checklist-checkbox" id="check8"></div>
+                    <div class="checklist-label">No console errors</div>
+                </div>
+                
+                <div class="checklist-item" onclick="toggleCheckbox(9)">
+                    <div class="checklist-checkbox" id="check9"></div>
+                    <div class="checklist-label">3 friends tested the site</div>
+                </div>
+            </div>
+            
+            <!-- Submission Format -->
+            <div class="deployment-demo">
+                <h3 style="color: white; margin-bottom: var(--space-lg); font-size: 1.5rem;">
+                    <i class="fas fa-paper-plane"></i> Submission Format
+                </h3>
+                
+                <div class="demo-terminal">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">## Deployment Submission</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">**Name:**</span>
+                        <span class="terminal-command">[Your Name]</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">**GitHub Repo:**</span>
+                        <span class="terminal-command">https://github.com/[username]/msebetsi-clone</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">**Live URL:**</span>
+                        <span class="terminal-command">https://msebetsi-clone-[username].vercel.app</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">**Checklist Completion:**</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-output">- [ ] Pre-deployment tests passed</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-output">- [ ] Git workflow followed</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-output">- [ ] Environment variables configured</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-output">- [ ] Mobile responsive verified</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-output">- [ ] 3 friends tested the site</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">**Challenges Faced:**</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-output">1. [Describe any issues]</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-output">2. [How you solved them]</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">**Screenshots:**</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-output">- [Add screenshot of live site]</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-output">- [Add screenshot of mobile view]</span>
+                    </div>
+                </div>
+                
+                <button class="deploy-button" onclick="simulateDeployment()">
+                    <i class="fas fa-rocket"></i> Simulate Full Deployment
+                </button>
+            </div>
+            
+            <!-- Grading Rubric -->
+            <div style="margin-top: var(--space-xxl);">
+                <h3 style="color: white; margin-bottom: var(--space-lg); text-align: center; font-size: 1.5rem;">
+                    <i class="fas fa-star"></i> Grading Rubric
+                </h3>
+                
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; background: rgba(30,30,30,0.9); border-radius: var(--radius-md); overflow: hidden;">
+                        <thead>
+                            <tr style="background: var(--msebetsi-red);">
+                                <th style="padding: var(--space-md); text-align: left;">Criteria</th>
+                                <th style="padding: var(--space-md); text-align: center;">Points</th>
+                                <th style="padding: var(--space-md); text-align: left;">Excellent (10)</th>
+                                <th style="padding: var(--space-md); text-align: left;">Good (7)</th>
+                                <th style="padding: var(--space-md); text-align: left;">Needs Work (4)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <td style="padding: var(--space-md);">Git Usage</td>
+                                <td style="padding: var(--space-md); text-align: center;">25</td>
+                                <td style="padding: var(--space-md); color: var(--status-success);">Clean commits, PR process followed</td>
+                                <td style="padding: var(--space-md); color: var(--status-warning);">Basic commits</td>
+                                <td style="padding: var(--space-md); color: var(--status-error);">Messy history</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <td style="padding: var(--space-md);">Deployment</td>
+                                <td style="padding: var(--space-md); text-align: center;">30</td>
+                                <td style="padding: var(--space-md); color: var(--status-success);">Live, fully functional</td>
+                                <td style="padding: var(--space-md); color: var(--status-warning);">Minor issues</td>
+                                <td style="padding: var(--space-md); color: var(--status-error);">Major issues</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <td style="padding: var(--space-md);">Code Quality</td>
+                                <td style="padding: var(--space-md); text-align: center;">20</td>
+                                <td style="padding: var(--space-md); color: var(--status-success);">Clean, documented, no errors</td>
+                                <td style="padding: var(--space-md); color: var(--status-warning);">Some issues</td>
+                                <td style="padding: var(--space-md); color: var(--status-error);">Many errors</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <td style="padding: var(--space-md);">Responsiveness</td>
+                                <td style="padding: var(--space-md); text-align: center;">15</td>
+                                <td style="padding: var(--space-md); color: var(--status-success);">Perfect on all devices</td>
+                                <td style="padding: var(--space-md); color: var(--status-warning);">Minor issues</td>
+                                <td style="padding: var(--space-md); color: var(--status-error);">Broken layout</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: var(--space-md);">Submission</td>
+                                <td style="padding: var(--space-md); text-align: center;">10</td>
+                                <td style="padding: var(--space-md); color: var(--status-success);">Complete, screenshots, checklist</td>
+                                <td style="padding: var(--space-md); color: var(--status-warning);">Missing parts</td>
+                                <td style="padding: var(--space-md); color: var(--status-error);">Incomplete</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Lesson Completion -->
+        <div style="text-align: center; padding: var(--space-xxxl);">
+            <button class="btn btn-success" onclick="completeLesson()" 
+                    style="padding: var(--space-xl) var(--space-xxxl); font-size: 1.2rem;">
+                <i class="fas fa-graduation-cap"></i> Complete Lesson 14
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // ===== MSEBETSI SOLUTIONS DEPLOYMENT ENGINE =====
+        class MsebetsiDeploymentEngine {
+            constructor() {
+                // Deployment Configuration
+                this.config = {
+                    steps: {
+                        1: { completed: false, name: 'Prepare Code' },
+                        2: { completed: false, name: 'Push to GitHub' },
+                        3: { completed: false, name: 'Deploy to Vercel' },
+                        4: { completed: false, name: 'Deploy to Netlify' }
+                    },
+                    selectedPlatform: null,
+                    deploymentStatus: 'ready',
+                    progress: 0
+                };
+                
+                // Initialize
+                this.init();
+            }
+            
+            init() {
+                // Update status indicator
+                this.updateDeploymentStatus('ready');
+                
+                // Setup event listeners
+                this.setupEventListeners();
+                
+                // Show welcome notification
+                setTimeout(() => {
+                    this.showNotification('🚀 Msebetsi Solutions Deployment Engine Ready!', 'info');
+                    this.showNotification('🛠️ Follow the steps to deploy your application', 'info', 3000);
+                }, 1000);
+            }
+            
+            // ===== STEP COMPLETION =====
+            completeStep(stepNumber) {
+                if (this.config.steps[stepNumber].completed) {
+                    this.showNotification('✅ Step already completed!', 'info');
+                    return;
+                }
+                
+                // Update step status
+                this.config.steps[stepNumber].completed = true;
+                
+                // Update UI
+                this.updateStepUI(stepNumber);
+                
+                // Update progress
+                this.updateProgress();
+                
+                // Show notification
+                this.showNotification(`✅ Step ${stepNumber}: ${this.config.steps[stepNumber].name} completed!`, 'success');
+                
+                // Simulate execution
+                this.simulateStepExecution(stepNumber);
+            }
+            
+            simulateStepExecution(stepNumber) {
+                const stepButton = document.querySelector(`#step${stepNumber} .step-button`);
+                const originalText = stepButton.innerHTML;
+                
+                // Show executing state
+                stepButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Executing...';
+                stepButton.disabled = true;
+                
+                // Update status
+                this.updateDeploymentStatus('deploying');
+                
+                // Simulate execution time
+                setTimeout(() => {
+                    stepButton.innerHTML = '<i class="fas fa-check"></i> Completed';
+                    stepButton.classList.add('completed');
+                    this.updateDeploymentStatus('ready');
+                }, 2000);
+            }
+            
+            updateStepUI(stepNumber) {
+                const stepCard = document.getElementById(`step${stepNumber}`);
+                const stepButton = stepCard.querySelector('.step-button');
+                
+                // Add completed styling
+                stepCard.style.borderColor = 'var(--status-success)';
+                stepCard.style.boxShadow = '0 0 30px rgba(0,255,136,0.3)';
+            }
+            
+            updateProgress() {
+                const completedSteps = Object.values(this.config.steps).filter(step => step.completed).length;
+                const totalSteps = Object.keys(this.config.steps).length;
+                const progress = (completedSteps / totalSteps) * 100;
+                
+                this.config.progress = progress;
+                
+                // Update UI
+                document.getElementById('stepCount').textContent = completedSteps;
+                document.getElementById('progressPercentage').textContent = `${Math.round(progress)}%`;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+            }
+            
+            // ===== PLATFORM SELECTION =====
+            selectPlatform(platform) {
+                this.config.selectedPlatform = platform;
+                
+                // Update UI
+                document.querySelectorAll('.platform-card').forEach(card => {
+                    card.style.transform = 'translateY(0)';
+                    card.style.boxShadow = 'none';
+                });
+                
+                const selectedCard = document.querySelector(`.platform-card.${platform}`);
+                selectedCard.style.transform = 'translateY(-10px)';
+                selectedCard.style.boxShadow = 'var(--shadow-xl)';
+                
+                // Show notification
+                this.showNotification(`✅ Selected ${platform.charAt(0).toUpperCase() + platform.slice(1)} for deployment`, 'success');
+            }
+            
+            // ===== DEPLOYMENT SIMULATION =====
+            simulateFullDeployment() {
+                if (this.config.progress === 100) {
+                    this.showNotification('🚀 Deployment already completed!', 'info');
+                    return;
+                }
+                
+                this.updateDeploymentStatus('deploying');
+                
+                // Simulate deployment process
+                const steps = [1, 2, 3, 4];
+                let currentStep = 0;
+                
+                const deployInterval = setInterval(() => {
+                    if (currentStep < steps.length) {
+                        const step = steps[currentStep];
+                        if (!this.config.steps[step].completed) {
+                            this.completeStep(step);
+                        }
+                        currentStep++;
+                    } else {
+                        clearInterval(deployInterval);
+                        this.updateDeploymentStatus('success');
+                        this.showNotification('🎉 Full deployment simulation completed!', 'success');
+                        this.showDeploymentSuccess();
+                    }
+                }, 2500);
+            }
+            
+            showDeploymentSuccess() {
+                // Show success message
+                setTimeout(() => {
+                    const terminal = document.querySelector('.demo-terminal');
+                    terminal.innerHTML = `
+                        <div class="terminal-line">
+                            <span class="terminal-prompt">$</span>
+                            <span class="terminal-command">deploy-msebetsi-clone</span>
+                        </div>
+                        <div class="terminal-line">
+                            <span class="terminal-output">🚀 Starting deployment...</span>
+                        </div>
+                        <div class="terminal-line">
+                            <span class="terminal-output">✅ Step 1: Code prepared successfully</span>
+                        </div>
+                        <div class="terminal-line">
+                            <span class="terminal-output">✅ Step 2: Pushed to GitHub</span>
+                        </div>
+                        <div class="terminal-line">
+                            <span class="terminal-output">✅ Step 3: Deployed to Vercel</span>
+                        </div>
+                        <div class="terminal-line">
+                            <span class="terminal-output">✅ Step 4: Netlify deployment configured</span>
+                        </div>
+                        <div class="terminal-line">
+                            <span class="terminal-output" style="color: var(--status-success); font-weight: bold;">
+                            🎉 Deployment successful! Your site is live at:</span>
+                        </div>
+                        <div class="terminal-line">
+                            <span class="terminal-output" style="color: var(--status-success);">
+                            https://msebetsi-clone.vercel.app</span>
+                        </div>
+                        <div class="terminal-line">
+                            <span class="terminal-output">⏱️ Deployment time: 1m 23s</span>
+                        </div>
+                        <div class="terminal-line">
+                            <span class="terminal-output">📊 Performance score: 98/100</span>
+                        </div>
+                    `;
+                    terminal.scrollTop = terminal.scrollHeight;
+                }, 1000);
+            }
+            
+            // ===== UI UPDATES =====
+            updateDeploymentStatus(status) {
+                this.config.deploymentStatus = status;
+                const indicator = document.getElementById('deployStatus');
+                const statusText = document.getElementById('deployStatusText');
+                
+                indicator.className = 'status-indicator';
+                indicator.classList.add(status);
+                
+                const statusMessages = {
+                    'ready': 'Ready to deploy',
+                    'deploying': 'Deploying...',
+                    'success': 'Deployed successfully',
+                    'error': 'Deployment error'
+                };
+                
+                statusText.textContent = statusMessages[status] || status;
+            }
+            
+            // ===== EVENT LISTENERS =====
+            setupEventListeners() {
+                // Setup checklist toggles
+                for (let i = 1; i <= 9; i++) {
+                    const checkbox = document.getElementById(`check${i}`);
+                    checkbox.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.toggleCheckbox(i);
+                    });
+                }
+            }
+            
+            toggleCheckbox(checkboxId) {
+                const checkbox = document.getElementById(`check${checkboxId}`);
+                checkbox.classList.toggle('checked');
+                
+                const checkedCount = document.querySelectorAll('.checklist-checkbox.checked').length;
+                const totalCount = 9;
+                
+                if (checkedCount === totalCount) {
+                    this.showNotification('✅ All checklist items completed! Ready for submission.', 'success');
+                }
+            }
+            
+            // ===== NOTIFICATIONS =====
+            showNotification(message, type = 'info', duration = 4000) {
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                
+                const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+                notification.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: var(--space-md);">
+                        <div style="font-size: 1.5rem;">${icon}</div>
+                        <div style="flex: 1; font-size: 0.9rem; color: var(--msebetsi-light-gray);">
+                            ${message}
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" 
+                                style="background: none; border: none; color: var(--msebetsi-gray); cursor: pointer;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.style.opacity = '0';
+                        notification.style.transform = 'translateX(100px)';
+                        setTimeout(() => {
+                            if (notification.parentElement) {
+                                notification.remove();
+                            }
+                        }, 300);
+                    }
+                }, duration);
+            }
+        }
+
+        // ===== GLOBAL FUNCTIONS =====
+        const msebetsiDeployment = new MsebetsiDeploymentEngine();
+
+        // Public functions for onclick handlers
+        function completeStep(step) { msebetsiDeployment.completeStep(step); }
+        function selectPlatform(platform) { msebetsiDeployment.selectPlatform(platform); }
+        function simulateDeployment() { msebetsiDeployment.simulateFullDeployment(); }
+        function toggleCheckbox(id) { msebetsiDeployment.toggleCheckbox(id); }
+
+        function completeLesson() {
+            // Confetti celebration
+            createConfetti();
+            
+            msebetsiDeployment.showNotification('🏆 Lesson 14 Completed! You mastered Deployment!', 'success');
+            
+            setTimeout(() => {
+                alert('🎉 CONGRATULATIONS!\n\nYou have successfully completed Lesson 14:\n\n✅ Mastered Git workflow and deployment\n✅ Learned Vercel and Netlify deployment\n✅ Implemented environment variables\n✅ Fixed common deployment issues\n✅ Completed deployment checklist\n✅ Learned production deployment patterns\n\nYou are now ready to deploy real-world applications!');
+                
+                // Save completion
+                localStorage.setItem('lesson14Completed', 'true');
+            }, 1000);
+        }
+
+        // Helper functions
+        function createConfetti() {
+            const colors = ['#E50914', '#8A2BE2', '#00B4D8', '#00FF88', '#FFD700', '#FF6B9D'];
+            
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: ${Math.random() * 12 + 6}px;
+                    height: ${Math.random() * 12 + 6}px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                    top: -20px;
+                    left: ${Math.random() * 100}vw;
+                    animation: fall ${Math.random() * 3 + 2}s linear forwards;
+                    z-index: 9997;
+                    transform: rotate(${Math.random() * 360}deg);
+                `;
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    if (confetti.parentElement) {
+                        confetti.remove();
+                    }
+                }, 5000);
+            }
+            
+            // Add animation if not exists
+            if (!document.querySelector('style[data-confetti]')) {
+                const style = document.createElement('style');
+                style.setAttribute('data-confetti', 'true');
+                style.textContent = `
+                    @keyframes fall {
+                        to {
+                            transform: translateY(100vh) rotate(${Math.random() * 720}deg);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+    </script>
+</body>
+</html>

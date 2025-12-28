@@ -1,0 +1,2391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 10: useEffect & Data Flow | Netflix Bootcamp</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Netflix+Sans:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Particle.js -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <style>
+        /* NETFLIX DATA FLOW DESIGN SYSTEM */
+        :root {
+            /* Netflix Professional Colors */
+            --netflix-red: #E50914;
+            --netflix-red-dark: #B20710;
+            --netflix-black: #141414;
+            --netflix-dark-gray: #2D2D2D;
+            --netflix-gray: #737373;
+            --netflix-light-gray: #E5E5E5;
+            --netflix-white: #FFFFFF;
+            --netflix-bg: #0F0F0F;
+            
+            /* Data Flow Colors */
+            --data-blue: #00B4D8;
+            --data-green: #00FF88;
+            --data-purple: #8A2BE2;
+            --data-yellow: #FFD700;
+            --data-orange: #FF6B00;
+            --data-pink: #FF6B9D;
+            
+            /* Effect Colors */
+            --effect-mount: #00B4D8;
+            --effect-update: #00FF88;
+            --effect-cleanup: #FF6B00;
+            --effect-error: #FF6B6B;
+            --effect-success: #46D369;
+            
+            /* Advanced Gradients */
+            --gradient-data-flow: linear-gradient(135deg, #00B4D8 0%, #8A2BE2 100%);
+            --gradient-netflix: linear-gradient(135deg, #E50914 0%, #B20710 100%);
+            --gradient-effect: linear-gradient(135deg, #00B4D8 0%, #00FF88 100%);
+            --gradient-cyber: linear-gradient(135deg, #00B4D8 0%, #8A2BE2 50%, #FF6B00 100%);
+            --gradient-hologram: linear-gradient(135deg, 
+                rgba(0,180,216,0.8) 0%, 
+                rgba(0,255,136,0.6) 50%, 
+                rgba(138,43,226,0.8) 100%);
+            
+            /* Particle Effects */
+            --particle-blue: #00B4D8;
+            --particle-green: #00FF88;
+            --particle-purple: #8A2BE2;
+            
+            /* Spacing System */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-xxl: 48px;
+            --space-xxxl: 64px;
+            --space-huge: 96px;
+            
+            /* Advanced Shadows */
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.7);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.9);
+            --shadow-xl: 0 12px 48px rgba(0,0,0,1);
+            --shadow-data: 0 0 40px rgba(0,180,216,0.5);
+            --shadow-holo: 0 0 60px rgba(0,255,136,0.4);
+            
+            /* Transitions */
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            
+            /* Z-index */
+            --z-base: 1;
+            --z-header: 1000;
+            --z-particle: 900;
+            --z-data-flow: 950;
+            --z-modal: 1002;
+            --z-notification: 1003;
+            --z-tooltip: 1004;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--netflix-bg);
+            color: var(--netflix-white);
+            font-family: 'Netflix Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Particle Background */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: var(--z-particle);
+            pointer-events: none;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--netflix-dark-gray);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--gradient-data-flow);
+            border-radius: 6px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--data-purple);
+        }
+        
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--netflix-black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .data-flow-loader {
+            width: 200px;
+            height: 200px;
+            position: relative;
+        }
+        
+        .data-node {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--data-blue);
+            border-radius: 50%;
+            animation: dataFlow 2s infinite ease-in-out;
+        }
+        
+        .data-node:nth-child(1) {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            animation-delay: 0s;
+        }
+        
+        .data-node:nth-child(2) {
+            top: 25%;
+            right: 0;
+            animation-delay: 0.2s;
+            background: var(--data-green);
+        }
+        
+        .data-node:nth-child(3) {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: 0.4s;
+            background: var(--data-purple);
+        }
+        
+        .data-node:nth-child(4) {
+            bottom: 25%;
+            left: 0;
+            animation-delay: 0.6s;
+            background: var(--data-yellow);
+        }
+        
+        .data-node:nth-child(5) {
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            animation-delay: 0.8s;
+            background: var(--data-orange);
+        }
+        
+        @keyframes dataFlow {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px currentColor;
+            }
+            50% {
+                transform: scale(1.5);
+                box-shadow: 0 0 40px currentColor;
+            }
+        }
+        
+        /* Header with Data Flow Animation */
+        .header {
+            background: linear-gradient(180deg, 
+                rgba(20,20,20,0.98) 0%, 
+                rgba(20,20,20,0.95) 50%, 
+                rgba(20,20,20,0.9) 100%);
+            padding: var(--space-lg) var(--space-xl);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: var(--z-header);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0,180,216,0.2);
+            transition: all var(--transition-normal);
+            box-shadow: var(--shadow-data);
+        }
+        
+        .header.scrolled {
+            padding: var(--space-md) var(--space-xl);
+            background: rgba(20,20,20,0.98);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+        
+        .netflix-logo {
+            color: var(--netflix-red);
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            text-decoration: none;
+            transition: all var(--transition-normal);
+            position: relative;
+        }
+        
+        .netflix-logo::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--gradient-data-flow);
+            transform: scaleX(0);
+            transition: transform var(--transition-normal);
+        }
+        
+        .netflix-logo:hover::after {
+            transform: scaleX(1);
+        }
+        
+        .netflix-logo:hover {
+            text-shadow: 0 0 30px rgba(229,9,20,0.5);
+        }
+        
+        .useEffect-badge {
+            background: var(--gradient-data-flow);
+            color: white;
+            padding: var(--space-sm) var(--space-xl);
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            box-shadow: var(--shadow-data);
+            animation: badgeGlow 3s infinite alternate;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .useEffect-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes badgeGlow {
+            0% { 
+                transform: scale(1); 
+                box-shadow: 0 0 30px rgba(0,180,216,0.5);
+            }
+            100% { 
+                transform: scale(1.05); 
+                box-shadow: 0 0 50px rgba(0,180,216,0.8);
+            }
+        }
+        
+        /* Navigation with Data Indicators */
+        .nav-menu {
+            display: flex;
+            gap: var(--space-xl);
+            align-items: center;
+        }
+        
+        .nav-item {
+            color: var(--netflix-light-gray);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            position: relative;
+            padding: var(--space-sm) 0;
+        }
+        
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--gradient-data-flow);
+            transform: scaleX(0);
+            transition: transform var(--transition-normal);
+        }
+        
+        .nav-item:hover::after {
+            transform: scaleX(1);
+        }
+        
+        .nav-item:hover {
+            color: white;
+        }
+        
+        .nav-item.active {
+            color: var(--data-blue);
+            font-weight: 700;
+        }
+        
+        .nav-item.active::after {
+            transform: scaleX(1);
+        }
+        
+        /* Data Flow Stats */
+        .data-stats {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+        
+        .stat-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            color: var(--netflix-light-gray);
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .stat-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .stat-dot.active {
+            background: var(--data-green);
+        }
+        
+        .stat-dot.inactive {
+            background: var(--netflix-gray);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Main Container */
+        .main-container {
+            margin-top: 100px;
+            padding: var(--space-xl);
+            max-width: 1800px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            z-index: var(--z-base);
+        }
+        
+        /* Hero Section with Data Flow Visualization */
+        .hero-section {
+            position: relative;
+            height: 80vh;
+            min-height: 600px;
+            margin-bottom: var(--space-huge);
+            border-radius: 32px;
+            overflow: hidden;
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)),
+                        url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            padding: var(--space-huge);
+            border: 2px solid rgba(0,180,216,0.3);
+            box-shadow: 
+                inset 0 0 100px rgba(0,180,216,0.1),
+                0 0 100px rgba(0,180,216,0.2);
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            z-index: 2;
+            position: relative;
+        }
+        
+        .hero-content::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            right: -50px;
+            bottom: -50px;
+            background: radial-gradient(circle at center, rgba(0,180,216,0.1) 0%, transparent 70%);
+            filter: blur(100px);
+            z-index: -1;
+        }
+        
+        .hero-title {
+            font-size: 5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: var(--space-lg);
+            background: linear-gradient(45deg, var(--data-blue), var(--data-green), var(--data-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 8s ease infinite;
+            background-size: 300% 300%;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .hero-subtitle {
+            font-size: 1.8rem;
+            color: var(--netflix-light-gray);
+            margin-bottom: var(--space-xl);
+            line-height: 1.6;
+            max-width: 600px;
+        }
+        
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-xl);
+            margin-top: var(--space-xxl);
+            padding: var(--space-xl);
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            border: 1px solid rgba(0,180,216,0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .hero-stat {
+            text-align: center;
+            position: relative;
+        }
+        
+        .hero-stat::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-data-flow);
+            border-radius: 3px;
+        }
+        
+        .hero-value {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--data-green);
+            margin-bottom: var(--space-sm);
+            text-shadow: 0 0 20px rgba(0,255,136,0.5);
+        }
+        
+        .hero-label {
+            font-size: 1rem;
+            color: var(--netflix-gray);
+            font-weight: 600;
+        }
+        
+        /* Interactive Data Flow Diagram */
+        .data-flow-diagram {
+            background: rgba(10,10,20,0.9);
+            border-radius: 32px;
+            padding: var(--space-xxxl);
+            margin-bottom: var(--space-huge);
+            border: 2px solid rgba(0,180,216,0.3);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                inset 0 0 80px rgba(0,180,216,0.1),
+                0 0 80px rgba(0,180,216,0.2);
+        }
+        
+        .data-flow-diagram::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-data-flow);
+        }
+        
+        .diagram-header {
+            text-align: center;
+            margin-bottom: var(--space-xxxl);
+        }
+        
+        .diagram-title {
+            font-size: 3rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-lg);
+        }
+        
+        .diagram-subtitle {
+            font-size: 1.2rem;
+            color: var(--netflix-gray);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        /* Lifecycle Visualization */
+        .lifecycle-visualization {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-xxl);
+            margin: var(--space-xxxl) 0;
+        }
+        
+        .lifecycle-stage {
+            background: rgba(20,20,30,0.8);
+            border-radius: 24px;
+            padding: var(--space-xxl);
+            border: 2px solid transparent;
+            transition: all var(--transition-normal);
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        
+        .lifecycle-stage:hover {
+            transform: translateY(-10px);
+            border-color: var(--data-blue);
+            box-shadow: var(--shadow-data);
+        }
+        
+        .lifecycle-stage.active {
+            border-color: var(--data-green);
+            box-shadow: 0 0 60px rgba(0,255,136,0.3);
+        }
+        
+        .stage-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+        
+        .stage-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-data-flow);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,180,216,0.3);
+        }
+        
+        .stage-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+        }
+        
+        .stage-description {
+            color: var(--netflix-gray);
+            line-height: 1.6;
+            margin-bottom: var(--space-lg);
+            font-size: 1.1rem;
+        }
+        
+        .stage-timing {
+            display: inline-block;
+            padding: var(--space-sm) var(--space-lg);
+            background: rgba(0,180,216,0.1);
+            border-radius: 20px;
+            color: var(--data-blue);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        /* Real-time Data Flow */
+        .real-time-flow {
+            position: relative;
+            height: 400px;
+            margin: var(--space-xxxl) 0;
+            background: rgba(0,0,0,0.5);
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(0,180,216,0.2);
+        }
+        
+        .flow-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .flow-nodes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+        
+        .flow-node {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: rgba(20,20,30,0.9);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            border: 3px solid transparent;
+            transition: all var(--transition-normal);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .flow-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 20px 50px rgba(0,180,216,0.4);
+        }
+        
+        .flow-node.active {
+            border-color: var(--data-green);
+            animation: nodePulse 2s infinite;
+        }
+        
+        @keyframes nodePulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(0,255,136,0.5); }
+            50% { box-shadow: 0 0 50px rgba(0,255,136,0.8); }
+        }
+        
+        /* Continue Watching Demo */
+        .continue-watching-demo {
+            background: rgba(20,20,20,0.9);
+            border-radius: 32px;
+            padding: var(--space-xxxl);
+            margin-bottom: var(--space-huge);
+            border: 2px solid rgba(138,43,226,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .demo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xxxl);
+            flex-wrap: wrap;
+            gap: var(--space-xl);
+        }
+        
+        .demo-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+        
+        .demo-controls {
+            display: flex;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+        }
+        
+        /* useEffect Code Editor */
+        .useEffect-editor {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: var(--space-xxl);
+            margin-bottom: var(--space-xxxl);
+            border: 2px solid rgba(0,180,216,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+            padding-bottom: var(--space-lg);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .editor-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--data-blue);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .editor-actions {
+            display: flex;
+            gap: var(--space-md);
+        }
+        
+        .code-container {
+            background: #0f0f1a;
+            border-radius: 16px;
+            padding: var(--space-xl);
+            overflow-x: auto;
+            font-family: 'SF Mono', Monaco, 'Cascada Code', Consolas, monospace;
+            font-size: 15px;
+            line-height: 1.8;
+            position: relative;
+        }
+        
+        .code-line {
+            padding: 4px 0;
+            white-space: pre-wrap;
+            position: relative;
+            padding-left: 60px;
+            min-height: 28px;
+        }
+        
+        .code-line::before {
+            content: attr(data-line);
+            position: absolute;
+            left: 0;
+            color: var(--netflix-gray);
+            opacity: 0.7;
+            font-size: 14px;
+            width: 50px;
+            text-align: right;
+            user-select: none;
+        }
+        
+        .code-keyword { color: #FF6B6B; font-weight: bold; }
+        .code-function { color: #4D9FFF; }
+        .code-hook { color: #00FF88; font-weight: bold; }
+        .code-string { color: #FFD700; }
+        .code-comment { color: #737373; font-style: italic; }
+        .code-jsx { color: #8A2BE2; }
+        .code-variable { color: #00B4D8; }
+        .code-operator { color: #FF6B9D; }
+        
+        .code-highlight {
+            background: rgba(0,180,216,0.2);
+            border-left: 3px solid var(--data-blue);
+            padding-left: 10px;
+            animation: highlightPulse 2s infinite;
+        }
+        
+        @keyframes highlightPulse {
+            0%, 100% { background: rgba(0,180,216,0.2); }
+            50% { background: rgba(0,180,216,0.4); }
+        }
+        
+        /* Continue Watching Grid */
+        .continue-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--space-xl);
+            margin-top: var(--space-xxl);
+        }
+        
+        .continue-card {
+            background: rgba(30,30,40,0.8);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all var(--transition-normal);
+            border: 2px solid transparent;
+            position: relative;
+        }
+        
+        .continue-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--data-green);
+            box-shadow: var(--shadow-holo);
+        }
+        
+        .continue-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            z-index: 2;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: var(--gradient-data-flow);
+            transition: width var(--transition-slow);
+        }
+        
+        .continue-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            filter: brightness(0.8);
+            transition: filter var(--transition-normal);
+        }
+        
+        .continue-card:hover .continue-image {
+            filter: brightness(1);
+        }
+        
+        .continue-content {
+            padding: var(--space-xl);
+        }
+        
+        .continue-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .continue-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--netflix-gray);
+            font-size: 0.9rem;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .continue-status {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            color: var(--data-green);
+            font-weight: 600;
+        }
+        
+        /* Interactive Quiz */
+        .interactive-quiz {
+            background: rgba(20,20,30,0.9);
+            border-radius: 32px;
+            padding: var(--space-xxxl);
+            margin-bottom: var(--space-huge);
+            border: 2px solid rgba(255,215,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .quiz-header {
+            text-align: center;
+            margin-bottom: var(--space-xxxl);
+        }
+        
+        .quiz-title {
+            font-size: 3rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-lg);
+        }
+        
+        .quiz-subtitle {
+            font-size: 1.2rem;
+            color: var(--netflix-gray);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .quiz-question {
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: var(--space-xxl);
+            margin-bottom: var(--space-xl);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all var(--transition-normal);
+        }
+        
+        .quiz-question.active {
+            border-color: var(--data-blue);
+            box-shadow: var(--shadow-data);
+        }
+        
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: var(--space-xl);
+            line-height: 1.4;
+        }
+        
+        .quiz-options {
+            display: grid;
+            gap: var(--space-md);
+        }
+        
+        .quiz-option {
+            padding: var(--space-lg) var(--space-xl);
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            color: var(--netflix-light-gray);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+        
+        .quiz-option:hover {
+            background: rgba(0,180,216,0.1);
+            border-color: rgba(0,180,216,0.3);
+        }
+        
+        .quiz-option.selected {
+            background: rgba(0,180,216,0.2);
+            border-color: var(--data-blue);
+            color: white;
+        }
+        
+        .quiz-option.correct {
+            background: rgba(0,255,136,0.2);
+            border-color: var(--data-green);
+            color: white;
+        }
+        
+        .quiz-option.incorrect {
+            background: rgba(255,107,107,0.2);
+            border-color: var(--effect-error);
+            color: white;
+        }
+        
+        .option-letter {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .quiz-option.selected .option-letter {
+            background: var(--data-blue);
+            color: white;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: var(--space-lg) var(--space-xxl);
+            border: none;
+            border-radius: 12px;
+            font-family: 'Netflix Sans';
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-md);
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-data-flow);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-data);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-success {
+            background: var(--gradient-effect);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,255,136,0.3);
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 120px;
+            right: 20px;
+            background: rgba(20,20,30,0.95);
+            border-left: 4px solid var(--data-blue);
+            padding: var(--space-lg) var(--space-xl);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            z-index: var(--z-notification);
+            animation: slideIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            max-width: 500px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0,180,216,0.3);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%) rotate(5deg);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0) rotate(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .hero-title {
+                font-size: 3.5rem;
+            }
+            
+            .continue-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .lifecycle-visualization {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-wrap: wrap;
+                gap: var(--space-md);
+            }
+            
+            .nav-menu {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+                margin-top: var(--space-md);
+            }
+            
+            .hero-section {
+                height: 60vh;
+                min-height: 400px;
+                padding: var(--space-xl);
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .hero-stats {
+                grid-template-columns: 1fr;
+                gap: var(--space-lg);
+            }
+            
+            .diagram-title {
+                font-size: 2rem;
+            }
+            
+            .quiz-title {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .demo-controls {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .stage-header {
+                flex-direction: column;
+                text-align: center;
+                gap: var(--space-md);
+            }
+        }
+        
+        /* Utility Classes */
+        .text-gradient {
+            background: var(--gradient-data-flow);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .glass-morphism {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle Background -->
+    <div id="particles-js"></div>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingScreen">
+        <div class="data-flow-loader">
+            <div class="data-node"></div>
+            <div class="data-node"></div>
+            <div class="data-node"></div>
+            <div class="data-node"></div>
+            <div class="data-node"></div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="mainHeader">
+        <div class="logo-container">
+            <a href="#" class="netflix-logo">NETFLIX</a>
+            <div class="useEffect-badge">
+                <i class="fas fa-code-branch"></i> useEffect MASTERY
+            </div>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active">Data Flow</a>
+            <a href="#" class="nav-item">Continue Watching</a>
+            <a href="#" class="nav-item">Lifecycle</a>
+            <a href="#" class="nav-item">Quiz</a>
+            <a href="#" class="nav-item">Dashboard</a>
+        </nav>
+
+        <div class="data-stats">
+            <div class="stat-indicator">
+                <div class="stat-dot active"></div>
+                <span>Data Flowing</span>
+            </div>
+            <div class="stat-indicator">
+                <div class="stat-dot active"></div>
+                <span id="activeEffects">5 Effects</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Hero Section -->
+        <section class="hero-section fade-in">
+            <div class="hero-content">
+                <h1 class="hero-title">Master useEffect<br>& Data Flow</h1>
+                <p class="hero-subtitle">
+                    Discover how Netflix fetches millions of watch histories in real-time. 
+                    Learn useEffect patterns that power the "Continue Watching" feature 
+                    for 200+ million users.
+                </p>
+                
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-value" id="apiCalls">0</div>
+                        <div class="hero-label">API Calls/Second</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-value" id="dataFlow">0MB</div>
+                        <div class="hero-label">Data Flow</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-value" id="activeConnections">0</div>
+                        <div class="hero-label">Active Connections</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Data Flow Diagram -->
+        <section class="data-flow-diagram fade-in">
+            <div class="diagram-header">
+                <h2 class="diagram-title">
+                    <i class="fas fa-project-diagram text-gradient"></i> 
+                    useEffect Lifecycle Flow
+                </h2>
+                <p class="diagram-subtitle">
+                    Visualize the complete lifecycle of useEffect hooks in React. 
+                    See how Netflix manages side effects across component mounts, updates, and unmounts.
+                </p>
+            </div>
+            
+            <div class="lifecycle-visualization">
+                <!-- Component Mount -->
+                <div class="lifecycle-stage active" onclick="explainStage('mount')">
+                    <div class="stage-header">
+                        <div class="stage-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <h3 class="stage-title">Component Mount</h3>
+                    </div>
+                    <p class="stage-description">
+                        When the component first renders to the screen. 
+                        useEffect runs once to fetch initial data, set up subscriptions, or initialize state.
+                    </p>
+                    <span class="stage-timing">Runs: Once on mount</span>
+                </div>
+                
+                <!-- Dependency Updates -->
+                <div class="lifecycle-stage" onclick="explainStage('update')">
+                    <div class="stage-header">
+                        <div class="stage-icon">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <h3 class="stage-title">Dependency Updates</h3>
+                    </div>
+                    <p class="stage-description">
+                        When dependencies in the array change. 
+                        useEffect re-runs to synchronize with new data, update UI, or fetch fresh content.
+                    </p>
+                    <span class="stage-timing">Runs: On dependency change</span>
+                </div>
+                
+                <!-- Cleanup Phase -->
+                <div class="lifecycle-stage" onclick="explainStage('cleanup')">
+                    <div class="stage-header">
+                        <div class="stage-icon">
+                            <i class="fas fa-broom"></i>
+                        </div>
+                        <h3 class="stage-title">Cleanup Phase</h3>
+                    </div>
+                    <p class="stage-description">
+                        Before the component unmounts or before the next effect runs. 
+                        Clean up subscriptions, timers, or abort ongoing requests.
+                    </p>
+                    <span class="stage-timing">Runs: Before unmount/next effect</span>
+                </div>
+            </div>
+            
+            <!-- Real-time Data Flow Visualization -->
+            <div class="real-time-flow" id="dataFlowViz">
+                <canvas class="flow-canvas" id="flowCanvas"></canvas>
+                <div class="flow-nodes">
+                    <div class="flow-node" style="top: 20%; left: 10%;" data-node="component">
+                        <i class="fas fa-cube"></i>
+                        <span>Component</span>
+                    </div>
+                    <div class="flow-node" style="top: 20%; right: 10%;" data-node="api">
+                        <i class="fas fa-server"></i>
+                        <span>API</span>
+                    </div>
+                    <div class="flow-node" style="bottom: 20%; left: 10%;" data-node="state">
+                        <i class="fas fa-database"></i>
+                        <span>State</span>
+                    </div>
+                    <div class="flow-node" style="bottom: 20%; right: 10%;" data-node="ui">
+                        <i class="fas fa-desktop"></i>
+                        <span>UI</span>
+                    </div>
+                    <div class="flow-node active" style="top: 50%; left: 50%; transform: translate(-50%, -50%);" data-node="effect">
+                        <i class="fas fa-bolt"></i>
+                        <span>useEffect</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Continue Watching Demo -->
+        <section class="continue-watching-demo fade-in">
+            <div class="demo-header">
+                <h2 class="demo-title">
+                    <i class="fas fa-history"></i> Continue Watching Simulation
+                </h2>
+                <div class="demo-controls">
+                    <button class="btn btn-primary" onclick="fetchWatchHistory()">
+                        <i class="fas fa-sync"></i> Fetch Data
+                    </button>
+                    <button class="btn btn-secondary" onclick="simulateError()">
+                        <i class="fas fa-bug"></i> Simulate Error
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearWatchHistory()">
+                        <i class="fas fa-trash"></i> Clear Data
+                    </button>
+                </div>
+            </div>
+            
+            <!-- useEffect Code Editor -->
+            <div class="useEffect-editor">
+                <div class="editor-header">
+                    <h3 class="editor-title">
+                        <i class="fas fa-code"></i> Netflix's useEffect Implementation
+                    </h3>
+                    <div class="editor-actions">
+                        <button class="btn btn-secondary" onclick="runCode()">
+                            <i class="fas fa-play"></i> Run Code
+                        </button>
+                        <button class="btn btn-secondary" onclick="explainCode()">
+                            <i class="fas fa-question-circle"></i> Explain
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="code-container">
+                    <div class="code-line" data-line="1"><span class="code-keyword">import</span> React, { <span class="code-hook">useEffect</span>, useState } <span class="code-keyword">from</span> <span class="code-string">'react'</span>;</div>
+                    <div class="code-line" data-line="2"></div>
+                    <div class="code-line" data-line="3"><span class="code-keyword">const</span> <span class="code-function">ContinueWatching</span> = () => {</div>
+                    <div class="code-line" data-line="4">&nbsp;&nbsp;<span class="code-keyword">const</span> [watchHistory, setWatchHistory] = <span class="code-function">useState</span>([]);</div>
+                    <div class="code-line" data-line="5">&nbsp;&nbsp;<span class="code-keyword">const</span> [loading, setLoading] = <span class="code-function">useState</span>(<span class="code-keyword">true</span>);</div>
+                    <div class="code-line" data-line="6">&nbsp;&nbsp;<span class="code-keyword">const</span> [error, setError] = <span class="code-function">useState</span>(<span class="code-keyword">null</span>);</div>
+                    <div class="code-line" data-line="7"></div>
+                    <div class="code-line code-highlight" data-line="8" id="highlightLine">  <span class="code-comment">// useEffect with cleanup and dependency array</span></div>
+                    <div class="code-line" data-line="9">  <span class="code-function">useEffect</span>(() => {</div>
+                    <div class="code-line" data-line="10">    <span class="code-keyword">let</span> isMounted = <span class="code-keyword">true</span>;</div>
+                    <div class="code-line" data-line="11">    <span class="code-keyword">const</span> abortController = <span class="code-keyword">new</span> <span class="code-function">AbortController</span>();</div>
+                    <div class="code-line" data-line="12"></div>
+                    <div class="code-line" data-line="13">    <span class="code-keyword">const</span> fetchWatchHistory = <span class="code-keyword">async</span> () => {</div>
+                    <div class="code-line" data-line="14">      <span class="code-keyword">try</span> {</div>
+                    <div class="code-line" data-line="15">        setLoading(<span class="code-keyword">true</span>);</div>
+                    <div class="code-line" data-line="16">        <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(</div>
+                    <div class="code-line" data-line="17">          <span class="code-string">'/api/watch-history'</span>,</div>
+                    <div class="code-line" data-line="18">          { signal: abortController.signal }</div>
+                    <div class="code-line" data-line="19">        );</div>
+                    <div class="code-line" data-line="20"></div>
+                    <div class="code-line" data-line="21">        <span class="code-keyword">if</span> (!response.ok) {</div>
+                    <div class="code-line" data-line="22">          <span class="code-keyword">throw new</span> <span class="code-function">Error</span>(<span class="code-string">'Failed to fetch watch history'</span>);</div>
+                    <div class="code-line" data-line="23">        }</div>
+                    <div class="code-line" data-line="24"></div>
+                    <div class="code-line" data-line="25">        <span class="code-keyword">const</span> data = <span class="code-keyword">await</span> response.<span class="code-function">json</span>();</div>
+                    <div class="code-line" data-line="26">        </div>
+                    <div class="code-line" data-line="27">        <span class="code-keyword">if</span> (isMounted) {</div>
+                    <div class="code-line" data-line="28">          <span class="code-function">setWatchHistory</span>(data);</div>
+                    <div class="code-line" data-line="29">          <span class="code-function">setError</span>(<span class="code-keyword">null</span>);</div>
+                    <div class="code-line" data-line="30">        }</div>
+                    <div class="code-line" data-line="31">      } <span class="code-keyword">catch</span> (err) {</div>
+                    <div class="code-line" data-line="32">        <span class="code-keyword">if</span> (isMounted && err.name !== <span class="code-string">'AbortError'</span>) {</div>
+                    <div class="code-line" data-line="33">          <span class="code-function">setError</span>(err.message);</div>
+                    <div class="code-line" data-line="34">        }</div>
+                    <div class="code-line" data-line="35">      } <span class="code-keyword">finally</span> {</div>
+                    <div class="code-line" data-line="36">        <span class="code-keyword">if</span> (isMounted) {</div>
+                    <div class="code-line" data-line="37">          <span class="code-function">setLoading</span>(<span class="code-keyword">false</span>);</div>
+                    <div class="code-line" data-line="38">        }</div>
+                    <div class="code-line" data-line="39">      }</div>
+                    <div class="code-line" data-line="40">    };</div>
+                    <div class="code-line" data-line="41"></div>
+                    <div class="code-line" data-line="42">    <span class="code-function">fetchWatchHistory</span>();</div>
+                    <div class="code-line" data-line="43"></div>
+                    <div class="code-line" data-line="44">    <span class="code-comment">// Cleanup function</span></div>
+                    <div class="code-line" data-line="45">    <span class="code-keyword">return</span> () => {</div>
+                    <div class="code-line" data-line="46">      isMounted = <span class="code-keyword">false</span>;</div>
+                    <div class="code-line" data-line="47">      abortController.<span class="code-function">abort</span>();</div>
+                    <div class="code-line" data-line="48">    };</div>
+                    <div class="code-line" data-line="49">  }, []); <span class="code-comment">// Empty dependency array = runs once on mount</span></div>
+                    <div class="code-line" data-line="50"></div>
+                    <div class="code-line" data-line="51">  <span class="code-keyword">return</span> (</div>
+                    <div class="code-line" data-line="52">    &lt;<span class="code-jsx">div</span> <span class="code-variable">className</span>=<span class="code-string">"continue-watching"</span>&gt;</div>
+                    <div class="code-line" data-line="53">      {loading && &lt;<span class="code-jsx">LoadingSkeleton</span> /&gt;}</div>
+                    <div class="code-line" data-line="54">      {error && &lt;<span class="code-jsx">ErrorMessage</span> <span class="code-variable">message</span>={error} /&gt;}</div>
+                    <div class="code-line" data-line="55">      {!loading && !error && watchHistory.<span class="code-function">map</span>((item) =&gt; (</div>
+                    <div class="code-line" data-line="56">        &lt;<span class="code-jsx">ContinueCard</span> <span class="code-variable">key</span>={item.id} <span class="code-variable">item</span>={item} /&gt;</div>
+                    <div class="code-line" data-line="57">      ))}</div>
+                    <div class="code-line" data-line="58">    &lt;/<span class="code-jsx">div</span>&gt;</div>
+                    <div class="code-line" data-line="59">  );</div>
+                    <div class="code-line" data-line="60">};</div>
+                </div>
+            </div>
+            
+            <!-- Continue Watching Grid -->
+            <div class="continue-grid" id="continueGrid">
+                <!-- Content will be dynamically loaded here -->
+            </div>
+            
+            <!-- Loading State -->
+            <div class="loading-state hidden" id="loadingState">
+                <div style="text-align: center; padding: var(--space-xxxl);">
+                    <div class="data-flow-loader" style="margin: 0 auto var(--space-xl);"></div>
+                    <h3 style="color: var(--data-blue); font-size: 1.5rem;">Fetching your watch history...</h3>
+                    <p style="color: var(--netflix-gray); margin-top: var(--space-sm);">Simulating Netflix API call</p>
+                </div>
+            </div>
+            
+            <!-- Error State -->
+            <div class="error-state hidden" id="errorState">
+                <div style="text-align: center; padding: var(--space-xxxl);">
+                    <div style="font-size: 4rem; color: var(--effect-error); margin-bottom: var(--space-xl);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3 style="color: white; font-size: 2rem; margin-bottom: var(--space-lg);">
+                        Failed to Load Data
+                    </h3>
+                    <p style="color: var(--netflix-gray); margin-bottom: var(--space-xxl);">
+                        There was an error fetching your watch history. This simulates 
+                        network issues or API failures that useEffect must handle.
+                    </p>
+                    <button class="btn btn-primary" onclick="fetchWatchHistory()">
+                        <i class="fas fa-redo"></i> Retry
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive useEffect Quiz -->
+        <section class="interactive-quiz fade-in">
+            <div class="quiz-header">
+                <h2 class="quiz-title">
+                    <i class="fas fa-graduation-cap text-gradient"></i> 
+                    useEffect Mastery Quiz
+                </h2>
+                <p class="quiz-subtitle">
+                    Test your understanding of useEffect lifecycle, cleanup functions, 
+                    and dependency arrays with Netflix-inspired scenarios.
+                </p>
+            </div>
+            
+            <div class="quiz-container">
+                <!-- Question 1 -->
+                <div class="quiz-question active" id="question1">
+                    <div class="question-text">
+                        1. When does useEffect run with an empty dependency array ([])?
+                    </div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectAnswer(1, 'A')">
+                            <div class="option-letter">A</div>
+                            <span>On every render</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectAnswer(1, 'B')">
+                            <div class="option-letter">B</div>
+                            <span>Only on component mount</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectAnswer(1, 'C')">
+                            <div class="option-letter">C</div>
+                            <span>When component state changes</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectAnswer(1, 'D')">
+                            <div class="option-letter">D</div>
+                            <span>Never</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Question 2 -->
+                <div class="quiz-question hidden" id="question2">
+                    <div class="question-text">
+                        2. What is the purpose of the cleanup function in useEffect?
+                    </div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectAnswer(2, 'A')">
+                            <div class="option-letter">A</div>
+                            <span>To improve performance</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectAnswer(2, 'B')">
+                            <div class="option-letter">B</div>
+                            <span>To prevent memory leaks from subscriptions</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectAnswer(2, 'C')">
+                            <div class="option-letter">C</div>
+                            <span>To reset component state</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectAnswer(2, 'D')">
+                            <div class="option-letter">D</div>
+                            <span>To update the UI</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Question 3 -->
+                <div class="quiz-question hidden" id="question3">
+                    <div class="question-text">
+                        3. How would Netflix use useEffect for their "Continue Watching" feature?
+                    </div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectAnswer(3, 'A')">
+                            <div class="option-letter">A</div>
+                            <span>Fetch user's watch history on component mount</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectAnswer(3, 'B')">
+                            <div class="option-letter">B</div>
+                            <span>Update progress bars in real-time</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectAnswer(3, 'C')">
+                            <div class="option-letter">C</div>
+                            <span>Clean up API calls when user navigates away</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectAnswer(3, 'D')">
+                            <div class="option-letter">D</div>
+                            <span>All of the above</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Question 4 -->
+                <div class="quiz-question hidden" id="question4">
+                    <div class="question-text">
+                        4. What happens if you omit the dependency array in useEffect?
+                    </div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectAnswer(4, 'A')">
+                            <div class="option-letter">A</div>
+                            <span>The effect runs once on mount</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectAnswer(4, 'B')">
+                            <div class="option-letter">B</div>
+                            <span>The effect runs on every render</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectAnswer(4, 'C')">
+                            <div class="option-letter">C</div>
+                            <span>React throws an error</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectAnswer(4, 'D')">
+                            <div class="option-letter">D</div>
+                            <span>The effect never runs</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Question 5 -->
+                <div class="quiz-question hidden" id="question5">
+                    <div class="question-text">
+                        5. When does the cleanup function run?
+                    </div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="selectAnswer(5, 'A')">
+                            <div class="option-letter">A</div>
+                            <span>Before the component unmounts</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectAnswer(5, 'B')">
+                            <div class="option-letter">B</div>
+                            <span>Before the effect runs again</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectAnswer(5, 'C')">
+                            <div class="option-letter">C</div>
+                            <span>Both A and B</span>
+                        </div>
+                        <div class="quiz-option" onclick="selectAnswer(5, 'D')">
+                            <div class="option-letter">D</div>
+                            <span>After the component updates</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: var(--space-xxxl);">
+                <button class="btn btn-success" onclick="submitQuiz()" style="padding: var(--space-xl) var(--space-xxxl); font-size: 1.2rem;">
+                    <i class="fas fa-paper-plane"></i> Submit Quiz
+                </button>
+                <div style="margin-top: var(--space-xl);">
+                    <span style="color: var(--netflix-gray);">Score: </span>
+                    <span style="color: var(--data-green); font-weight: 800; font-size: 1.5rem;" id="quizScore">0/5</span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Lesson Completion -->
+        <div style="text-align: center; padding: var(--space-huge);">
+            <button class="btn btn-primary" onclick="completeLesson()" style="padding: var(--space-xxl) var(--space-huge); font-size: 1.5rem; border-radius: 20px;">
+                <i class="fas fa-graduation-cap"></i> Complete Lesson 10
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Netflix Data Flow & useEffect System
+        class NetflixDataFlow {
+            constructor() {
+                this.state = {
+                    watchHistory: [],
+                    loading: false,
+                    error: null,
+                    activeEffects: 5,
+                    apiCalls: 0,
+                    dataFlow: 0,
+                    activeConnections: 0,
+                    quizAnswers: {},
+                    quizScore: 0,
+                    currentQuestion: 1,
+                    isDataFlowing: true
+                };
+                
+                this.dataFlowInterval = null;
+                this.canvas = null;
+                this.ctx = null;
+                this.particles = [];
+                this.dataStreams = [];
+                this.abortController = null;
+            }
+            
+            // Initialize
+            initialize() {
+                this.setupParticles();
+                this.setupDataFlow();
+                this.setupCanvas();
+                this.startDataFlowAnimation();
+                this.updateStats();
+                
+                // Hide loading screen
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('loadingScreen').style.display = 'none';
+                    }, 500);
+                }, 2000);
+            }
+            
+            // Particle.js Setup
+            setupParticles() {
+                particlesJS('particles-js', {
+                    particles: {
+                        number: { value: 100, density: { enable: true, value_area: 800 } },
+                        color: { value: ['#00B4D8', '#00FF88', '#8A2BE2'] },
+                        shape: { type: 'circle' },
+                        opacity: { value: 0.5, random: true },
+                        size: { value: 3, random: true },
+                        line_linked: {
+                            enable: true,
+                            distance: 150,
+                            color: '#00B4D8',
+                            opacity: 0.2,
+                            width: 1
+                        },
+                        move: {
+                            enable: true,
+                            speed: 2,
+                            direction: 'none',
+                            random: true,
+                            straight: false,
+                            out_mode: 'out',
+                            bounce: false
+                        }
+                    },
+                    interactivity: {
+                        detect_on: 'canvas',
+                        events: {
+                            onhover: { enable: true, mode: 'repulse' },
+                            onclick: { enable: true, mode: 'push' }
+                        }
+                    }
+                });
+            }
+            
+            // Canvas Data Flow Setup
+            setupCanvas() {
+                this.canvas = document.getElementById('flowCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.resizeCanvas();
+                window.addEventListener('resize', () => this.resizeCanvas());
+                
+                // Create data streams
+                this.createDataStreams();
+            }
+            
+            resizeCanvas() {
+                const container = document.getElementById('dataFlowViz');
+                this.canvas.width = container.clientWidth;
+                this.canvas.height = container.clientHeight;
+            }
+            
+            createDataStreams() {
+                const nodes = [
+                    { id: 'component', x: this.canvas.width * 0.1, y: this.canvas.height * 0.2 },
+                    { id: 'api', x: this.canvas.width * 0.9, y: this.canvas.height * 0.2 },
+                    { id: 'state', x: this.canvas.width * 0.1, y: this.canvas.height * 0.8 },
+                    { id: 'ui', x: this.canvas.width * 0.9, y: this.canvas.height * 0.8 },
+                    { id: 'effect', x: this.canvas.width * 0.5, y: this.canvas.height * 0.5 }
+                ];
+                
+                // Create connections
+                this.dataStreams = [
+                    { from: 'component', to: 'effect', color: '#00B4D8', speed: 2 },
+                    { from: 'effect', to: 'api', color: '#00FF88', speed: 3 },
+                    { from: 'api', to: 'effect', color: '#8A2BE2', speed: 2 },
+                    { from: 'effect', to: 'state', color: '#FFD700', speed: 1.5 },
+                    { from: 'state', to: 'ui', color: '#FF6B9D', speed: 2 },
+                    { from: 'ui', to: 'component', color: '#00B4D8', speed: 1 }
+                ];
+                
+                // Create particles for each stream
+                this.dataStreams.forEach(stream => {
+                    for (let i = 0; i < 20; i++) {
+                        this.particles.push({
+                            stream: stream,
+                            position: Math.random(),
+                            size: 2 + Math.random() * 4,
+                            speed: stream.speed * (0.5 + Math.random() * 0.5)
+                        });
+                    }
+                });
+            }
+            
+            startDataFlowAnimation() {
+                const animate = () => {
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                    
+                    // Draw connections
+                    this.drawConnections();
+                    
+                    // Update and draw particles
+                    this.updateParticles();
+                    
+                    requestAnimationFrame(animate);
+                };
+                
+                animate();
+            }
+            
+            drawConnections() {
+                const nodes = {
+                    component: { x: this.canvas.width * 0.1, y: this.canvas.height * 0.2 },
+                    api: { x: this.canvas.width * 0.9, y: this.canvas.height * 0.2 },
+                    state: { x: this.canvas.width * 0.1, y: this.canvas.height * 0.8 },
+                    ui: { x: this.canvas.width * 0.9, y: this.canvas.height * 0.8 },
+                    effect: { x: this.canvas.width * 0.5, y: this.canvas.height * 0.5 }
+                };
+                
+                this.dataStreams.forEach(stream => {
+                    const from = nodes[stream.from];
+                    const to = nodes[stream.to];
+                    
+                    // Draw line
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(from.x, from.y);
+                    this.ctx.lineTo(to.x, to.y);
+                    this.ctx.strokeStyle = stream.color + '20';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.stroke();
+                    
+                    // Draw glow
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(from.x, from.y);
+                    this.ctx.lineTo(to.x, to.y);
+                    this.ctx.strokeStyle = stream.color;
+                    this.ctx.lineWidth = 1;
+                    this.ctx.stroke();
+                });
+            }
+            
+            updateParticles() {
+                const nodes = {
+                    component: { x: this.canvas.width * 0.1, y: this.canvas.height * 0.2 },
+                    api: { x: this.canvas.width * 0.9, y: this.canvas.height * 0.2 },
+                    state: { x: this.canvas.width * 0.1, y: this.canvas.height * 0.8 },
+                    ui: { x: this.canvas.width * 0.9, y: this.canvas.height * 0.8 },
+                    effect: { x: this.canvas.width * 0.5, y: this.canvas.height * 0.5 }
+                };
+                
+                this.particles.forEach(particle => {
+                    const from = nodes[particle.stream.from];
+                    const to = nodes[particle.stream.to];
+                    
+                    // Update position
+                    particle.position += 0.01 * particle.speed;
+                    if (particle.position > 1) {
+                        particle.position = 0;
+                    }
+                    
+                    // Calculate current position
+                    const x = from.x + (to.x - from.x) * particle.position;
+                    const y = from.y + (to.y - from.y) * particle.position;
+                    
+                    // Draw particle
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, particle.size, 0, Math.PI * 2);
+                    this.ctx.fillStyle = particle.stream.color;
+                    this.ctx.fill();
+                    
+                    // Draw glow
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, particle.size * 2, 0, Math.PI * 2);
+                    this.ctx.fillStyle = particle.stream.color + '40';
+                    this.ctx.fill();
+                });
+            }
+            
+            // Data Flow Simulation
+            setupDataFlow() {
+                this.dataFlowInterval = setInterval(() => {
+                    if (this.state.isDataFlowing) {
+                        this.state.apiCalls += Math.floor(Math.random() * 5) + 1;
+                        this.state.dataFlow += Math.random() * 0.5;
+                        this.state.activeConnections = 50 + Math.floor(Math.random() * 50);
+                        
+                        this.updateStats();
+                        
+                        // Occasionally add new effects
+                        if (Math.random() > 0.9) {
+                            this.state.activeEffects += 1;
+                            document.getElementById('activeEffects').textContent = 
+                                `${this.state.activeEffects} Effects`;
+                        }
+                    }
+                }, 1000);
+            }
+            
+            updateStats() {
+                document.getElementById('apiCalls').textContent = 
+                    this.formatNumber(this.state.apiCalls);
+                document.getElementById('dataFlow').textContent = 
+                    `${this.state.dataFlow.toFixed(1)}MB`;
+                document.getElementById('activeConnections').textContent = 
+                    this.state.activeConnections;
+            }
+            
+            formatNumber(num) {
+                if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+                if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+                return num.toString();
+            }
+            
+            // Continue Watching Simulation
+            async fetchWatchHistory() {
+                // Abort any previous request
+                if (this.abortController) {
+                    this.abortController.abort();
+                }
+                
+                this.abortController = new AbortController();
+                let isMounted = true;
+                
+                try {
+                    // Show loading state
+                    this.showLoadingState();
+                    
+                    // Simulate network delay
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    if (!isMounted) return;
+                    
+                    // Simulate API response
+                    const mockData = this.generateMockWatchHistory();
+                    
+                    if (Math.random() > 0.1) { // 90% success rate
+                        this.state.watchHistory = mockData;
+                        this.state.error = null;
+                        this.showSuccessState(mockData);
+                        showNotification('✅ Watch history fetched successfully!', 'success');
+                    } else {
+                        throw new Error('Network request failed');
+                    }
+                    
+                } catch (error) {
+                    if (isMounted && error.name !== 'AbortError') {
+                        this.state.error = error.message;
+                        this.showErrorState();
+                        showNotification('❌ Failed to fetch watch history', 'error');
+                    }
+                } finally {
+                    if (isMounted) {
+                        this.state.loading = false;
+                    }
+                }
+                
+                return () => {
+                    isMounted = false;
+                    if (this.abortController) {
+                        this.abortController.abort();
+                    }
+                };
+            }
+            
+            generateMockWatchHistory() {
+                return [
+                    {
+                        id: 1,
+                        title: "Stranger Things",
+                        progress: 65,
+                        episode: "S4:E3 - Chapter Three",
+                        duration: "58m",
+                        lastWatched: "2 hours ago",
+                        match: 98
+                    },
+                    {
+                        id: 2,
+                        title: "The Crown",
+                        progress: 42,
+                        episode: "S6:E5 - Annus Horribilis",
+                        duration: "52m",
+                        lastWatched: "1 day ago",
+                        match: 96
+                    },
+                    {
+                        id: 3,
+                        title: "Bird Box Barcelona",
+                        progress: 85,
+                        episode: "Movie",
+                        duration: "1h 52m",
+                        lastWatched: "3 days ago",
+                        match: 87
+                    },
+                    {
+                        id: 4,
+                        title: "Wednesday",
+                        progress: 20,
+                        episode: "S1:E2 - Woe Is the Loneliest Number",
+                        duration: "49m",
+                        lastWatched: "1 week ago",
+                        match: 92
+                    },
+                    {
+                        id: 5,
+                        title: "Money Heist",
+                        progress: 75,
+                        episode: "S5:E8 - Vívela o revívela",
+                        duration: "53m",
+                        lastWatched: "2 weeks ago",
+                        match: 95
+                    },
+                    {
+                        id: 6,
+                        title: "The Queen's Gambit",
+                        progress: 100,
+                        episode: "S1:E7 - End Game",
+                        duration: "46m",
+                        lastWatched: "1 month ago",
+                        match: 89
+                    }
+                ];
+            }
+            
+            showLoadingState() {
+                document.getElementById('continueGrid').classList.add('hidden');
+                document.getElementById('errorState').classList.add('hidden');
+                document.getElementById('loadingState').classList.remove('hidden');
+                
+                // Highlight code
+                this.highlightCodeLines([13, 42]);
+            }
+            
+            showSuccessState(data) {
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('errorState').classList.add('hidden');
+                
+                const grid = document.getElementById('continueGrid');
+                grid.classList.remove('hidden');
+                
+                grid.innerHTML = data.map(item => `
+                    <div class="continue-card">
+                        <div class="continue-progress">
+                            <div class="progress-bar" style="width: ${item.progress}%"></div>
+                        </div>
+                        <div style="height: 200px; background: linear-gradient(45deg, #333, #444);"></div>
+                        <div class="continue-content">
+                            <h3 class="continue-title">${item.title}</h3>
+                            <div class="continue-meta">
+                                <span>${item.episode}</span>
+                                <span>${item.duration}</span>
+                            </div>
+                            <div class="continue-status">
+                                <i class="fas fa-play-circle"></i>
+                                <span>${item.progress}% complete</span>
+                                <span style="margin-left: auto; color: var(--data-green);">
+                                    ${item.match}% Match
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Highlight code
+                this.highlightCodeLines([27, 28, 29]);
+            }
+            
+            showErrorState() {
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('continueGrid').classList.add('hidden');
+                document.getElementById('errorState').classList.remove('hidden');
+                
+                // Highlight code
+                this.highlightCodeLines([31, 33]);
+            }
+            
+            simulateError() {
+                this.state.error = "Network Error: Failed to connect to Netflix API";
+                this.showErrorState();
+                showNotification('🐛 Simulating network error...', 'warning');
+            }
+            
+            clearWatchHistory() {
+                this.state.watchHistory = [];
+                document.getElementById('continueGrid').classList.add('hidden');
+                showNotification('🗑️ Watch history cleared', 'info');
+                
+                // Highlight cleanup code
+                this.highlightCodeLines([45, 46, 47]);
+            }
+            
+            // Code Highlighting
+            highlightCodeLines(lines) {
+                document.querySelectorAll('.code-line').forEach(line => {
+                    line.classList.remove('code-highlight');
+                });
+                
+                lines.forEach(lineNumber => {
+                    const line = document.querySelector(`.code-line[data-line="${lineNumber}"]`);
+                    if (line) {
+                        line.classList.add('code-highlight');
+                        line.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+            }
+            
+            // Quiz Functions
+            selectAnswer(questionNumber, answer) {
+                const question = document.getElementById(`question${questionNumber}`);
+                const options = question.querySelectorAll('.quiz-option');
+                
+                // Remove previous selections
+                options.forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // Mark selected answer
+                const selectedOption = Array.from(options).find(option => 
+                    option.querySelector('.option-letter').textContent === answer
+                );
+                selectedOption.classList.add('selected');
+                
+                // Store answer
+                this.state.quizAnswers[questionNumber] = answer;
+            }
+            
+            submitQuiz() {
+                const correctAnswers = {
+                    1: 'B',
+                    2: 'B',
+                    3: 'D',
+                    4: 'B',
+                    5: 'C'
+                };
+                
+                let score = 0;
+                
+                // Check answers
+                for (const [question, answer] of Object.entries(correctAnswers)) {
+                    if (this.state.quizAnswers[question] === answer) {
+                        score++;
+                        
+                        // Highlight correct answer
+                        const questionDiv = document.getElementById(`question${question}`);
+                        const options = questionDiv.querySelectorAll('.quiz-option');
+                        options.forEach(option => {
+                            if (option.querySelector('.option-letter').textContent === answer) {
+                                option.classList.add('correct');
+                            }
+                        });
+                    } else if (this.state.quizAnswers[question]) {
+                        // Highlight incorrect answer
+                        const questionDiv = document.getElementById(`question${question}`);
+                        const options = questionDiv.querySelectorAll('.quiz-option');
+                        options.forEach(option => {
+                            if (option.querySelector('.option-letter').textContent === this.state.quizAnswers[question]) {
+                                option.classList.add('incorrect');
+                            }
+                            if (option.querySelector('.option-letter').textContent === correctAnswers[question]) {
+                                option.classList.add('correct');
+                            }
+                        });
+                    }
+                }
+                
+                this.state.quizScore = score;
+                document.getElementById('quizScore').textContent = `${score}/5`;
+                
+                if (score === 5) {
+                    showNotification('🏆 Perfect score! You mastered useEffect!', 'success');
+                } else if (score >= 3) {
+                    showNotification('✅ Good job! You understand useEffect well.', 'success');
+                } else {
+                    showNotification('📚 Review the lifecycle stages and try again!', 'info');
+                }
+            }
+            
+            // Stage Explanations
+            explainStage(stage) {
+                const stages = document.querySelectorAll('.lifecycle-stage');
+                stages.forEach(s => s.classList.remove('active'));
+                
+                const activeStage = Array.from(stages).find(s => 
+                    s.onclick.toString().includes(stage)
+                );
+                activeStage.classList.add('active');
+                
+                const explanations = {
+                    mount: "🎯 Component Mount: useEffect runs once when component first renders. Netflix uses this to fetch initial user data, like 'Continue Watching' history.",
+                    update: "🔄 Dependency Updates: When dependencies change, useEffect re-runs. Netflix uses this to refresh content when user interacts with the app.",
+                    cleanup: "🧹 Cleanup Phase: Before unmount or next effect, cleanup runs. Netflix uses this to abort API calls and prevent memory leaks."
+                };
+                
+                showNotification(explanations[stage], 'info');
+                
+                // Highlight relevant code
+                if (stage === 'mount') this.highlightCodeLines([9, 49]);
+                if (stage === 'update') this.highlightCodeLines([9, 49]);
+                if (stage === 'cleanup') this.highlightCodeLines([44, 48]);
+            }
+            
+            // Interactive Functions
+            runCode() {
+                this.fetchWatchHistory();
+                showNotification('🚀 Running useEffect code...', 'info');
+            }
+            
+            explainCode() {
+                showNotification('📖 Line 9-49: useEffect hook with empty dependency array runs once on mount. Line 45-48: Cleanup function prevents memory leaks.', 'info');
+                this.highlightCodeLines([9, 45, 49]);
+            }
+            
+            // Lesson Completion
+            completeLesson() {
+                // Stop data flow
+                this.state.isDataFlowing = false;
+                clearInterval(this.dataFlowInterval);
+                
+                // Confetti celebration
+                this.createConfetti();
+                
+                showNotification('🎉 Lesson 10 Completed! You mastered useEffect!', 'success');
+                
+                setTimeout(() => {
+                    alert('🏆 CONGRATULATIONS!\n\nYou have successfully completed Lesson 10:\n\n✅ Mastered useEffect lifecycle\n✅ Implemented data fetching with cleanup\n✅ Built Netflix Continue Watching feature\n✅ Visualized data flow in real-time\n✅ Completed interactive quiz\n✅ Simulated API calls and errors\n\nYou are now ready to build production React applications!');
+                    
+                    // Save completion
+                    localStorage.setItem('lesson10Completed', 'true');
+                }, 1000);
+            }
+            
+            createConfetti() {
+                const colors = ['#00B4D8', '#00FF88', '#8A2BE2', '#FFD700', '#FF6B00', '#FF6B9D'];
+                
+                for (let i = 0; i < 200; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.style.cssText = `
+                        position: fixed;
+                        width: ${Math.random() * 15 + 5}px;
+                        height: ${Math.random() * 15 + 5}px;
+                        background: ${colors[Math.floor(Math.random() * colors.length)]};
+                        border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                        top: -20px;
+                        left: ${Math.random() * 100}vw;
+                        animation: fall ${Math.random() * 3 + 2}s linear forwards;
+                        z-index: 9998;
+                        transform: rotate(${Math.random() * 360}deg);
+                    `;
+                    
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        if (confetti.parentElement) {
+                            confetti.remove();
+                        }
+                    }, 5000);
+                }
+                
+                // Add animation if not exists
+                if (!document.querySelector('style[data-confetti]')) {
+                    const style = document.createElement('style');
+                    style.setAttribute('data-confetti', 'true');
+                    style.textContent = `
+                        @keyframes fall {
+                            to {
+                                transform: translateY(100vh) rotate(${Math.random() * 720}deg);
+                                opacity: 0;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+        }
+
+        // Initialize Data Flow System
+        const netflixDataFlow = new NetflixDataFlow();
+
+        // DOM Ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize data flow system
+            netflixDataFlow.initialize();
+            
+            // Handle scroll for header
+            window.addEventListener('scroll', function() {
+                const header = document.getElementById('mainHeader');
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+            
+            // Welcome notification
+            setTimeout(() => {
+                showNotification('📡 Data flow initialized! Try fetching watch history.', 'info');
+            }, 2500);
+            
+            // Start with initial data fetch
+            setTimeout(() => {
+                netflixDataFlow.fetchWatchHistory();
+            }, 3000);
+        });
+
+        // Global Functions
+        function fetchWatchHistory() {
+            netflixDataFlow.fetchWatchHistory();
+        }
+
+        function simulateError() {
+            netflixDataFlow.simulateError();
+        }
+
+        function clearWatchHistory() {
+            netflixDataFlow.clearWatchHistory();
+        }
+
+        function runCode() {
+            netflixDataFlow.runCode();
+        }
+
+        function explainCode() {
+            netflixDataFlow.explainCode();
+        }
+
+        function explainStage(stage) {
+            netflixDataFlow.explainStage(stage);
+        }
+
+        function selectAnswer(questionNumber, answer) {
+            netflixDataFlow.selectAnswer(questionNumber, answer);
+        }
+
+        function submitQuiz() {
+            netflixDataFlow.submitQuiz();
+        }
+
+        function completeLesson() {
+            netflixDataFlow.completeLesson();
+        }
+
+        // Notification System
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            
+            const icon = type === 'success' ? '✅' : 
+                         type === 'error' ? '❌' : 
+                         type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            const color = type === 'success' ? '#00FF88' : 
+                         type === 'error' ? '#FF6B6B' : 
+                         type === 'warning' ? '#FFD700' : '#00B4D8';
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: var(--space-lg);">
+                    <div style="font-size: 2rem;">${icon}</div>
+                    <div style="flex: 1;">
+                        <div style="color: white; font-weight: 800; margin-bottom: 4px; font-size: 1.1rem;">
+                            ${type === 'success' ? 'Success!' : 
+                              type === 'error' ? 'Error' : 
+                              type === 'warning' ? 'Warning' : 'Info'}
+                        </div>
+                        <div style="color: var(--netflix-light-gray); font-size: 1rem; line-height: 1.4;">
+                            ${message}
+                        </div>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="background: none; border: none; color: var(--netflix-gray); cursor: pointer; font-size: 1.2rem;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            notification.style.borderLeftColor = color;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100px) rotate(5deg)';
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

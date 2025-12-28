@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Msebetsi — React Mastery Course</title>
+  <style>
+    :root {
+      --bg: #0a192f;
+      --card: #112240;
+      --muted: #8892b0;
+      --accent: #64ffda;
+      --accent-2: #e6f1ff;
+      --success: #64ffda;
+      --warning: #f1c40f;
+      --danger: #ff6b6b;
+      --glass: rgba(17,34,64,0.8);
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--bg); color: var(--accent-2); }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      height: 100vh;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      padding: 28px 20px;
+      background: linear-gradient(180deg, var(--card), #0d1b2a);
+      border-right: 1px solid rgba(100,255,218,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), #8affd7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--bg);
+      font-weight: 700;
+    }
+    .brand h1 { font-size: 16px; margin: 0; }
+    .nav { display: flex; flex-direction: column; gap: 6px; }
+    .nav a {
+      padding: 12px 14px;
+      border-radius: 8px;
+      color: var(--muted);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .nav a:hover { background: rgba(100,255,218,0.05); }
+    .nav a.active {
+      background: rgba(100,255,218,0.08);
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .nav-icon { width: 20px; text-align: center; }
+
+    .progress-wrap {
+      margin-top: auto;
+      background: var(--card);
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      border: 1px solid rgba(100,255,218,0.1);
+    }
+    .prog-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .prog-percent { color: var(--accent); font-weight: 600; }
+    .prog {
+      height: 10px;
+      background: rgba(100,255,218,0.1);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .prog > i {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #8affd7);
+      border-radius: 999px;
+      transition: width 0.5s ease;
+   }
+
+    /* Main Content */
+    .main {
+      padding: 28px 36px;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(100,255,218,0.1);
+    }
+    .header h2 { margin: 0; font-size: 24px; font-weight: 600; }
+    .header p { margin: 8px 0 0 0; color: var(--muted); font-size: 14px; }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .user-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #8affd7);
+      color: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+
+    /* Dashboard Stats */
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--card);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: transform 0.2s;
+      border: 1px solid rgba(100,255,218,0.1);
+    }
+    .stat-card:hover { transform: translateY(-2px); }
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .stat-1 .stat-icon { background: rgba(100,255,218,0.1); color: var(--accent); }
+    .stat-2 .stat-icon { background: rgba(46,204,113,0.1); color: var(--success); }
+    .stat-3 .stat-icon { background: rgba(241,196,15,0.1); color: var(--warning); }
+    .stat-4 .stat-icon { background: rgba(255,107,107,0.1); color: var(--danger); }
+    .stat-content h3 { font-size: 28px; margin: 0; }
+    .stat-content p { font-size: 13px; color: var(--muted); margin: 4px 0 0 0; }
+
+    /* Lessons Grid */
+    .lessons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .lesson-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(100,255,218,0.1);
+    }
+    .lesson-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(100,255,218,0.15);
+      border-color: rgba(100,255,218,0.2);
+    }
+    .lesson-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .lesson-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), #8affd7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--bg);
+      font-weight: 700;
+      font-size: 18px;
+    }
+    .lesson-badge {
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .beginner { background: rgba(100,255,218,0.1); color: var(--accent); }
+    .intermediate { background: rgba(241,196,15,0.1); color: var(--warning); }
+    .advanced { background: rgba(255,107,107,0.1); color: var(--danger); }
+    .project { background: rgba(52,152,219,0.1); color: #3498db; }
+    .lesson-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 12px 0 8px 0;
+      line-height: 1.4;
+    }
+    .lesson-desc {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .lesson-progress {
+      margin-top: auto;
+    }
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .lesson-progress-bar {
+      height: 6px;
+      background: rgba(100,255,218,0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .lesson-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #8affd7);
+      border-radius: 999px;
+      transition: width 0.5s ease;
+    }
+    .lesson-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(100,255,218,0.1);
+    }
+    .lesson-duration {
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .start-btn {
+      padding: 8px 20px;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .start-btn:hover {
+      background: #57e0c5;
+      transform: translateY(-1px);
+    }
+    .view-certificate {
+      padding: 8px 16px;
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid rgba(100,255,218,0.2);
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .view-certificate:hover {
+      background: rgba(100,255,218,0.05);
+      border-color: var(--accent);
+    }
+
+    /* Certificate Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal-content {
+      background: var(--card);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.3);
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      color: var(--accent-2);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: -280px;
+        z-index: 100;
+        transition: left 0.3s;
+      }
+      .sidebar.active { left: 0; }
+      .main { padding: 20px; }
+    }
+    @media (max-width: 768px) {
+      .lessons-grid { grid-template-columns: 1fr; }
+      .dashboard-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .dashboard-stats { grid-template-columns: 1fr; }
+      .header { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .user-menu { align-self: flex-end; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-logo">⚛️</div>
+        <div>
+          <h1>Msebetsi React</h1>
+          <div style="font-size:12px;color:var(--muted)">Professional React Development</div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Main navigation">
+        <a href="#dashboard" class="active">
+          <span class="nav-icon">📊</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="#progress">
+          <span class="nav-icon">📈</span>
+          <span>Progress</span>
+        </a>
+        <a href="#certificates">
+          <span class="nav-icon">🏆</span>
+          <span>Certificates</span>
+        </a>
+        <a href="#resources">
+          <span class="nav-icon">📁</span>
+          <span>Resources</span>
+        </a>
+        <a href="#settings">
+          <span class="nav-icon">⚙️</span>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="progress-wrap">
+        <div class="prog-label">
+          <span>Overall Progress</span>
+          <span id="overall-percent" class="prog-percent">0%</span>
+        </div>
+        <div class="prog">
+          <i id="overall-progress-bar" style="width: 0%"></i>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px">
+          <span id="completed-modules">0</span> of 15 lessons completed
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <!-- Dashboard View -->
+      <div id="dashboard-view">
+        <div class="header">
+          <div>
+            <h2>React Mastery — Msebetsi Solutions Pty Ltd</h2>
+            <p>15 comprehensive lessons building enterprise-level React applications</p>
+          </div>
+          <div class="user-menu">
+            <div style="text-align:right">
+              <div style="font-size:13px;color:var(--muted)">Instructor:</div>
+              <div style="font-weight:600">Tshepho Nkoe</div>
+            </div>
+            <div class="user-avatar">TN</div>
+          </div>
+        </div>
+
+        <!-- Dashboard Stats -->
+        <div class="dashboard-stats">
+          <div class="stat-card stat-1">
+            <div class="stat-icon">⚛️</div>
+            <div class="stat-content">
+              <h3 id="total-modules">15</h3>
+              <p>React Lessons</p>
+            </div>
+          </div>
+          <div class="stat-card stat-2">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+              <h3 id="completed-count">0</h3>
+              <p>Completed Lessons</p>
+            </div>
+          </div>
+          <div class="stat-card stat-3">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-content">
+              <h3 id="in-progress-count">0</h3>
+              <p>In Progress</p>
+            </div>
+          </div>
+          <div class="stat-card stat-4">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-content">
+              <h3 id="overall-grade">0%</h3>
+              <p>Overall Grade</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom:20px;font-size:18px;">React Course Curriculum</h3>
+        <div id="lessons-container" class="lessons-grid">
+          <!-- Lessons will be loaded here dynamically -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Certificate Modal -->
+  <div id="certificate-modal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <div id="certificate-content" style="padding:40px;">
+        <!-- Certificate content will be loaded here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // React Course Data with 15 Lessons - CORRECTED PATHS
+    const lessons = [
+      {
+        id: 'lesson-01',
+        number: 1,
+        title: 'Lesson 01 — Create-Vite & Project Setup',
+        description: 'Initializing React with Vite and setting up Msebetsi developer workspace',
+        level: 'beginner',
+        progress: 0,
+        completed: false,
+        grade: 0,
+        duration: '2-3 hours',
+        topics: ['Vite vs Create-React-App', 'Project Setup', 'Msebetsi Environment'],
+        link: './react/lesson1.html'
+      },
+      {
+        id: 'lesson-02',
+        number: 2,
+        title: 'Lesson 02 — JSX Expressions & Component Structure',
+        description: 'Building Msebetsi Solutions title components with dynamic rendering',
+        level: 'beginner',
+        progress: 0,
+        completed: false,
+        grade: 0,
+        duration: '3-4 hours',
+        topics: ['JSX Syntax', 'Components', 'Dynamic Rendering'],
+        link: './react/lesson2.html'
+      },
+      {
+        id: 'lesson-03',
+        number: 3,
+        title: 'Lesson 03 — React Styling & Design System',
+        description: 'Implementing Msebetsi Solutions design tokens and styling patterns',
+        level: 'beginner',
+        progress: 0,
+        completed: false,
+        grade: 0,
+        duration: '3-4 hours',
+        topics: ['CSS Modules', 'Styled Components', 'Design Tokens'],
+        link: './react/lesson3.html'
+      },
+      {
+        id: 'lesson-04',
+        number: 4,
+        title: 'Lesson 04 — Props & Reusable Components',
+        description: 'Creating Msebetsi Solutions component system with prop validation',
+        level: 'beginner',
+        progress: 0,
+        completed: false,
+        grade: 0,
+        duration: '3-4 hours',
+        topics: ['Props', 'PropTypes', 'Reusable Components'],
+        link: './react/lesson4.html'
+      },
+      {
+        id: 'lesson-05',
+        number: 5,
+        title: 'Lesson 05 — Component Architecture',
+        description: 'Deconstructing Msebetsi dashboard into scalable component hierarchy',
+        level: 'intermediate',
+        progress: 0,
+        completed: false,
+        grade: 0,
+        duration: '4-5 hours',
+        topics: ['Component Composition', 'Architecture', 'Hierarchy'],
+        link: './react/lesson5.html'
+      },
+      {
+        id: 'lesson-06',
+        number: 6,
+        title: 'Lesson 06 — Event Handling & Interactive Elements',
+        description: 'Implementing Msebetsi Solutions interactive UI components',
+        level: 'intermediate',
+        progress: 0,
+        completed: false,
+        grade: 0,
+        duration: '3-4 hours',
+        topics: ['Event Handling', 'Interactive UI', 'State Updates'],
+        link: './react/lesson6.html'
+      },
+      {
+        id: 'lesson-07',
+        number: 7,
+        title: 'Lesson 07 — State & User Experience',
+        description: 'Managing Msebetsi user profiles and application state',
+        level: 'intermediate',
+        progress: 0,
+        completed: false,
+        grade: 0,
+        duration: '3-4 hours',
+        topics: ['useState', 'State Management', 'LocalStorage'],
+        link: './react/lesson7.html'
+      },
+      {
+        id: 'lesson-08',
+        number: 8,
+        title: 'Lesson 08 — React Forms & Search',
+        description: 'Implementing Msebetsi Solutions data search and form validation',
+        level: 'intermediate',
+        progress: 0,
+        completed: false,
+        grade: 0,
+        duration: '3-4 hours',
+        topics: ['Forms', 'Validation', 'Search'],
+        link: './react/lesson8.html'
+      },
+      {
+        id: 'lesson-09',
+        number: 9,
+        title: 'Lesson 09 — Conditional Rendering & UI States',
+        description: 'Handling loading, error, and empty states in Msebetsi applications',
+        level: 'intermediate',
+        progress: 0,
+        completed: false,
+        grade: 0,
+        duration: '3-4 hours',
+        topics: ['Conditional Rendering', 'UI States', 'Error Handling'],
+        link: './react/lesson9.html'
+      },
+      {
+        id: 'lesson-10',
+        number: 10,
+        title: 'Lesson 10 — useEffect & Data Flow',
+        description: 'Fetching and managing Msebetsi Solutions data with lifecycle hooks',
+        level: 'advanced',
+        progress: 0,
+        completed: false,
+        grade: 0,
+        duration: '4-5 hours',
+        topics: ['useEffect', 'Data Fetching', 'Lifecycle'],
+        link: './react/lesson10.html'
+      },
+      {
+        id: 'lesson-11',
+        number: 11,
+        title: 'Lesson 11 — Fetching Data & API Integration',
+        description: 'Connecting to external APIs for Msebetsi Solutions data',
+        level: 'advanced',
+        progress: 0,
+        completed: false,
+        grade: 0,
+        duration: '4-5 hours',
+        topics: ['API Integration', 'Fetch API', 'Error Handling'],
+        link: './react/lesson11.html'
+      },
+      {
+        id: 'lesson-12',
+        number: 12,
+        title: 'Lesson 12 — React Router & Navigation',
+        description: 'Implementing Msebetsi Solutions multi-page SPA experience',
+        level: 'advanced',
+        progress: 0,
+        completed: false,
+        grade: 0,
+        duration: '4-5 hours',
+        topics: ['React Router', 'Navigation', 'SPA'],
+        link: './react/lesson12.html'
+      },
+      {
+        id: 'lesson-13',
+        number: 13,
+        title: 'Lesson 13 — Context API & Global State',
+        description: 'Managing Msebetsi authentication and theme context',
+        level: 'advanced',
+        progress: 0,
+        completed: false,
+        grade: 0,
+        duration: '4-5 hours',
+        topics: ['Context API', 'Global State', 'Authentication'],
+        link: './react/lesson13.html'
+      },
+      {
+        id: 'lesson-14',
+        number: 14,
+        title: 'Lesson 14 — Git & Deployment Pipeline',
+        description: 'Msebetsi Solutions CI/CD workflow and deployment',
+        level: 'project',
+        progress: 0,
+        completed: false,
+        grade: 0,
+        duration: '4-5 hours',
+        topics: ['Git', 'Deployment', 'CI/CD'],
+        link: './react/lesson14.html'
+      },
+      {
+        id: 'lesson-15',
+        number: 15,
+        title: 'Lesson 15 — Final Project: Msebetsi Dashboard',
+        description: 'Complete enterprise React application for Msebetsi Solutions Pty Ltd',
+        level: 'project',
+        progress: 0,
+        completed: false,
+        grade: 0,
+        duration: '10-12 hours',
+        topics: ['Full Project', 'Dashboard', 'Enterprise App'],
+        link: './react/lesson15.html'
+      }
+    ];
+
+    let currentLesson = null;
+
+    // Initialize the app
+    function init() {
+      loadProgressFromStorage();
+      renderLessons();
+      updateDashboardStats();
+      setupNavigation();
+    }
+
+    // Load progress from localStorage
+    function loadProgressFromStorage() {
+      const saved = localStorage.getItem('msebetsi-react-lessons');
+      if (saved) {
+        const data = JSON.parse(saved);
+        data.forEach(savedLesson => {
+          const lesson = lessons.find(l => l.id === savedLesson.id);
+          if (lesson) {
+            lesson.progress = savedLesson.progress || 0;
+            lesson.completed = savedLesson.completed || false;
+            lesson.grade = savedLesson.grade || 0;
+          }
+        });
+      }
+    }
+
+    // Save progress to localStorage
+    function saveProgressToStorage() {
+      const progressData = lessons.map(lesson => ({
+        id: lesson.id,
+        progress: lesson.progress,
+        completed: lesson.completed,
+        grade: lesson.grade
+      }));
+      localStorage.setItem('msebetsi-react-lessons', JSON.stringify(progressData));
+    }
+
+    // Render all lessons
+    function renderLessons() {
+      const container = document.getElementById('lessons-container');
+      container.innerHTML = '';
+
+      lessons.forEach(lesson => {
+        const lessonCard = document.createElement('div');
+        lessonCard.className = 'lesson-card';
+        lessonCard.onclick = () => openLesson(lesson.id);
+
+        lessonCard.innerHTML = `
+          <div class="lesson-header">
+            <div class="lesson-icon">${String(lesson.number).padStart(2, '0')}</div>
+            <span class="lesson-badge ${lesson.level}">${lesson.level.toUpperCase()}</span>
+          </div>
+          <h3 class="lesson-title">${lesson.title}</h3>
+          <p class="lesson-desc">${lesson.description}</p>
+          <div class="lesson-progress">
+            <div class="progress-text">
+              <span>${lesson.completed ? 'Completed' : 'In Progress'}</span>
+              <span>${lesson.progress}%</span>
+            </div>
+            <div class="lesson-progress-bar">
+              <div class="lesson-progress-fill" style="width: ${lesson.progress}%"></div>
+            </div>
+          </div>
+          <div class="lesson-actions">
+            <div class="lesson-duration">
+              <span>⏱️</span>
+              <span>${lesson.duration}</span>
+            </div>
+            ${lesson.completed ? 
+              `<button class="view-certificate" onclick="event.stopPropagation(); viewLessonCertificate('${lesson.id}')">
+                View Certificate
+              </button>` : 
+              `<button class="start-btn" onclick="event.stopPropagation(); startLesson('${lesson.id}')">
+                ${lesson.progress > 0 ? 'Continue' : 'Start'}
+              </button>`
+            }
+          </div>
+        `;
+
+        container.appendChild(lessonCard);
+      });
+
+      updateDashboardStats();
+      saveProgressToStorage();
+    }
+
+    // Update dashboard statistics
+    function updateDashboardStats() {
+      const completed = lessons.filter(l => l.completed).length;
+      const inProgress = lessons.filter(l => l.progress > 0 && !l.completed).length;
+      
+      let totalGradeSum = 0;
+      let completedLessonCount = 0;
+      lessons.forEach(lesson => {
+        if (lesson.completed) {
+          totalGradeSum += lesson.grade;
+          completedLessonCount++;
+        }
+      });
+      const overallGrade = completedLessonCount > 0 ? Math.round(totalGradeSum / completedLessonCount) : 0;
+
+      // Update overall progress
+      const overallProgress = Math.round((completed / lessons.length) * 100);
+      document.getElementById('overall-percent').textContent = `${overallProgress}%`;
+      document.getElementById('overall-progress-bar').style.width = `${overallProgress}%`;
+      document.getElementById('completed-modules').textContent = completed;
+
+      // Update dashboard stats
+      document.getElementById('completed-count').textContent = completed;
+      document.getElementById('in-progress-count').textContent = inProgress;
+      document.getElementById('overall-grade').textContent = `${overallGrade}%`;
+      document.getElementById('total-modules').textContent = lessons.length;
+    }
+
+    // Start a lesson
+    function startLesson(lessonId) {
+      const lesson = lessons.find(l => l.id === lessonId);
+      if (!lesson) return;
+      
+      currentLesson = lesson;
+      
+      // Mark as in progress if not started
+      if (lesson.progress === 0) {
+        lesson.progress = 10;
+        renderLessons();
+        saveProgressToStorage();
+      }
+      
+      // Use relative path
+      if (lesson.link) {
+        window.location.href = lesson.link;
+      } else {
+        // Fallback: use ../react/lesson[number].html
+        window.location.href = `../react/lesson${String(lesson.number).padStart(2, '0')}.html`;
+      }
+    }
+
+    // Open lesson details (for clicking the card)
+    function openLesson(lessonId) {
+      const lesson = lessons.find(l => l.id === lessonId);
+      if (!lesson) return;
+      
+      currentLesson = lesson;
+      
+      // Mark as in progress if not started
+      if (lesson.progress === 0) {
+        lesson.progress = 10;
+        renderLessons();
+        saveProgressToStorage();
+      }
+      
+      // Use relative path
+      if (lesson.link) {
+        window.location.href = lesson.link;
+      } else {
+        // Fallback: use ../react/lesson[number].html
+        window.location.href = `../react/lesson${String(lesson.number).padStart(2, '0')}.html`;
+      }
+    }
+
+    // View certificate for a lesson
+    function viewLessonCertificate(lessonId) {
+      const lesson = lessons.find(l => l.id === lessonId);
+      if (!lesson || !lesson.completed) {
+        alert("You must complete the lesson to view its certificate.");
+        return;
+      }
+      
+      const modal = document.getElementById('certificate-modal');
+      const content = document.getElementById('certificate-content');
+      
+      const certificateHTML = `
+        <div style="text-align:center;border:20px solid rgba(100,255,218,0.1);padding:40px;background:var(--card);border-radius:16px;">
+          <div style="margin-bottom:40px;">
+            <h1 style="color:var(--accent);font-size:36px;margin-bottom:10px;">LESSON COMPLETION CERTIFICATE</h1>
+            <p style="color:var(--muted);font-size:18px;">This is to certify that</p>
+            <h2 style="font-size:32px;margin:20px 0;color:var(--accent-2);">[Student Name]</h2>
+            <p style="color:var(--muted);font-size:18px;">has successfully completed</p>
+          </div>
+          
+          <div style="margin:40px 0;padding:30px;background:rgba(100,255,218,0.05);border-radius:10px;border:1px solid rgba(100,255,218,0.1);">
+            <h3 style="font-size:28px;color:var(--accent);margin-bottom:10px;">${lesson.title}</h3>
+            <p style="color:var(--muted);font-size:16px;margin-bottom:20px;">${lesson.description}</p>
+            <div style="display:flex;justify-content:center;gap:40px;margin-top:30px;">
+              <div>
+                <p style="color:var(--muted);font-size:14px;margin:0;">Grade Achieved</p>
+                <p style="font-size:24px;font-weight:bold;color:${lesson.grade >= 90 ? 'var(--accent)' : lesson.grade >= 75 ? 'var(--warning)' : 'var(--danger)'};margin:5px 0;">${lesson.grade}%</p>
+              </div>
+              <div>
+                <p style="color:var(--muted);font-size:14px;margin:0;">Completion Date</p>
+                <p style="font-size:24px;font-weight:bold;color:var(--accent);margin:5px 0;">${new Date().toLocaleDateString()}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div style="margin-top:40px;padding-top:40px;border-top:2px solid rgba(100,255,218,0.1);">
+            <div style="display:flex;justify-content:space-around;align-items:center;">
+              <div style="text-align:center;">
+                <div style="width:200px;height:2px;background:var(--accent);margin:20px auto;"></div>
+                <p style="margin-top:10px;color:var(--muted);">Instructor: Tshepho Nkoe</p>
+              </div>
+              <div style="text-align:center;">
+                <div style="width:150px;height:150px;border:2px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;">
+                  <div style="font-size:48px;color:var(--accent);">MS</div>
+                </div>
+                <p style="margin-top:20px;color:var(--muted);">Msebetsi Solutions Pty Ltd</p>
+              </div>
+              <div style="text-align:center;">
+                <div style="width:200px;height:2px;background:var(--accent);margin:20px auto;"></div>
+                <p style="margin-top:10px;color:var(--muted);">Director Signature</p>
+              </div>
+            </div>
+          </div>
+          
+          <div style="margin-top:40px;font-size:14px;color:var(--muted);">
+            <p>Certificate ID: MS-REACT-${lesson.id.toUpperCase()}-${Date.now().toString(36).substr(0, 8)}</p>
+            <p>Verified at: https://msebetsi.solutions/react-certificates</p>
+          </div>
+        </div>
+      `;
+      
+      content.innerHTML = certificateHTML;
+      modal.style.display = 'flex';
+    }
+
+    // Close modal
+    function closeModal() {
+      document.getElementById('certificate-modal').style.display = 'none';
+    }
+
+    // Setup navigation
+    function setupNavigation() {
+      const navLinks = document.querySelectorAll('.nav a');
+      navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          navLinks.forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+          
+          const target = link.getAttribute('href').substring(1);
+          if (target === 'dashboard') {
+            // Already on dashboard
+          } else if (target === 'progress') {
+            const completed = lessons.filter(l => l.completed).length;
+            const inProgress = lessons.filter(l => l.progress > 0 && !l.completed).length;
+            const totalHours = lessons.reduce((sum, lesson) => {
+              const hours = parseInt(lesson.duration.split('-')[0]);
+              return sum + (isNaN(hours) ? 3 : hours);
+            }, 0);
+            
+            alert(`Progress Report:\n\n• ${completed} of 15 lessons completed\n• ${inProgress} lessons in progress\n• Estimated total study time: ${totalHours} hours\n• Average grade: ${calculateAverageGrade()}%\n\nInstructor: Tshepho Nkoe\nCompany: Msebetsi Solutions Pty Ltd`);
+          } else if (target === 'certificates') {
+            const completedLessons = lessons.filter(l => l.completed);
+            if (completedLessons.length > 0) {
+              const certificateSummary = completedLessons.map(l => 
+                `• ${l.title} - Grade: ${l.grade}%`
+              ).join('\n');
+              
+              alert(`You have ${completedLessons.length} lesson certificates:\n\n${certificateSummary}\n\nInstructor: Tshepho Nkoe\nCompany: Msebetsi Solutions Pty Ltd`);
+            } else {
+              alert('No certificates yet. Complete lessons to earn certificates!');
+            }
+          } else if (target === 'resources') {
+            alert('React Resources:\n\n• Official React Documentation\n• Msebetsi React Cheatsheet\n• Code Examples Repository\n• Video Tutorial Library\n• Community Forum\n\nAccess these resources through your student portal.');
+          } else if (target === 'settings') {
+            alert('Settings:\n\n• Notification Preferences\n• Display Settings\n• Account Management\n• Privacy Controls\n\nContact support for assistance.');
+          }
+        });
+      });
+    }
+
+    // Calculate average grade
+    function calculateAverageGrade() {
+      const completedLessons = lessons.filter(l => l.completed);
+      if (completedLessons.length === 0) return 0;
+      
+      const totalGrade = completedLessons.reduce((sum, lesson) => sum + lesson.grade, 0);
+      return Math.round(totalGrade / completedLessons.length);
+    }
+
+    // Auto-complete all lessons (for testing)
+    function autoCompleteAll() {
+      lessons.forEach(lesson => {
+        if (!lesson.completed) {
+          lesson.progress = 100;
+          lesson.completed = true;
+          lesson.grade = Math.floor(Math.random() * 31) + 70;
+        }
+      });
+      
+      renderLessons();
+      updateDashboardStats();
+      saveProgressToStorage();
+      alert('All React lessons have been completed!\n\nInstructor: Tshepho Nkoe\nCompany: Msebetsi Solutions Pty Ltd');
+    }
+
+    // Initialize on load
+    window.addEventListener('load', init);
+
+    // Add auto-complete button for testing
+    const autoCompleteBtn = document.createElement('button');
+    autoCompleteBtn.textContent = 'Auto-Complete All';
+    autoCompleteBtn.style.position = 'fixed';
+    autoCompleteBtn.style.bottom = '20px';
+    autoCompleteBtn.style.right = '20px';
+    autoCompleteBtn.style.padding = '10px 20px';
+    autoCompleteBtn.style.background = 'var(--accent)';
+    autoCompleteBtn.style.color = 'var(--bg)';
+    autoCompleteBtn.style.border = 'none';
+    autoCompleteBtn.style.borderRadius = '8px';
+    autoCompleteBtn.style.cursor = 'pointer';
+    autoCompleteBtn.style.zIndex = '1000';
+    autoCompleteBtn.onclick = autoCompleteAll;
+    document.body.appendChild(autoCompleteBtn);
+  </script>
+</body>
+</html>
