@@ -1,0 +1,2163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 8: Context API & Global State | Msebetsi Solutions Bootcamp</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <!-- Loading Animation -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        /* MSEBETSI SOLUTIONS PROFESSIONAL DESIGN SYSTEM */
+        :root {
+            /* Msebetsi Solutions Professional Colors */
+            --msebetsi-red: #E50914;
+            --msebetsi-red-dark: #B20710;
+            --msebetsi-black: #141414;
+            --msebetsi-dark-gray: #2D2D2D;
+            --msebetsi-gray: #737373;
+            --msebetsi-light-gray: #E5E5E5;
+            --msebetsi-white: #FFFFFF;
+            --msebetsi-bg: #0F0F0F;
+            
+            /* Professional Gradients */
+            --gradient-msebetsi: linear-gradient(180deg, rgba(20,20,20,1) 0%, rgba(20,20,20,0.9) 50%, rgba(20,20,20,0.7) 100%);
+            --gradient-red: linear-gradient(180deg, #E50914 0%, #B20710 100%);
+            --gradient-blue: linear-gradient(180deg, #0072D2 0%, #0056A3 100%);
+            --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            --gradient-search: linear-gradient(90deg, rgba(20,20,20,0.95) 0%, rgba(20,20,20,0.85) 100%);
+            
+            /* Context Colors */
+            --context-primary: #E50914;
+            --context-secondary: #0072D2;
+            --context-success: #46D369;
+            --context-warning: #FFD700;
+            --context-error: #FF6B6B;
+            --context-info: #4D9FFF;
+            
+            /* Spacing System */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-xxl: 48px;
+            --space-xxxl: 64px;
+            
+            /* Shadows */
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.5);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.7);
+            --shadow-lg: 0 8px 16px rgba(0,0,0,0.9);
+            --shadow-xl: 0 12px 24px rgba(0,0,0,1);
+            --shadow-red: 0 0 30px rgba(229,9,20,0.4);
+            --shadow-blue: 0 0 30px rgba(0,114,210,0.4);
+            
+            /* Transitions */
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Z-index Layers */
+            --z-nav: 1000;
+            --z-search: 1001;
+            --z-modal: 1002;
+            --z-tooltip: 1003;
+            --z-notification: 1004;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--msebetsi-bg);
+            color: var(--msebetsi-white);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(229,9,20,0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 20%, rgba(0,114,210,0.15) 0%, transparent 40%);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--msebetsi-dark-gray);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--msebetsi-red);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--msebetsi-red-dark);
+        }
+        
+        /* Loading Animation */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--msebetsi-black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .msebetsi-loader {
+            width: 100px;
+            height: 100px;
+            position: relative;
+        }
+        
+        .msebetsi-loader span {
+            position: absolute;
+            width: 30px;
+            height: 100px;
+            background: var(--msebetsi-red);
+            animation: msebetsiLoader 1.5s infinite ease-in-out;
+        }
+        
+        .msebetsi-loader span:nth-child(1) {
+            left: 0;
+            animation-delay: 0s;
+        }
+        
+        .msebetsi-loader span:nth-child(2) {
+            left: 35px;
+            animation-delay: 0.2s;
+        }
+        
+        .msebetsi-loader span:nth-child(3) {
+            left: 70px;
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes msebetsiLoader {
+            0%, 100% {
+                transform: scaleY(1);
+                background: var(--msebetsi-red);
+            }
+            50% {
+                transform: scaleY(0.5);
+                background: var(--msebetsi-red-dark);
+            }
+        }
+        
+        /* Header - Professional Msebetsi Nav */
+        .header {
+            background: linear-gradient(180deg, 
+                rgba(20,20,20,0.95) 0%, 
+                rgba(20,20,20,0.9) 50%, 
+                rgba(20,20,20,0.8) 100%);
+            padding: var(--space-lg) var(--space-xl);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: var(--z-nav);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: all var(--transition-normal);
+        }
+        
+        .header.scrolled {
+            background: rgba(20,20,20,0.95);
+            box-shadow: var(--shadow-lg);
+            padding: var(--space-md) var(--space-xl);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+        
+        .msebetsi-logo {
+            color: var(--msebetsi-red);
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            text-decoration: none;
+            transition: all var(--transition-normal);
+        }
+        
+        .msebetsi-logo:hover {
+            text-shadow: var(--shadow-red);
+            transform: scale(1.05);
+        }
+        
+        .context-badge {
+            background: var(--gradient-blue);
+            color: white;
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 24px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            box-shadow: var(--shadow-blue);
+            animation: contextPulse 3s infinite;
+        }
+        
+        @keyframes contextPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Navigation */
+        .nav-menu {
+            display: flex;
+            gap: var(--space-xl);
+            align-items: center;
+        }
+        
+        .nav-item {
+            color: var(--msebetsi-light-gray);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            position: relative;
+            padding: var(--space-sm) 0;
+        }
+        
+        .nav-item:hover {
+            color: white;
+        }
+        
+        .nav-item.active {
+            color: white;
+            font-weight: 700;
+        }
+        
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--msebetsi-red);
+            border-radius: 3px;
+        }
+        
+        /* Search Bar - Professional Msebetsi Style */
+        .search-container {
+            position: relative;
+            margin-left: auto;
+            margin-right: var(--space-xl);
+        }
+        
+        .search-input {
+            width: 300px;
+            padding: var(--space-md) var(--space-lg);
+            background: rgba(0,0,0,0.7);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 30px;
+            color: white;
+            font-size: 14px;
+            font-family: 'Inter';
+            transition: all var(--transition-normal);
+            padding-left: 48px;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            width: 400px;
+            border-color: var(--msebetsi-red);
+            background: rgba(0,0,0,0.9);
+            box-shadow: var(--shadow-red);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: var(--space-lg);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--msebetsi-gray);
+            transition: color var(--transition-fast);
+        }
+        
+        .search-input:focus + .search-icon {
+            color: var(--msebetsi-red);
+        }
+        
+        /* User Menu */
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+        
+        .profile-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--gradient-red);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+        
+        .profile-icon:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-red);
+        }
+        
+        /* Main Layout */
+        .main-container {
+            margin-top: 80px;
+            padding: var(--space-xl);
+            max-width: 1600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Hero Section - Msebetsi Homepage Style */
+        .hero-section {
+            position: relative;
+            height: 80vh;
+            min-height: 600px;
+            margin-bottom: var(--space-xxxl);
+            border-radius: 20px;
+            overflow: hidden;
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.9)),
+                        url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            padding: var(--space-xxxl);
+        }
+        
+        .hero-content {
+            max-width: 600px;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: var(--space-lg);
+            text-shadow: 2px 2px 20px rgba(0,0,0,0.8);
+            background: linear-gradient(45deg, #fff, var(--msebetsi-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-description {
+            font-size: 1.5rem;
+            margin-bottom: var(--space-xl);
+            color: var(--msebetsi-light-gray);
+            line-height: 1.6;
+        }
+        
+        .hero-actions {
+            display: flex;
+            gap: var(--space-lg);
+            margin-top: var(--space-xl);
+        }
+        
+        .hero-button {
+            padding: var(--space-lg) var(--space-xxl);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+        
+        .hero-button.primary {
+            background: var(--msebetsi-white);
+            color: var(--msebetsi-black);
+        }
+        
+        .hero-button.primary:hover {
+            background: rgba(255,255,255,0.9);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .hero-button.secondary {
+            background: rgba(109, 109, 110, 0.7);
+            color: white;
+        }
+        
+        .hero-button.secondary:hover {
+            background: rgba(109, 109, 110, 0.9);
+        }
+        
+        /* Movie/TV Show Rows */
+        .content-rows {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xxxl);
+        }
+        
+        .row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .row-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+        
+        .row-see-all {
+            color: var(--msebetsi-red);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+        
+        .row-see-all:hover {
+            color: white;
+            text-decoration: underline;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: var(--space-lg);
+        }
+        
+        /* Content Card - Msebetsi Style */
+        .content-card {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all var(--transition-normal);
+            cursor: pointer;
+            aspect-ratio: 2/3;
+        }
+        
+        .content-card:hover {
+            transform: scale(1.05) translateY(-10px);
+            box-shadow: var(--shadow-xl);
+            z-index: 10;
+        }
+        
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--transition-slow);
+        }
+        
+        .content-card:hover .card-image {
+            transform: scale(1.1);
+        }
+        
+        .card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: var(--space-lg);
+            transform: translateY(100%);
+            transition: transform var(--transition-normal);
+        }
+        
+        .content-card:hover .card-overlay {
+            transform: translateY(0);
+        }
+        
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+            color: white;
+        }
+        
+        .card-meta {
+            display: flex;
+            gap: var(--space-sm);
+            color: var(--msebetsi-gray);
+            font-size: 0.8rem;
+        }
+        
+        /* Context Demo Area */
+        .context-demo-area {
+            background: var(--gradient-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: var(--space-xxl);
+            margin: var(--space-xxxl) 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .context-demo-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-red);
+        }
+        
+        .demo-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: var(--space-xl);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+        
+        /* Context Tree Visualization */
+        .context-tree {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-xl);
+            margin: var(--space-xxl) 0;
+        }
+        
+        .context-node {
+            background: rgba(20,20,20,0.8);
+            border-radius: 16px;
+            padding: var(--space-xl);
+            border: 2px solid transparent;
+            transition: all var(--transition-normal);
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .context-node:hover {
+            border-color: var(--context-primary);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .context-node.active {
+            border-color: var(--context-success);
+            box-shadow: 0 0 40px rgba(70,211,105,0.3);
+        }
+        
+        .node-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .node-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-red);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .node-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: white;
+        }
+        
+        .node-description {
+            color: var(--msebetsi-gray);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: var(--space-lg);
+        }
+        
+        /* Live Context Editor */
+        .context-editor {
+            background: rgba(10,10,10,0.9);
+            border-radius: 16px;
+            padding: var(--space-xl);
+            margin-top: var(--space-xxl);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+        }
+        
+        .editor-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .editor-actions {
+            display: flex;
+            gap: var(--space-md);
+        }
+        
+        /* Form Controls */
+        .form-control {
+            margin-bottom: var(--space-xl);
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            color: var(--msebetsi-light-gray);
+            font-size: 0.9rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: var(--space-lg);
+            background: rgba(0,0,0,0.5);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-family: 'Inter';
+            transition: all var(--transition-normal);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--msebetsi-red);
+            box-shadow: var(--shadow-red);
+        }
+        
+        .form-input.error {
+            border-color: var(--context-error);
+            box-shadow: 0 0 20px rgba(255,107,107,0.3);
+        }
+        
+        .form-input.success {
+            border-color: var(--context-success);
+            box-shadow: 0 0 20px rgba(70,211,105,0.3);
+        }
+        
+        .error-message {
+            color: var(--context-error);
+            font-size: 0.8rem;
+            margin-top: var(--space-xs);
+            display: none;
+        }
+        
+        .form-input.error + .error-message {
+            display: block;
+        }
+        
+        /* Live Search Results */
+        .search-results {
+            background: rgba(20,20,20,0.95);
+            border-radius: 16px;
+            padding: var(--space-xl);
+            margin-top: var(--space-xxl);
+            border: 1px solid rgba(255,255,255,0.1);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: var(--space-lg);
+        }
+        
+        /* Live Context Updates */
+        .context-updates {
+            background: rgba(20,20,20,0.8);
+            border-radius: 16px;
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        
+        .update-item {
+            padding: var(--space-md);
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            margin-bottom: var(--space-md);
+            border-left: 4px solid var(--msebetsi-red);
+        }
+        
+        .update-time {
+            font-size: 0.8rem;
+            color: var(--msebetsi-gray);
+            margin-bottom: var(--space-xs);
+        }
+        
+        .update-message {
+            color: white;
+            font-weight: 500;
+        }
+        
+        /* Context Provider Stats */
+        .context-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-lg);
+            margin-top: var(--space-xxl);
+        }
+        
+        .stat-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: var(--space-xl);
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all var(--transition-normal);
+        }
+        
+        .stat-card:hover {
+            border-color: var(--msebetsi-red);
+            transform: translateY(-4px);
+        }
+        
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--msebetsi-red);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--msebetsi-gray);
+            font-weight: 600;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: var(--space-md) var(--space-xl);
+            border: none;
+            border-radius: 8px;
+            font-family: 'Inter';
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+        
+        .btn-primary {
+            background: var(--gradient-red);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-red);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* Lesson Navigation */
+        .lesson-nav {
+            position: fixed;
+            bottom: var(--space-xl);
+            right: var(--space-xl);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            z-index: 1000;
+        }
+        
+        .nav-button {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--gradient-red);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all var(--transition-normal);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .nav-button:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: rgba(20,20,20,0.95);
+            border-left: 4px solid var(--msebetsi-red);
+            padding: var(--space-lg);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            z-index: var(--z-notification);
+            animation: slideInRight 0.3s ease;
+            max-width: 400px;
+            backdrop-filter: blur(20px);
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+            
+            .hero-title {
+                font-size: 3rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: var(--space-md);
+                flex-wrap: wrap;
+            }
+            
+            .search-input {
+                width: 200px;
+            }
+            
+            .search-input:focus {
+                width: 300px;
+            }
+            
+            .hero-section {
+                height: 60vh;
+                min-height: 400px;
+                padding: var(--space-xl);
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .hero-description {
+                font-size: 1rem;
+            }
+            
+            .content-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .lesson-nav {
+                bottom: var(--space-md);
+                right: var(--space-md);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .nav-menu {
+                display: none;
+            }
+            
+            .search-input {
+                width: 150px;
+            }
+            
+            .hero-actions {
+                flex-direction: column;
+            }
+            
+            .content-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .slide-up {
+            animation: slideUp 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(40px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Utility Classes */
+        .text-gradient {
+            background: linear-gradient(45deg, var(--msebetsi-red), var(--context-info));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .glass-morphism {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-overlay" id="loadingScreen">
+        <div class="msebetsi-loader">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="mainHeader">
+        <div class="logo-container">
+            <a href="#" class="msebetsi-logo">MSEBETSI SOLUTIONS</a>
+            <div class="context-badge">
+                <i class="fas fa-sitemap"></i> GLOBAL STATE MANAGEMENT
+            </div>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active">Home</a>
+            <a href="#" class="nav-item">Solutions</a>
+            <a href="#" class="nav-item">Services</a>
+            <a href="#" class="nav-item">Enterprise</a>
+            <a href="#" class="nav-item">My Projects</a>
+        </nav>
+
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search solutions, services, modules...">
+            <i class="fas fa-search search-icon"></i>
+        </div>
+
+        <div class="user-menu">
+            <div class="profile-icon" onclick="toggleProfileMenu()">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Hero Section -->
+        <section class="hero-section fade-in">
+            <div class="hero-content">
+                <h1 class="hero-title">Master Context API<br>Like Enterprise Architects</h1>
+                <p class="hero-description">
+                    Discover how Msebetsi Solutions manages global state across enterprise applications. 
+                    Build production-ready forms with real-time validation and professional search systems.
+                </p>
+                <div class="hero-actions">
+                    <button class="hero-button primary" onclick="startLesson()">
+                        <i class="fas fa-play"></i> Start Lesson
+                    </button>
+                    <button class="hero-button secondary" onclick="showContextDemo()">
+                        <i class="fas fa-eye"></i> View Demo
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Content Rows -->
+        <div class="content-rows">
+            <!-- Context API Row -->
+            <section class="slide-up">
+                <div class="row-header">
+                    <h2 class="row-title">
+                        <i class="fas fa-globe"></i> Global Context Providers
+                    </h2>
+                    <a href="#" class="row-see-all">See All</a>
+                </div>
+                <div class="content-grid" id="contextProviders">
+                    <!-- Context cards will be dynamically generated -->
+                </div>
+            </section>
+
+            <!-- Controlled Forms Row -->
+            <section class="slide-up">
+                <div class="row-header">
+                    <h2 class="row-title">
+                        <i class="fas fa-edit"></i> Controlled Components
+                    </h2>
+                    <a href="#" class="row-see-all">See All</a>
+                </div>
+                <div class="content-grid" id="formComponents">
+                    <!-- Form cards will be dynamically generated -->
+                </div>
+            </section>
+
+            <!-- Live Demo Area -->
+            <section class="context-demo-area slide-up">
+                <h2 class="demo-title">
+                    <i class="fas fa-code text-gradient"></i> Live Context Editor
+                </h2>
+                
+                <!-- Context Tree -->
+                <div class="context-tree" id="contextTree">
+                    <!-- Context nodes will be dynamically generated -->
+                </div>
+
+                <!-- Live Context Editor -->
+                <div class="context-editor">
+                    <div class="editor-header">
+                        <h3 class="editor-title">
+                            <i class="fas fa-sliders-h"></i> Global State Control Panel
+                        </h3>
+                        <div class="editor-actions">
+                            <button class="btn btn-primary" onclick="resetContext()">
+                                <i class="fas fa-redo"></i> Reset
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportContext()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- User Context Form -->
+                    <div class="form-control">
+                        <label class="form-label">
+                            <i class="fas fa-user"></i> User Context
+                        </label>
+                        <input type="text" 
+                               class="form-input" 
+                               id="userContextInput"
+                               placeholder="Update user context..."
+                               oninput="updateUserContext(this.value)">
+                        <div class="error-message" id="userContextError"></div>
+                    </div>
+
+                    <!-- Theme Context Form -->
+                    <div class="form-control">
+                        <label class="form-label">
+                            <i class="fas fa-palette"></i> Theme Context
+                        </label>
+                        <select class="form-input" id="themeContextSelect" onchange="updateThemeContext(this.value)">
+                            <option value="dark">Dark Theme (Enterprise Default)</option>
+                            <option value="light">Light Theme</option>
+                            <option value="oled">OLED Black</option>
+                            <option value="professional">Professional Mode</option>
+                        </select>
+                    </div>
+
+                    <!-- Language Context Form -->
+                    <div class="form-control">
+                        <label class="form-label">
+                            <i class="fas fa-language"></i> Language Context
+                        </label>
+                        <div style="display: flex; gap: var(--space-md); flex-wrap: wrap;">
+                            <button class="btn btn-secondary" onclick="setLanguage('en')">English</button>
+                            <button class="btn btn-secondary" onclick="setLanguage('es')">Español</button>
+                            <button class="btn btn-secondary" onclick="setLanguage('fr')">Français</button>
+                            <button class="btn btn-secondary" onclick="setLanguage('de')">Deutsch</button>
+                            <button class="btn btn-secondary" onclick="setLanguage('ja')">日本語</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Search Results -->
+                <div class="search-results hidden" id="searchResults">
+                    <div class="row-header">
+                        <h3 class="row-title">
+                            <i class="fas fa-search"></i> Live Search Results
+                        </h3>
+                        <span class="row-see-all" id="resultsCount">0 results</span>
+                    </div>
+                    <div class="results-grid" id="resultsGrid">
+                        <!-- Search results will appear here -->
+                    </div>
+                </div>
+
+                <!-- Context Updates -->
+                <div class="context-updates">
+                    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: var(--space-lg);">
+                        <i class="fas fa-history"></i> Real-time Context Updates
+                    </h3>
+                    <div id="contextUpdatesList">
+                        <!-- Updates will appear here -->
+                    </div>
+                </div>
+
+                <!-- Context Stats -->
+                <div class="context-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="providerCount">0</div>
+                        <div class="stat-label">Context Providers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="consumerCount">0</div>
+                        <div class="stat-label">Context Consumers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="updateCount">0</div>
+                        <div class="stat-label">State Updates</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="performanceScore">0ms</div>
+                        <div class="stat-label">Performance</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Lesson Navigation -->
+    <div class="lesson-nav">
+        <button class="nav-button" onclick="scrollToTop()" title="Scroll to Top">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        <button class="nav-button" onclick="toggleSearch()" title="Toggle Search">
+            <i class="fas fa-search"></i>
+        </button>
+        <button class="nav-button" onclick="completeLesson()" title="Complete Lesson">
+            <i class="fas fa-check"></i>
+        </button>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Msebetsi Solutions Global State Management System
+        class MsebetsiContextSystem {
+            constructor() {
+                this.contexts = {
+                    user: {
+                        id: 'user123',
+                        name: 'Enterprise User',
+                        email: 'user@msebetsi.com',
+                        profile: 'admin',
+                        preferences: {
+                            autoplay: true,
+                            quality: 'hd',
+                            language: 'en',
+                            subtitles: true
+                        }
+                    },
+                    theme: {
+                        mode: 'dark',
+                        primaryColor: '#E50914',
+                        secondaryColor: '#0072D2',
+                        contrast: 'high'
+                    },
+                    search: {
+                        query: '',
+                        results: [],
+                        filters: {
+                            type: 'all',
+                            category: 'all',
+                            year: 'all',
+                            rating: 'all'
+                        },
+                        isLoading: false
+                    },
+                    navigation: {
+                        currentRoute: '/',
+                        previousRoute: null,
+                        history: []
+                    },
+                    auth: {
+                        isAuthenticated: true,
+                        role: 'admin',
+                        permissions: ['read', 'write', 'delete']
+                    }
+                };
+                
+                this.subscribers = [];
+                this.updateCount = 0;
+                this.performanceMetrics = [];
+                this.contextHistory = [];
+                
+                // Mock data
+                this.contentLibrary = this.generateMockContent();
+                this.contextProviders = this.generateContextProviders();
+                this.formComponents = this.generateFormComponents();
+            }
+            
+            generateMockContent() {
+                return [
+                    {
+                        id: 1,
+                        title: "Enterprise Dashboard",
+                        type: "solution",
+                        category: "Analytics",
+                        year: 2023,
+                        rating: 9.2,
+                        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80"
+                    },
+                    {
+                        id: 2,
+                        title: "CRM System",
+                        type: "solution",
+                        category: "Business",
+                        year: 2023,
+                        rating: 8.8,
+                        image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&q=80"
+                    },
+                    {
+                        id: 3,
+                        title: "AI Analytics",
+                        type: "service",
+                        category: "AI/ML",
+                        year: 2024,
+                        rating: 9.5,
+                        image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&q=80"
+                    },
+                    {
+                        id: 4,
+                        title: "Cloud Migration",
+                        type: "service",
+                        category: "Cloud",
+                        year: 2023,
+                        rating: 8.9,
+                        image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&q=80"
+                    },
+                    {
+                        id: 5,
+                        title: "Security Suite",
+                        type: "solution",
+                        category: "Security",
+                        year: 2024,
+                        rating: 9.7,
+                        image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400&q=80"
+                    },
+                    {
+                        id: 6,
+                        title: "Mobile Platform",
+                        type: "solution",
+                        category: "Mobile",
+                        year: 2023,
+                        rating: 8.6,
+                        image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&q=80"
+                    }
+                ];
+            }
+            
+            generateContextProviders() {
+                return [
+                    {
+                        id: 'user',
+                        name: 'User Context',
+                        description: 'Manages user authentication, profiles, and preferences',
+                        consumers: ['Navbar', 'ProfileMenu', 'Settings'],
+                        icon: 'fa-user'
+                    },
+                    {
+                        id: 'theme',
+                        name: 'Theme Context',
+                        description: 'Handles dark/light modes and UI theming',
+                        consumers: ['All Components'],
+                        icon: 'fa-palette'
+                    },
+                    {
+                        id: 'search',
+                        name: 'Search Context',
+                        description: 'Global search state and results management',
+                        consumers: ['SearchBar', 'ResultsGrid', 'Filters'],
+                        icon: 'fa-search'
+                    },
+                    {
+                        id: 'auth',
+                        name: 'Auth Context',
+                        description: 'Authentication and authorization state',
+                        consumers: ['Login', 'Signup', 'ProtectedRoutes'],
+                        icon: 'fa-shield-alt'
+                    },
+                    {
+                        id: 'navigation',
+                        name: 'Navigation Context',
+                        description: 'Routing and navigation state management',
+                        consumers: ['Router', 'Breadcrumbs', 'History'],
+                        icon: 'fa-compass'
+                    },
+                    {
+                        id: 'notifications',
+                        name: 'Notifications Context',
+                        description: 'Global notification and alert system',
+                        consumers: ['NotificationCenter', 'Toast', 'Alerts'],
+                        icon: 'fa-bell'
+                    }
+                ];
+            }
+            
+            generateFormComponents() {
+                return [
+                    {
+                        id: 'search',
+                        name: 'Search Form',
+                        description: 'Real-time search with validation',
+                        fields: ['query', 'filters', 'sort'],
+                        icon: 'fa-search'
+                    },
+                    {
+                        id: 'login',
+                        name: 'Login Form',
+                        description: 'Enterprise authentication with validation',
+                        fields: ['email', 'password', 'remember'],
+                        icon: 'fa-sign-in-alt'
+                    },
+                    {
+                        id: 'profile',
+                        name: 'Profile Form',
+                        description: 'User profile management',
+                        fields: ['name', 'email', 'avatar', 'preferences'],
+                        icon: 'fa-user-edit'
+                    },
+                    {
+                        id: 'settings',
+                        name: 'Settings Form',
+                        description: 'Enterprise configuration',
+                        fields: ['theme', 'language', 'notifications', 'privacy'],
+                        icon: 'fa-cog'
+                    },
+                    {
+                        id: 'support',
+                        name: 'Support Form',
+                        description: 'Enterprise support ticket system',
+                        fields: ['category', 'priority', 'description', 'contact'],
+                        icon: 'fa-headset'
+                    },
+                    {
+                        id: 'feedback',
+                        name: 'Feedback Form',
+                        description: 'Enterprise feedback collection',
+                        fields: ['rating', 'comments', 'department', 'urgency'],
+                        icon: 'fa-comment-alt'
+                    }
+                ];
+            }
+            
+            // Context Provider Methods
+            getContext(contextName) {
+                return this.contexts[contextName];
+            }
+            
+            updateContext(contextName, updates) {
+                const startTime = performance.now();
+                
+                // Create deep copy for history
+                const oldContext = JSON.parse(JSON.stringify(this.contexts[contextName]));
+                
+                // Update context
+                this.contexts[contextName] = {
+                    ...this.contexts[contextName],
+                    ...updates
+                };
+                
+                // Track performance
+                const endTime = performance.now();
+                const duration = endTime - startTime;
+                this.performanceMetrics.push({ contextName, duration, timestamp: Date.now() });
+                
+                // Limit performance history
+                if (this.performanceMetrics.length > 50) {
+                    this.performanceMetrics.shift();
+                }
+                
+                // Add to context history
+                this.contextHistory.unshift({
+                    timestamp: new Date().toISOString(),
+                    context: contextName,
+                    action: 'UPDATE',
+                    oldValue: oldContext,
+                    newValue: this.contexts[contextName]
+                });
+                
+                // Limit history
+                if (this.contextHistory.length > 10) {
+                    this.contextHistory.pop();
+                }
+                
+                this.updateCount++;
+                
+                // Notify subscribers
+                this.notifySubscribers(contextName);
+                
+                // Update UI
+                this.updateContextUI(contextName);
+                
+                return true;
+            }
+            
+            // Search Functionality
+            async searchContent(query) {
+                if (!query || query.trim() === '') {
+                    this.updateContext('search', { query: '', results: [], isLoading: false });
+                    return [];
+                }
+                
+                this.updateContext('search', { query, isLoading: true });
+                
+                // Simulate API call
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        const filtered = this.contentLibrary.filter(item =>
+                            item.title.toLowerCase().includes(query.toLowerCase()) ||
+                            item.category.toLowerCase().includes(query.toLowerCase())
+                        );
+                        
+                        this.updateContext('search', {
+                            results: filtered,
+                            isLoading: false
+                        });
+                        
+                        resolve(filtered);
+                    }, 500);
+                });
+            }
+            
+            // Form Validation
+            validateForm(formId, data) {
+                const validations = {
+                    search: {
+                        query: (value) => value.length >= 2 || 'Search term must be at least 2 characters'
+                    },
+                    login: {
+                        email: (value) => /\S+@\S+\.\S+/.test(value) || 'Invalid email address',
+                        password: (value) => value.length >= 8 || 'Password must be at least 8 characters'
+                    },
+                    profile: {
+                        name: (value) => value.length >= 2 || 'Name must be at least 2 characters',
+                        email: (value) => /\S+@\S+\.\S+/.test(value) || 'Invalid email address'
+                    }
+                };
+                
+                const formValidations = validations[formId];
+                if (!formValidations) return { isValid: true, errors: {} };
+                
+                const errors = {};
+                let isValid = true;
+                
+                for (const [field, validator] of Object.entries(formValidations)) {
+                    const error = validator(data[field]);
+                    if (error) {
+                        errors[field] = error;
+                        isValid = false;
+                    }
+                }
+                
+                return { isValid, errors };
+            }
+            
+            // Subscriber Management
+            subscribe(callback) {
+                this.subscribers.push(callback);
+                return () => {
+                    this.subscribers = this.subscribers.filter(cb => cb !== callback);
+                };
+            }
+            
+            notifySubscribers(contextName) {
+                this.subscribers.forEach(callback => {
+                    callback(contextName, this.contexts[contextName]);
+                });
+            }
+            
+            // UI Updates
+            updateContextUI(contextName) {
+                switch(contextName) {
+                    case 'user':
+                        updateUserContextDisplay();
+                        break;
+                    case 'search':
+                        updateSearchResults();
+                        break;
+                    case 'theme':
+                        updateTheme();
+                        break;
+                }
+                
+                updateStats();
+                updateContextUpdates();
+            }
+            
+            // Performance Metrics
+            getAveragePerformance() {
+                if (this.performanceMetrics.length === 0) return '0ms';
+                
+                const avg = this.performanceMetrics.reduce((sum, metric) => sum + metric.duration, 0) / this.performanceMetrics.length;
+                return `${avg.toFixed(2)}ms`;
+            }
+            
+            getContextStats() {
+                return {
+                    providers: this.contextProviders.length,
+                    consumers: this.contextProviders.reduce((sum, provider) => sum + provider.consumers.length, 0),
+                    updates: this.updateCount,
+                    performance: this.getAveragePerformance()
+                };
+            }
+            
+            // Export Context
+            exportContext() {
+                return {
+                    contexts: this.contexts,
+                    stats: this.getContextStats(),
+                    timestamp: new Date().toISOString()
+                };
+            }
+            
+            // Reset Context
+            resetContext() {
+                this.contexts = {
+                    user: {
+                        id: 'user123',
+                        name: 'Enterprise User',
+                        email: 'user@msebetsi.com',
+                        profile: 'admin',
+                        preferences: {
+                            autoplay: true,
+                            quality: 'hd',
+                            language: 'en',
+                            subtitles: true
+                        }
+                    },
+                    theme: {
+                        mode: 'dark',
+                        primaryColor: '#E50914',
+                        secondaryColor: '#0072D2',
+                        contrast: 'high'
+                    },
+                    search: {
+                        query: '',
+                        results: [],
+                        filters: {
+                            type: 'all',
+                            category: 'all',
+                            year: 'all',
+                            rating: 'all'
+                        },
+                        isLoading: false
+                    }
+                };
+                
+                this.updateCount = 0;
+                this.performanceMetrics = [];
+                
+                this.updateContextUI('user');
+                this.updateContextUI('theme');
+                this.updateContextUI('search');
+                
+                return true;
+            }
+        }
+
+        // Initialize Context System
+        const contextSystem = new MsebetsiContextSystem();
+
+        // DOM Elements
+        const loadingScreen = document.getElementById('loadingScreen');
+        const mainHeader = document.getElementById('mainHeader');
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        const contextTree = document.getElementById('contextTree');
+        const contextProviders = document.getElementById('contextProviders');
+        const formComponents = document.getElementById('formComponents');
+        const contextUpdatesList = document.getElementById('contextUpdatesList');
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Show loading animation
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 500);
+            
+            // Initialize UI
+            renderContextProviders();
+            renderFormComponents();
+            renderContextTree();
+            updateStats();
+            updateContextUpdates();
+            
+            // Add scroll listener for header
+            window.addEventListener('scroll', handleScroll);
+            
+            // Initialize search
+            setupSearch();
+            
+            // Show welcome notification
+            setTimeout(() => {
+                showNotification('🚀 Welcome to Msebetsi Solutions Context API Masterclass!', 'success');
+            }, 1000);
+            
+            // Add interactive tutorial
+            startInteractiveTutorial();
+        });
+
+        // Scroll Handler
+        function handleScroll() {
+            if (window.scrollY > 50) {
+                mainHeader.classList.add('scrolled');
+            } else {
+                mainHeader.classList.remove('scrolled');
+            }
+        }
+
+        // Render Context Providers
+        function renderContextProviders() {
+            contextProviders.innerHTML = contextSystem.contextProviders.map(provider => `
+                <div class="content-card" onclick="selectContext('${provider.id}')">
+                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80" 
+                         alt="${provider.name}" 
+                         class="card-image">
+                    <div class="card-overlay">
+                        <h3 class="card-title">
+                            <i class="fas ${provider.icon}"></i> ${provider.name}
+                        </h3>
+                        <div class="card-meta">
+                            <span>${provider.consumers.length} consumers</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render Form Components
+        function renderFormComponents() {
+            formComponents.innerHTML = contextSystem.formComponents.map(form => `
+                <div class="content-card" onclick="showFormDemo('${form.id}')">
+                    <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&q=80" 
+                         alt="${form.name}" 
+                         class="card-image">
+                    <div class="card-overlay">
+                        <h3 class="card-title">
+                            <i class="fas ${form.icon}"></i> ${form.name}
+                        </h3>
+                        <div class="card-meta">
+                            <span>${form.fields.length} fields</span>
+                            <span>${form.description}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render Context Tree
+        function renderContextTree() {
+            contextTree.innerHTML = contextSystem.contextProviders.map(provider => {
+                const isActive = provider.id === 'user' || provider.id === 'theme';
+                return `
+                    <div class="context-node ${isActive ? 'active' : ''}" onclick="focusContext('${provider.id}')">
+                        <div class="node-header">
+                            <div class="node-icon">
+                                <i class="fas ${provider.icon}"></i>
+                            </div>
+                            <h3 class="node-title">${provider.name}</h3>
+                        </div>
+                        <p class="node-description">${provider.description}</p>
+                        <div class="card-meta">
+                            <span>Consumers: ${provider.consumers.join(', ')}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Setup Search
+        function setupSearch() {
+            let searchTimeout;
+            
+            searchInput.addEventListener('input', function(e) {
+                clearTimeout(searchTimeout);
+                
+                const query = e.target.value;
+                
+                if (query.trim() === '') {
+                    searchResults.classList.add('hidden');
+                    return;
+                }
+                
+                searchTimeout = setTimeout(async () => {
+                    searchResults.classList.remove('hidden');
+                    await contextSystem.searchContent(query);
+                }, 300);
+            });
+            
+            // Close search on escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    searchResults.classList.add('hidden');
+                    searchInput.value = '';
+                }
+            });
+        }
+
+        // Update Search Results
+        function updateSearchResults() {
+            const searchContext = contextSystem.getContext('search');
+            const resultsGrid = document.getElementById('resultsGrid');
+            const resultsCount = document.getElementById('resultsCount');
+            
+            if (searchContext.isLoading) {
+                resultsGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: var(--space-xl);">Loading results...</div>';
+                resultsCount.textContent = 'Searching...';
+                return;
+            }
+            
+            resultsCount.textContent = `${searchContext.results.length} results`;
+            
+            if (searchContext.results.length === 0) {
+                resultsGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: var(--space-xl);">
+                        <i class="fas fa-search" style="font-size: 3rem; color: var(--msebetsi-gray); margin-bottom: var(--space-lg);"></i>
+                        <h3 style="color: white; margin-bottom: var(--space-sm);">No results found</h3>
+                        <p style="color: var(--msebetsi-gray);">Try different keywords or filters</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            resultsGrid.innerHTML = searchContext.results.map(item => `
+                <div class="content-card" onclick="selectContent(${item.id})">
+                    <img src="${item.image}" alt="${item.title}" class="card-image">
+                    <div class="card-overlay">
+                        <h3 class="card-title">${item.title}</h3>
+                        <div class="card-meta">
+                            <span>${item.type.replace('_', ' ')}</span>
+                            <span>${item.category}</span>
+                            <span>${item.year}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update Stats
+        function updateStats() {
+            const stats = contextSystem.getContextStats();
+            
+            document.getElementById('providerCount').textContent = stats.providers;
+            document.getElementById('consumerCount').textContent = stats.consumers;
+            document.getElementById('updateCount').textContent = stats.updates;
+            document.getElementById('performanceScore').textContent = stats.performance;
+        }
+
+        // Update Context Updates
+        function updateContextUpdates() {
+            contextUpdatesList.innerHTML = contextSystem.contextHistory.map(update => `
+                <div class="update-item">
+                    <div class="update-time">
+                        ${new Date(update.timestamp).toLocaleTimeString()}
+                    </div>
+                    <div class="update-message">
+                        <strong>${update.context}</strong> context updated
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update User Context Display
+        function updateUserContextDisplay() {
+            const userContext = contextSystem.getContext('user');
+            const input = document.getElementById('userContextInput');
+            const error = document.getElementById('userContextError');
+            
+            // Update input value
+            input.value = userContext.name;
+            
+            // Clear error
+            input.classList.remove('error');
+            error.textContent = '';
+        }
+
+        // Update Theme
+        function updateTheme() {
+            const themeContext = contextSystem.getContext('theme');
+            const select = document.getElementById('themeContextSelect');
+            
+            select.value = themeContext.mode;
+        }
+
+        // UI Interaction Functions
+        function startLesson() {
+            showNotification('🚀 Starting Context API Lesson!', 'success');
+            
+            // Animate context nodes
+            const nodes = document.querySelectorAll('.context-node');
+            nodes.forEach((node, index) => {
+                setTimeout(() => {
+                    node.style.animation = 'pulse 1s';
+                    setTimeout(() => {
+                        node.style.animation = '';
+                    }, 1000);
+                }, index * 200);
+            });
+        }
+
+        function showContextDemo() {
+            showNotification('🎬 Showing Context API Demo', 'info');
+            
+            // Scroll to demo area
+            document.querySelector('.context-demo-area').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+
+        function selectContext(contextId) {
+            const provider = contextSystem.contextProviders.find(p => p.id === contextId);
+            if (!provider) return;
+            
+            showNotification(`🔍 Selected ${provider.name} Context`, 'info');
+            
+            // Highlight selected context
+            document.querySelectorAll('.context-node').forEach(node => {
+                node.classList.remove('active');
+            });
+            
+            const node = document.querySelector(`.context-node[onclick*="${contextId}"]`);
+            if (node) {
+                node.classList.add('active');
+                node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function focusContext(contextId) {
+            const provider = contextSystem.contextProviders.find(p => p.id === contextId);
+            if (!provider) return;
+            
+            showNotification(`🎯 Focusing on ${provider.name} Context`, 'info');
+            
+            // Show detailed view
+            alert(`${provider.name} Context\n\nDescription: ${provider.description}\n\nConsumers: ${provider.consumers.join(', ')}\n\nUsed by: Msebetsi ${provider.consumers[0]} component`);
+        }
+
+        function showFormDemo(formId) {
+            const form = contextSystem.formComponents.find(f => f.id === formId);
+            if (!form) return;
+            
+            showNotification(`📝 Opening ${form.name} Demo`, 'info');
+            
+            // Show form demo
+            const demoHTML = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 9998; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: var(--msebetsi-black); padding: var(--space-xxl); border-radius: 20px; max-width: 500px; width: 90%; border: 2px solid var(--msebetsi-red);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xl);">
+                            <h3 style="font-size: 1.5rem; font-weight: 700; color: white;">
+                                <i class="fas ${form.icon}"></i> ${form.name}
+                            </h3>
+                            <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: none; border: none; color: var(--msebetsi-gray); font-size: 1.5rem; cursor: pointer;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <p style="color: var(--msebetsi-gray); margin-bottom: var(--space-xl);">
+                            ${form.description}
+                        </p>
+                        ${form.fields.map(field => `
+                            <div style="margin-bottom: var(--space-lg);">
+                                <label style="display: block; color: var(--msebetsi-light-gray); margin-bottom: var(--space-sm); font-weight: 600;">
+                                    ${field.charAt(0).toUpperCase() + field.slice(1)}
+                                </label>
+                                <input type="text" 
+                                       style="width: 100%; padding: var(--space-md); background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white;"
+                                       placeholder="Enter ${field}...">
+                            </div>
+                        `).join('')}
+                        <button style="width: 100%; padding: var(--space-lg); background: var(--msebetsi-red); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: var(--space-xl);">
+                            Submit Form
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            const demo = document.createElement('div');
+            demo.innerHTML = demoHTML;
+            document.body.appendChild(demo);
+        }
+
+        // Context Update Functions
+        function updateUserContext(value) {
+            const input = document.getElementById('userContextInput');
+            const error = document.getElementById('userContextError');
+            
+            // Validate
+            if (value.length < 2) {
+                input.classList.add('error');
+                error.textContent = 'Name must be at least 2 characters';
+                return;
+            }
+            
+            if (value.length > 50) {
+                input.classList.add('error');
+                error.textContent = 'Name must be less than 50 characters';
+                return;
+            }
+            
+            // Update context
+            const success = contextSystem.updateContext('user', {
+                name: value,
+                lastUpdated: new Date().toISOString()
+            });
+            
+            if (success) {
+                input.classList.remove('error');
+                input.classList.add('success');
+                error.textContent = '';
+                
+                setTimeout(() => {
+                    input.classList.remove('success');
+                }, 2000);
+            }
+        }
+
+        function updateThemeContext(value) {
+            const success = contextSystem.updateContext('theme', {
+                mode: value,
+                lastUpdated: new Date().toISOString()
+            });
+            
+            if (success) {
+                showNotification(`🎨 Theme changed to ${value}`, 'success');
+            }
+        }
+
+        function setLanguage(lang) {
+            const success = contextSystem.updateContext('user', {
+                preferences: {
+                    ...contextSystem.getContext('user').preferences,
+                    language: lang
+                }
+            });
+            
+            if (success) {
+                showNotification(`🌐 Language set to ${lang.toUpperCase()}`, 'success');
+            }
+        }
+
+        function resetContext() {
+            const confirmed = confirm('Reset all context to default values?');
+            if (!confirmed) return;
+            
+            contextSystem.resetContext();
+            showNotification('🔄 All context reset to defaults', 'info');
+        }
+
+        function exportContext() {
+            const contextData = contextSystem.exportContext();
+            const dataStr = JSON.stringify(contextData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'msebetsi-context-export.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showNotification('💾 Context exported successfully!', 'success');
+        }
+
+        // Navigation Functions
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleSearch() {
+            searchInput.focus();
+            searchInput.value = '';
+            searchResults.classList.remove('hidden');
+            showNotification('🔍 Search activated! Try searching for solutions.', 'info');
+        }
+
+        function toggleProfileMenu() {
+            showNotification('👤 Profile menu coming soon!', 'info');
+        }
+
+        function selectContent(contentId) {
+            const content = contextSystem.contentLibrary.find(c => c.id === contentId);
+            if (!content) return;
+            
+            showNotification(`🎯 Selected: ${content.title}`, 'success');
+        }
+
+        function completeLesson() {
+            showNotification('🏆 Congratulations! Lesson 8 Completed!', 'success');
+            
+            // Confetti animation
+            createConfetti();
+            
+            setTimeout(() => {
+                alert('🎉 LESSON 8 MASTERED!\n\nYou have learned:\n✅ Context API fundamentals\n✅ Global state management\n✅ Controlled components\n✅ Form validation patterns\n✅ Enterprise-scale architecture\n✅ Real-time search systems\n\nYou are now ready to build production enterprise applications!');
+            }, 1000);
+        }
+
+        // Notification System
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            
+            const icon = type === 'success' ? '✅' : 'ℹ️';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: var(--space-md);">
+                    <div style="font-size: 1.5rem;">${icon}</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 700; margin-bottom: var(--space-xs); color: white;">
+                            ${type === 'success' ? 'Success!' : 'Info'}
+                        </div>
+                        <div style="color: var(--msebetsi-gray); font-size: 0.9rem;">
+                            ${message}
+                        </div>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="background: none; border: none; color: var(--msebetsi-gray); cursor: pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100px)';
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 4000);
+        }
+
+        // Confetti Animation
+        function createConfetti() {
+            const colors = ['#E50914', '#0072D2', '#46D369', '#FFD700', '#9C27B0', '#FFFFFF'];
+            
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: ${Math.random() * 10 + 5}px;
+                    height: ${Math.random() * 10 + 5}px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                    top: -20px;
+                    left: ${Math.random() * 100}vw;
+                    animation: fall ${Math.random() * 3 + 2}s linear forwards;
+                    z-index: 9997;
+                    transform: rotate(${Math.random() * 360}deg);
+                `;
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    if (confetti.parentElement) {
+                        confetti.remove();
+                    }
+                }, 5000);
+            }
+            
+            // Add animation if not exists
+            if (!document.querySelector('style[data-confetti]')) {
+                const style = document.createElement('style');
+                style.setAttribute('data-confetti', 'true');
+                style.textContent = `
+                    @keyframes fall {
+                        to {
+                            transform: translateY(100vh) rotate(${Math.random() * 720}deg);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        // Interactive Tutorial
+        function startInteractiveTutorial() {
+            setTimeout(() => {
+                showNotification('💡 Try typing in the search bar to see real-time results!', 'info');
+            }, 2000);
+            
+            setTimeout(() => {
+                showNotification('🎯 Click on any context node to see detailed information', 'info');
+            }, 5000);
+            
+            setTimeout(() => {
+                showNotification('🔄 Update the user context to see real-time state changes', 'info');
+            }, 8000);
+        }
+
+        // Subscribe to context updates
+        contextSystem.subscribe((contextName, context) => {
+            console.log(`Context updated: ${contextName}`, context);
+        });
+    </script>
+</body>
+</html>

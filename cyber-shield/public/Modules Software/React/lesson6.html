@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 6: Interactive Msebetsi Solutions Features | Msebetsi Solutions Bootcamp</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* MSEBETSI SOLUTIONS DESIGN SYSTEM - Interactive Edition */
+        :root {
+            /* Msebetsi Solutions Colors */
+            --msebetsi-red: #E50914;
+            --msebetsi-red-dark: #B20710;
+            --msebetsi-black: #141414;
+            --msebetsi-dark-gray: #2D2D2D;
+            --msebetsi-gray: #B3B3B3;
+            --msebetsi-light-gray: #F5F5F5;
+            --msebetsi-white: #FFFFFF;
+            
+            /* Interactive Colors */
+            --interactive-blue: #4D9FFF;
+            --interactive-green: #46D369;
+            --interactive-yellow: #FFD700;
+            --interactive-purple: #9C27B0;
+            
+            /* Gradients */
+            --gradient-red: linear-gradient(135deg, #E50914, #FF3333);
+            --gradient-blue: linear-gradient(135deg, #4D9FFF, #6BB5FF);
+            --gradient-dark: linear-gradient(135deg, #141414, #2D2D2D);
+            --gradient-hover: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 12px;
+            --space-lg: 16px;
+            --space-xl: 20px;
+            --space-xxl: 32px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            color: var(--msebetsi-white);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Header - Msebetsi Solutions Dark Theme */
+        .header {
+            background: rgba(20, 20, 20, 0.95);
+            border-bottom: 1px solid #333;
+            padding: var(--space-lg) var(--space-xl);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+        
+        .interactive-badge {
+            background: var(--gradient-blue);
+            color: var(--msebetsi-white);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 20px rgba(77, 159, 255, 0.3);
+            animation: glow 2s infinite alternate;
+        }
+        
+        .msebetsi-logo {
+            color: var(--msebetsi-red);
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+        
+        .lesson-badge {
+            background: var(--gradient-red);
+            color: white;
+            padding: var(--space-xs) var(--space-md);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: var(--space-sm);
+        }
+        
+        /* Progress */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+        }
+        
+        .progress-bar-wrapper {
+            width: 200px;
+            background: #333;
+            border-radius: 20px;
+            height: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            width: 50%;
+            height: 100%;
+            background: var(--gradient-red);
+            border-radius: 20px;
+            transition: width 0.7s ease;
+        }
+        
+        /* Main Layout */
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: var(--space-xl);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-xl);
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(to right, rgba(20, 20, 20, 0.9), rgba(20, 20, 20, 0.7)), 
+                        url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1000');
+            background-size: cover;
+            background-position: center;
+            border-radius: 16px;
+            padding: var(--space-xxl);
+            margin: var(--space-lg) 0;
+            position: relative;
+            overflow: hidden;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .hero-content {
+            max-width: 600px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-size: clamp(24px, 4vw, 48px);
+            font-weight: 900;
+            margin-bottom: var(--space-lg);
+            line-height: 1.1;
+            background: linear-gradient(45deg, #fff, var(--interactive-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Module Badge */
+        .module-badge {
+            display: inline-block;
+            background: var(--gradient-red);
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: var(--space-xl);
+            box-shadow: 0 4px 20px rgba(229, 9, 20, 0.3);
+        }
+        
+        /* Interactive Cards Container */
+        .interactive-cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-xl);
+            margin: var(--space-xxl) 0;
+        }
+        
+        /* Interactive Card */
+        .interactive-card {
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #333;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            position: relative;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .interactive-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--interactive-blue);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
+                        0 0 30px rgba(77, 159, 255, 0.2);
+        }
+        
+        .card-header {
+            padding: var(--space-xl);
+            background: rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid #333;
+        }
+        
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-blue);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: var(--space-md);
+            box-shadow: 0 8px 20px rgba(77, 159, 255, 0.3);
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+            color: white;
+        }
+        
+        .card-content {
+            padding: var(--space-xl);
+            flex-grow: 1;
+        }
+        
+        /* Event Code Block */
+        .event-code-block {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #444;
+            border-radius: 12px;
+            padding: var(--space-lg);
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            margin: var(--space-lg) 0;
+            overflow-x: auto;
+            position: relative;
+        }
+        
+        .code-line {
+            padding: var(--space-xs) 0;
+            color: #e0e0e0;
+        }
+        
+        .code-keyword {
+            color: #4D9FFF;
+        }
+        
+        .code-string {
+            color: #46D369;
+        }
+        
+        .code-comment {
+            color: #888;
+        }
+        
+        /* Interactive Demo Area */
+        .demo-area {
+            background: rgba(20, 20, 20, 0.8);
+            border-radius: 16px;
+            padding: var(--space-xl);
+            margin: var(--space-xxl) 0;
+            border: 1px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .demo-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: var(--space-xl);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+        
+        /* Msebetsi Solutions Player Demo */
+        .player-demo {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-xl);
+        }
+        
+        @media (min-width: 768px) {
+            .player-demo {
+                grid-template-columns: 300px 1fr;
+            }
+        }
+        
+        .video-player-container {
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            aspect-ratio: 16/9;
+        }
+        
+        .video-player {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: filter 0.3s ease;
+        }
+        
+        .player-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: var(--space-xl);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .video-player-container:hover .player-controls {
+            opacity: 1;
+        }
+        
+        .play-button {
+            width: 60px;
+            height: 60px;
+            background: var(--msebetsi-red);
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .play-button:hover {
+            transform: scale(1.1);
+            background: var(--msebetsi-red-dark);
+            box-shadow: 0 0 30px rgba(229, 9, 20, 0.5);
+        }
+        
+        .time-display {
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        /* Control Panel */
+        .control-panel {
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 12px;
+            padding: var(--space-xl);
+            border: 1px solid #444;
+        }
+        
+        .control-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: var(--space-lg);
+            color: white;
+        }
+        
+        .control-group {
+            margin-bottom: var(--space-xl);
+        }
+        
+        .control-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            color: var(--msebetsi-gray);
+            font-size: 14px;
+        }
+        
+        .control-input {
+            width: 100%;
+            padding: var(--space-md);
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .control-input:focus {
+            outline: none;
+            border-color: var(--interactive-blue);
+        }
+        
+        /* Hover Preview Demo */
+        .hover-preview-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-lg);
+            margin-top: var(--space-xxl);
+        }
+        
+        .movie-preview-card {
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            border: 1px solid #333;
+        }
+        
+        .movie-preview-card:hover {
+            transform: scale(1.05);
+            border-color: var(--interactive-blue);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4),
+                        0 0 30px rgba(77, 159, 255, 0.2);
+            z-index: 10;
+        }
+        
+        .movie-thumbnail {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: linear-gradient(45deg, #333, #444);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .preview-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: flex-end;
+            padding: var(--space-lg);
+        }
+        
+        .movie-preview-card:hover .preview-overlay {
+            opacity: 1;
+        }
+        
+        .preview-info {
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .movie-preview-card:hover .preview-info {
+            transform: translateY(0);
+        }
+        
+        /* Stats Panel */
+        .stats-panel {
+            background: rgba(20, 20, 20, 0.8);
+            border-radius: 16px;
+            padding: var(--space-xl);
+            margin: var(--space-xxl) 0;
+            border: 1px solid #333;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-xl);
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: var(--space-lg);
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--interactive-blue);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--msebetsi-gray);
+            font-weight: 600;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+            margin: var(--space-xxl) 0;
+        }
+        
+        .action-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: var(--space-lg) var(--space-xl);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-md);
+        }
+        
+        .action-btn-primary {
+            background: var(--gradient-red);
+            color: white;
+        }
+        
+        .action-btn-primary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(229, 9, 20, 0.3);
+        }
+        
+        .action-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid #444;
+        }
+        
+        .action-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-4px);
+        }
+        
+        /* Animations */
+        @keyframes glow {
+            from { box-shadow: 0 0 20px rgba(77, 159, 255, 0.3); }
+            to { box-shadow: 0 0 30px rgba(77, 159, 255, 0.5); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.6s ease-out;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-md);
+            }
+            
+            .hero-section {
+                padding: var(--space-xl);
+                min-height: 200px;
+            }
+            
+            .interactive-cards-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-area {
+                padding: var(--space-lg);
+            }
+            
+            .stats-panel {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-btn {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-md);
+            }
+            
+            .progress-container {
+                width: 100%;
+            }
+            
+            .hero-title {
+                font-size: 24px;
+            }
+            
+            .card-header {
+                padding: var(--space-lg);
+            }
+        }
+        
+        /* Utility Classes */
+        .text-gradient {
+            background: linear-gradient(45deg, var(--interactive-blue), var(--interactive-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .mb-sm { margin-bottom: var(--space-sm); }
+        .mb-md { margin-bottom: var(--space-md); }
+        .mb-lg { margin-bottom: var(--space-lg); }
+        .mb-xl { margin-bottom: var(--space-xl); }
+        .mb-xxl { margin-bottom: var(--space-xxl); }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-container">
+            <div class="interactive-badge">
+                <i class="fas fa-bolt"></i> MODULE 2: INTERACTIVE FEATURES
+            </div>
+            <div>
+                <div class="msebetsi-logo">MSEBETSI SOLUTIONS</div>
+                <div style="display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap;">
+                    <div style="color: var(--msebetsi-gray); font-weight: 700; font-size: 14px;">
+                        Event Handling & Interactive Elements
+                    </div>
+                    <div class="lesson-badge">Lesson 6</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="progress-container">
+            <div style="font-weight: 700; color: var(--msebetsi-white); font-size: 14px;">
+                <i class="fas fa-play-circle" style="color: var(--msebetsi-red); margin-right: 6px;"></i>
+                Module 2, Lesson 6
+            </div>
+            <div class="progress-bar-wrapper">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div style="color: var(--msebetsi-red); font-weight: 800; font-size: 18px;" id="progressText">50%</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero-section slide-in">
+            <div class="hero-content">
+                <div class="module-badge">
+                    <i class="fas fa-gamepad"></i> INTERACTIVE MSEBETSI SOLUTIONS FEATURES
+                </div>
+                <h1 class="hero-title">
+                    Master Event Handling<br>
+                    <span class="text-gradient">Like Msebetsi Solutions Engineers</span>
+                </h1>
+                <p style="font-size: 18px; color: var(--msebetsi-gray); line-height: 1.6; margin-bottom: var(--space-xl);">
+                    Discover how Msebetsi Solutions creates immersive experiences with onClick, onChange, and synthetic events. 
+                    Build interactive play buttons, hover previews, and real-time controls.
+                </p>
+                
+                <div style="display: flex; gap: var(--space-md); flex-wrap: wrap;">
+                    <button class="action-btn action-btn-primary" onclick="startInteractiveTour()">
+                        <i class="fas fa-play"></i> Start Interactive Tour
+                    </button>
+                    <button class="action-btn action-btn-secondary" onclick="showCodeExamples()">
+                        <i class="fas fa-code"></i> View Code Examples
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Teacher Introduction -->
+        <div style="background: rgba(30, 30, 30, 0.8); padding: var(--space-xl); border-radius: 16px; border-left: 4px solid var(--interactive-blue); margin-bottom: var(--space-xxl);">
+            <div style="display: flex; gap: var(--space-lg); align-items: flex-start;">
+                <div style="width: 60px; height: 60px; background: linear-gradient(45deg, var(--interactive-blue), var(--interactive-purple)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; flex-shrink: 0;">
+                    TN
+                </div>
+                <div>
+                    <h3 style="color: var(--interactive-blue); margin-bottom: var(--space-sm); font-size: 18px;">
+                        <i class="fas fa-user-tie"></i> Tshepho Nkoe, Msebetsi Solutions Interactive Engineer:
+                    </h3>
+                    <p style="font-size: 16px; color: var(--msebetsi-gray);">
+                        "Every click, hover, and tap on Msebetsi Solutions triggers sophisticated event handling. 
+                        Today, you'll learn how we make the platform feel alive with real-time interactions. 
+                        Let's dive into the magic behind Msebetsi Solutions' responsive interface!"
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Concepts Cards -->
+        <div class="interactive-cards-container">
+            <!-- onClick Concept -->
+            <div class="interactive-card" onclick="demoClickEvent()">
+                <div class="card-header">
+                    <div class="card-icon" style="background: var(--gradient-red);">
+                        <i class="fas fa-mouse-pointer"></i>
+                    </div>
+                    <h3 class="card-title">onClick Events</h3>
+                    <div style="font-size: 14px; color: var(--msebetsi-gray);">
+                        Play buttons, navigation clicks, and user actions
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="event-code-block">
+                        <div class="code-line"><span class="code-keyword">const</span> <span class="code-string">PlayButton</span> = () => {</div>
+                        <div class="code-line">&nbsp;&nbsp;<span class="code-keyword">const</span> [isPlaying, setIsPlaying] = <span class="code-string">useState</span>(false);</div>
+                        <div class="code-line">&nbsp;&nbsp;</div>
+                        <div class="code-line">&nbsp;&nbsp;<span class="code-keyword">const</span> handleClick = () => {</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;setIsPlaying(!isPlaying);</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">// Toggle play state</span></div>
+                        <div class="code-line">&nbsp;&nbsp;};</div>
+                        <div class="code-line">&nbsp;&nbsp;</div>
+                        <div class="code-line">&nbsp;&nbsp;<span class="code-keyword">return</span> (</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&lt;button <span class="code-keyword">onClick</span>={handleClick}&gt;</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{isPlaying ? '⏸️ Pause' : '▶️ Play'}</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&lt;/button&gt;</div>
+                        <div class="code-line">&nbsp;&nbsp;);</div>
+                        <div class="code-line">};</div>
+                    </div>
+                    <div style="margin-top: var(--space-lg);">
+                        <button class="action-btn action-btn-secondary" style="width: 100%;">
+                            <i class="fas fa-hand-pointer"></i> Click to Demo
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- onChange Concept -->
+            <div class="interactive-card" onmouseenter="demoHoverEvent()">
+                <div class="card-header">
+                    <div class="card-icon" style="background: var(--gradient-blue);">
+                        <i class="fas fa-sliders-h"></i>
+                    </div>
+                    <h3 class="card-title">onChange Events</h3>
+                    <div style="font-size: 14px; color: var(--msebetsi-gray);">
+                        Volume controls, settings, and input updates
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="event-code-block">
+                        <div class="code-line"><span class="code-keyword">const</span> <span class="code-string">VolumeControl</span> = () => {</div>
+                        <div class="code-line">&nbsp;&nbsp;<span class="code-keyword">const</span> [volume, setVolume] = <span class="code-string">useState</span>(50);</div>
+                        <div class="code-line">&nbsp;&nbsp;</div>
+                        <div class="code-line">&nbsp;&nbsp;<span class="code-keyword">const</span> handleChange = (event) => {</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">const</span> newVolume = event.target.value;</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;setVolume(newVolume);</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">// Update audio volume in real-time</span></div>
+                        <div class="code-line">&nbsp;&nbsp;};</div>
+                        <div class="code-line">&nbsp;&nbsp;</div>
+                        <div class="code-line">&nbsp;&nbsp;<span class="code-keyword">return</span> (</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&lt;input</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">type</span>="range"</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">value</span>={volume}</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">onChange</span>={handleChange}</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;/&gt;</div>
+                        <div class="code-line">&nbsp;&nbsp;);</div>
+                        <div class="code-line">};</div>
+                    </div>
+                    <div style="margin-top: var(--space-lg);">
+                        <div class="control-label">Hover over me to see effects!</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Synthetic Events -->
+            <div class="interactive-card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(45deg, var(--interactive-purple), var(--interactive-blue));">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <h3 class="card-title">Synthetic Events</h3>
+                    <div style="font-size: 14px; color: var(--msebetsi-gray);">
+                        Msebetsi Solutions' smooth hover previews & animations
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="event-code-block">
+                        <div class="code-line"><span class="code-comment">// Msebetsi Solutions Hover Preview Effect</span></div>
+                        <div class="code-line"><span class="code-keyword">const</span> <span class="code-string">MovieCard</span> = ({ movie }) => {</div>
+                        <div class="code-line">&nbsp;&nbsp;<span class="code-keyword">const</span> [isHovered, setIsHovered] = <span class="code-string">useState</span>(false);</div>
+                        <div class="code-line">&nbsp;&nbsp;</div>
+                        <div class="code-line">&nbsp;&nbsp;<span class="code-keyword">const</span> handleMouseEnter = () => {</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;setIsHovered(true);</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">// Start playing preview video</span></div>
+                        <div class="code-line">&nbsp;&nbsp;};</div>
+                        <div class="code-line">&nbsp;&nbsp;</div>
+                        <div class="code-line">&nbsp;&nbsp;<span class="code-keyword">const</span> handleMouseLeave = () => {</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;setIsHovered(false);</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">// Stop preview video</span></div>
+                        <div class="code-line">&nbsp;&nbsp;};</div>
+                    </div>
+                    <div style="margin-top: var(--space-lg);">
+                        <div style="display: flex; gap: var(--space-sm);">
+                            <span style="background: rgba(77, 159, 255, 0.2); padding: var(--space-sm) var(--space-md); border-radius: 20px; font-size: 12px;">
+                                onMouseEnter
+                            </span>
+                            <span style="background: rgba(77, 159, 255, 0.2); padding: var(--space-sm) var(--space-md); border-radius: 20px; font-size: 12px;">
+                                onMouseLeave
+                            </span>
+                            <span style="background: rgba(77, 159, 255, 0.2); padding: var(--space-sm) var(--space-md); border-radius: 20px; font-size: 12px;">
+                                onFocus
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Interactive Demo -->
+        <section class="demo-area">
+            <h2 class="demo-title">
+                <i class="fas fa-play-circle text-gradient"></i> Msebetsi Solutions Player Simulation
+                <span style="font-size: 14px; color: var(--msebetsi-gray); margin-left: auto;">
+                    Real-time Event Handling Demo
+                </span>
+            </h2>
+            
+            <div class="player-demo">
+                <!-- Video Player -->
+                <div>
+                    <div class="video-player-container" id="videoPlayer">
+                        <video class="video-player" id="demoVideo" poster="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1000">
+                            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                        </video>
+                        
+                        <div class="player-controls">
+                            <button class="play-button" id="playButton" onclick="togglePlay()">
+                                <i class="fas fa-play" id="playIcon"></i>
+                            </button>
+                            <div class="time-display" id="timeDisplay">
+                                <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: var(--space-lg);">
+                        <div class="control-label">Video Status: <span id="videoStatus">Paused</span></div>
+                        <div style="width: 100%; height: 4px; background: #333; border-radius: 2px; margin-top: var(--space-sm); overflow: hidden;">
+                            <div id="progressFill" style="width: 0%; height: 100%; background: var(--msebetsi-red); transition: width 0.3s ease;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Control Panel -->
+                <div class="control-panel">
+                    <h3 class="control-title">Interactive Controls</h3>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Volume Control</label>
+                        <input type="range" class="control-input" min="0" max="100" value="50" 
+                               id="volumeControl" oninput="updateVolume(this.value)">
+                        <div style="display: flex; justify-content: space-between; margin-top: var(--space-xs);">
+                            <span style="font-size: 12px; color: var(--msebetsi-gray);">0%</span>
+                            <span style="font-size: 12px; color: var(--interactive-blue);" id="volumeValue">50%</span>
+                            <span style="font-size: 12px; color: var(--msebetsi-gray);">100%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Playback Speed</label>
+                        <div style="display: flex; gap: var(--space-sm);">
+                            <button class="action-btn action-btn-secondary" onclick="setPlaybackSpeed(0.5)" style="flex: 1;">
+                                0.5x
+                            </button>
+                            <button class="action-btn action-btn-primary" onclick="setPlaybackSpeed(1)" style="flex: 1;">
+                                1.0x
+                            </button>
+                            <button class="action-btn action-btn-secondary" onclick="setPlaybackSpeed(1.5)" style="flex: 1;">
+                                1.5x
+                            </button>
+                            <button class="action-btn action-btn-secondary" onclick="setPlaybackSpeed(2)" style="flex: 1;">
+                                2.0x
+                            </button>
+                        </div>
+                        <div style="text-align: center; margin-top: var(--space-sm);">
+                            <span style="font-size: 12px; color: var(--msebetsi-gray;">Current: </span>
+                            <span style="font-size: 12px; color: var(--interactive-green); font-weight: 600;" id="speedValue">1.0x</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Video Quality</label>
+                        <select class="control-input" id="qualitySelect" onchange="updateQuality(this.value)">
+                            <option value="auto">Auto (Recommended)</option>
+                            <option value="low">Low (480p)</option>
+                            <option value="medium" selected>Medium (720p)</option>
+                            <option value="high">High (1080p)</option>
+                            <option value="ultra">Ultra (4K)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Subtitles</label>
+                        <div style="display: flex; align-items: center; gap: var(--space-md);">
+                            <label style="display: flex; align-items: center; gap: var(--space-sm); cursor: pointer;">
+                                <input type="checkbox" id="subtitlesToggle" onchange="toggleSubtitles()">
+                                <span style="font-size: 14px; color: var(--msebetsi-gray);">Enable Subtitles</span>
+                            </label>
+                            <span style="margin-left: auto; font-size: 12px; color: var(--interactive-blue);" id="subtitleStatus">OFF</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hover Preview Demo -->
+        <section class="demo-area">
+            <h2 class="demo-title">
+                <i class="fas fa-expand-arrows-alt text-gradient"></i> Msebetsi Solutions Hover Preview System
+                <span style="font-size: 14px; color: var(--msebetsi-gray); margin-left: auto;">
+                    Mouse Events in Action
+                </span>
+            </h2>
+            
+            <div class="hover-preview-demo">
+                <!-- Movie Preview 1 -->
+                <div class="movie-preview-card" onmouseenter="showPreview(1)" onmouseleave="hidePreview(1)">
+                    <div class="movie-thumbnail" id="preview1">
+                        <div class="preview-overlay">
+                            <div class="preview-info">
+                                <div style="font-weight: 700; font-size: 16px; margin-bottom: var(--space-xs);">
+                                    Stranger Things
+                                </div>
+                                <div style="display: flex; gap: var(--space-sm); margin-bottom: var(--space-sm);">
+                                    <span style="background: var(--msebetsi-red); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;">
+                                        98% Match
+                                    </span>
+                                    <span style="color: var(--msebetsi-gray); font-size: 12px;">
+                                        4 Seasons
+                                    </span>
+                                </div>
+                                <div style="display: flex; gap: var(--space-sm);">
+                                    <button class="play-button" style="width: 40px; height: 40px; font-size: 14px;">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    <button style="background: rgba(255, 255, 255, 0.1); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-info"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="padding: var(--space-lg);">
+                        <div style="font-weight: 700; font-size: 14px; margin-bottom: var(--space-xs);">
+                            Stranger Things
+                        </div>
+                        <div style="font-size: 12px; color: var(--msebetsi-gray);">
+                            <span>2016</span> • <span>TV-14</span> • <span>4 Seasons</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Movie Preview 2 -->
+                <div class="movie-preview-card" onmouseenter="showPreview(2)" onmouseleave="hidePreview(2)">
+                    <div class="movie-thumbnail" id="preview2">
+                        <div class="preview-overlay">
+                            <div class="preview-info">
+                                <div style="font-weight: 700; font-size: 16px; margin-bottom: var(--space-xs);">
+                                    The Crown
+                                </div>
+                                <div style="display: flex; gap: var(--space-sm); margin-bottom: var(--space-sm);">
+                                    <span style="background: var(--interactive-green); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;">
+                                        96% Match
+                                    </span>
+                                    <span style="color: var(--msebetsi-gray); font-size: 12px;">
+                                        6 Seasons
+                                    </span>
+                                </div>
+                                <div style="display: flex; gap: var(--space-sm);">
+                                    <button class="play-button" style="width: 40px; height: 40px; font-size: 14px;">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    <button style="background: rgba(255, 255, 255, 0.1); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-info"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="padding: var(--space-lg);">
+                        <div style="font-weight: 700; font-size: 14px; margin-bottom: var(--space-xs);">
+                            The Crown
+                        </div>
+                        <div style="font-size: 12px; color: var(--msebetsi-gray);">
+                            <span>2016</span> • <span>TV-MA</span> • <span>6 Seasons</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Movie Preview 3 -->
+                <div class="movie-preview-card" onmouseenter="showPreview(3)" onmouseleave="hidePreview(3)">
+                    <div class="movie-thumbnail" id="preview3">
+                        <div class="preview-overlay">
+                            <div class="preview-info">
+                                <div style="font-weight: 700; font-size: 16px; margin-bottom: var(--space-xs);">
+                                    Squid Game
+                                </div>
+                                <div style="display: flex; gap: var(--space-sm); margin-bottom: var(--space-sm);">
+                                    <span style="background: var(--msebetsi-red); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;">
+                                        99% Match
+                                    </span>
+                                    <span style="color: var(--msebetsi-gray); font-size: 12px;">
+                                        1 Season
+                                    </span>
+                                </div>
+                                <div style="display: flex; gap: var(--space-sm);">
+                                    <button class="play-button" style="width: 40px; height: 40px; font-size: 14px;">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    <button style="background: rgba(255, 255, 255, 0.1); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-info"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="padding: var(--space-lg);">
+                        <div style="font-weight: 700; font-size: 14px; margin-bottom: var(--space-xs);">
+                            Squid Game
+                        </div>
+                        <div style="font-size: 12px; color: var(--msebetsi-gray);">
+                            <span>2021</span> • <span>TV-MA</span> • <span>1 Season</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: var(--space-xl); padding: var(--space-lg); background: rgba(0, 0, 0, 0.5); border-radius: 12px;">
+                <div style="display: flex; align-items: center; gap: var(--space-md); flex-wrap: wrap;">
+                    <div style="width: 40px; height: 40px; background: var(--gradient-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 700; margin-bottom: var(--space-xs); color: white;">
+                            Msebetsi Solutions Pro Tip:
+                        </div>
+                        <div style="color: var(--msebetsi-gray); font-size: 14px;">
+                            Msebetsi Solutions uses <strong>debounced hover events</strong> to prevent previews from triggering accidentally. 
+                            Hover for 500ms before showing previews for the best user experience.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Panel -->
+        <div class="stats-panel">
+            <div class="stat-item">
+                <div class="stat-value" id="clickCount">0</div>
+                <div class="stat-label">Clicks Registered</div>
+                <div style="font-size: 12px; color: var(--msebetsi-gray); margin-top: var(--space-sm);">
+                    Every click updates state
+                </div>
+            </div>
+            
+            <div class="stat-item">
+                <div class="stat-value" id="hoverCount">0</div>
+                <div class="stat-label">Hover Events</div>
+                <div style="font-size: 12px; color: var(--msebetsi-gray); margin-top: var(--space-sm);">
+                    Mouse enter/leave tracking
+                </div>
+            </div>
+            
+            <div class="stat-item">
+                <div class="stat-value" id="playTime">0s</div>
+                <div class="stat-label">Video Play Time</div>
+                <div style="font-size: 12px; color: var(--msebetsi-gray); margin-top: var(--space-sm);">
+                    onChange event monitoring
+                </div>
+            </div>
+            
+            <div class="stat-item">
+                <div class="stat-value" id="eventCount">0</div>
+                <div class="stat-label">Total Events</div>
+                <div style="font-size: 12px; color: var(--msebetsi-gray); margin-top: var(--space-sm);">
+                    All synthetic events
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="action-btn action-btn-primary" onclick="completeLesson()">
+                <i class="fas fa-check-circle"></i> Complete Lesson 6
+            </button>
+            <button class="action-btn action-btn-secondary" onclick="resetDemo()">
+                <i class="fas fa-redo"></i> Reset Interactive Demo
+            </button>
+            <button class="action-btn action-btn-secondary" onclick="downloadCodeTemplate()">
+                <i class="fas fa-download"></i> Download Code Template
+            </button>
+        </div>
+
+        <!-- Next Lesson Preview -->
+        <div style="background: linear-gradient(45deg, rgba(77, 159, 255, 0.1), rgba(70, 211, 105, 0.1)); padding: var(--space-xl); border-radius: 16px; margin-top: var(--space-xxl); border: 1px solid rgba(77, 159, 255, 0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-lg);">
+                <div>
+                    <div style="font-size: 12px; color: var(--interactive-blue); font-weight: 700; margin-bottom: var(--space-sm);">
+                        NEXT LESSON PREVIEW
+                    </div>
+                    <div style="font-size: 24px; font-weight: 900; color: white; margin-bottom: var(--space-sm);">
+                        Lesson 7: State Management & User Profiles
+                    </div>
+                    <div style="color: var(--msebetsi-gray);">
+                        Learn how Msebetsi Solutions manages complex state for millions of users
+                    </div>
+                </div>
+                <button class="action-btn action-btn-primary" onclick="previewNextLesson()" style="min-width: 200px;">
+                    <i class="fas fa-forward"></i> Preview Next Lesson
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // State management
+        let isPlaying = false;
+        let clickCount = 0;
+        let hoverCount = 0;
+        let eventCount = 0;
+        let playTime = 0;
+        let playInterval;
+        let progress = localStorage.getItem('lesson6Progress') || 50;
+        
+        // DOM Elements
+        const video = document.getElementById('demoVideo');
+        const playButton = document.getElementById('playButton');
+        const playIcon = document.getElementById('playIcon');
+        const videoStatus = document.getElementById('videoStatus');
+        const volumeValue = document.getElementById('volumeValue');
+        const speedValue = document.getElementById('speedValue');
+        const subtitleStatus = document.getElementById('subtitleStatus');
+        const progressFill = document.getElementById('progressFill');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        
+        // Stats elements
+        const clickCountEl = document.getElementById('clickCount');
+        const hoverCountEl = document.getElementById('hoverCount');
+        const playTimeEl = document.getElementById('playTime');
+        const eventCountEl = document.getElementById('eventCount');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set progress
+            progressBar.style.width = progress + '%';
+            progressText.textContent = progress + '%';
+            
+            // Initialize video
+            video.volume = 0.5;
+            video.addEventListener('timeupdate', updateProgressBar);
+            video.addEventListener('loadedmetadata', () => {
+                durationEl.textContent = formatTime(video.duration);
+            });
+            
+            // Load saved state
+            loadState();
+            
+            // Start event tracking
+            startEventTracking();
+        });
+        
+        // Event Tracking
+        function startEventTracking() {
+            // Track clicks
+            document.addEventListener('click', () => {
+                clickCount++;
+                eventCount++;
+                updateStats();
+            });
+            
+            // Track hovers
+            const previewCards = document.querySelectorAll('.movie-preview-card');
+            previewCards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    hoverCount++;
+                    eventCount++;
+                    updateStats();
+                });
+            });
+        }
+        
+        // Update stats display
+        function updateStats() {
+            clickCountEl.textContent = clickCount;
+            hoverCountEl.textContent = hoverCount;
+            eventCountEl.textContent = eventCount;
+            playTimeEl.textContent = Math.floor(playTime) + 's';
+            
+            // Save state
+            saveState();
+        }
+        
+        // Toggle play/pause
+        function togglePlay() {
+            if (isPlaying) {
+                video.pause();
+                playIcon.className = 'fas fa-play';
+                videoStatus.textContent = 'Paused';
+                clearInterval(playInterval);
+            } else {
+                video.play();
+                playIcon.className = 'fas fa-pause';
+                videoStatus.textContent = 'Playing';
+                playInterval = setInterval(() => {
+                    playTime++;
+                    updateStats();
+                }, 1000);
+            }
+            isPlaying = !isPlaying;
+            
+            // Add visual feedback
+            playButton.style.animation = 'pulse 0.3s ease';
+            setTimeout(() => {
+                playButton.style.animation = '';
+            }, 300);
+            
+            showNotification(isPlaying ? '▶️ Video Playing' : '⏸️ Video Paused', 'info');
+        }
+        
+        // Update volume
+        function updateVolume(value) {
+            video.volume = value / 100;
+            volumeValue.textContent = value + '%';
+            
+            // Visual feedback
+            const volumeControl = document.getElementById('volumeControl');
+            volumeControl.style.background = `linear-gradient(to right, var(--interactive-blue) ${value}%, #333 ${value}%)`;
+            
+            showNotification(`🔊 Volume: ${value}%`, 'info');
+        }
+        
+        // Set playback speed
+        function setPlaybackSpeed(speed) {
+            video.playbackRate = speed;
+            speedValue.textContent = speed.toFixed(1) + 'x';
+            
+            // Update button states
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                btn.classList.remove('action-btn-primary');
+                btn.classList.add('action-btn-secondary');
+            });
+            event.target.classList.add('action-btn-primary');
+            event.target.classList.remove('action-btn-secondary');
+            
+            showNotification(`⏩ Playback Speed: ${speed.toFixed(1)}x`, 'info');
+        }
+        
+        // Update video quality
+        function updateQuality(quality) {
+            showNotification(`🎬 Quality set to: ${quality.toUpperCase()}`, 'info');
+        }
+        
+        // Toggle subtitles
+        function toggleSubtitles() {
+            const toggle = document.getElementById('subtitlesToggle');
+            const isEnabled = toggle.checked;
+            subtitleStatus.textContent = isEnabled ? 'ON' : 'OFF';
+            
+            if (isEnabled) {
+                subtitleStatus.style.color = 'var(--interactive-green)';
+                showNotification('📝 Subtitles Enabled', 'success');
+            } else {
+                subtitleStatus.style.color = 'var(--interactive-blue)';
+                showNotification('📝 Subtitles Disabled', 'info');
+            }
+        }
+        
+        // Update progress bar
+        function updateProgressBar() {
+            const progress = (video.currentTime / video.duration) * 100;
+            progressFill.style.width = progress + '%';
+            currentTimeEl.textContent = formatTime(video.currentTime);
+        }
+        
+        // Format time
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+        
+        // Show hover preview
+        function showPreview(cardNumber) {
+            const preview = document.getElementById(`preview${cardNumber}`);
+            preview.style.background = 'linear-gradient(45deg, #222, #444)';
+            
+            // Add subtle animation
+            preview.style.transform = 'scale(1.02)';
+            preview.style.transition = 'all 0.3s ease';
+            
+            showNotification(`👁️ Previewing content ${cardNumber}`, 'info');
+        }
+        
+        // Hide hover preview
+        function hidePreview(cardNumber) {
+            const preview = document.getElementById(`preview${cardNumber}`);
+            preview.style.background = 'linear-gradient(45deg, #333, #444)';
+            preview.style.transform = 'scale(1)';
+        }
+        
+        // Demo click event
+        function demoClickEvent() {
+            showNotification('🎯 onClick Event Triggered! State updated successfully.', 'success');
+            
+            // Visual feedback
+            event.target.style.animation = 'pulse 0.5s ease';
+            setTimeout(() => {
+                event.target.style.animation = '';
+            }, 500);
+            
+            updateProgress(55);
+        }
+        
+        // Demo hover event
+        function demoHoverEvent() {
+            // Add glow effect
+            event.target.style.boxShadow = '0 0 30px rgba(77, 159, 255, 0.4)';
+            setTimeout(() => {
+                event.target.style.boxShadow = '';
+            }, 1000);
+            
+            showNotification('🖱️ onMouseEnter Event Detected', 'info');
+        }
+        
+        // Start interactive tour
+        function startInteractiveTour() {
+            showNotification('🚀 Starting Interactive Tour! Try clicking and hovering on elements.', 'success');
+            
+            // Highlight interactive elements
+            const interactiveElements = document.querySelectorAll('.interactive-card, .play-button, .control-input');
+            interactiveElements.forEach(el => {
+                el.style.outline = '2px solid var(--interactive-blue)';
+                setTimeout(() => {
+                    el.style.outline = '';
+                }, 2000);
+            });
+            
+            updateProgress(60);
+        }
+        
+        // Show code examples
+        function showCodeExamples() {
+            showNotification('💻 Loading React event handling examples...', 'info');
+            
+            // Simulate loading
+            setTimeout(() => {
+                const codeBlocks = document.querySelectorAll('.event-code-block');
+                codeBlocks.forEach(block => {
+                    block.style.borderColor = 'var(--interactive-blue)';
+                    block.style.boxShadow = '0 0 20px rgba(77, 159, 255, 0.2)';
+                });
+                
+                setTimeout(() => {
+                    codeBlocks.forEach(block => {
+                        block.style.borderColor = '';
+                        block.style.boxShadow = '';
+                    });
+                }, 3000);
+                
+                showNotification('📚 Code examples ready! Check the interactive cards.', 'success');
+            }, 1000);
+            
+            updateProgress(65);
+        }
+        
+        // Complete lesson
+        function completeLesson() {
+            updateProgress(100);
+            showNotification('🎉 Lesson 6 Completed! You\'ve mastered Msebetsi Solutions event handling!', 'success');
+            
+            // Confetti effect
+            createConfetti();
+            
+            // Save completion
+            localStorage.setItem('lesson6Completed', 'true');
+            
+            setTimeout(() => {
+                alert('Congratulations! You\'ve completed Lesson 6: Interactive Msebetsi Solutions Features.\n\nKey skills mastered:\n• onClick event handling\n• onChange real-time updates\n• Synthetic hover events\n• Msebetsi Solutions player controls\n• Interactive preview system');
+            }, 1000);
+        }
+        
+        // Reset demo
+        function resetDemo() {
+            // Reset video
+            video.pause();
+            video.currentTime = 0;
+            video.volume = 0.5;
+            video.playbackRate = 1;
+            
+            // Reset UI
+            isPlaying = false;
+            playIcon.className = 'fas fa-play';
+            videoStatus.textContent = 'Paused';
+            volumeValue.textContent = '50%';
+            speedValue.textContent = '1.0x';
+            progressFill.style.width = '0%';
+            currentTimeEl.textContent = '0:00';
+            
+            // Reset controls
+            document.getElementById('volumeControl').value = 50;
+            document.getElementById('qualitySelect').value = 'medium';
+            document.getElementById('subtitlesToggle').checked = false;
+            subtitleStatus.textContent = 'OFF';
+            
+            // Reset stats
+            clickCount = 0;
+            hoverCount = 0;
+            eventCount = 0;
+            playTime = 0;
+            updateStats();
+            
+            showNotification('🔄 Demo Reset Successfully', 'info');
+        }
+        
+        // Download code template
+        function downloadCodeTemplate() {
+            const code = `// Msebetsi Solutions Interactive Components - Event Handling Template
+import React, { useState } from 'react';
+
+export const MsebetsiPlayer = () => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(50);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handlePlayClick = () => {
+    setIsPlaying(!isPlaying);
+    console.log('Play/Pause clicked:', !isPlaying);
+  };
+
+  const handleVolumeChange = (event) => {
+    const newVolume = event.target.value;
+    setVolume(newVolume);
+    console.log('Volume updated:', newVolume);
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    console.log('Hover preview activated');
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    console.log('Hover preview deactivated');
+  };
+
+  return (
+    <div className="msebetsi-player">
+      {/* Your interactive components here */}
+    </div>
+  );
+};
+
+// Msebetsi Solutions Hover Preview Component
+export const HoverPreview = ({ title, matchPercentage }) => {
+  const [showPreview, setShowPreview] = useState(false);
+
+  const handleMouseEnter = () => {
+    setTimeout(() => setShowPreview(true), 500); // Msebetsi Solutions uses debouncing
+  };
+
+  const handleMouseLeave = () => {
+    setShowPreview(false);
+  };
+
+  return (
+    <div 
+      className="movie-card"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {showPreview && <PreviewOverlay title={title} />}
+    </div>
+  );
+};`;
+
+            const blob = new Blob([code], { type: 'text/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'MsebetsiSolutionsEventHandling.jsx';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('📥 Code Template Downloaded!', 'success');
+            updateProgress(75);
+        }
+        
+        // Preview next lesson
+        function previewNextLesson() {
+            showNotification('🔜 Coming soon: State Management & User Profiles', 'info');
+            
+            // Show preview modal
+            setTimeout(() => {
+                alert('NEXT LESSON PREVIEW:\n\nLesson 7: State Management & User Profiles\n\n• React Context API\n• Redux for Msebetsi Solutions-scale apps\n• User profile switching\n• Watch history synchronization\n• Personalized recommendations\n\nGet ready to handle millions of user states!');
+            }, 500);
+        }
+        
+        // Update progress
+        function updateProgress(newProgress) {
+            if (newProgress > progress) {
+                progress = newProgress;
+                progressBar.style.width = progress + '%';
+                progressText.textContent = progress + '%';
+                localStorage.setItem('lesson6Progress', progress);
+                
+                if (progress >= 100) {
+                    showNotification('🏆 Module 2 Progress: 100% Complete!', 'success');
+                }
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: ${type === 'success' ? '#46D369' : type === 'info' ? '#4D9FFF' : '#FFD700'};
+                color: ${type === 'info' ? 'white' : '#141414'};
+                padding: 16px 24px;
+                border-radius: 12px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                max-width: 300px;
+                z-index: 9999;
+                animation: slideIn 0.3s ease;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                border-left: 5px solid ${type === 'success' ? '#2E7D32' : type === 'info' ? '#1E88E5' : '#F57C00'};
+            `;
+            
+            const icon = type === 'success' ? '✅' : type === 'info' ? 'ℹ️' : '⚠️';
+            notification.innerHTML = `
+                <div style="font-size: 20px;">${icon}</div>
+                <div>${message}</div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        
+        // Create confetti effect
+        function createConfetti() {
+            const colors = ['#E50914', '#4D9FFF', '#46D369', '#FFD700', '#9C27B0'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: 10px;
+                    height: 10px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                    top: -20px;
+                    left: ${Math.random() * 100}vw;
+                    animation: fall ${Math.random() * 3 + 2}s linear forwards;
+                    z-index: 9998;
+                `;
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 5000);
+            }
+            
+            // Add CSS for animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fall {
+                    to {
+                        transform: translateY(100vh) rotate(${Math.random() * 360}deg);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Save state
+        function saveState() {
+            const state = {
+                clickCount,
+                hoverCount,
+                eventCount,
+                playTime,
+                progress
+            };
+            localStorage.setItem('msebetsiInteractiveState', JSON.stringify(state));
+        }
+        
+        // Load state
+        function loadState() {
+            const saved = localStorage.getItem('msebetsiInteractiveState');
+            if (saved) {
+                try {
+                    const state = JSON.parse(saved);
+                    clickCount = state.clickCount || 0;
+                    hoverCount = state.hoverCount || 0;
+                    eventCount = state.eventCount || 0;
+                    playTime = state.playTime || 0;
+                    updateStats();
+                } catch (e) {
+                    console.error('Failed to load state:', e);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

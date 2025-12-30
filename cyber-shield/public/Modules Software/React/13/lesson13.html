@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix Sports Watch Party | useContext & Real-time State</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Netflix+Sans:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Netflix + PlayStation Theme */
+            --netflix-red: #E50914;
+            --playstation-blue: #003087;
+            --playstation-gold: #FFB800;
+            --sports-green: #00CC66;
+            --live-red: #FF3333;
+            --chat-blue: #0084FF;
+            
+            /* Theme Variables */
+            --bg-primary: #141414;
+            --bg-secondary: #2D2D2D;
+            --text-primary: #FFFFFF;
+            --text-secondary: #8C8C8C;
+            --border-color: #404040;
+            
+            /* Gradients */
+            --gradient-sports: linear-gradient(135deg, #E50914 0%, #003087 100%);
+            --gradient-chat: linear-gradient(135deg, #0084FF 0%, #00CC66 100%);
+            --gradient-live: linear-gradient(135deg, #FF3333 0%, #FF6B6B 100%);
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-xxl: 48px;
+            --space-xxxl: 64px;
+            
+            /* Shadows */
+            --shadow-xl: 0 16px 64px rgba(0,0,0,0.4);
+            --shadow-chat: 0 8px 32px rgba(0,132,255,0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Netflix Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Sports Watch Party Layout */
+        .watch-party-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: var(--space-lg);
+            min-height: 100vh;
+            padding: var(--space-md);
+        }
+
+        /* Main Sports Stream */
+        .main-stream-section {
+            position: relative;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .stream-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: var(--space-lg);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .live-indicator {
+            background: var(--live-red);
+            color: white;
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .stream-metadata {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xl);
+            color: white;
+        }
+
+        .stream-quality {
+            background: rgba(255,255,255,0.2);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .stream-container {
+            width: 100%;
+            height: 70vh;
+            background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stream-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://images.unsplash.com/photo-1579952363873-27f1bddcd8e5?w=1600&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.7;
+        }
+
+        /* Sports Stats Overlay */
+        .stats-overlay {
+            position: absolute;
+            bottom: 80px;
+            left: 0;
+            right: 0;
+            padding: var(--space-lg);
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            display: flex;
+            justify-content: space-between;
+            color: white;
+        }
+
+        .team-stats {
+            display: flex;
+            gap: var(--space-xxl);
+        }
+
+        .team {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .team-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-sm);
+            font-weight: 900;
+            font-size: 1.5rem;
+        }
+
+        .score {
+            font-size: 3rem;
+            font-weight: 900;
+            margin: var(--space-sm) 0;
+        }
+
+        .game-info {
+            text-align: center;
+        }
+
+        .period {
+            font-size: 1.2rem;
+            color: var(--playstation-gold);
+            margin-bottom: var(--space-sm);
+        }
+
+        .game-clock {
+            font-size: 2rem;
+            font-weight: 900;
+            font-family: monospace;
+        }
+
+        /* Watch Party Chat */
+        .watch-party-chat {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+        }
+
+        .chat-header {
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--border-color);
+            background: var(--gradient-sports);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .chat-header h2 {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .participants-count {
+            background: rgba(255,255,255,0.2);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: var(--space-lg);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+        }
+
+        .message {
+            display: flex;
+            gap: var(--space-md);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-chat);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            background: var(--bg-primary);
+            padding: var(--space-md);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            max-width: 280px;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--space-xs);
+            font-size: 0.9rem;
+        }
+
+        .message-sender {
+            font-weight: 700;
+            color: var(--chat-blue);
+        }
+
+        .message-time {
+            color: var(--text-secondary);
+        }
+
+        .reaction-buttons {
+            display: flex;
+            gap: var(--space-xs);
+            margin-top: var(--space-sm);
+        }
+
+        .reaction-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .reaction-btn:hover {
+            background: var(--chat-blue);
+            color: white;
+        }
+
+        .chat-input-container {
+            padding: var(--space-lg);
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        .chat-input {
+            display: flex;
+            gap: var(--space-md);
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: var(--space-md);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        .send-btn {
+            background: var(--gradient-sports);
+            color: white;
+            border: none;
+            padding: var(--space-md) var(--space-lg);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        /* Reactions Overlay */
+        .reactions-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: var(--space-sm);
+            z-index: 20;
+        }
+
+        .reaction-burst {
+            position: absolute;
+            pointer-events: none;
+            animation: burst 1s ease-out forwards;
+        }
+
+        @keyframes burst {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* PlayStation Features */
+        .ps-features {
+            background: var(--playstation-blue);
+            border-radius: 16px;
+            padding: var(--space-lg);
+            margin-top: var(--space-lg);
+            border: 2px solid var(--playstation-gold);
+        }
+
+        .ps-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-lg);
+            color: white;
+        }
+
+        .ps-header i {
+            color: var(--playstation-gold);
+        }
+
+        .ps-controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+        }
+
+        .ps-button {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: var(--space-md);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-xs);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ps-button:hover {
+            background: rgba(255,184,0,0.2);
+            border-color: var(--playstation-gold);
+        }
+
+        .ps-button i {
+            font-size: 1.5rem;
+        }
+
+        /* Sports Cards Grid */
+        .sports-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
+            padding: var(--space-lg);
+            background: var(--bg-secondary);
+            border-radius: 16px;
+        }
+
+        .sport-card {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .sport-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--netflix-red);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .sport-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .sport-info {
+            padding: var(--space-md);
+        }
+
+        .sport-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: var(--space-xs);
+        }
+
+        .sport-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Context Education Panel */
+        .education-panel {
+            background: rgba(20,20,20,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: var(--space-xxl);
+            margin-top: var(--space-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        .education-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+        }
+
+        .education-title {
+            font-size: 2rem;
+            font-weight: 900;
+            background: var(--gradient-sports);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .context-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: var(--space-xxl);
+            margin: var(--space-xxl) 0;
+        }
+
+        .context-node {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--gradient-chat);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            position: relative;
+        }
+
+        .context-node::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 2px solid var(--chat-blue);
+            border-radius: 50%;
+            animation: pulse 3s infinite;
+        }
+
+        .context-arrow {
+            font-size: 2rem;
+            color: var(--playstation-gold);
+        }
+
+        /* Real-time Features */
+        .real-time-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin-top: var(--space-xl);
+        }
+
+        .feature-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: var(--space-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-sports);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-md);
+            font-size: 1.5rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .watch-party-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sports-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .watch-party-container {
+                padding: var(--space-sm);
+            }
+            
+            .team-stats {
+                gap: var(--space-lg);
+            }
+            
+            .score {
+                font-size: 2rem;
+            }
+            
+            .sports-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .context-diagram {
+                flex-direction: column;
+                gap: var(--space-xl);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Netflix Sports Watch Party -->
+    <div class="watch-party-container">
+        <!-- Main Stream Section -->
+        <div class="main-stream-section">
+            <div class="stream-header">
+                <div class="stream-metadata">
+                    <div class="live-indicator">
+                        <i class="fas fa-circle"></i> LIVE
+                    </div>
+                    <div>F1 MONACO GRAND PRIX</div>
+                    <div class="stream-quality">4K HDR • 5.1 SURROUND</div>
+                </div>
+                <div style="color: white; display: flex; align-items: center; gap: var(--space-md);">
+                    <i class="fas fa-users"></i>
+                    <span id="viewerCount">12,458</span> watching
+                </div>
+            </div>
+
+            <div class="stream-container" id="mainStream">
+                <!-- Reactions will appear here -->
+            </div>
+
+            <div class="stats-overlay">
+                <div class="team-stats">
+                    <div class="team">
+                        <div class="team-logo" style="background: #DC0000; color: white;">R</div>
+                        <div style="font-weight: 700;">RED BULL</div>
+                        <div class="score" id="team1Score">1</div>
+                    </div>
+                    <div class="team">
+                        <div class="team-logo" style="background: #FF8700; color: black;">M</div>
+                        <div style="font-weight: 700;">MCLAREN</div>
+                        <div class="score" id="team2Score">0</div>
+                    </div>
+                </div>
+                
+                <div class="game-info">
+                    <div class="period">LAP 42/78</div>
+                    <div class="game-clock" id="gameClock">01:23:45</div>
+                    <div style="color: var(--text-secondary); margin-top: var(--space-sm);">MONACO GP</div>
+                </div>
+            </div>
+
+            <!-- Reactions Overlay -->
+            <div class="reactions-overlay">
+                <button class="reaction-btn" onclick="sendReaction('🔥')">🔥 Fire Play</button>
+                <button class="reaction-btn" onclick="sendReaction('😲')">😲 Wow</button>
+                <button class="reaction-btn" onclick="sendReaction('👏')">👏 Great Move</button>
+                <button class="reaction-btn" onclick="sendReaction('💔')">💔 Heartbreak</button>
+            </div>
+        </div>
+
+        <!-- Watch Party Chat -->
+        <div class="watch-party-chat">
+            <div class="chat-header">
+                <h2>
+                    <i class="fas fa-comments"></i>
+                    WATCH PARTY CHAT
+                    <span class="participants-count" id="participantCount">48</span>
+                </h2>
+                <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-top: var(--space-sm);">
+                    Real-time chat with sports fans worldwide
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <!-- Chat messages will be loaded here -->
+            </div>
+
+            <div class="chat-input-container">
+                <div class="chat-input">
+                    <input type="text" 
+                           id="chatInput" 
+                           placeholder="Type your message... (Press Enter to send)"
+                           onkeypress="handleChatInput(event)">
+                    <button class="send-btn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                </div>
+                <div style="margin-top: var(--space-sm); display: flex; gap: var(--space-sm);">
+                    <button class="reaction-btn" onclick="quickReaction('🏎️')">🏎️</button>
+                    <button class="reaction-btn" onclick="quickReaction('🏆')">🏆</button>
+                    <button class="reaction-btn" onclick="quickReaction('⚽')">⚽</button>
+                    <button class="reaction-btn" onclick="quickReaction('🏀')">🏀</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PlayStation Integration Features -->
+        <div class="ps-features">
+            <div class="ps-header">
+                <i class="fab fa-playstation"></i>
+                <h3>PlayStation Integration</h3>
+            </div>
+            <div class="ps-controls">
+                <div class="ps-button" onclick="psFeature('sharePlay')">
+                    <i class="fas fa-share-alt"></i>
+                    <span>Share Play</span>
+                </div>
+                <div class="ps-button" onclick="psFeature('pictureInPicture')">
+                    <i class="fas fa-layer-group"></i>
+                    <span>Multi-view</span>
+                </div>
+                <div class="ps-button" onclick="psFeature('controller')">
+                    <i class="fas fa-gamepad"></i>
+                    <span>Controller Chat</span>
+                </div>
+                <div class="ps-button" onclick="psFeature('trophies')">
+                    <i class="fas fa-trophy"></i>
+                    <span>Watch Trophies</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Sports Cards -->
+        <div class="sports-cards">
+            <div class="sport-card" onclick="switchStream('f1')">
+                <img src="https://images.unsplash.com/photo-1579952363873-27f1bddcd8e5?w=400&q=80" alt="F1 Racing">
+                <div class="sport-info">
+                    <div class="sport-title">F1 MONACO GP</div>
+                    <div class="sport-meta">
+                        <span>🏎️ LIVE</span>
+                        <span>3.2M viewers</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sport-card" onclick="switchStream('nba')">
+                <img src="https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&q=80" alt="NBA">
+                <div class="sport-info">
+                    <div class="sport-title">NBA FINALS</div>
+                    <div class="sport-meta">
+                        <span>🏀 Q4 08:45</span>
+                        <span>2.1M viewers</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sport-card" onclick="switchStream('soccer')">
+                <img src="https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=400&q=80" alt="Soccer">
+                <div class="sport-info">
+                    <div class="sport-title">UEFA FINAL</div>
+                    <div class="sport-meta">
+                        <span>⚽ 2nd Half</span>
+                        <span>4.5M viewers</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sport-card" onclick="switchStream('tennis')">
+                <img src="https://images.unsplash.com/photo-1622279457486-62dcc4a431f7?w=400&q=80" alt="Tennis">
+                <div class="sport-info">
+                    <div class="sport-title">WIMBLEDON</div>
+                    <div class="sport-meta">
+                        <span>🎾 SET 3</span>
+                        <span>1.8M viewers</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sport-card" onclick="switchStream('baseball')">
+                <img src="https://images.unsplash.com/photo-1549638441-b787d2e11f14?w=400&q=80" alt="Baseball">
+                <div class="sport-info">
+                    <div class="sport-title">WORLD SERIES</div>
+                    <div class="sport-meta">
+                        <span>⚾ 7th INNING</span>
+                        <span>1.5M viewers</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sport-card" onclick="switchStream('golf')">
+                <img src="https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=400&q=80" alt="Golf">
+                <div class="sport-info">
+                    <div class="sport-title">MASTERS</div>
+                    <div class="sport-meta">
+                        <span>⛳ FINAL ROUND</span>
+                        <span>890K viewers</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Context Education Panel -->
+        <div class="education-panel">
+            <div class="education-header">
+                <h2 class="education-title">Lesson 13: useContext & Real-time Watch Party</h2>
+                <div style="color: var(--playstation-gold);">
+                    <i class="fas fa-graduation-cap"></i> Netflix Engineering
+                </div>
+            </div>
+
+            <p style="color: var(--text-secondary); margin-bottom: var(--space-xl); line-height: 1.8;">
+                Learn how Netflix uses React Context API to manage real-time watch party state across millions 
+                of concurrent viewers. This system handles live chat, reactions, synchronized playback, 
+                and PlayStation integration.
+            </p>
+
+            <div class="context-diagram">
+                <div class="context-node">
+                    <i class="fas fa-users"></i>
+                    <span>UserContext</span>
+                </div>
+                <div class="context-arrow">→</div>
+                <div class="context-node">
+                    <i class="fas fa-comments"></i>
+                    <span>ChatContext</span>
+                </div>
+                <div class="context-arrow">→</div>
+                <div class="context-node">
+                    <i class="fas fa-broadcast-tower"></i>
+                    <span>StreamContext</span>
+                </div>
+            </div>
+
+            <div class="real-time-features">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Real-time Updates</h3>
+                    <p style="color: var(--text-secondary); margin-top: var(--space-sm);">
+                        WebSocket connections for instant chat and reaction propagation
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-sync"></i>
+                    </div>
+                    <h3>Synchronized Playback</h3>
+                    <p style="color: var(--text-secondary); margin-top: var(--space-sm);">
+                        All users watch the same moment, regardless of join time
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fab fa-playstation"></i>
+                    </div>
+                    <h3>PlayStation Integration</h3>
+                    <p style="color: var(--text-secondary); margin-top: var(--space-sm);">
+                        Controller-based chat, Share Play, and trophy system
+                    </p>
+                </div>
+            </div>
+
+            <!-- Code Example -->
+            <div style="background: #0d1117; border-radius: 12px; padding: var(--space-xl); margin-top: var(--space-xl);">
+                <div style="color: var(--playstation-gold); margin-bottom: var(--space-md); font-weight: 700;">
+                    <i class="fas fa-code"></i> WatchPartyContext.js
+                </div>
+                <pre style="color: #c9d1d9; font-family: 'SF Mono', monospace; font-size: 0.9rem; overflow-x: auto;">
+// Netflix Watch Party Context
+import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { useWebSocket } from './useWebSocket';
+
+const WatchPartyContext = createContext();
+
+const initialState = {
+    participants: [],
+    messages: [],
+    reactions: [],
+    currentStream: 'f1',
+    playbackTime: 0,
+    isBuffering: false,
+    userReactions: new Map(),
+    ps5Connected: false
+};
+
+function watchPartyReducer(state, action) {
+    switch (action.type) {
+        case 'ADD_PARTICIPANT':
+            return {
+                ...state,
+                participants: [...state.participants, action.payload]
+            };
+        case 'ADD_MESSAGE':
+            return {
+                ...state,
+                messages: [...state.messages.slice(-99), action.payload]
+            };
+        case 'ADD_REACTION':
+            return {
+                ...state,
+                reactions: [...state.reactions, action.payload],
+                userReactions: new Map(state.userReactions)
+                    .set(action.payload.userId, action.payload.type)
+            };
+        case 'SYNC_PLAYBACK':
+            return {
+                ...state,
+                playbackTime: action.payload.time,
+                isBuffering: false
+            };
+        case 'PS5_CONNECTED':
+            return {
+                ...state,
+                ps5Connected: true,
+                participants: [...state.participants, {
+                    id: 'ps5_user',
+                    name: 'PlayStation User',
+                    avatar: 'PS5'
+                }]
+            };
+        default:
+            return state;
+    }
+}
+
+export function WatchPartyProvider({ children, streamId }) {
+    const [state, dispatch] = useReducer(watchPartyReducer, initialState);
+    const { connect, send, subscribe } = useWebSocket();
+
+    useEffect(() => {
+        // Connect to watch party WebSocket
+        connect(`wss://watchparty.netflix.com/${streamId}`);
+        
+        // Subscribe to real-time events
+        subscribe('chat-message', (data) => {
+            dispatch({ type: 'ADD_MESSAGE', payload: data });
+        });
+        
+        subscribe('reaction', (data) => {
+            dispatch({ type: 'ADD_REACTION', payload: data });
+        });
+        
+        subscribe('playback-sync', (data) => {
+            dispatch({ type: 'SYNC_PLAYBACK', payload: data });
+        });
+
+        // PlayStation DualSense integration
+        if ('getGamepads' in navigator) {
+            navigator.getGamepads();
+            dispatch({ type: 'PS5_CONNECTED' });
+        }
+    }, [streamId]);
+
+    const sendMessage = (text) => {
+        const message = {
+            id: Date.now(),
+            text,
+            userId: 'current_user',
+            timestamp: new Date().toISOString()
+        };
+        send('chat-message', message);
+        dispatch({ type: 'ADD_MESSAGE', payload: message });
+    };
+
+    const sendReaction = (type) => {
+        const reaction = {
+            type,
+            userId: 'current_user',
+            timestamp: Date.now()
+        };
+        send('reaction', reaction);
+        dispatch({ type: 'ADD_REACTION', payload: reaction });
+    };
+
+    const value = {
+        state,
+        sendMessage,
+        sendReaction,
+        syncPlayback: (time) => dispatch({ 
+            type: 'SYNC_PLAYBACK', 
+            payload: { time } 
+        })
+    };
+
+    return (
+        <WatchPartyContext.Provider value={value}>
+            {children}
+        </WatchPartyContext.Provider>
+    );
+}
+
+export const useWatchParty = () => {
+    const context = useContext(WatchPartyContext);
+    if (!context) {
+        throw new Error('useWatchParty must be used within WatchPartyProvider');
+    }
+    return context;
+};</pre>
+            </div>
+
+            <div style="text-align: center; margin-top: var(--space-xl);">
+                <button onclick="completeLesson()" 
+                        style="background: var(--gradient-sports); 
+                               color: white; 
+                               border: none; 
+                               padding: var(--space-lg) var(--space-xxl); 
+                               border-radius: 8px; 
+                               font-size: 1.1rem; 
+                               font-weight: 700; 
+                               cursor: pointer;">
+                    <i class="fas fa-check-circle"></i> Complete Lesson 13
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== NETFLIX WATCH PARTY ENGINE =====
+        class NetflixWatchParty {
+            constructor() {
+                this.participants = 48;
+                this.messages = [];
+                this.reactions = [];
+                this.currentGameTime = 4234; // seconds
+                this.score1 = 1;
+                this.score2 = 0;
+                
+                this.init();
+                this.loadSampleMessages();
+                this.startGameClock();
+                this.simulateLiveChat();
+            }
+
+            init() {
+                this.updateViewerCount();
+                this.updateParticipantCount();
+            }
+
+            loadSampleMessages() {
+                const sampleMessages = [
+                    { id: 1, sender: 'F1_Fanatic', text: 'What an incredible overtake by Verstappen! 🏎️', time: '2:30', avatar: 'FF' },
+                    { id: 2, sender: 'Netflix_Engineer', text: 'Watch Party system handling 50K messages/sec! 🚀', time: '2:45', avatar: 'NE' },
+                    { id: 3, sender: 'PlayStation_User', text: 'Playing on PS5 - the 4K stream is stunning! 🎮', time: '3:00', avatar: 'PS' },
+                    { id: 4, sender: 'Sports_Analyst', text: 'Red Bull strategy paying off in the pits 👏', time: '3:15', avatar: 'SA' },
+                    { id: 5, sender: 'Racing_Legend', text: 'Best Monaco GP Ive seen in years! 💯', time: '3:30', avatar: 'RL' }
+                ];
+
+                this.messages = sampleMessages;
+                this.renderChat();
+            }
+
+            renderChat() {
+                const chatContainer = document.getElementById('chatMessages');
+                chatContainer.innerHTML = this.messages.map(msg => `
+                    <div class="message">
+                        <div class="message-avatar" style="background: linear-gradient(135deg, ${this.getAvatarColor(msg.avatar)}, #666);">
+                            ${msg.avatar}
+                        </div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-sender">${msg.sender}</span>
+                                <span class="message-time">${msg.time}</span>
+                            </div>
+                            <div>${msg.text}</div>
+                            <div class="reaction-buttons">
+                                <button class="reaction-btn" onclick="likeMessage(${msg.id})">👍</button>
+                                <button class="reaction-btn" onclick="loveMessage(${msg.id})">❤️</button>
+                                <button class="reaction-btn" onclick="replyToMessage(${msg.id})">↩️</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+
+            getAvatarColor(avatar) {
+                const colors = {
+                    'FF': '#DC0000',
+                    'NE': '#E50914',
+                    'PS': '#003087',
+                    'SA': '#00CC66',
+                    'RL': '#FF8700'
+                };
+                return colors[avatar] || '#0084FF';
+            }
+
+            addMessage(sender, text) {
+                const message = {
+                    id: Date.now(),
+                    sender,
+                    text,
+                    time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                    avatar: sender.substring(0, 2).toUpperCase()
+                };
+                
+                this.messages.push(message);
+                if (this.messages.length > 100) this.messages.shift();
+                this.renderChat();
+                
+                // Simulate responses
+                this.simulateResponse(text);
+            }
+
+            simulateResponse(userMessage) {
+                const responses = {
+                    'verstappen': "Verstappen's Red Bull is dominating this season!",
+                    'ps5': "PS5 integration with Netflix Watch Party is revolutionary!",
+                    'netflix': "Netflix Sports streaming in 4K HDR is amazing!",
+                    'overtake': "That was an incredible overtaking move!",
+                    'pit': "Pit strategy is everything in Monaco!"
+                };
+
+                const lowerMsg = userMessage.toLowerCase();
+                let response = null;
+
+                for (const [key, reply] of Object.entries(responses)) {
+                    if (lowerMsg.includes(key)) {
+                        response = reply;
+                        break;
+                    }
+                }
+
+                if (response) {
+                    setTimeout(() => {
+                        this.addMessage('Sports_Bot', response + ' 🤖');
+                    }, 1500);
+                }
+            }
+
+            sendReaction(type) {
+                const reaction = {
+                    type,
+                    x: Math.random() * 80 + 10,
+                    y: Math.random() * 60 + 20
+                };
+                
+                this.reactions.push(reaction);
+                this.showReactionOnStream(type, reaction.x, reaction.y);
+                
+                // Add to chat
+                this.addMessage('You', `Reacted: ${type}`);
+                
+                // Broadcast to other users
+                this.broadcastReaction(type);
+            }
+
+            showReactionOnStream(type, x, y) {
+                const stream = document.getElementById('mainStream');
+                const reaction = document.createElement('div');
+                reaction.className = 'reaction-burst';
+                reaction.innerHTML = `<span style="font-size: 2rem;">${type}</span>`;
+                reaction.style.position = 'absolute';
+                reaction.style.left = `${x}%`;
+                reaction.style.top = `${y}%`;
+                reaction.style.color = this.getReactionColor(type);
+                
+                stream.appendChild(reaction);
+                
+                setTimeout(() => reaction.remove(), 1000);
+            }
+
+            getReactionColor(type) {
+                const colors = {
+                    '🔥': '#FF6B00',
+                    '😲': '#FFD700',
+                    '👏': '#00CC66',
+                    '💔': '#FF3333',
+                    '🏎️': '#DC0000',
+                    '🏆': '#FFB800'
+                };
+                return colors[type] || '#FFFFFF';
+            }
+
+            broadcastReaction(type) {
+                // Simulate other users reacting
+                const reactions = ['🔥', '👏', '😲', '🏎️', '💔'];
+                setTimeout(() => {
+                    const randomReaction = reactions[Math.floor(Math.random() * reactions.length)];
+                    const x = Math.random() * 80 + 10;
+                    const y = Math.random() * 60 + 20;
+                    this.showReactionOnStream(randomReaction, x, y);
+                    
+                    // Update viewer count
+                    this.participants += Math.floor(Math.random() * 5);
+                    this.updateParticipantCount();
+                }, 500);
+            }
+
+            startGameClock() {
+                setInterval(() => {
+                    this.currentGameTime++;
+                    const hours = Math.floor(this.currentGameTime / 3600);
+                    const minutes = Math.floor((this.currentGameTime % 3600) / 60);
+                    const seconds = this.currentGameTime % 60;
+                    
+                    document.getElementById('gameClock').textContent = 
+                        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    // Random score updates
+                    if (Math.random() > 0.95) {
+                        this.score1++;
+                        document.getElementById('team1Score').textContent = this.score1;
+                        this.sendReaction('🔥');
+                    }
+                    if (Math.random() > 0.97) {
+                        this.score2++;
+                        document.getElementById('team2Score').textContent = this.score2;
+                        this.sendReaction('😲');
+                    }
+                }, 1000);
+            }
+
+            updateViewerCount() {
+                setInterval(() => {
+                    const viewerElement = document.getElementById('viewerCount');
+                    const current = parseInt(viewerElement.textContent.replace(',', ''));
+                    const change = Math.floor((Math.random() - 0.3) * 100);
+                    const newCount = Math.max(12000, current + change);
+                    viewerElement.textContent = newCount.toLocaleString();
+                }, 3000);
+            }
+
+            updateParticipantCount() {
+                document.getElementById('participantCount').textContent = this.participants;
+            }
+
+            simulateLiveChat() {
+                const sportsComments = [
+                    "That pit stop was lightning fast! ⚡",
+                    "McLaren catching up! This is getting exciting!",
+                    "4K HDR stream looks incredible on my PS5 🎮",
+                    "Netflix Watch Party feature is a game changer!",
+                    "Safety car coming out? 🤔",
+                    "Verstappen extending his lead 🏎️",
+                    "The audio in 5.1 surround is immersive!",
+                    "Reactions are synced perfectly across all users 👏",
+                    "PlayStation controller chat is so convenient",
+                    "This is the future of sports broadcasting! 🚀"
+                ];
+
+                const users = ['F1_Expert', 'Sports_Fan', 'Tech_Enthusiast', 'PlayStation_Gamer', 'Netflix_User'];
+
+                setInterval(() => {
+                    if (Math.random() > 0.7) {
+                        const user = users[Math.floor(Math.random() * users.length)];
+                        const comment = sportsComments[Math.floor(Math.random() * sportsComments.length)];
+                        this.addMessage(user, comment);
+                    }
+                }, 5000);
+            }
+
+            switchStream(sport) {
+                const streams = {
+                    'f1': { title: 'F1 MONACO GP', viewers: '3.2M', color: '#DC0000' },
+                    'nba': { title: 'NBA FINALS', viewers: '2.1M', color: '#FF6B00' },
+                    'soccer': { title: 'UEFA FINAL', viewers: '4.5M', color: '#00CC66' },
+                    'tennis': { title: 'WIMBLEDON', viewers: '1.8M', color: '#0084FF' },
+                    'baseball': { title: 'WORLD SERIES', viewers: '1.5M', color: '#FF3333' },
+                    'golf': { title: 'MASTERS', viewers: '890K', color: '#00CC66' }
+                };
+
+                const stream = streams[sport];
+                document.querySelector('.stream-metadata div:nth-child(2)').textContent = stream.title;
+                document.getElementById('viewerCount').textContent = stream.viewers;
+                
+                this.addMessage('System', `Switched to ${stream.title} stream`);
+                
+                // Change stream background
+                const backgrounds = {
+                    'f1': 'https://images.unsplash.com/photo-1579952363873-27f1bddcd8e5?w=1600&q=80',
+                    'nba': 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=1600&q=80',
+                    'soccer': 'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=1600&q=80',
+                    'tennis': 'https://images.unsplash.com/photo-1622279457486-62dcc4a431f7?w=1600&q=80',
+                    'baseball': 'https://images.unsplash.com/photo-1549638441-b787d2e11f14?w=1600&q=80',
+                    'golf': 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=1600&q=80'
+                };
+
+                document.querySelector('.stream-container::before').style.backgroundImage = 
+                    `url('${backgrounds[sport]}')`;
+            }
+        }
+
+        // Initialize Watch Party
+        const watchParty = new NetflixWatchParty();
+
+        // Global Functions
+        function handleChatInput(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (text) {
+                watchParty.addMessage('You', text);
+                input.value = '';
+            }
+        }
+
+        function sendReaction(type) {
+            watchParty.sendReaction(type);
+        }
+
+        function quickReaction(emoji) {
+            sendReaction(emoji);
+        }
+
+        function psFeature(feature) {
+            const messages = {
+                'sharePlay': 'Share Play activated - sharing stream with friends!',
+                'pictureInPicture': 'Multi-view enabled - watching 4 streams at once!',
+                'controller': 'DualSense controller chat activated!',
+                'trophies': 'Watch Party trophy unlocked! 🏆'
+            };
+            
+            watchParty.addMessage('PlayStation', messages[feature]);
+            
+            if (feature === 'sharePlay') {
+                watchParty.participants += 5;
+                watchParty.updateParticipantCount();
+            }
+        }
+
+        function switchStream(sport) {
+            watchParty.switchStream(sport);
+        }
+
+        function likeMessage(messageId) {
+            watchParty.addMessage('System', `Liked message #${messageId}`);
+        }
+
+        function loveMessage(messageId) {
+            watchParty.addMessage('System', `Loved message #${messageId}`);
+        }
+
+        function replyToMessage(messageId) {
+            document.getElementById('chatInput').focus();
+            document.getElementById('chatInput').placeholder = 'Replying to message...';
+        }
+
+        function completeLesson() {
+            watchParty.addMessage('Netflix Engineering', 
+                'Lesson 13 Completed! useContext for Watch Party mastered! 🎓');
+            
+            // Show completion animation
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    watchParty.sendReaction('🎓');
+                }, i * 100);
+            }
+            
+            alert('🎉 Lesson 13 Complete!\n\nYou have mastered:\n• Real-time useContext state management\n• Watch Party chat system\n• PlayStation integration\n• Live sports streaming with reactions');
+        }
+
+        // Add some initial reactions
+        setTimeout(() => watchParty.sendReaction('🏎️'), 1000);
+        setTimeout(() => watchParty.sendReaction('🔥'), 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 1: React Introduction | Msebetsi Bootcamp</title>
+    <style>
+        /* Netflix-inspired Theme */
+        :root {
+            --netflix-red: #E50914;
+            --netflix-red-dark: #B20710;
+            --white: #FFFFFF;
+            --black: #141414;
+            --gray-light: #F5F5F5;
+            --gray-medium: #B3B3B3;
+            --gray-dark: #2D2D2D;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: var(--white);
+            color: var(--black);
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(to bottom, var(--white) 0%, #f8f8f8 100%);
+            border-bottom: 4px solid var(--netflix-red);
+            padding: 25px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .msebetsi-logo {
+            height: 50px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+        
+        .netflix-logo {
+            color: var(--netflix-red);
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        
+        .progress-container {
+            width: 300px;
+            background: var(--gray-light);
+            border-radius: 20px;
+            height: 12px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            width: 7%;
+            height: 100%;
+            background: var(--netflix-red);
+            border-radius: 20px;
+            transition: width 0.5s ease;
+        }
+        
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 25px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border-left: 5px solid var(--netflix-red);
+        }
+        
+        .scenario-card {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+            border: 2px solid var(--netflix-red);
+        }
+        
+        /* Typography */
+        h1 {
+            color: var(--netflix-red);
+            font-size: 42px;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+        
+        h2 {
+            color: var(--black);
+            font-size: 28px;
+            margin: 25px 0 15px;
+            font-weight: 700;
+        }
+        
+        h3 {
+            color: var(--netflix-red);
+            font-size: 22px;
+            margin: 20px 0 10px;
+            font-weight: 600;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            font-size: 17px;
+            color: var(--black);
+        }
+        
+        /* Lists */
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 20px;
+        }
+        
+        li {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        /* Buttons - Netflix Style */
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background: var(--netflix-red);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin: 10px 10px 10px 0;
+            box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3);
+        }
+        
+        .btn:hover {
+            background: var(--netflix-red-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(229, 9, 20, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--netflix-red);
+            border: 2px solid var(--netflix-red);
+            box-shadow: none;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(229, 9, 20, 0.1);
+        }
+        
+        /* Tech Lead Message */
+        .tech-lead-message {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 30px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--netflix-red) 0%, #ff6b6b 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        
+        /* Interactive Elements */
+        .interactive-box {
+            background: var(--gray-light);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 25px 0;
+            border: 2px dashed var(--gray-medium);
+        }
+        
+        .code-snippet {
+            background: var(--black);
+            color: #00ff88;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-size: 15px;
+        }
+        
+        /* Quiz Styling */
+        .quiz-container {
+            background: #f8f9ff;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            border: 2px solid #e0e7ff;
+        }
+        
+        .quiz-question {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--black);
+        }
+        
+        .quiz-option {
+            display: block;
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .quiz-option:hover {
+            border-color: var(--netflix-red);
+            background: #fff5f5;
+        }
+        
+        .quiz-option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .quiz-option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 50px;
+            background: var(--gray-light);
+            border-top: 3px solid var(--netflix-red);
+            color: var(--gray-dark);
+        }
+        
+        .badge {
+            display: inline-block;
+            background: var(--netflix-red);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 5px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .progress-container {
+                width: 100%;
+            }
+            
+            h1 {
+                font-size: 32px;
+            }
+            
+            .tech-lead-message {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-container">
+            <div class="avatar" style="width: 50px; height: 50px; font-size: 24px;">MS</div>
+            <div>
+                <div class="netflix-logo">MSEBETSI SOLUTIONS</div>
+                <div style="color: var(--gray-dark); font-weight: 600;">UI Development Bootcamp</div>
+            </div>
+        </div>
+        
+        <div>
+            <div style="margin-bottom: 8px; font-weight: 600; color: var(--black);">Lesson 1 of 15</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>🎬 Welcome to React & The Msebetsi Solutions  Watch Party Project</h1>
+        
+        <!-- Tech Lead Introduction -->
+        <div class="tech-lead-message">
+            <div class="avatar">TL</div>
+            <div>
+                <h3>👨‍💻 Msebetsi Solutions Tech Lead:</h3>
+                <p>"Welcome, developers! I'm Tshepho Nkoe, your technical lead at Msebetsi Solutions. Today, we're starting an exciting journey together. A Client has hired our team to build their next big feature: <strong>Interactive Watch Party</strong>. Over the next 15 lessons, you'll learn React by building this real-world feature."</p>
+                <p><strong>Your Mission:</strong> Transform from beginner to Msebetsi-ready React developer.</p>
+            </div>
+        </div>
+
+        <!-- Why React Matters -->
+        <div class="card">
+            <h2>🚀 Why Learn React in 2026?</h2>
+            <p>React is not just another library - it's the backbone of modern web applications used by:</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 15px; margin: 20px 0;">
+                <div class="badge">Netflix</div>
+                <div class="badge">Facebook</div>
+                <div class="badge">Instagram</div>
+                <div class="badge">WhatsApp Web</div>
+                <div class="badge">Airbnb</div>
+                <div class="badge">Uber</div>
+            </div>
+            
+            <h3>Key Benefits:</h3>
+            <ul>
+                <li><strong>Component-Based Architecture:</strong> Build reusable UI pieces (like LEGO blocks)</li>
+                <li><strong>Virtual DOM:</strong> Lightning-fast updates without page reloads</li>
+                <li><strong>Huge Community:</strong> 15+ million developers worldwide</li>
+                <li><strong>High Salary:</strong> React developers earn 40% more than average frontend roles</li>
+                <li><strong>Future-Proof:</strong> Backed by Meta (Facebook) with continuous updates</li>
+            </ul>
+        </div>
+
+        <!-- Netflix Watch Party Scenario -->
+        <div class="card scenario-card">
+            <h2>🎥 The Msebetsi Solutions Watch Party Project</h2>
+            <p><strong>Client Brief</strong> "Our users want to watch movies together remotely, with synchronized playback, live chat, and reactions. We need a seamless, real-time experience that works across all devices."</p>
+            
+            <h3>📋 Msebetsi Solutions Project Kickoff:</h3>
+            <div class="interactive-box">
+                <h4>Project Requirements:</h4>
+                <ol>
+                    <li><strong>Real-time synchronized video playback</strong> across multiple users</li>
+                    <li><strong>Live chat component</strong> with emoji reactions</li>
+                    <li><strong>User presence indicators</strong> (who's watching)</li>
+                    <li><strong>Invite system</strong> with shareable links</li>
+                    <li><strong>Performance:</strong> Must handle 50+ simultaneous viewers</li>
+                </ol>
+                
+                <div style="background: #e9ffe9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <h4>🏆 Your Learning Path:</h4>
+                    <p>Each React concept you learn will directly apply to building this feature!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- What You'll Build -->
+        <div class="card">
+            <h2>🔧 What You'll Build in This Course</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 25px 0;">
+                <div style="padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                    <h3>🎯 Lesson 2-5: Foundation</h3>
+                    <ul>
+                        <li>React Components</li>
+                        <li>JSX Syntax</li>
+                        <li>Props & State</li>
+                        <li>UI Styling</li>
+                    </ul>
+                </div>
+                <div style="padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                    <h3>⚡ Lesson 6-10: Core Features</h3>
+                    <ul>
+                        <li>Video Player Component</li>
+                        <li>Live Chat Interface</li>
+                        <li>User Authentication</li>
+                        <li>Real-time Updates</li>
+                    </ul>
+                </div>
+                <div style="padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                    <h3>🚀 Lesson 11-15: Advanced</h3>
+                    <ul>
+                        <li>WebSocket Integration</li>
+                        <li>Performance Optimization</li>
+                        <li>Testing & Deployment</li>
+                        <li>Final Presentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Quiz -->
+        <div class="quiz-container">
+            <h2>🧠 Quick Knowledge Check</h2>
+            <p>Let's see what you already know about React:</p>
+            
+            <div class="quiz-question">1. What problem does React's Virtual DOM solve?</div>
+            <div class="quiz-option" onclick="checkAnswer(this, 'correct')">Minimizes direct DOM manipulation for better performance</div>
+            <div class="quiz-option" onclick="checkAnswer(this, 'incorrect')">Increases page loading speed by 200%</div>
+            <div class="quiz-option" onclick="checkAnswer(this, 'incorrect')">Replaces HTML entirely with JavaScript</div>
+            
+            <div class="quiz-question" style="margin-top: 30px;">2. Why choose React for Watch Party feature?</div>
+            <div class="quiz-option" onclick="checkAnswer(this, 'incorrect')">Because it's the cheapest option</div>
+            <div class="quiz-option" onclick="checkAnswer(this, 'correct')">Real-time updates and reusable components</div>
+            <div class="quiz-option" onclick="checkAnswer(this, 'incorrect')">React works without internet connection</div>
+            
+            <div id="quizResult" style="margin-top: 25px; padding: 15px; border-radius: 8px; display: none;"></div>
+        </div>
+
+        <!-- Your First Task -->
+        <div class="card" style="background: linear-gradient(135deg, #fff0f0 0%, #ffffff 100%);">
+            <h2>📝 Your First Msebetsi Task</h2>
+            <p><strong>Assignment:</strong> Create a simple React component that displays a movie title and play button</p>
+            
+            <div class="code-snippet">
+// This is what you'll learn to build in Lesson 2<br>
+function MovieCard({ title, year }) {<br>
+&nbsp;&nbsp;return (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;div className="movie-card"&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;h3&gt;{title} ({year})&lt;/h3&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;button className="Msebetsi-play-btn"&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;▶ Play Now<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/button&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/div&gt;<br>
+&nbsp;&nbsp;);<br>
+}
+            </div>
+            
+            <div style="text-align: center; margin-top: 25px;">
+                <button class="btn" onclick="startCourse()">🚀 Start Lesson 2</button>
+                <button class="btn btn-secondary" onclick="downloadMaterials()">📥 Download Course Materials</button>
+            </div>
+        </div>
+
+        <!-- Course Navigation -->
+        <div style="display: flex; justify-content: space-between; margin-top: 40px; padding-top: 25px; border-top: 2px solid var(--gray-light);">
+            <div></div> <!-- Empty for spacing -->
+            <div>
+                <button class="btn" onclick="nextLesson()">Next: Lesson 2 →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div style="margin-bottom: 20px;">
+            <div style="font-size: 24px; font-weight: 800; color: var(--netflix-red); margin-bottom: 10px;">MSEBETSI SOLUTIONS</div>
+            <div style="color: var(--gray-dark);">Official React Training Partner for Msebetsi Solutions Pty Ltd</div>
+        </div>
+        <div style="font-size: 14px; color: var(--gray-medium);">
+            © 2026 Msebetsi Solutions. All rights reserved. | 
+            <a href="#" style="color: var(--netflix-red); text-decoration: none;">Privacy Policy</a> | 
+            <a href="#" style="color: var(--netflix-red); text-decoration: none;">Contact Support</a>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize progress bar
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('progressBar').style.width = '7%';
+        });
+
+        // Quiz functionality
+        function checkAnswer(element, result) {
+            const options = element.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+                opt.style.pointerEvents = 'none';
+            });
+            
+            element.classList.add(result);
+            
+            const resultDiv = document.getElementById('quizResult');
+            resultDiv.style.display = 'block';
+            
+            if (result === 'correct') {
+                resultDiv.innerHTML = '✅ Correct! Great job. React\'s Virtual DOM minimizes expensive DOM operations.';
+                resultDiv.style.background = '#d4edda';
+                resultDiv.style.color = '#155724';
+                resultDiv.style.border = '1px solid #c3e6cb';
+            } else {
+                resultDiv.innerHTML = '❌ Not quite right. The Virtual DOM helps with performance by minimizing direct DOM manipulation.';
+                resultDiv.style.background = '#f8d7da';
+                resultDiv.style.color = '#721c24';
+                resultDiv.style.border = '1px solid #f5c6cb';
+            }
+        }
+
+        // Navigation functions
+        function startCourse() {
+            alert('Welcome to the course! Lesson 2 will teach you how to set up React with Vite.');
+            // In a real implementation, this would navigate to lesson2.html
+            document.getElementById('progressBar').style.width = '14%';
+        }
+
+        function downloadMaterials() {
+            alert('Course materials downloaded! Check your downloads folder.');
+            // Create a fake download
+            const content = 'React Course Materials\n\nLesson 1: Introduction\nLesson 2: Setup & Components\n...';
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'msebetsi-react-course-materials.txt';
+            a.click();
+        }
+
+        function nextLesson() {
+            // In full implementation, this would be lesson2.html
+            alert('Moving to Lesson 2: Setting up React with Vite and creating your first component.');
+            document.getElementById('progressBar').style.width = '14%';
+            
+            // Scroll to top with smooth animation
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            
+            // Show next lesson content (simulated)
+            document.querySelector('h1').innerHTML = '🎬 Lesson 2: React Setup with Vite';
+            document.querySelector('.tech-lead-message p').innerHTML = '"Great! Now let\'s set up your development environment. We use Vite at Msebetsi for its blazing-fast performance."';
+        }
+
+        // Add some interactive effects
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('mousedown', function() {
+                this.style.transform = 'translateY(0px)';
+            });
+            
+            button.addEventListener('mouseup', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+        });
+    </script>
+</body>
+</html>

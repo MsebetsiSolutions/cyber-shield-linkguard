@@ -1,0 +1,2045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 12: React Router & Msebetsi Solutions Navigation | Msebetsi Solutions Engineering</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ===== MSEBETSI SOLUTIONS NAVIGATION DESIGN SYSTEM ===== */
+        :root {
+            /* Msebetsi Solutions Colors */
+            --msebetsi-red: #E50914;
+            --msebetsi-red-dark: #B20710;
+            --msebetsi-black: #141414;
+            --msebetsi-dark-gray: #2D2D2D;
+            --msebetsi-gray: #737373;
+            --msebetsi-light-gray: #E5E5E5;
+            --msebetsi-white: #FFFFFF;
+            --msebetsi-bg: #0F0F0F;
+            
+            /* Router Colors */
+            --router-active: #E50914;
+            --router-hover: #FF6B6B;
+            --router-inactive: #737373;
+            --router-bg: rgba(20,20,20,0.95);
+            --router-border: rgba(255,255,255,0.1);
+            
+            /* Category Colors */
+            --category-home: #E50914;
+            --category-browse: #00FF88;
+            --category-watch: #00B4D8;
+            --category-mylist: #8A2BE2;
+            --category-sports: #FFD700;
+            --category-games: #FF6B9D;
+            
+            /* Gradients */
+            --gradient-router: linear-gradient(135deg, #E50914 0%, #8A2BE2 100%);
+            --gradient-nav: linear-gradient(180deg, 
+                rgba(20,20,20,0.98) 0%, 
+                rgba(20,20,20,0.95) 50%, 
+                rgba(20,20,20,0.9) 100%);
+            --gradient-ps5: linear-gradient(135deg, #006FCD 0%, #2A9D8F 100%);
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-xxl: 48px;
+            --space-xxxl: 64px;
+            
+            /* Shadows */
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.9);
+            --shadow-xl: 0 16px 64px rgba(0,0,0,0.95);
+            --shadow-router: 0 0 40px rgba(229,9,20,0.5);
+            --shadow-glow: 0 0 60px rgba(0,180,216,0.6);
+            
+            /* Transitions */
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            
+            /* Border Radius */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-round: 50%;
+            
+            /* Z-index */
+            --z-nav: 1000;
+            --z-sidebar: 999;
+            --z-modal: 1002;
+            --z-overlay: 1001;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--msebetsi-bg);
+            color: var(--msebetsi-white);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(229,9,20,0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 20%, rgba(0,180,216,0.1) 0%, transparent 40%);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--msebetsi-dark-gray);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--msebetsi-red);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--router-hover);
+        }
+        
+        /* Msebetsi Solutions Router Header */
+        .router-header {
+            background: var(--gradient-nav);
+            padding: var(--space-xl) var(--space-xxl);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: var(--z-nav);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--router-border);
+            transition: all var(--transition-normal);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .router-header.scrolled {
+            background: rgba(20,20,20,0.98);
+            padding: var(--space-lg) var(--space-xxl);
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xl);
+        }
+        
+        .msebetsi-logo {
+            color: var(--msebetsi-red);
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            text-decoration: none;
+            transition: all var(--transition-normal);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .msebetsi-logo:hover {
+            text-shadow: 0 0 30px rgba(229,9,20,0.7);
+            transform: scale(1.05);
+        }
+        
+        .router-badge {
+            background: var(--gradient-router);
+            color: white;
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+        }
+        
+        /* Main Navigation */
+        .main-nav {
+            display: flex;
+            gap: var(--space-lg);
+            align-items: center;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: var(--space-lg);
+            list-style: none;
+        }
+        
+        .nav-link {
+            color: var(--router-inactive);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-normal);
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .nav-link:hover {
+            color: var(--msebetsi-white);
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .nav-link.active {
+            color: var(--router-active);
+            background: rgba(229,9,20,0.1);
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background: var(--router-active);
+            border-radius: var(--radius-round);
+            animation: navPulse 2s infinite;
+        }
+        
+        @keyframes navPulse {
+            0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+            50% { opacity: 0.5; transform: translateX(-50%) scale(1.2); }
+        }
+        
+        .nav-icon {
+            font-size: 1.2rem;
+        }
+        
+        /* User Controls */
+        .user-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-input {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--router-border);
+            border-radius: 20px;
+            padding: var(--space-sm) var(--space-lg);
+            padding-left: var(--space-xl);
+            color: var(--msebetsi-white);
+            font-family: 'Inter';
+            font-size: 0.9rem;
+            width: 200px;
+            transition: all var(--transition-normal);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--router-active);
+            width: 300px;
+            box-shadow: var(--shadow-router);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: var(--space-md);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--router-inactive);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-router);
+            border-radius: var(--radius-round);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            border: 2px solid transparent;
+        }
+        
+        .user-avatar:hover {
+            transform: scale(1.1);
+            border-color: var(--router-active);
+            box-shadow: var(--shadow-router);
+        }
+        
+        /* Sidebar Navigation (PlayStation Style) */
+        .sidebar-nav {
+            position: fixed;
+            left: var(--space-xl);
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(20,20,20,0.95);
+            border-radius: var(--radius-xl);
+            padding: var(--space-lg);
+            z-index: var(--z-sidebar);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--router-border);
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+        }
+        
+        .sidebar-item {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.05);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--router-inactive);
+            font-size: 1.5rem;
+            text-decoration: none;
+            transition: all var(--transition-bounce);
+            position: relative;
+            border: 2px solid transparent;
+        }
+        
+        .sidebar-item:hover {
+            background: rgba(229,9,20,0.2);
+            color: var(--msebetsi-white);
+            transform: translateX(10px) scale(1.1);
+            border-color: var(--router-active);
+        }
+        
+        .sidebar-item.active {
+            background: var(--gradient-router);
+            color: white;
+            transform: translateX(10px) scale(1.1);
+            box-shadow: var(--shadow-router);
+        }
+        
+        .sidebar-label {
+            position: absolute;
+            left: calc(100% + var(--space-md));
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(20,20,20,0.95);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-normal);
+            border: 1px solid var(--router-border);
+        }
+        
+        .sidebar-item:hover .sidebar-label {
+            opacity: 1;
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            min-height: 100vh;
+            padding: 140px var(--space-xxxl) var(--space-xxxl);
+            max-width: 1600px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        /* Route Content */
+        .route-content {
+            animation: routeEnter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes routeEnter {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Home Page */
+        .home-page {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9));
+            border-radius: var(--radius-xl);
+            padding: var(--space-xxxl);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--router-border);
+        }
+        
+        .home-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1600&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.2;
+            z-index: -1;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: var(--space-xxxl);
+        }
+        
+        .page-title {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: var(--space-lg);
+            background: linear-gradient(45deg, var(--category-home), var(--category-sports));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleShimmer 3s infinite alternate;
+        }
+        
+        @keyframes titleShimmer {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        
+        .page-subtitle {
+            font-size: 1.5rem;
+            color: var(--msebetsi-light-gray);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-xl);
+            margin-top: var(--space-xxl);
+        }
+        
+        .category-card {
+            background: rgba(30,30,30,0.9);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            transition: all var(--transition-normal);
+            border: 2px solid transparent;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--category-home);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .category-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-router);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-lg);
+            font-size: 2rem;
+        }
+        
+        .category-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            color: white;
+        }
+        
+        .category-description {
+            color: var(--msebetsi-gray);
+            line-height: 1.6;
+        }
+        
+        /* Browse Page */
+        .browse-page {
+            background: rgba(20,20,20,0.95);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xxxl);
+            border: 1px solid var(--router-border);
+        }
+        
+        .browse-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--space-xl);
+            margin-top: var(--space-xxl);
+        }
+        
+        .content-card {
+            background: var(--msebetsi-dark-gray);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all var(--transition-normal);
+            border: 2px solid transparent;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .content-card:hover {
+            transform: scale(1.05) rotate(2deg);
+            border-color: var(--category-browse);
+            box-shadow: var(--shadow-xl);
+            z-index: 10;
+        }
+        
+        .content-poster {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            transition: transform var(--transition-normal);
+        }
+        
+        .content-card:hover .content-poster {
+            transform: scale(1.1);
+        }
+        
+        .content-info {
+            padding: var(--space-lg);
+        }
+        
+        .content-title {
+            font-weight: 800;
+            margin-bottom: var(--space-xs);
+            color: white;
+            font-size: 1.1rem;
+        }
+        
+        .content-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--msebetsi-gray);
+            font-size: 0.9rem;
+        }
+        
+        .watch-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: var(--msebetsi-red);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: var(--radius-round);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all var(--transition-normal);
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        .content-card:hover .watch-button {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Watch Page */
+        .watch-page {
+            background: rgba(0,0,0,0.95);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xxxl);
+            border: 1px solid var(--router-border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .watch-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://images.unsplash.com/photo-1574267432553-4b4628081c31?w=1600&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.3;
+            z-index: -1;
+        }
+        
+        .player-container {
+            background: #000;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin: var(--space-xxl) 0;
+            aspect-ratio: 16/9;
+            position: relative;
+            border: 3px solid var(--router-border);
+        }
+        
+        .player-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: var(--space-xxl);
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+        }
+        
+        .player-container:hover .player-overlay {
+            opacity: 1;
+        }
+        
+        .player-title {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: var(--space-md);
+            color: white;
+        }
+        
+        .player-controls {
+            display: flex;
+            gap: var(--space-lg);
+            align-items: center;
+            margin-top: var(--space-xl);
+        }
+        
+        .control-button {
+            width: 60px;
+            height: 60px;
+            background: rgba(0,0,0,0.7);
+            border: 2px solid var(--category-watch);
+            border-radius: var(--radius-round);
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-normal);
+        }
+        
+        .control-button:hover {
+            background: var(--category-watch);
+            transform: scale(1.1);
+            box-shadow: var(--shadow-glow);
+        }
+        
+        /* My List Page */
+        .mylist-page {
+            background: rgba(20,20,20,0.95);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xxxl);
+            border: 1px solid var(--router-border);
+        }
+        
+        .list-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--space-xl);
+            margin-top: var(--space-xxl);
+        }
+        
+        .list-item {
+            background: var(--msebetsi-dark-gray);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            transition: all var(--transition-normal);
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+            cursor: pointer;
+        }
+        
+        .list-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--category-mylist);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .list-rank {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--category-mylist);
+            min-width: 60px;
+        }
+        
+        .list-content {
+            flex: 1;
+        }
+        
+        .list-title {
+            font-weight: 800;
+            margin-bottom: var(--space-xs);
+            color: white;
+        }
+        
+        .list-meta {
+            color: var(--msebetsi-gray);
+            font-size: 0.9rem;
+        }
+        
+        .remove-button {
+            background: rgba(229,9,20,0.2);
+            color: var(--msebetsi-red);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-round);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .remove-button:hover {
+            background: var(--msebetsi-red);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        /* Nested Routes Demo */
+        .nested-routes {
+            background: rgba(20,20,20,0.95);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xxxl);
+            margin-top: var(--space-xxxl);
+            border: 1px solid var(--router-border);
+        }
+        
+        .nested-header {
+            text-align: center;
+            margin-bottom: var(--space-xxl);
+        }
+        
+        .nested-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: var(--space-lg);
+            color: white;
+        }
+        
+        .nested-tabs {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-xxl);
+        }
+        
+        .nested-tab {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-md);
+            color: var(--msebetsi-light-gray);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+        
+        .nested-tab:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .nested-tab.active {
+            background: var(--gradient-router);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-router);
+        }
+        
+        .nested-content {
+            background: rgba(0,0,0,0.5);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xxl);
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--router-border);
+        }
+        
+        /* Route Indicators */
+        .route-indicators {
+            position: fixed;
+            bottom: var(--space-xl);
+            right: var(--space-xl);
+            display: flex;
+            gap: var(--space-sm);
+            z-index: 100;
+        }
+        
+        .route-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: var(--radius-round);
+            background: var(--router-inactive);
+            transition: all var(--transition-normal);
+        }
+        
+        .route-indicator.active {
+            background: var(--router-active);
+            transform: scale(1.2);
+            box-shadow: 0 0 20px var(--router-active);
+        }
+        
+        /* Route Transition Overlay */
+        .route-transition {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--msebetsi-black);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-normal);
+        }
+        
+        .route-transition.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .transition-content {
+            text-align: center;
+        }
+        
+        .transition-icon {
+            font-size: 4rem;
+            color: var(--router-active);
+            margin-bottom: var(--space-lg);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .transition-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        /* Router Stats */
+        .router-stats {
+            position: fixed;
+            top: 120px;
+            right: var(--space-xl);
+            background: rgba(20,20,20,0.95);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--router-border);
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .stat-label {
+            color: var(--msebetsi-gray);
+            font-size: 0.9rem;
+        }
+        
+        .stat-value {
+            color: white;
+            font-weight: 700;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: var(--space-md) var(--space-xl);
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: 'Inter';
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+        
+        .btn-primary {
+            background: var(--msebetsi-red);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--msebetsi-red-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-router);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid var(--router-border);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 120px;
+            right: 20px;
+            background: rgba(20,20,20,0.98);
+            border-left: 4px solid var(--router-active);
+            padding: var(--space-lg) var(--space-xl);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-xl);
+            z-index: var(--z-modal);
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--router-border);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .main-content {
+                padding: 140px var(--space-xl) var(--space-xxxl);
+            }
+            
+            .page-title {
+                font-size: 3rem;
+            }
+            
+            .browse-grid,
+            .list-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+            
+            .sidebar-nav {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .router-header {
+                padding: var(--space-lg);
+            }
+            
+            .header-container {
+                flex-direction: column;
+                gap: var(--space-lg);
+            }
+            
+            .main-nav {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .nav-links {
+                gap: var(--space-sm);
+            }
+            
+            .nav-link span:not(.nav-icon) {
+                display: none;
+            }
+            
+            .search-input {
+                width: 150px;
+            }
+            
+            .search-input:focus {
+                width: 200px;
+            }
+            
+            .main-content {
+                padding: 180px var(--space-lg) var(--space-xxl);
+            }
+            
+            .page-title {
+                font-size: 2.5rem;
+            }
+            
+            .category-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .browse-grid,
+            .list-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+            
+            .router-stats {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .page-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .browse-grid,
+            .list-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Route Transition Overlay -->
+    <div class="route-transition" id="routeTransition">
+        <div class="transition-content">
+            <div class="transition-icon">
+                <i class="fas fa-sync-alt"></i>
+            </div>
+            <div class="transition-text" id="transitionText">Navigating...</div>
+        </div>
+    </div>
+
+    <!-- Msebetsi Solutions Router Header -->
+    <header class="router-header" id="mainHeader">
+        <div class="header-container">
+            <div class="logo-section">
+                <a href="#/" class="msebetsi-logo">
+                    <i class="fas fa-play-circle"></i>
+                    <span>MSEBETSI</span>
+                </a>
+                <div class="router-badge">
+                    <i class="fas fa-route"></i> React Router v6
+                </div>
+            </div>
+
+            <!-- Main Navigation -->
+            <nav class="main-nav">
+                <ul class="nav-links">
+                    <li>
+                        <a href="#/" class="nav-link" id="navHome">
+                            <i class="fas fa-home nav-icon"></i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#/browse" class="nav-link" id="navBrowse">
+                            <i class="fas fa-compass nav-icon"></i>
+                            <span>Browse</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#/watch/1" class="nav-link" id="navWatch">
+                            <i class="fas fa-play-circle nav-icon"></i>
+                            <span>Watch</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#/mylist" class="nav-link" id="navMyList">
+                            <i class="fas fa-list nav-icon"></i>
+                            <span>My List</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- User Controls -->
+            <div class="user-controls">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search movies, shows..." 
+                           id="searchInput">
+                </div>
+                <div class="user-avatar" onclick="showUserMenu()">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- PlayStation Style Sidebar -->
+    <nav class="sidebar-nav">
+        <a href="#/" class="sidebar-item" id="sidebarHome" title="Home">
+            <i class="fas fa-home"></i>
+            <span class="sidebar-label">Home</span>
+        </a>
+        <a href="#/browse" class="sidebar-item" id="sidebarBrowse" title="Browse">
+            <i class="fas fa-compass"></i>
+            <span class="sidebar-label">Browse</span>
+        </a>
+        <a href="#/watch/1" class="sidebar-item" id="sidebarWatch" title="Watch">
+            <i class="fas fa-play-circle"></i>
+            <span class="sidebar-label">Watch</span>
+        </a>
+        <a href="#/mylist" class="sidebar-item" id="sidebarMyList" title="My List">
+            <i class="fas fa-list"></i>
+            <span class="sidebar-label">My List</span>
+        </a>
+        <a href="#/sports" class="sidebar-item" id="sidebarSports" title="Sports">
+            <i class="fas fa-football-ball"></i>
+            <span class="sidebar-label">Sports</span>
+        </a>
+        <a href="#/games" class="sidebar-item" id="sidebarGames" title="Games">
+            <i class="fas fa-gamepad"></i>
+            <span class="sidebar-label">Games</span>
+        </a>
+    </nav>
+
+    <!-- Router Stats -->
+    <div class="router-stats">
+        <div class="stat-item">
+            <span class="stat-label">Current Route:</span>
+            <span class="stat-value" id="currentRoute">/</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Navigation Count:</span>
+            <span class="stat-value" id="navCount">0</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Router Status:</span>
+            <span class="stat-value" id="routerStatus">Active</span>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="main-content" id="mainContent">
+        <!-- Route content will be dynamically rendered here -->
+        <div id="routeContent">
+            <!-- Default home page will load here -->
+        </div>
+    </main>
+
+    <!-- Route Indicators -->
+    <div class="route-indicators">
+        <div class="route-indicator active" id="indicator1"></div>
+        <div class="route-indicator" id="indicator2"></div>
+        <div class="route-indicator" id="indicator3"></div>
+        <div class="route-indicator" id="indicator4"></div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // ===== MSEBETSI SOLUTIONS ROUTER ENGINE =====
+        class MsebetsiRouter {
+            constructor() {
+                // Router Configuration
+                this.config = {
+                    routes: {
+                        '/': 'Home',
+                        '/browse': 'Browse',
+                        '/watch/:id': 'Watch',
+                        '/mylist': 'My List',
+                        '/sports': 'Sports',
+                        '/games': 'Games'
+                    },
+                    transitionSpeed: 300,
+                    enableTransitions: true,
+                    navigationCount: 0
+                };
+                
+                // Application State
+                this.state = {
+                    currentRoute: '/',
+                    previousRoute: null,
+                    isTransitioning: false,
+                    userData: {
+                        name: 'Tshepho Nkoe',
+                        avatar: 'TN'
+                    },
+                    watchHistory: [],
+                    myList: this.generateMyList(),
+                    browseContent: this.generateBrowseContent()
+                };
+                
+                // Initialize
+                this.init();
+            }
+            
+            generateMyList() {
+                return [
+                    { id: 1, title: 'Stranger Things', type: 'TV Show', added: '2 days ago', rank: 1 },
+                    { id: 2, title: 'The Crown', type: 'TV Show', added: '1 week ago', rank: 2 },
+                    { id: 3, title: 'Wednesday', type: 'TV Show', added: '3 days ago', rank: 3 },
+                    { id: 4, title: 'Squid Game', type: 'TV Show', added: '2 weeks ago', rank: 4 },
+                    { id: 5, title: 'Bird Box', type: 'Movie', added: '1 month ago', rank: 5 },
+                    { id: 6, title: 'Red Notice', type: 'Movie', added: '3 weeks ago', rank: 6 }
+                ];
+            }
+            
+            generateBrowseContent() {
+                return [
+                    { id: 1, title: 'Stranger Things', year: 2022, rating: '95%', duration: '4 Seasons', type: 'TV Show' },
+                    { id: 2, title: 'The Crown', year: 2022, rating: '92%', duration: '6 Seasons', type: 'TV Show' },
+                    { id: 3, title: 'Wednesday', year: 2022, rating: '89%', duration: '1 Season', type: 'TV Show' },
+                    { id: 4, title: 'Squid Game', year: 2021, rating: '94%', duration: '1 Season', type: 'TV Show' },
+                    { id: 5, title: 'Bird Box', year: 2018, rating: '87%', duration: '2h 4m', type: 'Movie' },
+                    { id: 6, title: 'Red Notice', year: 2021, rating: '92%', duration: '1h 58m', type: 'Movie' },
+                    { id: 7, title: 'Glass Onion', year: 2022, rating: '93%', duration: '2h 19m', type: 'Movie' },
+                    { id: 8, title: 'All Quiet', year: 2022, rating: '90%', duration: '2h 28m', type: 'Movie' }
+                ];
+            }
+            
+            init() {
+                // Setup hash change listener
+                window.addEventListener('hashchange', () => this.handleRouteChange());
+                
+                // Setup initial route
+                this.handleRouteChange();
+                
+                // Setup scroll handler for header
+                window.addEventListener('scroll', this.handleScroll.bind(this));
+                
+                // Setup search functionality
+                this.setupSearch();
+                
+                // Update router stats
+                this.updateRouterStats();
+                
+                // Show welcome notification
+                setTimeout(() => {
+                    this.showNotification('🚀 Msebetsi Solutions Router v6 Initialized!', 'info');
+                    this.showNotification('🕹️ PlayStation-style navigation activated!', 'info', 3000);
+                }, 1000);
+            }
+            
+            // ===== ROUTE HANDLING =====
+            handleRouteChange() {
+                const hash = window.location.hash.substring(1) || '/';
+                const route = this.parseRoute(hash);
+                
+                if (this.state.currentRoute !== route) {
+                    this.navigateTo(route);
+                }
+            }
+            
+            parseRoute(hash) {
+                // Parse route and extract params
+                if (hash.startsWith('/watch/')) {
+                    const id = hash.split('/')[2];
+                    return `/watch/${id}`;
+                }
+                return hash;
+            }
+            
+            navigateTo(route) {
+                if (this.state.isTransitioning || route === this.state.currentRoute) {
+                    return;
+                }
+                
+                // Start transition
+                this.startTransition(route);
+                
+                // Update navigation count
+                this.config.navigationCount++;
+                
+                // Update state
+                this.state.previousRoute = this.state.currentRoute;
+                this.state.currentRoute = route;
+                
+                // Render new route
+                setTimeout(() => {
+                    this.renderRoute(route);
+                    this.updateNavigation();
+                    this.updateRouterStats();
+                    this.endTransition();
+                }, this.config.transitionSpeed);
+            }
+            
+            startTransition(route) {
+                if (this.config.enableTransitions) {
+                    this.state.isTransitioning = true;
+                    const transition = document.getElementById('routeTransition');
+                    const transitionText = document.getElementById('transitionText');
+                    
+                    const routeNames = {
+                        '/': 'Loading Home...',
+                        '/browse': 'Loading Browse...',
+                        '/watch/:id': 'Loading Player...',
+                        '/mylist': 'Loading My List...',
+                        '/sports': 'Loading Sports...',
+                        '/games': 'Loading Games...'
+                    };
+                    
+                    transitionText.textContent = routeNames[route] || 'Navigating...';
+                    transition.classList.add('active');
+                }
+            }
+            
+            endTransition() {
+                if (this.config.enableTransitions) {
+                    setTimeout(() => {
+                        const transition = document.getElementById('routeTransition');
+                        transition.classList.remove('active');
+                        this.state.isTransitioning = false;
+                    }, this.config.transitionSpeed);
+                }
+            }
+            
+            renderRoute(route) {
+                const content = document.getElementById('routeContent');
+                
+                switch(route) {
+                    case '/':
+                        content.innerHTML = this.renderHomePage();
+                        break;
+                    case '/browse':
+                        content.innerHTML = this.renderBrowsePage();
+                        break;
+                    case '/watch/1':
+                    case '/watch/2':
+                    case '/watch/3':
+                        const id = route.split('/')[2];
+                        content.innerHTML = this.renderWatchPage(id);
+                        break;
+                    case '/mylist':
+                        content.innerHTML = this.renderMyListPage();
+                        break;
+                    case '/sports':
+                        content.innerHTML = this.renderSportsPage();
+                        break;
+                    case '/games':
+                        content.innerHTML = this.renderGamesPage();
+                        break;
+                    default:
+                        content.innerHTML = this.renderNotFoundPage();
+                }
+                
+                // Update indicators
+                this.updateRouteIndicators(route);
+            }
+            
+            // ===== PAGE RENDERING =====
+            renderHomePage() {
+                return `
+                    <div class="route-content home-page">
+                        <div class="page-header">
+                            <h1 class="page-title">Msebetsi Solutions Router v6</h1>
+                            <p class="page-subtitle">
+                                Experience Msebetsi Solutions' multi-page SPA with PlayStation-style navigation. 
+                                Learn React Router v6 patterns including nested routes, dynamic segments, 
+                                and modern navigation design.
+                            </p>
+                        </div>
+                        
+                        <div class="category-grid">
+                            <a href="#/browse" class="category-card" onclick="msebetsiRouter.navigateTo('/browse')">
+                                <div class="category-icon" style="background: var(--gradient-router);">
+                                    <i class="fas fa-compass"></i>
+                                </div>
+                                <h3 class="category-title">Browse Content</h3>
+                                <p class="category-description">
+                                    Explore Msebetsi Solutions' vast library with dynamic routing and filters
+                                </p>
+                            </a>
+                            
+                            <a href="#/watch/1" class="category-card" onclick="msebetsiRouter.navigateTo('/watch/1')">
+                                <div class="category-icon" style="background: linear-gradient(135deg, #00B4D8, #0077B6);">
+                                    <i class="fas fa-play-circle"></i>
+                                </div>
+                                <h3 class="category-title">Watch Player</h3>
+                                <p class="category-description">
+                                    Experience Msebetsi Solutions' video player with route parameters
+                                </p>
+                            </a>
+                            
+                            <a href="#/mylist" class="category-card" onclick="msebetsiRouter.navigateTo('/mylist')">
+                                <div class="category-icon" style="background: linear-gradient(135deg, #8A2BE2, #4A00E0);">
+                                    <i class="fas fa-list"></i>
+                                </div>
+                                <h3 class="category-title">My List</h3>
+                                <p class="category-description">
+                                    Manage your saved content with nested route patterns
+                                </p>
+                            </a>
+                        </div>
+                        
+                        <div class="nested-routes">
+                            <div class="nested-header">
+                                <h2 class="nested-title">Nested Routes Demo</h2>
+                                <p class="page-subtitle">
+                                    React Router v6 introduces powerful nested routing capabilities
+                                </p>
+                            </div>
+                            
+                            <div class="nested-tabs">
+                                <button class="nested-tab active" onclick="showNestedContent('movies')">
+                                    <i class="fas fa-film"></i> Movies
+                                </button>
+                                <button class="nested-tab" onclick="showNestedContent('shows')">
+                                    <i class="fas fa-tv"></i> TV Shows
+                                </button>
+                                <button class="nested-tab" onclick="showNestedContent('sports')">
+                                    <i class="fas fa-football-ball"></i> Sports
+                                </button>
+                                <button class="nested-tab" onclick="showNestedContent('games')">
+                                    <i class="fas fa-gamepad"></i> Games
+                                </button>
+                            </div>
+                            
+                            <div class="nested-content" id="nestedContent">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 3rem; color: var(--router-active); margin-bottom: var(--space-lg);">
+                                        <i class="fas fa-film"></i>
+                                    </div>
+                                    <h3 style="color: white; margin-bottom: var(--space-md);">Movies Library</h3>
+                                    <p style="color: var(--msebetsi-gray);">
+                                        This demonstrates nested routing where content changes based on the active tab
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            renderBrowsePage() {
+                return `
+                    <div class="route-content browse-page">
+                        <div class="page-header">
+                            <h1 class="page-title" style="background: linear-gradient(45deg, var(--category-browse), #00B4D8);">
+                                Browse Msebetsi Solutions
+                            </h1>
+                            <p class="page-subtitle">
+                                Discover thousands of movies and TV shows. Each card links to its watch page.
+                            </p>
+                        </div>
+                        
+                        <div class="browse-grid">
+                            ${this.state.browseContent.map(item => `
+                                <div class="content-card" onclick="msebetsiRouter.navigateTo('/watch/${item.id}')">
+                                    <img src="https://images.unsplash.com/photo-${1518709268805 + item.id}?w=400&q=80" 
+                                         alt="${item.title}" 
+                                         class="content-poster"
+                                         onerror="this.src='https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&q=80'">
+                                    <div class="content-info">
+                                        <div class="content-title">${item.title}</div>
+                                        <div class="content-meta">
+                                            <span>${item.year}</span>
+                                            <span>${item.rating}</span>
+                                            <span>${item.type}</span>
+                                        </div>
+                                    </div>
+                                    <button class="watch-button" onclick="event.stopPropagation(); msebetsiRouter.navigateTo('/watch/${item.id}')">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: var(--space-xxl);">
+                            <button class="btn btn-primary" onclick="loadMoreContent()">
+                                <i class="fas fa-sync-alt"></i> Load More Content
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            renderWatchPage(id) {
+                const movie = this.state.browseContent.find(m => m.id == id) || 
+                             { title: 'Stranger Things', year: 2022, rating: '95%' };
+                
+                return `
+                    <div class="route-content watch-page">
+                        <div class="page-header">
+                            <h1 class="page-title" style="background: linear-gradient(45deg, var(--category-watch), #0077B6);">
+                                Now Playing
+                            </h1>
+                            <p class="page-subtitle">
+                                Watch: ${movie.title} (${movie.year}) • ${movie.rating} Match
+                            </p>
+                        </div>
+                        
+                        <div class="player-container">
+                            <div style="width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 5rem; color: var(--msebetsi-red); margin-bottom: var(--space-lg);">
+                                        <i class="fas fa-play-circle"></i>
+                                    </div>
+                                    <h2 style="color: white; margin-bottom: var(--space-md);">${movie.title}</h2>
+                                    <p style="color: var(--msebetsi-gray);">Video player would be here in production</p>
+                                </div>
+                            </div>
+                            
+                            <div class="player-overlay">
+                                <h2 class="player-title">${movie.title}</h2>
+                                <div class="player-controls">
+                                    <button class="control-button" onclick="togglePlay()">
+                                        <i class="fas fa-play" id="playIcon"></i>
+                                    </button>
+                                    <button class="control-button" onclick="toggleFullscreen()">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <button class="control-button" onclick="toggleSubtitles()">
+                                        <i class="fas fa-closed-captioning"></i>
+                                    </button>
+                                    <button class="control-button" onclick="toggleAudio()">
+                                        <i class="fas fa-volume-up"></i>
+                                    </button>
+                                    <button class="control-button" onclick="addToMyList(${id})">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="category-grid" style="margin-top: var(--space-xxl);">
+                            <div class="category-card" onclick="msebetsiRouter.navigateTo('/watch/${parseInt(id) - 1 || 1}')">
+                                <div class="category-icon" style="background: rgba(229,9,20,0.2); color: var(--msebetsi-red);">
+                                    <i class="fas fa-step-backward"></i>
+                                </div>
+                                <h3 class="category-title">Previous Episode</h3>
+                                <p class="category-description">
+                                    Watch the previous content in this series
+                                </p>
+                            </div>
+                            
+                            <div class="category-card" onclick="msebetsiRouter.navigateTo('/browse')">
+                                <div class="category-icon" style="background: rgba(0,255,136,0.2); color: var(--category-browse);">
+                                    <i class="fas fa-compass"></i>
+                                </div>
+                                <h3 class="category-title">Browse More</h3>
+                                <p class="category-description">
+                                    Discover more content to watch
+                                </p>
+                            </div>
+                            
+                            <div class="category-card" onclick="msebetsiRouter.navigateTo('/watch/${parseInt(id) + 1 || 2}')">
+                                <div class="category-icon" style="background: rgba(0,180,216,0.2); color: var(--category-watch);">
+                                    <i class="fas fa-step-forward"></i>
+                                </div>
+                                <h3 class="category-title">Next Episode</h3>
+                                <p class="category-description">
+                                    Continue watching the next content
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            renderMyListPage() {
+                return `
+                    <div class="route-content mylist-page">
+                        <div class="page-header">
+                            <h1 class="page-title" style="background: linear-gradient(45deg, var(--category-mylist), #4A00E0);">
+                                My List
+                            </h1>
+                            <p class="page-subtitle">
+                                Your personalized collection of movies and TV shows. Click to watch, drag to reorder.
+                            </p>
+                        </div>
+                        
+                        <div class="list-grid">
+                            ${this.state.myList.map(item => `
+                                <div class="list-item" onclick="msebetsiRouter.navigateTo('/watch/${item.id}')">
+                                    <div class="list-rank">${item.rank}</div>
+                                    <div class="list-content">
+                                        <div class="list-title">${item.title}</div>
+                                        <div class="list-meta">
+                                            <span>${item.type}</span> • 
+                                            <span>Added ${item.added}</span>
+                                        </div>
+                                    </div>
+                                    <button class="remove-button" onclick="event.stopPropagation(); removeFromList(${item.id})">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: var(--space-xxl);">
+                            <button class="btn btn-primary" onclick="msebetsiRouter.navigateTo('/browse')">
+                                <i class="fas fa-plus"></i> Add More to List
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            renderSportsPage() {
+                return `
+                    <div class="route-content home-page" style="border-color: var(--category-sports);">
+                        <div class="page-header">
+                            <h1 class="page-title" style="background: linear-gradient(45deg, var(--category-sports), #FF8C00);">
+                                Msebetsi Solutions Sports
+                            </h1>
+                            <p class="page-subtitle">
+                                Experience live sports streaming with PlayStation-style navigation and real-time updates.
+                            </p>
+                        </div>
+                        
+                        <div class="category-grid">
+                            <div class="category-card" onclick="msebetsiRouter.navigateTo('/watch/10')">
+                                <div class="category-icon" style="background: linear-gradient(135deg, #FFD700, #FF8C00);">
+                                    <i class="fas fa-football-ball"></i>
+                                </div>
+                                <h3 class="category-title">Live Football</h3>
+                                <p class="category-description">
+                                    Watch Premier League matches live with real-time stats
+                                </p>
+                            </div>
+                            
+                            <div class="category-card" onclick="msebetsiRouter.navigateTo('/watch/11')">
+                                <div class="category-icon" style="background: linear-gradient(135deg, #E50914, #8B0000);">
+                                    <i class="fas fa-basketball-ball"></i>
+                                </div>
+                                <h3 class="category-title">NBA Live</h3>
+                                <p class="category-description">
+                                    Stream NBA games with multi-angle camera views
+                                </p>
+                            </div>
+                            
+                            <div class="category-card" onclick="msebetsiRouter.navigateTo('/watch/12')">
+                                <div class="category-icon" style="background: linear-gradient(135deg, #00B4D8, #0077B6);">
+                                    <i class="fas fa-baseball-ball"></i>
+                                </div>
+                                <h3 class="category-title">MLB Games</h3>
+                                <p class="category-description">
+                                    Baseball streaming with advanced analytics overlay
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            renderGamesPage() {
+                return `
+                    <div class="route-content home-page" style="border-color: var(--category-games);">
+                        <div class="page-header">
+                            <h1 class="page-title" style="background: linear-gradient(45deg, var(--category-games), #FF4081);">
+                                Msebetsi Solutions Games
+                            </h1>
+                            <p class="page-subtitle">
+                                PlayStation-style gaming experience with Msebetsi Solutions' interactive content.
+                            </p>
+                        </div>
+                        
+                        <div class="category-grid">
+                            <div class="category-card" onclick="msebetsiRouter.navigateTo('/watch/13')">
+                                <div class="category-icon" style="background: linear-gradient(135deg, #FF6B9D, #FF4081);">
+                                    <i class="fas fa-gamepad"></i>
+                                </div>
+                                <h3 class="category-title">Interactive Movies</h3>
+                                <p class="category-description">
+                                    Choose-your-own-adventure style interactive content
+                                </p>
+                            </div>
+                            
+                            <div class="category-card" onclick="msebetsiRouter.navigateTo('/watch/14')">
+                                <div class="category-icon" style="background: linear-gradient(135deg, #8A2BE2, #4A00E0);">
+                                    <i class="fas fa-chess"></i>
+                                </div>
+                                <h3 class="category-title">Strategy Games</h3>
+                                <p class="category-description">
+                                    Msebetsi Solutions-exclusive strategy and puzzle games
+                                </p>
+                            </div>
+                            
+                            <div class="category-card" onclick="msebetsiRouter.navigateTo('/watch/15')">
+                                <div class="category-icon" style="background: linear-gradient(135deg, #00FF88, #00B4D8);">
+                                    <i class="fas fa-vr-cardboard"></i>
+                                </div>
+                                <h3 class="category-title">VR Experiences</h3>
+                                <p class="category-description">
+                                    Virtual reality content with 360° navigation
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            renderNotFoundPage() {
+                return `
+                    <div class="route-content home-page" style="text-align: center; padding: var(--space-xxxl);">
+                        <div style="font-size: 8rem; color: var(--msebetsi-red); margin-bottom: var(--space-lg);">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h1 class="page-title">404 - Page Not Found</h1>
+                        <p class="page-subtitle">
+                            The route you're looking for doesn't exist. Check the URL or navigate using the menu.
+                        </p>
+                        <div style="margin-top: var(--space-xxl);">
+                            <button class="btn btn-primary" onclick="msebetsiRouter.navigateTo('/')">
+                                <i class="fas fa-home"></i> Go Home
+                            </button>
+                            <button class="btn btn-secondary" onclick="window.history.back()">
+                                <i class="fas fa-arrow-left"></i> Go Back
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // ===== UI UPDATES =====
+            updateNavigation() {
+                // Update main nav
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Update main nav based on current route
+                const navIds = {
+                    '/': 'navHome',
+                    '/browse': 'navBrowse',
+                    '/watch/:id': 'navWatch',
+                    '/mylist': 'navMyList',
+                    '/sports': 'navSports',
+                    '/games': 'navGames'
+                };
+                
+                const currentNavId = navIds[this.state.currentRoute] || navIds[this.state.currentRoute.split('/')[0] + '/:id'];
+                if (currentNavId) {
+                    document.getElementById(currentNavId)?.classList.add('active');
+                }
+                
+                // Update sidebar
+                const sidebarIds = {
+                    '/': 'sidebarHome',
+                    '/browse': 'sidebarBrowse',
+                    '/watch/:id': 'sidebarWatch',
+                    '/mylist': 'sidebarMyList',
+                    '/sports': 'sidebarSports',
+                    '/games': 'sidebarGames'
+                };
+                
+                const currentSidebarId = sidebarIds[this.state.currentRoute] || sidebarIds[this.state.currentRoute.split('/')[0] + '/:id'];
+                if (currentSidebarId) {
+                    document.getElementById(currentSidebarId)?.classList.add('active');
+                }
+            }
+            
+            updateRouteIndicators(route) {
+                const routes = ['/', '/browse', '/watch/:id', '/mylist'];
+                const index = routes.findIndex(r => route.startsWith(r.split('/')[0]));
+                
+                document.querySelectorAll('.route-indicator').forEach((indicator, i) => {
+                    indicator.classList.toggle('active', i === index);
+                });
+            }
+            
+            updateRouterStats() {
+                document.getElementById('currentRoute').textContent = this.state.currentRoute;
+                document.getElementById('navCount').textContent = this.config.navigationCount;
+                document.getElementById('routerStatus').textContent = 
+                    this.state.isTransitioning ? 'Transitioning' : 'Active';
+            }
+            
+            // ===== UTILITIES =====
+            setupSearch() {
+                const searchInput = document.getElementById('searchInput');
+                searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.handleSearch(searchInput.value);
+                    }
+                });
+            }
+            
+            handleSearch(query) {
+                if (query.trim()) {
+                    this.showNotification(`🔍 Searching for: ${query}`, 'info');
+                    // In a real app, this would navigate to search results
+                    // For demo, just show a notification
+                    setTimeout(() => {
+                        this.showNotification(`Found 42 results for "${query}"`, 'success');
+                    }, 1000);
+                }
+            }
+            
+            handleScroll() {
+                const header = document.getElementById('mainHeader');
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            }
+            
+            showNotification(message, type = 'info', duration = 4000) {
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                
+                const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+                notification.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: var(--space-md);">
+                        <div style="font-size: 1.5rem;">${icon}</div>
+                        <div style="flex: 1; font-size: 0.9rem; color: var(--msebetsi-light-gray);">
+                            ${message}
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" 
+                                style="background: none; border: none; color: var(--msebetsi-gray); cursor: pointer;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.style.opacity = '0';
+                        notification.style.transform = 'translateX(100px)';
+                        setTimeout(() => {
+                            if (notification.parentElement) {
+                                notification.remove();
+                            }
+                        }, 300);
+                    }
+                }, duration);
+            }
+        }
+
+        // ===== GLOBAL FUNCTIONS =====
+        const msebetsiRouter = new MsebetsiRouter();
+
+        // DOM Ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup nested routes demo
+            showNestedContent('movies');
+            
+            // Setup scroll handler
+            window.addEventListener('scroll', () => msebetsiRouter.handleScroll());
+            
+            // Welcome message
+            setTimeout(() => {
+                msebetsiRouter.showNotification('🎮 PlayStation-style navigation activated!', 'info');
+                msebetsiRouter.showNotification('📍 Try clicking different routes to see transitions', 'info', 3000);
+            }, 1500);
+        });
+
+        // Public functions for onclick handlers
+        function showNestedContent(type) {
+            const content = document.getElementById('nestedContent');
+            const tabs = document.querySelectorAll('.nested-tab');
+            
+            // Update active tab
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event?.target?.classList.add('active');
+            
+            const contents = {
+                movies: {
+                    icon: 'film',
+                    title: 'Movies Library',
+                    description: 'Browse thousands of movies with nested routing'
+                },
+                shows: {
+                    icon: 'tv',
+                    title: 'TV Shows',
+                    description: 'Discover TV series with season/episode nesting'
+                },
+                sports: {
+                    icon: 'football-ball',
+                    title: 'Live Sports',
+                    description: 'Real-time sports streaming with route parameters'
+                },
+                games: {
+                    icon: 'gamepad',
+                    title: 'Interactive Games',
+                    description: 'PlayStation-style gaming experiences'
+                }
+            };
+            
+            const data = contents[type];
+            
+            content.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; color: var(--router-active); margin-bottom: var(--space-lg);">
+                        <i class="fas fa-${data.icon}"></i>
+                    </div>
+                    <h3 style="color: white; margin-bottom: var(--space-md);">${data.title}</h3>
+                    <p style="color: var(--msebetsi-gray); max-width: 600px; margin: 0 auto;">
+                        ${data.description}
+                    </p>
+                    <div style="margin-top: var(--space-xl);">
+                        <button class="btn btn-secondary" onclick="msebetsiRouter.navigateTo('/${type}')">
+                            <i class="fas fa-external-link-alt"></i> Open ${data.title}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadMoreContent() {
+            msebetsiRouter.showNotification('📦 Loading more content...', 'info');
+            setTimeout(() => {
+                msebetsiRouter.showNotification('✅ 8 more items loaded!', 'success');
+            }, 1500);
+        }
+
+        function togglePlay() {
+            const icon = document.getElementById('playIcon');
+            const isPlaying = icon.classList.contains('fa-play');
+            icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
+            msebetsiRouter.showNotification(isPlaying ? '▶️ Playback started' : '⏸️ Playback paused', 'info');
+        }
+
+        function toggleFullscreen() {
+            msebetsiRouter.showNotification('🖥️ Toggled fullscreen mode', 'info');
+        }
+
+        function toggleSubtitles() {
+            msebetsiRouter.showNotification('📝 Subtitles toggled', 'info');
+        }
+
+        function toggleAudio() {
+            msebetsiRouter.showNotification('🔊 Audio settings updated', 'info');
+        }
+
+        function addToMyList(id) {
+            msebetsiRouter.showNotification('✅ Added to My List!', 'success');
+            // In a real app, this would update the state
+        }
+
+        function removeFromList(id) {
+            if (confirm('Remove from My List?')) {
+                msebetsiRouter.showNotification('🗑️ Removed from My List', 'info');
+                // In a real app, this would update the state
+            }
+        }
+
+        function showUserMenu() {
+            msebetsiRouter.showNotification('👤 User menu would open here', 'info');
+        }
+
+        function completeLesson() {
+            // Confetti celebration
+            createConfetti();
+            
+            msebetsiRouter.showNotification('🏆 Lesson 12 Completed! You mastered React Router!', 'success');
+            
+            setTimeout(() => {
+                alert('🎉 CONGRATULATIONS!\n\nYou have successfully completed Lesson 12:\n\n✅ Mastered React Router v6 patterns\n✅ Built Msebetsi Solutions multi-page SPA\n✅ Implemented PlayStation-style navigation\n✅ Created nested routes and dynamic segments\n✅ Built modern navigation system\n✅ Learned production routing patterns\n\nYou are now ready to build enterprise-level React applications!');
+                
+                // Save completion
+                localStorage.setItem('lesson12Completed', 'true');
+            }, 1000);
+        }
+
+        // Helper functions
+        function createConfetti() {
+            const colors = ['#E50914', '#8A2BE2', '#00B4D8', '#00FF88', '#FFD700', '#FF6B9D'];
+            
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: ${Math.random() * 12 + 6}px;
+                    height: ${Math.random() * 12 + 6}px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                    top: -20px;
+                    left: ${Math.random() * 100}vw;
+                    animation: fall ${Math.random() * 3 + 2}s linear forwards;
+                    z-index: 9997;
+                    transform: rotate(${Math.random() * 360}deg);
+                `;
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    if (confetti.parentElement) {
+                        confetti.remove();
+                    }
+                }, 5000);
+            }
+            
+            // Add animation if not exists
+            if (!document.querySelector('style[data-confetti]')) {
+                const style = document.createElement('style');
+                style.setAttribute('data-confetti', 'true');
+                style.textContent = `
+                    @keyframes fall {
+                        to {
+                            transform: translateY(100vh) rotate(${Math.random() * 720}deg);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+    </script>
+</body>
+</html>

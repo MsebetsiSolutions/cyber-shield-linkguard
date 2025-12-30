@@ -1,0 +1,2816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 9: Msebetsi Solutions Watch Party - Advanced React State Management</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Netflix+Sans:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ===== LESSON INTRODUCTION STYLES ===== */
+        .lesson-intro {
+            background: linear-gradient(135deg, #141414 0%, #0a0a0a 100%);
+            padding: var(--space-xxxl) var(--space-xl);
+            border-bottom: 3px solid var(--msebetsi-red);
+            margin-bottom: var(--space-xxxl);
+        }
+
+        .lesson-header {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .lesson-badge {
+            background: var(--gradient-watch-party);
+            color: white;
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: var(--space-lg);
+            animation: pulse 2s infinite;
+        }
+
+        .lesson-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: var(--space-lg);
+            background: linear-gradient(45deg, #E50914, #8A2BE2, #00B4D8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .lesson-subtitle {
+            font-size: 1.5rem;
+            color: var(--msebetsi-light-gray);
+            margin-bottom: var(--space-xl);
+            line-height: 1.6;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .mission-card {
+            background: rgba(20, 20, 20, 0.8);
+            border-radius: 16px;
+            padding: var(--space-xl);
+            margin: var(--space-xl) auto;
+            max-width: 900px;
+            border: 2px solid var(--watch-party-purple);
+            backdrop-filter: blur(10px);
+        }
+
+        .mission-title {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            color: var(--watch-party-green);
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: var(--space-lg);
+        }
+
+        .mission-text {
+            color: var(--msebetsi-light-gray);
+            line-height: 1.7;
+            font-size: 1.1rem;
+            margin-bottom: var(--space-lg);
+        }
+
+        .objectives-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin-top: var(--space-xl);
+        }
+
+        .objective-card {
+            background: rgba(30, 30, 30, 0.9);
+            border-radius: 12px;
+            padding: var(--space-lg);
+            transition: transform var(--transition-normal);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .objective-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--watch-party-blue);
+        }
+
+        .objective-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-watch-party);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-md);
+            font-size: 1.5rem;
+        }
+
+        .objective-title {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+        }
+
+        .objective-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .objective-list li {
+            color: var(--msebetsi-gray);
+            margin-bottom: var(--space-xs);
+            padding-left: var(--space-md);
+            position: relative;
+        }
+
+        .objective-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--watch-party-green);
+        }
+
+        .architecture-section {
+            background: rgba(10, 10, 10, 0.9);
+            border-radius: 20px;
+            padding: var(--space-xxl);
+            margin: var(--space-xxxl) auto;
+            max-width: 1000px;
+            border: 2px solid rgba(0, 180, 216, 0.3);
+        }
+
+        .section-title {
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: var(--space-xxl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-md);
+        }
+
+        .code-block {
+            background: #0d1117;
+            border-radius: 12px;
+            padding: var(--space-xl);
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: var(--space-lg) 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .code-comment {
+            color: #8b949e;
+        }
+
+        .code-keyword {
+            color: #ff7b72;
+        }
+
+        .code-string {
+            color: #a5d6ff;
+        }
+
+        .code-function {
+            color: #d2a8ff;
+        }
+
+        .hierarchy-diagram {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .hierarchy-line {
+            padding-left: 20px;
+            margin: 4px 0;
+            color: var(--watch-party-green);
+        }
+
+        .challenge-card {
+            background: linear-gradient(135deg, rgba(229, 9, 20, 0.1), rgba(138, 43, 226, 0.1));
+            border-radius: 16px;
+            padding: var(--space-xl);
+            margin: var(--space-lg) 0;
+            border-left: 4px solid var(--msebetsi-red);
+        }
+
+        .challenge-title {
+            color: var(--msebetsi-red);
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .skills-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-lg);
+            margin-top: var(--space-xxl);
+        }
+
+        .skill-category {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: var(--space-lg);
+        }
+
+        .skill-header {
+            color: var(--watch-party-yellow);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .success-metrics {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 180, 216, 0.1));
+            border-radius: 16px;
+            padding: var(--space-xl);
+            margin: var(--space-xxl) auto;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .success-title {
+            color: var(--watch-party-green);
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: var(--space-xl);
+        }
+
+        .metric-item {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            padding: var(--space-md) var(--space-lg);
+            margin: var(--space-sm);
+            border-radius: 8px;
+            color: var(--msebetsi-light-gray);
+            font-weight: 600;
+            transition: all var(--transition-fast);
+        }
+
+        .metric-item:hover {
+            background: var(--watch-party-purple);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .prerequisites {
+            background: rgba(20, 20, 20, 0.9);
+            border-radius: 16px;
+            padding: var(--space-xl);
+            margin: var(--space-xxl) auto;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .prereq-list {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
+        }
+
+        .prereq-item {
+            background: var(--msebetsi-red);
+            color: white;
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .start-lesson-btn {
+            display: block;
+            width: 300px;
+            margin: var(--space-xxxl) auto;
+            padding: var(--space-xl) var(--space-xxl);
+            background: linear-gradient(45deg, #E50914, #B20710);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 10px 40px rgba(229, 9, 20, 0.4);
+        }
+
+        .start-lesson-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 50px rgba(229, 9, 20, 0.6);
+        }
+
+        /* MSEBETSI SOLUTIONS WATCH PARTY DESIGN SYSTEM */
+        :root {
+            /* Msebetsi Colors */
+            --msebetsi-red: #E50914;
+            --msebetsi-red-dark: #B20710;
+            --msebetsi-black: #141414;
+            --msebetsi-dark-gray: #2D2D2D;
+            --msebetsi-gray: #737373;
+            --msebetsi-light-gray: #E5E5E5;
+            --msebetsi-white: #FFFFFF;
+            --msebetsi-bg: #0F0F0F;
+            
+            /* Watch Party Colors */
+            --watch-party-purple: #8A2BE2;
+            --watch-party-blue: #00B4D8;
+            --watch-party-green: #00FF88;
+            --watch-party-yellow: #FFD700;
+            --watch-party-pink: #FF6B9D;
+            
+            /* State Colors */
+            --state-loading: #4D9FFF;
+            --state-error: #FF6B6B;
+            --state-success: #46D369;
+            --state-warning: #FFD700;
+            --state-empty: #737373;
+            
+            /* Gradients */
+            --gradient-watch-party: linear-gradient(135deg, #8A2BE2 0%, #00B4D8 100%);
+            --gradient-msebetsi: linear-gradient(135deg, #E50914 0%, #B20710 100%);
+            --gradient-states: linear-gradient(135deg, #4D9FFF 0%, #8A2BE2 100%);
+            --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-xxl: 48px;
+            --space-xxxl: 64px;
+            
+            /* Shadows */
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.7);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.9);
+            --shadow-xl: 0 12px 48px rgba(0,0,0,1);
+            --shadow-watch: 0 0 40px rgba(138,43,226,0.5);
+            --shadow-red: 0 0 40px rgba(229,9,20,0.5);
+            
+            /* Transitions */
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Z-index */
+            --z-base: 1;
+            --z-header: 1000;
+            --z-watch-party: 1001;
+            --z-modal: 1002;
+            --z-notification: 1003;
+            --z-tooltip: 1004;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--msebetsi-bg);
+            color: var(--msebetsi-white);
+            font-family: 'Netflix Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(138,43,226,0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 20%, rgba(0,180,216,0.15) 0%, transparent 40%);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--msebetsi-dark-gray);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--watch-party-purple);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--watch-party-blue);
+        }
+        
+        /* Header with Watch Party Badge */
+        .header {
+            background: linear-gradient(180deg, 
+                rgba(20,20,20,0.95) 0%, 
+                rgba(20,20,20,0.9) 50%, 
+                rgba(20,20,20,0.8) 100%);
+            padding: var(--space-lg) var(--space-xl);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: var(--z-header);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: all var(--transition-normal);
+        }
+        
+        .header.scrolled {
+            background: rgba(20,20,20,0.98);
+            box-shadow: var(--shadow-lg);
+            padding: var(--space-md) var(--space-xl);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+        
+        .msebetsi-logo {
+            color: var(--msebetsi-red);
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            text-decoration: none;
+            transition: all var(--transition-normal);
+        }
+        
+        .msebetsi-logo:hover {
+            text-shadow: var(--shadow-red);
+            transform: scale(1.05);
+        }
+        
+        .watch-party-badge {
+            background: var(--gradient-watch-party);
+            color: white;
+            padding: var(--space-sm) var(--space-xl);
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            box-shadow: var(--shadow-watch);
+            animation: pulse-watch 2s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .watch-party-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes pulse-watch {
+            0%, 100% { transform: scale(1); box-shadow: var(--shadow-watch); }
+            50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(138,43,226,0.6); }
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+        
+        /* Navigation */
+        .nav-menu {
+            display: flex;
+            gap: var(--space-xl);
+            align-items: center;
+        }
+        
+        .nav-item {
+            color: var(--msebetsi-light-gray);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            position: relative;
+            padding: var(--space-sm) 0;
+        }
+        
+        .nav-item:hover {
+            color: white;
+        }
+        
+        .nav-item.active {
+            color: var(--watch-party-green);
+            font-weight: 700;
+        }
+        
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--watch-party-green);
+            border-radius: 3px;
+        }
+        
+        /* Watch Party Controls */
+        .watch-party-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+        
+        .party-button {
+            background: var(--gradient-watch-party);
+            color: white;
+            border: none;
+            padding: var(--space-sm) var(--space-xl);
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            transition: all var(--transition-normal);
+        }
+        
+        .party-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-watch);
+        }
+        
+        .party-button.active {
+            background: var(--watch-party-green);
+            color: var(--msebetsi-black);
+        }
+        
+        /* Main Layout */
+        .main-container {
+            margin-top: 100px;
+            padding: var(--space-xl);
+            max-width: 1600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            position: relative;
+            height: 70vh;
+            min-height: 500px;
+            margin-bottom: var(--space-xxxl);
+            border-radius: 24px;
+            overflow: hidden;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)),
+                        url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            padding: var(--space-xxxl);
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-size: 4.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: var(--space-lg);
+            background: linear-gradient(45deg, var(--watch-party-purple), var(--watch-party-green), var(--watch-party-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 8s infinite alternate;
+        }
+        
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        
+        .hero-subtitle {
+            font-size: 1.8rem;
+            color: var(--msebetsi-light-gray);
+            margin-bottom: var(--space-xl);
+            line-height: 1.6;
+        }
+        
+        .hero-stats {
+            display: flex;
+            gap: var(--space-xxl);
+            margin-top: var(--space-xl);
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--watch-party-green);
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            color: var(--msebetsi-gray);
+            margin-top: var(--space-sm);
+        }
+        
+        /* Watch Party Theater */
+        .watch-party-theater {
+            background: rgba(10,10,10,0.9);
+            border-radius: 24px;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xxxl);
+            border: 2px solid rgba(138,43,226,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .theater-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+            padding-bottom: var(--space-lg);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .theater-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+        
+        .theater-controls {
+            display: flex;
+            gap: var(--space-lg);
+            align-items: center;
+        }
+        
+        .theater-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--space-xxl);
+            min-height: 600px;
+        }
+        
+        /* Video Player */
+        .video-player-container {
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            aspect-ratio: 16/9;
+        }
+        
+        .video-player {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .player-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: var(--space-xl);
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+        }
+        
+        .video-player-container:hover .player-overlay {
+            opacity: 1;
+        }
+        
+        .player-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .player-meta {
+            display: flex;
+            gap: var(--space-lg);
+            color: var(--msebetsi-light-gray);
+            font-size: 0.9rem;
+        }
+        
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+        
+        .control-button {
+            width: 56px;
+            height: 56px;
+            background: rgba(0,0,0,0.7);
+            border: 2px solid var(--watch-party-purple);
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-normal);
+        }
+        
+        .control-button:hover {
+            background: var(--watch-party-purple);
+            transform: scale(1.1);
+        }
+        
+        /* Live Reactions */
+        .live-reactions {
+            position: absolute;
+            top: var(--space-xl);
+            right: var(--space-xl);
+            display: flex;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        
+        .reaction-bubble {
+            background: rgba(138,43,226,0.9);
+            color: white;
+            padding: var(--space-sm) var(--space-md);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            animation: float-up 4s forwards;
+            backdrop-filter: blur(10px);
+        }
+        
+        @keyframes float-up {
+            0% {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            10% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+        }
+        
+        /* Chat Panel */
+        .chat-panel {
+            background: rgba(20,20,20,0.9);
+            border-radius: 16px;
+            padding: var(--space-xl);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(138,43,226,0.3);
+        }
+        
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .chat-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .online-users {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-watch-party);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-md);
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .message {
+            margin-bottom: var(--space-md);
+            padding: var(--space-md);
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--watch-party-purple);
+        }
+        
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .message-user {
+            font-weight: 700;
+            color: var(--watch-party-green);
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+        
+        .message-time {
+            font-size: 0.8rem;
+            color: var(--msebetsi-gray);
+        }
+        
+        .message-content {
+            color: var(--msebetsi-light-gray);
+            line-height: 1.5;
+        }
+        
+        .reactions-bar {
+            display: flex;
+            gap: var(--space-sm);
+            margin-top: var(--space-sm);
+        }
+        
+        .reaction-button {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: var(--msebetsi-light-gray);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .reaction-button:hover {
+            background: var(--watch-party-purple);
+            color: white;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: var(--space-md);
+            align-items: center;
+        }
+        
+        .emoji-button {
+            background: none;
+            border: none;
+            color: var(--watch-party-yellow);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: var(--space-sm);
+            border-radius: 50%;
+            transition: all var(--transition-fast);
+        }
+        
+        .emoji-button:hover {
+            background: rgba(255,215,0,0.1);
+        }
+        
+        .chat-textarea {
+            flex: 1;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: var(--space-md) var(--space-lg);
+            color: white;
+            font-family: 'Netflix Sans';
+            resize: none;
+            min-height: 48px;
+            max-height: 120px;
+        }
+        
+        .chat-textarea:focus {
+            outline: none;
+            border-color: var(--watch-party-purple);
+        }
+        
+        .send-button {
+            background: var(--watch-party-purple);
+            color: white;
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+        
+        .send-button:hover {
+            background: var(--watch-party-blue);
+            transform: rotate(15deg);
+        }
+        
+        /* UI States Demo */
+        .states-demo {
+            background: rgba(20,20,20,0.9);
+            border-radius: 24px;
+            padding: var(--space-xxxl);
+            margin-bottom: var(--space-xxxl);
+            border: 2px solid rgba(77,159,255,0.3);
+        }
+        
+        .states-header {
+            text-align: center;
+            margin-bottom: var(--space-xxxl);
+        }
+        
+        .states-title {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: var(--space-lg);
+            background: linear-gradient(45deg, var(--state-loading), var(--state-error), var(--state-success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .states-subtitle {
+            font-size: 1.2rem;
+            color: var(--msebetsi-gray);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .states-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-xxl);
+        }
+        
+        .state-card {
+            background: rgba(30,30,30,0.9);
+            border-radius: 20px;
+            padding: var(--space-xxl);
+            text-align: center;
+            transition: all var(--transition-normal);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .state-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .state-card.loading {
+            border-color: var(--state-loading);
+        }
+        
+        .state-card.error {
+            border-color: var(--state-error);
+        }
+        
+        .state-card.empty {
+            border-color: var(--state-empty);
+        }
+        
+        .state-card.success {
+            border-color: var(--state-success);
+        }
+        
+        .state-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--space-xl);
+            font-size: 2.5rem;
+        }
+        
+        .loading .state-icon {
+            background: var(--state-loading);
+            animation: spin 2s linear infinite;
+        }
+        
+        .error .state-icon {
+            background: var(--state-error);
+        }
+        
+        .empty .state-icon {
+            background: var(--state-empty);
+        }
+        
+        .success .state-icon {
+            background: var(--state-success);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .state-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            color: white;
+        }
+        
+        .state-description {
+            color: var(--msebetsi-gray);
+            margin-bottom: var(--space-xl);
+            line-height: 1.6;
+        }
+        
+        .state-code {
+            background: rgba(0,0,0,0.5);
+            border-radius: 12px;
+            padding: var(--space-md);
+            font-family: 'SF Mono', monospace;
+            font-size: 0.9rem;
+            text-align: left;
+            margin-top: var(--space-lg);
+        }
+        
+        /* MovieRow Demo */
+        .movierow-demo {
+            background: rgba(20,20,20,0.9);
+            border-radius: 24px;
+            padding: var(--space-xxxl);
+            margin-bottom: var(--space-xxxl);
+            border: 2px solid rgba(70,211,105,0.3);
+        }
+        
+        .movierow-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xxl);
+        }
+        
+        .movierow-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+        
+        .state-selector {
+            display: flex;
+            gap: var(--space-md);
+            background: rgba(0,0,0,0.5);
+            padding: var(--space-sm);
+            border-radius: 12px;
+        }
+        
+        .state-button {
+            padding: var(--space-md) var(--space-xl);
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: var(--msebetsi-light-gray);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .state-button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .state-button.active {
+            background: var(--msebetsi-red);
+            color: white;
+        }
+        
+        .movierow-container {
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-xxl);
+            border-radius: 16px;
+            background: rgba(0,0,0,0.3);
+        }
+        
+        /* Loading State */
+        .loading-state {
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: var(--state-loading);
+            border-radius: 50%;
+            margin: 0 auto var(--space-lg);
+            animation: spin 1s linear infinite;
+        }
+        
+        .loading-text {
+            color: var(--state-loading);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        /* Error State */
+        .error-state {
+            text-align: center;
+        }
+        
+        .error-icon {
+            font-size: 4rem;
+            color: var(--state-error);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .error-text {
+            color: var(--state-error);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .retry-button {
+            background: var(--state-error);
+            color: white;
+            border: none;
+            padding: var(--space-md) var(--space-xl);
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+        
+        .retry-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255,107,107,0.3);
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            color: var(--state-empty);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .empty-text {
+            color: var(--state-empty);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .browse-button {
+            background: var(--msebetsi-red);
+            color: white;
+            border: none;
+            padding: var(--space-md) var(--space-xl);
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+        
+        .browse-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(229,9,20,0.3);
+        }
+        
+        /* Success State */
+        .success-state {
+            width: 100%;
+        }
+        
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--space-lg);
+        }
+        
+        .movie-card {
+            background: var(--msebetsi-dark-gray);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all var(--transition-normal);
+            cursor: pointer;
+        }
+        
+        .movie-card:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .movie-poster {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+        
+        .movie-info {
+            padding: var(--space-md);
+        }
+        
+        .movie-title {
+            font-weight: 700;
+            margin-bottom: var(--space-xs);
+            color: white;
+        }
+        
+        .movie-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--msebetsi-gray);
+            font-size: 0.9rem;
+        }
+        
+        /* Search Bar */
+        .search-section {
+            background: rgba(20,20,20,0.9);
+            border-radius: 24px;
+            padding: var(--space-xxxl);
+            margin-bottom: var(--space-xxxl);
+            border: 2px solid rgba(0,180,216,0.3);
+        }
+        
+        .search-header {
+            text-align: center;
+            margin-bottom: var(--space-xxl);
+        }
+        
+        .search-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: var(--space-lg);
+            color: white;
+        }
+        
+        .search-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .search-input-group {
+            position: relative;
+            margin-bottom: var(--space-xl);
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: var(--space-xl) var(--space-xxl);
+            background: rgba(0,0,0,0.7);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 50px;
+            color: white;
+            font-size: 1.2rem;
+            font-family: 'Netflix Sans';
+            transition: all var(--transition-normal);
+            padding-left: 70px;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--watch-party-blue);
+            box-shadow: 0 0 40px rgba(0,180,216,0.3);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: var(--space-xl);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--msebetsi-gray);
+            font-size: 1.5rem;
+        }
+        
+        .search-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+            color: var(--msebetsi-gray);
+            font-size: 0.9rem;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: var(--space-md) var(--space-xl);
+            border: none;
+            border-radius: 8px;
+            font-family: 'Netflix Sans';
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+        
+        .btn-primary {
+            background: var(--gradient-watch-party);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-watch);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 120px;
+            right: 20px;
+            background: rgba(20,20,20,0.95);
+            border-left: 4px solid var(--watch-party-purple);
+            padding: var(--space-lg) var(--space-xl);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            z-index: var(--z-notification);
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+            backdrop-filter: blur(20px);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Fade In Animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .theater-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero-title {
+                font-size: 3rem;
+            }
+            
+            .lesson-title {
+                font-size: 2.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-wrap: wrap;
+                gap: var(--space-md);
+            }
+            
+            .nav-menu {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+                margin-top: var(--space-md);
+            }
+            
+            .hero-section {
+                height: 50vh;
+                min-height: 300px;
+                padding: var(--space-xl);
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+            
+            .states-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .objectives-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .lesson-title {
+                font-size: 2rem;
+            }
+            
+            .lesson-subtitle {
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .watch-party-controls {
+                flex-direction: column;
+                gap: var(--space-sm);
+            }
+            
+            .theater-controls {
+                flex-direction: column;
+                gap: var(--space-sm);
+            }
+            
+            .state-selector {
+                flex-direction: column;
+            }
+            
+            .start-lesson-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="mainHeader">
+        <div class="logo-container">
+            <a href="#" class="msebetsi-logo">MSEBETSI SOLUTIONS</a>
+            <div class="watch-party-badge">
+                <i class="fas fa-users"></i> WATCH PARTY ENGINEERING
+                <span class="online-count">Lesson 9</span>
+            </div>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active">Engineering Lab</a>
+            <a href="#" class="nav-item">Components</a>
+            <a href="#" class="nav-item">State Patterns</a>
+            <a href="#" class="nav-item">Real-time Systems</a>
+            <a href="#" class="nav-item">Architecture</a>
+        </nav>
+
+        <div class="watch-party-controls">
+            <button class="party-button" onclick="showLessonIntro()">
+                <i class="fas fa-book"></i> Lesson Guide
+            </button>
+            <button class="party-button active" onclick="startWatchPartyDemo()">
+                <i class="fas fa-play"></i> Start Demo
+            </button>
+            <div class="user-avatar" onclick="toggleProfile()">DEV</div>
+        </div>
+    </header>
+
+    <!-- Lesson Introduction -->
+    <div class="lesson-intro" id="lessonIntro">
+        <div class="lesson-header">
+            <div class="lesson-badge">
+                <i class="fas fa-graduation-cap"></i> ADVANCED REACT ENGINEERING
+            </div>
+            <h1 class="lesson-title">Msebetsi Solutions Watch Party Systems</h1>
+            <p class="lesson-subtitle">
+                Master production-grade React state management by building Msebetsi Solutions' next big feature.
+                Think like a Msebetsi Solutions engineer while learning advanced conditional rendering and real-time systems.
+            </p>
+            
+            <div class="mission-card">
+                <h2 class="mission-title">
+                    <i class="fas fa-bullhorn"></i> MISSION BRIEF
+                </h2>
+                <p class="mission-text">
+                    <strong>You've been invited by Msebetsi Solutions to prototype their next big feature: Watch Party.</strong>
+                    Your task isn't just to build a UI—it's to architect a <strong>production-grade React system</strong> 
+                    that handles real-time collaboration, multiple UI states, and seamless user experiences at Msebetsi Solutions scale.
+                </p>
+                <p class="mission-text">
+                    This isn't a clone exercise. This is engineering training for how Msebetsi Solutions thinks about 
+                    <strong>state management, component architecture, and user experience</strong> at scale.
+                </p>
+            </div>
+
+            <div class="objectives-grid">
+                <div class="objective-card">
+                    <div class="objective-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3 class="objective-title">Production State Management</h3>
+                    <ul class="objective-list">
+                        <li>Model complex application states</li>
+                        <li>Implement Msebetsi Solutions-style patterns</li>
+                        <li>Handle async data flows</li>
+                        <li>Create predictable UX</li>
+                    </ul>
+                </div>
+
+                <div class="objective-card">
+                    <div class="objective-icon">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
+                    <h3 class="objective-title">Conditional Rendering at Scale</h3>
+                    <ul class="objective-list">
+                        <li>Professional state patterns</li>
+                        <li>Skeleton vs spinner logic</li>
+                        <li>Smooth state transitions</li>
+                        <li>Msebetsi Solutions empty states</li>
+                    </ul>
+                </div>
+
+                <div class="objective-card">
+                    <div class="objective-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <h3 class="objective-title">Component Architecture</h3>
+                    <ul class="objective-list">
+                        <li>Single Responsibility Principle</li>
+                        <li>Clean component boundaries</li>
+                        <li>Maintainable React architecture</li>
+                        <li>Feature decomposition</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="architecture-section">
+                <h2 class="section-title">
+                    <i class="fas fa-sitemap"></i> Architecture Blueprint
+                </h2>
+                
+                <div class="code-block">
+                    <span class="code-comment">// Msebetsi Solutions-style state modeling</span><br>
+                    <span class="code-keyword">const</span> <span class="code-function">watchPartyState</span> = {<br>
+                    &nbsp;&nbsp;<span class="code-comment">// Application States</span><br>
+                    &nbsp;&nbsp;status: <span class="code-string">'loading'</span> | <span class="code-string">'success'</span> | <span class="code-string">'error'</span> | <span class="code-string">'empty'</span>,<br>
+                    <br>
+                    &nbsp;&nbsp;<span class="code-comment">// Real-time Data</span><br>
+                    &nbsp;&nbsp;users: [],<br>
+                    &nbsp;&nbsp;messages: [],<br>
+                    &nbsp;&nbsp;reactions: [],<br>
+                    &nbsp;&nbsp;playback: { isPlaying: true, time: 0 },<br>
+                    <br>
+                    &nbsp;&nbsp;<span class="code-comment">// UI States</span><br>
+                    &nbsp;&nbsp;search: { query: '', results: [], isLoading: false },<br>
+                    &nbsp;&nbsp;chat: { isOpen: true, unread: 0 },<br>
+                    &nbsp;&nbsp;notifications: []<br>
+                    };
+                </div>
+
+                <h3 style="color: white; margin: var(--space-xl) 0 var(--space-md) 0;">Component Hierarchy</h3>
+                <div class="hierarchy-diagram">
+                    <div class="hierarchy-line">WatchPartyApp/</div>
+                    <div class="hierarchy-line">├── WatchPartyHeader/    # Live badge, user count, controls</div>
+                    <div class="hierarchy-line">├── VideoPlayer/         # Playback with overlay states</div>
+                    <div class="hierarchy-line">├── ChatPanel/           # Real-time messaging</div>
+                    <div class="hierarchy-line">├── ReactionSystem/      # Live emoji reactions</div>
+                    <div class="hierarchy-line">├── MovieRow/           # Dynamic content with states</div>
+                    <div class="hierarchy-line">└── SearchSystem/       # Debounced search with filters</div>
+                </div>
+            </div>
+
+            <div class="challenge-card">
+                <h3 class="challenge-title">
+                    <i class="fas fa-puzzle-piece"></i> Technical Challenges You'll Solve
+                </h3>
+                <p style="color: var(--msebetsi-light-gray); line-height: 1.6;">
+                    <strong>Challenge 1: Managing Multiple States</strong> - The Watch Party has 5+ simultaneous states. 
+                    You'll learn to compartmentalize state and prevent "state explosion."<br><br>
+                    
+                    <strong>Challenge 2: Real-Time Updates Without Backend</strong> - How do you simulate live data for learning?
+                    You'll use intervals, debounced search, and progressive state updates.<br><br>
+                    
+                    <strong>Challenge 3: Responsive Design at Scale</strong> - Msebetsi Solutions Watch Party works on TV, desktop, mobile, tablet.
+                    You'll implement adaptive layouts and mobile-first design.
+                </p>
+            </div>
+
+            <div class="skills-section">
+                <div class="skill-category">
+                    <h4 class="skill-header">
+                        <i class="fas fa-react"></i> React Engineering
+                    </h4>
+                    <p style="color: var(--msebetsi-light-gray); font-size: 0.9rem;">
+                        Thinking in components and state, designing predictable data flows, building maintainable architecture
+                    </p>
+                </div>
+                <div class="skill-category">
+                    <h4 class="skill-header">
+                        <i class="fas fa-layer-group"></i> Frontend Architecture
+                    </h4>
+                    <p style="color: var(--msebetsi-light-gray); font-size: 0.9rem;">
+                        Component decomposition strategy, state modeling for complex features, event-driven system design
+                    </p>
+                </div>
+                <div class="skill-category">
+                    <h4 class="skill-header">
+                        <i class="fas fa-cube"></i> Msebetsi Solutions Mindset
+                    </h4>
+                    <p style="color: var(--msebetsi-light-gray); font-size: 0.9rem;">
+                        UX-first thinking, state as source of truth, progressive enhancement, collaborative feature design
+                    </p>
+                </div>
+            </div>
+
+            <div class="success-metrics">
+                <h3 class="success-title">Success Metrics</h3>
+                <p style="color: var(--msebetsi-light-gray); margin-bottom: var(--space-lg);">
+                    You've mastered this lesson when you can:
+                </p>
+                <div>
+                    <span class="metric-item">Explain Msebetsi Solutions UI state patterns</span>
+                    <span class="metric-item">Design component hierarchies</span>
+                    <span class="metric-item">Implement conditional rendering</span>
+                    <span class="metric-item">Build real-time features</span>
+                    <span class="metric-item">Debug state transitions</span>
+                    <span class="metric-item">Test search functionality</span>
+                </div>
+            </div>
+
+            <div class="prerequisites">
+                <h3 style="color: white; margin-bottom: var(--space-lg);">
+                    <i class="fas fa-check-circle"></i> Prerequisites
+                </h3>
+                <p style="color: var(--msebetsi-gray); margin-bottom: var(--space-lg);">
+                    Before starting, ensure you understand:
+                </p>
+                <div class="prereq-list">
+                    <span class="prereq-item">
+                        <i class="fas fa-check"></i> React Components
+                    </span>
+                    <span class="prereq-item">
+                        <i class="fas fa-check"></i> Props & State
+                    </span>
+                    <span class="prereq-item">
+                        <i class="fas fa-check"></i> Event Handling
+                    </span>
+                    <span class="prereq-item">
+                        <i class="fas fa-check"></i> Conditional Rendering
+                    </span>
+                </div>
+            </div>
+
+            <button class="start-lesson-btn" onclick="startLesson()">
+                <i class="fas fa-rocket"></i> START ENGINEERING LAB
+            </button>
+
+            <p style="color: var(--msebetsi-gray); text-align: center; margin-top: var(--space-xl); font-size: 0.9rem;">
+                <i class="fas fa-lock"></i> Confidential: Msebetsi Solutions Engineering Playbook<br>
+                This lesson incorporates real patterns used by Msebetsi Solutions engineers, adapted for learning.
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Content (Initially Hidden) -->
+    <div class="main-container" id="watchPartyDemo" style="display: none;">
+        <!-- Hero Section -->
+        <section class="hero-section fade-in">
+            <div class="hero-content">
+                <h1 class="hero-title">Msebetsi Solutions Watch Party</h1>
+                <p class="hero-subtitle">
+                    Watch movies together in real-time with friends. React, chat, and share the experience 
+                    like never before. Msebetsi Solutions' newest innovation in social viewing.
+                </p>
+                
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="liveParties">142</div>
+                        <div class="stat-label">Live Parties</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="activeUsers">8,542</div>
+                        <div class="stat-label">Active Users</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalReactions">24.7k</div>
+                        <div class="stat-label">Reactions Today</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Watch Party Theater -->
+        <section class="watch-party-theater fade-in">
+            <div class="theater-header">
+                <h2 class="theater-title">
+                    <i class="fas fa-film"></i> Stranger Things - Season 4
+                    <span style="font-size: 1rem; color: var(--watch-party-green);">
+                        <i class="fas fa-circle"></i> Live Now
+                    </span>
+                </h2>
+                <div class="theater-controls">
+                    <div class="online-users">
+                        <div class="user-avatar" title="You">DEV</div>
+                        <div class="user-avatar" title="Tshepho">T</div>
+                        <div class="user-avatar" title="Sam">S</div>
+                        <div class="user-avatar" title="+9 more">+9</div>
+                    </div>
+                    <button class="btn btn-primary" onclick="watchParty.inviteFriends()">
+                        <i class="fas fa-user-plus"></i> Invite Friends
+                    </button>
+                </div>
+            </div>
+
+            <div class="theater-content">
+                <!-- Video Player -->
+                <div class="video-player-container">
+                    <video class="video-player" id="partyVideo" 
+                           poster="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=1200&q=80">
+                        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                    </video>
+                    
+                    <div class="player-overlay">
+                        <div>
+                            <h3 class="player-title">Stranger Things: Chapter One</h3>
+                            <div class="player-meta">
+                                <span>Episode 1</span>
+                                <span>58m</span>
+                                <span>HD</span>
+                                <span>Survival Horror</span>
+                            </div>
+                        </div>
+                        
+                        <div class="player-controls">
+                            <button class="control-button" onclick="watchParty.togglePlay()" id="playButton">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button class="control-button" onclick="watchParty.syncPlayback()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="control-button" onclick="watchParty.toggleReactions()">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <button class="control-button" onclick="watchParty.screenshot()">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                            <div style="margin-left: auto; color: var(--msebetsi-light-gray);">
+                                <span id="currentTime">0:00</span> / <span id="duration">1:14:32</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Live Reactions Overlay -->
+                    <div class="live-reactions" id="reactionsContainer">
+                        <!-- Reactions will appear here -->
+                    </div>
+                </div>
+
+                <!-- Chat Panel -->
+                <div class="chat-panel">
+                    <div class="chat-header">
+                        <h3 class="chat-title">
+                            <i class="fas fa-comments"></i> Party Chat
+                        </h3>
+                        <div class="online-users">
+                            <span style="color: var(--msebetsi-gray);">12 watching</span>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message">
+                            <div class="message-header">
+                                <div class="message-user">
+                                    <i class="fas fa-crown" style="color: var(--watch-party-yellow);"></i>
+                                    Tshepho (Host)
+                                </div>
+                                <div class="message-time">2:15</div>
+                            </div>
+                            <div class="message-content">
+                                Welcome everyone to the watch party! Ready for some Stranger Things?
+                            </div>
+                            <div class="reactions-bar">
+                                <button class="reaction-button">👍 3</button>
+                                <button class="reaction-button">🎉 5</button>
+                                <button class="reaction-button">❤️ 8</button>
+                            </div>
+                        </div>
+                        
+                        <div class="message">
+                            <div class="message-header">
+                                <div class="message-user">
+                                    <i class="fas fa-user" style="color: var(--watch-party-green);"></i>
+                                    Sam
+                                </div>
+                                <div class="message-time">2:18</div>
+                            </div>
+                            <div class="message-content">
+                                So excited! This is my first time watching Season 4 😱
+                            </div>
+                            <div class="reactions-bar">
+                                <button class="reaction-button">🔥 2</button>
+                            </div>
+                        </div>
+                        
+                        <div class="message">
+                            <div class="message-header">
+                                <div class="message-user">
+                                    <i class="fas fa-user" style="color: var(--watch-party-blue);"></i>
+                                    Jordan
+                                </div>
+                                <div class="message-time">2:20</div>
+                            </div>
+                            <div class="message-content">
+                                That opening scene though! Who else got chills? 🙀
+                            </div>
+                            <div class="reactions-bar">
+                                <button class="reaction-button">😱 7</button>
+                                <button class="reaction-button">👏 4</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input">
+                        <button class="emoji-button" onclick="toggleEmojiPicker()">
+                            😀
+                        </button>
+                        <textarea class="chat-textarea" id="chatInput" 
+                                  placeholder="Type your message... (Press Enter to send)" 
+                                  rows="1"></textarea>
+                        <button class="send-button" onclick="watchParty.sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Quick Reactions -->
+                    <div style="display: flex; gap: var(--space-sm); margin-top: var(--space-md);">
+                        <button class="reaction-button" onclick="watchParty.sendQuickReaction('❤️')">❤️ Love</button>
+                        <button class="reaction-button" onclick="watchParty.sendQuickReaction('😂')">😂 Funny</button>
+                        <button class="reaction-button" onclick="watchParty.sendQuickReaction('😱')">😱 Scary</button>
+                        <button class="reaction-button" onclick="watchParty.sendQuickReaction('👏')">👏 Bravo</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conditional Rendering States Demo -->
+        <section class="states-demo fade-in">
+            <div class="states-header">
+                <h2 class="states-title">Conditional Rendering Patterns</h2>
+                <p class="states-subtitle">
+                    Learn how Msebetsi Solutions handles different UI states professionally. 
+                    Master loading, error, empty, and success states with real-world examples.
+                </p>
+            </div>
+            
+            <div class="states-grid">
+                <!-- Loading State -->
+                <div class="state-card loading">
+                    <div class="state-icon">
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                    <h3 class="state-title">Loading State</h3>
+                    <p class="state-description">
+                        Shows progress indicators while content is being fetched. 
+                        Msebetsi Solutions uses skeleton screens for better UX.
+                    </p>
+                    <button class="btn btn-secondary" onclick="watchParty.demoLoadingState()">
+                        <i class="fas fa-sync"></i> Demo Loading
+                    </button>
+                    <div class="state-code">
+                        // Conditional rendering pattern<br>
+                        {isLoading ? (<br>
+                        &nbsp;&nbsp;&lt;LoadingSkeleton /&gt;<br>
+                        ) : (<br>
+                        &nbsp;&nbsp;&lt;Content /&gt;<br>
+                        )}
+                    </div>
+                </div>
+                
+                <!-- Error State -->
+                <div class="state-card error">
+                    <div class="state-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3 class="state-title">Error State</h3>
+                    <p class="state-description">
+                        Handles network errors, failed requests, and unexpected issues 
+                        with clear messages and recovery options.
+                    </p>
+                    <button class="btn btn-secondary" onclick="watchParty.demoErrorState()">
+                        <i class="fas fa-bug"></i> Demo Error
+                    </button>
+                    <div class="state-code">
+                        // Error boundary pattern<br>
+                        {error ? (<br>
+                        &nbsp;&nbsp;&lt;ErrorDisplay <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;error={error}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;onRetry={fetchData}<br>
+                        &nbsp;&nbsp;/&gt;<br>
+                        ) : null}
+                    </div>
+                </div>
+                
+                <!-- Empty State -->
+                <div class="state-card empty">
+                    <div class="state-icon">
+                        <i class="fas fa-inbox"></i>
+                    </div>
+                    <h3 class="state-title">Empty State</h3>
+                    <p class="state-description">
+                        Displays when no content is available. Provides clear guidance 
+                        on what users can do next.
+                    </p>
+                    <button class="btn btn-secondary" onclick="watchParty.demoEmptyState()">
+                        <i class="fas fa-box-open"></i> Demo Empty
+                    </button>
+                    <div class="state-code">
+                        // Empty state pattern<br>
+                        {data.length === 0 ? (<br>
+                        &nbsp;&nbsp;&lt;EmptyState<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;title="No results found"<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;action={fetchMore}<br>
+                        &nbsp;&nbsp;/&gt;<br>
+                        ) : null}
+                    </div>
+                </div>
+                
+                <!-- Success State -->
+                <div class="state-card success">
+                    <div class="state-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3 class="state-title">Success State</h3>
+                    <p class="state-description">
+                        Shows when content loads successfully. Includes smooth 
+                        transitions and celebratory animations.
+                    </p>
+                    <button class="btn btn-secondary" onclick="watchParty.demoSuccessState()">
+                        <i class="fas fa-check"></i> Demo Success
+                    </button>
+                    <div class="state-code">
+                        // Success state with animation<br>
+                        &lt;AnimatePresence&gt;<br>
+                        &nbsp;&nbsp;{isVisible && (<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&lt;motion.div<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;initial={{ opacity: 0 }}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;animate={{ opacity: 1 }}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&gt;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Content /&gt;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&lt;/motion.div&gt;<br>
+                        &nbsp;&nbsp;)}<br>
+                        &lt;/AnimatePresence&gt;
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MovieRow with State Management -->
+        <section class="movierow-demo fade-in">
+            <div class="movierow-header">
+                <h2 class="movierow-title">
+                    <i class="fas fa-film"></i> MovieRow State Management
+                </h2>
+                <div class="state-selector">
+                    <button class="state-button active" onclick="watchParty.setMovieRowState('success')">
+                        Success
+                    </button>
+                    <button class="state-button" onclick="watchParty.setMovieRowState('loading')">
+                        Loading
+                    </button>
+                    <button class="state-button" onclick="watchParty.setMovieRowState('error')">
+                        Error
+                    </button>
+                    <button class="state-button" onclick="watchParty.setMovieRowState('empty')">
+                        Empty
+                    </button>
+                </div>
+            </div>
+            
+            <div class="movierow-container" id="movieRowDemo">
+                <!-- MovieRow will render based on state -->
+            </div>
+        </section>
+
+        <!-- Advanced Search Demo -->
+        <section class="search-section fade-in">
+            <div class="search-header">
+                <h2 class="search-title">
+                    <i class="fas fa-search"></i> Real-time Search & Filtering
+                </h2>
+                <p style="color: var(--msebetsi-gray); max-width: 600px; margin: 0 auto;">
+                    Experience Msebetsi Solutions' advanced search system with real-time filtering, 
+                    type-ahead suggestions, and instant results.
+                </p>
+            </div>
+            
+            <div class="search-container">
+                <div class="search-input-group">
+                    <input type="text" class="search-input" id="movieSearch" 
+                           placeholder="Search movies, series, actors, genres..."
+                           oninput="watchParty.handleSearch(this.value)">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                
+                <div class="search-stats">
+                    <span id="searchStatus">Ready to search</span>
+                    <span id="resultsCount">0 results</span>
+                </div>
+                
+                <div id="searchResultsContainer">
+                    <!-- Search results will appear here -->
+                </div>
+                
+                <div style="text-align: center; margin-top: var(--space-xxl);">
+                    <button class="btn btn-primary" onclick="watchParty.testSearchFunctionality()">
+                        <i class="fas fa-vial"></i> Test Search Functionality
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Lesson Completion -->
+        <div style="text-align: center; padding: var(--space-xxxl);">
+            <button class="btn btn-primary" onclick="completeLesson()" style="padding: var(--space-xl) var(--space-xxxl); font-size: 1.2rem;">
+                <i class="fas fa-graduation-cap"></i> Complete Lesson 9
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Msebetsi Solutions Watch Party & State Management System
+        class MsebetsiWatchParty {
+            constructor() {
+                this.state = {
+                    currentState: 'success',
+                    isPlaying: false,
+                    messages: [],
+                    reactions: [],
+                    searchQuery: '',
+                    searchResults: [],
+                    isLoading: false,
+                    hasError: false,
+                    isPartyActive: true,
+                    onlineUsers: 12,
+                    liveParties: 142,
+                    activeUsers: 8542,
+                    totalReactions: 24700
+                };
+                
+                this.movies = this.generateMovies();
+                this.searchDebounce = null;
+                this.reactionInterval = null;
+            }
+            
+            generateMovies() {
+                return [
+                    { id: 1, title: "Stranger Things", year: 2016, rating: "TV-14", genre: "Sci-Fi", duration: "4 Seasons", match: 98 },
+                    { id: 2, title: "The Crown", year: 2016, rating: "TV-MA", genre: "Drama", duration: "6 Seasons", match: 96 },
+                    { id: 3, title: "Bird Box", year: 2018, rating: "TV-MA", genre: "Thriller", duration: "2h 4m", match: 87 },
+                    { id: 4, title: "Red Notice", year: 2021, rating: "PG-13", genre: "Action", duration: "1h 58m", match: 92 },
+                    { id: 5, title: "Squid Game", year: 2021, rating: "TV-MA", genre: "Thriller", duration: "1 Season", match: 95 },
+                    { id: 6, title: "Wednesday", year: 2022, rating: "TV-14", genre: "Comedy", duration: "1 Season", match: 89 }
+                ];
+            }
+            
+            // State Management
+            setMovieRowState(state) {
+                this.state.currentState = state;
+                this.updateMovieRowUI();
+                this.updateStateButtons(state);
+                
+                let message = '';
+                switch(state) {
+                    case 'loading':
+                        message = '🔄 Loading state activated';
+                        break;
+                    case 'error':
+                        message = '❌ Error state simulated';
+                        break;
+                    case 'empty':
+                        message = '📭 Empty state displayed';
+                        break;
+                    case 'success':
+                        message = '✅ Success state loaded';
+                        break;
+                }
+                
+                showNotification(message, state === 'error' ? 'error' : 'info');
+            }
+            
+            updateStateButtons(activeState) {
+                document.querySelectorAll('.state-button').forEach(button => {
+                    button.classList.remove('active');
+                    if (button.textContent.trim().toLowerCase() === activeState) {
+                        button.classList.add('active');
+                    }
+                });
+            }
+            
+            // Watch Party Functions
+            togglePlay() {
+                const video = document.getElementById('partyVideo');
+                const button = document.getElementById('playButton');
+                
+                if (this.state.isPlaying) {
+                    video.pause();
+                    button.innerHTML = '<i class="fas fa-play"></i>';
+                    showNotification('⏸️ Playback paused', 'info');
+                } else {
+                    video.play();
+                    button.innerHTML = '<i class="fas fa-pause"></i>';
+                    showNotification('▶️ Playback started', 'success');
+                    
+                    // Start generating random reactions
+                    this.startReactionGenerator();
+                }
+                
+                this.state.isPlaying = !this.state.isPlaying;
+            }
+            
+            startReactionGenerator() {
+                if (this.reactionInterval) clearInterval(this.reactionInterval);
+                
+                this.reactionInterval = setInterval(() => {
+                    if (this.state.isPlaying && Math.random() > 0.7) {
+                        this.generateRandomReaction();
+                    }
+                }, 3000);
+            }
+            
+            generateRandomReaction() {
+                const reactions = ['❤️', '😂', '😱', '👏', '🔥', '🎉', '😮', '🙌'];
+                const users = ['Tshepho', 'Sam', 'Jordan', 'Taylor', 'Casey', 'Riley'];
+                const reaction = reactions[Math.floor(Math.random() * reactions.length)];
+                const user = users[Math.floor(Math.random() * users.length)];
+                
+                this.showReaction(reaction, user);
+                this.state.totalReactions++;
+                document.getElementById('totalReactions').textContent = 
+                    (this.state.totalReactions > 1000) 
+                    ? `${(this.state.totalReactions / 1000).toFixed(1)}k`
+                    : this.state.totalReactions;
+            }
+            
+            showReaction(emoji, user = null) {
+                const container = document.getElementById('reactionsContainer');
+                const reaction = document.createElement('div');
+                reaction.className = 'reaction-bubble';
+                reaction.innerHTML = user 
+                    ? `${emoji} ${user}`
+                    : emoji;
+                reaction.style.animationDelay = '0s';
+                
+                container.appendChild(reaction);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    if (reaction.parentElement) {
+                        reaction.remove();
+                    }
+                }, 4000);
+                
+                // Limit number of reactions
+                if (container.children.length > 5) {
+                    container.removeChild(container.firstChild);
+                }
+            }
+            
+            // Chat Functions
+            sendMessage() {
+                const input = document.getElementById('chatInput');
+                const message = input.value.trim();
+                
+                if (!message) return;
+                
+                this.addMessage('You', message);
+                input.value = '';
+                input.style.height = 'auto';
+                
+                // Simulate response
+                setTimeout(() => {
+                    const responses = [
+                        "That scene was amazing!",
+                        "I can't believe that just happened!",
+                        "Who's your favorite character?",
+                        "This is getting intense!",
+                        "Msebetsi Solutions really outdid themselves with this one!"
+                    ];
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    this.addMessage('Tshepho', randomResponse);
+                }, 1000 + Math.random() * 2000);
+            }
+            
+            addMessage(user, content) {
+                const messagesDiv = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message';
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <div class="message-user">
+                            <i class="fas fa-${user === 'Tshepho' ? 'crown' : 'user'}" 
+                               style="color: ${user === 'Tshepho' ? 'var(--watch-party-yellow)' : 'var(--watch-party-green)'};"></i>
+                            ${user}
+                        </div>
+                        <div class="message-time">
+                            ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                    </div>
+                    <div class="message-content">${content}</div>
+                    <div class="reactions-bar">
+                        <button class="reaction-button" onclick="this.textContent = '👍 1'">👍 0</button>
+                        <button class="reaction-button" onclick="this.textContent = '❤️ 1'">❤️ 0</button>
+                    </div>
+                `;
+                
+                messagesDiv.appendChild(messageDiv);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+            
+            sendQuickReaction(emoji) {
+                this.showReaction(emoji);
+                this.state.totalReactions++;
+                document.getElementById('totalReactions').textContent = 
+                    (this.state.totalReactions > 1000) 
+                    ? `${(this.state.totalReactions / 1000).toFixed(1)}k`
+                    : this.state.totalReactions;
+            }
+            
+            // Search Functions
+            handleSearch(query) {
+                this.state.searchQuery = query;
+                
+                clearTimeout(this.searchDebounce);
+                
+                if (!query) {
+                    this.updateSearchResults([]);
+                    document.getElementById('searchStatus').textContent = 'Ready to search';
+                    document.getElementById('resultsCount').textContent = '0 results';
+                    return;
+                }
+                
+                document.getElementById('searchStatus').textContent = 'Searching...';
+                this.state.isLoading = true;
+                
+                this.searchDebounce = setTimeout(() => {
+                    const results = this.movies.filter(movie => 
+                        movie.title.toLowerCase().includes(query.toLowerCase()) ||
+                        movie.genre.toLowerCase().includes(query.toLowerCase())
+                    );
+                    
+                    this.updateSearchResults(results);
+                    this.state.isLoading = false;
+                    
+                    document.getElementById('searchStatus').textContent = results.length > 0 
+                        ? `Found ${results.length} matches` 
+                        : 'No results found';
+                    document.getElementById('resultsCount').textContent = `${results.length} results`;
+                }, 300);
+            }
+            
+            updateSearchResults(results) {
+                const container = document.getElementById('searchResultsContainer');
+                
+                if (results.length === 0) {
+                    if (this.state.searchQuery) {
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: var(--space-xxl); color: var(--msebetsi-gray);">
+                                <i class="fas fa-search" style="font-size: 3rem; margin-bottom: var(--space-lg);"></i>
+                                <h3 style="color: white; margin-bottom: var(--space-sm);">No results found</h3>
+                                <p>Try different keywords or browse our categories</p>
+                            </div>
+                        `;
+                    } else {
+                        container.innerHTML = '';
+                    }
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <div class="movies-grid">
+                        ${results.map(movie => `
+                            <div class="movie-card">
+                                <div style="height: 300px; background: linear-gradient(45deg, #333, #444); border-radius: 12px 12px 0 0;"></div>
+                                <div class="movie-info">
+                                    <div class="movie-title">${movie.title}</div>
+                                    <div class="movie-meta">
+                                        <span>${movie.year}</span>
+                                        <span>${movie.rating}</span>
+                                        <span>${movie.match}% Match</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            // UI Updates
+            updateMovieRowUI() {
+                const container = document.getElementById('movieRowDemo');
+                
+                switch(this.state.currentState) {
+                    case 'loading':
+                        container.innerHTML = `
+                            <div class="loading-state">
+                                <div class="loading-spinner"></div>
+                                <div class="loading-text">Loading recommendations...</div>
+                            </div>
+                        `;
+                        break;
+                        
+                    case 'error':
+                        container.innerHTML = `
+                            <div class="error-state">
+                                <div class="error-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="error-text">Failed to load content</div>
+                                <button class="retry-button" onclick="watchParty.setMovieRowState('success')">
+                                    Retry
+                                </button>
+                            </div>
+                        `;
+                        break;
+                        
+                    case 'empty':
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="fas fa-inbox"></i>
+                                </div>
+                                <div class="empty-text">No movies in this category</div>
+                                <button class="browse-button" onclick="watchParty.setMovieRowState('success')">
+                                    Browse Movies
+                                </button>
+                            </div>
+                        `;
+                        break;
+                        
+                    case 'success':
+                        container.innerHTML = `
+                            <div class="success-state">
+                                <div class="movies-grid">
+                                    ${this.movies.map(movie => `
+                                        <div class="movie-card">
+                                            <div style="height: 300px; background: linear-gradient(45deg, #333, #444); border-radius: 12px 12px 0 0;"></div>
+                                            <div class="movie-info">
+                                                <div class="movie-title">${movie.title}</div>
+                                                <div class="movie-meta">
+                                                    <span>${movie.year}</span>
+                                                    <span>${movie.rating}</span>
+                                                    <span>${movie.match}%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                        break;
+                }
+            }
+            
+            // Test Functionality
+            testSearchFunctionality() {
+                const tests = [
+                    { query: 'stranger', expected: 1 },
+                    { query: 'thriller', expected: 2 },
+                    { query: 'game', expected: 1 },
+                    { query: 'nonexistent', expected: 0 }
+                ];
+                
+                let passed = 0;
+                let results = [];
+                
+                tests.forEach(test => {
+                    const filtered = this.movies.filter(movie => 
+                        movie.title.toLowerCase().includes(test.query.toLowerCase()) ||
+                        movie.genre.toLowerCase().includes(test.query.toLowerCase())
+                    );
+                    
+                    const success = filtered.length === test.expected;
+                    passed += success ? 1 : 0;
+                    
+                    results.push({
+                        query: test.query,
+                        expected: test.expected,
+                        actual: filtered.length,
+                        success: success
+                    });
+                });
+                
+                const score = Math.round((passed / tests.length) * 100);
+                
+                let resultHTML = `
+                    <div style="background: rgba(0,0,0,0.5); padding: var(--space-xl); border-radius: 12px; margin-top: var(--space-lg);">
+                        <h3 style="color: white; margin-bottom: var(--space-lg);">
+                            <i class="fas fa-vial"></i> Search Test Results: ${score}%
+                        </h3>
+                        <div style="display: grid; gap: var(--space-md);">
+                `;
+                
+                results.forEach(result => {
+                    resultHTML += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm); background: rgba(255,255,255,0.05); border-radius: 8px;">
+                            <span style="color: var(--msebetsi-light-gray);">"${result.query}"</span>
+                            <div>
+                                <span style="color: ${result.success ? 'var(--state-success)' : 'var(--state-error)'}; margin-right: var(--space-md);">
+                                    ${result.actual} results
+                                </span>
+                                <i class="fas fa-${result.success ? 'check' : 'times'}" 
+                                   style="color: ${result.success ? 'var(--state-success)' : 'var(--state-error)'};"></i>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                resultHTML += `
+                        </div>
+                        <div style="margin-top: var(--space-lg); text-align: center;">
+                            <button class="btn btn-primary" onclick="watchParty.handleSearch('')">
+                                Clear Search
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('searchResultsContainer').innerHTML = resultHTML;
+                
+                showNotification(`🧪 Search tests completed: ${score}% passed`, score === 100 ? 'success' : 'warning');
+            }
+            
+            // Demo Functions
+            demoLoadingState() {
+                this.setMovieRowState('loading');
+                setTimeout(() => {
+                    if (this.state.currentState === 'loading') {
+                        this.setMovieRowState('success');
+                    }
+                }, 2000);
+            }
+            
+            demoErrorState() {
+                this.setMovieRowState('error');
+            }
+            
+            demoEmptyState() {
+                this.setMovieRowState('empty');
+            }
+            
+            demoSuccessState() {
+                this.setMovieRowState('success');
+                showNotification('✅ Success state loaded with animations!', 'success');
+            }
+            
+            // Party Management
+            createWatchParty() {
+                showNotification('🎬 Creating new watch party...', 'success');
+                this.state.liveParties++;
+                document.getElementById('liveParties').textContent = this.state.liveParties;
+                
+                setTimeout(() => {
+                    showNotification('✨ Watch party created! Invite friends to join.', 'success');
+                }, 1000);
+            }
+            
+            joinWatchParty() {
+                showNotification('👥 Joining live watch party...', 'info');
+                this.state.activeUsers += 5;
+                this.state.onlineUsers += 1;
+                document.getElementById('activeUsers').textContent = this.state.activeUsers;
+                
+                setTimeout(() => {
+                    showNotification('🎉 Joined the party! Say hello in the chat.', 'success');
+                }, 1000);
+            }
+            
+            inviteFriends() {
+                showNotification('📤 Invitations sent to your friends!', 'success');
+                this.state.onlineUsers += 3;
+            }
+            
+            syncPlayback() {
+                showNotification('🔄 Playback synchronized for all viewers', 'info');
+            }
+            
+            toggleReactions() {
+                if (this.reactionInterval) {
+                    clearInterval(this.reactionInterval);
+                    this.reactionInterval = null;
+                    showNotification('❌ Reaction generation stopped', 'info');
+                } else {
+                    this.startReactionGenerator();
+                    showNotification('❤️ Reaction generation started', 'success');
+                }
+            }
+            
+            screenshot() {
+                showNotification('📸 Screenshot captured! Saved to your activity.', 'success');
+            }
+        }
+
+        // Initialize Watch Party System
+        const watchParty = new MsebetsiWatchParty();
+
+        // DOM Ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize UI
+            watchParty.updateMovieRowUI();
+            
+            // Setup chat input
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) {
+                chatInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        watchParty.sendMessage();
+                    }
+                });
+                
+                chatInput.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+                });
+            }
+            
+            // Setup video player
+            const video = document.getElementById('partyVideo');
+            if (video) {
+                video.addEventListener('loadedmetadata', function() {
+                    document.getElementById('duration').textContent = 
+                        formatTime(video.duration);
+                });
+                
+                video.addEventListener('timeupdate', function() {
+                    document.getElementById('currentTime').textContent = 
+                        formatTime(video.currentTime);
+                });
+                
+                // Start with some random reactions
+                setTimeout(() => {
+                    ['❤️', '🔥', '😱', '👏'].forEach(emoji => {
+                        setTimeout(() => {
+                            watchParty.showReaction(emoji);
+                        }, Math.random() * 2000);
+                    });
+                }, 1000);
+            }
+            
+            // Update live stats
+            setInterval(() => {
+                if (watchParty) {
+                    watchParty.state.liveParties += Math.floor(Math.random() * 3) - 1;
+                    watchParty.state.activeUsers += Math.floor(Math.random() * 10) - 2;
+                    watchParty.state.liveParties = Math.max(100, watchParty.state.liveParties);
+                    watchParty.state.activeUsers = Math.max(8000, watchParty.state.activeUsers);
+                    
+                    document.getElementById('liveParties').textContent = watchParty.state.liveParties;
+                    document.getElementById('activeUsers').textContent = watchParty.state.activeUsers;
+                }
+            }, 10000);
+        });
+
+        // Lesson Control Functions
+        function startLesson() {
+            document.getElementById('lessonIntro').style.display = 'none';
+            document.getElementById('watchPartyDemo').style.display = 'block';
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Show welcome notification
+            setTimeout(() => {
+                showNotification('🚀 Engineering Lab Started! Build like a Msebetsi Solutions engineer.', 'success');
+            }, 500);
+        }
+        
+        function showLessonIntro() {
+            document.getElementById('lessonIntro').style.display = 'block';
+            document.getElementById('watchPartyDemo').style.display = 'none';
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function startWatchPartyDemo() {
+            startLesson();
+            
+            // Additional setup for demo
+            setTimeout(() => {
+                showNotification('🎬 Watch Party Demo Ready! Try the video controls and chat.', 'info');
+            }, 1000);
+        }
+
+        // Helper Functions
+        function formatTime(seconds) {
+            if (!seconds) return "0:00";
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function toggleEmojiPicker() {
+            showNotification('😀 Emoji picker coming soon! Try the quick reactions below.', 'info');
+        }
+
+        function toggleProfile() {
+            showNotification('👤 Profile settings coming soon!', 'info');
+        }
+
+        function completeLesson() {
+            // Confetti celebration
+            createConfetti();
+            
+            showNotification('🏆 Lesson 9 Completed! You mastered advanced React state management!', 'success');
+            
+            setTimeout(() => {
+                alert('🎉 CONGRATULATIONS!\n\nYou have successfully completed Lesson 9:\n\n✅ Built Msebetsi Solutions Watch Party system\n✅ Mastered production state management\n✅ Implemented real-time search with filtering\n✅ Handled loading/error/empty/success states\n✅ Created professional React architecture\n✅ Tested search functionality\n\nYou are now ready to build production Msebetsi Solutions applications!');
+                
+                // Save completion
+                localStorage.setItem('lesson9Completed', 'true');
+            }, 1000);
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: var(--space-md);">
+                    <div style="font-size: 1.5rem;">${icon}</div>
+                    <div style="flex: 1;">
+                        <div style="color: white; font-weight: 700; margin-bottom: 4px;">
+                            ${type === 'success' ? 'Success!' : type === 'error' ? 'Error' : type === 'warning' ? 'Warning' : 'Info'}
+                        </div>
+                        <div style="color: var(--msebetsi-gray); font-size: 0.9rem;">
+                            ${message}
+                        </div>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="background: none; border: none; color: var(--msebetsi-gray); cursor: pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100px)';
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 4000);
+        }
+
+        function createConfetti() {
+            const colors = ['#8A2BE2', '#00B4D8', '#00FF88', '#FFD700', '#FF6B9D', '#E50914'];
+            
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: ${Math.random() * 12 + 6}px;
+                    height: ${Math.random() * 12 + 6}px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                    top: -20px;
+                    left: ${Math.random() * 100}vw;
+                    animation: fall ${Math.random() * 3 + 2}s linear forwards;
+                    z-index: 9997;
+                    transform: rotate(${Math.random() * 360}deg);
+                `;
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    if (confetti.parentElement) {
+                        confetti.remove();
+                    }
+                }, 5000);
+            }
+            
+            // Add animation if not exists
+            if (!document.querySelector('style[data-confetti]')) {
+                const style = document.createElement('style');
+                style.setAttribute('data-confetti', 'true');
+                style.textContent = `
+                    @keyframes fall {
+                        to {
+                            transform: translateY(100vh) rotate(${Math.random() * 720}deg);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        // Handle scroll for header
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('mainHeader');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+</html>
