@@ -1,0 +1,2623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 4: Functions & AI APIs | Python AI Bootcamp</title>
+    <style>
+        /* OpenAI/ChatGPT Theme Variables */
+        :root {
+            /* Light Theme - ChatGPT Style */
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F7F7F8;
+            --bg-tertiary: #ECECF1;
+            --border-color: #E5E5E5;
+            --text-primary: #000000;
+            --text-secondary: #565869;
+            --text-tertiary: #8E8EA0;
+            --ai-green: #10A37F;
+            --ai-green-hover: #1A7F64;
+            --ai-purple: #5436DA;
+            --user-blue: #0066CC;
+            --anthropic-blue: #2563EB;
+            --cohere-purple: #8B5CF6;
+            --code-bg: #F6F6F6;
+            --code-text: #000000;
+            --highlight-bg: rgba(16, 163, 127, 0.1);
+            --sidebar-bg: #F7F7F8;
+            --message-ai-bg: #F7F7F8;
+            --message-user-bg: #FFFFFF;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --transition-speed: 0.3s;
+            --success-green: #10A37F;
+            --warning-orange: #F59E0B;
+            --error-red: #EF4444;
+        }
+
+        /* Dark Theme - ChatGPT Style */
+        .dark-mode {
+            --bg-primary: #343541;
+            --bg-secondary: #444654;
+            --bg-tertiary: #202123;
+            --border-color: #565869;
+            --text-primary: #FFFFFF;
+            --text-secondary: #C5C5D2;
+            --text-tertiary: #8E8EA0;
+            --ai-green: #10A37F;
+            --ai-green-hover: #1A7F64;
+            --ai-purple: #5436DA;
+            --user-blue: #0066CC;
+            --anthropic-blue: #3B82F6;
+            --cohere-purple: #8B5CF6;
+            --code-bg: #0D1117;
+            --code-text: #FFFFFF;
+            --highlight-bg: rgba(16, 163, 127, 0.2);
+            --sidebar-bg: #202123;
+            --message-ai-bg: #444654;
+            --message-user-bg: #343541;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --success-green: #10A37F;
+            --warning-orange: #F59E0B;
+            --error-red: #EF4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Segoe UI', Arial, sans-serif;
+            transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-primary);
+            box-shadow: 0 2px 10px var(--shadow-color);
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .theme-icon {
+            font-size: 18px;
+        }
+
+        /* Header - ChatGPT Style */
+        .header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--ai-green), var(--ai-purple));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .lesson-tag {
+            background: var(--ai-green);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Main Layout - ChatGPT Style */
+        .main-layout {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Sidebar - ChatGPT Left Panel Style */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            position: sticky;
+            top: 70px;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            margin-bottom: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .sidebar-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .sidebar-item.active {
+            background: var(--highlight-bg);
+            color: var(--ai-green);
+            font-weight: 600;
+        }
+
+        .sidebar-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* API Provider Badges */
+        .api-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 2px;
+        }
+
+        .badge-openai {
+            background: rgba(16, 163, 127, 0.1);
+            color: var(--ai-green);
+            border: 1px solid rgba(16, 163, 127, 0.3);
+        }
+
+        .badge-anthropic {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--anthropic-blue);
+            border: 1px solid rgba(37, 99, 235, 0.3);
+        }
+
+        .badge-cohere {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--cohere-purple);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        /* Main Content - ChatGPT Chat Style */
+        .main-content {
+            flex: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Message Bubbles - ChatGPT Style */
+        .message {
+            display: flex;
+            gap: 16px;
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .message:last-child {
+            border-bottom: none;
+        }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .avatar.ai {
+            background: var(--ai-green);
+            color: white;
+        }
+
+        .avatar.user {
+            background: var(--user-blue);
+            color: white;
+        }
+
+        .avatar.openai {
+            background: var(--ai-green);
+        }
+
+        .avatar.anthropic {
+            background: var(--anthropic-blue);
+        }
+
+        .avatar.cohere {
+            background: var(--cohere-purple);
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .message-author {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .message-text {
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .message-text p {
+            margin-bottom: 12px;
+        }
+
+        .message-text ul, .message-text ol {
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .message-text li {
+            margin-bottom: 6px;
+        }
+
+        /* Interactive Code Blocks - ChatGPT Style */
+        .code-block {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border: 1px solid var(--border-color);
+            position: relative;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .code-language {
+            font-weight: 600;
+            color: var(--ai-green);
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .code-action {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .code-action:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .code-content {
+            color: var(--code-text);
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        .code-line {
+            padding: 2px 0;
+        }
+
+        .code-line.highlight {
+            background: var(--highlight-bg);
+            border-left: 3px solid var(--ai-green);
+            padding-left: 8px;
+        }
+
+        /* Function Examples */
+        .function-demo {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .function-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .function-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .function-metrics {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .metric {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* API Console */
+        .api-console {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .console-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .console-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .console-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: rgba(16, 163, 127, 0.1);
+            color: var(--ai-green);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--ai-green);
+            border-radius: 50%;
+        }
+
+        .console-input {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .console-input input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'SFMono-Regular', monospace;
+            font-size: 14px;
+        }
+
+        .console-input input:focus {
+            outline: none;
+            border-color: var(--ai-green);
+        }
+
+        .console-output {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'SFMono-Regular', monospace;
+            font-size: 13px;
+            color: var(--code-text);
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        /* API Keys Section */
+        .api-keys {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .api-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .api-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--ai-green);
+        }
+
+        .api-card.openai {
+            border-left: 4px solid var(--ai-green);
+        }
+
+        .api-card.anthropic {
+            border-left: 4px solid var(--anthropic-blue);
+        }
+
+        .api-card.cohere {
+            border-left: 4px solid var(--cohere-purple);
+        }
+
+        .api-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .api-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .api-logo.openai {
+            background: linear-gradient(135deg, var(--ai-green), #1A7F64);
+        }
+
+        .api-logo.anthropic {
+            background: linear-gradient(135deg, var(--anthropic-blue), #1D4ED8);
+        }
+
+        .api-logo.cohere {
+            background: linear-gradient(135deg, var(--cohere-purple), #7C3AED);
+        }
+
+        .api-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .api-card-body {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        /* Chatbot Interface */
+        .chatbot-interface {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            margin: 24px 0;
+        }
+
+        .chatbot-header {
+            background: var(--bg-tertiary);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .chatbot-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .chatbot-messages {
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .chatbot-message {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .chatbot-message.user {
+            justify-content: flex-end;
+        }
+
+        .chatbot-message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .chatbot-message.ai .chatbot-message-content {
+            background: var(--message-ai-bg);
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+        }
+
+        .chatbot-message.user .chatbot-message-content {
+            background: var(--user-blue);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chatbot-input {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-primary);
+        }
+
+        .chatbot-input-inner {
+            display: flex;
+            gap: 12px;
+        }
+
+        .chatbot-input-inner input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .chatbot-input-inner input:focus {
+            outline: none;
+            border-color: var(--ai-green);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--ai-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--ai-green-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* Progress Indicators */
+        .progress-section {
+            margin: 24px 0;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .progress-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--ai-green), var(--ai-purple));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        /* Interactive Exercise */
+        .exercise {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .exercise-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .exercise-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--ai-green);
+            color: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .exercise-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .exercise-content {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        /* Type Hints & Docstrings Demo */
+        .type-hint-demo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .type-hint-demo {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .demo-bad, .demo-good {
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid;
+        }
+
+        .demo-bad {
+            border-color: var(--error-red);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .demo-good {
+            border-color: var(--success-green);
+            background: rgba(16, 163, 127, 0.05);
+        }
+
+        .demo-label {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .demo-bad .demo-label {
+            background: var(--error-red);
+            color: white;
+        }
+
+        .demo-good .demo-label {
+            background: var(--success-green);
+            color: white;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+            }
+            
+            .header {
+                padding: 12px 16px;
+            }
+            
+            .main-content {
+                padding: 16px;
+            }
+            
+            .message {
+                padding: 16px 0;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes typing {
+            0% { width: 0; }
+            100% { width: 100%; }
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--text-tertiary);
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        .typing-dot:nth-child(3) { animation-delay: 0s; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Theme Toggle Button -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon theme-icon" id="themeIcon"></i>
+        <span id="themeText">Dark Mode</span>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">⚡</div>
+        <div class="header-title">Python AI Developer Bootcamp</div>
+        <div class="lesson-tag">Lesson 4</div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Lesson 4 Topics</div>
+                <div class="sidebar-item active" onclick="scrollToSection('clean-functions')">
+                    <i class="fas fa-code sidebar-icon"></i>
+                    <span>Clean Functions</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('ai-refactoring')">
+                    <i class="fas fa-robot sidebar-icon"></i>
+                    <span>AI Refactoring</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('type-hints')">
+                    <i class="fas fa-file-code sidebar-icon"></i>
+                    <span>Type Hints & Docstrings</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('api-keys')">
+                    <i class="fas fa-key sidebar-icon"></i>
+                    <span>Get API Keys</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('api-calls')">
+                    <i class="fas fa-exchange-alt sidebar-icon"></i>
+                    <span>First API Call</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('build-chatbot')">
+                    <i class="fas fa-comments sidebar-icon"></i>
+                    <span>Build a Chatbot</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">API Providers</div>
+                <div class="sidebar-item" onclick="scrollToProvider('openai')">
+                    <i class="fas fa-brain sidebar-icon" style="color: var(--ai-green);"></i>
+                    <span>OpenAI (GPT-4)</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToProvider('anthropic')">
+                    <i class="fas fa-cube sidebar-icon" style="color: var(--anthropic-blue);"></i>
+                    <span>Anthropic (Claude)</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToProvider('cohere')">
+                    <i class="fas fa-bolt sidebar-icon" style="color: var(--cohere-purple);"></i>
+                    <span>Cohere</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Resources</div>
+                <div class="sidebar-item" onclick="downloadCodeSamples()">
+                    <i class="fas fa-download sidebar-icon"></i>
+                    <span>Download Code Samples</span>
+                </div>
+                <div class="sidebar-item" onclick="openAPIKeysPage()">
+                    <i class="fas fa-external-link-alt sidebar-icon"></i>
+                    <span>Get Free API Credits</span>
+                </div>
+                <div class="sidebar-item" onclick="openAPIDocs()">
+                    <i class="fas fa-book sidebar-icon"></i>
+                    <span>API Documentation</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Progress</div>
+                <div class="progress-section" style="margin: 0; padding: 0; border: none; background: transparent;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="globalProgress" style="width: 28%"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <span>Lesson 4/15</span>
+                        <span id="progressPercent">28%</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Welcome Message -->
+            <div class="message fade-in">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Now</span>
+                    </div>
+                    <div class="message-text">
+                        <h1>🚀 Lesson 4: Functions & AI APIs in the Age of AI</h1>
+                        <p>Welcome to the most practical lesson yet! Today, you'll master modern Python functions while building real AI applications. We'll combine clean code practices with actual API calls to OpenAI, Anthropic, and Cohere.</p>
+                        
+                        <div class="api-keys">
+                            <div class="api-card openai">
+                                <div class="api-card-header">
+                                    <div class="api-logo openai">O</div>
+                                    <div class="api-card-title">OpenAI GPT-4</div>
+                                </div>
+                                <div class="api-card-body">
+                                    Get $5 free credit<br>
+                                    Most popular AI API<br>
+                                    Powers ChatGPT
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="getOpenAIKey()">Get Free Key</button>
+                            </div>
+                            
+                            <div class="api-card anthropic">
+                                <div class="api-card-header">
+                                    <div class="api-logo anthropic">A</div>
+                                    <div class="api-card-title">Anthropic Claude</div>
+                                </div>
+                                <div class="api-card-body">
+                                    Free trial available<br>
+                                    Excellent for reasoning<br>
+                                    100K context window
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="getAnthropicKey()">Try Free</button>
+                            </div>
+                            
+                            <div class="api-card cohere">
+                                <div class="api-card-header">
+                                    <div class="api-logo cohere">C</div>
+                                    <div class="api-card-title">Cohere</div>
+                                </div>
+                                <div class="api-card-body">
+                                    Free tier available<br>
+                                    Great for classification<br>
+                                    Simple API design
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="getCohereKey()">Get Started</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clean Functions -->
+            <div class="message fade-in" id="clean-functions">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 1</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>🧹 Writing Clean Functions for AI Systems</h2>
+                        <p>In AI development, clean functions are essential for maintainability and collaboration. Here's how OpenAI engineers write functions:</p>
+                        
+                        <div class="type-hint-demo">
+                            <div class="demo-bad">
+                                <span class="demo-label">❌ Bad Practice (Old Way)</span>
+                                <div class="code-content" style="font-size: 13px;">
+                                    def process_data(data, model):<br>
+                                    &nbsp;&nbsp;result = []<br>
+                                    &nbsp;&nbsp;for d in data:<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;r = model.predict(d)<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;if r > 0.5:<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result.append(1)<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;else:<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result.append(0)<br>
+                                    &nbsp;&nbsp;return result
+                                </div>
+                            </div>
+                            
+                            <div class="demo-good">
+                                <span class="demo-label">✅ Good Practice (Modern AI Way)</span>
+                                <div class="code-content" style="font-size: 13px;">
+                                    def classify_ai_predictions(<br>
+                                    &nbsp;&nbsp;data: List[np.ndarray],<br>
+                                    &nbsp;&nbsp;model: AIModel,<br>
+                                    &nbsp;&nbsp;threshold: float = 0.5<br>
+                                    ) -> List[int]:<br>
+                                    """Classify AI predictions with configurable threshold.<br><br>
+                                    Args:<br>
+                                    &nbsp;&nbsp;data: List of input arrays for prediction<br>
+                                    &nbsp;&nbsp;model: Trained AI model for inference<br>
+                                    &nbsp;&nbsp;threshold: Confidence threshold for classification<br><br>
+                                    Returns:<br>
+                                    &nbsp;&nbsp;List of binary predictions (0 or 1)<br>
+                                    """<br>
+                                    return [<br>
+                                    &nbsp;&nbsp;1 if model.predict(d) > threshold else 0<br>
+                                    &nbsp;&nbsp;for d in data<br>
+                                    ]
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Function Principles -->
+                        <div class="exercise">
+                            <div class="exercise-header">
+                                <div class="exercise-icon">🎯</div>
+                                <div class="exercise-title">Clean Function Principles</div>
+                            </div>
+                            <div class="exercise-content">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 16px 0;">
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <div style="color: var(--ai-green); margin-bottom: 8px;"><i class="fas fa-check-circle"></i></div>
+                                        <div style="font-weight: 600;">Single Responsibility</div>
+                                        <div style="font-size: 12px; color: var(--text-tertiary);">Do one thing well</div>
+                                    </div>
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <div style="color: var(--ai-green); margin-bottom: 8px;"><i class="fas fa-comment"></i></div>
+                                        <div style="font-weight: 600;">Clear Docstrings</div>
+                                        <div style="font-size: 12px; color: var(--text-tertiary);">AI can read these</div>
+                                    </div>
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <div style="color: var(--ai-green); margin-bottom: 8px;"><i class="fas fa-code"></i></div>
+                                        <div style="font-weight: 600;">Type Hints</div>
+                                        <div style="font-size: 12px; color: var(--text-tertiary);">Better IDE support</div>
+                                    </div>
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <div style="color: var(--ai-green); margin-bottom: 8px;"><i class="fas fa-sliders-h"></i></div>
+                                        <div style="font-weight: 600;">Default Parameters</div>
+                                        <div style="font-size: 12px; color: var(--text-tertiary);">Flexible but simple</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Interactive Exercise -->
+                        <div class="exercise">
+                            <div class="exercise-header">
+                                <div class="exercise-icon">✏️</div>
+                                <div class="exercise-title">Practice: Write a Clean AI Function</div>
+                            </div>
+                            <div class="exercise-content">
+                                Create a function that processes AI conversation data. Add type hints and a clear docstring.
+                            </div>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>Your Solution</span>
+                                    <div class="code-actions">
+                                        <button class="code-action" onclick="formatWithAI()">
+                                            <i class="fas fa-robot"></i> AI Format
+                                        </button>
+                                        <button class="code-action" onclick="checkFunction()">
+                                            <i class="fas fa-check"></i> Check
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="code-content" id="functionExercise" contenteditable="true" spellcheck="false">
+def process_conversation(conversations):
+    # TODO: Add type hints and docstring
+    # Process each conversation
+    results = []
+    for conv in conversations:
+        # Extract user and AI messages
+        user_msg = conv.get('user', '')
+        ai_msg = conv.get('ai', '')
+        
+        # Calculate statistics
+        stats = {
+            'user_length': len(user_msg),
+            'ai_length': len(ai_msg),
+            'ratio': len(ai_msg) / max(len(user_msg), 1)
+        }
+        results.append(stats)
+    
+    return results
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Refactoring -->
+            <div class="message fade-in" id="ai-refactoring">
+                <div class="avatar user">You</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Student</span>
+                        <span class="message-time">Question</span>
+                    </div>
+                    <div class="message-text">
+                        <p>How do AI engineers use ChatGPT to refactor and document their code?</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="message fade-in">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 2</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>🤖 AI-Assisted Refactoring & Documentation</h2>
+                        <p>Professional developers use AI for code improvement daily. Here's the workflow:</p>
+                        
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="simulateAIRefactor()">
+                                        <i class="fas fa-magic"></i> AI Refactor
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line"># Before AI Refactoring - Messy function</span><br>
+                                <span class="code-line">def ai_process(data, model_type='gpt', temp=0.7, tokens=100, stream=False):</span><br>
+                                <span class="code-line">    if model_type == 'gpt':</span><br>
+                                <span class="code-line">        result = openai_call(data, temp, tokens)</span><br>
+                                <span class="code-line">    elif model_type == 'claude':</span><br>
+                                <span class="code-line">        result = anthropic_call(data, temp, tokens)</span><br>
+                                <span class="code-line">    else:</span><br>
+                                <span class="code-line">        return None</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    if stream:</span><br>
+                                <span class="code-line">        for chunk in result:</span><br>
+                                <span class="code-line">            print(chunk)</span><br>
+                                <span class="code-line">    else:</span><br>
+                                <span class="code-line">        return result</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line"># Ask ChatGPT: "Refactor this function with type hints and better structure"</span>
+                            </div>
+                        </div>
+
+                        <!-- AI Refactoring Assistant -->
+                        <div class="api-console">
+                            <div class="console-header">
+                                <div class="console-title">AI Refactoring Assistant</div>
+                                <div class="console-status">
+                                    <div class="status-dot"></div>
+                                    <span>Connected to GPT-4</span>
+                                </div>
+                            </div>
+                            <div class="console-input">
+                                <input type="text" id="refactorPrompt" placeholder="Ask AI to refactor or document your code..." value="Add type hints, docstring, and improve structure">
+                                <button class="btn btn-primary" onclick="refactorWithAI()">
+                                    <i class="fas fa-robot"></i> Refactor
+                                </button>
+                            </div>
+                            <div class="console-output" id="refactorOutput">
+                                // AI refactored code will appear here<br>
+                                // Try clicking "AI Refactor" above
+                            </div>
+                        </div>
+
+                        <!-- Documentation Example -->
+                        <div class="function-demo">
+                            <div class="function-header">
+                                <div class="function-title">AI-Generated Documentation</div>
+                                <div class="function-metrics">
+                                    <div class="metric">
+                                        <i class="fas fa-star" style="color: var(--warning-orange);"></i>
+                                        <span>Readability: 95%</span>
+                                    </div>
+                                    <div class="metric">
+                                        <i class="fas fa-check" style="color: var(--success-green);"></i>
+                                        <span>Completeness: 100%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="code-block">
+                                <div class="code-content">
+                                    <span class="code-line highlight"># After AI Refactoring - Clean, documented function</span><br>
+                                    <span class="code-line">from typing import Optional, Union, List, Dict, Any</span><br>
+                                    <span class="code-line">from enum import Enum</span><br>
+                                    <span class="code-line"></span><br>
+                                    <span class="code-line">class AIModel(Enum):</span><br>
+                                    <span class="code-line">    """Enumeration of supported AI models."""</span><br>
+                                    <span class="code-line">    GPT = "gpt"</span><br>
+                                    <span class="code-line">    CLAUDE = "claude"</span><br>
+                                    <span class="code-line"></span><br>
+                                    <span class="code-line">def process_with_ai(</span><br>
+                                    <span class="code-line">    prompt: str,</span><br>
+                                    <span class="code-line">    model: AIModel = AIModel.GPT,</span><br>
+                                    <span class="code-line">    temperature: float = 0.7,</span><br>
+                                    <span class="code-line">    max_tokens: int = 100,</span><br>
+                                    <span class="code-line">    stream: bool = False</span><br>
+                                    <span class="code-line">) -> Union[str, List[str], None]:</span><br>
+                                    <span class="code-line">    """</span><br>
+                                    <span class="code-line">    Process a prompt using specified AI model with configurable parameters.</span><br>
+                                    <span class="code-line"></span><br>
+                                    <span class="code-line">    This function abstracts away the complexity of calling different AI APIs</span><br>
+                                    <span class="code-line">    and provides a consistent interface for AI-powered text generation.</span><br>
+                                    <span class="code-line"></span><br>
+                                    <span class="code-line">    Args:</span><br>
+                                    <span class="code-line">        prompt: The input text to process</span><br>
+                                    <span class="code-line">        model: Which AI model to use (GPT or Claude)</span><br>
+                                    <span class="code-line">        temperature: Controls randomness (0.0 to 1.0)</span><br>
+                                    <span class="code-line">        max_tokens: Maximum length of generated response</span><br>
+                                    <span class="code-line">        stream: Whether to stream response chunks</span><br>
+                                    <span class="code-line"></span><br>
+                                    <span class="code-line">    Returns:</span><br>
+                                    <span class="code-line">        Generated text or list of chunks if streaming</span><br>
+                                    <span class="code-line"></span><br>
+                                    <span class="code-line">    Raises:</span><br>
+                                    <span class="code-line">        ValueError: If model is not supported</span><br>
+                                    <span class="code-line">        APIError: If AI API call fails</span><br>
+                                    <span class="code-line">    """</span><br>
+                                    <span class="code-line">    # Dispatch to appropriate API handler</span><br>
+                                    <span class="code-line">    if model == AIModel.GPT:</span><br>
+                                    <span class="code-line">        return call_openai_api(prompt, temperature, max_tokens, stream)</span><br>
+                                    <span class="code-line">    elif model == AIModel.CLAUDE:</span><br>
+                                    <span class="code-line">        return call_anthropic_api(prompt, temperature, max_tokens, stream)</span><br>
+                                    <span class="code-line">    else:</span><br>
+                                    <span class="code-line">        raise ValueError(f"Unsupported model: {model}")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Type Hints & Docstrings -->
+            <div class="message fade-in" id="type-hints">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 3</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>📝 Modern Type Hints & Docstrings for AI Code</h2>
+                        <p>Type hints and docstrings aren't just for humans—AI uses them too! Here's why they're essential:</p>
+                        
+                        <div class="api-keys">
+                            <div class="api-card">
+                                <div class="api-card-header">
+                                    <div class="api-logo" style="background: var(--ai-green);">1</div>
+                                    <div class="api-card-title">Better IDE Support</div>
+                                </div>
+                                <div class="api-card-body">
+                                    Autocomplete<br>
+                                    Error detection<br>
+                                    Code navigation
+                                </div>
+                            </div>
+                            
+                            <div class="api-card">
+                                <div class="api-card-header">
+                                    <div class="api-logo" style="background: var(--anthropic-blue);">2</div>
+                                    <div class="api-card-title">AI Understanding</div>
+                                </div>
+                                <div class="api-card-body">
+                                    ChatGPT reads types<br>
+                                    Better refactoring<br>
+                                    Accurate documentation
+                                </div>
+                            </div>
+                            
+                            <div class="api-card">
+                                <div class="api-card-header">
+                                    <div class="api-logo" style="background: var(--cohere-purple);">3</div>
+                                    <div class="api-card-title">Team Collaboration</div>
+                                </div>
+                                <div class="api-card-body">
+                                    Clear interfaces<br>
+                                    Reduced bugs<br>
+                                    Faster onboarding
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Type Hint Examples -->
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python Type Hints</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="explainTypeHints()">
+                                        <i class="fas fa-info-circle"></i> Explain
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line"># Modern type hints for AI functions</span><br>
+                                <span class="code-line">from typing import List, Dict, Optional, Union, Any, Callable</span><br>
+                                <span class="code-line">from dataclasses import dataclass</span><br>
+                                <span class="code-line">from datetime import datetime</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">@dataclass</span><br>
+                                <span class="code-line">class AIResponse:</span><br>
+                                <span class="code-line">    """Data class for standardized AI responses."""</span><br>
+                                <span class="code-line">    content: str</span><br>
+                                <span class="code-line">    model: str</span><br>
+                                <span class="code-line">    tokens_used: int</span><br>
+                                <span class="code-line">    timestamp: datetime</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">def generate_ai_response(</span><br>
+                                <span class="code-line">    prompt: str,</span><br>
+                                <span class="code-line">    model: str = "gpt-4",</span><br>
+                                <span class="code-line">    temperature: float = 0.7,</span><br>
+                                <span class="code-line">    max_tokens: Optional[int] = None,</span><br>
+                                <span class="code-line">    callbacks: List[Callable[[str], None]] = None</span><br>
+                                <span class="code-line">) -> Union[AIResponse, List[AIResponse]]:</span><br>
+                                <span class="code-line">    """</span><br>
+                                <span class="code-line">    Generate AI response with comprehensive configuration.</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    Type hints enable:</span><br>
+                                <span class="code-line">    • Static type checking with mypy/pyright</span><br>
+                                <span class="code-line">    • Better IDE autocompletion</span><br>
+                                <span class="code-line">    • AI-assisted code generation</span><br>
+                                <span class="code-line">    • Self-documenting code</span><br>
+                                <span class="code-line">    """</span><br>
+                                <span class="code-line">    # Implementation here...</span><br>
+                                <span class="code-line">    pass</span>
+                            </div>
+                        </div>
+
+                        <!-- Docstring Standards -->
+                        <div class="exercise">
+                            <div class="exercise-header">
+                                <div class="exercise-icon">📚</div>
+                                <div class="exercise-title">Google-Style Docstrings for AI Functions</div>
+                            </div>
+                            <div class="exercise-content">
+                                <div class="code-block">
+                                    <div class="code-content" style="font-size: 13px;">
+                                        def call_ai_api(<br>
+                                        &nbsp;&nbsp;prompt: str,<br>
+                                        &nbsp;&nbsp;api_key: str,<br>
+                                        &nbsp;&nbsp;endpoint: str = "https://api.openai.com/v1/chat/completions"<br>
+                                        ) -> Dict[str, Any]:<br>
+                                        """Call AI API with proper error handling and logging.<br><br>
+                                        <span class="code-line highlight">Args:</span><br>
+                                        &nbsp;&nbsp;prompt: User input text to send to AI<br>
+                                        &nbsp;&nbsp;api_key: Authentication key for API access<br>
+                                        &nbsp;&nbsp;endpoint: API endpoint URL (defaults to OpenAI)<br><br>
+                                        <span class="code-line highlight">Returns:</span><br>
+                                        &nbsp;&nbsp;Dictionary containing AI response and metadata<br><br>
+                                        <span class="code-line highlight">Raises:</span><br>
+                                        &nbsp;&nbsp;AuthenticationError: If API key is invalid<br>
+                                        &nbsp;&nbsp;RateLimitError: If API quota exceeded<br>
+                                        &nbsp;&nbsp;APIError: For other API failures<br><br>
+                                        <span class="code-line highlight">Examples:</span><br>
+                                        &nbsp;&nbsp;&gt;&gt;&gt; response = call_ai_api("Hello", "sk-...")<br>
+                                        &nbsp;&nbsp;&gt;&gt;&gt; print(response['choices'][0]['message']['content'])<br>
+                                        &nbsp;&nbsp;'Hello! How can I assist you today?'<br>
+                                        """<br>
+                                        # Implementation<br>
+                                        pass
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Get API Keys -->
+            <div class="message fade-in" id="api-keys">
+                <div class="avatar user">You</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Student</span>
+                        <span class="message-time">Question</span>
+                    </div>
+                    <div class="message-text">
+                        <p>How do I actually get free API keys and start making AI calls?</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="message fade-in">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 4</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>🔑 Get Free API Keys & Start Building</h2>
+                        <p>Let's get you real API keys for three major AI providers—all with free tiers!</p>
+                        
+                        <!-- API Key Step-by-Step -->
+                        <div class="function-demo">
+                            <div class="function-header">
+                                <div class="function-title">Step 1: OpenAI (ChatGPT API)</div>
+                                <div class="api-badge badge-openai">
+                                    <i class="fas fa-check-circle"></i>
+                                    $5 Free Credit
+                                </div>
+                            </div>
+                            <div class="code-block">
+                                <div class="code-content">
+                                    1. Go to <a href="https://platform.openai.com" target="_blank" style="color: var(--ai-green);">platform.openai.com</a><br>
+                                    2. Sign up with email or Google<br>
+                                    3. Go to API Keys section<br>
+                                    4. Click "Create new secret key"<br>
+                                    5. Copy key (it starts with sk-...)<br>
+                                    6. Save in .env file: OPENAI_API_KEY=your_key_here
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="function-demo">
+                            <div class="function-header">
+                                <div class="function-title">Step 2: Anthropic (Claude API)</div>
+                                <div class="api-badge badge-anthropic">
+                                    <i class="fas fa-bolt"></i>
+                                    Free Trial
+                                </div>
+                            </div>
+                            <div class="code-block">
+                                <div class="code-content">
+                                    1. Visit <a href="https://console.anthropic.com" target="_blank" style="color: var(--anthropic-blue);">console.anthropic.com</a><br>
+                                    2. Sign up for free trial<br>
+                                    3. Navigate to API Keys<br>
+                                    4. Create new key<br>
+                                    5. Save in .env: ANTHROPIC_API_KEY=your_key_here<br>
+                                    6. Use claude-2.1 or claude-3 models
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="function-demo">
+                            <div class="function-header">
+                                <div class="function-title">Step 3: Cohere</div>
+                                <div class="api-badge badge-cohere">
+                                    <i class="fas fa-infinity"></i>
+                                    Free Tier
+                                </div>
+                            </div>
+                            <div class="code-block">
+                                <div class="code-content">
+                                    1. Go to <a href="https://dashboard.cohere.com" target="_blank" style="color: var(--cohere-purple);">dashboard.cohere.com</a><br>
+                                    2. Sign up for free account<br>
+                                    3. Get your API key<br>
+                                    4. Save in .env: COHERE_API_KEY=your_key_here<br>
+                                    5. Great for classification and embeddings
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Environment File Setup -->
+                        <div class="exercise">
+                            <div class="exercise-header">
+                                <div class="exercise-icon">⚙️</div>
+                                <div class="exercise-title">Create Your .env File</div>
+                            </div>
+                            <div class="exercise-content">
+                                Create a .env file in your project root (NEVER commit this to GitHub!):
+                            </div>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>.env</span>
+                                    <div class="code-actions">
+                                        <button class="code-action" onclick="copyEnvTemplate()">
+                                            <i class="fas fa-copy"></i> Copy Template
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="code-content">
+                                    # AI API Keys - Get free credits from links above<br>
+                                    OPENAI_API_KEY=sk-your_openai_key_here<br>
+                                    ANTHROPIC_API_KEY=your_anthropic_key_here<br>
+                                    COHERE_API_KEY=your_cohere_key_here<br>
+                                    <br>
+                                    # Configuration<br>
+                                    DEFAULT_MODEL=gpt-3.5-turbo<br>
+                                    MAX_TOKENS=500<br>
+                                    TEMPERATURE=0.7<br>
+                                    <br>
+                                    # Never share these keys! Add .env to .gitignore
+                                </div>
+                            </div>
+                            <div style="margin-top: 16px;">
+                                <button class="btn btn-primary" onclick="downloadEnvTemplate()">
+                                    <i class="fas fa-download"></i> Download .env Template
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- First API Call -->
+            <div class="message fade-in" id="api-calls">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 5</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>📡 Make Your First AI API Call</h2>
+                        <p>Let's write a clean function to call the OpenAI API. This is the foundation of all AI applications.</p>
+                        
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="testAPICall()">
+                                        <i class="fas fa-play"></i> Test Call
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line">import os</span><br>
+                                <span class="code-line">from typing import Optional, Dict, Any</span><br>
+                                <span class="code-line">from dotenv import load_dotenv</span><br>
+                                <span class="code-line">import openai</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line"># Load environment variables</span><br>
+                                <span class="code-line">load_dotenv()</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">def call_openai(</span><br>
+                                <span class="code-line">    prompt: str,</span><br>
+                                <span class="code-line">    model: str = "gpt-3.5-turbo",</span><br>
+                                <span class="code-line">    temperature: float = 0.7,</span><br>
+                                <span class="code-line">    max_tokens: Optional[int] = None,</span><br>
+                                <span class="code-line">    system_message: str = "You are a helpful AI assistant."</span><br>
+                                <span class="code-line">) -> Dict[str, Any]:</span><br>
+                                <span class="code-line">    """</span><br>
+                                <span class="code-line">    Call OpenAI's Chat Completions API with proper error handling.</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    Args:</span><br>
+                                <span class="code-line">        prompt: User's message to the AI</span><br>
+                                <span class="code-line">        model: Which OpenAI model to use</span><br>
+                                <span class="code-line">        temperature: Creativity control (0.0-1.0)</span><br>
+                                <span class="code-line">        max_tokens: Maximum response length</span><br>
+                                <span class="code-line">        system_message: AI's role/personality</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    Returns:</span><br>
+                                <span class="code-line">        Dictionary with 'success', 'response', and 'usage' keys</span><br>
+                                <span class="code-line">    """</span><br>
+                                <span class="code-line">    try:</span><br>
+                                <span class="code-line">        response = openai.ChatCompletion.create(</span><br>
+                                <span class="code-line">            model=model,</span><br>
+                                <span class="code-line">            messages=[</span><br>
+                                <span class="code-line">                {"role": "system", "content": system_message},</span><br>
+                                <span class="code-line">                {"role": "user", "content": prompt}</span><br>
+                                <span class="code-line">            ],</span><br>
+                                <span class="code-line">            temperature=temperature,</span><br>
+                                <span class="code-line">            max_tokens=max_tokens</span><br>
+                                <span class="code-line">        )</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        return {</span><br>
+                                <span class="code-line">            "success": True,</span><br>
+                                <span class="code-line">            "response": response.choices[0].message.content,</span><br>
+                                <span class="code-line">            "usage": response.usage.dict(),</span><br>
+                                <span class="code-line">            "model": response.model</span><br>
+                                <span class="code-line">        }</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">    except openai.error.AuthenticationError:</span><br>
+                                <span class="code-line">        return {"success": False, "error": "Invalid API key"}</span><br>
+                                <span class="code-line">    except openai.error.RateLimitError:</span><br>
+                                <span class="code-line">        return {"success": False, "error": "Rate limit exceeded"}</span><br>
+                                <span class="code-line">    except Exception as e:</span><br>
+                                <span class="code-line">        return {"success": False, "error": str(e)}</span>
+                            </div>
+                        </div>
+
+                        <!-- Live API Console -->
+                        <div class="api-console">
+                            <div class="console-header">
+                                <div class="console-title">Live API Test Console</div>
+                                <div class="console-status">
+                                    <div class="status-dot"></div>
+                                    <span>Ready for testing</span>
+                                </div>
+                            </div>
+                            <div class="console-input">
+                                <input type="text" id="apiTestPrompt" placeholder="Enter a prompt to test the API..." value="Explain Python functions in one sentence">
+                                <select id="apiProvider" style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary);">
+                                    <option value="openai">OpenAI GPT</option>
+                                    <option value="anthropic">Anthropic Claude</option>
+                                    <option value="cohere">Cohere</option>
+                                    <option value="simulated">Simulated (No API Key Needed)</option>
+                                </select>
+                                <button class="btn btn-primary" onclick="makeAPICall()">
+                                    <i class="fas fa-paper-plane"></i> Send
+                                </button>
+                            </div>
+                            <div class="console-output" id="apiConsoleOutput">
+                                👋 Welcome to the API Console!<br><br>
+                                Enter a prompt and click "Send" to test AI API calls.<br>
+                                Select "Simulated" if you don't have API keys yet.<br><br>
+                                Example prompts:<br>
+                                • "Explain Python functions"<br>
+                                • "Write a hello world program"<br>
+                                • "What is artificial intelligence?"
+                            </div>
+                        </div>
+
+                        <!-- Multi-API Function -->
+                        <div class="exercise">
+                            <div class="exercise-header">
+                                <div class="exercise-icon">🔄</div>
+                                <div class="exercise-title">Challenge: Multi-API Function</div>
+                            </div>
+                            <div class="exercise-content">
+                                Create a function that can call multiple AI APIs with a unified interface.
+                            </div>
+                            <div class="code-block">
+                                <div class="code-content" id="multiApiExercise" contenteditable="true" spellcheck="false">
+def call_ai_provider(
+    prompt: str,
+    provider: str = "openai",
+    **kwargs
+):
+    """
+    Unified function to call different AI providers.
+    
+    Supported providers: openai, anthropic, cohere
+    
+    Returns standardized response format.
+    """
+    # TODO: Implement multi-provider support
+    # Hint: Use if/elif/else or dictionary dispatch
+    pass
+                                </div>
+                            </div>
+                            <div style="margin-top: 16px; display: flex; gap: 12px;">
+                                <button class="btn btn-secondary" onclick="getMultiAPISolution()">
+                                    <i class="fas fa-lightbulb"></i> Show Solution
+                                </button>
+                                <button class="btn btn-primary" onclick="testMultiAPI()">
+                                    <i class="fas fa-vial"></i> Test Function
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Build a Chatbot -->
+            <div class="message fade-in" id="build-chatbot">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 6</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>🤖 Build Your First AI Chatbot</h2>
+                        <p>Now, let's combine everything you've learned to build a complete chatbot!</p>
+                        
+                        <!-- Chatbot Interface -->
+                        <div class="chatbot-interface">
+                            <div class="chatbot-header">
+                                <div class="avatar openai">AI</div>
+                                <div class="chatbot-title">Your AI Chatbot</div>
+                                <div class="api-badge badge-openai">
+                                    <i class="fas fa-bolt"></i>
+                                    Powered by GPT
+                                </div>
+                            </div>
+                            <div class="chatbot-messages" id="chatbotMessages">
+                                <div class="chatbot-message ai">
+                                    <div class="chatbot-message-content">
+                                        Hello! I'm your AI assistant. How can I help you today?
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chatbot-input">
+                                <div class="chatbot-input-inner">
+                                    <input type="text" id="chatbotInput" placeholder="Type your message..." onkeypress="if(event.key === 'Enter') sendChatbotMessage()">
+                                    <button class="btn btn-primary" onclick="sendChatbotMessage()">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Complete Chatbot Code -->
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python - Complete Chatbot</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="downloadChatbotCode()">
+                                        <i class="fas fa-download"></i> Download
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line">"""</span><br>
+                                <span class="code-line">AI Chatbot - Complete Implementation</span><br>
+                                <span class="code-line">Combines clean functions, type hints, and API calls</span><br>
+                                <span class="code-line">"""</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">import os</span><br>
+                                <span class="code-line">from typing import List, Dict, Optional</span><br>
+                                <span class="code-line">from dataclasses import dataclass, asdict</span><br>
+                                <span class="code-line">from datetime import datetime</span><br>
+                                <span class="code-line">from dotenv import load_dotenv</span><br>
+                                <span class="code-line">import openai</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">load_dotenv()</span><br>
+                                <span class="code-line">openai.api_key = os.getenv("OPENAI_API_KEY")</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">@dataclass</span><br>
+                                <span class="code-line">class ChatMessage:</span><br>
+                                <span class="code-line">    """Data class for chat messages."""</span><br>
+                                <span class="code-line">    role: str  # 'user' or 'assistant'</span><br>
+                                <span class="code-line">    content: str</span><br>
+                                <span class="code-line">    timestamp: datetime</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">class AIChatbot:</span><br>
+                                <span class="code-line">    """Main chatbot class with conversation history."""</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def __init__(</span><br>
+                                <span class="code-line">        self,</span><br>
+                                <span class="code-line">        system_prompt: str = "You are a helpful AI assistant.",</span><br>
+                                <span class="code-line">        model: str = "gpt-3.5-turbo"</span><br>
+                                <span class="code-line">    ) -> None:</span><br>
+                                <span class="code-line">        self.system_prompt = system_prompt</span><br>
+                                <span class="code-line">        self.model = model</span><br>
+                                <span class="code-line">        self.conversation_history: List[ChatMessage] = []</span><br>
+                                <span class="code-line">        self._initialize_conversation()</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def _initialize_conversation(self) -> None:</span><br>
+                                <span class="code-line">        """Add system message to start conversation."""</span><br>
+                                <span class="code-line">        system_msg = ChatMessage(</span><br>
+                                <span class="code-line">            role="system",</span><br>
+                                <span class="code-line">            content=self.system_prompt,</span><br>
+                                <span class="code-line">            timestamp=datetime.now()</span><br>
+                                <span class="code-line">        )</span><br>
+                                <span class="code-line">        self.conversation_history.append(system_msg)</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def add_user_message(self, content: str) -> None:</span><br>
+                                <span class="code-line">        """Add user message to conversation history."""</span><br>
+                                <span class="code-line">        message = ChatMessage(</span><br>
+                                <span class="code-line">            role="user",</span><br>
+                                <span class="code-line">            content=content,</span><br>
+                                <span class="code-line">            timestamp=datetime.now()</span><br>
+                                <span class="code-line">        )</span><br>
+                                <span class="code-line">        self.conversation_history.append(message)</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def get_ai_response(self) -> Dict[str, any]:</span><br>
+                                <span class="code-line">        """Get AI response based on conversation history."""</span><br>
+                                <span class="code-line">        try:</span><br>
+                                <span class="code-line">            response = openai.ChatCompletion.create(</span><br>
+                                <span class="code-line">                model=self.model,</span><br>
+                                <span class="code-line">                messages=[</span><br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;asdict(msg) for msg in self.conversation_history<br>
+                                <span class="code-line">                ],</span><br>
+                                <span class="code-line">                temperature=0.7,</span><br>
+                                <span class="code-line">                max_tokens=500</span><br>
+                                <span class="code-line">            )</span><br>
+                                <span class="code-line">            </span><br>
+                                <span class="code-line">            ai_content = response.choices[0].message.content</span><br>
+                                <span class="code-line">            ai_message = ChatMessage(</span><br>
+                                <span class="code-line">                role="assistant",</span><br>
+                                <span class="code-line">                content=ai_content,</span><br>
+                                <span class="code-line">                timestamp=datetime.now()</span><br>
+                                <span class="code-line">            )</span><br>
+                                <span class="code-line">            self.conversation_history.append(ai_message)</span><br>
+                                <span class="code-line">            </span><br>
+                                <span class="code-line">            return {</span><br>
+                                <span class="code-line">                "success": True,</span><br>
+                                <span class="code-line">                "response": ai_content,</span><br>
+                                <span class="code-line">                "tokens": response.usage.total_tokens</span><br>
+                                <span class="code-line">            }</span><br>
+                                <span class="code-line">            </span><br>
+                                <span class="code-line">        except Exception as e:</span><br>
+                                <span class="code-line">            return {"success": False, "error": str(e)}</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def chat_loop(self) -> None:</span><br>
+                                <span class="code-line">        """Run interactive chat loop."""</span><br>
+                                <span class="code-line">        print("🤖 AI Chatbot Started! Type 'quit' to exit.")</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        while True:</span><br>
+                                <span class="code-line">            user_input = input("\\nYou: ").strip()</span><br>
+                                <span class="code-line">            </span><br>
+                                <span class="code-line">            if user_input.lower() == "quit":</span><br>
+                                <span class="code-line">                print("Goodbye! 👋")</span><br>
+                                <span class="code-line">                break</span><br>
+                                <span class="code-line">            </span><br>
+                                <span class="code-line">            self.add_user_message(user_input)</span><br>
+                                <span class="code-line">            result = self.get_ai_response()</span><br>
+                                <span class="code-line">            </span><br>
+                                <span class="code-line">            if result["success"]:</span><br>
+                                <span class="code-line">                print(f"🤖 AI: {result['response']}")</span><br>
+                                <span class="code-line">                print(f"📊 Tokens used: {result['tokens']}")</span><br>
+                                <span class="code-line">            else:</span><br>
+                                <span class="code-line">                print(f"❌ Error: {result['error']}")</span>
+                            </div>
+                        </div>
+
+                        <!-- Progress & Next Steps -->
+                        <div class="progress-section">
+                            <div class="progress-header">
+                                <div class="progress-title">Lesson 4 Complete! 🎉</div>
+                                <div class="progress-title">Next: Lesson 5 - AI Systems Architecture</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="lessonProgress" style="width: 100%"></div>
+                            </div>
+                            <div class="progress-stats">
+                                <span>Clean Functions</span>
+                                <span>AI Refactoring</span>
+                                <span>Type Hints</span>
+                                <span>API Keys</span>
+                                <span>API Calls</span>
+                                <span>Chatbot Built</span>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; margin-top: 32px;">
+                            <button class="btn btn-primary" onclick="downloadCompleteProject()" style="padding: 15px 30px; font-size: 16px;">
+                                <i class="fas fa-rocket"></i> Download Complete AI Project
+                            </button>
+                            <button class="btn btn-secondary" onclick="continueToLesson5()" style="padding: 15px 30px; font-size: 16px; margin-left: 16px;">
+                                Continue to Lesson 5 →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div>Python AI Developer Bootcamp • Lesson 4: Functions & AI APIs</div>
+        <div style="margin-top: 8px; font-size: 12px;">
+            Build Real AI Applications • Get Free API Keys • Learn Modern Python
+        </div>
+    </footer>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+        const body = document.body;
+
+        // Check for saved theme or prefer-color-scheme
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const savedTheme = localStorage.getItem('theme');
+
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            body.classList.add('dark-mode');
+            themeIcon.className = 'fas fa-sun theme-icon';
+            themeText.textContent = 'Light Mode';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                themeIcon.className = 'fas fa-sun theme-icon';
+                themeText.textContent = 'Light Mode';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.className = 'fas fa-moon theme-icon';
+                themeText.textContent = 'Dark Mode';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Navigation
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+                
+                // Update active sidebar item
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                event.currentTarget.classList.add('active');
+            }
+        }
+
+        function scrollToProvider(provider) {
+            scrollToSection('api-keys');
+        }
+
+        // API Key Functions
+        function getOpenAIKey() {
+            window.open('https://platform.openai.com/api-keys', '_blank');
+            alert('🌐 Opening OpenAI API Keys page...\n\nGet your $5 free credit!');
+        }
+
+        function getAnthropicKey() {
+            window.open('https://console.anthropic.com', '_blank');
+            alert('🌐 Opening Anthropic Console...\n\nSign up for the free trial!');
+        }
+
+        function getCohereKey() {
+            window.open('https://dashboard.cohere.com', '_blank');
+            alert('🌐 Opening Cohere Dashboard...\n\nGet started with the free tier!');
+        }
+
+        // Copy code
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-block');
+            const codeContent = codeBlock.querySelector('.code-content').textContent;
+            
+            navigator.clipboard.writeText(codeContent).then(() => {
+                const originalText = button.textContent;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied';
+                button.style.color = 'var(--ai-green)';
+                
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                    button.style.color = '';
+                }, 2000);
+            });
+        }
+
+        // Format with AI
+        function formatWithAI() {
+            const codeElement = document.getElementById('functionExercise');
+            const code = codeElement.textContent;
+            
+            // Simulate AI formatting
+            const formatted = `from typing import List, Dict, Any
+
+def process_conversation(
+    conversations: List[Dict[str, str]]
+) -> List[Dict[str, Any]]:
+    """
+    Process AI conversation data and calculate statistics.
+    
+    Args:
+        conversations: List of dictionaries with 'user' and 'ai' keys
+        
+    Returns:
+        List of dictionaries with conversation statistics
+    """
+    results = []
+    
+    for conv in conversations:
+        user_msg = conv.get('user', '')
+        ai_msg = conv.get('ai', '')
+        
+        # Calculate statistics
+        stats = {
+            'user_length': len(user_msg),
+            'ai_length': len(ai_msg),
+            'ratio': len(ai_msg) / max(len(user_msg), 1)
+        }
+        results.append(stats)
+    
+    return results`;
+            
+            codeElement.textContent = formatted;
+            
+            alert('✨ AI has formatted your function!\n\nAdded:\n• Type hints\n• Google-style docstring\n• Clear variable names\n• Proper spacing');
+        }
+
+        function checkFunction() {
+            alert('✅ Function Analysis:\n\n✔ Proper function structure\n✔ Good variable names\n✔ Clear logic flow\n\n💡 Suggestion: Add return type hint and comprehensive docstring');
+        }
+
+        // AI Refactoring
+        function simulateAIRefactor() {
+            const beforeCode = `def ai_process(data, model_type='gpt', temp=0.7, tokens=100, stream=False):
+    if model_type == 'gpt':
+        result = openai_call(data, temp, tokens)
+    elif model_type == 'claude':
+        result = anthropic_call(data, temp, tokens)
+    else:
+        return None
+    
+    if stream:
+        for chunk in result:
+            print(chunk)
+    else:
+        return result`;
+
+            const afterCode = `from typing import Optional, Union, List
+from enum import Enum
+
+class AIModel(Enum):
+    """Enumeration of supported AI models."""
+    GPT = "gpt"
+    CLAUDE = "claude"
+
+def process_with_ai(
+    prompt: str,
+    model: AIModel = AIModel.GPT,
+    temperature: float = 0.7,
+    max_tokens: int = 100,
+    stream: bool = False
+) -> Union[str, List[str], None]:
+    """
+    Process a prompt using specified AI model with configurable parameters.
+    
+    Args:
+        prompt: Input text to process
+        model: AI model to use (GPT or Claude)
+        temperature: Creativity control (0.0-1.0)
+        max_tokens: Maximum response length
+        stream: Whether to stream response chunks
+        
+    Returns:
+        Generated text or list of chunks if streaming
+    """
+    # Dispatch to appropriate API handler
+    if model == AIModel.GPT:
+        return call_openai_api(prompt, temperature, max_tokens, stream)
+    elif model == AIModel.CLAUDE:
+        return call_anthropic_api(prompt, temperature, max_tokens, stream)
+    else:
+        raise ValueError(f"Unsupported model: {model}")`;
+
+            document.getElementById('refactorOutput').textContent = afterCode;
+            
+            alert('🤖 AI Refactoring Complete!\n\nImprovements made:\n• Added type hints\n• Created enum for models\n• Added comprehensive docstring\n• Better error handling\n• Consistent naming conventions');
+        }
+
+        function refactorWithAI() {
+            const prompt = document.getElementById('refactorPrompt').value;
+            const output = document.getElementById('refactorOutput');
+            
+            output.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+            
+            setTimeout(() => {
+                const improvements = [
+                    "✨ Added type hints for better static analysis",
+                    "📝 Added Google-style docstring with examples",
+                    "🔧 Created helper functions for single responsibility",
+                    "🚀 Added proper error handling with specific exceptions",
+                    "🎯 Used dataclasses for structured data",
+                    "⚡ Added default parameters with sensible values"
+                ];
+                
+                const randomImprovements = improvements.sort(() => Math.random() - 0.5).slice(0, 4);
+                
+                output.innerHTML = `🤖 AI Refactoring Result based on: "${prompt}"\n\n`;
+                output.innerHTML += '✅ Improvements made:\n\n';
+                randomImprovements.forEach(imp => {
+                    output.innerHTML += `• ${imp}\n`;
+                });
+                output.innerHTML += '\n💡 Try implementing these improvements in your own code!';
+            }, 2000);
+        }
+
+        // Type hints explanation
+        function explainTypeHints() {
+            alert(`🎯 Type Hints Explained:
+
+Why use them in AI development?
+
+1. **Better AI Assistance**: ChatGPT/VSCode understand your code better
+2. **Early Error Detection**: Catch bugs before runtime
+3. **Self-Documenting**: Clear function signatures
+4. **IDE Support**: Better autocomplete and navigation
+5. **Team Collaboration**: Clear contracts between functions
+
+Example benefits for AI code:
+• ChatGPT can suggest better implementations
+• Mypy can validate your API call structures
+• IDE knows what data your AI functions expect`);
+        }
+
+        // Environment template
+        function copyEnvTemplate() {
+            const template = `# AI API Keys - Get free credits
+OPENAI_API_KEY=sk-your_openai_key_here
+ANTHROPIC_API_KEY=your_anthropic_key_here
+COHERE_API_KEY=your_cohere_key_here
+
+# Configuration
+DEFAULT_MODEL=gpt-3.5-turbo
+MAX_TOKENS=500
+TEMPERATURE=0.7
+
+# Never share these keys! Add .env to .gitignore`;
+
+            navigator.clipboard.writeText(template).then(() => {
+                alert('✅ .env template copied to clipboard!\n\nPaste into a new .env file in your project root.\n\n⚠️ Remember: Never commit .env to GitHub!');
+            });
+        }
+
+        function downloadEnvTemplate() {
+            const content = `# AI API Keys - Get free credits
+OPENAI_API_KEY=sk-your_openai_key_here
+ANTHROPIC_API_KEY=your_anthropic_key_here
+COHERE_API_KEY=your_cohere_key_here
+
+# Configuration
+DEFAULT_MODEL=gpt-3.5-turbo
+MAX_TOKENS=500
+TEMPERATURE=0.7
+
+# Never share these keys! Add .env to .gitignore
+
+# How to get free API keys:
+# 1. OpenAI: https://platform.openai.com/api-keys ($5 free credit)
+# 2. Anthropic: https://console.anthropic.com (free trial)
+# 3. Cohere: https://dashboard.cohere.com (free tier)
+
+# Installation:
+# pip install openai anthropic cohere python-dotenv`;
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '.env.template';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('📥 .env template downloaded!\n\nSave as ".env" in your project root.');
+        }
+
+        // API Call testing
+        function testAPICall() {
+            alert(`🚀 Testing API Call Function...
+
+Simulated API Response:
+
+✅ Success: True
+🤖 Response: "Python functions are reusable blocks of code that perform specific tasks, making programs more organized and maintainable."
+📊 Usage: {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30}
+🎯 Model: gpt-3.5-turbo
+
+Your function is working correctly! 🎉`);
+        }
+
+        function makeAPICall() {
+            const prompt = document.getElementById('apiTestPrompt').value;
+            const provider = document.getElementById('apiProvider').value;
+            const output = document.getElementById('apiConsoleOutput');
+            
+            if (!prompt.trim()) {
+                alert('Please enter a prompt!');
+                return;
+            }
+            
+            output.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+            
+            setTimeout(() => {
+                const providers = {
+                    'openai': { name: 'OpenAI GPT-3.5', color: 'var(--ai-green)' },
+                    'anthropic': { name: 'Anthropic Claude', color: 'var(--anthropic-blue)' },
+                    'cohere': { name: 'Cohere', color: 'var(--cohere-purple)' },
+                    'simulated': { name: 'Simulated AI', color: 'var(--text-tertiary)' }
+                };
+                
+                const selected = providers[provider];
+                const responses = [
+                    `I understand you're asking about "${prompt}". Here's what I can tell you: This is a fundamental concept in programming that helps organize code effectively.`,
+                    `Great question about "${prompt}"! In simple terms, it's a core programming concept that every developer should master for writing clean, maintainable code.`,
+                    `Regarding "${prompt}", this is essential knowledge for any programmer. It allows you to write reusable code and avoid repetition in your projects.`
+                ];
+                
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                
+                output.innerHTML = `
+                    <div style="color: ${selected.color}; font-weight: bold; margin-bottom: 8px;">
+                        <i class="fas fa-check-circle"></i> ${selected.name} Response
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <strong>Prompt:</strong> ${prompt}
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <strong>Response:</strong> ${randomResponse}
+                    </div>
+                    <div style="background: rgba(16, 163, 127, 0.1); padding: 8px; border-radius: 6px; font-size: 12px;">
+                        <div><strong>API Call Details:</strong></div>
+                        <div>• Provider: ${selected.name}</div>
+                        <div>• Status: Success ✅</div>
+                        <div>• Tokens used: ${Math.floor(Math.random() * 50) + 20}</div>
+                        <div>• Response time: ${(Math.random() * 2 + 0.5).toFixed(2)}s</div>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 12px; color: var(--text-tertiary);">
+                        ${provider === 'simulated' ? '💡 This is a simulation. Get real API keys for live testing!' : '✅ Real API call simulated successfully!'}
+                    </div>
+                `;
+            }, 1500);
+        }
+
+        // Multi-API exercise
+        function getMultiAPISolution() {
+            const solution = `from typing import Dict, Any, Optional
+import os
+from dotenv import load_dotenv
+import openai
+import anthropic
+import cohere
+
+load_dotenv()
+
+def call_ai_provider(
+    prompt: str,
+    provider: str = "openai",
+    model: Optional[str] = None,
+    temperature: float = 0.7,
+    max_tokens: int = 100
+) -> Dict[str, Any]:
+    """
+    Unified function to call different AI providers.
+    
+    Supported providers: openai, anthropic, cohere
+    
+    Args:
+        prompt: Input text to process
+        provider: Which AI provider to use
+        model: Specific model to use (defaults based on provider)
+        temperature: Creativity control
+        max_tokens: Maximum response length
+        
+    Returns:
+        Dictionary with 'success', 'response', and provider-specific metadata
+    """
+    
+    # Set default models for each provider
+    if not model:
+        model = {
+            "openai": "gpt-3.5-turbo",
+            "anthropic": "claude-2.1",
+            "cohere": "command"
+        }[provider]
+    
+    try:
+        if provider == "openai":
+            response = openai.ChatCompletion.create(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+            return {
+                "success": True,
+                "provider": "openai",
+                "response": response.choices[0].message.content,
+                "usage": response.usage.dict()
+            }
+            
+        elif provider == "anthropic":
+            client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+            response = client.completions.create(
+                model=model,
+                prompt=f"{anthropic.HUMAN_PROMPT} {prompt}{anthropic.AI_PROMPT}",
+                temperature=temperature,
+                max_tokens_to_sample=max_tokens
+            )
+            return {
+                "success": True,
+                "provider": "anthropic",
+                "response": response.completion,
+                "usage": {"tokens": len(prompt.split()) + len(response.completion.split())}
+            }
+            
+        elif provider == "cohere":
+            co = cohere.Client(os.getenv("COHERE_API_KEY"))
+            response = co.generate(
+                model=model,
+                prompt=prompt,
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+            return {
+                "success": True,
+                "provider": "cohere",
+                "response": response.generations[0].text,
+                "usage": {"tokens": response.meta.tokens}
+            }
+            
+        else:
+            return {"success": False, "error": f"Unsupported provider: {provider}"}
+            
+    except Exception as e:
+        return {"success": False, "error": str(e), "provider": provider}`;
+
+            document.getElementById('multiApiExercise').textContent = solution;
+            alert('🎯 Multi-API Solution Loaded!\n\nThis function:\n• Supports 3 AI providers\n• Has consistent error handling\n• Returns standardized responses\n• Uses environment variables\n• Has comprehensive type hints');
+        }
+
+        function testMultiAPI() {
+            alert(`🧪 Testing Multi-API Function...
+
+✅ Function Structure: Good
+✅ Error Handling: Implemented
+✅ Type Hints: Complete
+✅ Documentation: Comprehensive
+✅ Provider Support: OpenAI, Anthropic, Cohere
+
+💡 Next Steps:
+1. Get your API keys from the providers
+2. Install required packages: pip install openai anthropic cohere
+3. Test with real API calls
+4. Add more providers if needed`);
+        }
+
+        // Chatbot functionality
+        function sendChatbotMessage() {
+            const input = document.getElementById('chatbotInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            const messagesDiv = document.getElementById('chatbotMessages');
+            
+            // Add user message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chatbot-message user';
+            userMsg.innerHTML = `<div class="chatbot-message-content">${message}</div>`;
+            messagesDiv.appendChild(userMsg);
+            
+            // Clear input
+            input.value = '';
+            
+            // Show typing indicator
+            const typing = document.createElement('div');
+            typing.className = 'chatbot-message ai';
+            typing.innerHTML = `
+                <div class="chatbot-message-content">
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            messagesDiv.appendChild(typing);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            
+            // Simulate AI response
+            setTimeout(() => {
+                typing.remove();
+                
+                const responses = [
+                    `I understand you said: "${message}". That's interesting! As an AI assistant, I'm here to help you learn about Python functions and AI APIs.`,
+                    `Thanks for your message! Regarding "${message}", I can help you understand how to implement this in Python with clean functions and proper API calls.`,
+                    `Great question/point about "${message}"! This relates directly to what we're learning about AI functions and APIs. Would you like me to explain more?`
+                ];
+                
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'chatbot-message ai';
+                aiMsg.innerHTML = `<div class="chatbot-message-content">${randomResponse}</div>`;
+                messagesDiv.appendChild(aiMsg);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }, 1500);
+        }
+
+        // Download functions
+        function downloadCodeSamples() {
+            const content = `# Lesson 4: Functions & AI APIs - Complete Code Samples
+
+## 1. Clean Functions Example
+# File: clean_functions.py
+# Contains examples of modern Python functions with type hints and docstrings
+
+## 2. AI Refactoring Examples
+# File: ai_refactoring.py
+# Shows before/after examples of AI-assisted code improvement
+
+## 3. Multi-API Function
+# File: multi_api.py
+# Complete implementation of unified AI API caller
+
+## 4. Complete Chatbot
+# File: ai_chatbot.py
+# Production-ready chatbot with conversation history
+
+## 5. Environment Template
+# File: .env.template
+# Template for your API keys and configuration
+
+## Installation:
+pip install openai anthropic cohere python-dotenv
+
+## Get Free API Keys:
+1. OpenAI: https://platform.openai.com/api-keys ($5 free)
+2. Anthropic: https://console.anthropic.com (free trial)
+3. Cohere: https://dashboard.cohere.com (free tier)
+
+Happy coding! 🚀`;
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'lesson4_code_samples.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('📚 All code samples downloaded!\n\nCheck your downloads folder for complete examples.');
+        }
+
+        function downloadChatbotCode() {
+            alert('🤖 Chatbot code downloaded!\n\nYou can now:\n1. Install requirements: pip install openai python-dotenv\n2. Add your OpenAI API key to .env\n3. Run: python ai_chatbot.py\n4. Start chatting with your AI!');
+            
+            // Update progress
+            updateGlobalProgress();
+        }
+
+        function downloadCompleteProject() {
+            const content = `# AI Functions & API Project - Complete Package
+
+## Project Structure:
+ai_functions_project/
+├── src/
+│   ├── __init__.py
+│   ├── clean_functions.py    # Clean function examples
+│   ├── ai_api_client.py      # Multi-provider API client
+│   ├── chatbot.py           # Complete chatbot
+│   └── utils.py             # Helper functions
+├── tests/
+│   └── test_functions.py    # Unit tests
+├── requirements.txt         # Dependencies
+├── .env.template           # API key template
+├── .gitignore             # Git ignore file
+└── README.md              # Project documentation
+
+## Quick Start:
+1. Copy .env.template to .env
+2. Add your API keys
+3. Run: pip install -r requirements.txt
+4. Try: python -m src.chatbot
+
+## Features:
+✅ Clean, typed functions for AI development
+✅ Support for OpenAI, Anthropic, Cohere
+✅ Error handling and logging
+✅ Conversation memory
+✅ Configurable parameters
+✅ Production-ready structure
+
+## Free API Credits:
+• OpenAI: $5 free at platform.openai.com
+• Anthropic: Free trial at console.anthropic.com
+• Cohere: Free tier at dashboard.cohere.com
+
+Build something amazing! 🚀`;
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ai_functions_project.zip.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('🎉 Complete project downloaded!\n\nYou now have a production-ready AI project structure.\n\nNext steps:\n1. Extract and explore the files\n2. Get your free API keys\n3. Start building your own AI applications!');
+        }
+
+        // Resource links
+        function openAPIKeysPage() {
+            window.open('https://platform.openai.com/api-keys', '_blank');
+        }
+
+        function openAPIDocs() {
+            window.open('https://platform.openai.com/docs', '_blank');
+        }
+
+        // Progress tracking
+        function updateGlobalProgress() {
+            const progressBar = document.getElementById('globalProgress');
+            const progressPercent = document.getElementById('progressPercent');
+            
+            // Increment progress
+            let current = parseInt(progressBar.style.width) || 28;
+            current = Math.min(100, current + 2);
+            
+            progressBar.style.width = `${current}%`;
+            progressPercent.textContent = `${current}%`;
+        }
+
+        function continueToLesson5() {
+            updateGlobalProgress();
+            alert('🚀 Moving to Lesson 5: Object-Oriented Programming for AI Systems\n\nTopics:\n• Designing AI classes\n• Building modular AI systems\n• Inheritance and composition\n• Real-world OpenAI architecture patterns');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up enter key for chatbot
+            document.getElementById('chatbotInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendChatbotMessage();
+                }
+            });
+            
+            // Update progress to initial state
+            const progressBar = document.getElementById('globalProgress');
+            progressBar.style.width = '28%';
+            document.getElementById('progressPercent').textContent = '28%';
+        });
+    </script>
+</body>
+</html>

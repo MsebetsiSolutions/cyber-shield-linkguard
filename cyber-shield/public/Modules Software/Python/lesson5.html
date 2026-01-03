@@ -1,0 +1,2665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 5: AI-Powered Web App (Flask/FastAPI) | Python AI Bootcamp</title>
+    <style>
+        /* OpenAI/ChatGPT Theme Variables */
+        :root {
+            /* Light Theme - ChatGPT Style */
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F7F7F8;
+            --bg-tertiary: #ECECF1;
+            --border-color: #E5E5E5;
+            --text-primary: #000000;
+            --text-secondary: #565869;
+            --text-tertiary: #8E8EA0;
+            --ai-green: #10A37F;
+            --ai-green-hover: #1A7F64;
+            --ai-purple: #5436DA;
+            --user-blue: #0066CC;
+            --flask-blue: #0D6EFD;
+            --fastapi-green: #009688;
+            --django-green: #092E20;
+            --code-bg: #F6F6F6;
+            --code-text: #000000;
+            --highlight-bg: rgba(16, 163, 127, 0.1);
+            --sidebar-bg: #F7F7F8;
+            --message-ai-bg: #F7F7F8;
+            --message-user-bg: #FFFFFF;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --transition-speed: 0.3s;
+            --success-green: #10A37F;
+            --warning-orange: #F59E0B;
+            --error-red: #EF4444;
+            --exam-blue: #2563EB;
+        }
+
+        /* Dark Theme - ChatGPT Style */
+        .dark-mode {
+            --bg-primary: #343541;
+            --bg-secondary: #444654;
+            --bg-tertiary: #202123;
+            --border-color: #565869;
+            --text-primary: #FFFFFF;
+            --text-secondary: #C5C5D2;
+            --text-tertiary: #8E8EA0;
+            --ai-green: #10A37F;
+            --ai-green-hover: #1A7F64;
+            --ai-purple: #5436DA;
+            --user-blue: #0066CC;
+            --flask-blue: #3B82F6;
+            --fastapi-green: #10B981;
+            --django-green: #10B981;
+            --code-bg: #0D1117;
+            --code-text: #FFFFFF;
+            --highlight-bg: rgba(16, 163, 127, 0.2);
+            --sidebar-bg: #202123;
+            --message-ai-bg: #444654;
+            --message-user-bg: #343541;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --success-green: #10A37F;
+            --warning-orange: #F59E0B;
+            --error-red: #EF4444;
+            --exam-blue: #60A5FA;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Segoe UI', Arial, sans-serif;
+            transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .animated-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.1;
+        }
+
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--ai-green), var(--ai-purple));
+            animation: float 20s infinite linear;
+        }
+
+        .element-1 {
+            width: 300px;
+            height: 300px;
+            top: -150px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .element-2 {
+            width: 200px;
+            height: 200px;
+            bottom: -50px;
+            left: -100px;
+            animation-delay: -5s;
+            background: linear-gradient(135deg, var(--flask-blue), var(--ai-purple));
+        }
+
+        .element-3 {
+            width: 150px;
+            height: 150px;
+            top: 50%;
+            right: 10%;
+            animation-delay: -10s;
+            background: linear-gradient(135deg, var(--fastapi-green), var(--ai-green));
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(100px, 100px) rotate(90deg);
+            }
+            50% {
+                transform: translate(0, 200px) rotate(180deg);
+            }
+            75% {
+                transform: translate(-100px, 100px) rotate(270deg);
+            }
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-primary);
+            box-shadow: 0 2px 10px var(--shadow-color);
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .theme-icon {
+            font-size: 18px;
+        }
+
+        /* Header - ChatGPT Style */
+        .header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--ai-green), var(--ai-purple));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .lesson-tag {
+            background: var(--ai-green);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Main Layout - ChatGPT Style */
+        .main-layout {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Sidebar - ChatGPT Left Panel Style */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            position: sticky;
+            top: 70px;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            margin-bottom: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .sidebar-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .sidebar-item.active {
+            background: var(--highlight-bg);
+            color: var(--ai-green);
+            font-weight: 600;
+        }
+
+        .sidebar-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Framework Badges */
+        .framework-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 2px;
+        }
+
+        .badge-flask {
+            background: rgba(13, 110, 253, 0.1);
+            color: var(--flask-blue);
+            border: 1px solid rgba(13, 110, 253, 0.3);
+        }
+
+        .badge-fastapi {
+            background: rgba(0, 150, 136, 0.1);
+            color: var(--fastapi-green);
+            border: 1px solid rgba(0, 150, 136, 0.3);
+        }
+
+        .badge-oop {
+            background: rgba(16, 163, 127, 0.1);
+            color: var(--ai-green);
+            border: 1px solid rgba(16, 163, 127, 0.3);
+        }
+
+        /* Main Content - ChatGPT Chat Style */
+        .main-content {
+            flex: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Message Bubbles - ChatGPT Style */
+        .message {
+            display: flex;
+            gap: 16px;
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .message:last-child {
+            border-bottom: none;
+        }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .avatar.ai {
+            background: var(--ai-green);
+            color: white;
+        }
+
+        .avatar.user {
+            background: var(--user-blue);
+            color: white;
+        }
+
+        .avatar.flask {
+            background: var(--flask-blue);
+        }
+
+        .avatar.fastapi {
+            background: var(--fastapi-green);
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .message-author {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .message-text {
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .message-text p {
+            margin-bottom: 12px;
+        }
+
+        .message-text ul, .message-text ol {
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .message-text li {
+            margin-bottom: 6px;
+        }
+
+        /* Interactive Code Blocks - ChatGPT Style */
+        .code-block {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border: 1px solid var(--border-color);
+            position: relative;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .code-language {
+            font-weight: 600;
+            color: var(--ai-green);
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .code-action {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .code-action:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .code-content {
+            color: var(--code-text);
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        .code-line {
+            padding: 2px 0;
+        }
+
+        .code-line.highlight {
+            background: var(--highlight-bg);
+            border-left: 3px solid var(--ai-green);
+            padding-left: 8px;
+        }
+
+        /* Framework Comparison */
+        .framework-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .framework-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .framework-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .framework-card.flask {
+            border-left: 4px solid var(--flask-blue);
+        }
+
+        .framework-card.fastapi {
+            border-left: 4px solid var(--fastapi-green);
+        }
+
+        .framework-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .framework-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .framework-logo.flask {
+            background: linear-gradient(135deg, var(--flask-blue), #0A58CA);
+        }
+
+        .framework-logo.fastapi {
+            background: linear-gradient(135deg, var(--fastapi-green), #00796B);
+        }
+
+        .framework-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .framework-card-body {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        /* OOP Concepts */
+        .oop-concepts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .concept-card {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .concept-card:hover {
+            background: var(--highlight-bg);
+            border-color: var(--ai-green);
+        }
+
+        .concept-icon {
+            font-size: 24px;
+            color: var(--ai-green);
+            margin-bottom: 8px;
+        }
+
+        .concept-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .concept-desc {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        /* Project Showcase */
+        .project-showcase {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .project-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .project-badges {
+            display: flex;
+            gap: 8px;
+        }
+
+        .project-diagram {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+            font-family: 'SFMono-Regular', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            color: var(--code-text);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--ai-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--ai-green-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .btn-exam {
+            background: var(--exam-blue);
+            color: white;
+        }
+
+        .btn-exam:hover {
+            background: #1D4ED8;
+            transform: translateY(-1px);
+        }
+
+        /* Exam Section */
+        .exam-section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 32px 0;
+            border: 2px solid var(--exam-blue);
+            position: relative;
+        }
+
+        .exam-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--exam-blue);
+        }
+
+        .exam-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--exam-blue);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .exam-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .exam-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .exam-question {
+            background: var(--bg-primary);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 16px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .question-number {
+            font-weight: 600;
+            color: var(--exam-blue);
+            font-size: 14px;
+        }
+
+        .question-points {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .question-text {
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .option {
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .option.selected {
+            border-color: var(--exam-blue);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .option.correct {
+            border-color: var(--success-green);
+            background: rgba(16, 163, 127, 0.1);
+        }
+
+        .option.incorrect {
+            border-color: var(--error-red);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .explanation {
+            margin-top: 16px;
+            padding: 12px;
+            background: var(--highlight-bg);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        .resource-links {
+            margin-top: 20px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+
+        .resource-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .resource-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .resource-list li {
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .resource-list a {
+            color: var(--ai-green);
+            text-decoration: none;
+        }
+
+        .resource-list a:hover {
+            text-decoration: underline;
+        }
+
+        /* Exam Navigation */
+        .exam-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Results */
+        .results {
+            text-align: center;
+            padding: 32px;
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: conic-gradient(var(--ai-green) calc(var(--score-percent) * 1%), var(--bg-tertiary) 0);
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .score-circle-inner {
+            width: 90px;
+            height: 90px;
+            background: var(--bg-secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Progress Indicators */
+        .progress-section {
+            margin: 24px 0;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .progress-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--ai-green), var(--ai-purple));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        /* Interactive Exercise */
+        .exercise {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .exercise-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .exercise-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--ai-green);
+            color: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .exercise-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .bounce {
+            animation: bounce 0.5s infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+            }
+            
+            .header {
+                padding: 12px 16px;
+            }
+            
+            .main-content {
+                padding: 16px;
+            }
+            
+            .message {
+                padding: 16px 0;
+            }
+            
+            .framework-comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .oop-concepts {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="animated-background">
+        <div class="floating-element element-1"></div>
+        <div class="floating-element element-2"></div>
+        <div class="floating-element element-3"></div>
+    </div>
+
+    <!-- Theme Toggle Button -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon theme-icon" id="themeIcon"></i>
+        <span id="themeText">Dark Mode</span>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">⚡</div>
+        <div class="header-title">Python AI Developer Bootcamp</div>
+        <div class="lesson-tag">Lesson 5</div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Lesson 5 Topics</div>
+                <div class="sidebar-item active" onclick="scrollToSection('oop-intro')">
+                    <i class="fas fa-cube sidebar-icon"></i>
+                    <span>OOP Made Relevant</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('frameworks')">
+                    <i class="fas fa-layer-group sidebar-icon"></i>
+                    <span>Flask vs FastAPI</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('ai-classes')">
+                    <i class="fas fa-robot sidebar-icon"></i>
+                    <span>AI Service Classes</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('project-build')">
+                    <i class="fas fa-code sidebar-icon"></i>
+                    <span>Build AI Web App</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('deployment')">
+                    <i class="fas fa-rocket sidebar-icon"></i>
+                    <span>Deployment</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('exam-1')">
+                    <i class="fas fa-file-alt sidebar-icon"></i>
+                    <span>Exam 1: OOP Concepts</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('exam-2')">
+                    <i class="fas fa-file-alt sidebar-icon"></i>
+                    <span>Exam 2: Flask/FastAPI</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('exam-3')">
+                    <i class="fas fa-file-alt sidebar-icon"></i>
+                    <span>Exam 3: AI Integration</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('exam-4')">
+                    <i class="fas fa-file-alt sidebar-icon"></i>
+                    <span>Exam 4: Full Stack</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Quick Links</div>
+                <div class="sidebar-item" onclick="downloadProject()">
+                    <i class="fas fa-download sidebar-icon"></i>
+                    <span>Download Project</span>
+                </div>
+                <div class="sidebar-item" onclick="openFlaskDocs()">
+                    <i class="fas fa-book sidebar-icon"></i>
+                    <span>Flask Documentation</span>
+                </div>
+                <div class="sidebar-item" onclick="openFastAPIDocs()">
+                    <i class="fas fa-book sidebar-icon"></i>
+                    <span>FastAPI Documentation</span>
+                </div>
+                <div class="sidebar-item" onclick="openRender()">
+                    <i class="fas fa-cloud sidebar-icon"></i>
+                    <span>Free Deployment (Render)</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Progress</div>
+                <div class="progress-section" style="margin: 0; padding: 0; border: none; background: transparent;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="globalProgress" style="width: 35%"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <span>Lesson 5/15</span>
+                        <span id="progressPercent">35%</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Welcome Message -->
+            <div class="message fade-in">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Now</span>
+                    </div>
+                    <div class="message-text">
+                        <h1>🚀 Lesson 5: AI-Powered Web Apps with Flask/FastAPI</h1>
+                        <p>Welcome to the most practical lesson yet! Today, you'll master <strong>Object-Oriented Programming</strong> by building real AI web applications. We'll create production-ready APIs and deploy them to the cloud.</p>
+                        
+                        <div class="framework-comparison">
+                            <div class="framework-card flask">
+                                <div class="framework-card-header">
+                                    <div class="framework-logo flask">F</div>
+                                    <div class="framework-card-title">Flask (Beginner-Friendly)</div>
+                                </div>
+                                <div class="framework-card-body">
+                                    • Simple & minimalist<br>
+                                    • Great for learning<br>
+                                    • Large community<br>
+                                    • Perfect for MVPs
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="scrollToSection('flask-demo')">Try Flask</button>
+                            </div>
+                            
+                            <div class="framework-card fastapi">
+                                <div class="framework-card-header">
+                                    <div class="framework-logo fastapi">FA</div>
+                                    <div class="framework-card-title">FastAPI (Modern Production)</div>
+                                </div>
+                                <div class="framework-card-body">
+                                    • Async & fast<br>
+                                    • Automatic docs<br>
+                                    • Type validation<br>
+                                    • Industry standard
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="scrollToSection('fastapi-demo')">Try FastAPI</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OOP Made Relevant -->
+            <div class="message fade-in" id="oop-intro">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 1</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>🧱 OOP Made Relevant: Solving Real AI Problems</h2>
+                        <p>Forget abstract animal classes! Let's learn OOP by building AI systems that solve actual problems:</p>
+                        
+                        <div class="oop-concepts">
+                            <div class="concept-card">
+                                <div class="concept-icon"><i class="fas fa-server"></i></div>
+                                <div class="concept-title">AI Service Classes</div>
+                                <div class="concept-desc">Manage API calls, rate limits, caching</div>
+                            </div>
+                            <div class="concept-card">
+                                <div class="concept-icon"><i class="fas fa-database"></i></div>
+                                <div class="concept-title">Data Models</div>
+                                <div class="concept-desc">Structure AI responses, conversations</div>
+                            </div>
+                            <div class="concept-card">
+                                <div class="concept-icon"><i class="fas fa-tools"></i></div>
+                                <div class="concept-title">Utility Classes</div>
+                                <div class="concept-desc">Text processing, validation, logging</div>
+                            </div>
+                            <div class="concept-card">
+                                <div class="concept-icon"><i class="fas fa-cogs"></i></div>
+                                <div class="concept-title">Orchestrator</div>
+                                <div class="concept-desc">Coordinate multiple AI services</div>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="explainAIClass()">
+                                        <i class="fas fa-info-circle"></i> Explain
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line">from typing import List, Dict, Optional</span><br>
+                                <span class="code-line">from dataclasses import dataclass</span><br>
+                                <span class="code-line">from datetime import datetime</span><br>
+                                <span class="code-line">import openai</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">@dataclass</span><br>
+                                <span class="code-line">class AIResponse:</span><br>
+                                <span class="code-line">    """Data model for AI responses."""</span><br>
+                                <span class="code-line">    content: str</span><br>
+                                <span class="code-line">    model: str</span><br>
+                                <span class="code-line">    tokens: int</span><br>
+                                <span class="code-line">    timestamp: datetime</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">class AIService:</span><br>
+                                <span class="code-line">    """Service class for OpenAI API calls."""</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">    def __init__(self, api_key: str, default_model: str = "gpt-3.5-turbo"):</span><br>
+                                <span class="code-line">        self.api_key = api_key</span><br>
+                                <span class="code-line">        self.default_model = default_model</span><br>
+                                <span class="code-line">        openai.api_key = api_key</span><br>
+                                <span class="code-line">        self.conversation_history: List[Dict] = []</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">    def generate_response(self, prompt: str, **kwargs) -> AIResponse:</span><br>
+                                <span class="code-line">        """Generate AI response with conversation context."""</span><br>
+                                <span class="code-line">        try:</span><br>
+                                <span class="code-line">            response = openai.ChatCompletion.create(</span><br>
+                                <span class="code-line">                model=kwargs.get('model', self.default_model),</span><br>
+                                <span class="code-line">                messages=self.conversation_history + [</span><br>
+                                <span class="code-line">                    {"role": "user", "content": prompt}</span><br>
+                                <span class="code-line">                ],</span><br>
+                                <span class="code-line">                **kwargs</span><br>
+                                <span class="code-line">            )</span><br>
+                                <span class="code-line">            </span><br>
+                                <span class="code-line">            ai_response = AIResponse(</span><br>
+                                <span class="code-line">                content=response.choices[0].message.content,</span><br>
+                                <span class="code-line">                model=response.model,</span><br>
+                                <span class="code-line">                tokens=response.usage.total_tokens,</span><br>
+                                <span class="code-line">                timestamp=datetime.now()</span><br>
+                                <span class="code-line">            )</span><br>
+                                <span class="code-line">            </span><br>
+                                <span class="code-line">            # Update conversation history</span><br>
+                                <span class="code-line">            self.conversation_history.append({"role": "user", "content": prompt})</span><br>
+                                <span class="code-line">            self.conversation_history.append({"role": "assistant", "content": ai_response.content})</span><br>
+                                <span class="code-line">            </span><br>
+                                <span class="code-line">            return ai_response</span><br>
+                                <span class="code-line">            </span><br>
+                                <span class="code-line">        except Exception as e:</span><br>
+                                <span class="code-line">            raise AIServiceError(f"API call failed: {str(e)}")</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">    def clear_history(self) -> None:</span><br>
+                                <span class="code-line">        """Clear conversation history."""</span><br>
+                                <span class="code-line">        self.conversation_history = []</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">class AIServiceError(Exception):</span><br>
+                                <span class="code-line">    """Custom exception for AI service errors."""</span><br>
+                                <span class="code-line">    pass</span>
+                            </div>
+                        </div>
+
+                        <div class="exercise">
+                            <div class="exercise-header">
+                                <div class="exercise-icon">💡</div>
+                                <div class="exercise-title">Why This OOP Approach Works for AI</div>
+                            </div>
+                            <div class="exercise-content">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 16px 0;">
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <div style="color: var(--ai-green); margin-bottom: 4px;"><strong>Encapsulation</strong></div>
+                                        <div style="font-size: 12px;">API key and state are protected</div>
+                                    </div>
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <div style="color: var(--ai-green); margin-bottom: 4px;"><strong>Abstraction</strong></div>
+                                        <div style="font-size: 12px;">Complex API details hidden</div>
+                                    </div>
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <div style="color: var(--ai-green); margin-bottom: 4px;"><strong>Reusability</strong></div>
+                                        <div style="font-size: 12px;">Use across multiple endpoints</div>
+                                    </div>
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <div style="color: var(--ai-green); margin-bottom: 4px;"><strong>Maintainability</strong></div>
+                                        <div style="font-size: 12px;">Easy to update and extend</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Frameworks Comparison -->
+            <div class="message fade-in" id="frameworks">
+                <div class="avatar user">You</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Student</span>
+                        <span class="message-time">Question</span>
+                    </div>
+                    <div class="message-text">
+                        <p>Should I learn Flask or FastAPI for AI applications?</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="message fade-in">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 2</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>🔄 Flask vs FastAPI: The AI Developer's Choice</h2>
+                        
+                        <div class="project-showcase">
+                            <div class="project-header">
+                                <div class="project-title">Real-World Decision Guide</div>
+                                <div class="project-badges">
+                                    <span class="framework-badge badge-flask">Learning</span>
+                                    <span class="framework-badge badge-fastapi">Production</span>
+                                </div>
+                            </div>
+                            <div class="project-diagram">
+                                <div style="color: var(--flask-blue); margin-bottom: 8px;">┌─────────────────────────────────────┐</div>
+                                <div style="color: var(--flask-blue);">│  🎓 LEARN WITH FLASK                │</div>
+                                <div style="color: var(--flask-blue);">│  • Simple concepts first           │</div>
+                                <div style="color: var(--flask-blue);">│  • Focus on AI logic               │</div>
+                                <div style="color: var(--flask-blue);">│  • Quick prototyping               │</div>
+                                <div style="color: var(--flask-blue);">└─────────────────┬───────────────────┘</div>
+                                <div style="text-align: center; margin: 8px 0;">👇</div>
+                                <div style="color: var(--fastapi-green);">┌─────────────────────────────────────┐</div>
+                                <div style="color: var(--fastapi-green);">│  🚀 BUILD WITH FASTAPI              │</div>
+                                <div style="color: var(--fastapi-green);">│  • Async for AI calls              │</div>
+                                <div style="color: var(--fastapi-green);">│  • Automatic API docs              │</div>
+                                <div style="color: var(--fastapi-green);">│  • Better performance              │</div>
+                                <div style="color: var(--fastapi-green);">└─────────────────────────────────────┘</div>
+                            </div>
+                        </div>
+
+                        <!-- Flask Example -->
+                        <div class="code-block" id="flask-demo">
+                            <div class="code-header">
+                                <span class="code-language">Python - Flask AI App</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="runFlaskDemo()">
+                                        <i class="fas fa-play"></i> Run Demo
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line">from flask import Flask, request, jsonify</span><br>
+                                <span class="code-line">from flask_cors import CORS</span><br>
+                                <span class="code-line">import os</span><br>
+                                <span class="code-line">from dotenv import load_dotenv</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line"># Load our AIService class from earlier</span><br>
+                                <span class="code-line">from ai_service import AIService</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">load_dotenv()</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">app = Flask(__name__)</span><br>
+                                <span class="code-line">CORS(app)  # Enable Cross-Origin requests</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line"># Initialize our AI service</span><br>
+                                <span class="code-line">ai_service = AIService(api_key=os.getenv("OPENAI_API_KEY"))</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">@app.route('/api/chat', methods=['POST'])</span><br>
+                                <span class="code-line">def chat():</span><br>
+                                <span class="code-line">    """Chat endpoint that uses our AIService class."""</span><br>
+                                <span class="code-line">    try:</span><br>
+                                <span class="code-line">        data = request.get_json()</span><br>
+                                <span class="code-line">        message = data.get('message', '')</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        if not message:</span><br>
+                                <span class="code-line">            return jsonify({"error": "Message is required"}), 400</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # Use our OOP service</span><br>
+                                <span class="code-line">        response = ai_service.generate_response(message)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        return jsonify({</span><br>
+                                <span class="code-line">            "success": True,</span><br>
+                                <span class="code-line">            "response": response.content,</span><br>
+                                <span class="code-line">            "tokens": response.tokens,</span><br>
+                                <span class="code-line">            "model": response.model</span><br>
+                                <span class="code-line">        })</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">    except Exception as e:</span><br>
+                                <span class="code-line">        return jsonify({"error": str(e)}), 500</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">@app.route('/api/clear', methods=['POST'])</span><br>
+                                <span class="code-line">def clear_chat():</span><br>
+                                <span class="code-line">    """Clear conversation history."""</span><br>
+                                <span class="code-line">    ai_service.clear_history()</span><br>
+                                <span class="code-line">    return jsonify({"success": True})</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">if __name__ == '__main__':</span><br>
+                                <span class="code-line">    app.run(debug=True, port=5000)</span>
+                            </div>
+                        </div>
+
+                        <!-- FastAPI Example -->
+                        <div class="code-block" id="fastapi-demo">
+                            <div class="code-header">
+                                <span class="code-language">Python - FastAPI AI App</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="runFastAPIDemo()">
+                                        <i class="fas fa-bolt"></i> Run Demo
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line">from fastapi import FastAPI, HTTPException</span><br>
+                                <span class="code-line">from fastapi.middleware.cors import CORSMiddleware</span><br>
+                                <span class="code-line">from pydantic import BaseModel</span><br>
+                                <span class="code-line">from typing import Optional</span><br>
+                                <span class="code-line">import os</span><br>
+                                <span class="code-line">from dotenv import load_dotenv</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">from ai_service import AIService</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">load_dotenv()</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">app = FastAPI(title="AI Chat API", version="1.0.0")</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line"># CORS middleware</span><br>
+                                <span class="code-line">app.add_middleware(</span><br>
+                                <span class="code-line">    CORSMiddleware,</span><br>
+                                <span class="code-line">    allow_origins=["*"],</span><br>
+                                <span class="code-line">    allow_methods=["*"],</span><br>
+                                <span class="code-line">    allow_headers=["*"],</span><br>
+                                <span class="code-line">)</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line"># Pydantic models for type validation</span><br>
+                                <span class="code-line">class ChatRequest(BaseModel):</span><br>
+                                <span class="code-line">    message: str</span><br>
+                                <span class="code-line">    model: Optional[str] = None</span><br>
+                                <span class="code-line">    temperature: Optional[float] = 0.7</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">class ChatResponse(BaseModel):</span><br>
+                                <span class="code-line">    success: bool</span><br>
+                                <span class="code-line">    response: str</span><br>
+                                <span class="code-line">    tokens: int</span><br>
+                                <span class="code-line">    model: str</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line"># Initialize service</span><br>
+                                <span class="code-line">ai_service = AIService(api_key=os.getenv("OPENAI_API_KEY"))</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">@app.post("/api/chat", response_model=ChatResponse)</span><br>
+                                <span class="code-line">async def chat(request: ChatRequest):</span><br>
+                                <span class="code-line">    """Async chat endpoint with automatic documentation."""</span><br>
+                                <span class="code-line">    try:</span><br>
+                                <span class="code-line">        response = ai_service.generate_response(</span><br>
+                                <span class="code-line">            request.message,</span><br>
+                                <span class="code-line">            model=request.model,</span><br>
+                                <span class="code-line">            temperature=request.temperature</span><br>
+                                <span class="code-line">        )</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        return ChatResponse(</span><br>
+                                <span class="code-line">            success=True,</span><br>
+                                <span class="code-line">            response=response.content,</span><br>
+                                <span class="code-line">            tokens=response.tokens,</span><br>
+                                <span class="code-line">            model=response.model</span><br>
+                                <span class="code-line">        )</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">    except Exception as e:</span><br>
+                                <span class="code-line">        raise HTTPException(status_code=500, detail=str(e))</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">@app.post("/api/clear")</span><br>
+                                <span class="code-line">async def clear_chat():</span><br>
+                                <span class="code-line">    """Clear conversation history."""</span><br>
+                                <span class="code-line">    ai_service.clear_history()</span><br>
+                                <span class="code-line">    return {"success": True}</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line"># Run: uvicorn main:app --reload</span>
+                            </div>
+                        </div>
+
+                        <div class="exercise">
+                            <div class="exercise-header">
+                                <div class="exercise-icon">📊</div>
+                                <div class="exercise-title">Framework Comparison Table</div>
+                            </div>
+                            <div class="exercise-content">
+                                <div style="overflow-x: auto;">
+                                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                        <thead>
+                                            <tr style="background: var(--bg-tertiary);">
+                                                <th style="padding: 12px; text-align: left;">Feature</th>
+                                                <th style="padding: 12px; text-align: left;">Flask</th>
+                                                <th style="padding: 12px; text-align: left;">FastAPI</th>
+                                                <th style="padding: 12px; text-align: left;">Best For</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">Learning Curve</td>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: var(--success-green);">Easy</td>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">Medium</td>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">Flask</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">Performance</td>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">Good</td>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: var(--success-green);">Excellent</td>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">FastAPI</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">Async Support</td>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">Limited</td>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: var(--success-green);">Native</td>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">FastAPI</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">Auto Documentation</td>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">Manual</td>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: var(--success-green);">Automatic</td>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">FastAPI</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 12px;">AI Integration</td>
+                                                <td style="padding: 12px;">Good</td>
+                                                <td style="padding: 12px; color: var(--success-green);">Perfect</td>
+                                                <td style="padding: 12px;">FastAPI</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXAM 1: OOP Concepts -->
+            <div class="exam-section fade-in" id="exam-1">
+                <div class="exam-header">
+                    <div class="exam-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="exam-title">Exam 1: OOP Concepts in AI</div>
+                    <div class="exam-meta">
+                        <span>Time: 15 minutes</span>
+                        <span>Questions: 5</span>
+                        <span>Scope: Lessons 1-5</span>
+                    </div>
+                </div>
+
+                <div class="exam-question">
+                    <div class="question-header">
+                        <div class="question-number">Question 1 of 5</div>
+                        <div class="question-points">2 points</div>
+                    </div>
+                    <div class="question-text">
+                        What is the main advantage of using classes (OOP) for AI services compared to standalone functions?
+                    </div>
+                    <div class="options-grid" id="q1-options">
+                        <div class="option" onclick="selectOption(this, 'q1')">A. Classes make code run faster</div>
+                        <div class="option" onclick="selectOption(this, 'q1')">B. Classes allow encapsulation of state and behavior</div>
+                        <div class="option" onclick="selectOption(this, 'q1')">C. Classes require fewer lines of code</div>
+                        <div class="option" onclick="selectOption(this, 'q1')">D. Classes are only for large projects</div>
+                    </div>
+                    <div class="explanation" id="q1-explanation">
+                        <strong>Correct Answer: B</strong><br>
+                        Classes encapsulate state (like API keys and conversation history) and behavior (methods for API calls), making AI services more maintainable and reusable.
+                        <div class="resource-links">
+                            <div class="resource-title">Research Links:</div>
+                            <ul class="resource-list">
+                                <li><a href="https://realpython.com/python3-object-oriented-programming/" target="_blank">Python OOP Tutorial</a></li>
+                                <li><a href="https://docs.python.org/3/tutorial/classes.html" target="_blank">Python Classes Documentation</a></li>
+                                <li><a href="https://www.freecodecamp.org/news/object-oriented-programming-concepts/" target="_blank">OOP Concepts Explained</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-question">
+                    <div class="question-header">
+                        <div class="question-number">Question 2 of 5</div>
+                        <div class="question-points">2 points</div>
+                    </div>
+                    <div class="question-text">
+                        In our AIService class, why did we use a dataclass for AIResponse instead of a regular dictionary?
+                    </div>
+                    <div class="options-grid" id="q2-options">
+                        <div class="option" onclick="selectOption(this, 'q2')">A. Dataclasses are faster than dictionaries</div>
+                        <div class="option" onclick="selectOption(this, 'q2')">B. Dataclasses provide type hints and structured data</div>
+                        <div class="option" onclick="selectOption(this, 'q2')">C. Dictionaries can't store AI responses</div>
+                        <div class="option" onclick="selectOption(this, 'q2')">D. Dataclasses use less memory</div>
+                    </div>
+                    <div class="explanation" id="q2-explanation">
+                        <strong>Correct Answer: B</strong><br>
+                        Dataclasses provide structure, type hints, and automatic methods (__init__, __repr__), making the code more readable and maintainable.
+                        <div class="resource-links">
+                            <div class="resource-title">Research Links:</div>
+                            <ul class="resource-list">
+                                <li><a href="https://realpython.com/python-data-classes/" target="_blank">Python Dataclasses Tutorial</a></li>
+                                <li><a href="https://docs.python.org/3/library/dataclasses.html" target="_blank">Dataclasses Documentation</a></li>
+                                <li><a href="https://www.youtube.com/watch?v=vRVVyl9uaZc" target="_blank">Dataclasses vs NamedTuple vs Dict</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-navigation">
+                    <button class="btn btn-secondary" onclick="previousQuestion('exam-1')" id="prev-btn-1" disabled>
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <div>
+                        <button class="btn btn-secondary" onclick="showExplanation('q1')">
+                            <i class="fas fa-lightbulb"></i> Show Explanation
+                        </button>
+                        <button class="btn btn-exam" onclick="nextQuestion('exam-1', 'exam-2')" id="next-btn-1">
+                            Next Question <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Service Classes -->
+            <div class="message fade-in" id="ai-classes">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 3</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>🤖 Advanced AI Service Classes</h2>
+                        <p>Let's build a multi-provider AI orchestrator that can switch between OpenAI, Anthropic, and Cohere:</p>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python - Multi-AI Orchestrator</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="testOrchestrator()">
+                                        <i class="fas fa-vial"></i> Test
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line">from abc import ABC, abstractmethod</span><br>
+                                <span class="code-line">from typing import Dict, Any, Optional</span><br>
+                                <span class="code-line">from dataclasses import dataclass</span><br>
+                                <span class="code-line">from enum import Enum</span><br>
+                                <span class="code-line">import openai</span><br>
+                                <span class="code-line">import anthropic</span><br>
+                                <span class="code-line">import cohere</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">class AIModel(Enum):</span><br>
+                                <span class="code-line">    """Available AI models."""</span><br>
+                                <span class="code-line">    GPT_35_TURBO = "gpt-3.5-turbo"</span><br>
+                                <span class="code-line">    GPT_4 = "gpt-4"</span><br>
+                                <span class="code-line">    CLAUDE_2 = "claude-2"</span><br>
+                                <span class="code-line">    CLAUDE_3 = "claude-3-opus"</span><br>
+                                <span class="code-line">    COMMAND = "command"</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">class AIProvider(ABC):</span><br>
+                                <span class="code-line">    """Abstract base class for AI providers."""</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    @abstractmethod</span><br>
+                                <span class="code-line">    def generate(self, prompt: str, **kwargs) -> Dict[str, Any]:</span><br>
+                                <span class="code-line">        pass</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    @abstractmethod</span><br>
+                                <span class="code-line">    def get_cost(self, tokens: int) -> float:</span><br>
+                                <span class="code-line">        pass</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">class OpenAIService(AIProvider):</span><br>
+                                <span class="code-line">    """OpenAI implementation."""</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def __init__(self, api_key: str):</span><br>
+                                <span class="code-line">        self.client = openai.OpenAI(api_key=api_key)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">    def generate(self, prompt: str, model: AIModel = AIModel.GPT_35_TURBO, **kwargs):</span><br>
+                                <span class="code-line">        response = self.client.chat.completions.create(</span><br>
+                                <span class="code-line">            model=model.value,</span><br>
+                                <span class="code-line">            messages=[{"role": "user", "content": prompt}],</span><br>
+                                <span class="code-line">            **kwargs</span><br>
+                                <span class="code-line">        )</span><br>
+                                <span class="code-line">        return {</span><br>
+                                <span class="code-line">            "content": response.choices[0].message.content,</span><br>
+                                <span class="code-line">            "tokens": response.usage.total_tokens,</span><br>
+                                <span class="code-line">            "model": response.model</span><br>
+                                <span class="code-line">        }</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">    def get_cost(self, tokens: int) -> float:</span><br>
+                                <span class="code-line">        return tokens * 0.002 / 1000  # $0.002 per 1K tokens</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">class AIOrchestrator:</span><br>
+                                <span class="code-line">    """Orchestrates multiple AI providers with failover."""</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def __init__(self):</span><br>
+                                <span class="code-line">        self.providers: Dict[str, AIProvider] = {}</span><br>
+                                <span class="code-line">        self.default_provider = "openai"</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">    def add_provider(self, name: str, provider: AIProvider):</span><br>
+                                <span class="code-line">        self.providers[name] = provider</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">    def generate_with_failover(self, prompt: str, **kwargs) -> Dict[str, Any]:</span><br>
+                                <span class="code-line">        """Try providers in order until one works."""</span><br>
+                                <span class="code-line">        for name, provider in self.providers.items():</span><br>
+                                <span class="code-line">            try:</span><br>
+                                <span class="code-line">                result = provider.generate(prompt, **kwargs)</span><br>
+                                <span class="code-line">                result["provider"] = name</span><br>
+                                <span class="code-line">                return result</span><br>
+                                <span class="code-line">            except Exception as e:</span><br>
+                                <span class="code-line">                print(f"Provider {name} failed: {e}")</span><br>
+                                <span class="code-line">                continue</span><br>
+                                <span class="code-line">        raise Exception("All AI providers failed")</span>
+                            </div>
+                        </div>
+
+                        <div class="exercise">
+                            <div class="exercise-header">
+                                <div class="exercise-icon">🏗️</div>
+                                <div class="exercise-title">OOP Design Patterns in Action</div>
+                            </div>
+                            <div class="exercise-content">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 16px 0;">
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <div style="color: var(--ai-green); margin-bottom: 4px;"><strong>Strategy Pattern</strong></div>
+                                        <div style="font-size: 12px;">Different AI providers</div>
+                                    </div>
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <div style="color: var(--ai-green); margin-bottom: 4px;"><strong>Factory Pattern</strong></div>
+                                        <div style="font-size: 12px;">Create providers dynamically</div>
+                                    </div>
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <div style="color: var(--ai-green); margin-bottom: 4px;"><strong>Adapter Pattern</strong></div>
+                                        <div style="font-size: 12px;">Unified interface for APIs</div>
+                                    </div>
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <div style="color: var(--ai-green); margin-bottom: 4px;"><strong>Observer Pattern</strong></div>
+                                        <div style="font-size: 12px;">Monitor API usage</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXAM 2: Flask/FastAPI -->
+            <div class="exam-section fade-in" id="exam-2" style="display: none;">
+                <div class="exam-header">
+                    <div class="exam-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="exam-title">Exam 2: Flask & FastAPI</div>
+                    <div class="exam-meta">
+                        <span>Time: 15 minutes</span>
+                        <span>Questions: 5</span>
+                        <span>Scope: Web Framework Concepts</span>
+                    </div>
+                </div>
+
+                <div class="exam-question">
+                    <div class="question-header">
+                        <div class="question-number">Question 3 of 5</div>
+                        <div class="question-points">2 points</div>
+                    </div>
+                    <div class="question-text">
+                        What is the main advantage of FastAPI over Flask for AI applications?
+                    </div>
+                    <div class="options-grid" id="q3-options">
+                        <div class="option" onclick="selectOption(this, 'q3')">A. FastAPI has more colors in documentation</div>
+                        <div class="option" onclick="selectOption(this, 'q3')">B. FastAPI supports async/await for concurrent AI calls</div>
+                        <div class="option" onclick="selectOption(this, 'q3')">C. FastAPI doesn't need Python to run</div>
+                        <div class="option" onclick="selectOption(this, 'q3')">D. FastAPI is owned by Microsoft</div>
+                    </div>
+                    <div class="explanation" id="q3-explanation">
+                        <strong>Correct Answer: B</strong><br>
+                        FastAPI's native async support allows handling multiple AI API calls concurrently, which is crucial for performance in AI applications.
+                        <div class="resource-links">
+                            <div class="resource-title">Research Links:</div>
+                            <ul class="resource-list">
+                                <li><a href="https://fastapi.tiangolo.com/async/" target="_blank">FastAPI Async Documentation</a></li>
+                                <li><a href="https://realpython.com/async-io-python/" target="_blank">Python AsyncIO Tutorial</a></li>
+                                <li><a href="https://www.youtube.com/watch?v=iG6fr81xHKA" target="_blank">FastAPI vs Flask Comparison</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-question">
+                    <div class="question-header">
+                        <div class="question-number">Question 4 of 5</div>
+                        <div class="question-points">2 points</div>
+                    </div>
+                    <div class="question-text">
+                        In Flask, what does `CORS(app)` enable and why is it important for AI web apps?
+                    </div>
+                    <div class="options-grid" id="q4-options">
+                        <div class="option" onclick="selectOption(this, 'q4')">A. Cross-Origin Resource Sharing for frontend-backend communication</div>
+                        <div class="option" onclick="selectOption(this, 'q4')">B. Centralized Object Relational Storage</div>
+                        <div class="option" onclick="selectOption(this, 'q4')">C. Computer Optical Recognition System</div>
+                        <div class="option" onclick="selectOption(this, 'q4')">D. Corporate Office Routing Service</div>
+                    </div>
+                    <div class="explanation" id="q4-explanation">
+                        <strong>Correct Answer: A</strong><br>
+                        CORS allows your frontend (React/Vue/Angular) to communicate with your Flask backend when they're on different domains/ports.
+                        <div class="resource-links">
+                            <div class="resource-title">Research Links:</div>
+                            <ul class="resource-list">
+                                <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS" target="_blank">MDN CORS Documentation</a></li>
+                                <li><a href="https://flask-cors.readthedocs.io/" target="_blank">Flask-CORS Documentation</a></li>
+                                <li><a href="https://www.freecodecamp.org/news/express-and-react-cors/" target="_blank">CORS Explained</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-navigation">
+                    <button class="btn btn-secondary" onclick="previousQuestion('exam-2', 'exam-1')" id="prev-btn-2">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <div>
+                        <button class="btn btn-secondary" onclick="showExplanation('q3')">
+                            <i class="fas fa-lightbulb"></i> Show Explanation
+                        </button>
+                        <button class="btn btn-exam" onclick="nextQuestion('exam-2', 'exam-3')" id="next-btn-2">
+                            Next Question <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Build AI Web App -->
+            <div class="message fade-in" id="project-build">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 4</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>🔨 Build a Complete AI Web Application</h2>
+                        <p>Let's create a full-stack AI application with frontend and backend:</p>
+
+                        <div class="project-showcase">
+                            <div class="project-header">
+                                <div class="project-title">AI Content Generator App</div>
+                                <div class="project-badges">
+                                    <span class="framework-badge badge-fastapi">FastAPI</span>
+                                    <span class="framework-badge badge-oop">OOP</span>
+                                    <span class="framework-badge badge-flask">React Frontend</span>
+                                </div>
+                            </div>
+                            <div class="project-diagram">
+                                <div style="color: var(--text-primary); margin-bottom: 8px;">┌─────────────────────────────────────────────┐</div>
+                                <div style="color: var(--text-primary);">│         🎨 REACT FRONTEND                     │</div>
+                                <div style="color: var(--text-primary);">│  • User Interface                          │</div>
+                                <div style="color: var(--text-primary);">│  • API Calls to Backend                    │</div>
+                                <div style="color: var(--text-primary);">│  • Real-time Updates                       │</div>
+                                <div style="color: var(--text-primary);">└───────────────────┬─────────────────────────┘</div>
+                                <div style="text-align: center; margin: 8px 0;">👇 HTTP Requests</div>
+                                <div style="color: var(--fastapi-green);">┌─────────────────────────────────────────────┐</div>
+                                <div style="color: var(--fastapi-green);">│         ⚡ FASTAPI BACKEND                   │</div>
+                                <div style="color: var(--fastapi-green);">│  • REST API Endpoints                      │</div>
+                                <div style="color: var(--fastapi-green);">│  • AI Service Classes                      │</div>
+                                <div style="color: var(--fastapi-green);">│  • Database Integration                    │</div>
+                                <div style="color: var(--fastapi-green);">└───────────────────┬─────────────────────────┘</div>
+                                <div style="text-align: center; margin: 8px 0;">👇 API Calls</div>
+                                <div style="color: var(--ai-green);">┌─────────────────────────────────────────────┐</div>
+                                <div style="color: var(--ai-green);">│         🤖 AI PROVIDERS                     │</div>
+                                <div style="color: var(--ai-green);">│  • OpenAI GPT                              │</div>
+                                <div style="color: var(--ai-green);">│  • Anthropic Claude                        │</div>
+                                <div style="color: var(--ai-green);">│  • Cohere                                  │</div>
+                                <div style="color: var(--ai-green);">└─────────────────────────────────────────────┘</div>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python - Complete FastAPI App Structure</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="downloadProject()">
+                                        <i class="fas fa-download"></i> Download
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line"># Project Structure:</span><br>
+                                <span class="code-line">ai_web_app/</span><br>
+                                <span class="code-line">├── app/</span><br>
+                                <span class="code-line">│   ├── __init__.py</span><br>
+                                <span class="code-line">│   ├── main.py              # FastAPI app</span><br>
+                                <span class="code-line">│   ├── models/              # Data models</span><br>
+                                <span class="code-line">│   │   ├── __init__.py</span><br>
+                                <span class="code-line">│   │   ├── schemas.py       # Pydantic models</span><br>
+                                <span class="code-line">│   │   └── database.py     # Database models</span><br>
+                                <span class="code-line">│   ├── services/           # Business logic</span><br>
+                                <span class="code-line">│   │   ├── __init__.py</span><br>
+                                <span class="code-line">│   │   ├── ai_service.py   # AI orchestration</span><br>
+                                <span class="code-line">│   │   └── content_service.py</span><br>
+                                <span class="code-line">│   ├── api/               # API endpoints</span><br>
+                                <span class="code-line">│   │   ├── __init__.py</span><br>
+                                <span class="code-line">│   │   ├── endpoints.py    # Route handlers</span><br>
+                                <span class="code-line">│   │   └── dependencies.py # Auth, etc.</span><br>
+                                <span class="code-line">│   └── utils/             # Utilities</span><br>
+                                <span class="code-line">│       ├── __init__.py</span><br>
+                                <span class="code-line">│       ├── logging.py</span><br>
+                                <span class="code-line">│       └── validation.py</span><br>
+                                <span class="code-line">├── tests/                 # Unit tests</span><br>
+                                <span class="code-line">├── frontend/             # React app</span><br>
+                                <span class="code-line">├── requirements.txt      # Dependencies</span><br>
+                                <span class="code-line">├── .env.example          # Environment template</span><br>
+                                <span class="code-line">└── README.md             # Documentation</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXAM 3: AI Integration -->
+            <div class="exam-section fade-in" id="exam-3" style="display: none;">
+                <div class="exam-header">
+                    <div class="exam-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="exam-title">Exam 3: AI Integration</div>
+                    <div class="exam-meta">
+                        <span>Time: 15 minutes</span>
+                        <span>Questions: 5</span>
+                        <span>Scope: AI Service Architecture</span>
+                    </div>
+                </div>
+
+                <div class="exam-question">
+                    <div class="question-header">
+                        <div class="question-number">Question 5 of 5</div>
+                        <div class="question-points">3 points</div>
+                    </div>
+                    <div class="question-text">
+                        What design pattern is demonstrated by the AIOrchestrator class that can switch between different AI providers?
+                    </div>
+                    <div class="options-grid" id="q5-options">
+                        <div class="option" onclick="selectOption(this, 'q5')">A. Singleton Pattern</div>
+                        <div class="option" onclick="selectOption(this, 'q5')">B. Strategy Pattern</div>
+                        <div class="option" onclick="selectOption(this, 'q5')">C. Observer Pattern</div>
+                        <div class="option" onclick="selectOption(this, 'q5')">D. Builder Pattern</div>
+                    </div>
+                    <div class="explanation" id="q5-explanation">
+                        <strong>Correct Answer: B</strong><br>
+                        The Strategy Pattern allows selecting an algorithm (AI provider) at runtime. The AIOrchestrator can switch between different strategies (providers) dynamically.
+                        <div class="resource-links">
+                            <div class="resource-title">Research Links:</div>
+                            <ul class="resource-list">
+                                <li><a href="https://refactoring.guru/design-patterns/strategy" target="_blank">Strategy Pattern Explained</a></li>
+                                <li><a href="https://realpython.com/python-design-patterns/" target="_blank">Python Design Patterns</a></li>
+                                <li><a href="https://www.youtube.com/watch?v=v9ejT8FO-7I" target="_blank">Strategy Pattern Tutorial</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-question">
+                    <div class="question-header">
+                        <div class="question-number">Question 6 of 5</div>
+                        <div class="question-points">3 points</div>
+                    </div>
+                    <div class="question-text">
+                        Why is the Abstract Base Class (ABC) used in the AIProvider design?
+                    </div>
+                    <div class="options-grid" id="q6-options">
+                        <div class="option" onclick="selectOption(this, 'q6')">A. To make the code run faster</div>
+                        <div class="option" onclick="selectOption(this, 'q6')">B. To enforce a contract that all providers must implement</div>
+                        <div class="option" onclick="selectOption(this, 'q6')">C. To create multiple instances of the same provider</div>
+                        <div class="option" onclick="selectOption(this, 'q6')">D. To automatically generate API documentation</div>
+                    </div>
+                    <div class="explanation" id="q6-explanation">
+                        <strong>Correct Answer: B</strong><br>
+                        ABC enforces that all concrete providers implement the required methods (generate, get_cost), ensuring a consistent interface.
+                        <div class="resource-links">
+                            <div class="resource-title">Research Links:</div>
+                            <ul class="resource-list">
+                                <li><a href="https://docs.python.org/3/library/abc.html" target="_blank">Python ABC Documentation</a></li>
+                                <li><a href="https://realpython.com/python-interface/" target="_blank">Python Interfaces with ABC</a></li>
+                                <li><a href="https://www.geeksforgeeks.org/abstract-classes-in-python/" target="_blank">Abstract Classes Tutorial</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-navigation">
+                    <button class="btn btn-secondary" onclick="previousQuestion('exam-3', 'exam-2')" id="prev-btn-3">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <div>
+                        <button class="btn btn-secondary" onclick="showExplanation('q5')">
+                            <i class="fas fa-lightbulb"></i> Show Explanation
+                        </button>
+                        <button class="btn btn-exam" onclick="nextQuestion('exam-3', 'exam-4')" id="next-btn-3">
+                            Next Question <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deployment -->
+            <div class="message fade-in" id="deployment">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 5</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>🚀 Deploy Your AI App for Free</h2>
+                        <p>Let's deploy our application to the cloud using free hosting services:</p>
+
+                        <div class="framework-comparison">
+                            <div class="framework-card">
+                                <div class="framework-card-header">
+                                    <div class="framework-logo" style="background: linear-gradient(135deg, #000000, #333333);">R</div>
+                                    <div class="framework-card-title">Render (Recommended)</div>
+                                </div>
+                                <div class="framework-card-body">
+                                    • Free tier: Web services + PostgreSQL<br>
+                                    • Easy deployment from GitHub<br>
+                                    • Automatic SSL certificates<br>
+                                    • Perfect for FastAPI/Flask
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="openRender()">Deploy Free</button>
+                            </div>
+                            
+                            <div class="framework-card">
+                                <div class="framework-card-header">
+                                    <div class="framework-logo" style="background: linear-gradient(135deg, #4285F4, #0F9D58);">G</div>
+                                    <div class="framework-card-title">Google Cloud Run</div>
+                                </div>
+                                <div class="framework-card-body">
+                                    • Free tier: 2 million requests/month<br>
+                                    • Container-based deployment<br>
+                                    • Scales to zero when not used<br>
+                                    • Integrates with Cloud SQL
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="openCloudRun()">Try Free</button>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">YAML - Render Deployment Config</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line"># render.yaml</span><br>
+                                <span class="code-line">services:</span><br>
+                                <span class="code-line">  - type: web</span><br>
+                                <span class="code-line">    name: ai-web-app</span><br>
+                                <span class="code-line">    env: python</span><br>
+                                <span class="code-line">    buildCommand: pip install -r requirements.txt</span><br>
+                                <span class="code-line">    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT</span><br>
+                                <span class="code-line">    envVars:</span><br>
+                                <span class="code-line">      - key: OPENAI_API_KEY</span><br>
+                                <span class="code-line">        sync: false  # Set in dashboard</span><br>
+                                <span class="code-line">      - key: DATABASE_URL</span><br>
+                                <span class="code-line">        fromDatabase:</span><br>
+                                <span class="code-line">          name: ai-app-db</span><br>
+                                <span class="code-line">          property: connectionString</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">databases:</span><br>
+                                <span class="code-line">  - name: ai-app-db</span><br>
+                                <span class="code-line">    plan: free</span>
+                            </div>
+                        </div>
+
+                        <div class="exercise">
+                            <div class="exercise-header">
+                                <div class="exercise-icon">📦</div>
+                                <div class="exercise-title">Requirements.txt for Deployment</div>
+                            </div>
+                            <div class="exercise-content">
+                                <div class="code-block">
+                                    <div class="code-content">
+                                        fastapi==0.104.1<br>
+                                        uvicorn[standard]==0.24.0<br>
+                                        openai==0.28.1<br>
+                                        python-dotenv==1.0.0<br>
+                                        pydantic==2.5.0<br>
+                                        pydantic-settings==2.1.0<br>
+                                        sqlalchemy==2.0.23<br>
+                                        psycopg2-binary==2.9.9<br>
+                                        alembic==1.12.1<br>
+                                        httpx==0.25.2<br>
+                                        jinja2==3.1.2<br>
+                                        python-multipart==0.0.6<br>
+                                        redis==5.0.1<br>
+                                        celery==5.3.4
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXAM 4: Full Stack -->
+            <div class="exam-section fade-in" id="exam-4" style="display: none;">
+                <div class="exam-header">
+                    <div class="exam-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="exam-title">Exam 4: Full Stack Development</div>
+                    <div class="exam-meta">
+                        <span>Time: 15 minutes</span>
+                        <span>Questions: 5</span>
+                        <span>Scope: Deployment & Architecture</span>
+                    </div>
+                </div>
+
+                <div class="exam-question">
+                    <div class="question-header">
+                        <div class="question-number">Question 7 of 5</div>
+                        <div class="question-points">3 points</div>
+                    </div>
+                    <div class="question-text">
+                        What is the purpose of the requirements.txt file in a Python web application?
+                    </div>
+                    <div class="options-grid" id="q7-options">
+                        <div class="option" onclick="selectOption(this, 'q7')">A. To list Python files in the project</div>
+                        <div class="option" onclick="selectOption(this, 'q7')">B. To specify all Python packages and their versions</div>
+                        <div class="option" onclick="selectOption(this, 'q7')">C. To document API requirements</div>
+                        <div class="option" onclick="selectOption(this, 'q7')">D. To list user requirements for the app</div>
+                    </div>
+                    <div class="explanation" id="q7-explanation">
+                        <strong>Correct Answer: B</strong><br>
+                        requirements.txt specifies all dependencies with their versions, ensuring consistent environments across development and production.
+                        <div class="resource-links">
+                            <div class="resource-title">Research Links:</div>
+                            <ul class="resource-list">
+                                <li><a href="https://pip.pypa.io/en/stable/user_guide/#requirements-files" target="_blank">pip Requirements Files</a></li>
+                                <li><a href="https://realpython.com/python-virtual-environments-a-primer/" target="_blank">Python Virtual Environments</a></li>
+                                <li><a href="https://www.freecodecamp.org/news/python-requirementstxt-explained/" target="_blank">requirements.txt Explained</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-question">
+                    <div class="question-header">
+                        <div class="question-number">Question 8 of 5</div>
+                        <div class="question-points">4 points</div>
+                    </div>
+                    <div class="question-text">
+                        Why should API keys be stored in environment variables rather than hardcoded in the source code?
+                    </div>
+                    <div class="options-grid" id="q8-options">
+                        <div class="option" onclick="selectOption(this, 'q8')">A. Environment variables make the code run faster</div>
+                        <div class="option" onclick="selectOption(this, 'q8')">B. It prevents API keys from being exposed in version control</div>
+                        <div class="option" onclick="selectOption(this, 'q8')">C. Environment variables are easier to type</div>
+                        <div class="option" onclick="selectOption(this, 'q8')">D. Python requires API keys in environment variables</div>
+                    </div>
+                    <div class="explanation" id="q8-explanation">
+                        <strong>Correct Answer: B</strong><br>
+                        Storing secrets in environment variables prevents accidental exposure in public repositories and allows different values for different environments.
+                        <div class="resource-links">
+                            <div class="resource-title">Research Links:</div>
+                            <ul class="resource-list">
+                                <li><a href="https://12factor.net/config" target="_blank">The Twelve-Factor App: Config</a></li>
+                                <li><a href="https://docs.python.org/3/library/os.html#os.getenv" target="_blank">Python os.getenv()</a></li>
+                                <li><a href="https://www.twilio.com/blog/environment-variables-python" target="_blank">Environment Variables in Python</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-navigation">
+                    <button class="btn btn-secondary" onclick="previousQuestion('exam-4', 'exam-3')" id="prev-btn-4">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <div>
+                        <button class="btn btn-secondary" onclick="showExplanation('q7')">
+                            <i class="fas fa-lightbulb"></i> Show Explanation
+                        </button>
+                        <button class="btn btn-exam" onclick="calculateScore()" id="submit-btn">
+                            Submit Exam <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="exam-section fade-in" id="results" style="display: none;">
+                <div class="results">
+                    <div class="exam-header">
+                        <div class="exam-icon"><i class="fas fa-trophy"></i></div>
+                        <div class="exam-title">Exam Results</div>
+                    </div>
+                    
+                    <div class="score-circle">
+                        <div class="score-circle-inner">
+                            <span id="score-display">0%</span>
+                        </div>
+                    </div>
+                    
+                    <h3 style="margin-bottom: 16px;" id="result-title">Loading Results...</h3>
+                    <p id="result-message" style="margin-bottom: 24px; color: var(--text-secondary);"></p>
+                    
+                    <div style="display: flex; gap: 16px; justify-content: center;">
+                        <button class="btn btn-secondary" onclick="reviewExam()">
+                            <i class="fas fa-redo"></i> Review Answers
+                        </button>
+                        <button class="btn btn-primary" onclick="continueToLesson6()">
+                            Continue to Lesson 6 <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress & Next Steps -->
+            <div class="progress-section">
+                <div class="progress-header">
+                    <div class="progress-title">Lesson 5 Complete! 🎉</div>
+                    <div class="progress-title">Next: Lesson 6 - AI Agents & Autonomous Systems</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="lessonProgress" style="width: 100%"></div>
+                </div>
+                <div class="progress-stats">
+                    <span>OOP Mastered</span>
+                    <span>Web Apps Built</span>
+                    <span>AI Services</span>
+                    <span>Deployment Ready</span>
+                    <span>4 Exams Passed</span>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 32px;">
+                <button class="btn btn-primary" onclick="downloadCompleteProject()" style="padding: 15px 30px; font-size: 16px;">
+                    <i class="fas fa-rocket"></i> Download Complete AI Web App
+                </button>
+                <button class="btn btn-secondary" onclick="startAllExams()" style="padding: 15px 30px; font-size: 16px; margin-left: 16px;">
+                    <i class="fas fa-graduation-cap"></i> Take All 4 Exams (60 min)
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div>Python AI Developer Bootcamp • Lesson 5: AI-Powered Web Apps</div>
+        <div style="margin-top: 8px; font-size: 12px;">
+            Object-Oriented Programming • Flask/FastAPI • Real AI Projects • Free Deployment
+        </div>
+    </footer>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+        const body = document.body;
+
+        // Check for saved theme or prefer-color-scheme
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const savedTheme = localStorage.getItem('theme');
+
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            body.classList.add('dark-mode');
+            themeIcon.className = 'fas fa-sun theme-icon';
+            themeText.textContent = 'Light Mode';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                themeIcon.className = 'fas fa-sun theme-icon';
+                themeText.textContent = 'Light Mode';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.className = 'fas fa-moon theme-icon';
+                themeText.textContent = 'Dark Mode';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Navigation
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+                
+                // Update active sidebar item
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                event.currentTarget.classList.add('active');
+            }
+        }
+
+        // Copy code
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-block');
+            const codeContent = codeBlock.querySelector('.code-content').textContent;
+            
+            navigator.clipboard.writeText(codeContent).then(() => {
+                const originalText = button.textContent;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied';
+                button.style.color = 'var(--ai-green)';
+                
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                    button.style.color = '';
+                }, 2000);
+            });
+        }
+
+        // Exam functionality
+        let examAnswers = {
+            'q1': null,
+            'q2': null,
+            'q3': null,
+            'q4': null,
+            'q5': null,
+            'q6': null,
+            'q7': null,
+            'q8': null
+        };
+
+        const correctAnswers = {
+            'q1': 'B. Classes allow encapsulation of state and behavior',
+            'q2': 'B. Dataclasses provide type hints and structured data',
+            'q3': 'B. FastAPI supports async/await for concurrent AI calls',
+            'q4': 'A. Cross-Origin Resource Sharing for frontend-backend communication',
+            'q5': 'B. Strategy Pattern',
+            'q6': 'B. To enforce a contract that all providers must implement',
+            'q7': 'B. To specify all Python packages and their versions',
+            'q8': 'B. It prevents API keys from being exposed in version control'
+        };
+
+        function selectOption(option, questionId) {
+            // Remove selected class from all options
+            const options = document.querySelectorAll(`#${questionId}-options .option`);
+            options.forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            option.classList.add('selected');
+            
+            // Store answer
+            examAnswers[questionId] = option.textContent;
+            
+            // Enable next button if all questions in current exam are answered
+            enableNextButton();
+        }
+
+        function enableNextButton() {
+            const currentExam = getCurrentExam();
+            const questions = getQuestionsForExam(currentExam);
+            const allAnswered = questions.every(q => examAnswers[q] !== null);
+            
+            if (allAnswered) {
+                const nextBtn = document.getElementById(`next-btn-${currentExam.slice(-1)}`);
+                if (nextBtn) {
+                    nextBtn.disabled = false;
+                }
+            }
+        }
+
+        function getCurrentExam() {
+            const exams = ['exam-1', 'exam-2', 'exam-3', 'exam-4'];
+            for (let exam of exams) {
+                if (document.getElementById(exam).style.display !== 'none') {
+                    return exam;
+                }
+            }
+            return 'exam-1';
+        }
+
+        function getQuestionsForExam(examId) {
+            const examQuestions = {
+                'exam-1': ['q1', 'q2'],
+                'exam-2': ['q3', 'q4'],
+                'exam-3': ['q5', 'q6'],
+                'exam-4': ['q7', 'q8']
+            };
+            return examQuestions[examId] || [];
+        }
+
+        function showExplanation(questionId) {
+            const explanation = document.getElementById(`${questionId}-explanation`);
+            if (explanation) {
+                explanation.classList.toggle('show');
+            }
+        }
+
+        function previousQuestion(currentExam, prevExam) {
+            document.getElementById(currentExam).style.display = 'none';
+            document.getElementById(prevExam).style.display = 'block';
+            scrollToSection(prevExam);
+        }
+
+        function nextQuestion(currentExam, nextExam) {
+            document.getElementById(currentExam).style.display = 'none';
+            document.getElementById(nextExam).style.display = 'block';
+            scrollToSection(nextExam);
+        }
+
+        function calculateScore() {
+            let correct = 0;
+            let total = 0;
+            
+            for (const [question, answer] of Object.entries(examAnswers)) {
+                if (answer !== null) {
+                    total++;
+                    if (answer === correctAnswers[question]) {
+                        correct++;
+                    }
+                }
+            }
+            
+            const scorePercent = Math.round((correct / total) * 100);
+            
+            // Show results
+            document.getElementById('exam-4').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            
+            // Update score display
+            document.getElementById('score-display').textContent = `${scorePercent}%`;
+            document.getElementById('result-title').textContent = 
+                scorePercent >= 80 ? '🎉 Excellent Work!' :
+                scorePercent >= 60 ? '👍 Good Job!' :
+                '📚 Keep Learning!';
+            
+            document.getElementById('result-message').innerHTML = 
+                `You scored <strong>${correct}/${total}</strong> (${scorePercent}%)<br><br>
+                ${scorePercent >= 80 ? 'Ready for professional AI development!' :
+                  scorePercent >= 60 ? 'Solid understanding - review the explanations!' :
+                  'Review the material and try again!'}`;
+            
+            // Update progress
+            updateGlobalProgress(scorePercent);
+        }
+
+        function reviewExam() {
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('exam-1').style.display = 'block';
+            scrollToSection('exam-1');
+        }
+
+        function startAllExams() {
+            // Reset answers
+            for (let key in examAnswers) {
+                examAnswers[key] = null;
+            }
+            
+            // Reset UI
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            });
+            
+            document.querySelectorAll('.explanation').forEach(exp => {
+                exp.classList.remove('show');
+            });
+            
+            // Start from first exam
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('exam-1').style.display = 'block';
+            document.getElementById('exam-2').style.display = 'none';
+            document.getElementById('exam-3').style.display = 'none';
+            document.getElementById('exam-4').style.display = 'none';
+            
+            scrollToSection('exam-1');
+        }
+
+        // Interactive functions
+        function explainAIClass() {
+            alert(`🎯 AI Service Class Explained:
+
+Key OOP Concepts in Practice:
+
+1. **Encapsulation**: API key and conversation history are hidden within the class
+2. **Abstraction**: Complex OpenAI API details are abstracted away
+3. **Reusability**: Same service can be used across multiple endpoints
+4. **Maintainability**: Easy to update API calls without breaking other code
+5. **Error Handling**: Centralized exception handling for all AI operations
+
+This is how professional AI systems are built!`);
+        }
+
+        function runFlaskDemo() {
+            alert(`🚀 Running Flask Demo...
+
+To run this Flask app:
+
+1. Save the code as app.py
+2. Install requirements: pip install flask flask-cors openai python-dotenv
+3. Set your OpenAI API key in .env file
+4. Run: python app.py
+5. Open: http://localhost:5000/api/chat
+
+Test with curl:
+curl -X POST http://localhost:5000/api/chat \\
+  -H "Content-Type: application/json" \\
+  -d '{"message": "Hello, AI!"}'`);
+        }
+
+        function runFastAPIDemo() {
+            alert(`⚡ Running FastAPI Demo...
+
+To run this FastAPI app:
+
+1. Save the code as main.py
+2. Install requirements: pip install fastapi uvicorn openai python-dotenv
+3. Set your OpenAI API key in .env file
+4. Run: uvicorn main:app --reload
+5. Open: http://localhost:8000/docs
+
+Automatic documentation available at:
+• http://localhost:8000/docs (Swagger UI)
+• http://localhost:8000/redoc (ReDoc)`);
+        }
+
+        function testOrchestrator() {
+            alert(`🧪 Testing AI Orchestrator...
+
+This architecture allows:
+
+✅ Multiple AI providers (OpenAI, Anthropic, Cohere)
+✅ Automatic failover if one provider fails
+✅ Consistent interface across providers
+✅ Easy to add new providers
+✅ Cost tracking per provider
+
+Production benefits:
+• No single point of failure
+• Can switch providers based on cost/performance
+• Rate limit handling per provider
+• Monitoring and logging per provider`);
+        }
+
+        // Resource links
+        function openFlaskDocs() {
+            window.open('https://flask.palletsprojects.com/', '_blank');
+        }
+
+        function openFastAPIDocs() {
+            window.open('https://fastapi.tiangolo.com/', '_blank');
+        }
+
+        function openRender() {
+            window.open('https://render.com', '_blank');
+        }
+
+        function openCloudRun() {
+            window.open('https://cloud.google.com/run', '_blank');
+        }
+
+        // Download functions
+        function downloadProject() {
+            const content = `# Complete AI Web Application Project
+
+## Project Structure
+ai_web_app/
+├── app/
+│   ├── __init__.py
+│   ├── main.py              # FastAPI application
+│   ├── models/              # Data models (Pydantic, SQLAlchemy)
+│   ├── services/           # Business logic and AI services
+│   ├── api/               # API endpoints and routes
+│   └── utils/             # Utility functions
+├── tests/                 # Unit and integration tests
+├── frontend/             # React/Vue frontend (optional)
+├── requirements.txt      # Python dependencies
+├── .env.example          # Environment variables template
+├── Dockerfile           # Container configuration
+├── docker-compose.yml   # Multi-container setup
+├── render.yaml          # Render deployment config
+└── README.md            # Project documentation
+
+## Features
+✅ FastAPI with automatic OpenAPI documentation
+✅ Multi-provider AI service (OpenAI, Anthropic, Cohere)
+✅ Object-Oriented design with proper separation of concerns
+✅ Database integration (PostgreSQL/SQLite)
+✅ Authentication and rate limiting
+✅ Async/await for concurrent AI calls
+✅ Comprehensive error handling
+✅ Logging and monitoring
+✅ Unit tests with pytest
+✅ Docker containerization
+✅ CI/CD pipeline configuration
+✅ Free deployment configuration
+
+## Quick Start
+1. Clone the repository
+2. Copy .env.example to .env and add your API keys
+3. Install dependencies: pip install -r requirements.txt
+4. Run the app: uvicorn app.main:app --reload
+5. Open http://localhost:8000/docs for API documentation
+
+## Free Deployment
+Deploy to Render.com for free:
+1. Push to GitHub
+2. Connect to Render
+3. Add environment variables
+4. Deploy!
+
+## Learning Path
+1. Start with Flask for learning
+2. Move to FastAPI for production
+3. Add more AI providers
+4. Implement caching (Redis)
+5. Add background tasks (Celery)
+6. Implement monitoring
+
+Happy coding! 🚀`;
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ai_web_app_project.zip.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('📦 Project template downloaded!\n\nYou now have a complete AI web application structure.\n\nNext steps:\n1. Extract and explore the structure\n2. Add your API keys\n3. Start building!');
+        }
+
+        function downloadCompleteProject() {
+            alert('🎯 Complete AI Web App Downloaded!\n\nIncludes:\n✅ FastAPI backend with OOP design\n✅ Multi-AI provider service\n✅ Database models\n✅ Authentication system\n✅ Frontend templates\n✅ Deployment configuration\n✅ Docker setup\n✅ Testing framework\n\nReady for production deployment!');
+            
+            // Update progress
+            updateGlobalProgress(100);
+        }
+
+        // Progress tracking
+        function updateGlobalProgress(score = 0) {
+            const progressBar = document.getElementById('globalProgress');
+            const progressPercent = document.getElementById('progressPercent');
+            
+            // Base progress + exam score bonus
+            let current = 35; // Starting at lesson 5
+            if (score > 0) {
+                current += Math.min(15, score / 100 * 15); // Max 15% bonus for perfect score
+            }
+            
+            progressBar.style.width = `${current}%`;
+            progressPercent.textContent = `${Math.round(current)}%`;
+        }
+
+        function continueToLesson6() {
+            updateGlobalProgress();
+            alert('🚀 Moving to Lesson 6: AI Agents & Autonomous Systems\n\nTopics:\n• Building AI agents that make decisions\n• Autonomous task completion\n• Memory and context management\n• Multi-agent systems\n• Real-world AI agent examples');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial progress
+            const progressBar = document.getElementById('globalProgress');
+            progressBar.style.width = '35%';
+            document.getElementById('progressPercent').textContent = '35%';
+            
+            // Set up floating animation
+            const elements = document.querySelectorAll('.floating-element');
+            elements.forEach((element, index) => {
+                element.style.animationDelay = `${-index * 5}s`;
+            });
+        });
+    </script>
+</body>
+</html>

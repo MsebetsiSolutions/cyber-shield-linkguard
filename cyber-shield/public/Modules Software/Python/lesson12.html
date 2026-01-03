@@ -1,0 +1,3000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 12: Advanced Python Methods for Manufacturing AI | Python Methods & Data Science</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <style>
+        /* Manufacturing Theme Variables */
+        :root {
+            --bg-primary: #0A0E17;
+            --bg-secondary: #0F172A;
+            --bg-tertiary: #1E293B;
+            --bg-quaternary: #334155;
+            --border-color: #475569;
+            --border-light: #64748B;
+            --text-primary: #F1F5F9;
+            --text-secondary: #CBD5E1;
+            --text-tertiary: #94A3B8;
+            --industrial-blue: #3B82F6;
+            --industrial-blue-light: rgba(59, 130, 246, 0.1);
+            --industrial-blue-hover: #2563EB;
+            --automation-orange: #F97316;
+            --robotics-yellow: #EAB308;
+            --predictive-green: #10B981;
+            --quality-red: #EF4444;
+            --iot-purple: #8B5CF6;
+            --plc-teal: #06D6A0;
+            --manufacturing-gray: #6B7280;
+            --safety-yellow: #FBBF24;
+            --code-bg: #0D1117;
+            --code-text: #E2E8F0;
+            --highlight-bg: rgba(59, 130, 246, 0.15);
+            --sidebar-bg: #0F172A;
+            --message-ai-bg: #1E293B;
+            --message-user-bg: #0F172A;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --shadow-heavy: rgba(0, 0, 0, 0.5);
+            --success-green: #10B981;
+            --warning-orange: #F97316;
+            --error-red: #EF4444;
+            --industrial-gradient: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            --automation-gradient: linear-gradient(135deg, #F97316, #EAB308);
+            --robotics-gradient: linear-gradient(135deg, #EAB308, #F97316);
+            --predictive-gradient: linear-gradient(135deg, #10B981, #06D6A0);
+            --quality-gradient: linear-gradient(135deg, #EF4444, #F97316);
+            --iot-gradient: linear-gradient(135deg, #8B5CF6, #3B82F6);
+            --data-science-pink: #EC4899;
+            --data-science-gradient: linear-gradient(135deg, #EC4899, #8B5CF6);
+        }
+
+        .dark-mode {
+            --bg-primary: #030712;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1F2937;
+            --bg-quaternary: #374151;
+            --border-color: #4B5563;
+            --border-light: #6B7280;
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-tertiary: #9CA3AF;
+            --industrial-blue: #60A5FA;
+            --industrial-blue-light: rgba(96, 165, 250, 0.15);
+            --industrial-blue-hover: #3B82F6;
+            --automation-orange: #FB923C;
+            --robotics-yellow: #FBBF24;
+            --predictive-green: #34D399;
+            --quality-red: #F87171;
+            --iot-purple: #A78BFA;
+            --plc-teal: #34D399;
+            --manufacturing-gray: #9CA3AF;
+            --safety-yellow: #FCD34D;
+            --data-science-pink: #F472B6;
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Header Styles */
+        .header {
+            background: var(--bg-secondary);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 32px;
+            background: var(--industrial-gradient);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .lesson-tag {
+            background: var(--data-science-gradient);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 90px;
+            right: 24px;
+            background: var(--bg-tertiary);
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            z-index: 100;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .theme-icon {
+            font-size: 16px;
+            color: var(--industrial-blue);
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            min-height: calc(100vh - 82px);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+            position: sticky;
+            top: 82px;
+            height: calc(100vh - 82px);
+        }
+
+        .sidebar-section {
+            margin-bottom: 32px;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .sidebar-item.active {
+            background: var(--industrial-blue-light);
+            border-left: 3px solid var(--industrial-blue);
+        }
+
+        .sidebar-icon {
+            color: var(--text-tertiary);
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Content Badges */
+        .content-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: auto;
+            border: 1px solid transparent;
+        }
+
+        .badge-exam {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--iot-purple);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .badge-data-science {
+            background: rgba(236, 72, 153, 0.1);
+            color: var(--data-science-pink);
+            border-color: rgba(236, 72, 153, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 24px;
+            max-width: calc(100% - 280px);
+        }
+
+        /* Message Styles */
+        .message {
+            background: var(--message-ai-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 16px;
+            border: 1px solid var(--border-color);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .message-author {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .message-time {
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+
+        .message-tags {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .message-text h1,
+        .message-text h2,
+        .message-text h3 {
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .message-text p {
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+        }
+
+        /* Learning Objectives */
+        .learning-objectives {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .objective-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding: 8px 0;
+        }
+
+        .objective-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--data-science-pink);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--code-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .code-header {
+            background: var(--bg-tertiary);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .code-language {
+            font-family: 'Cascadia Code', 'Courier New', monospace;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .code-action {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .code-action:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .code-content {
+            padding: 16px;
+            overflow-x: auto;
+            font-family: 'Cascadia Code', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--code-text);
+        }
+
+        /* Interactive Code Runner */
+        .code-runner {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .code-input {
+            width: 100%;
+            min-height: 150px;
+            background: var(--code-bg);
+            color: var(--code-text);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'Cascadia Code', 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 12px;
+        }
+
+        .runner-output {
+            background: var(--code-bg);
+            color: var(--code-text);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            min-height: 100px;
+            font-family: 'Cascadia Code', 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+
+        /* Data Visualization Container */
+        .viz-container {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid var(--data-science-pink);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        /* Method Examples Grid */
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .method-card {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .method-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px var(--shadow-heavy);
+            border-color: var(--data-science-pink);
+        }
+
+        .method-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--data-science-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .method-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        /* Manufacturing Dashboard */
+        .manufacturing-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .dashboard-card {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid var(--industrial-blue);
+        }
+
+        .dashboard-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--industrial-blue);
+            margin-bottom: 8px;
+        }
+
+        .dashboard-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Correlation Matrix */
+        .correlation-matrix {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 4px;
+            margin: 20px 0;
+        }
+
+        .correlation-cell {
+            padding: 12px;
+            text-align: center;
+            font-family: 'Cascadia Code', monospace;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .correlation-cell:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--industrial-gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-data-science {
+            background: var(--data-science-gradient);
+            color: white;
+        }
+
+        .btn-data-science:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.3);
+        }
+
+        /* Avatar Variations */
+        .avatar.data-science {
+            background: var(--data-science-gradient);
+            color: white;
+        }
+
+        .avatar.industrial {
+            background: var(--industrial-gradient);
+            color: white;
+        }
+
+        .avatar.automation {
+            background: var(--automation-gradient);
+            color: white;
+        }
+
+        .avatar.robotics {
+            background: var(--robotics-gradient);
+            color: white;
+        }
+
+        /* Interactive Exercise */
+        .interactive-exercise {
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 20px 0;
+            border: 2px solid var(--robotics-yellow);
+        }
+
+        .exercise-task {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border-left: 4px solid var(--robotics-yellow);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1024px) {
+            .main-layout {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                top: auto;
+            }
+            
+            .main-content {
+                max-width: 100%;
+            }
+            
+            .method-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .correlation-matrix {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-wrap: wrap;
+            }
+            
+            .lesson-tag {
+                margin-top: 8px;
+                margin-left: 0;
+            }
+            
+            .method-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .correlation-matrix {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .message {
+                flex-direction: column;
+            }
+            
+            .avatar {
+                align-self: flex-start;
+            }
+            
+            .theme-toggle {
+                position: static;
+                margin: 16px auto;
+                width: fit-content;
+            }
+        }
+
+        /* Pyodide Loader */
+        .pyodide-loader {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .loader-spinner {
+            border: 4px solid var(--bg-secondary);
+            border-top: 4px solid var(--industrial-blue);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon theme-icon" id="themeIcon"></i>
+        <span id="themeText">Light Mode</span>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">🏭</div>
+        <div class="header-title">Python AI Developer Bootcamp</div>
+        <div class="lesson-tag">Lesson 12: Python Methods & Data Science</div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-cogs"></i>
+                    Lesson 12 Topics
+                </div>
+                <div style="height: 4px; background: var(--bg-tertiary); border-radius: 2px; margin: 8px 0;">
+                    <div style="height: 100%; background: var(--data-science-gradient); border-radius: 2px; width: 20%;" id="lessonProgress"></div>
+                </div>
+                <div class="sidebar-item active" onclick="scrollToSection('python-methods-intro')">
+                    <i class="fas fa-code sidebar-icon"></i>
+                    <span>Python Methods Fundamentals</span>
+                    <div class="content-badge badge-data-science">Core</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('string-methods')">
+                    <i class="fas fa-text-width sidebar-icon"></i>
+                    <span>String Methods in Manufacturing</span>
+                    <div class="content-badge badge-data-science">Strings</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('list-methods')">
+                    <i class="fas fa-list sidebar-icon"></i>
+                    <span>List Methods for Production Data</span>
+                    <div class="content-badge badge-data-science">Lists</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('dict-methods')">
+                    <i class="fas fa-database sidebar-icon"></i>
+                    <span>Dictionary Methods for IoT Data</span>
+                    <div class="content-badge badge-data-science">Dicts</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('data-visualization')">
+                    <i class="fas fa-chart-bar sidebar-icon"></i>
+                    <span>Data Visualization & Correlation</span>
+                    <div class="content-badge badge-data-science">Viz</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('real-world-exercise')">
+                    <i class="fas fa-industry sidebar-icon"></i>
+                    <span>Manufacturing User System</span>
+                    <div class="content-badge badge-industrial">Exercise</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('advanced-patterns')">
+                    <i class="fas fa-brain sidebar-icon"></i>
+                    <span>Advanced AI Architecture Patterns</span>
+                    <div class="content-badge badge-data-science">AI</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-tools"></i>
+                    Interactive Tools
+                </div>
+                <div class="sidebar-item" onclick="runPythonCodeRunner()">
+                    <i class="fas fa-play sidebar-icon"></i>
+                    <span>Python Code Runner</span>
+                </div>
+                <div class="sidebar-item" onclick="runDataVisualization()">
+                    <i class="fas fa-chart-line sidebar-icon"></i>
+                    <span>Live Data Visualization</span>
+                </div>
+                <div class="sidebar-item" onclick="runManufacturingSimulation()">
+                    <i class="fas fa-industry sidebar-icon"></i>
+                    <span>Manufacturing Data Simulator</span>
+                </div>
+                <div class="sidebar-item" onclick="runCorrelationAnalysis()">
+                    <i class="fas fa-project-diagram sidebar-icon"></i>
+                    <span>Correlation Analyzer</span>
+                </div>
+                <div class="sidebar-item" onclick="startInteractiveExercise()">
+                    <i class="fas fa-graduation-cap sidebar-icon"></i>
+                    <span>Start Hands-on Exercise</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-chart-line"></i>
+                    Manufacturing Dashboard
+                </div>
+                <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 12px;">
+                    <div class="manufacturing-dashboard" style="grid-template-columns: 1fr; gap: 8px;">
+                        <div class="dashboard-card">
+                            <div class="dashboard-value">94.2%</div>
+                            <div class="dashboard-label">Data Accuracy</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-value">12.5K</div>
+                            <div class="dashboard-label">Sensor Readings/Hour</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-value">0.987</div>
+                            <div class="dashboard-label">Avg. Correlation</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; text-align: center;">
+                        <span style="font-size: 11px; color: var(--text-tertiary);">Live Factory Analytics</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Pyodide Loader -->
+            <div class="pyodide-loader" id="pyodideLoader">
+                <div class="loader-spinner"></div>
+                <p>Loading Python runtime...</p>
+                <p style="font-size: 12px; color: var(--text-tertiary);">This may take a few seconds</p>
+            </div>
+
+            <!-- Introduction -->
+            <div class="message fade-in" id="python-methods-intro">
+                <div class="avatar data-science">📊</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Data Science Engineer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-data-science">Python Methods</div>
+                            <div class="content-badge badge-industrial">Manufacturing AI</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h1>🏭 Lesson 12: Advanced Python Methods for Manufacturing AI & Data Science</h1>
+                        <p>Master Python string, list, and dictionary methods in the context of industrial automation, robotics, and manufacturing data analysis. Learn through hands-on, interactive examples.</p>
+                        
+                        <div class="learning-objectives">
+                            <h3 style="color: var(--text-primary); margin-bottom: 20px;">🎯 Learning Objectives</h3>
+                            <div class="objective-item">
+                                <div class="objective-icon">1</div>
+                                <div>
+                                    <strong>String Methods</strong>: Process manufacturing data with precision
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">2</div>
+                                <div>
+                                    <strong>List & Dictionary Methods</strong>: Manage production data efficiently
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">3</div>
+                                <div>
+                                    <strong>Data Visualization</strong>: Create insightful manufacturing dashboards
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">4</div>
+                                <div>
+                                    <strong>Correlation Analysis</strong>: Discover relationships in factory data
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">5</div>
+                                <div>
+                                    <strong>Real-World Exercise</strong>: Fix and enhance a manufacturing user system
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-runner">
+                            <h3>🚀 Interactive Python Runner</h3>
+                            <p>Try Python code directly in your browser:</p>
+                            <textarea class="code-input" id="pythonCode" placeholder="print('Hello Manufacturing World!')
+# Try: [x.upper() for x in ['robot', 'sensor', 'actuator']]"># Manufacturing data processing example
+production_data = ['Robot_ARM_001', 'SENSOR_temp_45', 'actuator_linear_12']
+
+# Clean and standardize data
+cleaned = []
+for item in production_data:
+    # Convert to lowercase and replace underscores with spaces
+    cleaned_item = item.lower().replace('_', ' ')
+    cleaned.append(cleaned_item.title())
+
+print("Cleaned Manufacturing Data:")
+for item in cleaned:
+    print(f"  - {item}")</textarea>
+                            <button class="btn btn-data-science" onclick="runPythonCode()">
+                                <i class="fas fa-play"></i> Run Python Code
+                            </button>
+                            <div class="runner-output" id="pythonOutput">Output will appear here...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- String Methods in Manufacturing -->
+            <div class="message fade-in" id="string-methods">
+                <div class="avatar industrial">🏭</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Industrial Data Scientist</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-data-science">String Methods</div>
+                            <div class="content-badge badge-industrial">Data Cleaning</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🔧 String Methods for Manufacturing Data Processing</h2>
+                        <p>Process sensor data, robot commands, and quality control logs using Python string methods. Clean, validate, and transform industrial data efficiently.</p>
+                        
+                        <div class="method-grid">
+                            <div class="method-card">
+                                <div class="method-icon">🧹</div>
+                                <div class="method-title">.strip() & .title()</div>
+                                <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 14px;">
+                                    Clean sensor data and standardize equipment names
+                                </p>
+                                <div class="code-content" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; font-size: 12px;">
+                                    sensor_id = "  TEMP_SENSOR_01  "<br>
+                                    clean_id = sensor_id.strip().title()<br>
+                                    # Result: "Temp_Sensor_01"
+                                </div>
+                            </div>
+                            
+                            <div class="method-card">
+                                <div class="method-icon">🔄</div>
+                                <div class="method-title">.replace() & .lower()</div>
+                                <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 14px;">
+                                    Standardize robot command formats
+                                </p>
+                                <div class="code-content" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; font-size: 12px;">
+                                    command = "MOVE_TO_X:150,Y:200"<br>
+                                    std_command = command.lower().replace(':', '=')<br>
+                                    # Result: "move_to_x=150,y=200"
+                                </div>
+                            </div>
+                            
+                            <div class="method-card">
+                                <div class="method-icon">🎯</div>
+                                <div class="method-title">.startswith() & .endswith()</div>
+                                <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 14px;">
+                                    Filter equipment by type or status
+                                </p>
+                                <div class="code-content" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; font-size: 12px;">
+                                    devices = ["robot_arm", "cnc_mill", "sensor_temp"]<br>
+                                    robots = [d for d in devices if d.startswith('robot')]<br>
+                                    # Result: ["robot_arm"]
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    <button class="code-action" onclick="runStringMethodsDemo()"><i class="fas fa-play"></i> Run</button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+<pre><code>class ManufacturingDataProcessor:
+    """Process manufacturing data using string methods"""
+    
+    def clean_sensor_data(self, raw_data):
+        """Clean and standardize sensor readings"""
+        cleaned = {}
+        
+        for sensor_id, reading in raw_data.items():
+            # Remove whitespace and convert to consistent format
+            clean_id = sensor_id.strip().replace(' ', '_').upper()
+            
+            # Handle different reading formats
+            if isinstance(reading, str):
+                clean_reading = reading.strip().replace('°C', '').replace('C', '')
+                if clean_reading.replace('.', '').isdigit():
+                    cleaned[clean_id] = float(clean_reading)
+                else:
+                    cleaned[clean_id] = clean_reading
+            else:
+                cleaned[clean_id] = reading
+        
+        return cleaned
+    
+    def validate_equipment_id(self, equipment_id):
+        """Validate manufacturing equipment IDs"""
+        rules = [
+            equipment_id.isalnum() or '_' in equipment_id,
+            len(equipment_id) <= 20,
+            not equipment_id.startswith('_'),
+            not equipment_id.endswith('_')
+        ]
+        
+        return all(rules)
+    
+    def extract_equipment_info(self, equipment_string):
+        """Extract type, model, and serial from equipment string"""
+        # Example: "CNC_MILL_HAAS_VF2_SN_12345"
+        parts = equipment_string.split('_')
+        
+        info = {
+            'type': parts[0] if len(parts) > 0 else '',
+            'model': '_'.join(parts[1:-2]) if len(parts) > 2 else '',
+            'serial': parts[-1] if parts[-1].isdigit() else ''
+        }
+        
+        return info
+
+# Example usage
+processor = ManufacturingDataProcessor()
+
+# Clean sensor data
+raw_sensors = {
+    '  Temp Sensor 1 ': '45.5°C',
+    'Pressure_Sensor_2': '  100.2  ',
+    'Humidity Sensor 3': '60%'
+}
+
+cleaned = processor.clean_sensor_data(raw_sensors)
+print("🧹 Cleaned Sensor Data:")
+for sensor, value in cleaned.items():
+    print(f"  {sensor}: {value}")
+
+# Validate equipment IDs
+equipment_ids = ['ROBOT_ARM_01', '_INVALID_', 'CNC_MILL_HAAS_VF2', 'TOO_LONG_EQUIPMENT_ID_12345']
+print("\n🎯 Equipment ID Validation:")
+for eid in equipment_ids:
+    valid = processor.validate_equipment_id(eid)
+    print(f"  {eid}: {'✅ Valid' if valid else '❌ Invalid'}")
+
+# Extract equipment information
+equipment = "CNC_MILL_HAAS_VF2_SN_12345"
+info = processor.extract_equipment_info(equipment)
+print(f"\n🔍 Equipment Analysis:")
+print(f"  Type: {info['type']}")
+print(f"  Model: {info['model']}")
+print(f"  Serial: {info['serial']}")</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List Methods for Production Data -->
+            <div class="message fade-in" id="list-methods">
+                <div class="avatar automation">⚙️</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Automation Engineer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-data-science">List Methods</div>
+                            <div class="content-badge badge-automation">Production Data</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>📊 List Methods for Production Line Data Management</h2>
+                        <p>Manage production batches, quality control results, and maintenance schedules using Python list methods. Implement efficient data processing for smart factories.</p>
+                        
+                        <div class="viz-container">
+                            <h3>📈 Production Line Throughput Analysis</h3>
+                            <canvas id="productionChart" class="chart-container"></canvas>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    <button class="code-action" onclick="runListMethodsDemo()"><i class="fas fa-play"></i> Run</button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+<pre><code>import random
+from datetime import datetime, timedelta
+
+class ProductionDataManager:
+    """Manage production data using list methods"""
+    
+    def __init__(self):
+        self.production_batches = []
+        self.quality_scores = []
+        self.downtime_records = []
+    
+    def generate_production_data(self, days=30):
+        """Generate simulated production data"""
+        start_date = datetime.now() - timedelta(days=days)
+        
+        for i in range(days):
+            date = start_date + timedelta(days=i)
+            
+            # Simulate production metrics
+            batch = {
+                'date': date.date(),
+                'units_produced': random.randint(800, 1200),
+                'defect_count': random.randint(0, 20),
+                'downtime_minutes': random.randint(0, 120),
+                'energy_consumption': random.uniform(800, 1200)
+            }
+            
+            self.production_batches.append(batch)
+            self.quality_scores.append(1 - (batch['defect_count'] / batch['units_produced']))
+        
+        return self.production_batches
+    
+    def analyze_production_trends(self):
+        """Analyze production trends using list methods"""
+        if not self.production_batches:
+            self.generate_production_data()
+        
+        # Extract metrics using list comprehensions
+        units = [batch['units_produced'] for batch in self.production_batches]
+        defects = [batch['defect_count'] for batch in self.production_batches]
+        downtimes = [batch['downtime_minutes'] for batch in self.production_batches]
+        
+        # Calculate statistics
+        analysis = {
+            'total_units': sum(units),
+            'avg_daily_units': sum(units) / len(units),
+            'max_units': max(units),
+            'min_units': min(units),
+            'total_defects': sum(defects),
+            'defect_rate': sum(defects) / sum(units),
+            'total_downtime': sum(downtimes),
+            'worst_day': self.production_batches[downtimes.index(max(downtimes))]['date']
+        }
+        
+        return analysis
+    
+    def optimize_production_schedule(self):
+        """Optimize production using list sorting and filtering"""
+        # Sort by efficiency (units/downtime)
+        sorted_batches = sorted(
+            self.production_batches,
+            key=lambda x: x['units_produced'] / (x['downtime_minutes'] + 1),
+            reverse=True
+        )
+        
+        # Filter high-performance days
+        high_perf_days = [
+            batch for batch in sorted_batches[:5]
+            if batch['defect_count'] < 10 and batch['downtime_minutes'] < 30
+        ]
+        
+        # Find patterns in high-performance days
+        patterns = {
+            'avg_units_high_perf': sum(b['units_produced'] for b in high_perf_days) / len(high_perf_days),
+            'common_downtime_causes': self.analyze_downtime_patterns(high_perf_days)
+        }
+        
+        return sorted_batches, high_perf_days, patterns
+    
+    def analyze_downtime_patterns(self, batches):
+        """Analyze downtime patterns using list methods"""
+        # Group by downtime ranges
+        downtime_ranges = {
+            'low': [b for b in batches if b['downtime_minutes'] < 30],
+            'medium': [b for b in batches if 30 <= b['downtime_minutes'] < 90],
+            'high': [b for b in batches if b['downtime_minutes'] >= 90]
+        }
+        
+        return downtime_ranges
+
+# Example usage
+print("🏭 Production Data Analysis")
+print("=" * 40)
+
+manager = ProductionDataManager()
+
+# Generate and analyze data
+batches = manager.generate_production_data(14)
+analysis = manager.analyze_production_trends()
+
+print(f"📊 14-Day Production Analysis:")
+print(f"  Total Units: {analysis['total_units']:,}")
+print(f"  Average Daily: {analysis['avg_daily_units']:.0f} units")
+print(f"  Defect Rate: {analysis['defect_rate']:.2%}")
+print(f"  Total Downtime: {analysis['total_downtime'] / 60:.1f} hours")
+print(f"  Worst Day: {analysis['worst_day']}")
+
+# Optimize schedule
+sorted_batches, high_perf, patterns = manager.optimize_production_schedule()
+print(f"\n⚡ Optimization Results:")
+print(f"  Best Day: {sorted_batches[0]['date']} - {sorted_batches[0]['units_produced']} units")
+print(f"  High-Perf Days Found: {len(high_perf)}")
+print(f"  Avg Units on High-Perf Days: {patterns['avg_units_high_perf']:.0f}")
+
+# Show sample data
+print(f"\n📅 Sample Production Data (First 3 days):")
+for batch in batches[:3]:
+    print(f"  {batch['date']}: {batch['units_produced']} units, "
+          f"{batch['defect_count']} defects, {batch['downtime_minutes']}min downtime")</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dictionary Methods for IoT Data -->
+            <div class="message fade-in" id="dict-methods">
+                <div class="avatar iot">📡</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">IoT Data Architect</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-data-science">Dictionary Methods</div>
+                            <div class="content-badge badge-iot">Sensor Networks</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>📡 Dictionary Methods for IoT Sensor Networks</h2>
+                        <p>Process real-time sensor data, manage equipment configurations, and implement fault detection using Python dictionary methods.</p>
+                        
+                        <div class="manufacturing-dashboard">
+                            <div class="dashboard-card">
+                                <div class="dashboard-value">142</div>
+                                <div class="dashboard-label">Active Sensors</div>
+                            </div>
+                            <div class="dashboard-card">
+                                <div class="dashboard-value">99.7%</div>
+                                <div class="dashboard-label">Data Completeness</div>
+                            </div>
+                            <div class="dashboard-card">
+                                <div class="dashboard-value">0.3s</div>
+                                <div class="dashboard-label">Avg. Processing Time</div>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    <button class="code-action" onclick="runDictMethodsDemo()"><i class="fas fa-play"></i> Run</button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+<pre><code>import json
+from collections import defaultdict, Counter
+import statistics
+
+class IoTSensorManager:
+    """Manage IoT sensor data using dictionary methods"""
+    
+    def __init__(self):
+        self.sensor_network = defaultdict(dict)
+        self.sensor_readings = []
+        self.alerts = []
+    
+    def add_sensor(self, sensor_id, sensor_type, location, config=None):
+        """Add a new sensor to the network"""
+        sensor_data = {
+            'type': sensor_type,
+            'location': location,
+            'status': 'active',
+            'config': config or {},
+            'readings': [],
+            'last_updated': None
+        }
+        
+        self.sensor_network[sensor_id] = sensor_data
+        return sensor_id
+    
+    def process_sensor_data(self, raw_data):
+        """Process incoming sensor data"""
+        processed = {}
+        
+        for sensor_id, reading in raw_data.items():
+            if sensor_id in self.sensor_network:
+                # Get sensor configuration
+                config = self.sensor_network[sensor_id].get('config', {})
+                
+                # Process based on sensor type
+                sensor_type = self.sensor_network[sensor_id]['type']
+                
+                if sensor_type == 'temperature':
+                    processed_value = self.process_temperature(reading, config)
+                elif sensor_type == 'vibration':
+                    processed_value = self.process_vibration(reading, config)
+                elif sensor_type == 'pressure':
+                    processed_value = self.process_pressure(reading, config)
+                else:
+                    processed_value = reading
+                
+                # Update sensor record
+                self.sensor_network[sensor_id]['readings'].append(processed_value)
+                self.sensor_network[sensor_id]['last_updated'] = 'now'
+                
+                # Check for anomalies
+                if self.detect_anomaly(sensor_id, processed_value):
+                    self.create_alert(sensor_id, processed_value)
+                
+                processed[sensor_id] = processed_value
+        
+        self.sensor_readings.append(processed)
+        return processed
+    
+    def process_temperature(self, reading, config):
+        """Process temperature sensor data"""
+        # Convert to Celsius if needed
+        if isinstance(reading, str) and 'F' in reading:
+            temp_f = float(reading.replace('F', '').strip())
+            return (temp_f - 32) * 5/9
+        return float(reading)
+    
+    def detect_anomaly(self, sensor_id, value):
+        """Detect anomalies in sensor readings"""
+        readings = self.sensor_network[sensor_id]['readings']
+        
+        if len(readings) > 10:
+            recent = readings[-10:]
+            mean = statistics.mean(recent)
+            stdev = statistics.stdev(recent) if len(recent) > 1 else 0
+            
+            # Check if value is outside 3 standard deviations
+            if stdev > 0 and abs(value - mean) > 3 * stdev:
+                return True
+        
+        return False
+    
+    def create_alert(self, sensor_id, value):
+        """Create anomaly alert"""
+        alert = {
+            'sensor_id': sensor_id,
+            'value': value,
+            'type': 'anomaly',
+            'timestamp': 'now',
+            'severity': 'high' if abs(value) > 100 else 'medium'
+        }
+        
+        self.alerts.append(alert)
+        return alert
+    
+    def get_sensor_stats(self):
+        """Get statistics for all sensors"""
+        stats = {}
+        
+        for sensor_id, data in self.sensor_network.items():
+            readings = data['readings']
+            if readings:
+                stats[sensor_id] = {
+                    'count': len(readings),
+                    'mean': statistics.mean(readings) if readings else 0,
+                    'min': min(readings) if readings else 0,
+                    'max': max(readings) if readings else 0,
+                    'last_value': readings[-1] if readings else None
+                }
+        
+        return stats
+    
+    def find_correlated_sensors(self):
+        """Find sensors with correlated readings"""
+        correlations = {}
+        
+        sensor_ids = list(self.sensor_network.keys())
+        
+        for i, sensor_a in enumerate(sensor_ids):
+            readings_a = self.sensor_network[sensor_a]['readings']
+            
+            for sensor_b in sensor_ids[i+1:]:
+                readings_b = self.sensor_network[sensor_b]['readings']
+                
+                # Simple correlation calculation
+                if len(readings_a) == len(readings_b) and len(readings_a) > 5:
+                    try:
+                        corr = statistics.correlation(readings_a, readings_b)
+                        if abs(corr) > 0.7:  # Strong correlation
+                            correlations[(sensor_a, sensor_b)] = corr
+                    except:
+                        pass
+        
+        return correlations
+
+# Example usage
+print("📡 IoT Sensor Network Management")
+print("=" * 40)
+
+manager = IoTSensorManager()
+
+# Add sensors
+manager.add_sensor('temp_001', 'temperature', 'cnc_machine_1', {'unit': 'C', 'threshold': 80})
+manager.add_sensor('vib_001', 'vibration', 'conveyor_belt', {'unit': 'mm/s', 'threshold': 5.0})
+manager.add_sensor('press_001', 'pressure', 'hydraulic_press', {'unit': 'bar', 'threshold': 150})
+
+print("✅ Sensors added to network:")
+for sensor_id, data in manager.sensor_network.items():
+    print(f"  {sensor_id}: {data['type']} at {data['location']}")
+
+# Process sample data
+sample_data = {
+    'temp_001': '75.5',
+    'vib_001': '2.3',
+    'press_001': '120.5'
+}
+
+processed = manager.process_sensor_data(sample_data)
+print(f"\n📊 Processed Sensor Readings:")
+for sensor, value in processed.items():
+    print(f"  {sensor}: {value:.2f}")
+
+# Add more readings for analysis
+for i in range(10):
+    noise = i * 0.1
+    manager.process_sensor_data({
+        'temp_001': str(75.5 + noise),
+        'vib_001': str(2.3 + noise * 0.1),
+        'press_001': str(120.5 + noise * 2)
+    })
+
+# Get statistics
+stats = manager.get_sensor_stats()
+print(f"\n📈 Sensor Statistics:")
+for sensor, stat in stats.items():
+    print(f"  {sensor}: {stat['count']} readings, "
+          f"mean={stat['mean']:.2f}, range=[{stat['min']:.2f}, {stat['max']:.2f}]")</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Visualization & Correlation -->
+            <div class="message fade-in" id="data-visualization">
+                <div class="avatar data-science">📈</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Data Visualization Expert</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-data-science">Visualization</div>
+                            <div class="content-badge badge-industrial">Correlation</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>📊 Data Visualization & Correlation Analysis for Manufacturing</h2>
+                        <p>Visualize production data, identify correlations, and make data-driven decisions using interactive charts and statistical analysis.</p>
+                        
+                        <div class="viz-container">
+                            <h3>🔗 Correlation Matrix: Manufacturing Metrics</h3>
+                            <div class="correlation-matrix" id="correlationMatrix"></div>
+                            <p style="text-align: center; margin-top: 10px; color: var(--text-tertiary);">
+                                Hover over cells to see correlation values. Strong positive correlations in green, negative in red.
+                            </p>
+                        </div>
+
+                        <div class="code-runner">
+                            <h3>🎨 Interactive Visualization Generator</h3>
+                            <textarea class="code-input" id="vizCode" placeholder="# Try changing the metrics or colors
+metrics = ['Throughput', 'Quality', 'Downtime', 'Energy']
+values = [85, 92, 15, 78]"># Manufacturing metrics visualization
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Manufacturing performance metrics
+metrics = ['Production\nRate', 'Quality\nScore', 'Machine\nUptime', 'Energy\nEfficiency', 'Safety\nIndex']
+current_values = [88, 94, 92, 85, 96]
+target_values = [90, 95, 95, 90, 98]
+
+# Create visualization
+fig, ax = plt.subplots(figsize=(10, 6))
+x = np.arange(len(metrics))
+width = 0.35
+
+bars1 = ax.bar(x - width/2, current_values, width, label='Current', color='#3B82F6')
+bars2 = ax.bar(x + width/2, target_values, width, label='Target', color='#10B981')
+
+# Add value labels
+for bars in [bars1, bars2]:
+    for bar in bars:
+        height = bar.get_height()
+        ax.annotate(f'{height}%',
+                   xy=(bar.get_x() + bar.get_width() / 2, height),
+                   xytext=(0, 3),  # 3 points vertical offset
+                   textcoords="offset points",
+                   ha='center', va='bottom')
+
+ax.set_xlabel('Manufacturing Metrics', fontsize=12)
+ax.set_ylabel('Performance (%)', fontsize=12)
+ax.set_title('🏭 Manufacturing Performance Dashboard', fontsize=14, fontweight='bold')
+ax.set_xticks(x)
+ax.set_xticklabels(metrics, fontsize=11)
+ax.legend()
+ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()</textarea>
+                            <button class="btn btn-data-science" onclick="runVisualization()">
+                                <i class="fas fa-chart-bar"></i> Generate Visualization
+                            </button>
+                            <div class="runner-output" id="vizOutput">
+                                Visualization output will appear here. Try running the default code!
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    <button class="code-action" onclick="runCorrelationDemo()"><i class="fas fa-play"></i> Run</button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+<pre><code>import numpy as np
+import pandas as pd
+from scipy import stats
+import matplotlib.pyplot as plt
+
+class ManufacturingCorrelationAnalyzer:
+    """Analyze correlations in manufacturing data"""
+    
+    def __init__(self):
+        self.data = pd.DataFrame()
+    
+    def generate_manufacturing_data(self, n_samples=100):
+        """Generate synthetic manufacturing data with correlations"""
+        np.random.seed(42)
+        
+        # Create correlated features
+        # Production rate influences quality and energy consumption
+        production_rate = np.random.normal(100, 15, n_samples)
+        
+        # Quality negatively correlated with defect rate
+        quality_score = 95 - 0.3 * np.abs(np.random.normal(0, 5, n_samples)) + 0.1 * production_rate
+        
+        # Energy consumption increases with production
+        energy_kwh = 800 + 2 * production_rate + np.random.normal(0, 50, n_samples)
+        
+        # Downtime has inverse relationship with maintenance score
+        maintenance_score = np.random.uniform(70, 100, n_samples)
+        downtime_hours = 50 - 0.4 * maintenance_score + np.random.normal(0, 10, n_samples)
+        
+        # Safety incidents (should be low)
+        safety_incidents = np.random.poisson(0.5, n_samples)
+        
+        # Create DataFrame
+        self.data = pd.DataFrame({
+            'production_rate': production_rate,
+            'quality_score': quality_score,
+            'energy_kwh': energy_kwh,
+            'downtime_hours': downtime_hours,
+            'maintenance_score': maintenance_score,
+            'safety_incidents': safety_incidents
+        })
+        
+        return self.data
+    
+    def calculate_correlations(self):
+        """Calculate correlation matrix"""
+        if self.data.empty:
+            self.generate_manufacturing_data()
+        
+        correlation_matrix = self.data.corr()
+        return correlation_matrix
+    
+    def visualize_correlations(self):
+        """Create heatmap visualization of correlations"""
+        corr_matrix = self.calculate_correlations()
+        
+        fig, ax = plt.subplots(figsize=(10, 8))
+        
+        # Create heatmap
+        im = ax.imshow(corr_matrix.values, cmap='RdYlBu', vmin=-1, vmax=1)
+        
+        # Set labels
+        ax.set_xticks(np.arange(len(corr_matrix.columns)))
+        ax.set_yticks(np.arange(len(corr_matrix.columns)))
+        ax.set_xticklabels(corr_matrix.columns, rotation=45, ha='right')
+        ax.set_yticklabels(corr_matrix.columns)
+        
+        # Add correlation values
+        for i in range(len(corr_matrix.columns)):
+            for j in range(len(corr_matrix.columns)):
+                text = ax.text(j, i, f'{corr_matrix.iloc[i, j]:.2f}',
+                             ha="center", va="center", color="black", fontsize=10)
+        
+        ax.set_title("🏭 Manufacturing Metrics Correlation Matrix", fontsize=14, fontweight='bold')
+        plt.colorbar(im)
+        plt.tight_layout()
+        
+        return fig
+    
+    def find_strong_correlations(self, threshold=0.7):
+        """Find strongly correlated metric pairs"""
+        corr_matrix = self.calculate_correlations()
+        
+        strong_correlations = []
+        
+        for i in range(len(corr_matrix.columns)):
+            for j in range(i+1, len(corr_matrix.columns)):
+                corr_value = corr_matrix.iloc[i, j]
+                if abs(corr_value) >= threshold:
+                    strong_correlations.append({
+                        'metric1': corr_matrix.columns[i],
+                        'metric2': corr_matrix.columns[j],
+                        'correlation': corr_value,
+                        'type': 'positive' if corr_value > 0 else 'negative'
+                    })
+        
+        return strong_correlations
+    
+    def create_scatter_plots(self, metric_pairs=None):
+        """Create scatter plots for correlated metrics"""
+        if metric_pairs is None:
+            metric_pairs = [('production_rate', 'quality_score'),
+                          ('maintenance_score', 'downtime_hours'),
+                          ('production_rate', 'energy_kwh')]
+        
+        figs = []
+        
+        for metric1, metric2 in metric_pairs:
+            fig, ax = plt.subplots(figsize=(8, 6))
+            
+            ax.scatter(self.data[metric1], self.data[metric2], alpha=0.6, s=50)
+            
+            # Add regression line
+            slope, intercept, r_value, p_value, std_err = stats.linregress(
+                self.data[metric1], self.data[metric2]
+            )
+            
+            x_line = np.array([self.data[metric1].min(), self.data[metric1].max()])
+            y_line = slope * x_line + intercept
+            
+            ax.plot(x_line, y_line, color='red', linewidth=2,
+                   label=f'y = {slope:.2f}x + {intercept:.2f}\nR² = {r_value**2:.2f}')
+            
+            ax.set_xlabel(metric1.replace('_', ' ').title())
+            ax.set_ylabel(metric2.replace('_', ' ').title())
+            ax.set_title(f'🔗 {metric1.replace("_", " ").title()} vs {metric2.replace("_", " ").title()}', 
+                        fontsize=12, fontweight='bold')
+            ax.legend()
+            ax.grid(True, alpha=0.3)
+            
+            figs.append(fig)
+        
+        return figs
+
+# Example usage
+print("📊 Manufacturing Correlation Analysis")
+print("=" * 50)
+
+analyzer = ManufacturingCorrelationAnalyzer()
+
+# Generate and analyze data
+data = analyzer.generate_manufacturing_data(50)
+print(f"✅ Generated {len(data)} manufacturing data samples")
+print(f"\n📈 Sample Data:")
+print(data.head())
+
+# Calculate correlations
+correlations = analyzer.calculate_correlations()
+print(f"\n🔗 Correlation Matrix:")
+print(correlations.round(2))
+
+# Find strong correlations
+strong_corrs = analyzer.find_strong_correlations(0.6)
+print(f"\n⚡ Strong Correlations (|r| ≥ 0.6):")
+for corr in strong_corrs:
+    print(f"  {corr['metric1']} ↔ {corr['metric2']}: {corr['correlation']:.2f} ({corr['type']})")
+
+# Statistical insights
+print(f"\n📋 Statistical Summary:")
+for column in data.columns:
+    print(f"  {column}:")
+    print(f"    Mean: {data[column].mean():.2f}")
+    print(f"    Std: {data[column].std():.2f}")
+    print(f"    Range: [{data[column].min():.2f}, {data[column].max():.2f}]")</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-World Manufacturing Exercise -->
+            <div class="message fade-in" id="real-world-exercise">
+                <div class="avatar robotics">🤖</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Robotics Systems Engineer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-industrial">Exercise</div>
+                            <div class="content-badge badge-data-science">Debugging</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🏭 Real-World Exercise: Manufacturing User Management System</h2>
+                        <p>Fix and enhance a manufacturing user system using Python methods. This system manages operators, engineers, and administrators in a smart factory environment.</p>
+                        
+                        <div class="interactive-exercise">
+                            <h3>🐛 Manufacturing User Dictionary System - Debug & Enhance</h3>
+                            
+                            <div class="exercise-task">
+                                <h4>🚨 Current Issues:</h4>
+                                <ul style="color: var(--text-secondary); padding-left: 20px;">
+                                    <li>Menu selection crashes on non-numeric input</li>
+                                    <li>User names aren't properly validated</li>
+                                    <li>Username generation has incorrect formatting</li>
+                                    <li>Whitespace handling removes all spaces</li>
+                                    <li>Case sensitivity causes user removal failures</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="code-runner">
+                                <h4>💻 Current Buggy Code:</h4>
+                                <textarea class="code-input" id="buggyCode"># 🏭 Manufacturing User Management System
+# 🐛 Contains multiple bugs - Fix them using Python methods!
+
+users = {
+    "john_doe": "John Doe",
+    "jane_smith": "Jane Smith",
+    "bob_engineer": "Bob Engineer"
+}
+
+def display_menu():
+    print("\n🏭 Manufacturing User Management System")
+    print("1. View all users")
+    print("2. Add new user(s)")
+    print("3. Remove user")
+    print("4. Search user")
+    print("5. Exit")
+
+def add_users():
+    user_input = input("Enter user name(s), comma-separated: ")
+    
+    # 🐛 BUG 1: Should only accept alphabetic characters and spaces
+    if not user_input.replace(' ', '').isalnum():
+        print("Invalid input! Names should contain only letters and spaces.")
+        return
+    
+    # Split by comma
+    names = user_input.split(',')
+    
+    for name in names:
+        # 🐛 BUG 2: Leading/trailing whitespace not properly handled
+        cleaned_name = name.replace(' ', '')
+        
+        # 🐛 BUG 3: Incorrect username generation
+        username = cleaned_name.upper().replace(' ', '.')
+        
+        # 🐛 BUG 4: Adding characters instead of whole name
+        for char in cleaned_name:
+            users[char] = char.upper()
+        
+        print(f"Added user: {cleaned_name}")
+
+def remove_user():
+    name = input("Enter name to remove: ")
+    
+    # 🐛 BUG 5: Case sensitivity issue
+    if name in users:
+        del users[name]
+        print(f"Removed {name}")
+    else:
+        print(f"User {name} not found")
+
+def main():
+    while True:
+        display_menu()
+        choice = input("\nEnter choice (1-5): ")
+        
+        # 🐛 BUG 6: Menu validation causes crash
+        if not choice.isalpha():
+            choice = int(choice)
+        else:
+            print("Please enter a number!")
+            continue
+        
+        if choice == 1:
+            print("\nCurrent Users:")
+            for username, name in users.items():
+                print(f"  {username}: {name}")
+        
+        elif choice == 2:
+            add_users()
+        
+        elif choice == 3:
+            remove_user()
+        
+        elif choice == 4:
+            search_term = input("Enter search term: ")
+            print(f"\nSearch results for '{search_term}':")
+            for username, name in users.items():
+                if search_term.lower() in name.lower():
+                    print(f"  {username}: {name}")
+        
+        elif choice == 5:
+            print("Exiting... Goodbye!")
+            break
+        
+        else:
+            print("Invalid choice!")
+
+if __name__ == "__main__":
+    main()</textarea>
+                                <button class="btn btn-data-science" onclick="runBuggyCode()">
+                                    <i class="fas fa-bug"></i> Run Buggy Code
+                                </button>
+                                <button class="btn btn-primary" onclick="showSolution()">
+                                    <i class="fas fa-lightbulb"></i> Show Solution
+                                </button>
+                                <div class="runner-output" id="exerciseOutput">
+                                    Run the code to see the bugs in action!
+                                </div>
+                            </div>
+                            
+                            <div class="exercise-task">
+                                <h4>🎯 Your Tasks:</h4>
+                                <ol style="color: var(--text-secondary); padding-left: 20px;">
+                                    <li>Fix menu validation to handle non-numeric input gracefully</li>
+                                    <li>Implement proper name validation (letters, spaces, commas only)</li>
+                                    <li>Fix username generation (lowercase with underscores)</li>
+                                    <li>Handle whitespace properly (strip only, don't replace all spaces)</li>
+                                    <li>Make user removal case-insensitive</li>
+                                    <li>Add proper user addition with title case names</li>
+                                    <li>Bonus: Convert menu to match/case statement</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced AI Architecture Patterns -->
+            <div class="message fade-in" id="advanced-patterns">
+                <div class="avatar data-science">🧠</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Systems Architect</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-data-science">AI Patterns</div>
+                            <div class="content-badge badge-industrial">Architecture</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🧠 Advanced AI Architecture Patterns for Manufacturing</h2>
+                        <p>Learn real-world AI system patterns used in production: async handling, rate limiting, cost tracking, and model versioning for scalable manufacturing AI.</p>
+                        
+                        <div class="method-grid">
+                            <div class="method-card">
+                                <div class="method-icon">⚡</div>
+                                <div class="method-title">Async Request Handling</div>
+                                <p style="color: var(--text-secondary); font-size: 14px;">
+                                    Scale AI inference across multiple manufacturing lines
+                                </p>
+                                <div class="code-content" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; font-size: 12px;">
+                                    async def process_sensor_batch(sensors):<br>
+                                    &nbsp;&nbsp;tasks = [analyze_sensor(s) for s in sensors]<br>
+                                    &nbsp;&nbsp;results = await asyncio.gather(*tasks)<br>
+                                    &nbsp;&nbsp;return aggregate_analysis(results)
+                                </div>
+                            </div>
+                            
+                            <div class="method-card">
+                                <div class="method-icon">⏱️</div>
+                                <div class="method-title">Rate Limiting</div>
+                                <p style="color: var(--text-secondary); font-size: 14px;">
+                                    Control API calls to AI models from production lines
+                                </p>
+                                <div class="code-content" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; font-size: 12px;">
+                                    from datetime import datetime, timedelta<br>
+                                    class RateLimiter:<br>
+                                    &nbsp;&nbsp;def __init__(self, calls, period):<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;self.calls = calls<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;self.period = period<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;self.timestamps = []
+                                </div>
+                            </div>
+                            
+                            <div class="method-card">
+                                <div class="method-icon">💰</div>
+                                <div class="method-title">Cost Tracking</div>
+                                <p style="color: var(--text-secondary); font-size: 14px;">
+                                    Monitor AI inference costs per production line
+                                </p>
+                                <div class="code-content" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; font-size: 12px;">
+                                    class CostTracker:<br>
+                                    &nbsp;&nbsp;def track_inference(self, model, tokens):<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;cost = tokens * COST_PER_TOKEN[model]<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;self.costs[model] += cost<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;return cost
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    <button class="code-action" onclick="runAIPatternsDemo()"><i class="fas fa-play"></i> Run</button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+<pre><code>import asyncio
+import time
+from datetime import datetime, timedelta
+from collections import defaultdict
+from typing import Dict, List, Optional
+import hashlib
+import json
+
+class ManufacturingAISystem:
+    """Advanced AI system for manufacturing with production patterns"""
+    
+    def __init__(self):
+        self.request_log = []
+        self.cost_tracker = defaultdict(float)
+        self.rate_limiter = RateLimiter(max_calls=100, period=60)  # 100 calls/minute
+        self.model_versions = {
+            'quality_inspection': 'v2.1',
+            'predictive_maintenance': 'v1.4',
+            'production_optimization': 'v3.0'
+        }
+    
+    async def async_process_production_batch(self, batch_data: List[Dict]):
+        """Process production batch asynchronously (OpenAI-style pattern)"""
+        print(f"🏭 Starting async processing of {len(batch_data)} items...")
+        
+        # Create tasks for parallel processing
+        tasks = []
+        for item in batch_data:
+            task = self.process_manufacturing_item(item)
+            tasks.append(task)
+        
+        # Process in parallel (like OpenAI's async API)
+        start_time = time.time()
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        processing_time = time.time() - start_time
+        
+        # Aggregate results
+        successful = [r for r in results if not isinstance(r, Exception)]
+        failed = [r for r in results if isinstance(r, Exception)]
+        
+        return {
+            'total_processed': len(batch_data),
+            'successful': len(successful),
+            'failed': len(failed),
+            'processing_time': processing_time,
+            'avg_time_per_item': processing_time / len(batch_data),
+            'results': successful[:5]  # Return first 5 results for demo
+        }
+    
+    async def process_manufacturing_item(self, item: Dict):
+        """Process single manufacturing item with AI"""
+        # Simulate AI processing delay
+        await asyncio.sleep(0.1)
+        
+        # Apply rate limiting
+        if not self.rate_limiter.allow_request():
+            raise Exception("Rate limit exceeded")
+        
+        # Track cost (simulated)
+        cost = self.track_ai_cost(item)
+        
+        # Process based on item type
+        if item.get('type') == 'quality_inspection':
+            result = self.run_quality_inspection(item)
+        elif item.get('type') == 'predictive_maintenance':
+            result = self.run_predictive_maintenance(item)
+        else:
+            result = self.run_general_analysis(item)
+        
+        # Log request
+        self.log_request(item, result, cost)
+        
+        return {
+            'item_id': item.get('id'),
+            'result': result,
+            'model_version': self.model_versions.get(item.get('type', 'general'), 'v1.0'),
+            'cost': cost,
+            'timestamp': datetime.now().isoformat()
+        }
+    
+    def run_quality_inspection(self, item: Dict):
+        """Run quality inspection AI model"""
+        # Simulate AI inference
+        defects = ['scratch', 'dent', 'misalignment']
+        
+        return {
+            'defects_found': len([d for d in defects if d in str(item)]),
+            'quality_score': max(0, 100 - len(defects) * 15),
+            'pass': len([d for d in defects if d in str(item)]) == 0,
+            'confidence': 0.92
+        }
+    
+    def track_ai_cost(self, item: Dict) -> float:
+        """Track AI inference cost (simplified)"""
+        cost_rates = {
+            'quality_inspection': 0.001,  # $ per inference
+            'predictive_maintenance': 0.002,
+            'production_optimization': 0.003
+        }
+        
+        item_type = item.get('type', 'general')
+        base_cost = cost_rates.get(item_type, 0.0005)
+        
+        # Add complexity factor
+        complexity = len(json.dumps(item)) / 1000  # Size factor
+        cost = base_cost * (1 + complexity)
+        
+        self.cost_tracker[item_type] += cost
+        return cost
+    
+    def log_request(self, item: Dict, result: Dict, cost: float):
+        """Log AI request for auditing and analytics"""
+        log_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'item_id': item.get('id'),
+            'item_type': item.get('type'),
+            'model_version': self.model_versions.get(item.get('type'), 'v1.0'),
+            'cost': cost,
+            'result_summary': str(result)[:100]  # First 100 chars
+        }
+        
+        self.request_log.append(log_entry)
+        
+        # Keep only last 1000 entries
+        if len(self.request_log) > 1000:
+            self.request_log = self.request_log[-1000:]
+    
+    def get_system_metrics(self):
+        """Get system performance metrics"""
+        if not self.request_log:
+            return {}
+        
+        # Calculate metrics
+        total_cost = sum(self.cost_tracker.values())
+        avg_cost = total_cost / len(self.request_log) if self.request_log else 0
+        
+        # Group by model version
+        version_usage = defaultdict(int)
+        for log in self.request_log:
+            version_usage[log['model_version']] += 1
+        
+        return {
+            'total_requests': len(self.request_log),
+            'total_cost': total_cost,
+            'avg_cost_per_request': avg_cost,
+            'cost_by_type': dict(self.cost_tracker),
+            'version_usage': dict(version_usage),
+            'rate_limit_status': self.rate_limiter.get_status()
+        }
+
+class RateLimiter:
+    """Rate limiter for AI API calls"""
+    
+    def __init__(self, max_calls: int = 100, period: int = 60):
+        self.max_calls = max_calls
+        self.period = period  # seconds
+        self.calls = []
+    
+    def allow_request(self) -> bool:
+        """Check if request is allowed under rate limit"""
+        now = time.time()
+        
+        # Remove old calls
+        self.calls = [call for call in self.calls if now - call < self.period]
+        
+        # Check if under limit
+        if len(self.calls) < self.max_calls:
+            self.calls.append(now)
+            return True
+        
+        return False
+    
+    def get_status(self) -> Dict:
+        """Get current rate limit status"""
+        now = time.time()
+        self.calls = [call for call in self.calls if now - call < self.period]
+        
+        return {
+            'current_calls': len(self.calls),
+            'max_calls': self.max_calls,
+            'period_seconds': self.period,
+            'remaining_calls': self.max_calls - len(self.calls),
+            'reset_in_seconds': self.period - (now - min(self.calls)) if self.calls else 0
+        }
+
+async def demo_ai_system():
+    """Demo the manufacturing AI system"""
+    print("🧠 Advanced Manufacturing AI System Demo")
+    print("=" * 50)
+    
+    # Initialize system
+    ai_system = ManufacturingAISystem()
+    
+    # Generate sample manufacturing data
+    sample_batch = []
+    for i in range(50):
+        item_type = ['quality_inspection', 'predictive_maintenance', 'production_optimization'][i % 3]
+        sample_batch.append({
+            'id': f'item_{i:03d}',
+            'type': item_type,
+            'data': {
+                'sensor_readings': [j * 0.1 for j in range(10)],
+                'timestamp': datetime.now().isoformat(),
+                'line_id': f'line_{(i % 5) + 1}',
+                'batch_number': i // 10 + 1
+            }
+        })
+    
+    print(f"📦 Generated {len(sample_batch)} manufacturing items")
+    print(f"🏭 Model versions: {ai_system.model_versions}")
+    
+    # Process batch asynchronously
+    print("\n⚡ Processing batch asynchronously...")
+    results = await ai_system.async_process_production_batch(sample_batch)
+    
+    print(f"\n✅ Processing Complete:")
+    print(f"   Total items: {results['total_processed']}")
+    print(f"   Successful: {results['successful']}")
+    print(f"   Failed: {results['failed']}")
+    print(f"   Total time: {results['processing_time']:.2f}s")
+    print(f"   Avg time per item: {results['avg_time_per_item']:.3f}s")
+    
+    # Show system metrics
+    metrics = ai_system.get_system_metrics()
+    print(f"\n📊 System Metrics:")
+    print(f"   Total requests: {metrics.get('total_requests', 0)}")
+    print(f"   Total cost: ${metrics.get('total_cost', 0):.4f}")
+    print(f"   Avg cost per request: ${metrics.get('avg_cost_per_request', 0):.6f}")
+    
+    print(f"\n🔧 Rate Limit Status:")
+    rate_status = metrics.get('rate_limit_status', {})
+    print(f"   Current calls: {rate_status.get('current_calls', 0)}")
+    print(f"   Remaining calls: {rate_status.get('remaining_calls', 0)}")
+    print(f"   Reset in: {rate_status.get('reset_in_seconds', 0):.1f}s")
+    
+    # Show sample results
+    if results['results']:
+        print(f"\n📝 Sample Results (first 2):")
+        for i, result in enumerate(results['results'][:2]):
+            print(f"   {i+1}. Item {result.get('item_id')}:")
+            print(f"      Model: {result.get('model_version')}")
+            print(f"      Cost: ${result.get('cost', 0):.6f}")
+            print(f"      Result: {result.get('result', {})}")
+
+# Run the demo
+print("Starting AI System Demo...")
+await demo_ai_system()</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize Pyodide
+        let pyodide;
+        
+        async function initializePyodide() {
+            const loader = document.getElementById('pyodideLoader');
+            loader.style.display = 'block';
+            
+            try {
+                pyodide = await loadPyodide({
+                    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
+                });
+                
+                // Load required packages
+                await pyodide.loadPackage(['micropip']);
+                await pyodide.runPythonAsync(`
+                    import micropip
+                    await micropip.install(['pandas', 'numpy', 'matplotlib', 'scipy'])
+                `);
+                
+                console.log('Pyodide initialized successfully');
+                loader.style.display = 'none';
+            } catch (error) {
+                console.error('Failed to initialize Pyodide:', error);
+                loader.innerHTML = `
+                    <div style="color: var(--error-red); text-align: center;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 16px;"></i>
+                        <p>Failed to load Python runtime. Some features may be limited.</p>
+                        <p style="font-size: 12px;">Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Initialize on page load
+        initializePyodide();
+        
+        // Theme Toggle Functionality
+        let isDarkMode = true;
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+
+        themeToggle.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                themeIcon.className = 'fas fa-moon theme-icon';
+                themeText.textContent = 'Dark Mode';
+            } else {
+                document.body.classList.remove('dark-mode');
+                themeIcon.className = 'fas fa-sun theme-icon';
+                themeText.textContent = 'Light Mode';
+            }
+        });
+
+        // Scroll to Section
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+                
+                // Update active sidebar item
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Find and activate the corresponding sidebar item
+                const sidebarItems = document.querySelectorAll('.sidebar-item');
+                for (const item of sidebarItems) {
+                    if (item.getAttribute('onclick')?.includes(sectionId)) {
+                        item.classList.add('active');
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Run Python Code
+        async function runPythonCode() {
+            const code = document.getElementById('pythonCode').value;
+            const output = document.getElementById('pythonOutput');
+            
+            output.innerHTML = '<span style="color: var(--text-tertiary);">Running Python code...</span>';
+            
+            if (!pyodide) {
+                output.innerHTML = '<span style="color: var(--error-red);">Python runtime not ready yet. Please wait...</span>';
+                return;
+            }
+            
+            try {
+                // Capture print output
+                let capturedOutput = '';
+                pyodide.runPython(`
+                    import sys
+                    import io
+                    sys.stdout = io.StringIO()
+                `);
+                
+                await pyodide.runPythonAsync(code);
+                
+                // Get the captured output
+                capturedOutput = pyodide.runPython('sys.stdout.getvalue()');
+                
+                // Restore stdout
+                pyodide.runPython('sys.stdout = sys.__stdout__');
+                
+                output.innerHTML = capturedOutput || '<span style="color: var(--text-tertiary);">(No output generated)</span>';
+                output.style.color = 'var(--code-text)';
+            } catch (error) {
+                output.innerHTML = `<span style="color: var(--error-red);">Error: ${error.message}</span>`;
+            }
+        }
+
+        // Run specific demos
+        async function runStringMethodsDemo() {
+            const code = `# String Methods Demo
+class ManufacturingDataProcessor:
+    def clean_sensor_data(self, raw_data):
+        cleaned = {}
+        for sensor_id, reading in raw_data.items():
+            clean_id = sensor_id.strip().replace(' ', '_').upper()
+            if isinstance(reading, str):
+                clean_reading = reading.strip().replace('°C', '').replace('C', '')
+                if clean_reading.replace('.', '').isdigit():
+                    cleaned[clean_id] = float(clean_reading)
+                else:
+                    cleaned[clean_id] = clean_reading
+            else:
+                cleaned[clean_id] = reading
+        return cleaned
+
+processor = ManufacturingDataProcessor()
+raw_sensors = {'  Temp Sensor 1 ': '45.5°C', 'Pressure_Sensor_2': '  100.2  '}
+cleaned = processor.clean_sensor_data(raw_sensors)
+print("🧹 Cleaned Sensor Data:")
+for sensor, value in cleaned.items():
+    print(f"  {sensor}: {value}")
+
+# String method examples
+text = "  ROBOT_ARM_001  "
+print(f"\\n🔧 String Method Examples:")
+print(f"  Original: '{text}'")
+print(f"  .strip(): '{text.strip()}'")
+print(f"  .lower(): '{text.lower()}'")
+print(f"  .replace('_', ' '): '{text.replace('_', ' ')}'")
+print(f"  .startswith('ROBOT'): {text.strip().startswith('ROBOT')}")`;
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+
+        async function runListMethodsDemo() {
+            const code = `# List Methods for Production Data
+import random
+from datetime import datetime, timedelta
+
+class ProductionDataManager:
+    def generate_production_data(self, days=7):
+        batches = []
+        for i in range(days):
+            batch = {
+                'day': f'Day {i+1}',
+                'units': random.randint(800, 1200),
+                'defects': random.randint(0, 20),
+                'downtime': random.randint(0, 120)
+            }
+            batches.append(batch)
+        return batches
+
+manager = ProductionDataManager()
+batches = manager.generate_production_data(7)
+
+print("🏭 Production Data Analysis")
+print("=" * 40)
+
+# Extract metrics using list comprehensions
+units = [batch['units'] for batch in batches]
+defects = [batch['defects'] for batch in batches]
+
+print(f"\\n📊 Daily Production:")
+for batch in batches:
+    print(f"  {batch['day']}: {batch['units']} units, {batch['defects']} defects")
+
+print(f"\\n📈 Statistics:")
+print(f"  Total units: {sum(units):,}")
+print(f"  Average daily: {sum(units)/len(units):.0f} units")
+print(f"  Max production: {max(units)} units (Day {units.index(max(units)) + 1})")
+print(f"  Min production: {min(units)} units (Day {units.index(min(units)) + 1})")
+print(f"  Total defects: {sum(defects)}")
+print(f"  Defect rate: {sum(defects)/sum(units):.2%}")
+
+# List method examples
+print(f"\\n🔧 List Method Examples:")
+production_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+print(f"  Original list: {production_days}")
+print(f"  .append('Saturday'): {production_days + ['Saturday']}")
+print(f"  .sort(): {sorted(production_days)}")
+print(f"  .index('Wednesday'): {production_days.index('Wednesday')}")`;
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+
+        async function runDictMethodsDemo() {
+            const code = `# Dictionary Methods for IoT Data
+import json
+
+class IoTSensorManager:
+    def __init__(self):
+        self.sensors = {}
+    
+    def add_sensor(self, sensor_id, sensor_type, location):
+        self.sensors[sensor_id] = {
+            'type': sensor_type,
+            'location': location,
+            'status': 'active',
+            'readings': []
+        }
+    
+    def get_sensor_info(self, sensor_id):
+        return self.sensors.get(sensor_id, None)
+
+manager = IoTSensorManager()
+manager.add_sensor('temp_001', 'temperature', 'cnc_machine_1')
+manager.add_sensor('vib_001', 'vibration', 'conveyor_belt')
+manager.add_sensor('press_001', 'pressure', 'hydraulic_press')
+
+print("📡 IoT Sensor Network")
+print("=" * 40)
+
+print(f"\\n🔧 Dictionary Method Examples:")
+
+# .keys() - Get all sensor IDs
+print(f"  .keys(): {list(manager.sensors.keys())}")
+
+# .values() - Get all sensor data
+sensor_types = [sensor['type'] for sensor in manager.sensors.values()]
+print(f"  .values() types: {sensor_types}")
+
+# .items() - Iterate through sensors
+print(f"\\n  .items() iteration:")
+for sensor_id, data in manager.sensors.items():
+    print(f"    {sensor_id}: {data['type']} at {data['location']}")
+
+# .get() - Safe access
+print(f"\\n  .get() for missing sensor: {manager.sensors.get('nonexistent', 'Sensor not found')}")
+
+# .update() - Add multiple sensors
+new_sensors = {
+    'temp_002': {'type': 'temperature', 'location': 'oven_1', 'status': 'active'},
+    'humid_001': {'type': 'humidity', 'location': 'clean_room', 'status': 'active'}
+}
+manager.sensors.update(new_sensors)
+print(f"\\n  After .update(): {len(manager.sensors)} total sensors")
+
+# .pop() - Remove sensor
+removed = manager.sensors.pop('humid_001', None)
+print(f"  After .pop('humid_001'): {len(manager.sensors)} sensors remaining")`;
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+
+        async function runCorrelationDemo() {
+            const code = `# Correlation Analysis Demo
+import numpy as np
+import pandas as pd
+
+# Generate manufacturing data
+np.random.seed(42)
+n_samples = 50
+
+production = np.random.normal(100, 15, n_samples)
+quality = 95 - 0.3 * np.abs(np.random.normal(0, 5, n_samples)) + 0.1 * production
+energy = 800 + 2 * production + np.random.normal(0, 50, n_samples)
+downtime = 50 - 0.4 * np.random.uniform(70, 100, n_samples) + np.random.normal(0, 10, n_samples)
+
+# Create DataFrame
+data = pd.DataFrame({
+    'production_rate': production,
+    'quality_score': quality,
+    'energy_kwh': energy,
+    'downtime_hours': downtime
+})
+
+print("📊 Manufacturing Correlation Analysis")
+print("=" * 50)
+
+# Calculate correlations
+correlations = data.corr()
+print(f"\\n🔗 Correlation Matrix:")
+print(correlations.round(3))
+
+# Find strong correlations
+strong_pairs = []
+for i in range(len(correlations.columns)):
+    for j in range(i+1, len(correlations.columns)):
+        corr = correlations.iloc[i, j]
+        if abs(corr) > 0.6:
+            strong_pairs.append({
+                'metric1': correlations.columns[i],
+                'metric2': correlations.columns[j],
+                'correlation': corr
+            })
+
+print(f"\\n⚡ Strong Correlations (|r| > 0.6):")
+for pair in strong_pairs:
+    direction = "positive" if pair['correlation'] > 0 else "negative"
+    print(f"  {pair['metric1']} ↔ {pair['metric2']}: {pair['correlation']:.3f} ({direction})")
+
+# Statistical summary
+print(f"\\n📈 Statistical Summary:")
+for column in data.columns:
+    print(f"\\n  {column}:")
+    print(f"    Mean: {data[column].mean():.2f}")
+    print(f"    Std Dev: {data[column].std():.2f}")
+    print(f"    Min: {data[column].min():.2f}")
+    print(f"    Max: {data[column].max():.2f}")
+    print(f"    Range: {data[column].max() - data[column].min():.2f}")`;
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+
+        async function runBuggyCode() {
+            const code = document.getElementById('buggyCode').value;
+            document.getElementById('exerciseOutput').innerHTML = 
+                '<span style="color: var(--warning-orange);">Running buggy code... Check the Python output above for errors!</span>';
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+
+        function showSolution() {
+            const solution = `# 🏭 Fixed Manufacturing User Management System
+
+users = {
+    "john_doe": "John Doe",
+    "jane_smith": "Jane Smith",
+    "bob_engineer": "Bob Engineer"
+}
+
+def display_menu():
+    print("\\n🏭 Manufacturing User Management System")
+    print("1. View all users")
+    print("2. Add new user(s)")
+    print("3. Remove user")
+    print("4. Search user")
+    print("5. Exit")
+
+def add_users():
+    user_input = input("Enter user name(s), comma-separated: ")
+    
+    # ✅ FIX 1: Validate alphabetic characters, spaces, and commas only
+    valid_chars = user_input.replace(' ', '').replace(',', '')
+    if not valid_chars.isalpha():
+        print("Invalid input! Names should contain only letters, spaces, and commas.")
+        return
+    
+    # Split by comma
+    names = user_input.split(',')
+    
+    for name in names:
+        # ✅ FIX 2: Strip only leading/trailing whitespace
+        cleaned_name = name.strip()
+        
+        if not cleaned_name:
+            continue
+        
+        # ✅ FIX 3: Convert to title case for display
+        display_name = cleaned_name.title()
+        
+        # ✅ FIX 4: Generate proper username (lowercase with underscores)
+        username = cleaned_name.lower().replace(' ', '_')
+        
+        # ✅ FIX 5: Add whole user, not individual characters
+        users[username] = display_name
+        print(f"Added user: {display_name} (username: {username})")
+
+def remove_user():
+    name = input("Enter name to remove: ")
+    
+    # ✅ FIX 6: Convert to title case and find by value
+    search_name = name.strip().title()
+    
+    # Find username by display name
+    username_to_remove = None
+    for username, display_name in users.items():
+        if display_name == search_name:
+            username_to_remove = username
+            break
+    
+    if username_to_remove:
+        del users[username_to_remove]
+        print(f"Removed {search_name} (username: {username_to_remove})")
+    else:
+        print(f"User {search_name} not found")
+
+def main():
+    while True:
+        display_menu()
+        choice = input("\\nEnter choice (1-5): ")
+        
+        # ✅ FIX 7: Handle non-numeric input gracefully
+        if choice.isdigit():
+            choice = int(choice)
+        else:
+            print("Invalid choice. Please enter a number (1-5).")
+            continue
+        
+        # ✅ BONUS: Using match case (Python 3.10+)
+        match choice:
+            case 1:
+                print("\\n👥 Current Users:")
+                if users:
+                    for username, name in users.items():
+                        print(f"  {username}: {name}")
+                else:
+                    print("  No users in system")
+            
+            case 2:
+                add_users()
+            
+            case 3:
+                remove_user()
+            
+            case 4:
+                search_term = input("Enter search term: ").lower()
+                print(f"\\n🔍 Search results for '{search_term}':")
+                found = False
+                for username, name in users.items():
+                    if search_term in name.lower() or search_term in username.lower():
+                        print(f"  {username}: {name}")
+                        found = True
+                if not found:
+                    print("  No matching users found")
+            
+            case 5:
+                print("Exiting... Goodbye! 👋")
+                break
+            
+            case _:
+                print("Invalid choice! Please enter 1-5.")
+
+if __name__ == "__main__":
+    main()`;
+            
+            document.getElementById('exerciseOutput').innerHTML = 
+                '<span style="color: var(--success-green);">✅ Fixed solution loaded! Copy this code to fix the bugs.</span>\n\n' +
+                solution;
+        }
+
+        async function runVisualization() {
+            const output = document.getElementById('vizOutput');
+            output.innerHTML = '<span style="color: var(--text-tertiary);">Visualization would be generated here in a full Python environment with matplotlib.</span>\n\n' +
+                             'In a full Python environment, this would create a bar chart comparing current vs target manufacturing metrics.';
+        }
+
+        async function runAIPatternsDemo() {
+            const code = `# Advanced AI Patterns Demo
+import asyncio
+import time
+from collections import defaultdict
+
+class RateLimiter:
+    def __init__(self, max_calls=10, period=60):
+        self.max_calls = max_calls
+        self.period = period
+        self.calls = []
+    
+    def allow_request(self):
+        now = time.time()
+        self.calls = [call for call in self.calls if now - call < self.period]
+        
+        if len(self.calls) < self.max_calls:
+            self.calls.append(now)
+            return True
+        return False
+
+class ManufacturingAISystem:
+    def __init__(self):
+        self.cost_tracker = defaultdict(float)
+        self.rate_limiter = RateLimiter(max_calls=5, period=10)
+    
+    async def process_item(self, item):
+        # Rate limiting
+        if not self.rate_limiter.allow_request():
+            return {"error": "Rate limit exceeded"}
+        
+        # Simulate AI processing
+        await asyncio.sleep(0.1)
+        
+        # Track cost
+        cost = 0.001 * (1 + len(str(item)) / 1000)
+        self.cost_tracker[item.get('type', 'unknown')] += cost
+        
+        return {
+            "item_id": item.get('id'),
+            "result": "processed",
+            "cost": cost,
+            "timestamp": time.time()
+        }
+
+async def demo():
+    print("🧠 AI System Patterns Demo")
+    print("=" * 40)
+    
+    system = ManufacturingAISystem()
+    
+    # Create sample items
+    items = [
+        {"id": f"item_{i}", "type": ["quality", "maintenance", "optimization"][i % 3]}
+        for i in range(10)
+    ]
+    
+    print(f"Processing {len(items)} items with rate limiting...")
+    
+    # Process items
+    tasks = [system.process_item(item) for item in items]
+    results = await asyncio.gather(*tasks)
+    
+    # Analyze results
+    successful = [r for r in results if "error" not in r]
+    failed = [r for r in results if "error" in r]
+    
+    print(f"\\n📊 Results:")
+    print(f"  Successful: {len(successful)}")
+    print(f"  Failed (rate limited): {len(failed)}")
+    print(f"  Total cost: ${sum(system.cost_tracker.values()):.4f}")
+    print(f"  Cost by type: {dict(system.cost_tracker)}")
+
+# Run the demo
+await demo()`;
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+
+        // Initialize correlation matrix
+        function initializeCorrelationMatrix() {
+            const matrix = document.getElementById('correlationMatrix');
+            const metrics = ['Prod', 'Qual', 'Energy', 'Uptime', 'Safety', 'Cost'];
+            
+            // Generate correlation values
+            const correlations = [];
+            for (let i = 0; i < metrics.length; i++) {
+                for (let j = 0; j < metrics.length; j++) {
+                    if (i === j) {
+                        correlations.push({value: 1.0, color: 'var(--industrial-blue)'});
+                    } else {
+                        // Generate realistic correlation values
+                        const baseCorr = Math.random() * 2 - 1; // -1 to 1
+                        const value = Math.round(baseCorr * 100) / 100;
+                        let color;
+                        
+                        if (value > 0.7) color = 'var(--predictive-green)';
+                        else if (value > 0.3) color = 'var(--robotics-yellow)';
+                        else if (value > -0.3) color = 'var(--text-tertiary)';
+                        else if (value > -0.7) color = 'var(--automation-orange)';
+                        else color = 'var(--quality-red)';
+                        
+                        correlations.push({value, color});
+                    }
+                }
+            }
+            
+            // Create matrix cells
+            matrix.innerHTML = '';
+            
+            // Header row
+            metrics.forEach(metric => {
+                const cell = document.createElement('div');
+                cell.className = 'correlation-cell';
+                cell.style.background = 'var(--bg-secondary)';
+                cell.style.fontWeight = 'bold';
+                cell.textContent = metric;
+                matrix.appendChild(cell);
+            });
+            
+            // Data rows
+            let index = 0;
+            for (let i = 0; i < metrics.length; i++) {
+                // Row header
+                const headerCell = document.createElement('div');
+                headerCell.className = 'correlation-cell';
+                headerCell.style.background = 'var(--bg-secondary)';
+                headerCell.style.fontWeight = 'bold';
+                headerCell.textContent = metrics[i];
+                matrix.appendChild(headerCell);
+                
+                // Data cells
+                for (let j = 0; j < metrics.length; j++) {
+                    const corr = correlations[index];
+                    const cell = document.createElement('div');
+                    cell.className = 'correlation-cell';
+                    cell.style.background = corr.color;
+                    cell.style.color = Math.abs(corr.value) > 0.5 ? 'white' : 'var(--text-primary)';
+                    cell.textContent = corr.value.toFixed(2);
+                    cell.title = `${metrics[i]} vs ${metrics[j]}: ${corr.value.toFixed(3)}`;
+                    
+                    cell.addEventListener('mouseenter', () => {
+                        cell.style.transform = 'scale(1.1)';
+                        cell.style.boxShadow = '0 4px 15px var(--shadow-color)';
+                        cell.style.zIndex = '10';
+                    });
+                    
+                    cell.addEventListener('mouseleave', () => {
+                        cell.style.transform = 'scale(1)';
+                        cell.style.boxShadow = 'none';
+                        cell.style.zIndex = '1';
+                    });
+                    
+                    matrix.appendChild(cell);
+                    index++;
+                }
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update lesson progress
+            const progressBar = document.getElementById('lessonProgress');
+            progressBar.style.width = '100%';
+            
+            // Initialize correlation matrix
+            initializeCorrelationMatrix();
+            
+            // Add fade-in animation to all messages
+            const messages = document.querySelectorAll('.message');
+            messages.forEach((message, index) => {
+                message.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+            // Initialize chart
+            initializeProductionChart();
+        });
+
+        function initializeProductionChart() {
+            const ctx = document.getElementById('productionChart').getContext('2d');
+            
+            // Sample production data
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const planned = [100, 105, 110, 115, 120, 90, 85];
+            const actual = [95, 102, 108, 112, 118, 88, 82];
+            const efficiency = planned.map((p, i) => (actual[i] / p) * 100);
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: days,
+                    datasets: [
+                        {
+                            label: 'Planned Production',
+                            data: planned,
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Actual Production',
+                            data: actual,
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Efficiency %',
+                            data: efficiency,
+                            type: 'line',
+                            backgroundColor: 'rgba(236, 72, 153, 0.2)',
+                            borderColor: 'rgba(236, 72, 153, 1)',
+                            borderWidth: 2,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Production Units'
+                            }
+                        },
+                        y1: {
+                            position: 'right',
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Efficiency %'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '🏭 Weekly Production Performance',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            color: 'var(--text-primary)'
+                        },
+                        legend: {
+                            labels: {
+                                color: 'var(--text-primary)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Tool functions
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-block').querySelector('.code-content');
+            const codeText = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(codeText).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+
+        function runPythonCodeRunner() {
+            document.getElementById('pythonCode').value = `# Welcome to the Python Code Runner!
+# Try these manufacturing examples:
+
+# 1. Clean sensor data
+sensors = {'Temp 01': '45.5°C', ' Pressure_02 ': ' 100.2 '}
+cleaned = {k.strip().replace(' ', '_').upper(): float(v.strip().replace('°C', '')) 
+           for k, v in sensors.items()}
+print("🧹 Cleaned Sensors:", cleaned)
+
+# 2. Production statistics
+production = [1200, 1180, 1250, 1100, 1300]
+print("📊 Production Stats:")
+print(f"  Total: {sum(production):,} units")
+print(f"  Average: {sum(production)/len(production):.0f} units/day")
+print(f"  Best day: {max(production)} units")
+print(f"  Worst day: {min(production)} units")
+
+# 3. Robot command formatting
+commands = ['MOVE TO X:100', 'ROTATE 45 DEG', 'GRIP PART']
+formatted = [cmd.lower().replace(' ', '_').replace(':', '=') for cmd in commands]
+print("🤖 Formatted Commands:", formatted)`;
+            
+            scrollToSection('python-methods-intro');
+        }
+
+        function runDataVisualization() {
+            alert('📊 Data Visualization Tool\n\nIn a full environment, this would open an interactive chart showing:\n• Production trends over time\n• Quality vs Production correlation\n• Energy consumption patterns\n• Downtime analysis\n\nTry the correlation matrix below for interactive exploration!');
+        }
+
+        function runManufacturingSimulation() {
+            document.getElementById('pythonCode').value = `# 🏭 Manufacturing Data Simulation
+import random
+from datetime import datetime, timedelta
+
+def simulate_production_line(days=7):
+    """Simulate a smart factory production line"""
+    data = []
+    base_production = 1000
+    
+    for day in range(days):
+        # Simulate daily variations
+        efficiency = random.uniform(0.85, 0.98)
+        downtime = random.randint(0, 120)  # minutes
+        defects = random.randint(0, int(base_production * 0.03))
+        
+        daily_data = {
+            'day': f'Day {day + 1}',
+            'date': (datetime.now() - timedelta(days=days-day)).strftime('%Y-%m-%d'),
+            'production_target': base_production,
+            'actual_production': int(base_production * efficiency),
+            'downtime_minutes': downtime,
+            'defects': defects,
+            'quality_score': 100 - (defects / base_production * 100),
+            'energy_kwh': random.uniform(800, 1200),
+            'oee': efficiency * (1 - downtime/1440) * (1 - defects/base_production)
+        }
+        data.append(daily_data)
+    
+    return data
+
+# Run simulation
+production_data = simulate_production_line(5)
+
+print("🏭 Smart Factory Simulation Results")
+print("=" * 50)
+
+for day in production_data:
+    print(f"\\n📅 {day['day']} ({day['date']}):")
+    print(f"  Production: {day['actual_production']:,}/{day['production_target']:,} units")
+    print(f"  Quality: {day['quality_score']:.1f}% ({day['defects']} defects)")
+    print(f"  Downtime: {day['downtime_minutes']} minutes")
+    print(f"  Energy: {day['energy_kwh']:.0f} kWh")
+    print(f"  OEE: {day['oee']:.1%}")
+
+# Calculate totals
+total_production = sum(d['actual_production'] for d in production_data)
+total_defects = sum(d['defects'] for d in production_data)
+avg_oee = sum(d['oee'] for d in production_data) / len(production_data)
+
+print(f"\\n📊 5-Day Summary:")
+print(f"  Total Production: {total_production:,} units")
+print(f"  Total Defects: {total_defects:,}")
+print(f"  Overall Defect Rate: {total_defects/total_production:.2%}")
+print(f"  Average OEE: {avg_oee:.1%}")
+print(f"  {'✅ World Class' if avg_oee > 0.85 else '⚠️ Needs Improvement'}")`;
+            
+            runPythonCode();
+        }
+
+        function runCorrelationAnalysis() {
+            initializeCorrelationMatrix();
+            alert('🔗 Correlation Analysis Started!\n\nExplore the correlation matrix above. Each cell shows the relationship between manufacturing metrics:\n\n• Green: Strong positive correlation (＞0.7)\n• Yellow: Moderate positive correlation (0.3-0.7)\n• Gray: Weak or no correlation (-0.3 to 0.3)\n• Orange: Moderate negative correlation (-0.7 to -0.3)\n• Red: Strong negative correlation (＜-0.7)\n\nHover over cells for exact values!');
+        }
+
+        function startInteractiveExercise() {
+            scrollToSection('real-world-exercise');
+            document.getElementById('exerciseOutput').innerHTML = 
+                '<span style="color: var(--robotics-yellow);">🏭 Interactive Exercise Ready!</span>\n\n' +
+                '1. Run the buggy code to see the errors\n' +
+                '2. Fix each bug using Python methods\n' +
+                '3. Check the solution when ready\n' +
+                '4. Try the bonus challenge: Convert to match/case!';
+        }
+    </script>
+</body>
+</html>

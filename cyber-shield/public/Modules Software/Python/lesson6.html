@@ -1,0 +1,3159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 6: AI Content Generator & File Handling | Python AI Bootcamp</title>
+    <style>
+        /* OpenAI/ChatGPT Theme Variables */
+        :root {
+            /* Light Theme - ChatGPT Style */
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F7F7F8;
+            --bg-tertiary: #ECECF1;
+            --border-color: #E5E5E5;
+            --text-primary: #000000;
+            --text-secondary: #565869;
+            --text-tertiary: #8E8EA0;
+            --ai-green: #10A37F;
+            --ai-green-hover: #1A7F64;
+            --ai-purple: #5436DA;
+            --user-blue: #0066CC;
+            --content-orange: #F97316;
+            --image-purple: #8B5CF6;
+            --file-blue: #3B82F6;
+            --api-red: #EF4444;
+            --code-bg: #F6F6F6;
+            --code-text: #000000;
+            --highlight-bg: rgba(16, 163, 127, 0.1);
+            --sidebar-bg: #F7F7F8;
+            --message-ai-bg: #F7F7F8;
+            --message-user-bg: #FFFFFF;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --transition-speed: 0.3s;
+            --success-green: #10A37F;
+            --warning-orange: #F59E0B;
+            --error-red: #EF4444;
+        }
+
+        /* Dark Theme - ChatGPT Style */
+        .dark-mode {
+            --bg-primary: #343541;
+            --bg-secondary: #444654;
+            --bg-tertiary: #202123;
+            --border-color: #565869;
+            --text-primary: #FFFFFF;
+            --text-secondary: #C5C5D2;
+            --text-tertiary: #8E8EA0;
+            --ai-green: #10A37F;
+            --ai-green-hover: #1A7F64;
+            --ai-purple: #5436DA;
+            --user-blue: #0066CC;
+            --content-orange: #FB923C;
+            --image-purple: #A78BFA;
+            --file-blue: #60A5FA;
+            --api-red: #F87171;
+            --code-bg: #0D1117;
+            --code-text: #FFFFFF;
+            --highlight-bg: rgba(16, 163, 127, 0.2);
+            --sidebar-bg: #202123;
+            --message-ai-bg: #444654;
+            --message-user-bg: #343541;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --success-green: #10A37F;
+            --warning-orange: #F59E0B;
+            --error-red: #EF4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Segoe UI', Arial, sans-serif;
+            transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background - Content Theme */
+        .animated-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.05;
+        }
+
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        .element-1 {
+            width: 300px;
+            height: 300px;
+            top: -150px;
+            right: -100px;
+            animation-delay: 0s;
+            background: linear-gradient(135deg, var(--content-orange), var(--ai-purple));
+        }
+
+        .element-2 {
+            width: 200px;
+            height: 200px;
+            bottom: -50px;
+            left: -100px;
+            animation-delay: -5s;
+            background: linear-gradient(135deg, var(--image-purple), var(--ai-green));
+        }
+
+        .element-3 {
+            width: 150px;
+            height: 150px;
+            top: 50%;
+            right: 10%;
+            animation-delay: -10s;
+            background: linear-gradient(135deg, var(--file-blue), var(--ai-purple));
+        }
+
+        .element-4 {
+            width: 180px;
+            height: 180px;
+            bottom: 30%;
+            left: 5%;
+            animation-delay: -7s;
+            background: linear-gradient(135deg, var(--api-red), var(--content-orange));
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(100px, 100px) rotate(90deg);
+            }
+            50% {
+                transform: translate(0, 200px) rotate(180deg);
+            }
+            75% {
+                transform: translate(-100px, 100px) rotate(270deg);
+            }
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-primary);
+            box-shadow: 0 2px 10px var(--shadow-color);
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .theme-icon {
+            font-size: 18px;
+        }
+
+        /* Header - ChatGPT Style */
+        .header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--content-orange), var(--ai-purple));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .lesson-tag {
+            background: var(--content-orange);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Main Layout - ChatGPT Style */
+        .main-layout {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Sidebar - ChatGPT Left Panel Style */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            position: sticky;
+            top: 70px;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            margin-bottom: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .sidebar-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .sidebar-item.active {
+            background: var(--highlight-bg);
+            color: var(--ai-green);
+            font-weight: 600;
+        }
+
+        .sidebar-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Content Type Badges */
+        .content-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 2px;
+        }
+
+        .badge-blog {
+            background: rgba(249, 115, 22, 0.1);
+            color: var(--content-orange);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+        }
+
+        .badge-image {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--image-purple);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .badge-social {
+            background: rgba(16, 163, 127, 0.1);
+            color: var(--ai-green);
+            border: 1px solid rgba(16, 163, 127, 0.3);
+        }
+
+        .badge-file {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--file-blue);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        /* Main Content - ChatGPT Chat Style */
+        .main-content {
+            flex: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Message Bubbles - ChatGPT Style */
+        .message {
+            display: flex;
+            gap: 16px;
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .message:last-child {
+            border-bottom: none;
+        }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .avatar.ai {
+            background: var(--ai-green);
+            color: white;
+        }
+
+        .avatar.user {
+            background: var(--user-blue);
+            color: white;
+        }
+
+        .avatar.blog {
+            background: var(--content-orange);
+        }
+
+        .avatar.image {
+            background: var(--image-purple);
+        }
+
+        .avatar.file {
+            background: var(--file-blue);
+        }
+
+        .avatar.api {
+            background: var(--api-red);
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .message-author {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .message-text {
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .message-text p {
+            margin-bottom: 12px;
+        }
+
+        .message-text ul, .message-text ol {
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .message-text li {
+            margin-bottom: 6px;
+        }
+
+        /* Interactive Code Blocks - ChatGPT Style */
+        .code-block {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border: 1px solid var(--border-color);
+            position: relative;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .code-language {
+            font-weight: 600;
+            color: var(--ai-green);
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .code-action {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .code-action:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .code-content {
+            color: var(--code-text);
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        .code-line {
+            padding: 2px 0;
+        }
+
+        .code-line.highlight {
+            background: var(--highlight-bg);
+            border-left: 3px solid var(--ai-green);
+            padding-left: 8px;
+        }
+
+        /* Interactive Console */
+        .console {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .console-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .console-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .console-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: rgba(16, 163, 127, 0.1);
+            color: var(--ai-green);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--ai-green);
+            border-radius: 50%;
+        }
+
+        .console-input {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .console-input input,
+        .console-input select,
+        .console-input textarea {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .console-input textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .console-input input:focus,
+        .console-input select:focus,
+        .console-input textarea:focus {
+            outline: none;
+            border-color: var(--ai-green);
+        }
+
+        .console-output {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'SFMono-Regular', monospace;
+            font-size: 13px;
+            color: var(--code-text);
+            min-height: 100px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        /* Content Generator Interface */
+        .generator-interface {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            margin: 24px 0;
+        }
+
+        .generator-header {
+            background: var(--bg-tertiary);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .generator-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .generator-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-primary);
+        }
+
+        .generator-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-secondary);
+            border-bottom: 2px solid transparent;
+        }
+
+        .generator-tab.active {
+            color: var(--content-orange);
+            border-bottom-color: var(--content-orange);
+            font-weight: 600;
+        }
+
+        .generator-content {
+            padding: 20px;
+        }
+
+        .generator-section {
+            display: none;
+        }
+
+        .generator-section.active {
+            display: block;
+        }
+
+        .generator-controls {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .control-description {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .generator-preview {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            margin-top: 20px;
+        }
+
+        .preview-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .preview-content {
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        /* Image Preview */
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .image-item {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* File Explorer */
+        .file-explorer {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'SFMono-Regular', monospace;
+            font-size: 13px;
+            color: var(--code-text);
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .file-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .file-icon {
+            width: 16px;
+            text-align: center;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--ai-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--ai-green-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .btn-orange {
+            background: var(--content-orange);
+            color: white;
+        }
+
+        .btn-orange:hover {
+            background: #EA580C;
+            transform: translateY(-1px);
+        }
+
+        .btn-purple {
+            background: var(--image-purple);
+            color: white;
+        }
+
+        .btn-purple:hover {
+            background: #7C3AED;
+            transform: translateY(-1px);
+        }
+
+        /* Progress Indicators */
+        .progress-section {
+            margin: 24px 0;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .progress-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--content-orange), var(--ai-purple));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        /* Interactive Exercise */
+        .exercise {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .exercise-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .exercise-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--ai-green);
+            color: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .exercise-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* JSON/CSV Viewer */
+        .data-viewer {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .data-viewer {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .json-viewer, .csv-viewer {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'SFMono-Regular', monospace;
+            font-size: 13px;
+            color: var(--code-text);
+            overflow-x: auto;
+            max-height: 300px;
+        }
+
+        /* Environment Variables Panel */
+        .env-panel {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .env-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 12px;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .env-row:last-child {
+            border-bottom: none;
+        }
+
+        .env-key {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .env-value {
+            font-family: 'SFMono-Regular', monospace;
+            color: var(--code-text);
+            word-break: break-all;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .slide-in {
+            animation: slideIn 0.3s ease;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+            }
+            
+            .header {
+                padding: 12px 16px;
+            }
+            
+            .main-content {
+                padding: 16px;
+            }
+            
+            .message {
+                padding: 16px 0;
+            }
+            
+            .generator-tabs {
+                flex-direction: column;
+            }
+            
+            .data-viewer {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Content Pipeline */
+        .pipeline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 24px 0;
+            position: relative;
+        }
+
+        .pipeline-step {
+            text-align: center;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pipeline-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 24px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: var(--border-color);
+            z-index: 0;
+        }
+
+        .step-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-tertiary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 20px;
+            color: var(--text-tertiary);
+            border: 2px solid var(--border-color);
+        }
+
+        .pipeline-step.active .step-icon {
+            background: var(--ai-green);
+            color: white;
+            border-color: var(--ai-green);
+        }
+
+        .step-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .step-description {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="animated-background">
+        <div class="floating-element element-1"></div>
+        <div class="floating-element element-2"></div>
+        <div class="floating-element element-3"></div>
+        <div class="floating-element element-4"></div>
+    </div>
+
+    <!-- Theme Toggle Button -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon theme-icon" id="themeIcon"></i>
+        <span id="themeText">Dark Mode</span>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">⚡</div>
+        <div class="header-title">Python AI Developer Bootcamp</div>
+        <div class="lesson-tag">Lesson 6</div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Lesson 6 Topics</div>
+                <div class="sidebar-item active" onclick="scrollToSection('content-intro')">
+                    <i class="fas fa-pen-nib sidebar-icon"></i>
+                    <span>AI Content Generation</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('blog-generator')">
+                    <i class="fas fa-blog sidebar-icon"></i>
+                    <span>Blog Post Generator</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('image-generator')">
+                    <i class="fas fa-image sidebar-icon"></i>
+                    <span>Image Generation (DALL-E)</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('social-media')">
+                    <i class="fas fa-share-alt sidebar-icon"></i>
+                    <span>Social Media Automation</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('file-handling')">
+                    <i class="fas fa-file sidebar-icon"></i>
+                    <span>File Handling (JSON/CSV)</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('api-calls')">
+                    <i class="fas fa-exchange-alt sidebar-icon"></i>
+                    <span>API Calls & Integration</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('env-security')">
+                    <i class="fas fa-key sidebar-icon"></i>
+                    <span>Environment & Security</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('content-pipeline')">
+                    <i class="fas fa-cogs sidebar-icon"></i>
+                    <span>Complete Content Pipeline</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Quick Tools</div>
+                <div class="sidebar-item" onclick="openBlogGenerator()">
+                    <i class="fas fa-magic sidebar-icon"></i>
+                    <span>Live Blog Generator</span>
+                </div>
+                <div class="sidebar-item" onclick="openImageGenerator()">
+                    <i class="fas fa-palette sidebar-icon"></i>
+                    <span>Image Generator</span>
+                </div>
+                <div class="sidebar-item" onclick="openFileExplorer()">
+                    <i class="fas fa-folder-open sidebar-icon"></i>
+                    <span>File Explorer</span>
+                </div>
+                <div class="sidebar-item" onclick="openAPIExplorer()">
+                    <i class="fas fa-globe sidebar-icon"></i>
+                    <span>API Explorer</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Resources</div>
+                <div class="sidebar-item" onclick="downloadContentKit()">
+                    <i class="fas fa-download sidebar-icon"></i>
+                    <span>Download Content Kit</span>
+                </div>
+                <div class="sidebar-item" onclick="openDALLE()">
+                    <i class="fas fa-external-link-alt sidebar-icon"></i>
+                    <span>DALL-E API Docs</span>
+                </div>
+                <div class="sidebar-item" onclick="openFreeAPIs()">
+                    <i class="fas fa-external-link-alt sidebar-icon"></i>
+                    <span>Free APIs List</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Progress</div>
+                <div class="progress-section" style="margin: 0; padding: 0; border: none; background: transparent;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="globalProgress" style="width: 42%"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <span>Lesson 6/15</span>
+                        <span id="progressPercent">42%</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Welcome Message -->
+            <div class="message fade-in" id="content-intro">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Now</span>
+                    </div>
+                    <div class="message-text">
+                        <h1>🚀 Lesson 6: AI Content Generator & File Handling</h1>
+                        <p>Transform from AI learner to AI creator! Today you'll build complete content generation systems that can write blogs, create images, automate social media, and process files.</p>
+                        
+                        <div class="pipeline">
+                            <div class="pipeline-step active">
+                                <div class="step-icon">📝</div>
+                                <div class="step-title">Write Content</div>
+                                <div class="step-description">Blogs & Articles</div>
+                            </div>
+                            <div class="pipeline-step">
+                                <div class="step-icon">🎨</div>
+                                <div class="step-title">Create Images</div>
+                                <div class="step-description">DALL-E API</div>
+                            </div>
+                            <div class="pipeline-step">
+                                <div class="step-icon">📊</div>
+                                <div class="step-title">Process Files</div>
+                                <div class="step-description">JSON/CSV</div>
+                            </div>
+                            <div class="pipeline-step">
+                                <div class="step-icon">🤖</div>
+                                <div class="step-title">Automate</div>
+                                <div class="step-description">Social Media</div>
+                            </div>
+                        </div>
+
+                        <div class="console">
+                            <div class="console-header">
+                                <div class="console-title">Live Content Generator</div>
+                                <div class="console-status">
+                                    <div class="status-dot"></div>
+                                    <span>Ready to create</span>
+                                </div>
+                            </div>
+                            <div class="console-input">
+                                <input type="text" id="contentPrompt" placeholder="Describe what you want to create (e.g., 'A blog about Python AI')" value="Create a blog post about Python AI development">
+                                <button class="btn btn-orange" onclick="generateContentPreview()">
+                                    <i class="fas fa-bolt"></i> Generate
+                                </button>
+                            </div>
+                            <div class="console-output" id="contentOutput">
+                                👋 Welcome to AI Content Generation!<br><br>
+                                Enter a topic and click Generate to see AI content creation in action.<br><br>
+                                Try these examples:<br>
+                                • "Explain machine learning basics"<br>
+                                • "Create social media posts for a tech product"<br>
+                                • "Generate product descriptions for an AI tool"<br>
+                                • "Write an email newsletter about Python"
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blog Post Generator -->
+            <div class="message fade-in" id="blog-generator">
+                <div class="avatar blog">BP</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Blog Generator</span>
+                        <span class="message-time">Topic 1</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>📝 Build a Complete Blog Post Generator</h2>
+                        <p>Create professional blog posts with AI in seconds. Here's the complete system:</p>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="runBlogGenerator()">
+                                        <i class="fas fa-play"></i> Run
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line">import openai</span><br>
+                                <span class="code-line">import json</span><br>
+                                <span class="code-line">from datetime import datetime</span><br>
+                                <span class="code-line">from typing import Dict, List, Optional</span><br>
+                                <span class="code-line">import markdown</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">class BlogGenerator:</span><br>
+                                <span class="code-line">    """Generate complete blog posts with AI."""</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def __init__(self, api_key: str):</span><br>
+                                <span class="code-line">        self.client = openai.OpenAI(api_key=api_key)</span><br>
+                                <span class="code-line">        self.templates = self._load_templates()</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def _load_templates(self) -> Dict:</span><br>
+                                <span class="code-line">        """Load blog post templates."""</span><br>
+                                <span class="code-line">        return {</span><br>
+                                <span class="code-line">            "tutorial": "Write a step-by-step tutorial about {topic}",</span><br>
+                                <span class="code-line">            "guide": "Create a comprehensive guide about {topic}",</span><br>
+                                <span class="code-line">            "review": "Write an honest review of {topic}",</span><br>
+                                <span class="code-line">            "news": "Write a news article about {topic}",</span><br>
+                                <span class="code-line">            "list": "Create a listicle about {topic}"</span><br>
+                                <span class="code-line">        }</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def generate_outline(self, topic: str, style: str = "tutorial") -> Dict:</span><br>
+                                <span class="code-line">        """Generate a blog post outline."""</span><br>
+                                <span class="code-line">        prompt = f"""Generate a detailed outline for a {style} blog post about "{topic}".</span><br>
+                                <span class="code-line">        Include:</span><br>
+                                <span class="code-line">        1. Title</span><br>
+                                <span class="code-line">        2. Introduction</span><br>
+                                <span class="code-line">        3. 5-7 main sections with subtopics</span><br>
+                                <span class="code-line">        4. Conclusion</span><br>
+                                <span class="code-line">        5. Call to action</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        Return as JSON with keys: title, introduction, sections, conclusion, cta"""</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        response = self.client.chat.completions.create(</span><br>
+                                <span class="code-line">            model="gpt-4",</span><br>
+                                <span class="code-line">            messages=[{"role": "user", "content": prompt}],</span><br>
+                                <span class="code-line">            temperature=0.7</span><br>
+                                <span class="code-line">        )</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        return json.loads(response.choices[0].message.content)</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def generate_full_post(self, outline: Dict) -> str:</span><br>
+                                <span class="code-line">        """Generate full blog post from outline."""</span><br>
+                                <span class="code-line">        sections_text = "\\n".join([</span><br>
+                                <span class="code-line">            f"{i+1}. {section['title']}: {section.get('description', '')}"</span><br>
+                                <span class="code-line">            for i, section in enumerate(outline['sections'])</span><br>
+                                <span class="code-line">        ])</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        prompt = f"""Write a complete blog post based on this outline:</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        Title: {outline['title']}</span><br>
+                                <span class="code-line">        Introduction: {outline['introduction']}</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        Sections:</span><br>
+                                <span class="code-line">        {sections_text}</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        Conclusion: {outline['conclusion']}</span><br>
+                                <span class="code-line">        Call to Action: {outline['cta']}</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        Write in a professional, engaging tone. Include code examples where relevant.</span><br>
+                                <span class="code-line">        Use markdown formatting with headings, lists, and code blocks."""</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        response = self.client.chat.completions.create(</span><br>
+                                <span class="code-line">            model="gpt-4",</span><br>
+                                <span class="code-line">            messages=[{"role": "user", "content": prompt}],</span><br>
+                                <span class="code-line">            temperature=0.8,</span><br>
+                                <span class="code-line">            max_tokens=2000</span><br>
+                                <span class="code-line">        )</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        return response.choices[0].message.content</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def save_to_file(self, content: str, filename: str):</span><br>
+                                <span class="code-line">        """Save blog post to markdown file."""</span><br>
+                                <span class="code-line">        with open(filename, 'w', encoding='utf-8') as f:</span><br>
+                                <span class="code-line">            f.write(content)</span><br>
+                                <span class="code-line">        print(f"✅ Blog post saved to {filename}")</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line"># Usage example:</span><br>
+                                <span class="code-line">blog_gen = BlogGenerator(api_key="your-key-here")</span><br>
+                                <span class="code-line">outline = blog_gen.generate_outline("Python AI Development", "tutorial")</span><br>
+                                <span class="code-line">post = blog_gen.generate_full_post(outline)</span><br>
+                                <span class="code-line">blog_gen.save_to_file(post, "python-ai-tutorial.md")</span>
+                            </div>
+                        </div>
+
+                        <!-- Live Blog Generator -->
+                        <div class="generator-interface">
+                            <div class="generator-header">
+                                <div class="avatar blog">BP</div>
+                                <div class="generator-title">Live Blog Post Generator</div>
+                                <div class="content-badge badge-blog">
+                                    <i class="fas fa-bolt"></i>
+                                    Powered by GPT-4
+                                </div>
+                            </div>
+                            <div class="generator-tabs">
+                                <div class="generator-tab active" onclick="switchTab('blog-outline')">Outline</div>
+                                <div class="generator-tab" onclick="switchTab('blog-content')">Full Post</div>
+                                <div class="generator-tab" onclick="switchTab('blog-export')">Export</div>
+                            </div>
+                            <div class="generator-content">
+                                <div class="generator-section active" id="blog-outline">
+                                    <div class="generator-controls">
+                                        <div class="control-group">
+                                            <label class="control-label">Blog Topic</label>
+                                            <input type="text" id="blogTopic" placeholder="Enter your blog topic" value="The Future of AI in Web Development">
+                                            <div class="control-description">What do you want to write about?</div>
+                                        </div>
+                                        <div class="control-group">
+                                            <label class="control-label">Writing Style</label>
+                                            <select id="blogStyle">
+                                                <option value="tutorial">Tutorial</option>
+                                                <option value="guide">Comprehensive Guide</option>
+                                                <option value="review">Product Review</option>
+                                                <option value="news">News Article</option>
+                                                <option value="list">Listicle</option>
+                                            </select>
+                                            <div class="control-description">Choose the type of blog post</div>
+                                        </div>
+                                        <div class="control-group">
+                                            <label class="control-label">Target Audience</label>
+                                            <select id="blogAudience">
+                                                <option value="beginners">Beginners</option>
+                                                <option value="developers">Developers</option>
+                                                <option value="business">Business Professionals</option>
+                                                <option value="academic">Academic Readers</option>
+                                            </select>
+                                            <div class="control-description">Who are you writing for?</div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-orange" onclick="generateBlogOutline()">
+                                        <i class="fas fa-magic"></i> Generate Outline
+                                    </button>
+                                    <div class="generator-preview" id="outlinePreview">
+                                        <div class="preview-title">Generated Outline</div>
+                                        <div class="preview-content" id="outlineContent">
+                                            Your blog outline will appear here...
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="generator-section" id="blog-content">
+                                    <div class="generator-controls">
+                                        <div class="control-group">
+                                            <label class="control-label">Writing Tone</label>
+                                            <select id="blogTone">
+                                                <option value="professional">Professional</option>
+                                                <option value="conversational">Conversational</option>
+                                                <option value="technical">Technical</option>
+                                                <option value="casual">Casual</option>
+                                                <option value="persuasive">Persuasive</option>
+                                            </select>
+                                            <div class="control-description">Choose the writing tone</div>
+                                        </div>
+                                        <div class="control-group">
+                                            <label class="control-label">Length</label>
+                                            <select id="blogLength">
+                                                <option value="short">Short (500 words)</option>
+                                                <option value="medium">Medium (1000 words)</option>
+                                                <option value="long">Long (2000+ words)</option>
+                                            </select>
+                                            <div class="control-description">How long should the post be?</div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-orange" onclick="generateFullBlog()">
+                                        <i class="fas fa-file-alt"></i> Generate Full Post
+                                    </button>
+                                    <div class="generator-preview" id="fullBlogPreview">
+                                        <div class="preview-title">Complete Blog Post</div>
+                                        <div class="preview-content" id="blogContent">
+                                            Your full blog post will appear here...
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="generator-section" id="blog-export">
+                                    <div class="generator-controls">
+                                        <div class="control-group">
+                                            <label class="control-label">Export Format</label>
+                                            <select id="exportFormat">
+                                                <option value="markdown">Markdown (.md)</option>
+                                                <option value="html">HTML</option>
+                                                <option value="pdf">PDF</option>
+                                                <option value="word">Word Document</option>
+                                            </select>
+                                            <div class="control-description">Choose file format</div>
+                                        </div>
+                                        <div class="control-group">
+                                            <label class="control-label">Filename</label>
+                                            <input type="text" id="exportFilename" placeholder="my-blog-post" value="ai-blog-post">
+                                            <div class="control-description">Name for your exported file</div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-orange" onclick="exportBlogPost()">
+                                        <i class="fas fa-download"></i> Export Blog Post
+                                    </button>
+                                    <div class="generator-preview">
+                                        <div class="preview-title">Export Options</div>
+                                        <div class="preview-content">
+                                            <p>Export your generated content to:</p>
+                                            <ul>
+                                                <li><strong>Markdown</strong>: For blogs, documentation, GitHub</li>
+                                                <li><strong>HTML</strong>: For websites and email newsletters</li>
+                                                <li><strong>PDF</strong>: For professional reports and documents</li>
+                                                <li><strong>Word</strong>: For editing in word processors</li>
+                                            </ul>
+                                            <p>All exports include proper formatting and metadata.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Generation with DALL-E -->
+            <div class="message fade-in" id="image-generator">
+                <div class="avatar image">IG</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Image Generator</span>
+                        <span class="message-time">Topic 2</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>🎨 Image Generation with DALL-E API</h2>
+                        <p>Create stunning images from text descriptions using OpenAI's DALL-E 3:</p>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="runImageGenerator()">
+                                        <i class="fas fa-play"></i> Run
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line">import openai</span><br>
+                                <span class="code-line">import requests</span><br>
+                                <span class="code-line">from PIL import Image</span><br>
+                                <span class="code-line">from io import BytesIO</span><br>
+                                <span class="code-line">import os</span><br>
+                                <span class="code-line">from datetime import datetime</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">class ImageGenerator:</span><br>
+                                <span class="code-line">    """Generate and manage images using DALL-E API."""</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def __init__(self, api_key: str):</span><br>
+                                <span class="code-line">        self.client = openai.OpenAI(api_key=api_key)</span><br>
+                                <span class="code-line">        self.output_dir = "generated_images"</span><br>
+                                <span class="code-line">        os.makedirs(self.output_dir, exist_ok=True)</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def generate_image(self, prompt: str, size: str = "1024x1024", </span><br>
+                                <span class="code-line">                       quality: str = "standard", style: str = "vivid") -> dict:</span><br>
+                                <span class="code-line">        """Generate an image from text prompt."""</span><br>
+                                <span class="code-line">        try:</span><br>
+                                <span class="code-line">            response = self.client.images.generate(</span><br>
+                                <span class="code-line">                model="dall-e-3",</span><br>
+                                <span class="code-line">                prompt=prompt,</span><br>
+                                <span class="code-line">                size=size,</span><br>
+                                <span class="code-line">                quality=quality,</span><br>
+                                <span class="code-line">                style=style,</span><br>
+                                <span class="code-line">                n=1</span><br>
+                                <span class="code-line">            )</span><br>
+                                <span class="code-line">            </span><br>
+                                <span class="code-line">            image_url = response.data[0].url</span><br>
+                                <span class="code-line">            revised_prompt = response.data[0].revised_prompt</span><br>
+                                <span class="code-line">            </span><br>
+                                <span class="code-line">            # Download and save the image</span><br>
+                                <span class="code-line">            filename = self._download_image(image_url, prompt)</span><br>
+                                <span class="code-line">            </span><br>
+                                <span class="code-line">            return {</span><br>
+                                <span class="code-line">                "success": True,</span><br>
+                                <span class="code-line">                "url": image_url,</span><br>
+                                <span class="code-line">                "revised_prompt": revised_prompt,</span><br>
+                                <span class="code-line">                "filename": filename,</span><br>
+                                <span class="code-line">                "size": size,</span><br>
+                                <span class="code-line">                "timestamp": datetime.now().isoformat()</span><br>
+                                <span class="code-line">            }</span><br>
+                                <span class="code-line">            </span><br>
+                                <span class="code-line">        except Exception as e:</span><br>
+                                <span class="code-line">            return {"success": False, "error": str(e)}</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def _download_image(self, url: str, prompt: str) -> str:</span><br>
+                                <span class="code-line">        """Download image from URL and save to disk."""</span><br>
+                                <span class="code-line">        response = requests.get(url)</span><br>
+                                <span class="code-line">        response.raise_for_status()</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # Create filename from prompt</span><br>
+                                <span class="code-line">        safe_prompt = "".join(c for c in prompt[:50] if c.isalnum() or c in (' ', '-', '_')).rstrip()</span><br>
+                                <span class="code-line">        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")</span><br>
+                                <span class="code-line">        filename = f"{safe_prompt}_{timestamp}.png"</span><br>
+                                <span class="code-line">        filepath = os.path.join(self.output_dir, filename)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # Save image</span><br>
+                                <span class="code-line">        with open(filepath, 'wb') as f:</span><br>
+                                <span class="code-line">            f.write(response.content)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        return filepath</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def generate_variations(self, image_path: str, n: int = 2) -> list:</span><br>
+                                <span class="code-line">        """Generate variations of an existing image."""</span><br>
+                                <span class="code-line">        with open(image_path, "rb") as image_file:</span><br>
+                                <span class="code-line">            response = self.client.images.create_variation(</span><br>
+                                <span class="code-line">                image=image_file,</span><br>
+                                <span class="code-line">                n=n,</span><br>
+                                <span class="code-line">                size="1024x1024"</span><br>
+                                <span class="code-line">            )</span><br>
+                                <span class="code-line">            </span><br>
+                                <span class="code-line">        return [data.url for data in response.data]</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def edit_image(self, image_path: str, mask_path: str, prompt: str) -> str:</span><br>
+                                <span class="code-line">        """Edit an image using a mask and prompt."""</span><br>
+                                <span class="code-line">        with open(image_path, "rb") as image_file, open(mask_path, "rb") as mask_file:</span><br>
+                                <span class="code-line">            response = self.client.images.edit(</span><br>
+                                <span class="code-line">                image=image_file,</span><br>
+                                <span class="code-line">                mask=mask_file,</span><br>
+                                <span class="code-line">                prompt=prompt,</span><br>
+                                <span class="code-line">                n=1,</span><br>
+                                <span class="code-line">                size="1024x1024"</span><br>
+                                <span class="code-line">            )</span><br>
+                                <span class="code-line">            </span><br>
+                                <span class="code-line">        return response.data[0].url</span>
+                            </div>
+                        </div>
+
+                        <!-- Live Image Generator -->
+                        <div class="generator-interface">
+                            <div class="generator-header">
+                                <div class="avatar image">IG</div>
+                                <div class="generator-title">Live Image Generator</div>
+                                <div class="content-badge badge-image">
+                                    <i class="fas fa-palette"></i>
+                                    DALL-E 3
+                                </div>
+                            </div>
+                            <div class="generator-content">
+                                <div class="generator-controls">
+                                    <div class="control-group">
+                                        <label class="control-label">Image Description</label>
+                                        <textarea id="imagePrompt" placeholder="Describe the image you want to create...">A futuristic city with flying cars and AI robots, digital art style</textarea>
+                                        <div class="control-description">Be as descriptive as possible for best results</div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">Image Size</label>
+                                        <select id="imageSize">
+                                            <option value="1024x1024">Square (1024x1024)</option>
+                                            <option value="1792x1024">Wide (1792x1024)</option>
+                                            <option value="1024x1792">Tall (1024x1792)</option>
+                                        </select>
+                                        <div class="control-description">Choose image dimensions</div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">Style</label>
+                                        <select id="imageStyle">
+                                            <option value="vivid">Vivid (More dramatic)</option>
+                                            <option value="natural">Natural (More realistic)</option>
+                                        </select>
+                                        <div class="control-description">Choose artistic style</div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">Quality</label>
+                                        <select id="imageQuality">
+                                            <option value="standard">Standard</option>
+                                            <option value="hd">HD (Higher quality)</option>
+                                        </select>
+                                        <div class="control-description">HD costs 2x credits but better quality</div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-purple" onclick="generateImage()">
+                                    <i class="fas fa-palette"></i> Generate Image
+                                </button>
+                                <div class="generator-preview">
+                                    <div class="preview-title">Generated Images</div>
+                                    <div class="image-preview" id="imagePreview">
+                                        <div class="image-item">
+                                            <i class="fas fa-image"></i>
+                                            <span>Generated images will appear here</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="exercise">
+                            <div class="exercise-header">
+                                <div class="exercise-icon">💡</div>
+                                <div class="exercise-title">Prompt Engineering Tips for DALL-E</div>
+                            </div>
+                            <div class="exercise-content">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 16px 0;">
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <div style="color: var(--image-purple); margin-bottom: 4px;"><strong>Be Specific</strong></div>
+                                        <div style="font-size: 12px;">"A red apple on a wooden table" vs "an apple"</div>
+                                    </div>
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <div style="color: var(--image-purple); margin-bottom: 4px;"><strong>Add Style</strong></div>
+                                        <div style="font-size: 12px;">"digital art", "photorealistic", "watercolor"</div>
+                                    </div>
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <div style="color: var(--image-purple); margin-bottom: 4px;"><strong>Include Lighting</strong></div>
+                                        <div style="font-size: 12px;">"sunset lighting", "studio lighting", "neon glow"</div>
+                                    </div>
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <div style="color: var(--image-purple); margin-bottom: 4px;"><strong>Mention Composition</strong></div>
+                                        <div style="font-size: 12px;">"close-up", "wide shot", "birds-eye view"</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media Automation -->
+            <div class="message fade-in" id="social-media">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 3</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>📱 Automate Social Media Content</h2>
+                        <p>Create and schedule social media posts across platforms using AI:</p>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="runSocialMediaDemo()">
+                                        <i class="fas fa-play"></i> Run
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line">import openai</span><br>
+                                <span class="code-line">import json</span><br>
+                                <span class="code-line">from datetime import datetime, timedelta</span><br>
+                                <span class="code-line">from typing import List, Dict</span><br>
+                                <span class="code-line">import csv</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">class SocialMediaAutomator:</span><br>
+                                <span class="code-line">    """Generate and manage social media content."""</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def __init__(self, api_key: str):</span><br>
+                                <span class="code-line">        self.client = openai.OpenAI(api_key=api_key)</span><br>
+                                <span class="code-line">        self.platform_rules = {</span><br>
+                                <span class="code-line">            "twitter": {"max_length": 280, "hashtags": 2},</span><br>
+                                <span class="code-line">            "linkedin": {"max_length": 3000, "hashtags": 3},</span><br>
+                                <span class="code-line">            "instagram": {"max_length": 2200, "hashtags": 30},</span><br>
+                                <span class="code-line">            "facebook": {"max_length": 63206, "hashtags": 0}</span><br>
+                                <span class="code-line">        }</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def generate_campaign(self, topic: str, platform: str, </span><br>
+                                <span class="code-line">                         num_posts: int = 5) -> List[Dict]:</span><br>
+                                <span class="code-line">        """Generate a social media campaign."""</span><br>
+                                <span class="code-line">        rules = self.platform_rules[platform]</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        prompt = f"""Generate {num_posts} social media posts for {platform} about "{topic}".</span><br>
+                                <span class="code-line">        Platform rules:</span><br>
+                                <span class="code-line">        - Maximum {rules['max_length']} characters per post</span><br>
+                                <span class="code-line">        - Use {rules['hashtags']} relevant hashtags per post</span><br>
+                                <span class="code-line">        - Make each post engaging and platform-appropriate</span><br>
+                                <span class="code-line">        - Include emojis where appropriate</span><br>
+                                <span class="code-line">        - Vary the post types (questions, facts, tips, etc.)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        Return as JSON list with keys: content, hashtags, post_type"""</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        response = self.client.chat.completions.create(</span><br>
+                                <span class="code-line">            model="gpt-4",</span><br>
+                                <span class="code-line">            messages=[{"role": "user", "content": prompt}],</span><br>
+                                <span class="code-line">            temperature=0.8</span><br>
+                                <span class="code-line">        )</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        posts = json.loads(response.choices[0].message.content)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # Add scheduling dates</span><br>
+                                <span class="code-line">        start_date = datetime.now()</span><br>
+                                <span class="code-line">        for i, post in enumerate(posts):</span><br>
+                                <span class="code-line">            post_date = start_date + timedelta(days=i)</span><br>
+                                <span class="code-line">            post["scheduled_date"] = post_date.strftime("%Y-%m-%d")</span><br>
+                                <span class="code-line">            post["platform"] = platform</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        return posts</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def export_to_csv(self, posts: List[Dict], filename: str):</span><br>
+                                <span class="code-line">        """Export posts to CSV for scheduling tools."""</span><br>
+                                <span class="code-line">        fieldnames = ["platform", "content", "hashtags", "post_type", "scheduled_date"]</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        with open(filename, 'w', newline='', encoding='utf-8') as f:</span><br>
+                                <span class="code-line">            writer = csv.DictWriter(f, fieldnames=fieldnames)</span><br>
+                                <span class="code-line">            writer.writeheader()</span><br>
+                                <span class="code-line">            writer.writerows(posts)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        print(f"✅ Exported {len(posts)} posts to {filename}")</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def create_content_calendar(self, topics: List[str], platforms: List[str],</span><br>
+                                <span class="code-line">                               posts_per_topic: int = 3) -> Dict:</span><br>
+                                <span class="code-line">        """Create a complete content calendar."""</span><br>
+                                <span class="code-line">        calendar = {}</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        for topic in topics:</span><br>
+                                <span class="code-line">            calendar[topic] = {}</span><br>
+                                <span class="code-line">            for platform in platforms:</span><br>
+                                <span class="code-line">                posts = self.generate_campaign(topic, platform, posts_per_topic)</span><br>
+                                <span class="code-line">                calendar[topic][platform] = posts</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        return calendar</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line"># Usage example:</span><br>
+                                <span class="code-line">automator = SocialMediaAutomator(api_key="your-key-here")</span><br>
+                                <span class="code-line">posts = automator.generate_campaign("Python AI Development", "twitter", 5)</span><br>
+                                <span class="code-line">automator.export_to_csv(posts, "social_media_schedule.csv")</span>
+                            </div>
+                        </div>
+
+                        <!-- Social Media Generator -->
+                        <div class="console">
+                            <div class="console-header">
+                                <div class="console-title">Social Media Content Generator</div>
+                                <div class="console-status">
+                                    <div class="status-dot"></div>
+                                    <span>Multi-platform ready</span>
+                                </div>
+                            </div>
+                            <div class="console-input">
+                                <input type="text" id="socialTopic" placeholder="Enter topic for social media posts" value="AI Content Creation">
+                                <select id="socialPlatform">
+                                    <option value="twitter">Twitter/X</option>
+                                    <option value="linkedin">LinkedIn</option>
+                                    <option value="instagram">Instagram</option>
+                                    <option value="facebook">Facebook</option>
+                                    <option value="all">All Platforms</option>
+                                </select>
+                                <button class="btn btn-primary" onclick="generateSocialMedia()">
+                                    <i class="fas fa-share-alt"></i> Generate Posts
+                                </button>
+                            </div>
+                            <div class="console-output" id="socialOutput">
+                                🚀 Social Media Content Generator<br><br>
+                                Enter a topic and select a platform to generate engaging posts.<br><br>
+                                Platform-specific formatting:<br>
+                                • <strong>Twitter</strong>: 280 chars, 2-3 hashtags<br>
+                                • <strong>LinkedIn</strong>: Professional tone, 3 hashtags<br>
+                                • <strong>Instagram</strong>: Visual focus, up to 30 hashtags<br>
+                                • <strong>Facebook</strong>: Conversational, longer posts
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Handling (JSON/CSV) -->
+            <div class="message fade-in" id="file-handling">
+                <div class="avatar file">FH</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">File Handler</span>
+                        <span class="message-time">Topic 4</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>📁 File Handling with JSON & CSV</h2>
+                        <p>Master file operations for AI content management:</p>
+
+                        <div class="data-viewer">
+                            <div class="json-viewer">
+                                <span style="color: var(--content-orange);">// JSON Example - AI Content Storage</span><br>
+                                {<br>
+                                &nbsp;&nbsp;"blog_posts": [<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;{<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"id": "bp_001",<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"title": "AI Revolution",<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"content": "AI is transforming...",<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tags": ["ai", "technology"],<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"created_at": "2024-01-15T10:30:00",<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status": "published"<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                                &nbsp;&nbsp;],<br>
+                                &nbsp;&nbsp;"images": [<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;{<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"id": "img_001",<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"prompt": "Futuristic city",<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"url": "https://...",<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"size": "1024x1024"<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                                &nbsp;&nbsp;],<br>
+                                &nbsp;&nbsp;"metadata": {<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;"total_posts": 1,<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;"total_images": 1,<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;"last_updated": "2024-01-15T10:30:00"<br>
+                                &nbsp;&nbsp;}<br>
+                                }
+                            </div>
+                            <div class="csv-viewer">
+                                <span style="color: var(--file-blue);"># CSV Example - Social Media Schedule</span><br>
+                                platform,content,hashtags,post_type,scheduled_date<br>
+                                twitter,"Just launched our AI blog generator! 🚀",#AI #Tech,announcement,2024-01-16<br>
+                                linkedin,"Excited to share our latest AI content creation tools...",#ArtificialIntelligence #ContentCreation,update,2024-01-17<br>
+                                instagram,"Creating stunning AI images has never been easier! ✨🎨",#AIArt #DigitalArt #CreativeAI,showcase,2024-01-18<br>
+                                facebook,"Join our webinar on AI content generation this Friday!",#AI #Webinar #ContentMarketing,event,2024-01-19<br>
+                                twitter,"Top 5 AI tools for content creators:",#AITools #ContentCreation #Productivity,list,2024-01-20
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="runFileHandler()">
+                                        <i class="fas fa-play"></i> Run
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line">import json</span><br>
+                                <span class="code-line">import csv</span><br>
+                                <span class="code-line">from datetime import datetime</span><br>
+                                <span class="code-line">from pathlib import Path</span><br>
+                                <span class="code-line">from typing import Any, Dict, List</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">class ContentManager:</span><br>
+                                <span class="code-line">    """Manage AI-generated content in files."""</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def __init__(self, data_dir: str = "ai_content"):</span><br>
+                                <span class="code-line">        self.data_dir = Path(data_dir)</span><br>
+                                <span class="code-line">        self.data_dir.mkdir(exist_ok=True)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # File paths</span><br>
+                                <span class="code-line">        self.blog_file = self.data_dir / "blog_posts.json"</span><br>
+                                <span class="code-line">        self.images_file = self.data_dir / "generated_images.json"</span><br>
+                                <span class="code-line">        self.social_file = self.data_dir / "social_schedule.csv"</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def save_blog_post(self, post_data: Dict[str, Any]) -> str:</span><br>
+                                <span class="code-line">        """Save blog post to JSON file."""</span><br>
+                                <span class="code-line">        # Load existing posts</span><br>
+                                <span class="code-line">        posts = self._load_json(self.blog_file, default=[])</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # Add metadata</span><br>
+                                <span class="code-line">        post_data["id"] = f"bp_{len(posts) + 1:03d}"</span><br>
+                                <span class="code-line">        post_data["created_at"] = datetime.now().isoformat()</span><br>
+                                <span class="code-line">        post_data["updated_at"] = datetime.now().isoformat()</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # Add to list and save</span><br>
+                                <span class="code-line">        posts.append(post_data)</span><br>
+                                <span class="code-line">        self._save_json(self.blog_file, posts)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        return post_data["id"]</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def save_image_record(self, image_data: Dict[str, Any]) -> str:</span><br>
+                                <span class="code-line">        """Save image generation record."""</span><br>
+                                <span class="code-line">        images = self._load_json(self.images_file, default=[])</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        image_data["id"] = f"img_{len(images) + 1:03d}"</span><br>
+                                <span class="code-line">        image_data["created_at"] = datetime.now().isoformat()</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        images.append(image_data)</span><br>
+                                <span class="code-line">        self._save_json(self.images_file, images)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        return image_data["id"]</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def export_social_schedule(self, posts: List[Dict[str, Any]]) -> str:</span><br>
+                                <span class="code-line">        """Export social media posts to CSV."""</span><br>
+                                <span class="code-line">        fieldnames = ["id", "platform", "content", "hashtags", </span><br>
+                                <span class="code-line">                     "post_type", "scheduled_date", "status"]</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # Add IDs to posts</span><br>
+                                <span class="code-line">        for i, post in enumerate(posts):</span><br>
+                                <span class="code-line">            post["id"] = f"sm_{i + 1:03d}"</span><br>
+                                <span class="code-line">            post["status"] = "scheduled"</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        with open(self.social_file, 'w', newline='', encoding='utf-8') as f:</span><br>
+                                <span class="code-line">            writer = csv.DictWriter(f, fieldnames=fieldnames)</span><br>
+                                <span class="code-line">            writer.writeheader()</span><br>
+                                <span class="code-line">            writer.writerows(posts)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        return str(self.social_file)</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def _load_json(self, filepath: Path, default: Any = None) -> Any:</span><br>
+                                <span class="code-line">        """Load JSON file with error handling."""</span><br>
+                                <span class="code-line">        if not filepath.exists():</span><br>
+                                <span class="code-line">            return default if default is not None else {}</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        try:</span><br>
+                                <span class="code-line">            with open(filepath, 'r', encoding='utf-8') as f:</span><br>
+                                <span class="code-line">                return json.load(f)</span><br>
+                                <span class="code-line">        except json.JSONDecodeError:</span><br>
+                                <span class="code-line">            return default if default is not None else {}</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def _save_json(self, filepath: Path, data: Any):</span><br>
+                                <span class="code-line">        """Save data to JSON file."""</span><br>
+                                <span class="code-line">        with open(filepath, 'w', encoding='utf-8') as f:</span><br>
+                                <span class="code-line">            json.dump(data, f, indent=2, ensure_ascii=False)</span>
+                            </div>
+                        </div>
+
+                        <!-- File Explorer -->
+                        <div class="console">
+                            <div class="console-header">
+                                <div class="console-title">File Explorer</div>
+                                <div class="console-status">
+                                    <div class="status-dot"></div>
+                                    <span>Ready to manage files</span>
+                                </div>
+                            </div>
+                            <div class="file-explorer" id="fileExplorer">
+                                📁 ai_content/<br>
+                                ├── 📄 blog_posts.json<br>
+                                ├── 📄 generated_images.json<br>
+                                ├── 📄 social_schedule.csv<br>
+                                ├── 📁 blog_posts/<br>
+                                │   ├── 📄 python-ai-tutorial.md<br>
+                                │   └── 📄 machine-learning-guide.md<br>
+                                └── 📁 generated_images/<br>
+                                    ├── 🖼️ futuristic_city.png<br>
+                                    └── 🖼️ ai_robot_art.png
+                            </div>
+                            <div style="margin-top: 16px; display: flex; gap: 12px;">
+                                <button class="btn btn-secondary" onclick="createSampleFiles()">
+                                    <i class="fas fa-plus"></i> Create Sample Files
+                                </button>
+                                <button class="btn btn-primary" onclick="downloadFiles()">
+                                    <i class="fas fa-download"></i> Download All Files
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Calls & Integration -->
+            <div class="message fade-in" id="api-calls">
+                <div class="avatar api">API</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">API Integrator</span>
+                        <span class="message-time">Topic 5</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>🌐 API Calls & External Integrations</h2>
+                        <p>Connect your AI content to real-world data and services:</p>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="runAPIIntegration()">
+                                        <i class="fas fa-play"></i> Run
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line">import requests</span><br>
+                                <span class="code-line">import json</span><br>
+                                <span class="code-line">from datetime import datetime</span><br>
+                                <span class="code-line">from typing import Dict, Any, Optional</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">class APIIntegrator:</span><br>
+                                <span class="code-line">    """Integrate external APIs with AI content generation."""</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def __init__(self):</span><br>
+                                <span class="code-line">        # Free public APIs (no keys required)</span><br>
+                                <span class="code-line">        self.apis = {</span><br>
+                                <span class="code-line">            "weather": "https://api.open-meteo.com/v1/forecast",</span><br>
+                                <span class="code-line">            "news": "https://newsapi.org/v2/top-headlines",</span><br>
+                                <span class="code-line">            "quotes": "https://api.quotable.io/random",</span><br>
+                                <span class="code-line">            "facts": "https://uselessfacts.jsph.pl/api/v2/facts/random",</span><br>
+                                <span class="code-line">            "images": "https://picsum.photos/v2/list"</span><br>
+                                <span class="code-line">        }</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def get_weather(self, city: str = "London") -> Dict[str, Any]:</span><br>
+                                <span class="code-line">        """Get current weather for a city."""</span><br>
+                                <span class="code-line">        params = {</span><br>
+                                <span class="code-line">            "latitude": 51.5074,  # London coordinates</span><br>
+                                <span class="code-line">            "longitude": -0.1278,</span><br>
+                                <span class="code-line">            "current": "temperature_2m,weather_code",</span><br>
+                                <span class="code-line">            "timezone": "auto"</span><br>
+                                <span class="code-line">        }</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        response = requests.get(self.apis["weather"], params=params)</span><br>
+                                <span class="code-line">        data = response.json()</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        return {</span><br>
+                                <span class="code-line">            "city": city,</span><br>
+                                <span class="code-line">            "temperature": data["current"]["temperature_2m"],</span><br>
+                                <span class="code-line">            "weather_code": data["current"]["weather_code"],</span><br>
+                                <span class="code-line">            "units": data["current_units"]["temperature_2m"]</span><br>
+                                <span class="code-line">        }</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def get_news(self, category: str = "technology", </span><br>
+                                <span class="code-line">                 country: str = "us") -> list:</span><br>
+                                <span class="code-line">        """Get latest news headlines."""</span><br>
+                                <span class="code-line">        # Note: News API requires a free API key from newsapi.org</span><br>
+                                <span class="code-line">        api_key = os.getenv("NEWS_API_KEY", "demo")</span><br>
+                                <span class="code-line">        params = {</span><br>
+                                <span class="code-line">            "category": category,</span><br>
+                                <span class="code-line">            "country": country,</span><br>
+                                <span class="code-line">            "apiKey": api_key</span><br>
+                                <span class="code-line">        }</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        response = requests.get(self.apis["news"], params=params)</span><br>
+                                <span class="code-line">        data = response.json()</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        return data.get("articles", [])[:5]  # Return top 5 articles</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def generate_content_with_context(self, topic: str, </span><br>
+                                <span class="code-line">                                     context_type: str = "weather") -> str:</span><br>
+                                <span class="code-line">        """Generate AI content with real-time context."""</span><br>
+                                <span class="code-line">        # Get real-time data</span><br>
+                                <span class="code-line">        if context_type == "weather":</span><br>
+                                <span class="code-line">            context = self.get_weather("London")</span><br>
+                                <span class="code-line">            context_text = f"Current weather in {context['city']}: {context['temperature']}{context['units']}"</span><br>
+                                <span class="code-line">        elif context_type == "news":</span><br>
+                                <span class="code-line">            articles = self.get_news("technology")</span><br>
+                                <span class="code-line">            headlines = [article['title'] for article in articles[:3]]</span><br>
+                                <span class="code-line">            context_text = f"Latest tech news: {'; '.join(headlines)}"</span><br>
+                                <span class="code-line">        else:</span><br>
+                                <span class="code-line">            context_text = ""</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # Use context in AI prompt</span><br>
+                                <span class="code-line">        prompt = f"""Create content about {topic}.</span><br>
+                                <span class="code-line">        Context: {context_text}</span><br>
+                                <span class="code-line">        Make the content relevant to the current context."""</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # Call AI API (using our existing BlogGenerator)</span><br>
+                                <span class="code-line">        # ... AI generation code here ...</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        return "Generated content with real-time context"</span>
+                            </div>
+                        </div>
+
+                        <!-- API Explorer -->
+                        <div class="console">
+                            <div class="console-header">
+                                <div class="console-title">API Explorer</div>
+                                <div class="console-status">
+                                    <div class="status-dot"></div>
+                                    <span>Connected to free APIs</span>
+                                </div>
+                            </div>
+                            <div class="console-input">
+                                <select id="apiSelector" onchange="updateAPIInput()">
+                                    <option value="weather">Weather API</option>
+                                    <option value="news">News API</option>
+                                    <option value="quotes">Quotes API</option>
+                                    <option value="facts">Fun Facts API</option>
+                                    <option value="images">Random Images API</option>
+                                </select>
+                                <input type="text" id="apiParam" placeholder="Enter parameter (e.g., city name)" value="London">
+                                <button class="btn btn-primary" onclick="callAPI()">
+                                    <i class="fas fa-bolt"></i> Call API
+                                </button>
+                            </div>
+                            <div class="console-output" id="apiOutput">
+                                🌐 API Explorer Ready<br><br>
+                                Select an API from the dropdown and click "Call API" to test.<br><br>
+                                All APIs are free and require no API keys.<br><br>
+                                Try these examples:<br>
+                                • Weather API: "London" or "New York"<br>
+                                • News API: "technology" or "business"<br>
+                                • Quotes API: Leave parameter empty for random quote
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Environment & Security -->
+            <div class="message fade-in" id="env-security">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 6</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>🔐 Environment Variables & Security</h2>
+                        <p>Keep your API keys safe and manage configurations properly:</p>
+
+                        <div class="env-panel">
+                            <div class="env-row">
+                                <div class="env-key">OPENAI_API_KEY</div>
+                                <div class="env-value">sk-...**********</div>
+                            </div>
+                            <div class="env-row">
+                                <div class="env-key">NEWS_API_KEY</div>
+                                <div class="env-value">abc123********</div>
+                            </div>
+                            <div class="env-row">
+                                <div class="env-key">DEFAULT_MODEL</div>
+                                <div class="env-value">gpt-4</div>
+                            </div>
+                            <div class="env-row">
+                                <div class="env-key">MAX_TOKENS</div>
+                                <div class="env-value">2000</div>
+                            </div>
+                            <div class="env-row">
+                                <div class="env-key">LOG_LEVEL</div>
+                                <div class="env-value">INFO</div>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python - Environment Management</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="showEnvExample()">
+                                        <i class="fas fa-key"></i> Show Example
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line">import os</span><br>
+                                <span class="code-line">from dotenv import load_dotenv</span><br>
+                                <span class="code-line">from typing import Optional</span><br>
+                                <span class="code-line">from pathlib import Path</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">class ConfigManager:</span><br>
+                                <span class="code-line">    """Manage application configuration and environment variables."""</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def __init__(self, env_file: str = ".env"):</span><br>
+                                <span class="code-line">        self.env_file = Path(env_file)</span><br>
+                                <span class="code-line">        self.config = {}</span><br>
+                                <span class="code-line">        self._load_config()</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def _load_config(self):</span><br>
+                                <span class="code-line">        """Load configuration from environment variables."""</span><br>
+                                <span class="code-line">        # Load .env file if it exists</span><br>
+                                <span class="code-line">        if self.env_file.exists():</span><br>
+                                <span class="code-line">            load_dotenv(self.env_file)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # Load all relevant environment variables</span><br>
+                                <span class="code-line">        self.config = {</span><br>
+                                <span class="code-line">            "openai_api_key": self._get_env("OPENAI_API_KEY", required=True),</span><br>
+                                <span class="code-line">            "news_api_key": self._get_env("NEWS_API_KEY"),</span><br>
+                                <span class="code-line">            "default_model": self._get_env("DEFAULT_MODEL", "gpt-4"),</span><br>
+                                <span class="code-line">            "max_tokens": int(self._get_env("MAX_TOKENS", "2000")),</span><br>
+                                <span class="code-line">            "temperature": float(self._get_env("TEMPERATURE", "0.7")),</span><br>
+                                <span class="code-line">            "log_level": self._get_env("LOG_LEVEL", "INFO"),</span><br>
+                                <span class="code-line">            "data_dir": self._get_env("DATA_DIR", "ai_content")</span><br>
+                                <span class="code-line">        }</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def _get_env(self, key: str, default: Optional[str] = None, </span><br>
+                                <span class="code-line">                 required: bool = False) -> str:</span><br>
+                                <span class="code-line">        """Get environment variable with validation."""</span><br>
+                                <span class="code-line">        value = os.getenv(key, default)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        if required and not value:</span><br>
+                                <span class="code-line">            raise ValueError(f"Environment variable {key} is required but not set")</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        return value</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def get(self, key: str, default: Optional[str] = None) -> str:</span><br>
+                                <span class="code-line">        """Get configuration value."""</span><br>
+                                <span class="code-line">        return self.config.get(key, default)</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def create_env_template(self):</span><br>
+                                <span class="code-line">        """Create a .env.template file for documentation."""</span><br>
+                                <span class="code-line">        template = """# AI Content Generator Configuration</span><br>
+                                <span class="code-line"># Copy this to .env and fill in your values</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line"># OpenAI API Key (required)</span><br>
+                                <span class="code-line"># Get from: https://platform.openai.com/api-keys</span><br>
+                                <span class="code-line">OPENAI_API_KEY=your_openai_api_key_here</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line"># News API Key (optional)</span><br>
+                                <span class="code-line"># Get from: https://newsapi.org</span><br>
+                                <span class="code-line">NEWS_API_KEY=your_news_api_key_here</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line"># AI Model Settings</span><br>
+                                <span class="code-line">DEFAULT_MODEL=gpt-4</span><br>
+                                <span class="code-line">MAX_TOKENS=2000</span><br>
+                                <span class="code-line">TEMPERATURE=0.7</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line"># Application Settings</span><br>
+                                <span class="code-line">LOG_LEVEL=INFO</span><br>
+                                <span class="code-line">DATA_DIR=ai_content</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line"># Never commit .env to version control!</span><br>
+                                <span class="code-line"># Add .env to .gitignore</span><br>
+                                <span class="code-line">"""</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        with open(".env.template", "w") as f:</span><br>
+                                <span class="code-line">            f.write(template)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        print("✅ Created .env.template file")</span>
+                            </div>
+                        </div>
+
+                        <div class="exercise">
+                            <div class="exercise-header">
+                                <div class="exercise-icon">🚨</div>
+                                <div class="exercise-title">Security Best Practices</div>
+                            </div>
+                            <div class="exercise-content">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin: 16px 0;">
+                                    <div style="padding: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px;">
+                                        <div style="color: var(--error-red); margin-bottom: 8px;"><i class="fas fa-times-circle"></i> <strong>Never Do This</strong></div>
+                                        <div style="font-size: 12px;">api_key = "sk-real-key-here" in source code</div>
+                                    </div>
+                                    <div style="padding: 12px; background: rgba(16, 163, 127, 0.1); border: 1px solid rgba(16, 163, 127, 0.3); border-radius: 8px;">
+                                        <div style="color: var(--success-green); margin-bottom: 8px;"><i class="fas fa-check-circle"></i> <strong>Always Do This</strong></div>
+                                        <div style="font-size: 12px;">api_key = os.getenv("OPENAI_API_KEY")</div>
+                                    </div>
+                                    <div style="padding: 12px; background: rgba(16, 163, 127, 0.1); border: 1px solid rgba(16, 163, 127, 0.3); border-radius: 8px;">
+                                        <div style="color: var(--success-green); margin-bottom: 8px;"><i class="fas fa-check-circle"></i> <strong>Git Security</strong></div>
+                                        <div style="font-size: 12px;">Add .env to .gitignore file</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Complete Content Pipeline -->
+            <div class="message fade-in" id="content-pipeline">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 7</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>🏭 Complete AI Content Pipeline</h2>
+                        <p>Combine everything into a single automated content creation system:</p>
+
+                        <div class="pipeline">
+                            <div class="pipeline-step active">
+                                <div class="step-icon">🎯</div>
+                                <div class="step-title">Topic Input</div>
+                                <div class="step-description">User specifies topic</div>
+                            </div>
+                            <div class="pipeline-step active">
+                                <div class="step-icon">📝</div>
+                                <div class="step-title">Content Generation</div>
+                                <div class="step-description">AI writes content</div>
+                            </div>
+                            <div class="pipeline-step active">
+                                <div class="step-icon">🎨</div>
+                                <div class="step-title">Image Creation</div>
+                                <div class="step-description">DALL-E creates images</div>
+                            </div>
+                            <div class="pipeline-step">
+                                <div class="step-icon">📱</div>
+                                <div class="step-title">Social Media</div>
+                                <div class="step-description">Auto-generate posts</div>
+                            </div>
+                            <div class="pipeline-step">
+                                <div class="step-icon">📁</div>
+                                <div class="step-title">File Export</div>
+                                <div class="step-description">Save to JSON/CSV</div>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python - Complete Pipeline</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="runCompletePipeline()">
+                                        <i class="fas fa-play"></i> Run Pipeline
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line">from typing import Dict, Any</span><br>
+                                <span class="code-line">import json</span><br>
+                                <span class="code-line">from datetime import datetime</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line">class ContentPipeline:</span><br>
+                                <span class="code-line">    """Complete AI content generation pipeline."""</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def __init__(self, blog_generator, image_generator, </span><br>
+                                <span class="code-line">                 social_automator, content_manager):</span><br>
+                                <span class="code-line">        self.blog_generator = blog_generator</span><br>
+                                <span class="code-line">        self.image_generator = image_generator</span><br>
+                                <span class="code-line">        self.social_automator = social_automator</span><br>
+                                <span class="code-line">        self.content_manager = content_manager</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def execute(self, topic: str, platforms: list = None) -> Dict[str, Any]:</span><br>
+                                <span class="code-line">        """Execute complete content pipeline."""</span><br>
+                                <span class="code-line">        print(f"🚀 Starting content pipeline for: {topic}")</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # 1. Generate blog content</span><br>
+                                <span class="code-line">        print("📝 Generating blog content...")</span><br>
+                                <span class="code-line">        outline = self.blog_generator.generate_outline(topic)</span><br>
+                                <span class="code-line">        blog_post = self.blog_generator.generate_full_post(outline)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # 2. Generate featured image</span><br>
+                                <span class="code-line">        print("🎨 Creating featured image...")</span><br>
+                                <span class="code-line">        image_prompt = f"Featured image for blog post about {topic}, professional, digital art"</span><br>
+                                <span class="code-line">        image_result = self.image_generator.generate_image(image_prompt)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # 3. Generate social media posts</span><br>
+                                <span class="code-line">        print("📱 Creating social media content...")</span><br>
+                                <span class="code-line">        platforms = platforms or ["twitter", "linkedin", "instagram"]</span><br>
+                                <span class="code-line">        social_posts = []</span><br>
+                                <span class="code-line">        for platform in platforms:</span><br>
+                                <span class="code-line">            posts = self.social_automator.generate_campaign(topic, platform, 3)</span><br>
+                                <span class="code-line">            social_posts.extend(posts)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # 4. Save everything</span><br>
+                                <span class="code-line">        print("💾 Saving all content...")</span><br>
+                                <span class="code-line">        blog_id = self.content_manager.save_blog_post({</span><br>
+                                <span class="code-line">            "title": outline["title"],</span><br>
+                                <span class="code-line">            "content": blog_post,</span><br>
+                                <span class="code-line">            "topic": topic,</span><br>
+                                <span class="code-line">            "outline": outline</span><br>
+                                <span class="code-line">        })</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        image_id = self.content_manager.save_image_record(image_result)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        csv_path = self.content_manager.export_social_schedule(social_posts)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # 5. Return results</span><br>
+                                <span class="code-line">        return {</span><br>
+                                <span class="code-line">            "blog_post": {</span><br>
+                                <span class="code-line">                "id": blog_id,</span><br>
+                                <span class="code-line">                "title": outline["title"],</span><br>
+                                <span class="code-line">                "word_count": len(blog_post.split())</span><br>
+                                <span class="code-line">            },</span><br>
+                                <span class="code-line">            "image": {</span><br>
+                                <span class="code-line">                "id": image_id,</span><br>
+                                <span class="code-line">                "url": image_result.get("url"),</span><br>
+                                <span class="code-line">                "prompt": image_prompt</span><br>
+                                <span class="code-line">            },</span><br>
+                                <span class="code-line">            "social_media": {</span><br>
+                                <span class="code-line">                "total_posts": len(social_posts),</span><br>
+                                <span class="code-line">                "platforms": platforms,</span><br>
+                                <span class="code-line">                "schedule_file": csv_path</span><br>
+                                <span class="code-line">            },</span><br>
+                                <span class="code-line">            "timestamp": datetime.now().isoformat()</span><br>
+                                <span class="code-line">        }</span>
+                            </div>
+                        </div>
+
+                        <!-- Pipeline Runner -->
+                        <div class="console">
+                            <div class="console-header">
+                                <div class="console-title">Complete Content Pipeline Runner</div>
+                                <div class="console-status">
+                                    <div class="status-dot pulse"></div>
+                                    <span>Ready to automate everything</span>
+                                </div>
+                            </div>
+                            <div class="console-input">
+                                <input type="text" id="pipelineTopic" placeholder="Enter topic for complete content pipeline" value="The Future of AI Content Creation">
+                                <button class="btn btn-orange" onclick="runPipeline()">
+                                    <i class="fas fa-cogs"></i> Run Complete Pipeline
+                                </button>
+                            </div>
+                            <div class="console-output" id="pipelineOutput">
+                                🏭 Complete AI Content Pipeline<br><br>
+                                This will execute the entire content creation process:<br><br>
+                                1. 📝 Generate blog post with outline<br>
+                                2. 🎨 Create featured image with DALL-E<br>
+                                3. 📱 Generate social media posts for all platforms<br>
+                                4. 📁 Save everything to files (JSON/CSV)<br>
+                                5. ✅ Export complete content package<br><br>
+                                Enter a topic and click "Run Complete Pipeline" to see it in action!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress & Next Steps -->
+            <div class="progress-section">
+                <div class="progress-header">
+                    <div class="progress-title">Lesson 6 Complete! 🎉</div>
+                    <div class="progress-title">Next: Lesson 7 - AI Agents & Autonomous Systems</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="lessonProgress" style="width: 100%"></div>
+                </div>
+                <div class="progress-stats">
+                    <span>Blog Generator</span>
+                    <span>Image Creation</span>
+                    <span>Social Media</span>
+                    <span>File Handling</span>
+                    <span>API Integration</span>
+                    <span>Security</span>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 32px;">
+                <button class="btn btn-orange" onclick="downloadCompleteContentKit()" style="padding: 15px 30px; font-size: 16px;">
+                    <i class="fas fa-box-open"></i> Download Complete Content Kit
+                </button>
+                <button class="btn btn-secondary" onclick="continueToLesson7()" style="padding: 15px 30px; font-size: 16px; margin-left: 16px;">
+                    Continue to Lesson 7 <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div>Python AI Developer Bootcamp • Lesson 6: AI Content Generator & File Handling</div>
+        <div style="margin-top: 8px; font-size: 12px;">
+            Build Complete Content Systems • Generate Images with DALL-E • Automate Social Media • Master File Handling
+        </div>
+    </footer>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+        const body = document.body;
+
+        // Check for saved theme or prefer-color-scheme
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const savedTheme = localStorage.getItem('theme');
+
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            body.classList.add('dark-mode');
+            themeIcon.className = 'fas fa-sun theme-icon';
+            themeText.textContent = 'Light Mode';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                themeIcon.className = 'fas fa-sun theme-icon';
+                themeText.textContent = 'Light Mode';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.className = 'fas fa-moon theme-icon';
+                themeText.textContent = 'Dark Mode';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Navigation
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+                
+                // Update active sidebar item
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                event.currentTarget.classList.add('active');
+            }
+        }
+
+        // Copy code
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-block');
+            const codeContent = codeBlock.querySelector('.code-content').textContent;
+            
+            navigator.clipboard.writeText(codeContent).then(() => {
+                const originalText = button.textContent;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied';
+                button.style.color = 'var(--ai-green)';
+                
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                    button.style.color = '';
+                }, 2000);
+            });
+        }
+
+        // Generator Tab Switching
+        function switchTab(tabName) {
+            // Update tabs
+            document.querySelectorAll('.generator-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Update content sections
+            document.querySelectorAll('.generator-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Content Generation Functions
+        function generateContentPreview() {
+            const prompt = document.getElementById('contentPrompt').value;
+            const output = document.getElementById('contentOutput');
+            
+            if (!prompt.trim()) {
+                alert('Please enter a topic!');
+                return;
+            }
+            
+            output.innerHTML = '<div class="typing-indicator" style="color: var(--text-tertiary);">AI is generating content...</div>';
+            
+            setTimeout(() => {
+                const examples = [
+                    `📝 **Blog Post Outline: "${prompt}"**\n\n` +
+                    `1. **Introduction:** Why this topic matters today\n` +
+                    `2. **Key Concept 1:** Understanding the basics\n` +
+                    `3. **Key Concept 2:** Practical applications\n` +
+                    `4. **Case Study:** Real-world example\n` +
+                    `5. **Future Trends:** What's next\n` +
+                    `6. **Conclusion:** Key takeaways\n\n` +
+                    `✨ AI has generated a complete outline for your content!`,
+                    
+                    `📱 **Social Media Posts for "${prompt}"**\n\n` +
+                    `**Twitter:**\n` +
+                    `Just explored ${prompt}! 🚀 The future is here. #AI #Tech\n\n` +
+                    `**LinkedIn:**\n` +
+                    `Excited to share insights about ${prompt}. This technology is transforming industries. #Innovation #FutureOfWork\n\n` +
+                    `**Instagram:**\n` +
+                    `Creating amazing content about ${prompt}! ✨ What do you want to know about this topic? #AI #ContentCreation`,
+                    
+                    `🎨 **Image Ideas for "${prompt}"**\n\n` +
+                    `1. **Concept Art:** ${prompt} in a futuristic setting\n` +
+                    `2. **Infographic:** Visual breakdown of key concepts\n` +
+                    `3. **Abstract:** Artistic representation of the theme\n` +
+                    `4. **Practical:** Step-by-step illustration\n\n` +
+                    `💡 Tip: Use descriptive prompts for best DALL-E results!`
+                ];
+                
+                const randomExample = examples[Math.floor(Math.random() * examples.length)];
+                output.textContent = randomExample;
+                
+                // Update progress
+                updateGlobalProgress();
+            }, 1500);
+        }
+
+        function generateBlogOutline() {
+            const topic = document.getElementById('blogTopic').value;
+            const style = document.getElementById('blogStyle').value;
+            const audience = document.getElementById('blogAudience').value;
+            const output = document.getElementById('outlineContent');
+            
+            if (!topic.trim()) {
+                alert('Please enter a blog topic!');
+                return;
+            }
+            
+            output.innerHTML = '<div class="typing-indicator" style="color: var(--text-tertiary);">AI is generating blog outline...</div>';
+            
+            setTimeout(() => {
+                const outlines = {
+                    'tutorial': `📚 **Tutorial: "${topic}"**\n\n` +
+                               `**Title:** The Complete Beginner's Guide to ${topic}\n\n` +
+                               `**Introduction:** Why learning ${topic} is essential for modern developers\n` +
+                               `**What You'll Learn:**\n` +
+                               `• Understanding the basics\n` +
+                               `• Setting up your environment\n` +
+                               `• Step-by-step implementation\n` +
+                               `• Best practices and tips\n` +
+                               `• Common mistakes to avoid\n\n` +
+                               `**Target Audience:** ${audience}\n` +
+                               `**Estimated Reading Time:** 10 minutes`,
+                               
+                    'guide': `📖 **Comprehensive Guide: "${topic}"**\n\n` +
+                            `**Title:** The Ultimate Guide to Mastering ${topic}\n\n` +
+                            `**Sections:**\n` +
+                            `1. Fundamentals and Core Concepts\n` +
+                            `2. Advanced Techniques and Strategies\n` +
+                            `3. Real-World Applications\n` +
+                            `4. Tools and Resources\n` +
+                            `5. Future Developments\n\n` +
+                            `**Depth:** In-depth coverage for ${audience}`,
+                            
+                    'review': `⭐ **Product Review: "${topic}"**\n\n` +
+                             `**Title:** Honest Review: Is ${topic} Worth It?\n\n` +
+                             `**Structure:**\n` +
+                             `• Introduction to the product\n` +
+                             `• Key features and benefits\n` +
+                             `• Pros and cons analysis\n` +
+                             `• User experience review\n` +
+                             `• Alternatives comparison\n` +
+                             `• Final verdict and recommendation`
+                };
+                
+                const outline = outlines[style] || outlines['tutorial'];
+                output.innerHTML = outline;
+                
+                // Activate next pipeline step
+                document.querySelectorAll('.pipeline-step')[1].classList.add('active');
+            }, 2000);
+        }
+
+        function generateFullBlog() {
+            const tone = document.getElementById('blogTone').value;
+            const length = document.getElementById('blogLength').value;
+            const output = document.getElementById('blogContent');
+            
+            output.innerHTML = '<div class="typing-indicator" style="color: var(--text-tertiary);">AI is writing complete blog post...</div>';
+            
+            setTimeout(() => {
+                const blogPosts = {
+                    'professional': `# The Future of AI Content Creation: A Professional Analysis\n\n` +
+                                   `## Introduction\n` +
+                                   `Artificial Intelligence is fundamentally transforming how we create and consume content. As we move further into the digital age, understanding these changes becomes crucial for creators, marketers, and businesses alike.\n\n` +
+                                   `## The Current Landscape\n` +
+                                   `Today's AI content tools can generate articles, create images, and even produce videos with remarkable quality. Platforms like GPT-4 and DALL-E 3 have made sophisticated content creation accessible to everyone.\n\n` +
+                                   `## Key Benefits\n` +
+                                   `• **Efficiency:** Generate content in minutes instead of hours\n` +
+                                   `• **Consistency:** Maintain brand voice across all content\n` +
+                                   `• **Scalability:** Create large volumes of content effortlessly\n` +
+                                   `• **Personalization:** Tailor content to specific audiences\n\n` +
+                                   `## Best Practices\n` +
+                                   `While AI tools are powerful, human oversight remains essential. The most successful content strategies combine AI efficiency with human creativity and strategic thinking.\n\n` +
+                                   `## Conclusion\n` +
+                                   `AI content creation represents not a replacement for human creativity, but rather a powerful augmentation. By embracing these tools while maintaining human oversight, we can achieve unprecedented levels of content quality and volume.`,
+                                   
+                    'conversational': `# Hey There! Let's Talk About AI Content Creation 🤖✨\n\n` +
+                                    `So, you've probably heard about AI writing blogs and creating images, right? It's pretty wild how far we've come! Let me break it down for you in simple terms.\n\n` +
+                                    `## What's the Big Deal?\n` +
+                                    `Imagine having a writing assistant that never gets tired, can research anything in seconds, and writes in whatever style you want. That's basically what AI content tools offer today!\n\n` +
+                                    `## My Experience\n` +
+                                    `I've been testing these tools for months, and here's what I found:\n` +
+                                    `- They're amazing for brainstorming ideas 💡\n` +
+                                    `- The first draft comes together super fast ⚡\n` +
+                                    `- You still need to add your personal touch ✨\n\n` +
+                                    `## Pro Tip\n` +
+                                    `Don't just copy-paste AI content! Use it as a starting point, then add your stories, experiences, and personality. That's what makes content truly engaging.\n\n` +
+                                    `## Final Thoughts\n` +
+                                    `AI isn't here to replace creators – it's here to help us create more, better, and more interesting content. And honestly, that's pretty exciting!`
+                };
+                
+                const blog = blogPosts[tone] || blogPosts['professional'];
+                output.innerHTML = blog;
+                
+                // Activate next pipeline step
+                document.querySelectorAll('.pipeline-step')[2].classList.add('active');
+            }, 3000);
+        }
+
+        function exportBlogPost() {
+            const format = document.getElementById('exportFormat').value;
+            const filename = document.getElementById('exportFilename').value;
+            
+            alert(`✅ Blog post exported successfully!\n\n` +
+                  `Format: ${format.toUpperCase()}\n` +
+                  `Filename: ${filename}.${format === 'markdown' ? 'md' : format}\n` +
+                  `Location: downloads/ folder\n\n` +
+                  `Your content is ready to use! 🎉`);
+            
+            // Activate next pipeline step
+            document.querySelectorAll('.pipeline-step')[3].classList.add('active');
+        }
+
+        function generateImage() {
+            const prompt = document.getElementById('imagePrompt').value;
+            const size = document.getElementById('imageSize').value;
+            const style = document.getElementById('imageStyle').value;
+            const quality = document.getElementById('imageQuality').value;
+            const preview = document.getElementById('imagePreview');
+            
+            if (!prompt.trim()) {
+                alert('Please describe the image you want to create!');
+                return;
+            }
+            
+            preview.innerHTML = '<div class="image-item" style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-tertiary);">' +
+                               '<i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 8px;"></i>' +
+                               '<span>Generating image with DALL-E...</span>' +
+                               '</div>';
+            
+            setTimeout(() => {
+                // Simulated image generation
+                const imageCount = 2;
+                let imagesHTML = '';
+                
+                for (let i = 0; i < imageCount; i++) {
+                    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'];
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    imagesHTML += `
+                        <div class="image-item slide-in" style="animation-delay: ${i * 0.2}s">
+                            <div style="width: 100%; height: 100%; background: ${color}; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 10px; text-align: center;">
+                                <div style="font-size: 12px; margin-bottom: 8px;">Generated Image</div>
+                                <div style="font-size: 10px; opacity: 0.8;">"${prompt.substring(0, 40)}..."</div>
+                                <div style="font-size: 9px; margin-top: 8px; opacity: 0.6;">${size} • ${style} • ${quality}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                preview.innerHTML = imagesHTML;
+                
+                // Show success message
+                setTimeout(() => {
+                    const notification = document.createElement('div');
+                    notification.style.cssText = `
+                        position: fixed;
+                        bottom: 20px;
+                        right: 20px;
+                        background: var(--ai-green);
+                        color: white;
+                        padding: 12px 20px;
+                        border-radius: 8px;
+                        z-index: 1000;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                        animation: slideIn 0.3s ease;
+                    `;
+                    notification.innerHTML = `
+                        <i class="fas fa-check-circle"></i>
+                        <span style="margin-left: 8px;">✅ 2 images generated with DALL-E!</span>
+                    `;
+                    document.body.appendChild(notification);
+                    
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 3000);
+                }, 500);
+                
+                // Activate next pipeline step
+                document.querySelectorAll('.pipeline-step')[2].classList.add('active');
+            }, 2500);
+        }
+
+        function generateSocialMedia() {
+            const topic = document.getElementById('socialTopic').value;
+            const platform = document.getElementById('socialPlatform').value;
+            const output = document.getElementById('socialOutput');
+            
+            if (!topic.trim()) {
+                alert('Please enter a topic!');
+                return;
+            }
+            
+            output.innerHTML = '<div class="typing-indicator" style="color: var(--text-tertiary);">AI is generating social media content...</div>';
+            
+            setTimeout(() => {
+                const platforms = platform === 'all' ? ['Twitter', 'LinkedIn', 'Instagram', 'Facebook'] : [platform];
+                let content = `📱 **Social Media Campaign: "${topic}"**\n\n`;
+                
+                platforms.forEach(p => {
+                    content += `**${p} Posts:**\n`;
+                    
+                    const posts = {
+                        'Twitter': [
+                            `Just explored ${topic}! The possibilities are endless. 🚀 #AI #Innovation`,
+                            `Quick tip about ${topic}: Start with the basics, then scale up! 💡 #TechTips`,
+                            `Discussion: What's your take on ${topic}? Share your thoughts below! 👇 #Community`
+                        ],
+                        'LinkedIn': [
+                            `Professional insight: How ${topic} is transforming our industry. Key takeaways and future predictions. #ProfessionalDevelopment #IndustryTrends`,
+                            `Case study: Implementing ${topic} solutions for business growth. Real results and lessons learned. #BusinessStrategy #SuccessStory`
+                        ],
+                        'Instagram': [
+                            `Creating amazing content about ${topic}! ✨ Swipe to see the process → #CreativeProcess #DigitalArt`,
+                            `Behind the scenes: How we approach ${topic}. 🎨 What should we create next? #ContentCreation #Inspiration`
+                        ],
+                        'Facebook': [
+                            `Community discussion: Let's talk about ${topic}. Share your experiences and questions in the comments! 👥 #CommunityEngagement`,
+                            `In-depth look at ${topic}: From theory to practice. Full article in the comments! 📖 #DeepDive #Learning`
+                        ]
+                    };
+                    
+                    const platformPosts = posts[p] || posts['Twitter'];
+                    platformPosts.forEach((post, i) => {
+                        content += `${i + 1}. ${post}\n`;
+                    });
+                    content += '\n';
+                });
+                
+                content += `\n✨ Generated ${platforms.length * 3} posts across ${platforms.length} platforms!`;
+                output.textContent = content;
+                
+                // Activate next pipeline step
+                document.querySelectorAll('.pipeline-step')[3].classList.add('active');
+            }, 2000);
+        }
+
+        function callAPI() {
+            const api = document.getElementById('apiSelector').value;
+            const param = document.getElementById('apiParam').value;
+            const output = document.getElementById('apiOutput');
+            
+            output.innerHTML = '<div class="typing-indicator" style="color: var(--text-tertiary);">Calling API...</div>';
+            
+            setTimeout(() => {
+                const responses = {
+                    'weather': `🌤️ **Weather in ${param || 'London'}**\n\n` +
+                               `Temperature: ${Math.floor(Math.random() * 15) + 15}°C\n` +
+                               `Conditions: Partly Cloudy\n` +
+                               `Humidity: ${Math.floor(Math.random() * 30) + 50}%\n` +
+                               `Wind: ${Math.floor(Math.random() * 20) + 5} km/h\n` +
+                               `Last Updated: Just now\n\n` +
+                               `📍 Source: Open-Meteo API`,
+                               
+                    'news': `📰 **Top News Headlines**\n\n` +
+                            `1. "AI Breakthrough: New Model Achieves Human-Level Understanding"\n` +
+                            `2. "Tech Giants Announce Major AI Partnership"\n` +
+                            `3. "The Future of Work: How AI is Changing Everything"\n` +
+                            `4. "Ethical AI: New Guidelines Released"\n` +
+                            `5. "Startup Raises $50M for AI Content Platform"\n\n` +
+                            `📊 Source: News API`,
+                            
+                    'quotes': `💬 **Random Inspirational Quote**\n\n` +
+                              `"The best way to predict the future is to invent it."\n\n` +
+                              `– Alan Kay\n\n` +
+                              `🎲 Category: ${['Technology', 'Innovation', 'Future'][Math.floor(Math.random() * 3)]}\n` +
+                              `📚 Source: Quotable API`,
+                              
+                    'facts': `🤔 **Random Fun Fact**\n\n` +
+                             `Did you know? Honey never spoils. Archaeologists have found pots of honey in ancient Egyptian tombs that are over 3,000 years old and still perfectly good to eat.\n\n` +
+                             `🔍 Source: Useless Facts API`,
+                             
+                    'images': `🖼️ **Random Images Available**\n\n` +
+                              `Image 1: https://picsum.photos/id/1/400/300\n` +
+                              `Image 2: https://picsum.photos/id/2/400/300\n` +
+                              `Image 3: https://picsum.photos/id/3/400/300\n\n` +
+                              `📸 Source: Lorem Picsum API\n` +
+                              `💡 Tip: These are placeholder images for development`
+                };
+                
+                const response = responses[api] || responses['weather'];
+                output.textContent = response;
+            }, 1500);
+        }
+
+        function updateAPIInput() {
+            const api = document.getElementById('apiSelector').value;
+            const paramInput = document.getElementById('apiParam');
+            
+            const placeholders = {
+                'weather': 'Enter city name (e.g., London)',
+                'news': 'Enter category (e.g., technology)',
+                'quotes': 'Leave empty for random quote',
+                'facts': 'Leave empty for random fact',
+                'images': 'Enter page number (optional)'
+            };
+            
+            paramInput.placeholder = placeholders[api] || 'Enter parameter';
+            
+            if (api === 'quotes' || api === 'facts') {
+                paramInput.value = '';
+            } else if (api === 'weather') {
+                paramInput.value = 'London';
+            } else if (api === 'news') {
+                paramInput.value = 'technology';
+            }
+        }
+
+        function createSampleFiles() {
+            const explorer = document.getElementById('fileExplorer');
+            
+            explorer.innerHTML = `📁 ai_content/<br>
+├── 📄 blog_posts.json (3 posts)<br>
+├── 📄 generated_images.json (5 images)<br>
+├── 📄 social_schedule.csv (12 posts)<br>
+├── 📁 blog_posts/<br>
+│   ├── 📄 python-ai-tutorial.md (1,245 words)<br>
+│   ├── 📄 machine-learning-guide.md (2,100 words)<br>
+│   └── 📄 future-of-ai.md (1,800 words)<br>
+└── 📁 generated_images/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├── 🖼️ futuristic_city.png (1024x1024)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├── 🖼️ ai_robot_art.png (1024x1024)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;└── 🖼️ digital_landscape.png (1792x1024)<br><br>
+✅ Created sample file structure with AI-generated content!`;
+            
+            alert('📁 Created sample file structure!\n\nAll files are ready in the "ai_content" folder.\n\nYou can now practice file operations with real data.');
+        }
+
+        function downloadFiles() {
+            alert('📥 Downloading all files...\n\nYour content package includes:\n• 3 blog posts in JSON format\n• 5 image records\n• Social media schedule CSV\n• Markdown files for each blog\n\nCheck your downloads folder for "ai_content_package.zip"');
+        }
+
+        function runPipeline() {
+            const topic = document.getElementById('pipelineTopic').value;
+            const output = document.getElementById('pipelineOutput');
+            
+            if (!topic.trim()) {
+                alert('Please enter a topic for the pipeline!');
+                return;
+            }
+            
+            output.innerHTML = '<div class="typing-indicator" style="color: var(--text-tertiary);">🚀 Starting complete content pipeline...</div>';
+            
+            const steps = [
+                `1. 📝 Generating blog outline for "${topic}"...`,
+                `2. ✍️ Writing complete blog post (2000 words)...`,
+                `3. 🎨 Creating featured image with DALL-E...`,
+                `4. 📱 Generating social media posts for 4 platforms...`,
+                `5. 📊 Creating content calendar and schedule...`,
+                `6. 💾 Saving all files (JSON, CSV, Markdown)...`,
+                `7. ✅ Packaging complete content kit...`
+            ];
+            
+            let currentStep = 0;
+            const interval = setInterval(() => {
+                if (currentStep < steps.length) {
+                    output.innerHTML = steps.slice(0, currentStep + 1).join('\n\n');
+                    currentStep++;
+                    
+                    // Update pipeline visualization
+                    if (currentStep <= 5) {
+                        document.querySelectorAll('.pipeline-step')[currentStep]?.classList.add('active');
+                    }
+                } else {
+                    clearInterval(interval);
+                    output.innerHTML = `🎉 **Pipeline Complete!**\n\n` +
+                                      `Successfully generated content for: "${topic}"\n\n` +
+                                      `**Results:**\n` +
+                                      `• 1 complete blog post (2000+ words)\n` +
+                                      `• 3 featured images (DALL-E generated)\n` +
+                                      `• 12 social media posts across 4 platforms\n` +
+                                      `• Content calendar in CSV format\n` +
+                                      `• All files saved to "ai_content/" folder\n` +
+                                      `• Complete package ready for download\n\n` +
+                                      `🚀 Your AI content factory is operational!`;
+                    
+                    // Activate all pipeline steps
+                    document.querySelectorAll('.pipeline-step').forEach(step => {
+                        step.classList.add('active');
+                    });
+                    
+                    // Update progress
+                    updateGlobalProgress(100);
+                }
+            }, 1000);
+        }
+
+        // Interactive functions
+        function runBlogGenerator() {
+            alert(`📝 Blog Generator Demo Running...\n\nThis would:\n1. Generate outline for your topic\n2. Write complete blog post\n3. Save to markdown file\n4. Export in multiple formats\n\nTry the live generator above to see it in action!`);
+        }
+
+        function runImageGenerator() {
+            alert(`🎨 Image Generator Demo Running...\n\nThis would:\n1. Send prompt to DALL-E API\n2. Generate high-quality image\n3. Download and save locally\n4. Create variations if needed\n\nTry the live image generator above!`);
+        }
+
+        function runSocialMediaDemo() {
+            alert(`📱 Social Media Automation Demo Running...\n\nThis would:\n1. Generate platform-specific posts\n2. Create content calendar\n3. Export to CSV for scheduling tools\n4. Schedule posts automatically\n\nTry the social media generator above!`);
+        }
+
+        function runFileHandler() {
+            alert(`📁 File Handler Demo Running...\n\nThis would:\n1. Save blog posts to JSON\n2. Store image metadata\n3. Export social media to CSV\n4. Manage complete content library\n\nTry creating sample files above!`);
+        }
+
+        function runAPIIntegration() {
+            alert(`🌐 API Integration Demo Running...\n\nThis would:\n1. Fetch weather data from API\n2. Get latest news headlines\n3. Combine with AI content\n4. Create context-aware content\n\nTry the API explorer above!`);
+        }
+
+        function showEnvExample() {
+            alert(`🔐 Environment Variables Example:\n\n# .env file contents:\nOPENAI_API_KEY=sk-...your-key-here\nNEWS_API_KEY=abc123...\nDEFAULT_MODEL=gpt-4\nMAX_TOKENS=2000\nLOG_LEVEL=INFO\n\n# Python code to load:\nimport os\nfrom dotenv import load_dotenv\n\nload_dotenv()\napi_key = os.getenv("OPENAI_API_KEY")\n\n✅ Never commit .env files to GitHub!\n✅ Add .env to .gitignore`);
+        }
+
+        function runCompletePipeline() {
+            alert(`🏭 Complete Pipeline Demo Running...\n\nThis would execute the entire process:\n1. Blog generation → 2. Image creation → 3. Social media → 4. File export\n\nTry the pipeline runner above to see the complete flow!`);
+        }
+
+        // Resource links
+        function openBlogGenerator() {
+            scrollToSection('blog-generator');
+        }
+
+        function openImageGenerator() {
+            scrollToSection('image-generator');
+        }
+
+        function openFileExplorer() {
+            scrollToSection('file-handling');
+        }
+
+        function openAPIExplorer() {
+            scrollToSection('api-calls');
+        }
+
+        function openDALLE() {
+            window.open('https://platform.openai.com/docs/guides/images', '_blank');
+        }
+
+        function openFreeAPIs() {
+            window.open('https://github.com/public-apis/public-apis', '_blank');
+        }
+
+        // Download functions
+        function downloadContentKit() {
+            const content = `# AI Content Generator Kit - Complete Package
+
+## What's Included:
+1. **Blog Post Generator** (blog_generator.py)
+   - Generate outlines and full posts
+   - Multiple writing styles
+   - Export to Markdown/HTML/PDF
+
+2. **Image Generator** (image_generator.py)
+   - DALL-E 3 integration
+   - Multiple sizes and styles
+   - Image editing and variations
+
+3. **Social Media Automator** (social_media.py)
+   - Platform-specific content
+   - Content calendar generation
+   - CSV export for scheduling tools
+
+4. **File Manager** (file_manager.py)
+   - JSON storage for blog posts
+   - CSV export for social media
+   - Complete content library
+
+5. **API Integrator** (api_integrator.py)
+   - Weather API integration
+   - News API integration
+   - Context-aware content
+
+6. **Configuration Manager** (config.py)
+   - Environment variables
+   - Security best practices
+   - .env template
+
+7. **Complete Pipeline** (pipeline.py)
+   - End-to-end automation
+   - All components connected
+   - Ready for production
+
+## Quick Start:
+1. Install: pip install openai python-dotenv requests pillow
+2. Add your OpenAI API key to .env
+3. Run: python pipeline.py --topic "Your Topic Here"
+4. Watch as AI creates complete content package!
+
+## Example Topics to Try:
+- "The Future of AI in Education"
+- "Sustainable Technology Solutions"
+- "Digital Marketing Trends 2024"
+- "Python Programming Best Practices"
+
+## Free APIs Included:
+• Weather data
+• News headlines
+• Inspirational quotes
+• Random images (placeholders)
+
+## Next Steps:
+1. Customize the templates for your brand
+2. Add more AI providers (Anthropic, Cohere)
+3. Integrate with your CMS
+4. Schedule automated content creation
+5. Add analytics and performance tracking
+
+Happy content creating! 🚀`;
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ai_content_kit.zip.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('📦 Content Kit Downloaded!\n\nIncludes all code from this lesson plus:\n✅ Complete file structure\n✅ Working examples\n✅ Configuration templates\n✅ Documentation\n\nReady to start creating!');
+        }
+
+        function downloadCompleteContentKit() {
+            alert('🎯 Complete AI Content Factory Downloaded!\n\nYou now have:\n• Blog Post Generator with multiple styles\n• DALL-E Image Creator with editing tools\n• Social Media Automator for all platforms\n• File Management System (JSON/CSV)\n• API Integrations for real-time data\n• Complete Pipeline for end-to-end automation\n• Security and configuration management\n\nYour AI content factory is ready to launch! 🚀');
+            
+            // Update progress
+            updateGlobalProgress(100);
+        }
+
+        // Progress tracking
+        function updateGlobalProgress(amount = 10) {
+            const progressBar = document.getElementById('globalProgress');
+            const progressPercent = document.getElementById('progressPercent');
+            
+            // Increment progress
+            let current = parseInt(progressBar.style.width) || 42;
+            current = Math.min(100, current + amount);
+            
+            progressBar.style.width = `${current}%`;
+            progressPercent.textContent = `${current}%`;
+        }
+
+        function continueToLesson7() {
+            updateGlobalProgress();
+            alert('🚀 Moving to Lesson 7: AI Agents & Autonomous Systems\n\nTopics:\n• Building AI agents that make decisions\n• Autonomous content creation pipelines\n• Multi-agent collaboration systems\n• Real-time monitoring and optimization\n• Advanced prompt engineering');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial progress
+            const progressBar = document.getElementById('globalProgress');
+            progressBar.style.width = '42%';
+            document.getElementById('progressPercent').textContent = '42%';
+            
+            // Set up floating animation
+            const elements = document.querySelectorAll('.floating-element');
+            elements.forEach((element, index) => {
+                element.style.animationDelay = `${-index * 5}s`;
+            });
+            
+            // Set up pipeline steps
+            document.querySelectorAll('.pipeline-step')[0].classList.add('active');
+        });
+    </script>
+</body>
+</html>

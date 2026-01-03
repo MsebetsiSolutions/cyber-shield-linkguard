@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 3: Data Types & OOP for AI | Python AI Bootcamp</title>
+    <style>
+        /* OpenAI/ChatGPT Theme Variables */
+        :root {
+            /* Light Theme - ChatGPT Style */
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F7F7F8;
+            --bg-tertiary: #ECECF1;
+            --border-color: #E5E5E5;
+            --text-primary: #000000;
+            --text-secondary: #565869;
+            --text-tertiary: #8E8EA0;
+            --ai-green: #10A37F;
+            --ai-green-hover: #1A7F64;
+            --ai-purple: #5436DA;
+            --user-blue: #0066CC;
+            --code-bg: #F6F6F6;
+            --code-text: #000000;
+            --highlight-bg: rgba(16, 163, 127, 0.1);
+            --sidebar-bg: #F7F7F8;
+            --message-ai-bg: #F7F7F8;
+            --message-user-bg: #FFFFFF;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        /* Dark Theme - ChatGPT Style */
+        .dark-mode {
+            --bg-primary: #343541;
+            --bg-secondary: #444654;
+            --bg-tertiary: #202123;
+            --border-color: #565869;
+            --text-primary: #FFFFFF;
+            --text-secondary: #C5C5D2;
+            --text-tertiary: #8E8EA0;
+            --ai-green: #10A37F;
+            --ai-green-hover: #1A7F64;
+            --ai-purple: #5436DA;
+            --user-blue: #0066CC;
+            --code-bg: #0D1117;
+            --code-text: #FFFFFF;
+            --highlight-bg: rgba(16, 163, 127, 0.2);
+            --sidebar-bg: #202123;
+            --message-ai-bg: #444654;
+            --message-user-bg: #343541;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Segoe UI', Arial, sans-serif;
+            transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-primary);
+            box-shadow: 0 2px 10px var(--shadow-color);
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .theme-icon {
+            font-size: 18px;
+        }
+
+        /* Header - ChatGPT Style */
+        .header {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--ai-green), var(--ai-purple));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .lesson-tag {
+            background: var(--ai-green);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Main Layout - ChatGPT Style */
+        .main-layout {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Sidebar - ChatGPT Left Panel Style */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            position: sticky;
+            top: 70px;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            margin-bottom: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .sidebar-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .sidebar-item.active {
+            background: var(--highlight-bg);
+            color: var(--ai-green);
+            font-weight: 600;
+        }
+
+        .sidebar-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content - ChatGPT Chat Style */
+        .main-content {
+            flex: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Message Bubbles - ChatGPT Style */
+        .message {
+            display: flex;
+            gap: 16px;
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .message:last-child {
+            border-bottom: none;
+        }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .avatar.ai {
+            background: var(--ai-green);
+            color: white;
+        }
+
+        .avatar.user {
+            background: var(--user-blue);
+            color: white;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .message-author {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .message-text {
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .message-text p {
+            margin-bottom: 12px;
+        }
+
+        .message-text ul, .message-text ol {
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .message-text li {
+            margin-bottom: 6px;
+        }
+
+        /* Interactive Code Blocks - ChatGPT Style */
+        .code-block {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border: 1px solid var(--border-color);
+            position: relative;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .code-language {
+            font-weight: 600;
+            color: var(--ai-green);
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .code-action {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .code-action:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .code-content {
+            color: var(--code-text);
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        .code-line {
+            padding: 2px 0;
+        }
+
+        .code-line.highlight {
+            background: var(--highlight-bg);
+            border-left: 3px solid var(--ai-green);
+            padding-left: 8px;
+        }
+
+        /* Interactive Notebook Cells */
+        .notebook-cell {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .cell-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .cell-type {
+            background: var(--ai-green);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .cell-content {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .cell-output {
+            background: var(--code-bg);
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 12px;
+            border: 1px solid var(--border-color);
+            color: var(--code-text);
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        /* Interactive AI Assistant */
+        .ai-assistant {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .assistant-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .assistant-avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--ai-green), var(--ai-purple));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .assistant-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .assistant-message {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .assistant-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 60px;
+            margin-bottom: 12px;
+        }
+
+        .assistant-input:focus {
+            outline: none;
+            border-color: var(--ai-green);
+            box-shadow: 0 0 0 2px rgba(16, 163, 127, 0.1);
+        }
+
+        .assistant-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--ai-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--ai-green-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+        }
+
+        /* Progress Indicators */
+        .progress-section {
+            margin: 24px 0;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .progress-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--ai-green), var(--ai-purple));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        /* Visualization Container */
+        .viz-container {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .viz-canvas {
+            width: 100%;
+            height: 300px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'SFMono-Regular', monospace;
+            color: var(--text-secondary);
+        }
+
+        /* Interactive Exercise */
+        .exercise {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .exercise-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .exercise-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--ai-green);
+            color: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .exercise-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .exercise-content {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .exercise-code {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border: 1px solid var(--border-color);
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 14px;
+            color: var(--code-text);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+            }
+            
+            .header {
+                padding: 12px 16px;
+            }
+            
+            .main-content {
+                padding: 16px;
+            }
+            
+            .message {
+                padding: 16px 0;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes typing {
+            0% { width: 0; }
+            100% { width: 100%; }
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 8px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--text-tertiary);
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        .typing-dot:nth-child(3) { animation-delay: 0s; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Theme Toggle Button -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon theme-icon" id="themeIcon"></i>
+        <span id="themeText">Dark Mode</span>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">🤖</div>
+        <div class="header-title">Python AI Developer Bootcamp</div>
+        <div class="lesson-tag">Lesson 3</div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Topics</div>
+                <div class="sidebar-item active" onclick="scrollToSection('data-types')">
+                    <i class="fas fa-database sidebar-icon"></i>
+                    <span>Data Types & Variables</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('ai-problem-solving')">
+                    <i class="fas fa-robot sidebar-icon"></i>
+                    <span>AI-Assisted Debugging</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('control-flow')">
+                    <i class="fas fa-code-branch sidebar-icon"></i>
+                    <span>Control Flow & Loops</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('oop-ai')">
+                    <i class="fas fa-cube sidebar-icon"></i>
+                    <span>OOP for AI Systems</span>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('notebooks')">
+                    <i class="fas fa-book sidebar-icon"></i>
+                    <span>Interactive Notebooks</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Resources</div>
+                <div class="sidebar-item" onclick="openResource('colab')">
+                    <i class="fab fa-google sidebar-icon"></i>
+                    <span>Google Colab</span>
+                </div>
+                <div class="sidebar-item" onclick="openResource('chatgpt')">
+                    <i class="fas fa-comment sidebar-icon"></i>
+                    <span>ChatGPT Debugger</span>
+                </div>
+                <div class="sidebar-item" onclick="openResource('docs')">
+                    <i class="fas fa-book-open sidebar-icon"></i>
+                    <span>Python Docs</span>
+                </div>
+                <div class="sidebar-item" onclick="downloadMaterials()">
+                    <i class="fas fa-download sidebar-icon"></i>
+                    <span>Download Materials</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Progress</div>
+                <div class="progress-section" style="margin: 0; padding: 0; border: none; background: transparent;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="globalProgress" style="width: 21%"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <span>Lesson 3/15</span>
+                        <span id="progressPercent">21%</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Welcome Message -->
+            <div class="message fade-in">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Now</span>
+                    </div>
+                    <div class="message-text">
+                        <h1>🎯 Lesson 3: Data Types & OOP for AI Systems</h1>
+                        <p>Welcome back! In this lesson, you'll master Python data types while building AI systems. We'll combine traditional Python concepts with modern AI workflows.</p>
+                        
+                        <div class="ai-assistant">
+                            <div class="assistant-header">
+                                <div class="assistant-avatar">🤖</div>
+                                <div class="assistant-title">Today's AI Project</div>
+                            </div>
+                            <div class="assistant-message">
+                                <strong>Build an AI-Powered Data Analyzer</strong><br>
+                                You'll create a system that processes AI conversation logs, extracts insights using OOP, and visualizes patterns—exactly like OpenAI analyzes ChatGPT data.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Types & Variables -->
+            <div class="message fade-in" id="data-types">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 1</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>📊 Data Types for AI Systems</h2>
+                        <p>In AI development, data types aren't just theory—they're tools for building intelligent systems.</p>
+                        
+                        <div class="notebook-cell">
+                            <div class="cell-header">
+                                <span class="cell-type">Code</span>
+                                <span>AI Data Structures in Practice</span>
+                            </div>
+                            <div class="cell-content">
+                                # How OpenAI structures AI data<br>
+                                <span class="code-line highlight"># Variables store AI configurations</span><br>
+                                model_name = "gpt-4"<br>
+                                temperature = 0.7<br>
+                                max_tokens = 500<br><br>
+                                
+                                <span class="code-line highlight"># Lists for conversation history</span><br>
+                                conversation_history = [<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;{"role": "system", "content": "You are a helpful assistant."},<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;{"role": "user", "content": "Explain AI data types"},<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;{"role": "assistant", "content": "AI uses lists, dicts, and objects..."}<br>
+                                ]<br><br>
+                                
+                                <span class="code-line highlight"># Dictionaries for API responses</span><br>
+                                ai_response = {<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;"id": "chatcmpl-123",<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;"object": "chat.completion",<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;"choices": [{"message": {"content": "Hello!"}}],<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;"usage": {"prompt_tokens": 10, "completion_tokens": 5}<br>
+                                }
+                            </div>
+                            <div class="cell-output">
+                                <strong>Output:</strong><br>
+                                This is how real AI systems structure data. Notice the hierarchical dictionary structure—it's optimized for JSON APIs.
+                            </div>
+                        </div>
+
+                        <!-- Interactive Exercise -->
+                        <div class="exercise">
+                            <div class="exercise-header">
+                                <div class="exercise-icon">💡</div>
+                                <div class="exercise-title">Try It: AI Data Structure</div>
+                            </div>
+                            <div class="exercise-content">
+                                Create a dictionary that represents an AI training dataset. Include lists of prompts and responses.
+                            </div>
+                            <div class="exercise-code" id="exercise1Code" contenteditable="true" spellcheck="false">
+# Your code here - click to edit<br>
+training_data = {<br>
+    "prompts": [],  # Add prompt strings here<br>
+    "responses": []  # Add response strings here<br>
+}
+                            </div>
+                            <div class="assistant-actions">
+                                <button class="btn btn-secondary" onclick="checkExercise(1)">Check with AI</button>
+                                <button class="btn btn-primary" onclick="runExercise(1)">Run Code</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI-Assisted Problem Solving -->
+            <div class="message fade-in" id="ai-problem-solving">
+                <div class="avatar user">You</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Student</span>
+                        <span class="message-time">Question</span>
+                    </div>
+                    <div class="message-text">
+                        <p>How do AI engineers actually debug their code? Do they use ChatGPT for help?</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="message fade-in">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 2</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>🔍 AI-Assisted Debugging (Like OpenAI Engineers)</h2>
+                        <p>Yes! Professional AI developers use AI assistants daily. Here's the workflow:</p>
+                        
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="explainWithAI(this)">
+                                        <i class="fas fa-robot"></i> Explain
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line"># Buggy code that OpenAI engineers might debug with AI</span><br>
+                                <span class="code-line">def process_ai_conversations(conversations):</span><br>
+                                <span class="code-line">    results = []</span><br>
+                                <span class="code-line">    for conv in conversations:</span><br>
+                                <span class="code-line">        # Bug: Trying to access non-existent key</span><br>
+                                <span class="code-line">        user_message = conv["user_message"]  # Should be "content"</span><br>
+                                <span class="code-line">        ai_response = conv["ai_response"]    # Should be "response"</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # Process the conversation</span><br>
+                                <span class="code-line">        processed = f"User: {user_message}\\nAI: {ai_response}"</span><br>
+                                <span class="code-line">        results.append(processed)</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    return results</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line"># Sample data</span><br>
+                                <span class="code-line">conversations = [</span><br>
+                                <span class="code-line">    {"role": "user", "content": "Hello"},</span><br>
+                                <span class="code-line">    {"role": "assistant", "response": "Hi there!"}</span><br>
+                                <span class="code-line">]</span>
+                            </div>
+                        </div>
+
+                        <!-- AI Debugging Assistant -->
+                        <div class="ai-assistant">
+                            <div class="assistant-header">
+                                <div class="assistant-avatar">🤖</div>
+                                <div class="assistant-title">AI Debugging Assistant</div>
+                            </div>
+                            <div class="assistant-message">
+                                I found 2 bugs in your code:
+                                1. KeyError: 'user_message' doesn't exist, should be 'content'
+                                2. Inconsistent data structure between user and assistant messages
+                            </div>
+                            <textarea class="assistant-input" id="debugQuestion" placeholder="Ask AI to explain the bug or suggest fixes..."></textarea>
+                            <div class="assistant-actions">
+                                <button class="btn btn-secondary" onclick="clearDebug()">Clear</button>
+                                <button class="btn btn-primary" onclick="askAIDebug()">
+                                    <i class="fas fa-paper-plane"></i> Ask AI
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="viz-container">
+                            <div class="viz-canvas" id="debugViz">
+                                <!-- Debug visualization will be drawn here -->
+                                <div style="text-align: center;">
+                                    <i class="fas fa-bug" style="font-size: 48px; color: var(--text-tertiary); margin-bottom: 16px;"></i>
+                                    <div>AI Debugging Visualization</div>
+                                    <div style="font-size: 12px; margin-top: 8px;">Click "Show Debug Flow" to visualize</div>
+                                </div>
+                            </div>
+                            <div style="text-align: center; margin-top: 16px;">
+                                <button class="btn btn-secondary" onclick="showDebugFlow()">
+                                    <i class="fas fa-project-diagram"></i> Show Debug Flow
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Flow & Loops -->
+            <div class="message fade-in" id="control-flow">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 3</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>🔄 Control Flow for AI Decision Making</h2>
+                        <p>AI systems make decisions using if/else and process data with loops. Here's how it works in production:</p>
+                        
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="runVisualization(this)">
+                                        <i class="fas fa-chart-line"></i> Visualize
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line"># AI Response Router - Used in ChatGPT</span><br>
+                                <span class="code-line">def route_ai_response(user_input, confidence_score):</span><br>
+                                <span class="code-line">    """Route user queries to appropriate handlers"""</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line highlight">    # If/else for decision making</span><br>
+                                <span class="code-line">    if confidence_score > 0.8:</span><br>
+                                <span class="code-line">        return generate_confident_response(user_input)</span><br>
+                                <span class="code-line">    elif confidence_score > 0.5:</span><br>
+                                <span class="code-line">        return generate_cautious_response(user_input)</span><br>
+                                <span class="code-line">    else:</span><br>
+                                <span class="code-line">        return ask_for_clarification(user_input)</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line highlight">    # While loop for conversation flow</span><br>
+                                <span class="code-line">def continue_conversation():</span><br>
+                                <span class="code-line">    conversation_active = True</span><br>
+                                <span class="code-line">    message_count = 0</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    while conversation_active and message_count < 10:</span><br>
+                                <span class="code-line">        user_input = get_user_input()</span><br>
+                                <span class="code-line">        response = generate_ai_response(user_input)</span><br>
+                                <span class="code-line">        display_response(response)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        message_count += 1</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        if user_input.lower() == "quit":</span><br>
+                                <span class="code-line">            conversation_active = False</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    return message_count</span>
+                            </div>
+                        </div>
+
+                        <!-- Data Visualization -->
+                        <div class="viz-container">
+                            <div class="viz-canvas" id="loopViz">
+                                <!-- Loop visualization will be drawn here -->
+                            </div>
+                            <div style="text-align: center; margin-top: 16px;">
+                                <button class="btn btn-primary" onclick="generateLoopVisualization()">
+                                    <i class="fas fa-play"></i> Generate Loop Visualization
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Interactive Exercise -->
+                        <div class="exercise">
+                            <div class="exercise-header">
+                                <div class="exercise-icon">🎯</div>
+                                <div class="exercise-title">Challenge: Build an AI Conversation Loop</div>
+                            </div>
+                            <div class="exercise-content">
+                                Create a while loop that simulates an AI conversation. Track message types and implement exit conditions.
+                            </div>
+                            <div class="exercise-code" id="exercise2Code" contenteditable="true" spellcheck="false">
+# Build your AI conversation loop here<br>
+conversation_history = []<br>
+active = True<br>
+<br>
+while active:<br>
+    # Your code here<br>
+    pass
+                            </div>
+                            <div class="assistant-actions">
+                                <button class="btn btn-secondary" onclick="checkExercise(2)">Get AI Feedback</button>
+                                <button class="btn btn-primary" onclick="runExercise(2)">Test Loop</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OOP for AI Systems -->
+            <div class="message fade-in" id="oop-ai">
+                <div class="avatar user">You</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Student</span>
+                        <span class="message-time">Question</span>
+                    </div>
+                    <div class="message-text">
+                        <p>How is Object-Oriented Programming used in real AI systems like ChatGPT?</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="message fade-in">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 4</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>🏗️ OOP for AI Systems (OpenAI Architecture)</h2>
+                        <p>OpenAI uses OOP to organize complex AI systems. Here's a simplified version of their architecture:</p>
+                        
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button class="code-action" onclick="runOOPExample()">
+                                        <i class="fas fa-play"></i> Run
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <span class="code-line"># OpenAI-style AI System Architecture</span><br>
+                                <span class="code-line">class AIConversation:</span><br>
+                                <span class="code-line">    """Represents a single AI conversation"""</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def __init__(self, system_prompt="You are a helpful assistant."):</span><br>
+                                <span class="code-line">        self.messages = [{"role": "system", "content": system_prompt}]</span><br>
+                                <span class="code-line">        self.token_count = 0</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">    def add_message(self, role, content):</span><br>
+                                <span class="code-line">        """Add a message to the conversation"""</span><br>
+                                <span class="code-line">        self.messages.append({"role": role, "content": content})</span><br>
+                                <span class="code-line">        self.token_count += len(content.split())  # Simplified token count</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">    def get_conversation_history(self):</span><br>
+                                <span class="code-line">        """Return formatted conversation history"""</span><br>
+                                <span class="code-line">        return self.messages</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def __str__(self):</span><br>
+                                <span class="code-line">        return f"AIConversation with {len(self.messages)} messages ({self.token_count} tokens)"</span><br>
+                                <span class="code-line"></span><br>
+                                <span class="code-line highlight">class AIAssistant:</span><br>
+                                <span class="code-line">    """Main AI assistant class (like ChatGPT's backend)"""</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def __init__(self, model="gpt-3.5-turbo"):</span><br>
+                                <span class="code-line">        self.model = model</span><br>
+                                <span class="code-line">        self.conversations = []</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">    def start_new_conversation(self, system_prompt=None):</span><br>
+                                <span class="code-line">        """Start a new conversation"""</span><br>
+                                <span class="code-line">        conv = AIConversation(system_prompt or "You are a helpful assistant.")</span><br>
+                                <span class="code-line">        self.conversations.append(conv)</span><br>
+                                <span class="code-line">        return conv</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def respond_to_message(self, conversation, user_message):</span><br>
+                                <span class="code-line">        """Process user message and generate AI response"""</span><br>
+                                <span class="code-line">        conversation.add_message("user", user_message)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        # Simulate AI response generation</span><br>
+                                <span class="code-line">        ai_response = self._generate_response(user_message)</span><br>
+                                <span class="code-line">        conversation.add_message("assistant", ai_response)</span><br>
+                                <span class="code-line">        </span><br>
+                                <span class="code-line">        return ai_response</span><br>
+                                <span class="code-line">    </span><br>
+                                <span class="code-line">    def _generate_response(self, user_message):</span><br>
+                                <span class="code-line">        """Simulate AI response generation"""</span><br>
+                                <span class="code-line">        responses = [</span><br>
+                                <span class="code-line">            f"I understand you're asking: {user_message}",</span><br>
+                                <span class="code-line">            "That's an interesting question!",</span><br>
+                                <span class="code-line">            "Let me help you with that.",</span><br>
+                                <span class="code-line">            "Based on your query, here's what I think..."</span><br>
+                                <span class="code-line">        ]</span><br>
+                                <span class="code-line">        return random.choice(responses)</span>
+                            </div>
+                        </div>
+
+                        <!-- Live OOP Demo -->
+                        <div class="ai-assistant">
+                            <div class="assistant-header">
+                                <div class="assistant-avatar">⚡</div>
+                                <div class="assistant-title">Live OOP Demonstration</div>
+                            </div>
+                            <div class="assistant-message">
+                                <strong>Try the AI system you just learned:</strong><br>
+                                Create an AI assistant, start conversations, and send messages using OOP principles.
+                            </div>
+                            <div class="exercise-code" id="oopDemoCode" contenteditable="true" spellcheck="false">
+# Try the OOP system yourself<br>
+# 1. Create an AI assistant<br>
+assistant = AIAssistant("gpt-4")<br>
+<br>
+# 2. Start a new conversation<br>
+conversation = assistant.start_new_conversation()<br>
+<br>
+# 3. Send a message<br>
+response = assistant.respond_to_message(conversation, "Hello AI!")<br>
+print(f"AI Response: {response}")<br>
+print(f"Conversation: {conversation}")
+                            </div>
+                            <div class="assistant-actions">
+                                <button class="btn btn-secondary" onclick="clearOOPDemo()">Clear</button>
+                                <button class="btn btn-primary" onclick="runOOPDemo()">
+                                    <i class="fas fa-play"></i> Run OOP Demo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Notebooks -->
+            <div class="message fade-in" id="notebooks">
+                <div class="avatar ai">AI</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">AI Instructor</span>
+                        <span class="message-time">Topic 5</span>
+                    </div>
+                    <div class="message-text">
+                        <h2>📓 Interactive Notebooks for AI Development</h2>
+                        <p>AI researchers use Jupyter/Colab notebooks for experimentation. Here's how to use them effectively:</p>
+                        
+                        <div class="notebook-cell">
+                            <div class="cell-header">
+                                <span class="cell-type">Colab</span>
+                                <span>AI Data Analysis Notebook</span>
+                            </div>
+                            <div class="cell-content">
+                                # Import AI libraries (as done in Colab)<br>
+                                import openai<br>
+                                import pandas as pd<br>
+                                import matplotlib.pyplot as plt<br>
+                                import seaborn as sns<br>
+                                <br>
+                                # Load AI conversation data<br>
+                                conversations = [<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;{"user": "What is Python?", "ai": "Python is a programming language..."},<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;{"user": "Explain AI", "ai": "AI is artificial intelligence..."},<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;{"user": "How to code?", "ai": "Start with basics..."}<br>
+                                ]<br>
+                                <br>
+                                # Convert to DataFrame for analysis<br>
+                                df = pd.DataFrame(conversations)<br>
+                                <br>
+                                # Analyze conversation patterns<br>
+                                df['user_length'] = df['user'].apply(len)<br>
+                                df['ai_length'] = df['ai'].apply(len)<br>
+                                <br>
+                                # Display results<br>
+                                print(df.describe())
+                            </div>
+                            <div class="cell-output" id="notebookOutput">
+                                <div class="typing-indicator" id="notebookTyping">
+                                    <div class="typing-dot"></div>
+                                    <div class="typing-dot"></div>
+                                    <div class="typing-dot"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="progress-section">
+                            <div class="progress-header">
+                                <div class="progress-title">Lesson Progress</div>
+                                <div class="progress-title" id="lessonProgress">0/5 Topics</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="lessonProgressBar" style="width: 20%"></div>
+                            </div>
+                            <div class="progress-stats">
+                                <span>Data Types</span>
+                                <span>AI Debugging</span>
+                                <span>Control Flow</span>
+                                <span>OOP Systems</span>
+                                <span>Notebooks</span>
+                            </div>
+                        </div>
+
+                        <!-- Next Steps -->
+                        <div class="exercise">
+                            <div class="exercise-header">
+                                <div class="exercise-icon">🚀</div>
+                                <div class="exercise-title">Your AI Development Environment</div>
+                            </div>
+                            <div class="exercise-content">
+                                <p>Set up your environment for AI development:</p>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 16px 0;">
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <i class="fab fa-google" style="color: var(--ai-green); margin-bottom: 8px;"></i>
+                                        <div style="font-weight: 600;">Google Colab</div>
+                                        <div style="font-size: 12px; color: var(--text-tertiary);">Free cloud notebooks</div>
+                                    </div>
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <i class="fas fa-laptop-code" style="color: var(--ai-purple); margin-bottom: 8px;"></i>
+                                        <div style="font-weight: 600;">VS Code</div>
+                                        <div style="font-size: 12px; color: var(--text-tertiary);">Local development</div>
+                                    </div>
+                                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                                        <i class="fas fa-robot" style="color: var(--user-blue); margin-bottom: 8px;"></i>
+                                        <div style="font-weight: 600;">AI Assistant</div>
+                                        <div style="font-size: 12px; color: var(--text-tertiary);">ChatGPT for debugging</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="assistant-actions">
+                                <button class="btn btn-primary" onclick="downloadLessonMaterials()">
+                                    <i class="fas fa-download"></i> Download Lesson Files
+                                </button>
+                                <button class="btn btn-secondary" onclick="continueToNext()">
+                                    Continue to Lesson 4 →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div>Python AI Developer Bootcamp • Lesson 3: Data Types & OOP for AI Systems</div>
+        <div style="margin-top: 8px; font-size: 12px;">
+            Build Like OpenAI • Learn by Building • AI-First Approach
+        </div>
+    </footer>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+        const body = document.body;
+
+        // Check for saved theme or prefer-color-scheme
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const savedTheme = localStorage.getItem('theme');
+
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            body.classList.add('dark-mode');
+            themeIcon.className = 'fas fa-sun theme-icon';
+            themeText.textContent = 'Light Mode';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                themeIcon.className = 'fas fa-sun theme-icon';
+                themeText.textContent = 'Light Mode';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.className = 'fas fa-moon theme-icon';
+                themeText.textContent = 'Dark Mode';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Scroll to sections
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+                
+                // Update active sidebar item
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                event.currentTarget.classList.add('active');
+            }
+        }
+
+        // Open resources
+        function openResource(type) {
+            const urls = {
+                'colab': 'https://colab.research.google.com',
+                'chatgpt': 'https://chat.openai.com',
+                'docs': 'https://docs.python.org/3/'
+            };
+            
+            if (urls[type]) {
+                window.open(urls[type], '_blank');
+            }
+        }
+
+        // Copy code
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-block');
+            const codeContent = codeBlock.querySelector('.code-content').textContent;
+            
+            navigator.clipboard.writeText(codeContent).then(() => {
+                const originalText = button.textContent;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied';
+                button.style.color = 'var(--ai-green)';
+                
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                    button.style.color = '';
+                }, 2000);
+            });
+        }
+
+        // Explain with AI
+        function explainWithAI(button) {
+            const codeBlock = button.closest('.code-block');
+            const codeContent = codeBlock.querySelector('.code-content').textContent;
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Thinking';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                const explanations = [
+                    "This code demonstrates AI conversation handling. The `route_ai_response` function uses if/else to decide how confident the AI should be in its response.",
+                    "The while loop simulates a conversation flow, limiting to 10 messages for safety. This is similar to how ChatGPT manages conversation length.",
+                    "Notice the use of dictionaries for structured data - this is essential for working with AI APIs which typically use JSON."
+                ];
+                
+                const randomExplanation = explanations[Math.floor(Math.random() * explanations.length)];
+                
+                alert(`🤖 AI Explanation:\n\n${randomExplanation}\n\nKey Concepts:\n• Control flow for decision making\n• Loops for repetitive tasks\n• Data structures for organization`);
+                
+                button.innerHTML = '<i class="fas fa-robot"></i> Explain';
+                button.disabled = false;
+            }, 1500);
+        }
+
+        // Run exercise
+        function runExercise(exerciseNum) {
+            const codeElement = document.getElementById(`exercise${exerciseNum}Code`);
+            const code = codeElement.textContent;
+            
+            // Simulate code execution
+            const results = [
+                "✅ Exercise completed successfully!\n\nOutput:\ntraining_data = {\n  'prompts': ['Hello', 'How are you?'],\n  'responses': ['Hi there!', 'I'm doing well, thanks!']\n}",
+                "✅ Conversation loop running...\n\nSimulated conversation:\nMessage 1: User: Hello\nMessage 2: AI: Hi there!\nMessage 3: User: How are you?\nMessage 4: AI: I'm doing well!\n\nTotal messages: 4"
+            ];
+            
+            alert(results[exerciseNum - 1]);
+            
+            // Update progress
+            updateProgress();
+        }
+
+        // Check exercise with AI
+        function checkExercise(exerciseNum) {
+            const codeElement = document.getElementById(`exercise${exerciseNum}Code`);
+            const code = codeElement.textContent;
+            
+            const feedback = [
+                "🤖 AI Feedback:\n\nGood start! Consider adding actual prompt-response pairs to make it more realistic. Try:\n\nprompts = ['What is AI?', 'Explain Python']\nresponses = ['AI is...', 'Python is...']",
+                "🤖 AI Feedback:\n\nRemember to add:\n1. Input collection\n2. Response generation\n3. Exit condition\n\nExample:\nuser_input = input('You: ')\nif user_input.lower() == 'quit':\n    active = False"
+            ];
+            
+            alert(feedback[exerciseNum - 1]);
+        }
+
+        // AI Debugging
+        function askAIDebug() {
+            const question = document.getElementById('debugQuestion').value;
+            const responses = [
+                "🤖 AI Debugging Assistant:\n\nThe main issue is inconsistent dictionary keys. In AI systems, we standardize keys like 'role' and 'content'. Try:\n\nfor conv in conversations:\n    if conv['role'] == 'user':\n        message = conv['content']\n    else:\n        message = conv['response']",
+                "🤖 AI Debugging Assistant:\n\nAdd error handling:\n\ntry:\n    user_message = conv.get('content', conv.get('user_message', ''))\nexcept KeyError:\n    print('Missing message key')\n    continue",
+                "🤖 AI Debugging Assistant:\n\nConsider using a Conversation class to enforce consistent structure:\n\nclass Conversation:\n    def __init__(self, role, content):\n        self.role = role\n        self.content = content"
+            ];
+            
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            alert(randomResponse);
+            
+            // Clear input
+            document.getElementById('debugQuestion').value = '';
+        }
+
+        function clearDebug() {
+            document.getElementById('debugQuestion').value = '';
+        }
+
+        // Visualization functions
+        function showDebugFlow() {
+            const canvas = document.getElementById('debugViz');
+            canvas.innerHTML = `
+                <div style="padding: 20px; text-align: left;">
+                    <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                        <div style="width: 12px; height: 12px; background: #FF6B6B; border-radius: 50%; margin-right: 8px;"></div>
+                        <span>Bug Detected: KeyError on 'user_message'</span>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                        <div style="width: 12px; height: 12px; background: #4ECDC4; border-radius: 50%; margin-right: 8px;"></div>
+                        <span>AI Suggestion: Use 'content' key instead</span>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                        <div style="width: 12px; height: 12px; background: #45B7D1; border-radius: 50%; margin-right: 8px;"></div>
+                        <span>Fix Applied: Updated dictionary access</span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 12px; height: 12px; background: #96CEB4; border-radius: 50%; margin-right: 8px;"></div>
+                        <span>Result: Code runs without errors ✅</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateLoopVisualization() {
+            const canvas = document.getElementById('loopViz');
+            canvas.innerHTML = `
+                <canvas id="loopChart" width="600" height="280"></canvas>
+            `;
+            
+            setTimeout(() => {
+                // Simulate chart generation
+                const ctx = document.getElementById('loopChart').getContext('2d');
+                
+                // Create a simple visualization
+                ctx.fillStyle = body.classList.contains('dark-mode') ? '#444654' : '#F7F7F8';
+                ctx.fillRect(0, 0, 600, 280);
+                
+                // Draw loop visualization
+                ctx.strokeStyle = '#10A37F';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(300, 140, 80, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Draw iteration points
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    const x = 300 + Math.cos(angle) * 80;
+                    const y = 140 + Math.sin(angle) * 80;
+                    
+                    ctx.fillStyle = i % 2 === 0 ? '#5436DA' : '#0066CC';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Draw iteration number
+                    ctx.fillStyle = body.classList.contains('dark-mode') ? '#FFFFFF' : '#000000';
+                    ctx.font = '12px Arial';
+                    ctx.fillText(`Iter ${i + 1}`, x - 10, y - 15);
+                }
+                
+                // Add title
+                ctx.fillStyle = body.classList.contains('dark-mode') ? '#FFFFFF' : '#000000';
+                ctx.font = '16px Arial';
+                ctx.fillText('Loop Iteration Visualization', 200, 40);
+                ctx.font = '12px Arial';
+                ctx.fillText('Blue: User Input | Purple: AI Response', 200, 60);
+            }, 100);
+        }
+
+        // OOP Functions
+        function runOOPExample() {
+            alert(`
+🏗️ OOP in Action:
+
+1. AIConversation class manages conversation state
+2. AIAssistant class orchestrates multiple conversations
+3. Encapsulation keeps data and behavior together
+4. Methods provide clean interfaces
+
+This architecture scales to handle thousands of simultaneous conversations like in ChatGPT!
+            `);
+        }
+
+        function runOOPDemo() {
+            const code = document.getElementById('oopDemoCode').textContent;
+            
+            // Simulate OOP demo execution
+            alert(`
+🚀 OOP Demo Output:
+
+Creating AI Assistant with model: gpt-4
+Starting new conversation...
+AI Response: "I understand you're asking: Hello AI!"
+Conversation: AIConversation with 3 messages (5 tokens)
+
+✅ Success! You've created:
+• 1 AI Assistant instance
+• 1 Conversation instance
+• 2 messages exchanged
+• Proper OOP structure maintained
+            `);
+        }
+
+        function clearOOPDemo() {
+            document.getElementById('oopDemoCode').textContent = `# Try the OOP system yourself
+# 1. Create an AI assistant
+assistant = AIAssistant("gpt-4")
+
+# 2. Start a new conversation
+conversation = assistant.start_new_conversation()
+
+# 3. Send a message
+response = assistant.respond_to_message(conversation, "Hello AI!")
+print(f"AI Response: {response}")
+print(f"Conversation: {conversation}")`;
+        }
+
+        // Notebook simulation
+        function simulateNotebookOutput() {
+            const output = document.getElementById('notebookOutput');
+            const typing = document.getElementById('notebookTyping');
+            
+            typing.style.display = 'flex';
+            
+            setTimeout(() => {
+                typing.style.display = 'none';
+                output.innerHTML = `
+                    <strong>Notebook Output:</strong><br><br>
+                    <div style="font-family: 'SFMono-Regular', monospace; font-size: 12px;">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;user_length&nbsp;&nbsp;&nbsp;&nbsp;ai_length<br>
+                        count&nbsp;&nbsp;&nbsp;&nbsp;3.000000&nbsp;&nbsp;&nbsp;&nbsp;3.000000<br>
+                        mean &nbsp;&nbsp;&nbsp;&nbsp;10.333333&nbsp;&nbsp;&nbsp;&nbsp;36.333333<br>
+                        std&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.507571&nbsp;&nbsp;&nbsp;&nbsp;9.073772<br>
+                        min &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.000000&nbsp;&nbsp;&nbsp;&nbsp;30.000000<br>
+                        25%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7.000000&nbsp;&nbsp;&nbsp;&nbsp;32.000000<br>
+                        50%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.000000&nbsp;&nbsp;&nbsp;&nbsp;33.000000<br>
+                        75%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12.000000&nbsp;&nbsp;&nbsp;&nbsp;40.000000<br>
+                        max &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;17.000000&nbsp;&nbsp;&nbsp;&nbsp;46.000000
+                    </div><br>
+                    <strong>Insight:</strong> AI responses are typically 3-4x longer than user messages.
+                `;
+                
+                // Update progress
+                updateProgress();
+            }, 2000);
+        }
+
+        // Initialize notebook simulation
+        setTimeout(simulateNotebookOutput, 1000);
+
+        // Progress tracking
+        let completedTopics = 0;
+        
+        function updateProgress() {
+            completedTopics = Math.min(5, completedTopics + 1);
+            
+            const progressBar = document.getElementById('lessonProgressBar');
+            const progressText = document.getElementById('lessonProgress');
+            
+            const percentage = (completedTopics / 5) * 100;
+            progressBar.style.width = `${percentage}%`;
+            progressText.textContent = `${completedTopics}/5 Topics`;
+            
+            // Update global progress
+            const globalProgress = document.getElementById('globalProgress');
+            const progressPercent = document.getElementById('progressPercent');
+            const newGlobal = 21 + (completedTopics * 2); // 21% base + 2% per topic
+            globalProgress.style.width = `${newGlobal}%`;
+            progressPercent.textContent = `${newGlobal}%`;
+        }
+
+        // Initialize progress
+        updateProgress();
+
+        // Download functions
+        function downloadMaterials() {
+            const content = `# Lesson 3: Data Types & OOP for AI Systems
+
+## Python Files:
+1. ai_conversation.py - OOP conversation system
+2. data_analyzer.py - AI data analysis with loops
+3. notebook_demo.ipynb - Jupyter notebook example
+
+## Resources:
+• Google Colab: https://colab.research.google.com
+• Python Documentation: https://docs.python.org/3/
+• OpenAI API Docs: https://platform.openai.com/docs
+
+## Key Concepts Covered:
+✓ Variables, Lists, Dictionaries for AI
+✓ AI-Assisted Debugging Workflow
+✓ Control Flow & Loops with Visualization
+✓ Object-Oriented Programming for AI Systems
+✓ Interactive Notebooks for AI Development
+
+Happy coding! 🚀`;
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'lesson3_materials.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('📥 Lesson materials downloaded!');
+        }
+
+        function downloadLessonMaterials() {
+            // Create a zip file simulation
+            alert('📦 Downloading lesson materials...\n\nIncluded:\n• Complete Python examples\n• Jupyter notebook templates\n• AI debugging cheatsheet\n• OOP design patterns\n\nCheck your downloads folder!');
+            
+            // Simulate download
+            updateProgress();
+        }
+
+        function continueToNext() {
+            if (completedTopics < 5) {
+                alert('📚 Complete all 5 topics before moving to Lesson 4!');
+                return;
+            }
+            
+            alert('🎉 Excellent work! Lesson 3 complete.\n\nMoving to Lesson 4: Advanced AI Functions & APIs\n\nTopics:\n• Building production AI functions\n• API integration patterns\n• Error handling for AI systems');
+            
+            // Update global progress to next lesson
+            const globalProgress = document.getElementById('globalProgress');
+            globalProgress.style.width = '28%';
+            document.getElementById('progressPercent').textContent = '28%';
+        }
+
+        // Initialize visualizations
+        generateLoopVisualization();
+    </script>
+</body>
+</html>
