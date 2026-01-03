@@ -1,0 +1,2656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 11: Python AI in Manufacturing | Industrial Automation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Enhanced Industrial Manufacturing Theme Variables */
+        :root {
+            /* Light Theme - Industrial Style */
+            --bg-primary: #0A0E17;
+            --bg-secondary: #0F172A;
+            --bg-tertiary: #1E293B;
+            --bg-quaternary: #334155;
+            --border-color: #475569;
+            --border-light: #64748B;
+            --text-primary: #F1F5F9;
+            --text-secondary: #CBD5E1;
+            --text-tertiary: #94A3B8;
+            --industrial-blue: #3B82F6;
+            --industrial-blue-light: rgba(59, 130, 246, 0.1);
+            --industrial-blue-hover: #2563EB;
+            --automation-orange: #F97316;
+            --robotics-yellow: #EAB308;
+            --predictive-green: #10B981;
+            --quality-red: #EF4444;
+            --iot-purple: #8B5CF6;
+            --plc-teal: #06D6A0;
+            --manufacturing-gray: #6B7280;
+            --safety-yellow: #FBBF24;
+            --code-bg: #0D1117;
+            --code-text: #E2E8F0;
+            --highlight-bg: rgba(59, 130, 246, 0.15);
+            --sidebar-bg: #0F172A;
+            --message-ai-bg: #1E293B;
+            --message-user-bg: #0F172A;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --shadow-heavy: rgba(0, 0, 0, 0.5);
+            --success-green: #10B981;
+            --warning-orange: #F97316;
+            --error-red: #EF4444;
+            --industrial-gradient: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            --automation-gradient: linear-gradient(135deg, #F97316, #EAB308);
+            --robotics-gradient: linear-gradient(135deg, #EAB308, #F97316);
+            --predictive-gradient: linear-gradient(135deg, #10B981, #06D6A0);
+            --quality-gradient: linear-gradient(135deg, #EF4444, #F97316);
+            --iot-gradient: linear-gradient(135deg, #8B5CF6, #3B82F6);
+            --exam-gradient: linear-gradient(135deg, #8B5CF6, #EF4444);
+        }
+
+        .dark-mode {
+            --bg-primary: #030712;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1F2937;
+            --bg-quaternary: #374151;
+            --border-color: #4B5563;
+            --border-light: #6B7280;
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-tertiary: #9CA3AF;
+            --industrial-blue: #60A5FA;
+            --industrial-blue-light: rgba(96, 165, 250, 0.15);
+            --industrial-blue-hover: #3B82F6;
+            --automation-orange: #FB923C;
+            --robotics-yellow: #FBBF24;
+            --predictive-green: #34D399;
+            --quality-red: #F87171;
+            --iot-purple: #A78BFA;
+            --plc-teal: #34D399;
+            --manufacturing-gray: #9CA3AF;
+            --safety-yellow: #FCD34D;
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Header Styles */
+        .header {
+            background: var(--bg-secondary);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 32px;
+            background: var(--industrial-gradient);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .lesson-tag {
+            background: var(--industrial-gradient);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 90px;
+            right: 24px;
+            background: var(--bg-tertiary);
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            z-index: 100;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .theme-icon {
+            font-size: 16px;
+            color: var(--industrial-blue);
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            min-height: calc(100vh - 82px);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+            position: sticky;
+            top: 82px;
+            height: calc(100vh - 82px);
+        }
+
+        .sidebar-section {
+            margin-bottom: 32px;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .sidebar-item.active {
+            background: var(--industrial-blue-light);
+            border-left: 3px solid var(--industrial-blue);
+        }
+
+        .sidebar-icon {
+            color: var(--text-tertiary);
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Content Badges */
+        .content-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: auto;
+            border: 1px solid transparent;
+        }
+
+        .badge-exam {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--iot-purple);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 24px;
+            max-width: calc(100% - 280px);
+        }
+
+        /* Message Styles */
+        .message {
+            background: var(--message-ai-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 16px;
+            border: 1px solid var(--border-color);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .message-author {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .message-time {
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+
+        .message-tags {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .message-text h1,
+        .message-text h2,
+        .message-text h3 {
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .message-text p {
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+        }
+
+        /* Learning Objectives */
+        .learning-objectives {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .objective-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding: 8px 0;
+        }
+
+        .objective-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--industrial-blue);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* Progress Tracker */
+        .progress-tracker {
+            display: flex;
+            justify-content: space-between;
+            margin: 24px 0;
+            position: relative;
+        }
+
+        .progress-tracker::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            background: var(--border-color);
+            z-index: 1;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        .progress-step span {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.completed span {
+            background: var(--industrial-blue);
+            border-color: var(--industrial-blue);
+            color: white;
+        }
+
+        .progress-step.active span {
+            background: var(--industrial-blue-light);
+            border-color: var(--industrial-blue);
+            color: var(--industrial-blue);
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--code-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .code-header {
+            background: var(--bg-tertiary);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .code-language {
+            font-family: 'Cascadia Code', 'Courier New', monospace;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .code-action {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .code-action:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .code-content {
+            padding: 16px;
+            overflow-x: auto;
+            font-family: 'Cascadia Code', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--code-text);
+        }
+
+        .code-line {
+            display: inline-block;
+            min-height: 20px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--industrial-gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-quaternary);
+        }
+
+        .btn-exam {
+            background: var(--exam-gradient);
+            color: white;
+        }
+
+        /* Exam Section */
+        .exam-section {
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 20px 0;
+            border: 2px solid var(--iot-purple);
+        }
+
+        .console-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .console-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .console-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--predictive-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Question Cards */
+        .question-card {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .question-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .option:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-light);
+        }
+
+        .option.selected {
+            background: var(--industrial-blue-light);
+            border-color: var(--industrial-blue);
+        }
+
+        .option-indicator {
+            width: 24px;
+            height: 24px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .option.selected .option-indicator {
+            background: var(--industrial-blue);
+            color: white;
+        }
+
+        /* Score Display */
+        .score-display {
+            background: var(--industrial-gradient);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            color: white;
+            margin: 20px 0;
+        }
+
+        .score-number {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .score-text {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-secondary);
+            padding: 32px 24px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 40px;
+        }
+
+        /* Industrial Background Animation */
+        .industrial-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.03;
+            overflow: hidden;
+        }
+
+        .factory-particle {
+            position: absolute;
+            background: var(--industrial-gradient);
+            border-radius: 50%;
+            animation: factoryFloat 25s infinite linear;
+            filter: blur(0.5px);
+        }
+
+        .conveyor-line {
+            position: absolute;
+            width: 4px;
+            background: linear-gradient(90deg, transparent, var(--automation-orange), transparent);
+            opacity: 0.1;
+            transform-origin: center;
+            animation: conveyorMove 20s infinite linear;
+        }
+
+        .robot-arm {
+            position: absolute;
+            width: 80px;
+            height: 2px;
+            background: var(--robotics-yellow);
+            border-radius: 2px;
+            animation: robotMove 10s infinite ease-in-out;
+            opacity: 0.05;
+        }
+
+        .data-stream {
+            position: absolute;
+            color: var(--industrial-blue);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            opacity: 0.1;
+            animation: dataFlow 15s infinite linear;
+        }
+
+        @keyframes factoryFloat {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(150px, 30px) rotate(90deg);
+            }
+            50% {
+                transform: translate(30px, 150px) rotate(180deg);
+            }
+            75% {
+                transform: translate(-80px, 30px) rotate(270deg);
+            }
+        }
+
+        @keyframes conveyorMove {
+            0% {
+                transform: translateX(-100%) rotate(0deg);
+            }
+            100% {
+                transform: translateX(100vw) rotate(360deg);
+            }
+        }
+
+        @keyframes robotMove {
+            0%, 100% {
+                transform: rotate(-45deg) scale(1);
+                opacity: 0.05;
+            }
+            50% {
+                transform: rotate(45deg) scale(1.2);
+                opacity: 0.1;
+            }
+        }
+
+        @keyframes dataFlow {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.1;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Manufacturing Specific Styles */
+        .avatar.industrial {
+            background: var(--industrial-gradient);
+            color: white;
+        }
+
+        .avatar.automation {
+            background: var(--automation-gradient);
+            color: white;
+        }
+
+        .avatar.robotics {
+            background: var(--robotics-gradient);
+            color: white;
+        }
+
+        .avatar.predictive {
+            background: var(--predictive-gradient);
+            color: white;
+        }
+
+        .avatar.quality {
+            background: var(--quality-gradient);
+            color: white;
+        }
+
+        .avatar.iot {
+            background: var(--iot-gradient);
+            color: white;
+        }
+
+        .avatar.exam {
+            background: var(--exam-gradient);
+            color: white;
+        }
+
+        .content-badge.badge-industrial {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--industrial-blue);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .content-badge.badge-automation {
+            background: rgba(249, 115, 22, 0.1);
+            color: var(--automation-orange);
+            border-color: rgba(249, 115, 22, 0.3);
+        }
+
+        .content-badge.badge-robotics {
+            background: rgba(234, 179, 8, 0.1);
+            color: var(--robotics-yellow);
+            border-color: rgba(234, 179, 8, 0.3);
+        }
+
+        .content-badge.badge-predictive {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--predictive-green);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .content-badge.badge-quality {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--quality-red);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .content-badge.badge-iot {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--iot-purple);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-industrial {
+            background: var(--industrial-gradient);
+            color: white;
+        }
+
+        .btn-industrial:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .factory-visualizer {
+            background: var(--industrial-gradient);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            color: white;
+        }
+
+        .production-node {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 8px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* KPI Dashboard */
+        .kpi-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .kpi-card {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid var(--industrial-blue);
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--industrial-blue);
+            margin-bottom: 8px;
+        }
+
+        .kpi-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .kpi-trend {
+            font-size: 12px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .trend-up {
+            color: var(--predictive-green);
+        }
+
+        .trend-down {
+            color: var(--quality-red);
+        }
+
+        /* Production Line Visualization */
+        .production-line {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            border: 2px solid var(--automation-orange);
+        }
+
+        .line-stage {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 16px 0;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+
+        .stage-number {
+            width: 36px;
+            height: 36px;
+            background: var(--industrial-blue);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Quality Control Matrix */
+        .quality-matrix {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .quality-cell {
+            background: rgba(16, 185, 129, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-family: 'Cascadia Code', monospace;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .cell-defect {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        /* Sensor Grid */
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .sensor-card {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            border: 2px solid var(--iot-purple);
+        }
+
+        .sensor-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--iot-purple);
+            margin: 8px 0;
+        }
+
+        /* Robot Programming Interface */
+        .robot-interface {
+            background: var(--robotics-gradient);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            color: white;
+        }
+
+        .robot-command {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 8px 0;
+            font-family: 'Cascadia Code', monospace;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1024px) {
+            .main-layout {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                top: auto;
+            }
+            
+            .main-content {
+                max-width: 100%;
+            }
+            
+            .kpi-dashboard {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-wrap: wrap;
+            }
+            
+            .lesson-tag {
+                margin-top: 8px;
+                margin-left: 0;
+            }
+            
+            .kpi-dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .message {
+                flex-direction: column;
+            }
+            
+            .avatar {
+                align-self: flex-start;
+            }
+            
+            .theme-toggle {
+                position: static;
+                margin: 16px auto;
+                width: fit-content;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Industrial Background -->
+    <div class="industrial-background" id="industrialBackground"></div>
+
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon theme-icon" id="themeIcon"></i>
+        <span id="themeText">Light Mode</span>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">🏭</div>
+        <div class="header-title">Python AI Developer Bootcamp</div>
+        <div class="lesson-tag">Lesson 11: AI in Manufacturing</div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-industry"></i>
+                    Lesson 11 Topics
+                </div>
+                <div style="height: 4px; background: var(--bg-tertiary); border-radius: 2px; margin: 8px 0;">
+                    <div style="height: 100%; background: var(--industrial-gradient); border-radius: 2px; width: 40%;" id="lessonProgress"></div>
+                </div>
+                <div class="sidebar-item active" onclick="scrollToSection('manufacturing-intro')">
+                    <i class="fas fa-industry sidebar-icon"></i>
+                    <span>Industry 4.0 Revolution</span>
+                    <div class="content-badge badge-industrial">Core</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('python-automation')">
+                    <i class="fas fa-robot sidebar-icon"></i>
+                    <span>Python Factory Automation</span>
+                    <div class="content-badge badge-automation">Auto</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('robotics-ai')">
+                    <i class="fas fa-robot sidebar-icon"></i>
+                    <span>Robotics & AI Control</span>
+                    <div class="content-badge badge-robotics">Robot</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('predictive-maintenance')">
+                    <i class="fas fa-tools sidebar-icon"></i>
+                    <span>Predictive Maintenance</span>
+                    <div class="content-badge badge-predictive">AI</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('quality-control')">
+                    <i class="fas fa-clipboard-check sidebar-icon"></i>
+                    <span>AI Quality Control</span>
+                    <div class="content-badge badge-quality">QC</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('production-optimization')">
+                    <i class="fas fa-chart-line sidebar-icon"></i>
+                    <span>Production Optimization</span>
+                    <div class="content-badge badge-iot">IoT</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('final-exam')">
+                    <i class="fas fa-graduation-cap sidebar-icon"></i>
+                    <span>Final Exam (25 Questions)</span>
+                    <div class="content-badge badge-exam">Test</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-tools"></i>
+                    Factory Tools
+                </div>
+                <div class="sidebar-item" onclick="runProductionSimulator()">
+                    <i class="fas fa-cogs sidebar-icon"></i>
+                    <span>Production Line Simulator</span>
+                </div>
+                <div class="sidebar-item" onclick="runPredictiveMaintenanceDemo()">
+                    <i class="fas fa-brain sidebar-icon"></i>
+                    <span>Predictive Maintenance AI</span>
+                </div>
+                <div class="sidebar-item" onclick="runQualityControlDemo()">
+                    <i class="fas fa-search sidebar-icon"></i>
+                    <span>Quality Control Analyzer</span>
+                </div>
+                <div class="sidebar-item" onclick="runRobotProgramming()">
+                    <i class="fas fa-robot sidebar-icon"></i>
+                    <span>Robot Programming IDE</span>
+                </div>
+                <div class="sidebar-item" onclick="startExam()">
+                    <i class="fas fa-play sidebar-icon"></i>
+                    <span>Start Manufacturing Exam</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-download"></i>
+                    Industrial Resources
+                </div>
+                <div class="sidebar-item" onclick="downloadManufacturingGuide()">
+                    <i class="fas fa-file-alt sidebar-icon"></i>
+                    <span>Industry 4.0 Guide</span>
+                </div>
+                <div class="sidebar-item" onclick="downloadPythonAutomation()">
+                    <i class="fas fa-robot sidebar-icon"></i>
+                    <span>Python Automation Scripts</span>
+                </div>
+                <div class="sidebar-item" onclick="downloadPredictiveModels()">
+                    <i class="fas fa-brain sidebar-icon"></i>
+                    <span>Predictive Maintenance Models</span>
+                </div>
+                <div class="sidebar-item" onclick="showAnswerKey()">
+                    <i class="fas fa-key sidebar-icon"></i>
+                    <span>Exam Answer Key</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-chart-line"></i>
+                    Factory Dashboard
+                </div>
+                <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 12px;">
+                    <div class="kpi-dashboard" style="grid-template-columns: 1fr; gap: 8px;">
+                        <div class="kpi-card">
+                            <div class="kpi-value">94.7%</div>
+                            <div class="kpi-label">Production Efficiency</div>
+                            <div class="kpi-trend trend-up">
+                                <i class="fas fa-arrow-up"></i> 2.3% from last month
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-value">99.2%</div>
+                            <div class="kpi-label">Quality Pass Rate</div>
+                            <div class="kpi-trend trend-up">
+                                <i class="fas fa-arrow-up"></i> 0.8% from last week
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-value">23d</div>
+                            <div class="kpi-label">Mean Time Between Failures</div>
+                            <div class="kpi-trend trend-up">
+                                <i class="fas fa-arrow-up"></i> 5 days improvement
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; text-align: center;">
+                        <span style="font-size: 11px; color: var(--text-tertiary);">Live Factory Data • Updated 5 min ago</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Introduction -->
+            <div class="message fade-in" id="manufacturing-intro">
+                <div class="avatar industrial">🏭</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Industrial AI Engineer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-industrial">Industry 4.0</div>
+                            <div class="content-badge badge-automation">Smart Factory</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h1>🏭 Lesson 11: Python AI in Manufacturing Industry</h1>
+                        <p>Welcome to Industry 4.0! Master Python applications in factory automation, robotics, predictive maintenance, quality control, and production optimization.</p>
+                        
+                        <!-- Learning Objectives -->
+                        <div class="learning-objectives">
+                            <h3 style="color: var(--text-primary); margin-bottom: 20px;">🎯 Learning Objectives</h3>
+                            <div class="objective-item">
+                                <div class="objective-icon">1</div>
+                                <div>
+                                    <strong>Factory Automation</strong>: Automate production lines with Python
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">2</div>
+                                <div>
+                                    <strong>Robotics Programming</strong>: Control industrial robots with Python AI
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">3</div>
+                                <div>
+                                    <strong>Predictive Maintenance</strong>: Prevent failures with ML models
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">4</div>
+                                <div>
+                                    <strong>AI Quality Control</strong>: Computer vision for defect detection
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">5</div>
+                                <div>
+                                    <strong>Production Optimization</strong>: Maximize efficiency with data analytics
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Python Factory Automation -->
+            <div class="message fade-in" id="python-automation">
+                <div class="avatar automation">⚙️</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Automation Engineer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-automation">Python Automation</div>
+                            <div class="content-badge badge-iot">Smart Factory</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>⚙️ Python Factory Automation Systems</h2>
+                        <p>Transform traditional factories into smart factories using Python automation. Control PLCs, manage production lines, and optimize workflows with Python scripts.</p>
+                        
+                        <div class="production-line">
+                            <h3>🏭 Smart Production Line</h3>
+                            <div class="line-stage">
+                                <div class="stage-number">1</div>
+                                <div>
+                                    <strong>Raw Material Input</strong><br>
+                                    Automated inventory management with RFID sensors
+                                </div>
+                            </div>
+                            <div class="line-stage">
+                                <div class="stage-number">2</div>
+                                <div>
+                                    <strong>CNC Machining</strong><br>
+                                    Python-controlled precision machining with quality checks
+                                </div>
+                            </div>
+                            <div class="line-stage">
+                                <div class="stage-number">3</div>
+                                <div>
+                                    <strong>Assembly Robots</strong><br>
+                                    Collaborative robots (cobots) with AI vision
+                                </div>
+                            </div>
+                            <div class="line-stage">
+                                <div class="stage-number">4</div>
+                                <div>
+                                    <strong>Quality Inspection</strong><br>
+                                    Computer vision for 100% quality control
+                                </div>
+                            </div>
+                            <div class="line-stage">
+                                <div class="stage-number">5</div>
+                                <div>
+                                    <strong>Packaging & Shipping</strong><br>
+                                    Automated packaging with real-time tracking
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    <button class="code-action" onclick="runFactorySimulation()"><i class="fas fa-play"></i> Run</button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+<pre><code>import pandas as pd
+import numpy as np
+from datetime import datetime
+import time
+
+class SmartFactory:
+    def __init__(self, production_rate=100):
+        self.production_rate = production_rate
+        self.defect_rate = 0.05  # 5% defect rate initially
+        self.machine_health = 95  # 95% machine health
+        self.energy_consumption = 1000  # kWh
+        self.products_produced = 0
+        
+    def optimize_production(self):
+        """Optimize production line using AI algorithms"""
+        # Analyze production data
+        data = self.collect_sensor_data()
+        
+        # Machine learning optimization
+        optimized_rate = self.production_rate * 1.15  # 15% improvement
+        
+        # Energy optimization
+        new_energy = self.energy_consumption * 0.9  # 10% reduction
+        
+        return {
+            'optimized_rate': optimized_rate,
+            'energy_savings': self.energy_consumption - new_energy,
+            'timestamp': datetime.now()
+        }
+    
+    def collect_sensor_data(self):
+        """Collect IoT sensor data from factory floor"""
+        return {
+            'temperature': np.random.uniform(20, 30),
+            'vibration': np.random.uniform(0.1, 2.0),
+            'pressure': np.random.uniform(100, 150),
+            'humidity': np.random.uniform(40, 60)
+        }
+
+# Factory simulation
+factory = SmartFactory()
+print("🏭 Smart Factory Automation System")
+print("=" * 40)
+print(f"Production Rate: {factory.production_rate} units/hour")
+print(f"Machine Health: {factory.machine_health}%")
+print(f"Defect Rate: {factory.defect_rate * 100}%")
+
+# Run optimization
+optimization = factory.optimize_production()
+print(f"\n✨ AI Optimization Results:")
+print(f"New Production Rate: {optimization['optimized_rate']:.0f} units/hour")
+print(f"Energy Savings: {optimization['energy_savings']:.0f} kWh")
+print(f"Estimated Annual Savings: ${optimization['energy_savings'] * 24 * 365 * 0.12:.0f}")</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="kpi-dashboard">
+                            <div class="kpi-card">
+                                <div class="kpi-value">98.5%</div>
+                                <div class="kpi-label">Automation Efficiency</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i> 3.2% from baseline
+                                </div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-value">45%</div>
+                                <div class="kpi-label">Labor Reduction</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i> Automated processes
+                                </div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-value">22%</div>
+                                <div class="kpi-label">Energy Savings</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i> Smart optimization
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Robotics & AI Control -->
+            <div class="message fade-in" id="robotics-ai">
+                <div class="avatar robotics">🤖</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Robotics Engineer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-robotics">Industrial Robots</div>
+                            <div class="content-badge badge-industrial">AI Control</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🤖 Robotics & AI Control Systems</h2>
+                        <p>Program industrial robots with Python for precision manufacturing. Implement collaborative robots (cobots), computer vision integration, and real-time control systems.</p>
+                        
+                        <div class="robot-interface">
+                            <h3>🤖 Industrial Robot Programming</h3>
+                            <div class="robot-command">ROBOT.INITIALIZE(safety_check=True)</div>
+                            <div class="robot-command">ROBOT.SET_VELOCITY(max_speed=2.5)</div>
+                            <div class="robot-command">ROBOT.ENABLE_COLLISION_DETECTION()</div>
+                            <div class="robot-command">ROBOT.PATH_PLANNING(optimization="shortest_path")</div>
+                            <div class="robot-command">ROBOT.EXECUTE_TASK("welding_task_001")</div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    <button class="code-action" onclick="runRobotControlDemo()"><i class="fas fa-play"></i> Run</button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+<pre><code>import numpy as np
+from scipy.spatial.transform import Rotation
+import matplotlib.pyplot as plt
+
+class IndustrialRobot:
+    def __init__(self, robot_type="6DOF"):
+        self.robot_type = robot_type
+        self.joints = 6 if robot_type == "6DOF" else 4
+        self.position = np.array([0, 0, 0])  # x, y, z coordinates
+        self.orientation = Rotation.identity()
+        self.safety_radius = 2.0  # meters
+        self.max_speed = 2.5  # m/s
+        
+    def move_to(self, target_position, speed_factor=0.5):
+        """Move robot to target position with collision avoidance"""
+        # Calculate path
+        direction = target_position - self.position
+        distance = np.linalg.norm(direction)
+        
+        # Safety check
+        if distance > self.safety_radius * 2:
+            print("⚠️ Warning: Target outside safety radius")
+            return False
+            
+        # AI path planning
+        path = self.calculate_optimal_path(target_position)
+        
+        # Execute movement
+        for point in path:
+            self.position = point
+            print(f"🤖 Moving to: {point}")
+            time.sleep(0.1)  # Simulate movement time
+            
+        return True
+    
+    def calculate_optimal_path(self, target):
+        """AI-powered path planning with obstacle avoidance"""
+        # Implement RRT (Rapidly-exploring Random Tree) algorithm
+        path_points = []
+        current = self.position.copy()
+        
+        # Simplified path planning
+        steps = 10
+        for i in range(steps + 1):
+            t = i / steps
+            point = self.position * (1 - t) + target * t
+            path_points.append(point)
+            
+        return path_points
+    
+    def perform_welding(self, points):
+        """Perform precision welding on given points"""
+        print(f"🔧 Starting welding operation on {len(points)} points")
+        for idx, point in enumerate(points):
+            self.move_to(point)
+            print(f"  Welding point {idx + 1} at {point}")
+        print("✅ Welding complete - Quality check passed")
+
+# Initialize robot
+robot = IndustrialRobot("6DOF")
+print("🤖 Industrial Robot Control System")
+print("=" * 40)
+print(f"Robot Type: {robot.robot_type}")
+print(f"Joints: {robot.joints}")
+print(f"Max Speed: {robot.max_speed} m/s")
+
+# Test movement
+target = np.array([1.5, 0.8, 0.5])
+success = robot.move_to(target)
+if success:
+    print(f"✅ Robot successfully moved to target position")
+    
+# Welding task
+welding_points = [
+    np.array([1.0, 0.5, 0.2]),
+    np.array([1.2, 0.6, 0.2]),
+    np.array([1.4, 0.7, 0.2])
+]
+robot.perform_welding(welding_points)</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="sensor-grid">
+                            <div class="sensor-card">
+                                <div class="sensor-icon">📊</div>
+                                <div class="sensor-value">0.01mm</div>
+                                <div class="sensor-label">Position Accuracy</div>
+                            </div>
+                            <div class="sensor-card">
+                                <div class="sensor-icon">⚡</div>
+                                <div class="sensor-value">99.9%</div>
+                                <div class="sensor-label">Uptime</div>
+                            </div>
+                            <div class="sensor-card">
+                                <div class="sensor-icon">🔄</div>
+                                <div class="sensor-value">0.5s</div>
+                                <div class="sensor-label">Cycle Time</div>
+                            </div>
+                            <div class="sensor-card">
+                                <div class="sensor-icon">🎯</div>
+                                <div class="sensor-value">100%</div>
+                                <div class="sensor-label">Task Success</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Predictive Maintenance -->
+            <div class="message fade-in" id="predictive-maintenance">
+                <div class="avatar predictive">🔧</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Maintenance AI</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-predictive">Predictive AI</div>
+                            <div class="content-badge badge-iot">Sensor Data</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🔧 Predictive Maintenance with Machine Learning</h2>
+                        <p>Predict equipment failures before they happen using sensor data and ML models. Reduce downtime, optimize maintenance schedules, and save millions in unplanned repairs.</p>
+                        
+                        <div class="factory-visualizer">
+                            <h3>🏭 Equipment Health Monitoring</h3>
+                            <div class="production-node">
+                                <strong>CNC Machine #1</strong> | Health: 92% | Next Maintenance: 14 days
+                            </div>
+                            <div class="production-node">
+                                <strong>Robotic Arm #3</strong> | Health: 85% | Alert: Bearing wear detected
+                            </div>
+                            <div class="production-node">
+                                <strong>Conveyor System</strong> | Health: 96% | Optimal performance
+                            </div>
+                            <div class="production-node">
+                                <strong>Hydraulic Press</strong> | Health: 78% | Warning: Seal replacement needed
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    <button class="code-action" onclick="runPredictiveModel()"><i class="fas fa-play"></i> Run</button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+<pre><code>import pandas as pd
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+import warnings
+warnings.filterwarnings('ignore')
+
+class PredictiveMaintenance:
+    def __init__(self):
+        self.models = {}
+        self.sensor_data = pd.DataFrame()
+        self.failure_threshold = 0.85
+        
+    def collect_equipment_data(self, num_samples=1000):
+        """Simulate equipment sensor data collection"""
+        np.random.seed(42)
+        
+        # Generate synthetic sensor data
+        data = {
+            'temperature': np.random.normal(70, 10, num_samples),
+            'vibration': np.random.normal(2.5, 1.2, num_samples),
+            'pressure': np.random.normal(100, 20, num_samples),
+            'noise_level': np.random.normal(75, 15, num_samples),
+            'power_consumption': np.random.normal(15, 3, num_samples),
+            'operating_hours': np.random.randint(100, 10000, num_samples)
+        }
+        
+        # Generate failure labels based on patterns
+        failures = []
+        for i in range(num_samples):
+            # Failure conditions
+            if (data['temperature'][i] > 90 or 
+                data['vibration'][i] > 4.5 or 
+                data['operating_hours'][i] > 8000):
+                failures.append(1)  # Will fail soon
+            else:
+                failures.append(0)  # Healthy
+        
+        data['failure_risk'] = failures
+        self.sensor_data = pd.DataFrame(data)
+        return self.sensor_data
+    
+    def train_predictive_model(self):
+        """Train ML model to predict equipment failures"""
+        if self.sensor_data.empty:
+            self.collect_equipment_data()
+        
+        # Prepare features and target
+        X = self.sensor_data.drop('failure_risk', axis=1)
+        y = self.sensor_data['failure_risk']
+        
+        # Split data
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42
+        )
+        
+        # Train Random Forest model
+        model = RandomForestClassifier(
+            n_estimators=100,
+            max_depth=10,
+            random_state=42
+        )
+        model.fit(X_train, y_train)
+        
+        # Evaluate model
+        accuracy = model.score(X_test, y_test)
+        
+        self.models['failure_predictor'] = model
+        return accuracy
+    
+    def predict_failure(self, equipment_data):
+        """Predict failure risk for specific equipment"""
+        if 'failure_predictor' not in self.models:
+            print("⚠️ Model not trained. Training now...")
+            self.train_predictive_model()
+        
+        model = self.models['failure_predictor']
+        prediction = model.predict_proba([equipment_data])[0]
+        
+        risk_score = prediction[1]  # Probability of failure
+        return risk_score
+    
+    def generate_maintenance_schedule(self, equipment_list):
+        """Generate optimal maintenance schedule"""
+        schedule = []
+        for eq_id, eq_data in equipment_list.items():
+            risk = self.predict_failure(eq_data)
+            
+            if risk > self.failure_threshold:
+                priority = "URGENT"
+                recommended_action = "Immediate maintenance required"
+            elif risk > 0.6:
+                priority = "HIGH"
+                recommended_action = "Schedule within 7 days"
+            elif risk > 0.3:
+                priority = "MEDIUM"
+                recommended_action = "Schedule within 30 days"
+            else:
+                priority = "LOW"
+                recommended_action = "Routine check next quarter"
+            
+            schedule.append({
+                'equipment_id': eq_id,
+                'risk_score': f"{risk:.1%}",
+                'priority': priority,
+                'action': recommended_action
+            })
+        
+        return pd.DataFrame(schedule)
+
+# Initialize predictive maintenance system
+pm_system = PredictiveMaintenance()
+
+print("🔧 Predictive Maintenance AI System")
+print("=" * 50)
+
+# Collect and analyze data
+data = pm_system.collect_equipment_data(500)
+print(f"📊 Data collected: {len(data)} sensor readings")
+print(f"⚠️ High-risk equipment: {data['failure_risk'].sum()} units")
+
+# Train model
+accuracy = pm_system.train_predictive_model()
+print(f"🤖 ML Model Accuracy: {accuracy:.1%}")
+
+# Test prediction
+test_equipment = {
+    'temperature': 85,
+    'vibration': 3.8,
+    'pressure': 110,
+    'noise_level': 82,
+    'power_consumption': 18,
+    'operating_hours': 7500
+}
+
+risk = pm_system.predict_failure(list(test_equipment.values()))
+print(f"🔍 Equipment Failure Risk: {risk:.1%}")
+print(f"📋 Recommendation: {'🚨 URGENT MAINTENANCE' if risk > 0.85 else '⚠️ Schedule maintenance'}")</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="kpi-dashboard">
+                            <div class="kpi-card">
+                                <div class="kpi-value">45%</div>
+                                <div class="kpi-label">Downtime Reduction</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i> Predictive vs Reactive
+                                </div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-value">$2.1M</div>
+                                <div class="kpi-label">Annual Savings</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i> Reduced repairs
+                                </div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-value">92%</div>
+                                <div class="kpi-label">Prediction Accuracy</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i> ML model performance
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Quality Control -->
+            <div class="message fade-in" id="quality-control">
+                <div class="avatar quality">📊</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Quality Control AI</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-quality">Computer Vision</div>
+                            <div class="content-badge badge-industrial">Zero Defects</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>📊 AI-Powered Quality Control</h2>
+                        <p>Implement computer vision systems for automated quality inspection. Detect defects in real-time, reduce waste, and achieve Six Sigma quality levels with AI.</p>
+                        
+                        <div class="quality-matrix">
+                            <div class="quality-cell">✓</div>
+                            <div class="quality-cell">✓</div>
+                            <div class="quality-cell">✓</div>
+                            <div class="quality-cell">✓</div>
+                            <div class="quality-cell">✗</div>
+                            <div class="quality-cell">✓</div>
+                            <div class="quality-cell">✓</div>
+                            <div class="quality-cell">✓</div>
+                            <div class="quality-cell">✓</div>
+                            <div class="quality-cell">✓</div>
+                            <div class="quality-cell">✓</div>
+                            <div class="quality-cell cell-defect">✗</div>
+                            <div class="quality-cell">✓</div>
+                            <div class="quality-cell">✓</div>
+                            <div class="quality-cell">✓</div>
+                            <div class="quality-cell">✓</div>
+                        </div>
+                        <p style="text-align: center; margin-top: 10px; color: var(--text-tertiary);">
+                            93.75% Pass Rate (15/16) | Defects: 2 | AI Detection: 100%
+                        </p>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    <button class="code-action" onclick="runQualityInspection()"><i class="fas fa-play"></i> Run</button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+<pre><code>import cv2
+import numpy as np
+from PIL import Image
+import matplotlib.pyplot as plt
+from sklearn.svm import SVC
+from sklearn.cluster import KMeans
+
+class QualityControlAI:
+    def __init__(self):
+        self.defect_types = ['scratch', 'dent', 'crack', 'discoloration', 'misalignment']
+        self.thresholds = {
+            'scratch': 0.3,
+            'dent': 0.4,
+            'crack': 0.25,
+            'discoloration': 0.35,
+            'misalignment': 0.5
+        }
+        
+    def analyze_image(self, image_path):
+        """Analyze product image for defects using computer vision"""
+        # Load and preprocess image
+        image = cv2.imread(image_path) if isinstance(image_path, str) else image_path
+        if image is None:
+            # Create synthetic image for demo
+            image = np.random.randint(0, 255, (512, 512, 3), dtype=np.uint8)
+            
+        # Convert to grayscale
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        
+        # Apply edge detection
+        edges = cv2.Canny(gray, 50, 150)
+        
+        # Find contours (potential defects)
+        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        # Analyze each contour
+        defects = []
+        for contour in contours:
+            area = cv2.contourArea(contour)
+            
+            # Filter small areas (noise)
+            if area < 100:
+                continue
+                
+            # Get bounding box
+            x, y, w, h = cv2.boundingRect(contour)
+            
+            # Calculate defect features
+            aspect_ratio = w / h if h > 0 else 0
+            solidity = area / (w * h) if w * h > 0 else 0
+            
+            # Classify defect type
+            defect_type = self.classify_defect(area, aspect_ratio, solidity)
+            
+            if defect_type:
+                severity = self.calculate_severity(area, defect_type)
+                defects.append({
+                    'type': defect_type,
+                    'severity': severity,
+                    'area': area,
+                    'location': (x, y, w, h),
+                    'critical': severity > self.thresholds[defect_type]
+                })
+        
+        return {
+            'total_defects': len(defects),
+            'defects': defects,
+            'pass': len(defects) == 0,
+            'image_analysis': {
+                'edges_detected': np.sum(edges > 0),
+                'contrast_score': np.std(gray)
+            }
+        }
+    
+    def classify_defect(self, area, aspect_ratio, solidity):
+        """Classify defect type using rule-based and ML approaches"""
+        # Simplified classification for demo
+        if aspect_ratio > 5 and area < 500:
+            return 'scratch'
+        elif solidity > 0.7 and area > 300:
+            return 'dent'
+        elif aspect_ratio < 0.2 and area > 200:
+            return 'crack'
+        elif solidity < 0.3:
+            return 'discoloration'
+        else:
+            return 'misalignment'
+    
+    def calculate_severity(self, area, defect_type):
+        """Calculate defect severity score"""
+        base_severity = min(area / 1000, 1.0)  # Normalize by area
+        
+        # Adjust based on defect type
+        type_weights = {
+            'crack': 1.5,
+            'scratch': 0.8,
+            'dent': 1.2,
+            'discoloration': 0.6,
+            'misalignment': 1.0
+        }
+        
+        return base_severity * type_weights.get(defect_type, 1.0)
+    
+    def generate_quality_report(self, batch_size=100):
+        """Generate comprehensive quality report"""
+        np.random.seed(42)
+        
+        # Simulate batch inspection
+        defects_per_unit = np.random.poisson(0.5, batch_size)
+        pass_count = np.sum(defects_per_unit == 0)
+        fail_count = batch_size - pass_count
+        
+        # Calculate quality metrics
+        defect_rate = fail_count / batch_size
+        sigma_level = self.calculate_sigma_level(defect_rate)
+        
+        return {
+            'batch_size': batch_size,
+            'units_passed': pass_count,
+            'units_failed': fail_count,
+            'defect_rate': f"{defect_rate:.2%}",
+            'sigma_level': sigma_level,
+            'first_pass_yield': f"{(pass_count/batch_size):.1%}",
+            'recommendation': self.get_recommendation(defect_rate)
+        }
+    
+    def calculate_sigma_level(self, defect_rate):
+        """Calculate Six Sigma level"""
+        if defect_rate == 0:
+            return "6σ+"
+        
+        # Simplified sigma calculation
+        dpm = defect_rate * 1000000  # Defects per million
+        if dpm < 3.4:
+            return "6σ"
+        elif dpm < 230:
+            return "5σ"
+        elif dpm < 6200:
+            return "4σ"
+        elif dpm < 66800:
+            return "3σ"
+        else:
+            return "<3σ"
+    
+    def get_recommendation(self, defect_rate):
+        """Get AI-powered recommendations for quality improvement"""
+        if defect_rate > 0.1:
+            return "🚨 CRITICAL: Implement immediate process control measures"
+        elif defect_rate > 0.05:
+            return "⚠️ HIGH: Review manufacturing parameters and training"
+        elif defect_rate > 0.01:
+            return "📋 MEDIUM: Schedule preventive maintenance"
+        else:
+            return "✅ EXCELLENT: Continue current processes"
+
+# Initialize Quality Control AI
+qc_ai = QualityControlAI()
+
+print("📊 AI Quality Control System")
+print("=" * 40)
+
+# Analyze a sample product
+analysis = qc_ai.analyze_image("sample_product.jpg")
+print(f"🔍 Defects Found: {analysis['total_defects']}")
+if analysis['defects']:
+    for i, defect in enumerate(analysis['defects'], 1):
+        print(f"  {i}. {defect['type'].upper()} - Severity: {defect['severity']:.2f}")
+else:
+    print("✅ No defects detected - Product PASS")
+
+# Generate batch quality report
+report = qc_ai.generate_quality_report(1000)
+print(f"\n📈 Batch Quality Report:")
+print(f"   Units Inspected: {report['batch_size']}")
+print(f"   Pass Rate: {report['first_pass_yield']}")
+print(f"   Defect Rate: {report['defect_rate']}")
+print(f"   Sigma Level: {report['sigma_level']}")
+print(f"   Recommendation: {report['recommendation']}")</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="sensor-grid">
+                            <div class="sensor-card">
+                                <div class="sensor-icon">👁️</div>
+                                <div class="sensor-value">0.1mm</div>
+                                <div class="sensor-label">Detection Precision</div>
+                            </div>
+                            <div class="sensor-card">
+                                <div class="sensor-icon">⚡</div>
+                                <div class="sensor-value">50ms</div>
+                                <div class="sensor-label">Inspection Time</div>
+                            </div>
+                            <div class="sensor-card">
+                                <div class="sensor-icon">🎯</div>
+                                <div class="sensor-value">99.8%</div>
+                                <div class="sensor-label">Detection Accuracy</div>
+                            </div>
+                            <div class="sensor-card">
+                                <div class="sensor-icon">💰</div>
+                                <div class="sensor-value">65%</div>
+                                <div class="sensor-label">Waste Reduction</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Production Optimization -->
+            <div class="message fade-in" id="production-optimization">
+                <div class="avatar iot">📈</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Production Optimizer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-iot">IoT Analytics</div>
+                            <div class="content-badge badge-predictive">Optimization</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>📈 Production Optimization with IoT & AI</h2>
+                        <p>Leverage IoT sensors and AI algorithms to optimize production efficiency, reduce waste, and maximize output. Implement digital twins for real-time factory optimization.</p>
+                        
+                        <div class="factory-visualizer">
+                            <h3>🏭 Digital Twin - Smart Factory Dashboard</h3>
+                            <div class="production-node">
+                                <strong>Production Line 1</strong> | Efficiency: 94% | OEE: 88%
+                            </div>
+                            <div class="production-node">
+                                <strong>Energy Consumption</strong> | Current: 850kW | Target: 800kW
+                            </div>
+                            <div class="production-node">
+                                <strong>Material Usage</strong> | Waste: 2.3% | Target: 1.8%
+                            </div>
+                            <div class="production-node">
+                                <strong>Labor Productivity</strong> | Output/Hour: 45 units | +12%
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    <button class="code-action" onclick="runOptimizationDemo()"><i class="fas fa-play"></i> Run</button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+<pre><code>import pandas as pd
+import numpy as np
+from datetime import datetime, timedelta
+import pulp  # Linear programming for optimization
+
+class ProductionOptimizer:
+    def __init__(self, factory_config):
+        self.config = factory_config
+        self.sensor_data = pd.DataFrame()
+        self.optimization_history = []
+        
+    def calculate_oee(self, availability, performance, quality):
+        """Calculate Overall Equipment Effectiveness (OEE)"""
+        oee = availability * performance * quality
+        return {
+            'oee': oee * 100,
+            'availability': availability * 100,
+            'performance': performance * 100,
+            'quality': quality * 100,
+            'world_class': oee >= 0.85
+        }
+    
+    def optimize_production_schedule(self, orders, constraints):
+        """Optimize production schedule using linear programming"""
+        # Create optimization problem
+        prob = pulp.LpProblem("Production_Scheduling", pulp.LpMaximize)
+        
+        # Decision variables
+        production_vars = pulp.LpVariable.dicts(
+            "Produce", 
+            orders.index, 
+            lowBound=0, 
+            upBound=None, 
+            cat='Integer'
+        )
+        
+        # Objective function: Maximize profit
+        prob += pulp.lpSum([
+            orders.loc[i, 'profit'] * production_vars[i] 
+            for i in orders.index
+        ])
+        
+        # Constraints
+        # Machine hours constraint
+        prob += pulp.lpSum([
+            orders.loc[i, 'machine_hours'] * production_vars[i] 
+            for i in orders.index
+        ]) <= constraints['max_machine_hours']
+        
+        # Labor hours constraint
+        prob += pulp.lpSum([
+            orders.loc[i, 'labor_hours'] * production_vars[i] 
+            for i in orders.index
+        ]) <= constraints['max_labor_hours']
+        
+        # Material constraint
+        prob += pulp.lpSum([
+            orders.loc[i, 'material_kg'] * production_vars[i] 
+            for i in orders.index
+        ]) <= constraints['max_material_kg']
+        
+        # Solve the problem
+        prob.solve(pulp.PULP_CBC_CMD(msg=False))
+        
+        # Extract solution
+        solution = {}
+        total_profit = 0
+        for i in orders.index:
+            quantity = pulp.value(production_vars[i])
+            if quantity > 0:
+                solution[orders.loc[i, 'product']] = quantity
+                total_profit += quantity * orders.loc[i, 'profit']
+        
+        return {
+            'schedule': solution,
+            'total_profit': total_profit,
+            'status': pulp.LpStatus[prob.status],
+            'resource_utilization': self.calculate_utilization(solution, orders, constraints)
+        }
+    
+    def calculate_utilization(self, schedule, orders, constraints):
+        """Calculate resource utilization"""
+        util = {}
+        total_machine_hours = 0
+        total_labor_hours = 0
+        total_material = 0
+        
+        for product, quantity in schedule.items():
+            product_data = orders[orders['product'] == product].iloc[0]
+            total_machine_hours += quantity * product_data['machine_hours']
+            total_labor_hours += quantity * product_data['labor_hours']
+            total_material += quantity * product_data['material_kg']
+        
+        util['machine_utilization'] = total_machine_hours / constraints['max_machine_hours']
+        util['labor_utilization'] = total_labor_hours / constraints['max_labor_hours']
+        util['material_utilization'] = total_material / constraints['max_material_kg']
+        
+        return util
+    
+    def analyze_energy_consumption(self, production_data):
+        """Analyze and optimize energy consumption"""
+        # Calculate energy per unit
+        energy_per_unit = production_data['energy_kwh'] / production_data['units_produced']
+        
+        # Identify optimization opportunities
+        recommendations = []
+        
+        if energy_per_unit.mean() > 10:
+            recommendations.append("🔧 High energy consumption - Consider equipment upgrade")
+        
+        peak_hours = production_data[production_data['hour'].between(8, 18)]
+        if peak_hours['energy_kwh'].mean() > production_data['energy_kwh'].mean() * 1.2:
+            recommendations.append("⏰ Shift production to off-peak hours for energy savings")
+        
+        return {
+            'avg_energy_per_unit': energy_per_unit.mean(),
+            'total_energy_savings_potential': energy_per_unit.mean() * 0.15,  # 15% savings possible
+            'recommendations': recommendations
+        }
+
+# Example usage
+print("📈 Production Optimization System")
+print("=" * 40)
+
+# Initialize optimizer
+optimizer = ProductionOptimizer({
+    'factory_lines': 3,
+    'shifts_per_day': 2,
+    'workers_per_shift': 50
+})
+
+# Calculate OEE
+oee_results = optimizer.calculate_oee(0.92, 0.95, 0.98)
+print(f"🏭 Overall Equipment Effectiveness (OEE):")
+print(f"   OEE Score: {oee_results['oee']:.1f}%")
+print(f"   Availability: {oee_results['availability']:.1f}%")
+print(f"   Performance: {oee_results['performance']:.1f}%")
+print(f"   Quality: {oee_results['quality']:.1f}%")
+print(f"   World Class: {'✅ YES' if oee_results['world_class'] else '⚠️ Needs Improvement'}")
+
+# Production scheduling optimization
+orders_data = pd.DataFrame({
+    'product': ['Widget A', 'Widget B', 'Widget C', 'Widget D'],
+    'profit': [50, 75, 60, 90],
+    'machine_hours': [2, 3, 1.5, 4],
+    'labor_hours': [1, 2, 1, 3],
+    'material_kg': [5, 8, 4, 10]
+})
+
+constraints = {
+    'max_machine_hours': 200,
+    'max_labor_hours': 150,
+    'max_material_kg': 500
+}
+
+schedule = optimizer.optimize_production_schedule(orders_data, constraints)
+print(f"\n📅 Optimized Production Schedule:")
+for product, quantity in schedule['schedule'].items():
+    print(f"   {product}: {quantity:,} units")
+print(f"💰 Total Profit: ${schedule['total_profit']:,.0f}")
+print(f"📊 Resource Utilization:")
+for resource, util in schedule['resource_utilization'].items():
+    print(f"   {resource}: {util:.1%}")</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="kpi-dashboard">
+                            <div class="kpi-card">
+                                <div class="kpi-value">18%</div>
+                                <div class="kpi-label">Cost Reduction</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i> AI optimization
+                                </div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-value">27%</div>
+                                <div class="kpi-label">Throughput Increase</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i> Better scheduling
+                                </div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-value">15%</div>
+                                <div class="kpi-label">Energy Savings</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i> Smart consumption
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Final Exam Section -->
+            <div class="message fade-in" id="final-exam">
+                <div class="avatar exam">🎓</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Exam Proctor</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-exam">Certification</div>
+                            <div class="content-badge badge-industrial">25 Questions</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🎓 Lesson 11: Final Certification Exam</h2>
+                        <p>Test your knowledge of Python AI in Manufacturing with this comprehensive 25-question exam. Score 80% or higher to earn your Industry 4.0 certification.</p>
+                        
+                        <div class="exam-section">
+                            <div class="console-header">
+                                <div class="console-title">🏭 Manufacturing AI Certification Exam</div>
+                                <div class="console-status">
+                                    <div class="status-dot"></div>
+                                    <span>Ready to Start</span>
+                                </div>
+                            </div>
+                            
+                            <div class="progress-tracker">
+                                <div class="progress-step completed">
+                                    <span>1</span>
+                                    <div class="step-label">Industry 4.0</div>
+                                </div>
+                                <div class="progress-step completed">
+                                    <span>2</span>
+                                    <div class="step-label">Automation</div>
+                                </div>
+                                <div class="progress-step completed">
+                                    <span>3</span>
+                                    <div class="step-label">Robotics</div>
+                                </div>
+                                <div class="progress-step completed">
+                                    <span>4</span>
+                                    <div class="step-label">Predictive</div>
+                                </div>
+                                <div class="progress-step completed">
+                                    <span>5</span>
+                                    <div class="step-label">Quality</div>
+                                </div>
+                                <div class="progress-step active">
+                                    <span>6</span>
+                                    <div class="step-label">Exam</div>
+                                </div>
+                            </div>
+                            
+                            <div style="text-align: center; margin: 32px 0;">
+                                <button class="btn btn-exam" onclick="startExam()" style="padding: 16px 48px; font-size: 18px;">
+                                    <i class="fas fa-play-circle"></i> Start Certification Exam
+                                </button>
+                                <p style="margin-top: 16px; color: var(--text-secondary);">
+                                    25 Questions • 60 Minute Time Limit • 80% Passing Score
+                                </p>
+                            </div>
+                            
+                            <div id="examQuestions" style="display: none;"></div>
+                            <div id="resultsPanel" style="display: none;"></div>
+                            
+                            <div class="production-line" style="background: var(--bg-tertiary); border-color: var(--border-color);">
+                                <h3>📋 Exam Topics Covered:</h3>
+                                <div class="line-stage">
+                                    <div class="stage-number">1</div>
+                                    <div>
+                                        <strong>Smart Factory Concepts</strong><br>
+                                        Industry 4.0, IoT, Digital Twins, Cyber-Physical Systems
+                                    </div>
+                                </div>
+                                <div class="line-stage">
+                                    <div class="stage-number">2</div>
+                                    <div>
+                                        <strong>Python Automation</strong><br>
+                                        PLC Control, Production Scheduling, Workflow Automation
+                                    </div>
+                                </div>
+                                <div class="line-stage">
+                                    <div class="stage-number">3</div>
+                                    <div>
+                                        <strong>Industrial Robotics</strong><br>
+                                        Robot Programming, Path Planning, Safety Systems
+                                    </div>
+                                </div>
+                                <div class="line-stage">
+                                    <div class="stage-number">4</div>
+                                    <div>
+                                        <strong>Predictive Maintenance</strong><br>
+                                        ML Models, Sensor Analytics, Failure Prediction
+                                    </div>
+                                </div>
+                                <div class="line-stage">
+                                    <div class="stage-number">5</div>
+                                    <div>
+                                        <strong>Quality Control AI</strong><br>
+                                        Computer Vision, Defect Detection, Six Sigma
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 32px;">
+                            <button class="btn btn-secondary" onclick="showAnswerKey()">
+                                <i class="fas fa-key"></i> Preview Answer Key
+                            </button>
+                            <button class="btn btn-secondary" onclick="downloadCertificate()" style="margin-left: 12px;">
+                                <i class="fas fa-certificate"></i> Download Certificate Template
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Theme Toggle Functionality
+        let isDarkMode = true;
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+
+        themeToggle.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                themeIcon.className = 'fas fa-moon theme-icon';
+                themeText.textContent = 'Dark Mode';
+            } else {
+                document.body.classList.remove('dark-mode');
+                themeIcon.className = 'fas fa-sun theme-icon';
+                themeText.textContent = 'Light Mode';
+            }
+            createIndustrialBackground();
+        });
+
+        // Scroll to Section
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+                
+                // Update active sidebar item
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Find and activate the corresponding sidebar item
+                const sidebarItems = document.querySelectorAll('.sidebar-item');
+                sidebarItems.forEach(item => {
+                    if (item.textContent.includes(sectionId.split('-').map(word => 
+                        word.charAt(0).toUpperCase() + word.slice(1)
+                    ).join(' ').replace('Ai', 'AI').replace('Iot', 'IoT'))) {
+                        item.classList.add('active');
+                    }
+                });
+            }
+        }
+
+        // Create Industrial Background Animation
+        function createIndustrialBackground() {
+            const background = document.getElementById('industrialBackground');
+            background.innerHTML = '';
+            
+            // Create factory particles
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'factory-particle';
+                particle.style.width = `${Math.random() * 40 + 10}px`;
+                particle.style.height = particle.style.width;
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.top = `${Math.random() * 100}vh`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                particle.style.animationDuration = `${Math.random() * 20 + 15}s`;
+                background.appendChild(particle);
+            }
+            
+            // Create conveyor lines
+            for (let i = 0; i < 5; i++) {
+                const conveyor = document.createElement('div');
+                conveyor.className = 'conveyor-line';
+                conveyor.style.height = `${Math.random() * 200 + 50}px`;
+                conveyor.style.left = `${Math.random() * 100}vw`;
+                conveyor.style.top = `${Math.random() * 100}vh`;
+                conveyor.style.animationDelay = `${Math.random() * 3}s`;
+                conveyor.style.transform = `rotate(${Math.random() * 360}deg)`;
+                background.appendChild(conveyor);
+            }
+            
+            // Create robot arms
+            for (let i = 0; i < 3; i++) {
+                const robot = document.createElement('div');
+                robot.className = 'robot-arm';
+                robot.style.left = `${Math.random() * 100}vw`;
+                robot.style.top = `${Math.random() * 100}vh`;
+                robot.style.animationDelay = `${Math.random() * 2}s`;
+                background.appendChild(robot);
+            }
+            
+            // Create data streams
+            for (let i = 0; i < 8; i++) {
+                const data = document.createElement('div');
+                data.className = 'data-stream';
+                data.textContent = Math.random() > 0.5 ? '01010101' : '11110000';
+                data.style.left = `${Math.random() * 100}vw`;
+                data.style.animationDelay = `${Math.random() * 4}s`;
+                background.appendChild(data);
+            }
+        }
+
+        // Initialize background
+        createIndustrialBackground();
+
+        // Copy Code Function
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-block').querySelector('.code-content');
+            const codeText = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(codeText).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+
+        // Run Factory Simulation
+        function runFactorySimulation() {
+            alert('🏭 Factory simulation started!\n\nProduction optimization in progress...\n\nResult: Production increased by 15%\nEnergy savings: 10% reduction\nAnnual savings: $10,512');
+        }
+
+        // Run Robot Control Demo
+        function runRobotControlDemo() {
+            alert('🤖 Robot control demo started!\n\nRobot initialized: 6DOF industrial robot\nSafety checks: PASSED\nPath planning: AI algorithm engaged\nWelding task: 3 points completed\nQuality check: PASSED');
+        }
+
+        // Run Predictive Model
+        function runPredictiveModel() {
+            alert('🔧 Predictive maintenance model running...\n\nData collected: 500 sensor readings\nModel accuracy: 92%\nHigh-risk equipment detected: 5 units\nMaintenance schedule generated\nEstimated savings: $2.1M annually');
+        }
+
+        // Run Quality Inspection
+        function runQualityInspection() {
+            alert('📊 Quality inspection started!\n\nBatch size: 1000 units\nDefects detected: 12 (1.2% defect rate)\nPass rate: 98.8%\nSigma level: 4σ\nRecommendation: Schedule preventive maintenance');
+        }
+
+        // Run Optimization Demo
+        function runOptimizationDemo() {
+            alert('📈 Production optimization demo running...\n\nOEE Score: 85.7% (World Class)\nProduction schedule optimized\nProfit increased by 27%\nResource utilization: 94%\nEnergy savings potential: 15%');
+        }
+
+        // Run Production Simulator
+        function runProductionSimulator() {
+            alert('🏭 Production Line Simulator\n\nStarting simulation...\n\n1. Raw Material: Automated ✓\n2. CNC Machining: Python-controlled ✓\n3. Assembly: Robots engaged ✓\n4. Quality: AI vision scanning ✓\n5. Packaging: Automated ✓\n\nOverall efficiency: 94.7%');
+        }
+
+        function runPredictiveMaintenanceDemo() {
+            alert('🔧 Predictive Maintenance AI Demo\n\nCollecting sensor data...\nTraining ML model...\nAnalyzing equipment health...\n\nResults:\n• CNC Machine #1: 92% health\n• Robotic Arm #3: 85% (Alert)\n• Conveyor System: 96% health\n• Hydraulic Press: 78% (Warning)\n\nMaintenance schedule generated');
+        }
+
+        function runQualityControlDemo() {
+            alert('📊 Quality Control Analyzer\n\nAnalyzing product images...\nDefect detection: AI vision active\n\nResults:\n• Defects detected: 2/16 (12.5%)\n• Detection accuracy: 99.8%\n• Inspection time: 50ms per unit\n• Waste reduction: 65%\n\nSigma level: 4σ');
+        }
+
+        function runRobotProgramming() {
+            alert('🤖 Robot Programming IDE\n\nOpening industrial robot programming interface...\n\nAvailable commands:\n1. ROBOT.INITIALIZE()\n2. ROBOT.SET_VELOCITY()\n3. ROBOT.PATH_PLANNING()\n4. ROBOT.EXECUTE_TASK()\n5. ROBOT.SAFETY_CHECK()\n\nSimulation ready: Execute welding task');
+        }
+
+        // Download Functions
+        function downloadManufacturingGuide() {
+            alert('📥 Downloading: Industry 4.0 Guide.pdf\n\nFile includes:\n• Smart Factory Concepts\n• IoT Implementation Guide\n• Digital Twin Architecture\n• Case Studies\n• Implementation Roadmap');
+        }
+
+        function downloadPythonAutomation() {
+            alert('📥 Downloading: Python Automation Scripts.zip\n\nIncludes:\n• PLC Control Scripts\n• Production Scheduling\n• Data Collection\n• Real-time Monitoring\n• API Integration Templates');
+        }
+
+        function downloadPredictiveModels() {
+            alert('📥 Downloading: Predictive Maintenance Models\n\nML Models included:\n• Random Forest Classifier\n• LSTM Time Series\n• Anomaly Detection\n• Feature Engineering Scripts\n• Deployment Templates');
+        }
+
+        // Exam Functions
+        function startExam() {
+            const examContainer = document.getElementById('examQuestions');
+            examContainer.style.display = 'block';
+            examContainer.innerHTML = `
+                <div style="text-align: center; margin: 20px 0;">
+                    <h3>🏭 Manufacturing AI Certification Exam</h3>
+                    <p style="color: var(--text-secondary);">Time remaining: <span id="timer">60:00</span></p>
+                </div>
+                
+                <div class="question-card">
+                    <div class="question-text">1. What is the core principle of Industry 4.0 in manufacturing?</div>
+                    <div class="options-grid">
+                        <div class="option" onclick="selectOption(this)">
+                            <div class="option-indicator">A</div>
+                            <div>Manual labor optimization</div>
+                        </div>
+                        <div class="option" onclick="selectOption(this)">
+                            <div class="option-indicator">B</div>
+                            <div>Cyber-physical systems and IoT integration</div>
+                        </div>
+                        <div class="option" onclick="selectOption(this)">
+                            <div class="option-indicator">C</div>
+                            <div>Traditional assembly lines</div>
+                        </div>
+                        <div class="option" onclick="selectOption(this)">
+                            <div class="option-indicator">D</div>
+                            <div>Paper-based documentation</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question-card">
+                    <div class="question-text">2. Which Python library is commonly used for industrial robot control?</div>
+                    <div class="options-grid">
+                        <div class="option" onclick="selectOption(this)">
+                            <div class="option-indicator">A</div>
+                            <div>TensorFlow</div>
+                        </div>
+                        <div class="option" onclick="selectOption(this)">
+                            <div class="option-indicator">B</div>
+                            <div>PyRobot / Robot Operating System (ROS)</div>
+                        </div>
+                        <div class="option" onclick="selectOption(this)">
+                            <div class="option-indicator">C</div>
+                            <div>Django</div>
+                        </div>
+                        <div class="option" onclick="selectOption(this)">
+                            <div class="option-indicator">D</div>
+                            <div>Matplotlib</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <button class="btn btn-exam" onclick="submitExam()">
+                        <i class="fas fa-paper-plane"></i> Submit Exam
+                    </button>
+                    <p style="margin-top: 16px; color: var(--text-secondary); font-size: 14px;">
+                        Note: This is a demo with 2 sample questions. Full exam contains 25 questions.
+                    </p>
+                </div>
+            `;
+            
+            // Start timer
+            startTimer(60 * 60); // 60 minutes
+        }
+
+        function selectOption(option) {
+            const options = option.parentElement.querySelectorAll('.option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+        }
+
+        function startTimer(seconds) {
+            const timerElement = document.getElementById('timer');
+            let timeLeft = seconds;
+            
+            const timer = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const secs = timeLeft % 60;
+                timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    submitExam();
+                }
+                timeLeft--;
+            }, 1000);
+        }
+
+        function submitExam() {
+            const resultsPanel = document.getElementById('resultsPanel');
+            resultsPanel.style.display = 'block';
+            resultsPanel.innerHTML = `
+                <div class="score-display">
+                    <div class="score-number">92%</div>
+                    <div class="score-text">Certification Exam Score</div>
+                    <p style="margin-top: 16px; opacity: 0.9;">Industry 4.0 AI Specialist Certified</p>
+                </div>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    <h3>🎉 Congratulations!</h3>
+                    <p style="color: var(--text-secondary); margin: 16px 0;">
+                        You have successfully passed the Manufacturing AI Certification Exam.
+                    </p>
+                    
+                    <div style="display: flex; justify-content: center; gap: 20px; margin: 30px 0; flex-wrap: wrap;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 32px; color: var(--predictive-green);">✅</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">Passed</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 32px; color: var(--industrial-blue);">25</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">Questions</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 32px; color: var(--robotics-yellow);">23</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">Correct</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 32px; color: var(--automation-orange);">92%</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">Score</div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-exam" onclick="downloadCertificate()">
+                        <i class="fas fa-certificate"></i> Download Certificate
+                    </button>
+                    
+                    <button class="btn btn-secondary" onclick="showAnswerKey()" style="margin-left: 12px;">
+                        <i class="fas fa-key"></i> View Answer Key
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('examQuestions').style.display = 'none';
+        }
+
+        function showAnswerKey() {
+            alert('🔑 Exam Answer Key\n\n1. B - Cyber-physical systems and IoT integration\n2. B - PyRobot / Robot Operating System (ROS)\n3. C - Predictive maintenance\n4. A - Computer vision for defect detection\n5. D - Overall Equipment Effectiveness\n6. B - IoT sensors and data analytics\n7. A - Six Sigma methodology\n8. C - Digital Twin simulation\n9. B - Random Forest algorithm\n10. D - All of the above\n\n... and 15 more questions with detailed explanations.');
+        }
+
+        function downloadCertificate() {
+            alert('📜 Downloading: Industry 4.0 AI Specialist Certificate.pdf\n\nCertificate includes:\n• Your name and score\n• Certification ID\n• Issue date\n• Digital signature\n• QR code for verification');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update lesson progress
+            const progressBar = document.getElementById('lessonProgress');
+            progressBar.style.width = '100%';
+            
+            // Add fade-in animation to all messages
+            const messages = document.querySelectorAll('.message');
+            messages.forEach((message, index) => {
+                message.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>

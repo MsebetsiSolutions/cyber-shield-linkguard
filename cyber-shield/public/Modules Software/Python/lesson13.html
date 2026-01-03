@@ -1,0 +1,3735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 13: List Comprehensions & Manufacturing AI Deployment | Python AI Bootcamp</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <style>
+        /* Manufacturing Theme Variables */
+        :root {
+            --bg-primary: #0A0E17;
+            --bg-secondary: #0F172A;
+            --bg-tertiary: #1E293B;
+            --bg-quaternary: #334155;
+            --border-color: #475569;
+            --border-light: #64748B;
+            --text-primary: #F1F5F9;
+            --text-secondary: #CBD5E1;
+            --text-tertiary: #94A3B8;
+            --industrial-blue: #3B82F6;
+            --industrial-blue-light: rgba(59, 130, 246, 0.1);
+            --industrial-blue-hover: #2563EB;
+            --automation-orange: #F97316;
+            --robotics-yellow: #EAB308;
+            --predictive-green: #10B981;
+            --quality-red: #EF4444;
+            --iot-purple: #8B5CF6;
+            --plc-teal: #06D6A0;
+            --manufacturing-gray: #6B7280;
+            --safety-yellow: #FBBF24;
+            --code-bg: #0D1117;
+            --code-text: #E2E8F0;
+            --highlight-bg: rgba(59, 130, 246, 0.15);
+            --sidebar-bg: #0F172A;
+            --message-ai-bg: #1E293B;
+            --message-user-bg: #0F172A;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --shadow-heavy: rgba(0, 0, 0, 0.5);
+            --success-green: #10B981;
+            --warning-orange: #F97316;
+            --error-red: #EF4444;
+            --industrial-gradient: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            --automation-gradient: linear-gradient(135deg, #F97316, #EAB308);
+            --robotics-gradient: linear-gradient(135deg, #EAB308, #F97316);
+            --predictive-gradient: linear-gradient(135deg, #10B981, #06D6A0);
+            --quality-gradient: linear-gradient(135deg, #EF4444, #F97316);
+            --iot-gradient: linear-gradient(135deg, #8B5CF6, #3B82F6);
+            --data-science-pink: #EC4899;
+            --data-science-gradient: linear-gradient(135deg, #EC4899, #8B5CF6);
+            --deployment-purple: #A855F7;
+            --deployment-gradient: linear-gradient(135deg, #A855F7, #8B5CF6);
+            --monitoring-teal: #14B8A6;
+            --monitoring-gradient: linear-gradient(135deg, #14B8A6, #06D6A0);
+            --render-blue: #46E3B7;
+            --railway-green: #FBBF24;
+        }
+
+        .dark-mode {
+            --bg-primary: #030712;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1F2937;
+            --bg-quaternary: #374151;
+            --border-color: #4B5563;
+            --border-light: #6B7280;
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-tertiary: #9CA3AF;
+            --industrial-blue: #60A5FA;
+            --industrial-blue-light: rgba(96, 165, 250, 0.15);
+            --industrial-blue-hover: #3B82F6;
+            --automation-orange: #FB923C;
+            --robotics-yellow: #FBBF24;
+            --predictive-green: #34D399;
+            --quality-red: #F87171;
+            --iot-purple: #A78BFA;
+            --plc-teal: #34D399;
+            --manufacturing-gray: #9CA3AF;
+            --safety-yellow: #FCD34D;
+            --data-science-pink: #F472B6;
+            --deployment-purple: #C084FC;
+            --monitoring-teal: #2DD4BF;
+            --render-blue: #2DD4BF;
+            --railway-green: #FCD34D;
+        }
+
+        /* Enhanced Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes highlight {
+            0% { background-color: var(--highlight-bg); }
+            100% { background-color: transparent; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes sparkle {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Header Styles */
+        .header {
+            background: var(--bg-secondary);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 32px;
+            background: var(--industrial-gradient);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .lesson-tag {
+            background: var(--deployment-gradient);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        /* Enhanced Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 90px;
+            right: 24px;
+            background: var(--bg-tertiary);
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            z-index: 100;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-heavy);
+            border-color: var(--industrial-blue);
+        }
+
+        .theme-icon {
+            font-size: 16px;
+            color: var(--industrial-blue);
+            transition: transform 0.3s ease;
+        }
+
+        .theme-toggle:hover .theme-icon {
+            transform: rotate(20deg);
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            min-height: calc(100vh - 82px);
+        }
+
+        /* Enhanced Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+            position: sticky;
+            top: 82px;
+            height: calc(100vh - 82px);
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar-section {
+            margin-bottom: 32px;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: var(--deployment-purple);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .sidebar-item:hover {
+            background: var(--bg-tertiary);
+            transform: translateX(5px);
+        }
+
+        .sidebar-item.active {
+            background: var(--industrial-blue-light);
+            border-left: 3px solid var(--industrial-blue);
+        }
+
+        .sidebar-item.active::before {
+            transform: scaleY(1);
+        }
+
+        .sidebar-icon {
+            color: var(--text-tertiary);
+            width: 20px;
+            text-align: center;
+            transition: color 0.3s ease;
+        }
+
+        .sidebar-item:hover .sidebar-icon {
+            color: var(--industrial-blue);
+        }
+
+        /* Enhanced Content Badges */
+        .content-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: auto;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .content-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .badge-list-comp {
+            background: rgba(236, 72, 153, 0.1);
+            color: var(--data-science-pink);
+            border-color: rgba(236, 72, 153, 0.3);
+        }
+
+        .badge-deployment {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--industrial-blue);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .badge-industrial {
+            background: rgba(249, 115, 22, 0.1);
+            color: var(--automation-orange);
+            border-color: rgba(249, 115, 22, 0.3);
+        }
+
+        .badge-data-science {
+            background: rgba(236, 72, 153, 0.1);
+            color: var(--data-science-pink);
+            border-color: rgba(236, 72, 153, 0.3);
+        }
+
+        .badge-render {
+            background: rgba(70, 227, 183, 0.1);
+            color: var(--render-blue);
+            border-color: rgba(70, 227, 183, 0.3);
+        }
+
+        .badge-railway {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--railway-green);
+            border-color: rgba(251, 191, 36, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 24px;
+            max-width: calc(100% - 280px);
+        }
+
+        /* Enhanced Message Styles */
+        .message {
+            background: var(--message-ai-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 16px;
+            border: 1px solid var(--border-color);
+            animation: slideIn 0.5s ease-out;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .message:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-heavy);
+        }
+
+        .message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--deployment-purple), var(--industrial-blue));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .message:hover::before {
+            transform: scaleX(1);
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .message:hover .avatar {
+            transform: scale(1.1);
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .message-author {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .message-time {
+            color: var(--text-tertiary);
+            font-size: 14px;
+            background: var(--bg-secondary);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .message-tags {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+            flex-wrap: wrap;
+        }
+
+        /* Enhanced Learning Objectives */
+        .learning-objectives {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .learning-objectives::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 12px;
+            padding: 2px;
+            background: linear-gradient(45deg, var(--deployment-purple), var(--industrial-blue));
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            -webkit-mask-composite: destination-out;
+        }
+
+        .objective-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding: 8px 0;
+            transition: transform 0.2s ease;
+        }
+
+        .objective-item:hover {
+            transform: translateX(5px);
+        }
+
+        .objective-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--data-science-pink);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .objective-item:hover .objective-icon {
+            transform: scale(1.2);
+        }
+
+        /* Enhanced Code Blocks */
+        .code-block {
+            background: var(--code-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .code-block:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-heavy);
+        }
+
+        .code-header {
+            background: var(--bg-tertiary);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .code-language {
+            font-family: 'Cascadia Code', 'Courier New', monospace;
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .code-action {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .code-action:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        .code-content {
+            padding: 16px;
+            overflow-x: auto;
+            font-family: 'Cascadia Code', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--code-text);
+        }
+
+        /* Enhanced Code Runner */
+        .code-runner {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid var(--deployment-purple);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .code-input {
+            width: 100%;
+            min-height: 150px;
+            background: var(--code-bg);
+            color: var(--code-text);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Cascadia Code', 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 12px;
+            transition: border-color 0.3s ease;
+        }
+
+        .code-input:focus {
+            outline: none;
+            border-color: var(--deployment-purple);
+            box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2);
+        }
+
+        .runner-output {
+            background: var(--code-bg);
+            color: var(--code-text);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 100px;
+            font-family: 'Cascadia Code', 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 300px;
+            transition: all 0.3s ease;
+        }
+
+        .runner-output.success {
+            border-color: var(--success-green);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .runner-output.error {
+            border-color: var(--error-red);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        /* Deployment Dashboard Styles */
+        .deployment-dashboard {
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            border: 2px solid var(--deployment-purple);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .deployment-dashboard::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--deployment-gradient);
+        }
+
+        .deployment-step {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--deployment-purple);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .deployment-step::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(168, 85, 247, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+
+        .deployment-step:hover::before {
+            transform: translateX(100%);
+        }
+
+        .deployment-step:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.2);
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            background: var(--deployment-gradient);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            font-weight: bold;
+            margin-right: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .deployment-step:hover .step-number {
+            transform: scale(1.1);
+        }
+
+        .step-title {
+            display: inline-block;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-primary);
+            vertical-align: middle;
+        }
+
+        /* Environment Variables Panel */
+        .env-panel {
+            background: var(--code-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .env-panel:hover {
+            border-color: var(--deployment-purple);
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.1);
+        }
+
+        .env-var {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border-light);
+            transition: all 0.3s ease;
+        }
+
+        .env-var:hover {
+            background: var(--bg-quaternary);
+            transform: translateX(3px);
+        }
+
+        .env-key {
+            font-family: 'Cascadia Code', monospace;
+            color: var(--industrial-blue);
+            font-weight: 600;
+        }
+
+        .env-value {
+            font-family: 'Cascadia Code', monospace;
+            color: var(--predictive-green);
+        }
+
+        .env-masked {
+            color: var(--text-tertiary);
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        .env-masked::after {
+            content: '••••••••••••';
+            background: var(--bg-secondary);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* Monitoring Dashboard */
+        .monitoring-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .metric-card {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border-top: 4px solid var(--monitoring-teal);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(20, 184, 166, 0.2);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(transparent, rgba(20, 184, 166, 0.1), transparent);
+            transform: translateY(-100%);
+            transition: transform 0.5s ease;
+        }
+
+        .metric-card:hover::before {
+            transform: translateY(100%);
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--monitoring-teal);
+            margin: 8px 0;
+            transition: transform 0.3s ease;
+        }
+
+        .metric-card:hover .metric-value {
+            transform: scale(1.1);
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .metric-trend {
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .metric-trend.up {
+            color: var(--success-green);
+        }
+
+        .metric-trend.down {
+            color: var(--error-red);
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .comparison-table:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-heavy);
+        }
+
+        .comparison-table th {
+            background: var(--deployment-gradient);
+            color: white;
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .comparison-table th::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+
+        .comparison-table:hover th::after {
+            transform: translateX(100%);
+        }
+
+        .comparison-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table tr:hover td {
+            background: var(--bg-quaternary);
+        }
+
+        /* Navigation Buttons */
+        .lesson-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin: 40px 0;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .lesson-navigation:hover {
+            border-color: var(--industrial-blue);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+
+        .nav-btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            background: var(--industrial-blue-light);
+            border-color: var(--industrial-blue);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .nav-btn i {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-btn:hover i {
+            transform: scale(1.2);
+        }
+
+        .nav-prev {
+            border-left: 4px solid var(--automation-orange);
+        }
+
+        .nav-next {
+            border-right: 4px solid var(--predictive-green);
+        }
+
+        /* Platform Badges */
+        .platform-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .platform-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .badge-render {
+            background: rgba(70, 227, 183, 0.1);
+            color: var(--render-blue);
+            border: 1px solid rgba(70, 227, 183, 0.3);
+        }
+
+        .badge-railway {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--railway-green);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        /* Manufacturing Guest List Visual */
+        .guest-visual {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .guest-card {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .guest-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+
+        .guest-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .guest-card.robot {
+            border-color: var(--robotics-yellow);
+        }
+
+        .guest-card.engineer {
+            border-color: var(--industrial-blue);
+        }
+
+        .guest-card.operator {
+            border-color: var(--predictive-green);
+        }
+
+        .guest-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px var(--shadow-heavy);
+        }
+
+        /* Enhanced Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+
+        .btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .btn-primary {
+            background: var(--industrial-gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-data-science {
+            background: var(--data-science-gradient);
+            color: white;
+        }
+
+        .btn-data-science:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.3);
+        }
+
+        .btn-render {
+            background: linear-gradient(135deg, #46E3B7, #3B82F6);
+            color: white;
+        }
+
+        .btn-railway {
+            background: linear-gradient(135deg, #FBBF24, #F97316);
+            color: white;
+        }
+
+        /* Method Grid */
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .method-card {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .method-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+
+        .method-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .method-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px var(--shadow-heavy);
+            border-color: var(--data-science-pink);
+        }
+
+        .method-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--data-science-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .method-card:hover .method-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* Interactive Exercise */
+        .interactive-exercise {
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 20px 0;
+            border: 2px solid var(--robotics-yellow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .interactive-exercise::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--robotics-gradient);
+        }
+
+        .exercise-task {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border-left: 4px solid var(--robotics-yellow);
+            transition: all 0.3s ease;
+        }
+
+        .exercise-task:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(234, 179, 8, 0.1);
+        }
+
+        /* Avatar Variations */
+        .avatar.data-science {
+            background: var(--data-science-gradient);
+            color: white;
+        }
+
+        .avatar.industrial {
+            background: var(--industrial-gradient);
+            color: white;
+        }
+
+        .avatar.automation {
+            background: var(--automation-gradient);
+            color: white;
+        }
+
+        .avatar.deployment {
+            background: var(--deployment-gradient);
+            color: white;
+        }
+
+        .avatar.monitoring {
+            background: var(--monitoring-gradient);
+            color: white;
+        }
+
+        /* Manufacturing Dashboard */
+        .manufacturing-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .dashboard-card {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid var(--industrial-blue);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .dashboard-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--industrial-blue);
+            margin-bottom: 8px;
+        }
+
+        .dashboard-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Pyodide Loader */
+        .pyodide-loader {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 2px solid var(--industrial-blue);
+        }
+
+        .loader-spinner {
+            border: 4px solid var(--bg-secondary);
+            border-top: 4px solid var(--industrial-blue);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Sparkle Effect */
+        .sparkle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        /* Progress Indicator */
+        .progress-indicator {
+            position: fixed;
+            top: 82px;
+            right: 24px;
+            width: 4px;
+            height: calc(100vh - 100px);
+            background: var(--bg-tertiary);
+            z-index: 90;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background: var(--deployment-gradient);
+            transition: height 0.3s ease;
+            border-radius: 2px;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px var(--shadow-color);
+            z-index: 1000;
+        }
+
+        /* Floating Elements */
+        .floating-element {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1024px) {
+            .main-layout {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                top: auto;
+            }
+            
+            .main-content {
+                max-width: 100%;
+            }
+            
+            .method-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .guest-visual {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .progress-indicator {
+                display: none;
+            }
+            
+            .theme-toggle {
+                position: static;
+                margin: 16px auto;
+                width: fit-content;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-wrap: wrap;
+            }
+            
+            .lesson-tag {
+                margin-top: 8px;
+                margin-left: 0;
+            }
+            
+            .method-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .guest-visual {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .message {
+                flex-direction: column;
+            }
+            
+            .avatar {
+                align-self: flex-start;
+            }
+            
+            .lesson-navigation {
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .nav-btn {
+                justify-content: center;
+            }
+            
+            .monitoring-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-title {
+                font-size: 16px;
+            }
+            
+            .lesson-tag {
+                font-size: 12px;
+            }
+            
+            .message {
+                padding: 16px;
+            }
+            
+            .code-runner {
+                padding: 16px;
+            }
+            
+            .deployment-step {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Indicator -->
+    <div class="progress-indicator" id="progressIndicator">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon theme-icon" id="themeIcon"></i>
+        <span id="themeText">Light Mode</span>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">🏭</div>
+        <div class="header-title">Python AI Developer Bootcamp</div>
+        <div class="lesson-tag">Lesson 13: List Comprehensions & AI Deployment</div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-cogs"></i>
+                    Lesson 13 Topics
+                </div>
+                <div style="height: 4px; background: var(--bg-tertiary); border-radius: 2px; margin: 8px 0;">
+                    <div style="height: 100%; background: var(--deployment-gradient); border-radius: 2px; width: 100%;" id="lessonProgress"></div>
+                </div>
+                <div class="sidebar-item active" onclick="scrollToSection('list-comprehensions')">
+                    <i class="fas fa-bolt sidebar-icon"></i>
+                    <span>List Comprehensions Fundamentals</span>
+                    <div class="content-badge badge-list-comp">Core</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('manufacturing-guest-system')">
+                    <i class="fas fa-users sidebar-icon"></i>
+                    <span>Manufacturing Guest Management</span>
+                    <div class="content-badge badge-industrial">Exercise</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('advanced-comprehensions')">
+                    <i class="fas fa-layer-group sidebar-icon"></i>
+                    <span>Advanced Comprehensions</span>
+                    <div class="content-badge badge-data-science">Advanced</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('deployment-overview')">
+                    <i class="fas fa-rocket sidebar-icon"></i>
+                    <span>AI Deployment Overview</span>
+                    <div class="content-badge badge-deployment">Deploy</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('render-deployment')">
+                    <i class="fas fa-server sidebar-icon"></i>
+                    <span>Deploy to Render</span>
+                    <div class="content-badge badge-render">Render</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('railway-deployment')">
+                    <i class="fas fa-train sidebar-icon"></i>
+                    <span>Deploy to Railway</span>
+                    <div class="content-badge badge-railway">Railway</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('monitoring-production')">
+                    <i class="fas fa-chart-line sidebar-icon"></i>
+                    <span>Production Monitoring</span>
+                    <div class="content-badge badge-deployment">Monitor</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-tools"></i>
+                    Interactive Tools
+                </div>
+                <div class="sidebar-item" onclick="runComprehensionDemo()">
+                    <i class="fas fa-bolt sidebar-icon"></i>
+                    <span>List Comprehension Simulator</span>
+                </div>
+                <div class="sidebar-item" onclick="runGuestSystemExercise()">
+                    <i class="fas fa-users sidebar-icon"></i>
+                    <span>Manufacturing Guest System</span>
+                </div>
+                <div class="sidebar-item" onclick="runDeploymentSimulator()">
+                    <i class="fas fa-rocket sidebar-icon"></i>
+                    <span>Deployment Simulator</span>
+                </div>
+                <div class="sidebar-item" onclick="showEnvironmentVariables()">
+                    <i class="fas fa-key sidebar-icon"></i>
+                    <span>Environment Variables Tool</span>
+                </div>
+                <div class="sidebar-item" onclick="generateDeploymentChecklist()">
+                    <i class="fas fa-clipboard-check sidebar-icon"></i>
+                    <span>Generate Deployment Checklist</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-deploydog"></i>
+                    Deployment Status
+                </div>
+                <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 12px;">
+                    <div class="manufacturing-dashboard" style="grid-template-columns: 1fr; gap: 8px;">
+                        <div class="dashboard-card">
+                            <div class="dashboard-value">4.2s</div>
+                            <div class="dashboard-label">Avg. Deployment Time</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-value">99.8%</div>
+                            <div class="dashboard-label">Uptime</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-value">24/7</div>
+                            <div class="dashboard-label">Monitoring Active</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; text-align: center;">
+                        <span style="font-size: 11px; color: var(--text-tertiary);">Production AI Systems</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Pyodide Loader -->
+            <div class="pyodide-loader" id="pyodideLoader">
+                <div class="loader-spinner"></div>
+                <p>Loading Python runtime...</p>
+                <p style="font-size: 12px; color: var(--text-tertiary);">This may take a few seconds</p>
+            </div>
+
+            <!-- List Comprehensions Introduction -->
+            <div class="message fade-in" id="list-comprehensions">
+                <div class="avatar data-science">⚡</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Data Science Engineer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-list-comp">List Comprehensions</div>
+                            <div class="content-badge badge-industrial">Manufacturing</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h1>🏭 Lesson 13: List Comprehensions & Manufacturing AI Deployment</h1>
+                        <p>Master Python list comprehensions for efficient manufacturing data processing, then deploy your AI application to production using Render and Railway.</p>
+                        
+                        <div class="learning-objectives">
+                            <h3 style="color: var(--text-primary); margin-bottom: 20px;">🎯 Learning Objectives</h3>
+                            <div class="objective-item">
+                                <div class="objective-icon">1</div>
+                                <div>
+                                    <strong>List Comprehensions</strong>: Process manufacturing data efficiently
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">2</div>
+                                <div>
+                                    <strong>Dictionary Comprehensions</strong>: Transform IoT sensor data
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">3</div>
+                                <div>
+                                    <strong>Manufacturing Guest System</strong>: Implement real-world application
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">4</div>
+                                <div>
+                                    <strong>AI Application Deployment</strong>: Deploy to Render/Railway
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">5</div>
+                                <div>
+                                    <strong>Production Monitoring</strong>: Set up environment variables & monitoring
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-runner">
+                            <h3>⚡ List Comprehension Power</h3>
+                            <p>See how comprehensions transform manufacturing data processing:</p>
+                            <textarea class="code-input" id="pythonCode" placeholder="# Traditional vs Comprehension approach
+# Traditional
+production_data = [1200, 1180, 1250, 1100, 1300]
+high_production = []
+for units in production_data:
+    if units > 1150:
+        high_production.append(units * 1.1)  # Add 10% bonus
+
+# List Comprehension
+high_production = [units * 1.1 for units in production_data if units > 1150]"># 🏭 Manufacturing Data Processing with Comprehensions
+
+# Traditional approach
+production_lines = ['Line_1', 'Line_2', 'Line_3', 'Line_4']
+active_lines = []
+
+for line in production_lines:
+    if '1' in line or '3' in line:  # Only odd-numbered lines are active
+        active_lines.append(f"ACTIVE_{line}")
+
+print("Traditional Approach:")
+print(f"Active Lines: {active_lines}")
+
+# List Comprehension approach
+active_lines_lc = [f"ACTIVE_{line}" for line in production_lines if '1' in line or '3' in line]
+
+print("\n⚡ List Comprehension Approach:")
+print(f"Active Lines: {active_lines_lc}")
+
+# Performance comparison
+print("\n📊 Performance Advantage:")
+print("- Fewer lines of code")
+print("- More readable")
+print("- Often faster execution")
+print("- Less memory overhead")
+
+# Real manufacturing example
+print("\n🏭 Real Manufacturing Example:")
+
+# Sensor data processing
+sensor_readings = [45.2, 47.8, 42.1, 49.5, 50.2, 38.9]
+critical_readings = [temp for temp in sensor_readings if temp > 48.0]
+
+print(f"Raw Readings: {sensor_readings}")
+print(f"Critical Temperatures (>48°C): {critical_readings}")
+print(f"Critical Count: {len(critical_readings)}")</textarea>
+                            <button class="btn btn-data-science" onclick="runPythonCode()">
+                                <i class="fas fa-play"></i> Run Python Code
+                            </button>
+                            <div class="runner-output" id="pythonOutput">Output will appear here...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manufacturing Guest Management System -->
+            <div class="message fade-in" id="manufacturing-guest-system">
+                <div class="avatar industrial">👥</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Industrial Systems Engineer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-industrial">Exercise</div>
+                            <div class="content-badge badge-data-science">Comprehensions</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🏭 Manufacturing Facility Access Management System</h2>
+                        <p>Manage personnel access to different manufacturing zones using list comprehensions. Track operators, engineers, and robots in the facility.</p>
+                        
+                        <!-- Visual Guest Display -->
+                        <div class="guest-visual" id="guestVisualization">
+                            <!-- Generated by JavaScript -->
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    <button class="code-action" onclick="runGuestSystem()"><i class="fas fa-play"></i> Run</button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+<pre><code>class ManufacturingAccessSystem:
+    """Manage personnel access in manufacturing facility"""
+    
+    def __init__(self):
+        # Manufacturing personnel data
+        self.personnel = [
+            {
+                "access_id": "ROB-001",
+                "name": "Assembly Robot ARM-1",
+                "role": "robot",
+                "zone_access": ["assembly_line", "quality_check"],
+                "active": True,
+                "skills": ["welding", "assembly", "painting"]
+            },
+            {
+                "access_id": "ENG-101",
+                "name": "Dr. Sarah Chen",
+                "role": "engineer",
+                "zone_access": ["control_room", "assembly_line", "maintenance"],
+                "active": True,
+                "skills": ["PLC programming", "machine learning", "robotics"]
+            },
+            {
+                "access_id": "OP-202",
+                "name": "Mike Rodriguez",
+                "role": "operator",
+                "zone_access": ["assembly_line", "packaging"],
+                "active": True,
+                "skills": ["CNC operation", "quality control", "safety protocols"]
+            },
+            {
+                "access_id": "ROB-002",
+                "name": "Quality Inspector Bot",
+                "role": "robot",
+                "zone_access": ["quality_check", "packaging"],
+                "active": False,  # Currently in maintenance
+                "skills": ["vision inspection", "defect detection"]
+            },
+            {
+                "access_id": "ENG-102",
+                "name": "Alex Johnson",
+                "role": "engineer",
+                "zone_access": ["control_room", "R&D", "maintenance"],
+                "active": True,
+                "skills": ["IoT systems", "data analysis", "predictive maintenance"]
+            }
+        ]
+    
+    def get_total_personnel(self):
+        """Calculate total active personnel using list comprehension"""
+        # YOUR CODE HERE: Use list comprehension to count active personnel
+        active_personnel = [p for p in self.personnel if p["active"]]
+        return len(active_personnel)
+    
+    def get_personnel_list(self):
+        """Get formatted personnel list using list comprehension"""
+        # YOUR CODE HERE: Use list comprehension to create formatted strings
+        personnel_list = [f"{p['access_id']}: {p['name']} ({p['role']})" 
+                         for p in self.personnel if p["active"]]
+        return personnel_list
+    
+    def get_zone_occupancy(self, zone):
+        """Get personnel in specific zone using list comprehension"""
+        # YOUR CODE HERE: Use list comprehension to filter by zone access
+        zone_personnel = [p["name"] for p in self.personnel 
+                         if p["active"] and zone in p["zone_access"]]
+        return zone_personnel
+    
+    def get_skills_inventory(self):
+        """Get all unique skills using nested list comprehension"""
+        # YOUR CODE HERE: Use nested list comprehension to flatten skills
+        all_skills = [skill for p in self.personnel for skill in p["skills"]]
+        return list(set(all_skills))  # Remove duplicates
+    
+    def get_role_summary(self):
+        """Get count by role using dictionary comprehension"""
+        # YOUR CODE HERE: Use dictionary comprehension to count by role
+        role_counts = {}
+        roles = [p["role"] for p in self.personnel if p["active"]]
+        for role in set(roles):
+            role_counts[role] = roles.count(role)
+        return role_counts
+
+# Main execution
+def main():
+    print("🏭 Manufacturing Facility Access Management System")
+    print("=" * 60)
+    
+    system = ManufacturingAccessSystem()
+    
+    # Test the system
+    print("\n👥 Total Active Personnel:")
+    total = system.get_total_personnel()
+    print(f"  Active: {total}")
+    print(f"  Total Registered: {len(system.personnel)}")
+    
+    print("\n📋 Personnel List:")
+    personnel_list = system.get_personnel_list()
+    for person in personnel_list:
+        print(f"  • {person}")
+    
+    print("\n📍 Zone Occupancy Check:")
+    zones = ["assembly_line", "control_room", "quality_check"]
+    for zone in zones:
+        occupants = system.get_zone_occupancy(zone)
+        print(f"  {zone.replace('_', ' ').title()}: {len(occupants)} personnel")
+        if occupants:
+            print(f"    - {', '.join(occupants)}")
+    
+    print("\n🛠️ Skills Inventory:")
+    skills = system.get_skills_inventory()
+    print(f"  Total Unique Skills: {len(skills)}")
+    print(f"  Skills: {', '.join(sorted(skills))}")
+    
+    print("\n🎯 Role Distribution:")
+    role_summary = system.get_role_summary()
+    for role, count in role_summary.items():
+        print(f"  {role.title()}: {count}")
+
+if __name__ == "__main__":
+    main()</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="interactive-exercise">
+                            <h3>🎯 Your Tasks:</h3>
+                            <div class="exercise-task">
+                                <h4>🚀 Implementation Requirements:</h4>
+                                <ol style="color: var(--text-secondary); padding-left: 20px;">
+                                    <li>Complete <code>get_total_personnel()</code> using list comprehension to count active personnel</li>
+                                    <li>Complete <code>get_personnel_list()</code> using list comprehension to format personnel strings</li>
+                                    <li>Complete <code>get_zone_occupancy()</code> using list comprehension to filter by zone</li>
+                                    <li>Complete <code>get_skills_inventory()</code> using nested list comprehension</li>
+                                    <li>Complete <code>get_role_summary()</code> using dictionary comprehension</li>
+                                </ol>
+                            </div>
+                            
+                            <button class="btn btn-primary" onclick="runGuestSystemExercise()">
+                                <i class="fas fa-users"></i> Run Guest System Exercise
+                            </button>
+                            <button class="btn btn-data-science" onclick="showGuestSystemSolution()">
+                                <i class="fas fa-lightbulb"></i> Show Solution
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Comprehensions -->
+            <div class="message fade-in" id="advanced-comprehensions">
+                <div class="avatar automation">🚀</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Automation Architect</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-data-science">Advanced</div>
+                            <div class="content-badge badge-industrial">Patterns</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🚀 Advanced Comprehensions for Manufacturing AI</h2>
+                        <p>Master dictionary, set, and generator comprehensions for efficient manufacturing data processing.</p>
+                        
+                        <div class="method-grid">
+                            <div class="method-card">
+                                <div class="method-icon">📚</div>
+                                <div class="method-title">Dictionary Comprehensions</div>
+                                <p style="color: var(--text-secondary); font-size: 14px;">
+                                    Transform sensor data into structured dictionaries
+                                </p>
+                                <div class="code-content" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; font-size: 12px;">
+                                    sensors = ["temp_01", "press_02"]<br>
+                                    readings = {s: random.uniform(0, 100) <br>for s in sensors}
+                                </div>
+                            </div>
+                            
+                            <div class="method-card">
+                                <div class="method-icon">⚡</div>
+                                <div class="method-title">Generator Comprehensions</div>
+                                <p style="color: var(--text-secondary); font-size: 14px;">
+                                    Process large datasets with memory efficiency
+                                </p>
+                                <div class="code-content" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; font-size: 12px;">
+                                    large_data = (x*2 for x in range(1000000)<br>if x % 2 == 0)
+                                </div>
+                            </div>
+                            
+                            <div class="method-card">
+                                <div class="method-icon">🔄</div>
+                                <div class="method-title">Set Comprehensions</div>
+                                <p style="color: var(--text-secondary); font-size: 14px;">
+                                    Remove duplicates from production data
+                                </p>
+                                <div class="code-content" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; font-size: 12px;">
+                                    defects = ["scratch", "dent", "scratch"]<br>
+                                    unique_defects = {d for d in defects}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    <button class="code-action" onclick="runAdvancedComprehensions()"><i class="fas fa-play"></i> Run</button>
+                                </div>
+                            </div>
+<pre><code>class ManufacturingDataProcessor:
+    """Advanced comprehensions for manufacturing data"""
+    
+    @staticmethod
+    def process_sensor_readings(raw_data):
+        """Dictionary comprehension example"""
+        # Convert raw sensor data to structured format
+        sensor_data = {
+            sensor_id: {
+                'value': float(value),
+                'unit': '°C' if 'temp' in sensor_id else 'psi',
+                'status': 'normal' if float(value) < 80 else 'warning'
+            }
+            for sensor_id, value in raw_data.items()
+            if value.replace('.', '').isdigit()
+        }
+        return sensor_data
+    
+    @staticmethod
+    def generate_production_batch(batch_size):
+        """Generator comprehension example"""
+        # Generate large dataset without storing in memory
+        return (
+            {
+                'batch_id': f'BATCH_{i:06d}',
+                'units': i * 100,
+                'quality_score': min(100, 95 + (i % 10)),
+                'energy_used': i * 1.5
+            }
+            for i in range(batch_size)
+            if i % 2 == 0  # Only even batches
+        )
+    
+    @staticmethod
+    def analyze_defect_patterns(defect_reports):
+        """Set comprehension example"""
+        # Extract unique defect types and locations
+        unique_defects = {
+            (report['type'], report['location'])
+            for report in defect_reports
+            if report.get('type') and report.get('location')
+        }
+        
+        # Count defects by type using dictionary comprehension
+        defect_counts = {
+            defect_type: sum(1 for r in defect_reports if r['type'] == defect_type)
+            for defect_type in set(r['type'] for r in defect_reports)
+        }
+        
+        return unique_defects, defect_counts
+    
+    @staticmethod
+    def optimize_production_schedule(production_data):
+        """Complex nested comprehensions"""
+        # Calculate efficiency metrics for each line
+        efficiency_metrics = {
+            line['id']: {
+                'oee': line['good_units'] / line['planned_units'],
+                'utilization': line['runtime'] / line['planned_runtime'],
+                'quality': line['good_units'] / (line['good_units'] + line['defects'])
+            }
+            for line in production_data
+            if line['planned_units'] > 0
+        }
+        
+        # Filter high-performance lines
+        high_perf_lines = [
+            line_id for line_id, metrics in efficiency_metrics.items()
+            if all(v > 0.85 for v in metrics.values())
+        ]
+        
+        return efficiency_metrics, high_perf_lines
+
+# Example usage
+print("🚀 Advanced Manufacturing Comprehensions")
+print("=" * 50)
+
+processor = ManufacturingDataProcessor()
+
+# 1. Dictionary Comprehension
+print("\n1. 📚 Dictionary Comprehension - Sensor Data:")
+raw_sensors = {
+    'temp_01': '45.5',
+    'temp_02': '78.2',
+    'press_01': '120.5',
+    'press_02': '95.3',
+    'invalid_sensor': 'error'
+}
+
+processed_sensors = processor.process_sensor_readings(raw_sensors)
+print(f"Processed {len(processed_sensors)} sensors:")
+for sensor, data in processed_sensors.items():
+    print(f"  {sensor}: {data['value']}{data['unit']} ({data['status']})")
+
+# 2. Generator Comprehension
+print("\n2. ⚡ Generator Comprehension - Production Batches:")
+batch_generator = processor.generate_production_batch(10)
+print("First 3 batches from generator:")
+for i, batch in enumerate(batch_generator):
+    if i >= 3:
+        break
+    print(f"  {batch['batch_id']}: {batch['units']} units, Quality: {batch['quality_score']}%")
+
+# 3. Set and Dictionary Comprehensions
+print("\n3. 🔄 Set & Dictionary Comprehensions - Defect Analysis:")
+defect_reports = [
+    {'type': 'scratch', 'location': 'assembly_line', 'severity': 'low'},
+    {'type': 'dent', 'location': 'packaging', 'severity': 'medium'},
+    {'type': 'scratch', 'location': 'assembly_line', 'severity': 'low'},
+    {'type': 'misalignment', 'location': 'assembly_line', 'severity': 'high'},
+    {'type': 'dent', 'location': 'quality_check', 'severity': 'medium'}
+]
+
+unique_defects, defect_counts = processor.analyze_defect_patterns(defect_reports)
+print(f"Unique defect patterns: {len(unique_defects)}")
+print("Defect counts:")
+for defect_type, count in defect_counts.items():
+    print(f"  {defect_type}: {count} occurrences")
+
+# 4. Complex Nested Comprehensions
+print("\n4. 🏭 Complex Comprehensions - Production Optimization:")
+production_data = [
+    {'id': 'Line_A', 'good_units': 850, 'planned_units': 1000, 'runtime': 420, 'planned_runtime': 480, 'defects': 15},
+    {'id': 'Line_B', 'good_units': 920, 'planned_units': 1000, 'runtime': 450, 'planned_runtime': 480, 'defects': 8},
+    {'id': 'Line_C', 'good_units': 780, 'planned_units': 1000, 'runtime': 400, 'planned_runtime': 480, 'defects': 22}
+]
+
+efficiency_metrics, high_perf_lines = processor.optimize_production_schedule(production_data)
+print("Production Line Efficiency:")
+for line_id, metrics in efficiency_metrics.items():
+    print(f"  {line_id}: OEE={metrics['oee']:.1%}, "
+          f"Utilization={metrics['utilization']:.1%}, "
+          f"Quality={metrics['quality']:.1%}")
+print(f"High Performance Lines: {high_perf_lines}")</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Deployment Overview -->
+            <div class="message fade-in" id="deployment-overview">
+                <div class="avatar deployment">🚀</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">DevOps Engineer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-deployment">Deployment</div>
+                            <div class="content-badge badge-industrial">Production</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🚀 Deploy Your Manufacturing AI Application to Production</h2>
+                        <p>Learn to deploy Python AI applications using Render and Railway. Transition from development to production with monitoring and scaling.</p>
+                        
+                        <div class="manufacturing-dashboard">
+                            <div class="dashboard-card">
+                                <div class="dashboard-value">2-5 min</div>
+                                <div class="dashboard-label">Deployment Time</div>
+                            </div>
+                            <div class="dashboard-card">
+                                <div class="dashboard-value">99.95%</div>
+                                <div class="dashboard-label">Uptime SLA</div>
+                            </div>
+                            <div class="dashboard-card">
+                                <div class="dashboard-value">$0</div>
+                                <div class="dashboard-label">Free Tier Start</div>
+                            </div>
+                        </div>
+
+                        <div class="comparison-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Platform</th>
+                                        <th>Best For</th>
+                                        <th>Free Tier</th>
+                                        <th>Ease of Use</th>
+                                        <th>Manufacturing AI Features</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="platform-badge badge-render"><i class="fas fa-server"></i> Render</span></td>
+                                        <td>Web APIs & Dashboards</td>
+                                        <td>✅ 750 free hours/month</td>
+                                        <td>⭐️⭐️⭐️⭐️⭐️</td>
+                                        <td>WebSocket support, Cron jobs, Auto-scaling</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="platform-badge badge-railway"><i class="fas fa-train"></i> Railway</span></td>
+                                        <td>Background workers & APIs</td>
+                                        <td>✅ $5 free credit</td>
+                                        <td>⭐️⭐️⭐️⭐️⭐️</td>
+                                        <td>Database integration, Webhooks, GitHub sync</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="deployment-dashboard">
+                            <h3>📦 Manufacturing AI Application Structure</h3>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-language">Python</span>
+                                    <div class="code-actions">
+                                        <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+                                </div>
+<pre><code># 🏭 manufacturing_ai_app/
+# ├── app.py              # Main application
+# ├── requirements.txt    # Dependencies
+# ├── Procfile           # Process definition
+# ├── runtime.txt        # Python version
+# ├── .env.example       # Environment template
+# ├── Dockerfile        # Container definition (optional)
+# └── README.md         # Documentation
+
+# 📄 requirements.txt
+flask==2.3.3
+pandas==2.0.3
+numpy==1.24.3
+scikit-learn==1.3.0
+python-dotenv==1.0.0
+gunicorn==20.1.0
+
+# 📄 Procfile
+web: gunicorn app:app --workers=4 --bind=0.0.0.0:$PORT
+
+# 📄 runtime.txt
+python-3.11.4
+
+# 📄 .env.example
+MANUFACTURING_API_KEY=your_api_key_here
+DATABASE_URL=postgresql://user:pass@localhost/dbname
+DEBUG_MODE=False
+LOG_LEVEL=INFO
+PREDICTION_MODEL_PATH=models/predictive_maintenance.pkl</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deploy to Render -->
+            <div class="message fade-in" id="render-deployment">
+                <div class="avatar deployment">🎯</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Render Deployment Specialist</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-render">Render</div>
+                            <div class="content-badge badge-deployment">Step-by-Step</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🎯 Deploy to Render: Step-by-Step Guide</h2>
+                        <p>Deploy your manufacturing AI application to Render in minutes. Perfect for production monitoring dashboards and predictive maintenance APIs.</p>
+                        
+                        <div class="deployment-dashboard">
+                            <div class="deployment-step">
+                                <span class="step-number">1</span>
+                                <span class="step-title">Create Render Account</span>
+                                <div style="margin-top: 12px; color: var(--text-secondary);">
+                                    <p>Visit <a href="https://render.com" style="color: var(--render-blue); text-decoration: none; border-bottom: 1px dashed var(--render-blue);">render.com</a> and sign up with GitHub, GitLab, or email.</p>
+                                    <p><strong>Manufacturing Tip:</strong> Use your work email for team collaboration.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="deployment-step">
+                                <span class="step-number">2</span>
+                                <span class="step-title">Prepare Your Application</span>
+                                <div style="margin-top: 12px; color: var(--text-secondary);">
+                                    <div class="code-content" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; margin: 8px 0;">
+                                        # 📄 app.py - Manufacturing AI API<br>
+                                        from flask import Flask, jsonify<br>
+                                        import pandas as pd<br><br>
+                                        
+                                        app = Flask(__name__)<br><br>
+                                        
+                                        @app.route('/health')<br>
+                                        def health_check():<br>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;return jsonify({"status": "healthy", "service": "manufacturing_ai"})<br><br>
+                                        
+                                        @app.route('/predict', methods=['POST'])<br>
+                                        def predict_maintenance():<br>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;# Your manufacturing AI logic here<br>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;return jsonify({"prediction": "maintenance_needed", "confidence": 0.92})<br><br>
+                                        
+                                        if __name__ == '__main__':<br>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;app.run(host='0.0.0.0', port=5000)
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="deployment-step">
+                                <span class="step-number">3</span>
+                                <span class="step-title">Set Up Environment Variables</span>
+                                <div style="margin-top: 12px; color: var(--text-secondary);">
+                                    <div class="env-panel">
+                                        <div class="env-var">
+                                            <span class="env-key">MANUFACTURING_API_KEY</span>
+                                            <span class="env-value env-masked">••••••••••••</span>
+                                        </div>
+                                        <div class="env-var">
+                                            <span class="env-key">DATABASE_URL</span>
+                                            <span class="env-value">postgresql://user:••••@db.render.com/manufacturing</span>
+                                        </div>
+                                        <div class="env-var">
+                                            <span class="env-key">DEBUG_MODE</span>
+                                            <span class="env-value">False</span>
+                                        </div>
+                                        <div class="env-var">
+                                            <span class="env-key">MODEL_VERSION</span>
+                                            <span class="env-value">v2.1-predictive-maintenance</span>
+                                        </div>
+                                    </div>
+                                    <p><strong>Manufacturing Security:</strong> Never commit API keys to version control. Use Render's environment variables.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="deployment-step">
+                                <span class="step-number">4</span>
+                                <span class="step-title">Deploy from GitHub</span>
+                                <div style="margin-top: 12px; color: var(--text-secondary);">
+                                    <p>1. Connect your GitHub repository</p>
+                                    <p>2. Select "Web Service"</p>
+                                    <p>3. Configure:</p>
+                                    <ul style="margin-left: 20px; color: var(--text-tertiary);">
+                                        <li>Name: <code>manufacturing-ai-api</code></li>
+                                        <li>Region: <code>Oregon (US West)</code> for lower latency</li>
+                                        <li>Branch: <code>main</code></li>
+                                        <li>Build Command: <code>pip install -r requirements.txt</code></li>
+                                        <li>Start Command: <code>gunicorn app:app</code></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="deployment-step">
+                                <span class="step-number">5</span>
+                                <span class="step-title">Monitor & Scale</span>
+                                <div style="margin-top: 12px; color: var(--text-secondary);">
+                                    <div class="monitoring-grid">
+                                        <div class="metric-card">
+                                            <div class="metric-label">Response Time</div>
+                                            <div class="metric-value">142ms</div>
+                                            <div class="metric-trend down">↓ 12%</div>
+                                        </div>
+                                        <div class="metric-card">
+                                            <div class="metric-label">Requests/Min</div>
+                                            <div class="metric-value">245</div>
+                                            <div class="metric-trend up">↑ 8%</div>
+                                        </div>
+                                        <div class="metric-card">
+                                            <div class="metric-label">Error Rate</div>
+                                            <div class="metric-value">0.02%</div>
+                                            <div class="metric-trend down">↓ 5%</div>
+                                        </div>
+                                        <div class="metric-card">
+                                            <div class="metric-label">Uptime</div>
+                                            <div class="metric-value">99.98%</div>
+                                            <div class="metric-trend">→ Stable</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-runner">
+                            <h3>🔧 Render Deployment Simulator</h3>
+                            <textarea class="code-input" id="renderDeployCode"># 🏭 Manufacturing AI Deployment Checklist
+import time
+
+class RenderDeploymentSimulator:
+    def __init__(self):
+        self.steps = []
+        self.current_step = 0
+    
+    def add_step(self, description, command=None):
+        self.steps.append({
+            'description': description,
+            'command': command,
+            'status': 'pending',
+            'timestamp': None
+        })
+    
+    def execute_deployment(self):
+        print("🚀 Starting Manufacturing AI Deployment to Render")
+        print("=" * 60)
+        
+        deployment_steps = [
+            ("Connecting to GitHub repository", "git remote add render https://github.com/your-repo"),
+            ("Installing dependencies", "pip install -r requirements.txt"),
+            ("Setting environment variables", "render env:set MANUFACTURING_API_KEY=***"),
+            ("Building application", "render build"),
+            ("Starting web service", "gunicorn app:app --workers=4"),
+            ("Health check", "curl https://manufacturing-ai-api.onrender.com/health"),
+            ("Deployment complete!", None)
+        ]
+        
+        for i, (desc, cmd) in enumerate(deployment_steps, 1):
+            print(f"\nStep {i}: {desc}")
+            if cmd:
+                print(f"   Command: {cmd}")
+            time.sleep(0.5)
+            print(f"   Status: ✅ Complete")
+        
+        print("\n" + "=" * 60)
+        print("🎉 Deployment Successful!")
+        print("\n📊 Application Details:")
+        print("   URL: https://manufacturing-ai-api.onrender.com")
+        print("   Region: Oregon (US West)")
+        print("   Instance: Free Tier (768 MB RAM)")
+        print("   Auto-deploy: Enabled on git push")
+        
+        return True
+
+# Run deployment simulation
+print("Starting Render deployment simulation...")
+simulator = RenderDeploymentSimulator()
+simulator.execute_deployment()</textarea>
+                            <button class="btn btn-render" onclick="runRenderDeployment()">
+                                <i class="fas fa-rocket"></i> Simulate Render Deployment
+                            </button>
+                            <div class="runner-output" id="renderOutput">Deployment output will appear here...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deploy to Railway -->
+            <div class="message fade-in" id="railway-deployment">
+                <div class="avatar monitoring">🚂</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Railway Deployment Engineer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-railway">Railway</div>
+                            <div class="content-badge badge-deployment">Database Integration</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🚂 Deploy to Railway with Database Integration</h2>
+                        <p>Deploy manufacturing AI applications with PostgreSQL databases, background workers, and real-time monitoring.</p>
+                        
+                        <div class="deployment-dashboard">
+                            <h3>🏭 Manufacturing AI with Database</h3>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-language">Python + PostgreSQL</span>
+                                    <div class="code-actions">
+                                        <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+                                </div>
+<pre><code># 📄 database.py - Manufacturing data models
+import os
+import psycopg2
+from datetime import datetime
+from contextlib import contextmanager
+
+class ManufacturingDatabase:
+    def __init__(self):
+        self.db_url = os.getenv('DATABASE_URL')
+    
+    @contextmanager
+    def get_connection(self):
+        conn = psycopg2.connect(self.db_url)
+        try:
+            yield conn
+        finally:
+            conn.close()
+    
+    def log_production_event(self, line_id, event_type, details):
+        """Log manufacturing events to database"""
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO production_events 
+                    (line_id, event_type, details, timestamp)
+                    VALUES (%s, %s, %s, %s)
+                    RETURNING id
+                """, (line_id, event_type, details, datetime.utcnow()))
+                conn.commit()
+                return cur.fetchone()[0]
+    
+    def get_production_stats(self, hours=24):
+        """Get production statistics for dashboard"""
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT 
+                        COUNT(*) as total_events,
+                        COUNT(DISTINCT line_id) as active_lines,
+                        AVG(CASE WHEN event_type = 'defect' THEN 1 ELSE 0 END) as defect_rate,
+                        MAX(timestamp) as last_update
+                    FROM production_events
+                    WHERE timestamp >= NOW() - INTERVAL '%s hours'
+                """, (hours,))
+                return dict(zip([desc[0] for desc in cur.description], cur.fetchone()))
+
+# 📄 railway.toml - Railway configuration
+[build]
+builder = "nixpacks"
+buildCommand = "pip install -r requirements.txt"
+
+[deploy]
+startCommand = "gunicorn app:app --workers=2"
+healthcheckPath = "/health"
+restartPolicyType = "always"
+
+[[services]]
+name = "manufacturing-ai-api"
+type = "web"
+port = 5000
+
+[[services]]
+name = "manufacturing-db"
+type = "postgresql"
+plan = "hobby"</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="deployment-step">
+                            <h4>🚂 Railway Deployment Steps:</h4>
+                            <ol style="color: var(--text-secondary); padding-left: 20px; margin-top: 12px;">
+                                <li>Install Railway CLI: <code>npm i -g @railway/cli</code></li>
+                                <li>Login: <code>railway login</code></li>
+                                <li>Initialize project: <code>railway init</code></li>
+                                <li>Add PostgreSQL: <code>railway add postgresql</code></li>
+                                <li>Set environment variables: <code>railway variables set DEBUG_MODE=False</code></li>
+                                <li>Deploy: <code>railway up</code></li>
+                                <li>Monitor logs: <code>railway logs</code></li>
+                            </ol>
+                        </div>
+
+                        <div class="code-runner">
+                            <h3>🔧 Railway CLI Simulator</h3>
+                            <textarea class="code-input" id="railwayDeployCode"># 🚂 Railway Deployment for Manufacturing AI
+import subprocess
+import time
+
+def simulate_railway_deployment():
+    print("🚂 Railway Manufacturing AI Deployment")
+    print("=" * 60)
+    
+    commands = [
+        ("railway login", "🔐 Authenticating with Railway..."),
+        ("railway init", "📦 Initializing Railway project..."),
+        ("railway add postgresql", "🗄️ Adding PostgreSQL database..."),
+        ("railway variables set MANUFACTURING_API_KEY=***", "🔧 Setting environment variables..."),
+        ("railway variables set MODEL_VERSION=v2.1", "🏷️ Setting model version..."),
+        ("railway up", "🚀 Deploying application..."),
+        ("railway logs", "📋 Streaming deployment logs..."),
+        ("railway open", "🌐 Opening application in browser...")
+    ]
+    
+    for cmd, description in commands:
+        print(f"\n{description}")
+        print(f"   Command: {cmd}")
+        time.sleep(0.7)
+        
+        # Simulate command output
+        if "login" in cmd:
+            print("   ✅ Authentication successful")
+        elif "init" in cmd:
+            print("   ✅ Project initialized")
+        elif "postgresql" in cmd:
+            print("   ✅ PostgreSQL database provisioned")
+            print("   📊 Connection string: postgresql://user:***@db.railway.app/manufacturing")
+        elif "variables" in cmd:
+            print("   ✅ Environment variables set")
+        elif "up" in cmd:
+            print("   🏗️ Building Docker image...")
+            time.sleep(0.5)
+            print("   📦 Pushing image to registry...")
+            time.sleep(0.5)
+            print("   🚀 Deploying to Railway infrastructure...")
+            time.sleep(0.5)
+            print("   ✅ Deployment complete!")
+        elif "logs" in cmd:
+            print("   📋 [INFO] Starting manufacturing AI application")
+            print("   📋 [INFO] Loading predictive maintenance model v2.1")
+            print("   📋 [INFO] Database connection established")
+            print("   📋 [INFO] API server listening on port 5000")
+        elif "open" in cmd:
+            print("   🌐 Opening: https://manufacturing-ai.up.railway.app")
+    
+    print("\n" + "=" * 60)
+    print("🎉 Railway Deployment Complete!")
+    print("\n🏭 Manufacturing AI Dashboard:")
+    print("   URL: https://manufacturing-ai.up.railway.app")
+    print("   Database: PostgreSQL (managed)")
+    print("   Region: Global CDN")
+    print("   Monitoring: Built-in logs & metrics")
+    
+    return True
+
+# Run simulation
+simulate_railway_deployment()</textarea>
+                            <button class="btn btn-railway" onclick="runRailwayDeployment()">
+                                <i class="fas fa-train"></i> Simulate Railway Deployment
+                            </button>
+                            <div class="runner-output" id="railwayOutput">Deployment output will appear here...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Production Monitoring -->
+            <div class="message fade-in" id="monitoring-production">
+                <div class="avatar monitoring">📊</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Site Reliability Engineer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-deployment">Monitoring</div>
+                            <div class="content-badge badge-industrial">Production</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>📊 Production Monitoring & Environment Variables</h2>
+                        <p>Set up comprehensive monitoring for your manufacturing AI applications with proper environment management.</p>
+                        
+                        <div class="monitoring-grid">
+                            <div class="metric-card">
+                                <div class="metric-label">API Response Time</div>
+                                <div class="metric-value">128ms</div>
+                                <div class="metric-trend down">↓ 15%</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Error Rate</div>
+                                <div class="metric-value">0.03%</div>
+                                <div class="metric-trend down">↓ 8%</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Active Users</div>
+                                <div class="metric-value">142</div>
+                                <div class="metric-trend up">↑ 12%</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Uptime (30d)</div>
+                                <div class="metric-value">99.97%</div>
+                                <div class="metric-trend">→ Stable</div>
+                            </div>
+                        </div>
+
+                        <div class="env-panel">
+                            <h4>🔐 Manufacturing AI Environment Variables</h4>
+                            <div class="env-var">
+                                <span class="env-key">MANUFACTURING_API_KEY</span>
+                                <span class="env-value env-masked">sk_prod_••••••••••••••••</span>
+                            </div>
+                            <div class="env-var">
+                                <span class="env-key">DATABASE_URL</span>
+                                <span class="env-value">postgresql://prod_user:••••@prod-db.render.com/manufacturing_prod</span>
+                            </div>
+                            <div class="env-var">
+                                <span class="env-key">MODEL_VERSION</span>
+                                <span class="env-value">v3.2-production</span>
+                            </div>
+                            <div class="env-var">
+                                <span class="env-key">LOG_LEVEL</span>
+                                <span class="env-value">INFO</span>
+                            </div>
+                            <div class="env-var">
+                                <span class="env-key">ALERT_WEBHOOK</span>
+                                <span class="env-value">https://hooks.slack.com/services/••••••••••••••••</span>
+                            </div>
+                            <div class="env-var">
+                                <span class="env-key">MAX_WORKERS</span>
+                                <span class="env-value">4</span>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    <button class="code-action" onclick="runMonitoringDemo()"><i class="fas fa-play"></i> Run</button>
+                                </div>
+                            </div>
+<pre><code>import os
+import json
+from datetime import datetime
+import logging
+from typing import Dict, Any
+
+class ManufacturingAIMonitor:
+    """Production monitoring for manufacturing AI applications"""
+    
+    def __init__(self):
+        # Load environment variables
+        self.api_key = os.getenv('MANUFACTURING_API_KEY')
+        self.model_version = os.getenv('MODEL_VERSION', 'v1.0')
+        self.debug_mode = os.getenv('DEBUG_MODE', 'False').lower() == 'true'
+        
+        # Setup logging
+        log_level = os.getenv('LOG_LEVEL', 'INFO')
+        logging.basicConfig(
+            level=getattr(logging, log_level),
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+        self.logger = logging.getLogger('manufacturing_ai')
+        
+        # Initialize metrics
+        self.metrics = {
+            'requests_processed': 0,
+            'errors': 0,
+            'avg_response_time': 0,
+            'predictions_made': 0,
+            'start_time': datetime.now()
+        }
+    
+    def process_manufacturing_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Process manufacturing AI request with monitoring"""
+        start_time = datetime.now()
+        
+        try:
+            # Log request
+            self.logger.info(f"Processing request: {request_data.get('type', 'unknown')}")
+            
+            # Validate API key
+            if not self.validate_api_key():
+                raise ValueError("Invalid API key")
+            
+            # Process based on request type
+            if request_data.get('type') == 'predictive_maintenance':
+                result = self.predict_maintenance(request_data)
+            elif request_data.get('type') == 'quality_inspection':
+                result = self.inspect_quality(request_data)
+            else:
+                result = self.process_general(request_data)
+            
+            # Update metrics
+            self.update_metrics(success=True, duration=(datetime.now() - start_time).total_seconds())
+            
+            return {
+                'success': True,
+                'result': result,
+                'model_version': self.model_version,
+                'processing_time': (datetime.now() - start_time).total_seconds()
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error processing request: {str(e)}")
+            self.update_metrics(success=False)
+            
+            return {
+                'success': False,
+                'error': str(e),
+                'model_version': self.model_version
+            }
+    
+    def validate_api_key(self) -> bool:
+        """Validate manufacturing API key"""
+        # In production, validate against your authentication service
+        return bool(self.api_key and len(self.api_key) > 10)
+    
+    def predict_maintenance(self, data: Dict) -> Dict:
+        """Predict maintenance needs for manufacturing equipment"""
+        # Your AI model logic here
+        return {
+            'maintenance_needed': True,
+            'confidence': 0.92,
+            'recommended_action': 'Schedule maintenance in 48 hours',
+            'critical_components': ['bearing_assembly', 'hydraulic_pump']
+        }
+    
+    def update_metrics(self, success: bool, duration: float = 0):
+        """Update monitoring metrics"""
+        self.metrics['requests_processed'] += 1
+        
+        if not success:
+            self.metrics['errors'] += 1
+        
+        # Update average response time
+        old_avg = self.metrics['avg_response_time']
+        old_count = self.metrics['requests_processed'] - 1
+        self.metrics['avg_response_time'] = (old_avg * old_count + duration) / self.metrics['requests_processed']
+        
+        if success and duration > 0:
+            self.metrics['predictions_made'] += 1
+    
+    def get_health_status(self) -> Dict:
+        """Get application health status"""
+        uptime = (datetime.now() - self.metrics['start_time']).total_seconds()
+        
+        return {
+            'status': 'healthy',
+            'uptime_seconds': uptime,
+            'metrics': self.metrics,
+            'environment': {
+                'model_version': self.model_version,
+                'debug_mode': self.debug_mode,
+                'log_level': self.logger.level
+            }
+        }
+    
+    def generate_alert(self, alert_type: str, message: str):
+        """Generate production alert"""
+        alert = {
+            'type': alert_type,
+            'message': message,
+            'timestamp': datetime.now().isoformat(),
+            'metrics': self.metrics.copy()
+        }
+        
+        # Log alert
+        self.logger.warning(f"Alert: {alert_type} - {message}")
+        
+        # In production, send to Slack/Teams/PagerDuty
+        webhook_url = os.getenv('ALERT_WEBHOOK')
+        if webhook_url and not self.debug_mode:
+            # Send to webhook (simplified)
+            self.logger.info(f"Alert sent to webhook: {alert_type}")
+        
+        return alert
+
+# Example usage
+def main():
+    print("📊 Manufacturing AI Production Monitoring")
+    print("=" * 50)
+    
+    # Set environment variables (simulated)
+    os.environ['MANUFACTURING_API_KEY'] = 'sk_prod_1234567890'
+    os.environ['MODEL_VERSION'] = 'v3.2-production'
+    os.environ['LOG_LEVEL'] = 'INFO'
+    os.environ['DEBUG_MODE'] = 'False'
+    
+    # Initialize monitor
+    monitor = ManufacturingAIMonitor()
+    
+    print("\n🏭 Processing Manufacturing Requests:")
+    
+    # Simulate requests
+    requests = [
+        {'type': 'predictive_maintenance', 'equipment_id': 'CNC_MILL_001'},
+        {'type': 'quality_inspection', 'batch_id': 'BATCH_2023_0456'},
+        {'type': 'unknown_type', 'data': 'test'}
+    ]
+    
+    for i, request in enumerate(requests, 1):
+        print(f"\nRequest {i}: {request['type']}")
+        result = monitor.process_manufacturing_request(request)
+        
+        if result['success']:
+            print(f"  ✅ Success: {result.get('result', {}).get('recommended_action', 'Completed')}")
+            print(f"  ⏱️ Processing time: {result.get('processing_time', 0):.3f}s")
+        else:
+            print(f"  ❌ Error: {result.get('error')}")
+    
+    # Get health status
+    print(f"\n📈 Health Status:")
+    health = monitor.get_health_status()
+    print(f"  Uptime: {health['uptime_seconds']:.0f}s")
+    print(f"  Requests processed: {health['metrics']['requests_processed']}")
+    print(f"  Error rate: {health['metrics']['errors']/health['metrics']['requests_processed']:.1%}")
+    print(f"  Avg response time: {health['metrics']['avg_response_time']:.3f}s")
+    print(f"  Model version: {health['environment']['model_version']}")
+
+if __name__ == "__main__":
+    main()</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lesson Navigation -->
+            <div class="lesson-navigation">
+                <a href="lesson12.html" class="nav-btn nav-prev">
+                    <i class="fas fa-arrow-left"></i>
+                    <div>
+                        <div style="font-size: 12px; color: var(--text-tertiary);">Previous Lesson</div>
+                        <div style="font-weight: 700;">Lesson 12: Advanced Python Methods</div>
+                    </div>
+                </a>
+                
+                <a href="lesson14.html" class="nav-btn nav-next">
+                    <div>
+                        <div style="font-size: 12px; color: var(--text-tertiary);">Next Lesson</div>
+                        <div style="font-weight: 700;">Lesson 14: Manufacturing APIs & FastAPI</div>
+                    </div>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Enhanced JavaScript for Lesson 13
+        let pyodide;
+        let isDarkMode = true;
+        
+        // Enhanced Sparkle Effect
+        function createSparkle(x, y) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            sparkle.style.left = `${x}px`;
+            sparkle.style.top = `${y}px`;
+            
+            const size = Math.random() * 8 + 4;
+            sparkle.style.width = `${size}px`;
+            sparkle.style.height = `${size}px`;
+            
+            document.body.appendChild(sparkle);
+            
+            sparkle.style.animation = `sparkle ${Math.random() * 0.5 + 0.3}s ease-out forwards`;
+            
+            setTimeout(() => {
+                sparkle.remove();
+            }, 500);
+        }
+        
+        // Enhanced Theme Toggle with sparkles
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+
+        themeToggle.addEventListener('click', (e) => {
+            isDarkMode = !isDarkMode;
+            
+            // Create sparkles
+            for (let i = 0; i < 5; i++) {
+                const rect = themeToggle.getBoundingClientRect();
+                const x = rect.left + Math.random() * rect.width;
+                const y = rect.top + Math.random() * rect.height;
+                setTimeout(() => createSparkle(x, y), i * 100);
+            }
+            
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                themeIcon.className = 'fas fa-moon theme-icon';
+                themeText.textContent = 'Dark Mode';
+            } else {
+                document.body.classList.remove('dark-mode');
+                themeIcon.className = 'fas fa-sun theme-icon';
+                themeText.textContent = 'Light Mode';
+            }
+            
+            // Animate icon
+            themeIcon.style.transform = 'rotate(360deg) scale(1.3)';
+            setTimeout(() => {
+                themeIcon.style.transform = '';
+            }, 300);
+        });
+
+        // Enhanced hover effects for buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('.btn, .code-action, .sidebar-item, .nav-btn');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    // Create ripple effect
+                    const ripple = document.createElement('span');
+                    ripple.style.position = 'absolute';
+                    ripple.style.borderRadius = '50%';
+                    ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                    ripple.style.transform = 'scale(0)';
+                    ripple.style.animation = 'ripple 0.6s linear';
+                    ripple.style.left = `${x}px`;
+                    ripple.style.top = `${y}px`;
+                    ripple.style.width = '100px';
+                    ripple.style.height = '100px';
+                    ripple.style.marginLeft = '-50px';
+                    ripple.style.marginTop = '-50px';
+                    
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+            
+            // Add CSS for ripple animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+
+        // Enhanced Scroll to Section with smooth animation
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+                
+                // Add highlight animation
+                element.style.animation = 'highlight 2s ease-out';
+                setTimeout(() => {
+                    element.style.animation = '';
+                }, 2000);
+                
+                // Update active sidebar item
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Find and activate the corresponding sidebar item
+                const sidebarItems = document.querySelectorAll('.sidebar-item');
+                for (const item of sidebarItems) {
+                    if (item.getAttribute('onclick')?.includes(sectionId)) {
+                        item.classList.add('active');
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Enhanced Pyodide Initialization
+        async function initializePyodide() {
+            const loader = document.getElementById('pyodideLoader');
+            loader.style.display = 'block';
+            
+            try {
+                pyodide = await loadPyodide({
+                    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
+                });
+                
+                // Load required packages
+                await pyodide.loadPackage(['micropip']);
+                await pyodide.runPythonAsync(`
+                    import micropip
+                    await micropip.install(['pandas', 'numpy', 'matplotlib', 'scipy'])
+                `);
+                
+                console.log('Pyodide initialized successfully');
+                
+                // Hide loader with animation
+                loader.style.opacity = '0';
+                loader.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 300);
+                
+                // Show success message
+                const output = document.getElementById('pythonOutput');
+                output.innerHTML = '<span style="color: var(--success-green);">✅ Python runtime loaded successfully!</span>';
+                output.classList.add('success');
+                setTimeout(() => {
+                    output.classList.remove('success');
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Failed to initialize Pyodide:', error);
+                loader.innerHTML = `
+                    <div style="color: var(--error-red); text-align: center;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 16px;"></i>
+                        <p>Failed to load Python runtime. Some features may be limited.</p>
+                        <p style="font-size: 12px;">Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Enhanced Run Python Code with progress indication
+        async function runPythonCode() {
+            const code = document.getElementById('pythonCode').value;
+            const output = document.getElementById('pythonOutput');
+            
+            output.innerHTML = '<span style="color: var(--text-tertiary);">🚀 Running Python code...</span>';
+            output.classList.remove('success', 'error');
+            
+            if (!pyodide) {
+                output.innerHTML = '<span style="color: var(--error-red);">Python runtime not ready yet. Please wait...</span>';
+                output.classList.add('error');
+                return;
+            }
+            
+            try {
+                // Create progress indicator
+                const progress = document.createElement('div');
+                progress.style.width = '0%';
+                progress.style.height = '2px';
+                progress.style.background = 'var(--industrial-gradient)';
+                progress.style.transition = 'width 0.3s ease';
+                output.appendChild(progress);
+                
+                // Animate progress
+                setTimeout(() => progress.style.width = '30%', 100);
+                setTimeout(() => progress.style.width = '60%', 200);
+                setTimeout(() => progress.style.width = '90%', 300);
+                
+                // Capture print output
+                let capturedOutput = '';
+                pyodide.runPython(`
+                    import sys
+                    import io
+                    sys.stdout = io.StringIO()
+                `);
+                
+                await pyodide.runPythonAsync(code);
+                
+                // Get the captured output
+                capturedOutput = pyodide.runPython('sys.stdout.getvalue()');
+                
+                // Restore stdout
+                pyodide.runPython('sys.stdout = sys.__stdout__');
+                
+                // Complete progress
+                progress.style.width = '100%';
+                setTimeout(() => progress.remove(), 300);
+                
+                output.innerHTML = capturedOutput || '<span style="color: var(--text-tertiary);">(No output generated)</span>';
+                output.style.color = 'var(--code-text)';
+                output.classList.add('success');
+                
+                // Add success animation
+                output.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    output.style.transform = '';
+                }, 300);
+                
+            } catch (error) {
+                output.innerHTML = `<span style="color: var(--error-red);">❌ Error: ${error.message}</span>`;
+                output.classList.add('error');
+                
+                // Add error animation
+                output.style.animation = 'shake 0.5s ease';
+                setTimeout(() => {
+                    output.style.animation = '';
+                }, 500);
+            }
+        }
+
+        // Add shake animation for errors
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                20%, 40%, 60%, 80% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Enhanced Copy Code Function
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-block').querySelector('.code-content');
+            const codeText = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(codeText).then(() => {
+                const originalText = button.innerHTML;
+                const originalIcon = button.querySelector('i').className;
+                
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                button.style.background = 'var(--success-green)';
+                button.style.color = 'white';
+                button.style.transform = 'scale(1.1)';
+                
+                // Create checkmark animation
+                const checkmark = document.createElement('div');
+                checkmark.innerHTML = '✓';
+                checkmark.style.position = 'absolute';
+                checkmark.style.top = '50%';
+                checkmark.style.left = '50%';
+                checkmark.style.transform = 'translate(-50%, -50%) scale(0)';
+                checkmark.style.fontSize = '24px';
+                checkmark.style.color = 'var(--success-green)';
+                checkmark.style.transition = 'transform 0.3s ease';
+                button.appendChild(checkmark);
+                
+                setTimeout(() => {
+                    checkmark.style.transform = 'translate(-50%, -50%) scale(1)';
+                }, 10);
+                
+                setTimeout(() => {
+                    checkmark.style.transform = 'translate(-50%, -50%) scale(0)';
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.querySelector('i').className = originalIcon;
+                        button.style.background = '';
+                        button.style.color = '';
+                        button.style.transform = '';
+                        checkmark.remove();
+                    }, 300);
+                }, 2000);
+            });
+        }
+
+        // Enhanced Guest Visualization
+        function initializeGuestVisualization() {
+            const container = document.getElementById('guestVisualization');
+            const personnel = [
+                { id: "ROB-001", name: "Assembly Robot ARM-1", role: "robot", status: "active", skills: 3 },
+                { id: "ENG-101", name: "Dr. Sarah Chen", role: "engineer", status: "active", skills: 3 },
+                { id: "OP-202", name: "Mike Rodriguez", role: "operator", status: "active", skills: 3 },
+                { id: "ROB-002", name: "Quality Inspector Bot", role: "robot", status: "maintenance", skills: 2 },
+                { id: "ENG-102", name: "Alex Johnson", role: "engineer", status: "active", skills: 3 }
+            ];
+            
+            container.innerHTML = '';
+            
+            personnel.forEach((person, index) => {
+                const card = document.createElement('div');
+                card.className = `guest-card ${person.role} floating-element`;
+                card.style.animationDelay = `${index * 0.1}s`;
+                
+                let icon = '🤖';
+                if (person.role === 'engineer') icon = '👨‍💻';
+                if (person.role === 'operator') icon = '👷‍♂️';
+                
+                card.innerHTML = `
+                    <div style="font-size: 32px; margin-bottom: 8px; transition: transform 0.3s ease;">${icon}</div>
+                    <div style="font-weight: 600; margin-bottom: 4px; font-size: 14px;">${person.name}</div>
+                    <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px;">${person.id}</div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 8px;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: ${person.status === 'active' ? 'var(--predictive-green)' : 'var(--warning-orange)'};"></span>
+                        <span style="font-size: 11px; text-transform: uppercase;">${person.status}</span>
+                    </div>
+                    <div style="font-size: 10px; color: var(--text-tertiary);">
+                        <i class="fas fa-tools" style="margin-right: 4px;"></i>${person.skills} skills
+                    </div>
+                `;
+                
+                // Add hover effect for icon
+                const iconElement = card.querySelector('div:first-child');
+                card.addEventListener('mouseenter', () => {
+                    iconElement.style.transform = 'scale(1.2) rotate(10deg)';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    iconElement.style.transform = '';
+                });
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Enhanced Deployment Simulations
+        async function runRenderDeployment() {
+            const code = document.getElementById('renderDeployCode').value;
+            const output = document.getElementById('renderOutput');
+            
+            output.innerHTML = '<span style="color: var(--text-tertiary);">🚀 Starting Render deployment simulation...</span>';
+            output.classList.remove('success', 'error');
+            
+            // Create progress steps
+            const steps = [
+                { text: "Connecting to GitHub repository", time: 800 },
+                { text: "Installing dependencies", time: 1200 },
+                { text: "Setting environment variables", time: 600 },
+                { text: "Building application", time: 1500 },
+                { text: "Starting web service", time: 900 },
+                { text: "Running health checks", time: 700 },
+                { text: "Deployment complete!", time: 500 }
+            ];
+            
+            let outputHTML = '';
+            outputHTML += '🚀 Starting Manufacturing AI Deployment to Render\n';
+            outputHTML += '='.repeat(60) + '\n\n';
+            
+            for (let i = 0; i < steps.length; i++) {
+                await new Promise(resolve => setTimeout(resolve, steps[i].time));
+                
+                outputHTML += `Step ${i + 1}: ${steps[i].text}\n`;
+                outputHTML += `   Status: ${i === steps.length - 1 ? '🎉 Complete!' : '✅ Complete'}\n\n`;
+                
+                output.innerHTML = outputHTML + '<span style="color: var(--text-tertiary);">Processing...</span>';
+                output.scrollTop = output.scrollHeight;
+            }
+            
+            outputHTML += '='.repeat(60) + '\n';
+            outputHTML += '🎉 Deployment Successful!\n\n';
+            outputHTML += '📊 Application Details:\n';
+            outputHTML += '   URL: https://manufacturing-ai-api.onrender.com\n';
+            outputHTML += '   Region: Oregon (US West)\n';
+            outputHTML += '   Instance: Free Tier (768 MB RAM)\n';
+            outputHTML += '   Auto-deploy: Enabled on git push\n\n';
+            outputHTML += '🏭 Your Manufacturing AI is now live in production!';
+            
+            output.innerHTML = outputHTML;
+            output.classList.add('success');
+        }
+
+        async function runRailwayDeployment() {
+            const output = document.getElementById('railwayOutput');
+            
+            output.innerHTML = '<span style="color: var(--text-tertiary);">🚂 Starting Railway deployment simulation...</span>';
+            output.classList.remove('success', 'error');
+            
+            // Create animated terminal effect
+            const commands = [
+                { cmd: "railway login", desc: "🔐 Authenticating with Railway...", time: 1000 },
+                { cmd: "railway init", desc: "📦 Initializing Railway project...", time: 1200 },
+                { cmd: "railway add postgresql", desc: "🗄️ Adding PostgreSQL database...", time: 1500 },
+                { cmd: "railway variables set MANUFACTURING_API_KEY=***", desc: "🔧 Setting environment variables...", time: 800 },
+                { cmd: "railway variables set MODEL_VERSION=v2.1", desc: "🏷️ Setting model version...", time: 600 },
+                { cmd: "railway up", desc: "🚀 Deploying application...", time: 2000 },
+                { cmd: "railway logs", desc: "📋 Streaming deployment logs...", time: 1500 },
+                { cmd: "railway open", desc: "🌐 Opening application in browser...", time: 800 }
+            ];
+            
+            let outputHTML = '';
+            outputHTML += '🚂 Railway Manufacturing AI Deployment\n';
+            outputHTML += '='.repeat(60) + '\n\n';
+            
+            for (const command of commands) {
+                outputHTML += `${command.desc}\n`;
+                outputHTML += `   Command: ${command.cmd}\n`;
+                
+                // Simulate typing effect
+                output.innerHTML = outputHTML + '<span class="typing-cursor">|</span>';
+                output.scrollTop = output.scrollHeight;
+                
+                await new Promise(resolve => setTimeout(resolve, command.time));
+                
+                if (command.cmd.includes('login')) outputHTML += '   ✅ Authentication successful\n\n';
+                else if (command.cmd.includes('init')) outputHTML += '   ✅ Project initialized\n\n';
+                else if (command.cmd.includes('postgresql')) outputHTML += '   ✅ PostgreSQL database provisioned\n   📊 Connection string: postgresql://user:***@db.railway.app/manufacturing\n\n';
+                else if (command.cmd.includes('variables')) outputHTML += '   ✅ Environment variables set\n\n';
+                else if (command.cmd.includes('railway up')) {
+                    outputHTML += '   🏗️ Building Docker image...\n';
+                    outputHTML += '   📦 Pushing image to registry...\n';
+                    outputHTML += '   🚀 Deploying to Railway infrastructure...\n';
+                    outputHTML += '   ✅ Deployment complete!\n\n';
+                }
+                else if (command.cmd.includes('logs')) {
+                    outputHTML += '   📋 [INFO] Starting manufacturing AI application\n';
+                    outputHTML += '   📋 [INFO] Loading predictive maintenance model v2.1\n';
+                    outputHTML += '   📋 [INFO] Database connection established\n';
+                    outputHTML += '   📋 [INFO] API server listening on port 5000\n\n';
+                }
+                else if (command.cmd.includes('open')) outputHTML += '   🌐 Opening: https://manufacturing-ai.up.railway.app\n\n';
+            }
+            
+            outputHTML += '='.repeat(60) + '\n';
+            outputHTML += '🎉 Railway Deployment Complete!\n\n';
+            outputHTML += '🏭 Manufacturing AI Dashboard:\n';
+            outputHTML += '   URL: https://manufacturing-ai.up.railway.app\n';
+            outputHTML += '   Database: PostgreSQL (managed)\n';
+            outputHTML += '   Region: Global CDN\n';
+            outputHTML += '   Monitoring: Built-in logs & metrics\n\n';
+            outputHTML += '🚂 Your manufacturing AI is now running on Railway!';
+            
+            output.innerHTML = outputHTML;
+            output.classList.add('success');
+        }
+
+        // Enhanced Tool Functions
+        function showEnvironmentVariables() {
+            const envVars = [
+                { key: "MANUFACTURING_API_KEY", value: "sk_prod_••••••••••••••••", description: "API key for manufacturing services", type: "secret" },
+                { key: "DATABASE_URL", value: "postgresql://user:••••@db.render.com/manufacturing", description: "Production database connection", type: "connection" },
+                { key: "MODEL_VERSION", value: "v3.2-production", description: "AI model version in production", type: "config" },
+                { key: "DEBUG_MODE", value: "False", description: "Enable debug logging", type: "config" },
+                { key: "LOG_LEVEL", value: "INFO", description: "Logging verbosity", type: "config" },
+                { key: "ALERT_WEBHOOK", value: "https://hooks.slack.com/services/••••••••••••••••", description: "Slack webhook for alerts", type: "secret" },
+                { key: "MAX_WORKERS", value: "4", description: "Maximum worker processes", type: "config" },
+                { key: "JWT_SECRET", value: "••••••••••••••••••••••••••••••••", description: "JWT signing secret", type: "secret" }
+            ];
+            
+            let html = '<h4>🔐 Environment Variables for Manufacturing AI</h4>';
+            html += '<div class="env-panel">';
+            
+            envVars.forEach(env => {
+                let icon = '🔧';
+                if (env.type === 'secret') icon = '🔒';
+                if (env.type === 'connection') icon = '🔌';
+                
+                html += `
+                    <div class="env-var" style="margin-bottom: 8px;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                <span style="font-size: 14px;">${icon}</span>
+                                <div class="env-key">${env.key}</div>
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-tertiary);">${env.description}</div>
+                        </div>
+                        <div class="env-value">${env.value}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            html += '<p style="margin-top: 12px; color: var(--text-secondary);">';
+            html += '<strong>🏭 Manufacturing Best Practices:</strong><br>';
+            html += '• 🔒 Store secrets in platform environment variables, not in code<br>';
+            html += '• 🏷️ Use different values for development and production<br>';
+            html += '• 🔄 Rotate API keys regularly for security<br>';
+            html += '• 📚 Document all environment variables in README.md';
+            html += '</p>';
+            
+            const output = document.getElementById('pythonOutput');
+            output.innerHTML = html;
+            output.classList.add('success');
+        }
+
+        function generateDeploymentChecklist() {
+            const checklist = `# 🏭 Manufacturing AI Deployment Checklist
+
+## ✅ Pre-Deployment
+- [ ] Test all manufacturing AI models locally
+- [ ] Update requirements.txt with exact versions
+- [ ] Create .env.example with all required variables
+- [ ] Write comprehensive README.md
+- [ ] Test database migrations (if any)
+
+## 🔧 Platform Setup
+- [ ] Create account on Render/Railway
+- [ ] Connect GitHub repository
+- [ ] Set up production database
+- [ ] Configure environment variables
+- [ ] Set up custom domain (if needed)
+
+## 🚀 Deployment
+- [ ] Deploy to staging environment first
+- [ ] Run automated tests
+- [ ] Verify API endpoints are working
+- [ ] Test database connections
+- [ ] Monitor initial deployment logs
+
+## 📊 Post-Deployment
+- [ ] Set up monitoring and alerts
+- [ ] Configure auto-scaling rules
+- [ ] Set up backup strategy
+- [ ] Document deployment process
+- [ ] Update deployment runbook
+
+## 🏭 Manufacturing Specific
+- [ ] Test with manufacturing data samples
+- [ ] Verify prediction accuracy
+- [ ] Set up data retention policies
+- [ ] Configure manufacturing-specific alerts
+- [ ] Schedule regular model retraining
+
+## 🔒 Security
+- [ ] Enable HTTPS/SSL
+- [ ] Set up API rate limiting
+- [ ] Configure CORS policies
+- [ ] Regular security updates
+- [ ] Monitor for suspicious activity`;
+            
+            const output = document.getElementById('pythonOutput');
+            output.innerHTML = 
+                '<span style="color: var(--success-green);">✅ Deployment Checklist Generated:</span>\n\n' +
+                '<div class="code-content" style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; white-space: pre-wrap; font-family: monospace;">' +
+                checklist +
+                '</div>';
+            output.classList.add('success');
+        }
+
+        // Enhanced Page Initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Pyodide
+            initializePyodide();
+            
+            // Initialize guest visualization
+            initializeGuestVisualization();
+            
+            // Update lesson progress
+            const progressBar = document.getElementById('lessonProgress');
+            if (progressBar) {
+                progressBar.style.width = '100%';
+            }
+            
+            // Add fade-in animation to all messages
+            const messages = document.querySelectorAll('.message');
+            messages.forEach((message, index) => {
+                message.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+            // Initialize progress indicator
+            updateProgressIndicator();
+            
+            // Add scroll event listener for progress indicator
+            window.addEventListener('scroll', updateProgressIndicator);
+            
+            // Add floating animation to some elements
+            const floatingElements = document.querySelectorAll('.floating-element, .logo, .avatar');
+            floatingElements.forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.2}s`;
+            });
+            
+            // Add tooltip functionality
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip';
+            document.body.appendChild(tooltip);
+            
+            document.querySelectorAll('[title]').forEach(el => {
+                el.addEventListener('mouseenter', (e) => {
+                    tooltip.textContent = el.getAttribute('title');
+                    tooltip.style.left = `${e.pageX}px`;
+                    tooltip.style.top = `${e.pageY - 40}px`;
+                    tooltip.style.opacity = '1';
+                });
+                
+                el.addEventListener('mouseleave', () => {
+                    tooltip.style.opacity = '0';
+                });
+            });
+        });
+
+        // Enhanced Progress Indicator
+        function updateProgressIndicator() {
+            const sections = document.querySelectorAll('.message');
+            const scrollPosition = window.scrollY + window.innerHeight / 3;
+            
+            let currentSection = 0;
+            sections.forEach((section, index) => {
+                const sectionTop = section.offsetTop;
+                const sectionBottom = sectionTop + section.offsetHeight;
+                
+                if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+                    currentSection = index;
+                }
+            });
+            
+            const progress = ((currentSection + 1) / sections.length) * 100;
+            const progressBar = document.getElementById('progressBar');
+            if (progressBar) {
+                progressBar.style.height = `${progress}%`;
+            }
+        }
+
+        // All other functions from your original code (runGuestSystem, runComprehensionDemo, etc.)
+        // Keep them exactly as in your original code, or enhance them similarly
+        
+        async function runGuestSystem() {
+            const code = `class ManufacturingAccessSystem:
+    def __init__(self):
+        self.personnel = [
+            {"access_id": "ROB-001", "name": "Assembly Robot ARM-1", "role": "robot", "zone_access": ["assembly_line", "quality_check"], "active": True, "skills": ["welding", "assembly", "painting"]},
+            {"access_id": "ENG-101", "name": "Dr. Sarah Chen", "role": "engineer", "zone_access": ["control_room", "assembly_line", "maintenance"], "active": True, "skills": ["PLC programming", "machine learning", "robotics"]},
+            {"access_id": "OP-202", "name": "Mike Rodriguez", "role": "operator", "zone_access": ["assembly_line", "packaging"], "active": True, "skills": ["CNC operation", "quality control", "safety protocols"]},
+            {"access_id": "ROB-002", "name": "Quality Inspector Bot", "role": "robot", "zone_access": ["quality_check", "packaging"], "active": False, "skills": ["vision inspection", "defect detection"]},
+            {"access_id": "ENG-102", "name": "Alex Johnson", "role": "engineer", "zone_access": ["control_room", "R&D", "maintenance"], "active": True, "skills": ["IoT systems", "data analysis", "predictive maintenance"]}
+        ]
+    
+    def get_total_personnel(self):
+        active_personnel = [p for p in self.personnel if p["active"]]
+        return len(active_personnel)
+    
+    def get_personnel_list(self):
+        personnel_list = [f"{p['access_id']}: {p['name']} ({p['role']})" 
+                         for p in self.personnel if p["active"]]
+        return personnel_list
+    
+    def get_zone_occupancy(self, zone):
+        zone_personnel = [p["name"] for p in self.personnel 
+                         if p["active"] and zone in p["zone_access"]]
+        return zone_personnel
+    
+    def get_skills_inventory(self):
+        all_skills = [skill for p in self.personnel for skill in p["skills"]]
+        return list(set(all_skills))
+    
+    def get_role_summary(self):
+        roles = [p["role"] for p in self.personnel if p["active"]]
+        role_counts = {role: roles.count(role) for role in set(roles)}
+        return role_counts
+
+print("🏭 Manufacturing Facility Access Management System")
+print("=" * 60)
+
+system = ManufacturingAccessSystem()
+
+print("\\n👥 Total Active Personnel:")
+total = system.get_total_personnel()
+print(f"  Active: {total}")
+print(f"  Total Registered: {len(system.personnel)}")
+
+print("\\n📋 Personnel List:")
+personnel_list = system.get_personnel_list()
+for person in personnel_list:
+    print(f"  • {person}")
+
+print("\\n📍 Zone Occupancy Check:")
+zones = ["assembly_line", "control_room", "quality_check"]
+for zone in zones:
+    occupants = system.get_zone_occupancy(zone)
+    print(f"  {zone.replace('_', ' ').title()}: {len(occupants)} personnel")
+    if occupants:
+        print(f"    - {', '.join(occupants)}")
+
+print("\\n🛠️ Skills Inventory:")
+skills = system.get_skills_inventory()
+print(f"  Total Unique Skills: {len(skills)}")
+print(f"  Skills: {', '.join(sorted(skills))}")
+
+print("\\n🎯 Role Distribution:")
+role_summary = system.get_role_summary()
+for role, count in role_summary.items():
+    print(f"  {role.title()}: {count}")`;
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+        
+        async function runGuestSystemExercise() {
+            const code = document.querySelector('#manufacturing-guest-system .code-content').textContent;
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+        
+        function showGuestSystemSolution() {
+            const solution = `# 🏭 Complete Manufacturing Access System Solution
+
+class ManufacturingAccessSystem:
+    def __init__(self):
+        self.personnel = [
+            {"access_id": "ROB-001", "name": "Assembly Robot ARM-1", "role": "robot", "zone_access": ["assembly_line", "quality_check"], "active": True, "skills": ["welding", "assembly", "painting"]},
+            {"access_id": "ENG-101", "name": "Dr. Sarah Chen", "role": "engineer", "zone_access": ["control_room", "assembly_line", "maintenance"], "active": True, "skills": ["PLC programming", "machine learning", "robotics"]},
+            {"access_id": "OP-202", "name": "Mike Rodriguez", "role": "operator", "zone_access": ["assembly_line", "packaging"], "active": True, "skills": ["CNC operation", "quality control", "safety protocols"]},
+            {"access_id": "ROB-002", "name": "Quality Inspector Bot", "role": "robot", "zone_access": ["quality_check", "packaging"], "active": False, "skills": ["vision inspection", "defect detection"]},
+            {"access_id": "ENG-102", "name": "Alex Johnson", "role": "engineer", "zone_access": ["control_room", "R&D", "maintenance"], "active": True, "skills": ["IoT systems", "data analysis", "predictive maintenance"]}
+        ]
+    
+    def get_total_personnel(self):
+        active_personnel = [p for p in self.personnel if p["active"]]
+        return len(active_personnel)
+    
+    def get_personnel_list(self):
+        personnel_list = [f"{p['access_id']}: {p['name']} ({p['role']})" 
+                         for p in self.personnel if p["active"]]
+        return personnel_list
+    
+    def get_zone_occupancy(self, zone):
+        zone_personnel = [p["name"] for p in self.personnel 
+                         if p["active"] and zone in p["zone_access"]]
+        return zone_personnel
+    
+    def get_skills_inventory(self):
+        all_skills = [skill for p in self.personnel for skill in p["skills"]]
+        return list(set(all_skills))
+    
+    def get_role_summary(self):
+        role_counts = {}
+        for p in self.personnel:
+            if p["active"]:
+                role_counts[p["role"]] = role_counts.get(p["role"], 0) + 1
+        return role_counts
+
+# Key Learning Points:
+# 1. List comprehensions filter and transform data in one line
+# 2. Nested list comprehensions flatten nested structures
+# 3. Dictionary comprehensions create dictionaries from iterables
+# 4. Comprehensions are more readable and often faster than loops
+# 5. Always consider readability - sometimes loops are clearer for complex logic`;
+            
+            const output = document.getElementById('pythonOutput');
+            output.innerHTML = '<span style="color: var(--success-green);">✅ Complete Solution:</span>\n\n' + solution;
+            output.classList.add('success');
+        }
+        
+        async function runComprehensionDemo() {
+            const code = `# ⚡ List Comprehension Power Demonstration
+
+print("🏭 Manufacturing Data Processing with Comprehensions")
+print("=" * 60)
+
+# 1. Basic List Comprehension
+print("\\n1. 🔧 Basic List Comprehension:")
+production = [1200, 1180, 1250, 1100, 1300]
+high_production = [units for units in production if units > 1150]
+print(f"   All production: {production}")
+print(f"   High production (>1150): {high_production}")
+
+# 2. List Comprehension with Transformation
+print("\\n2. 🔄 List Comprehension with Transformation:")
+sensor_readings = [45.2, 47.8, 42.1, 49.5]
+fahrenheit_readings = [(temp * 9/5) + 32 for temp in sensor_readings]
+print(f"   Celsius: {sensor_readings}")
+print(f"   Fahrenheit: {[round(f, 1) for f in fahrenheit_readings]}")
+
+# 3. Nested List Comprehension
+print("\\n3. 🏗️ Nested List Comprehension:")
+production_lines = [
+    ['part_a', 'part_b', 'part_c'],
+    ['part_d', 'part_e'],
+    ['part_f', 'part_g', 'part_h']
+]
+all_parts = [part for line in production_lines for part in line]
+print(f"   Production lines: {production_lines}")
+print(f"   All parts: {all_parts}")
+
+# 4. Dictionary Comprehension
+print("\\n4. 📚 Dictionary Comprehension:")
+sensors = ['temp_01', 'press_02', 'vib_03', 'temp_02']
+sensor_status = {sensor: 'active' for sensor in sensors}
+print(f"   Sensors: {sensors}")
+print(f"   Status: {sensor_status}")
+
+# 5. Set Comprehension
+print("\\n5. 🔄 Set Comprehension:")
+defects = ['scratch', 'dent', 'scratch', 'misalignment', 'dent']
+unique_defects = {defect for defect in defects}
+print(f"   All defects: {defects}")
+print(f"   Unique defects: {unique_defects}")
+
+# 6. Generator Expression (Memory Efficient)
+print("\\n6. ⚡ Generator Expression:")
+def generate_large_dataset():
+    for i in range(1000000):
+        yield i * 2
+
+doubles = (i * 2 for i in range(10) if i % 2 == 0)
+print(f"   First 5 from generator: {[next(doubles) for _ in range(5)]}")
+
+# 7. Real Manufacturing Example
+print("\\n7. 🏭 Real Manufacturing Example:")
+orders = [
+    {"id": "ORD-001", "quantity": 150, "priority": "high"},
+    {"id": "ORD-002", "quantity": 80, "priority": "normal"},
+    {"id": "ORD-003", "quantity": 200, "priority": "high"},
+    {"id": "ORD-004", "quantity": 60, "priority": "low"}
+]
+
+critical_orders = [
+    order["id"] 
+    for order in orders 
+    if order["priority"] == "high" and order["quantity"] > 100
+]
+
+print(f"   Critical orders: {critical_orders}")
+
+order_summary = {
+    order["id"]: {
+        "status": "urgent" if order["priority"] == "high" else "normal",
+        "estimated_time": order["quantity"] * 0.5
+    }
+    for order in orders
+}
+
+print(f"   Order summary: {order_summary}")`;
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+        
+        async function runAdvancedComprehensions() {
+            const code = document.querySelector('#advanced-comprehensions .code-content').textContent;
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+        
+        async function runDeploymentSimulator() {
+            const code = `# 🚀 Manufacturing AI Deployment Simulator
+
+import time
+import random
+
+class DeploymentSimulator:
+    def __init__(self):
+        self.platforms = ['Render', 'Railway', 'Heroku', 'AWS']
+        self.services = ['Web API', 'Database', 'Background Worker', 'Monitoring']
+        
+    def simulate_deployment(self, platform):
+        print(f"🚀 Deploying Manufacturing AI to {platform}")
+        print("=" * 60)
+        
+        steps = [
+            ("Initializing deployment", 0.5),
+            ("Checking dependencies", 0.8),
+            ("Building Docker image", 1.2),
+            ("Running tests", 0.7),
+            ("Setting environment variables", 0.3),
+            ("Deploying to production", 1.5),
+            ("Running health checks", 0.6),
+            ("Enabling monitoring", 0.4)
+        ]
+        
+        for step, duration in steps:
+            print(f"\\n{step}...")
+            time.sleep(duration * 0.1)
+            print(f"   ✅ Complete")
+        
+        metrics = {
+            'response_time': random.uniform(50, 200),
+            'uptime': random.uniform(99.5, 99.99),
+            'requests_per_minute': random.randint(100, 500),
+            'error_rate': random.uniform(0.01, 0.1)
+        }
+        
+        print(f"\\n" + "=" * 60)
+        print(f"🎉 Deployment to {platform} Successful!")
+        print(f"\\n📊 Production Metrics:")
+        print(f"   Avg Response Time: {metrics['response_time']:.1f}ms")
+        print(f"   Uptime: {metrics['uptime']:.2f}%")
+        print(f"   Requests/Min: {metrics['requests_per_minute']}")
+        print(f"   Error Rate: {metrics['error_rate']:.2f}%")
+        print(f"\\n🏭 Manufacturing AI is now live in production!")
+        
+        return metrics
+
+print("🏭 Manufacturing AI Deployment Simulator")
+print("=" * 50)
+
+simulator = DeploymentSimulator()
+
+print("\\nAvailable Platforms:")
+for i, platform in enumerate(simulator.platforms, 1):
+    print(f"  {i}. {platform}")
+
+print("\\n🔧 Simulating Render deployment...")
+metrics = simulator.simulate_deployment('Render')
+
+print("\\n🔧 Simulating Railway deployment...")
+metrics = simulator.simulate_deployment('Railway')
+
+print("\\n📈 Comparison:")
+print("  Render: Great for web APIs, Free tier available")
+print("  Railway: Excellent for databases, Easy GitHub integration")
+print("  Both: Perfect for Manufacturing AI applications!")`;
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+        
+        async function runMonitoringDemo() {
+            const code = document.querySelector('#monitoring-production .code-content').textContent;
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+    </script>
+</body>
+</html>

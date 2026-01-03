@@ -1,0 +1,3136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 13: List Comprehensions & Manufacturing AI Deployment | Python AI Bootcamp</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <style>
+        /* Manufacturing Theme Variables (Continued from previous lesson) */
+        :root {
+            --bg-primary: #0A0E17;
+            --bg-secondary: #0F172A;
+            --bg-tertiary: #1E293B;
+            --bg-quaternary: #334155;
+            --border-color: #475569;
+            --border-light: #64748B;
+            --text-primary: #F1F5F9;
+            --text-secondary: #CBD5E1;
+            --text-tertiary: #94A3B8;
+            --industrial-blue: #3B82F6;
+            --industrial-blue-light: rgba(59, 130, 246, 0.1);
+            --industrial-blue-hover: #2563EB;
+            --automation-orange: #F97316;
+            --robotics-yellow: #EAB308;
+            --predictive-green: #10B981;
+            --quality-red: #EF4444;
+            --iot-purple: #8B5CF6;
+            --plc-teal: #06D6A0;
+            --manufacturing-gray: #6B7280;
+            --safety-yellow: #FBBF24;
+            --code-bg: #0D1117;
+            --code-text: #E2E8F0;
+            --highlight-bg: rgba(59, 130, 246, 0.15);
+            --sidebar-bg: #0F172A;
+            --message-ai-bg: #1E293B;
+            --message-user-bg: #0F172A;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --shadow-heavy: rgba(0, 0, 0, 0.5);
+            --success-green: #10B981;
+            --warning-orange: #F97316;
+            --error-red: #EF4444;
+            --industrial-gradient: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            --automation-gradient: linear-gradient(135deg, #F97316, #EAB308);
+            --robotics-gradient: linear-gradient(135deg, #EAB308, #F97316);
+            --predictive-gradient: linear-gradient(135deg, #10B981, #06D6A0);
+            --quality-gradient: linear-gradient(135deg, #EF4444, #F97316);
+            --iot-gradient: linear-gradient(135deg, #8B5CF6, #3B82F6);
+            --data-science-pink: #EC4899;
+            --data-science-gradient: linear-gradient(135deg, #EC4899, #8B5CF6);
+            --deployment-purple: #A855F7;
+            --deployment-gradient: linear-gradient(135deg, #A855F7, #8B5CF6);
+            --monitoring-teal: #14B8A6;
+            --monitoring-gradient: linear-gradient(135deg, #14B8A6, #06D6A0);
+        }
+
+        .dark-mode {
+            --bg-primary: #030712;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1F2937;
+            --bg-quaternary: #374151;
+            --border-color: #4B5563;
+            --border-light: #6B7280;
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-tertiary: #9CA3AF;
+            --industrial-blue: #60A5FA;
+            --industrial-blue-light: rgba(96, 165, 250, 0.15);
+            --industrial-blue-hover: #3B82F6;
+            --automation-orange: #FB923C;
+            --robotics-yellow: #FBBF24;
+            --predictive-green: #34D399;
+            --quality-red: #F87171;
+            --iot-purple: #A78BFA;
+            --plc-teal: #34D399;
+            --manufacturing-gray: #9CA3AF;
+            --safety-yellow: #FCD34D;
+            --data-science-pink: #F472B6;
+            --deployment-purple: #C084FC;
+            --monitoring-teal: #2DD4BF;
+        }
+
+        /* Keep all existing styles from previous lesson and add new ones below */
+
+        /* Deployment Dashboard Styles */
+        .deployment-dashboard {
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            border: 2px solid var(--deployment-purple);
+        }
+
+        .deployment-step {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--deployment-purple);
+            transition: all 0.3s ease;
+        }
+
+        .deployment-step:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.2);
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            background: var(--deployment-gradient);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        .step-title {
+            display: inline-block;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-primary);
+            vertical-align: middle;
+        }
+
+        /* Environment Variables Panel */
+        .env-panel {
+            background: var(--code-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .env-var {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border-light);
+        }
+
+        .env-key {
+            font-family: 'Cascadia Code', monospace;
+            color: var(--industrial-blue);
+        }
+
+        .env-value {
+            font-family: 'Cascadia Code', monospace;
+            color: var(--predictive-green);
+        }
+
+        .env-masked {
+            color: var(--text-tertiary);
+            letter-spacing: 2px;
+        }
+
+        /* Monitoring Dashboard */
+        .monitoring-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .metric-card {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border-top: 4px solid var(--monitoring-teal);
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--monitoring-teal);
+            margin: 8px 0;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .comparison-table th {
+            background: var(--deployment-gradient);
+            color: white;
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table tr:hover {
+            background: var(--bg-quaternary);
+        }
+
+        /* Navigation Buttons */
+        .lesson-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin: 40px 0;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            background: var(--industrial-blue-light);
+            border-color: var(--industrial-blue);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .nav-btn i {
+            font-size: 20px;
+        }
+
+        .nav-prev {
+            border-left: 4px solid var(--automation-orange);
+        }
+
+        .nav-next {
+            border-right: 4px solid var(--predictive-green);
+        }
+
+        /* Platform Badges */
+        .platform-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-render {
+            background: rgba(168, 85, 247, 0.1);
+            color: var(--deployment-purple);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .badge-railway {
+            background: rgba(20, 184, 166, 0.1);
+            color: var(--monitoring-teal);
+            border: 1px solid rgba(20, 184, 166, 0.3);
+        }
+
+        .badge-list-comp {
+            background: rgba(236, 72, 153, 0.1);
+            color: var(--data-science-pink);
+            border: 1px solid rgba(236, 72, 153, 0.3);
+        }
+
+        .badge-deployment {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--industrial-blue);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        /* Manufacturing Guest List Visual */
+        .guest-visual {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .guest-card {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .guest-card.robot {
+            border-color: var(--robotics-yellow);
+        }
+
+        .guest-card.engineer {
+            border-color: var(--industrial-blue);
+        }
+
+        .guest-card.operator {
+            border-color: var(--predictive-green);
+        }
+
+        .guest-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px var(--shadow-heavy);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .lesson-navigation {
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .nav-btn {
+                justify-content: center;
+            }
+            
+            .guest-visual {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            
+            .monitoring-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon theme-icon" id="themeIcon"></i>
+        <span id="themeText">Light Mode</span>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">🏭</div>
+        <div class="header-title">Python AI Developer Bootcamp</div>
+        <div class="lesson-tag">Lesson 13: List Comprehensions & AI Deployment</div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-cogs"></i>
+                    Lesson 13 Topics
+                </div>
+                <div style="height: 4px; background: var(--bg-tertiary); border-radius: 2px; margin: 8px 0;">
+                    <div style="height: 100%; background: var(--deployment-gradient); border-radius: 2px; width: 100%;" id="lessonProgress"></div>
+                </div>
+                <div class="sidebar-item active" onclick="scrollToSection('list-comprehensions')">
+                    <i class="fas fa-bolt sidebar-icon"></i>
+                    <span>List Comprehensions Fundamentals</span>
+                    <div class="content-badge badge-list-comp">Core</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('manufacturing-guest-system')">
+                    <i class="fas fa-users sidebar-icon"></i>
+                    <span>Manufacturing Guest Management</span>
+                    <div class="content-badge badge-industrial">Exercise</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('advanced-comprehensions')">
+                    <i class="fas fa-layer-group sidebar-icon"></i>
+                    <span>Advanced Comprehensions</span>
+                    <div class="content-badge badge-data-science">Advanced</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('deployment-overview')">
+                    <i class="fas fa-rocket sidebar-icon"></i>
+                    <span>AI Deployment Overview</span>
+                    <div class="content-badge badge-deployment">Deploy</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('render-deployment')">
+                    <i class="fas fa-server sidebar-icon"></i>
+                    <span>Deploy to Render</span>
+                    <div class="content-badge badge-render">Render</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('railway-deployment')">
+                    <i class="fas fa-train sidebar-icon"></i>
+                    <span>Deploy to Railway</span>
+                    <div class="content-badge badge-railway">Railway</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('monitoring-production')">
+                    <i class="fas fa-chart-line sidebar-icon"></i>
+                    <span>Production Monitoring</span>
+                    <div class="content-badge badge-deployment">Monitor</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-tools"></i>
+                    Interactive Tools
+                </div>
+                <div class="sidebar-item" onclick="runComprehensionDemo()">
+                    <i class="fas fa-bolt sidebar-icon"></i>
+                    <span>List Comprehension Simulator</span>
+                </div>
+                <div class="sidebar-item" onclick="runGuestSystemExercise()">
+                    <i class="fas fa-users sidebar-icon"></i>
+                    <span>Manufacturing Guest System</span>
+                </div>
+                <div class="sidebar-item" onclick="runDeploymentSimulator()">
+                    <i class="fas fa-rocket sidebar-icon"></i>
+                    <span>Deployment Simulator</span>
+                </div>
+                <div class="sidebar-item" onclick="showEnvironmentVariables()">
+                    <i class="fas fa-key sidebar-icon"></i>
+                    <span>Environment Variables Tool</span>
+                </div>
+                <div class="sidebar-item" onclick="generateDeploymentChecklist()">
+                    <i class="fas fa-clipboard-check sidebar-icon"></i>
+                    <span>Generate Deployment Checklist</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-deploydog"></i>
+                    Deployment Status
+                </div>
+                <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 12px;">
+                    <div class="manufacturing-dashboard" style="grid-template-columns: 1fr; gap: 8px;">
+                        <div class="dashboard-card">
+                            <div class="dashboard-value">4.2s</div>
+                            <div class="dashboard-label">Avg. Deployment Time</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-value">99.8%</div>
+                            <div class="dashboard-label">Uptime</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-value">24/7</div>
+                            <div class="dashboard-label">Monitoring Active</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; text-align: center;">
+                        <span style="font-size: 11px; color: var(--text-tertiary);">Production AI Systems</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Pyodide Loader -->
+            <div class="pyodide-loader" id="pyodideLoader">
+                <div class="loader-spinner"></div>
+                <p>Loading Python runtime...</p>
+                <p style="font-size: 12px; color: var(--text-tertiary);">This may take a few seconds</p>
+            </div>
+
+            <!-- List Comprehensions Introduction -->
+            <div class="message fade-in" id="list-comprehensions">
+                <div class="avatar data-science">⚡</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Data Science Engineer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-list-comp">List Comprehensions</div>
+                            <div class="content-badge badge-industrial">Manufacturing</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h1>🏭 Lesson 13: List Comprehensions & Manufacturing AI Deployment</h1>
+                        <p>Master Python list comprehensions for efficient manufacturing data processing, then deploy your AI application to production using Render and Railway.</p>
+                        
+                        <div class="learning-objectives">
+                            <h3 style="color: var(--text-primary); margin-bottom: 20px;">🎯 Learning Objectives</h3>
+                            <div class="objective-item">
+                                <div class="objective-icon">1</div>
+                                <div>
+                                    <strong>List Comprehensions</strong>: Process manufacturing data efficiently
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">2</div>
+                                <div>
+                                    <strong>Dictionary Comprehensions</strong>: Transform IoT sensor data
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">3</div>
+                                <div>
+                                    <strong>Manufacturing Guest System</strong>: Implement real-world application
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">4</div>
+                                <div>
+                                    <strong>AI Application Deployment</strong>: Deploy to Render/Railway
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">5</div>
+                                <div>
+                                    <strong>Production Monitoring</strong>: Set up environment variables & monitoring
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-runner">
+                            <h3>⚡ List Comprehension Power</h3>
+                            <p>See how comprehensions transform manufacturing data processing:</p>
+                            <textarea class="code-input" id="pythonCode" placeholder="# Traditional vs Comprehension approach
+# Traditional
+production_data = [1200, 1180, 1250, 1100, 1300]
+high_production = []
+for units in production_data:
+    if units > 1150:
+        high_production.append(units * 1.1)  # Add 10% bonus
+
+# List Comprehension
+high_production = [units * 1.1 for units in production_data if units > 1150]"># 🏭 Manufacturing Data Processing with Comprehensions
+
+# Traditional approach
+production_lines = ['Line_1', 'Line_2', 'Line_3', 'Line_4']
+active_lines = []
+
+for line in production_lines:
+    if '1' in line or '3' in line:  # Only odd-numbered lines are active
+        active_lines.append(f"ACTIVE_{line}")
+
+print("Traditional Approach:")
+print(f"Active Lines: {active_lines}")
+
+# List Comprehension approach
+active_lines_lc = [f"ACTIVE_{line}" for line in production_lines if '1' in line or '3' in line]
+
+print("\n⚡ List Comprehension Approach:")
+print(f"Active Lines: {active_lines_lc}")
+
+# Performance comparison
+print("\n📊 Performance Advantage:")
+print("- Fewer lines of code")
+print("- More readable")
+print("- Often faster execution")
+print("- Less memory overhead")
+
+# Real manufacturing example
+print("\n🏭 Real Manufacturing Example:")
+
+# Sensor data processing
+sensor_readings = [45.2, 47.8, 42.1, 49.5, 50.2, 38.9]
+critical_readings = [temp for temp in sensor_readings if temp > 48.0]
+
+print(f"Raw Readings: {sensor_readings}")
+print(f"Critical Temperatures (>48°C): {critical_readings}")
+print(f"Critical Count: {len(critical_readings)}")</textarea>
+                            <button class="btn btn-data-science" onclick="runPythonCode()">
+                                <i class="fas fa-play"></i> Run Python Code
+                            </button>
+                            <div class="runner-output" id="pythonOutput">Output will appear here...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manufacturing Guest Management System -->
+            <div class="message fade-in" id="manufacturing-guest-system">
+                <div class="avatar industrial">👥</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Industrial Systems Engineer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-industrial">Exercise</div>
+                            <div class="content-badge badge-data-science">Comprehensions</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🏭 Manufacturing Facility Access Management System</h2>
+                        <p>Manage personnel access to different manufacturing zones using list comprehensions. Track operators, engineers, and robots in the facility.</p>
+                        
+                        <!-- Visual Guest Display -->
+                        <div class="guest-visual" id="guestVisualization">
+                            <!-- Generated by JavaScript -->
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    <button class="code-action" onclick="runGuestSystem()"><i class="fas fa-play"></i> Run</button>
+                                </div>
+                            </div>
+                            <div class="code-content">
+<pre><code>class ManufacturingAccessSystem:
+    """Manage personnel access in manufacturing facility"""
+    
+    def __init__(self):
+        # Manufacturing personnel data
+        self.personnel = [
+            {
+                "access_id": "ROB-001",
+                "name": "Assembly Robot ARM-1",
+                "role": "robot",
+                "zone_access": ["assembly_line", "quality_check"],
+                "active": True,
+                "skills": ["welding", "assembly", "painting"]
+            },
+            {
+                "access_id": "ENG-101",
+                "name": "Dr. Sarah Chen",
+                "role": "engineer",
+                "zone_access": ["control_room", "assembly_line", "maintenance"],
+                "active": True,
+                "skills": ["PLC programming", "machine learning", "robotics"]
+            },
+            {
+                "access_id": "OP-202",
+                "name": "Mike Rodriguez",
+                "role": "operator",
+                "zone_access": ["assembly_line", "packaging"],
+                "active": True,
+                "skills": ["CNC operation", "quality control", "safety protocols"]
+            },
+            {
+                "access_id": "ROB-002",
+                "name": "Quality Inspector Bot",
+                "role": "robot",
+                "zone_access": ["quality_check", "packaging"],
+                "active": False,  # Currently in maintenance
+                "skills": ["vision inspection", "defect detection"]
+            },
+            {
+                "access_id": "ENG-102",
+                "name": "Alex Johnson",
+                "role": "engineer",
+                "zone_access": ["control_room", "R&D", "maintenance"],
+                "active": True,
+                "skills": ["IoT systems", "data analysis", "predictive maintenance"]
+            }
+        ]
+    
+    def get_total_personnel(self):
+        """Calculate total active personnel using list comprehension"""
+        # YOUR CODE HERE: Use list comprehension to count active personnel
+        active_personnel = [p for p in self.personnel if p["active"]]
+        return len(active_personnel)
+    
+    def get_personnel_list(self):
+        """Get formatted personnel list using list comprehension"""
+        # YOUR CODE HERE: Use list comprehension to create formatted strings
+        personnel_list = [f"{p['access_id']}: {p['name']} ({p['role']})" 
+                         for p in self.personnel if p["active"]]
+        return personnel_list
+    
+    def get_zone_occupancy(self, zone):
+        """Get personnel in specific zone using list comprehension"""
+        # YOUR CODE HERE: Use list comprehension to filter by zone access
+        zone_personnel = [p["name"] for p in self.personnel 
+                         if p["active"] and zone in p["zone_access"]]
+        return zone_personnel
+    
+    def get_skills_inventory(self):
+        """Get all unique skills using nested list comprehension"""
+        # YOUR CODE HERE: Use nested list comprehension to flatten skills
+        all_skills = [skill for p in self.personnel for skill in p["skills"]]
+        return list(set(all_skills))  # Remove duplicates
+    
+    def get_role_summary(self):
+        """Get count by role using dictionary comprehension"""
+        # YOUR CODE HERE: Use dictionary comprehension to count by role
+        role_counts = {}
+        roles = [p["role"] for p in self.personnel if p["active"]]
+        for role in set(roles):
+            role_counts[role] = roles.count(role)
+        return role_counts
+
+# Main execution
+def main():
+    print("🏭 Manufacturing Facility Access Management System")
+    print("=" * 60)
+    
+    system = ManufacturingAccessSystem()
+    
+    # Test the system
+    print("\n👥 Total Active Personnel:")
+    total = system.get_total_personnel()
+    print(f"  Active: {total}")
+    print(f"  Total Registered: {len(system.personnel)}")
+    
+    print("\n📋 Personnel List:")
+    personnel_list = system.get_personnel_list()
+    for person in personnel_list:
+        print(f"  • {person}")
+    
+    print("\n📍 Zone Occupancy Check:")
+    zones = ["assembly_line", "control_room", "quality_check"]
+    for zone in zones:
+        occupants = system.get_zone_occupancy(zone)
+        print(f"  {zone.replace('_', ' ').title()}: {len(occupants)} personnel")
+        if occupants:
+            print(f"    - {', '.join(occupants)}")
+    
+    print("\n🛠️ Skills Inventory:")
+    skills = system.get_skills_inventory()
+    print(f"  Total Unique Skills: {len(skills)}")
+    print(f"  Skills: {', '.join(sorted(skills))}")
+    
+    print("\n🎯 Role Distribution:")
+    role_summary = system.get_role_summary()
+    for role, count in role_summary.items():
+        print(f"  {role.title()}: {count}")
+
+if __name__ == "__main__":
+    main()</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="interactive-exercise">
+                            <h3>🎯 Your Tasks:</h3>
+                            <div class="exercise-task">
+                                <h4>🚀 Implementation Requirements:</h4>
+                                <ol style="color: var(--text-secondary); padding-left: 20px;">
+                                    <li>Complete <code>get_total_personnel()</code> using list comprehension to count active personnel</li>
+                                    <li>Complete <code>get_personnel_list()</code> using list comprehension to format personnel strings</li>
+                                    <li>Complete <code>get_zone_occupancy()</code> using list comprehension to filter by zone</li>
+                                    <li>Complete <code>get_skills_inventory()</code> using nested list comprehension</li>
+                                    <li>Complete <code>get_role_summary()</code> using dictionary comprehension</li>
+                                </ol>
+                            </div>
+                            
+                            <button class="btn btn-primary" onclick="runGuestSystemExercise()">
+                                <i class="fas fa-users"></i> Run Guest System Exercise
+                            </button>
+                            <button class="btn btn-data-science" onclick="showGuestSystemSolution()">
+                                <i class="fas fa-lightbulb"></i> Show Solution
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Comprehensions -->
+            <div class="message fade-in" id="advanced-comprehensions">
+                <div class="avatar automation">🚀</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Automation Architect</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-data-science">Advanced</div>
+                            <div class="content-badge badge-industrial">Patterns</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🚀 Advanced Comprehensions for Manufacturing AI</h2>
+                        <p>Master dictionary, set, and generator comprehensions for efficient manufacturing data processing.</p>
+                        
+                        <div class="method-grid">
+                            <div class="method-card">
+                                <div class="method-icon">📚</div>
+                                <div class="method-title">Dictionary Comprehensions</div>
+                                <p style="color: var(--text-secondary); font-size: 14px;">
+                                    Transform sensor data into structured dictionaries
+                                </p>
+                                <div class="code-content" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; font-size: 12px;">
+                                    sensors = ["temp_01", "press_02"]<br>
+                                    readings = {s: random.uniform(0, 100) <br>for s in sensors}
+                                </div>
+                            </div>
+                            
+                            <div class="method-card">
+                                <div class="method-icon">⚡</div>
+                                <div class="method-title">Generator Comprehensions</div>
+                                <p style="color: var(--text-secondary); font-size: 14px;">
+                                    Process large datasets with memory efficiency
+                                </p>
+                                <div class="code-content" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; font-size: 12px;">
+                                    large_data = (x*2 for x in range(1000000)<br>if x % 2 == 0)
+                                </div>
+                            </div>
+                            
+                            <div class="method-card">
+                                <div class="method-icon">🔄</div>
+                                <div class="method-title">Set Comprehensions</div>
+                                <p style="color: var(--text-secondary); font-size: 14px;">
+                                    Remove duplicates from production data
+                                </p>
+                                <div class="code-content" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; font-size: 12px;">
+                                    defects = ["scratch", "dent", "scratch"]<br>
+                                    unique_defects = {d for d in defects}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    <button class="code-action" onclick="runAdvancedComprehensions()"><i class="fas fa-play"></i> Run</button>
+                                </div>
+                            </div>
+<pre><code>class ManufacturingDataProcessor:
+    """Advanced comprehensions for manufacturing data"""
+    
+    @staticmethod
+    def process_sensor_readings(raw_data):
+        """Dictionary comprehension example"""
+        # Convert raw sensor data to structured format
+        sensor_data = {
+            sensor_id: {
+                'value': float(value),
+                'unit': '°C' if 'temp' in sensor_id else 'psi',
+                'status': 'normal' if float(value) < 80 else 'warning'
+            }
+            for sensor_id, value in raw_data.items()
+            if value.replace('.', '').isdigit()
+        }
+        return sensor_data
+    
+    @staticmethod
+    def generate_production_batch(batch_size):
+        """Generator comprehension example"""
+        # Generate large dataset without storing in memory
+        return (
+            {
+                'batch_id': f'BATCH_{i:06d}',
+                'units': i * 100,
+                'quality_score': min(100, 95 + (i % 10)),
+                'energy_used': i * 1.5
+            }
+            for i in range(batch_size)
+            if i % 2 == 0  # Only even batches
+        )
+    
+    @staticmethod
+    def analyze_defect_patterns(defect_reports):
+        """Set comprehension example"""
+        # Extract unique defect types and locations
+        unique_defects = {
+            (report['type'], report['location'])
+            for report in defect_reports
+            if report.get('type') and report.get('location')
+        }
+        
+        # Count defects by type using dictionary comprehension
+        defect_counts = {
+            defect_type: sum(1 for r in defect_reports if r['type'] == defect_type)
+            for defect_type in set(r['type'] for r in defect_reports)
+        }
+        
+        return unique_defects, defect_counts
+    
+    @staticmethod
+    def optimize_production_schedule(production_data):
+        """Complex nested comprehensions"""
+        # Calculate efficiency metrics for each line
+        efficiency_metrics = {
+            line['id']: {
+                'oee': line['good_units'] / line['planned_units'],
+                'utilization': line['runtime'] / line['planned_runtime'],
+                'quality': line['good_units'] / (line['good_units'] + line['defects'])
+            }
+            for line in production_data
+            if line['planned_units'] > 0
+        }
+        
+        # Filter high-performance lines
+        high_perf_lines = [
+            line_id for line_id, metrics in efficiency_metrics.items()
+            if all(v > 0.85 for v in metrics.values())
+        ]
+        
+        return efficiency_metrics, high_perf_lines
+
+# Example usage
+print("🚀 Advanced Manufacturing Comprehensions")
+print("=" * 50)
+
+processor = ManufacturingDataProcessor()
+
+# 1. Dictionary Comprehension
+print("\n1. 📚 Dictionary Comprehension - Sensor Data:")
+raw_sensors = {
+    'temp_01': '45.5',
+    'temp_02': '78.2',
+    'press_01': '120.5',
+    'press_02': '95.3',
+    'invalid_sensor': 'error'
+}
+
+processed_sensors = processor.process_sensor_readings(raw_sensors)
+print(f"Processed {len(processed_sensors)} sensors:")
+for sensor, data in processed_sensors.items():
+    print(f"  {sensor}: {data['value']}{data['unit']} ({data['status']})")
+
+# 2. Generator Comprehension
+print("\n2. ⚡ Generator Comprehension - Production Batches:")
+batch_generator = processor.generate_production_batch(10)
+print("First 3 batches from generator:")
+for i, batch in enumerate(batch_generator):
+    if i >= 3:
+        break
+    print(f"  {batch['batch_id']}: {batch['units']} units, Quality: {batch['quality_score']}%")
+
+# 3. Set and Dictionary Comprehensions
+print("\n3. 🔄 Set & Dictionary Comprehensions - Defect Analysis:")
+defect_reports = [
+    {'type': 'scratch', 'location': 'assembly_line', 'severity': 'low'},
+    {'type': 'dent', 'location': 'packaging', 'severity': 'medium'},
+    {'type': 'scratch', 'location': 'assembly_line', 'severity': 'low'},
+    {'type': 'misalignment', 'location': 'assembly_line', 'severity': 'high'},
+    {'type': 'dent', 'location': 'quality_check', 'severity': 'medium'}
+]
+
+unique_defects, defect_counts = processor.analyze_defect_patterns(defect_reports)
+print(f"Unique defect patterns: {len(unique_defects)}")
+print("Defect counts:")
+for defect_type, count in defect_counts.items():
+    print(f"  {defect_type}: {count} occurrences")
+
+# 4. Complex Nested Comprehensions
+print("\n4. 🏭 Complex Comprehensions - Production Optimization:")
+production_data = [
+    {'id': 'Line_A', 'good_units': 850, 'planned_units': 1000, 'runtime': 420, 'planned_runtime': 480, 'defects': 15},
+    {'id': 'Line_B', 'good_units': 920, 'planned_units': 1000, 'runtime': 450, 'planned_runtime': 480, 'defects': 8},
+    {'id': 'Line_C', 'good_units': 780, 'planned_units': 1000, 'runtime': 400, 'planned_runtime': 480, 'defects': 22}
+]
+
+efficiency_metrics, high_perf_lines = processor.optimize_production_schedule(production_data)
+print("Production Line Efficiency:")
+for line_id, metrics in efficiency_metrics.items():
+    print(f"  {line_id}: OEE={metrics['oee']:.1%}, "
+          f"Utilization={metrics['utilization']:.1%}, "
+          f"Quality={metrics['quality']:.1%}")
+print(f"High Performance Lines: {high_perf_lines}")</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Deployment Overview -->
+            <div class="message fade-in" id="deployment-overview">
+                <div class="avatar deployment">🚀</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">DevOps Engineer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-deployment">Deployment</div>
+                            <div class="content-badge badge-industrial">Production</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🚀 Deploy Your Manufacturing AI Application to Production</h2>
+                        <p>Learn to deploy Python AI applications using Render and Railway. Transition from development to production with monitoring and scaling.</p>
+                        
+                        <div class="manufacturing-dashboard">
+                            <div class="dashboard-card">
+                                <div class="dashboard-value">2-5 min</div>
+                                <div class="dashboard-label">Deployment Time</div>
+                            </div>
+                            <div class="dashboard-card">
+                                <div class="dashboard-value">99.95%</div>
+                                <div class="dashboard-label">Uptime SLA</div>
+                            </div>
+                            <div class="dashboard-card">
+                                <div class="dashboard-value">$0</div>
+                                <div class="dashboard-label">Free Tier Start</div>
+                            </div>
+                        </div>
+
+                        <div class="comparison-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Platform</th>
+                                        <th>Best For</th>
+                                        <th>Free Tier</th>
+                                        <th>Ease of Use</th>
+                                        <th>Manufacturing AI Features</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="platform-badge badge-render"><i class="fas fa-server"></i> Render</span></td>
+                                        <td>Web APIs & Dashboards</td>
+                                        <td>✅ 750 free hours/month</td>
+                                        <td>⭐️⭐️⭐️⭐️⭐️</td>
+                                        <td>WebSocket support, Cron jobs, Auto-scaling</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="platform-badge badge-railway"><i class="fas fa-train"></i> Railway</span></td>
+                                        <td>Background workers & APIs</td>
+                                        <td>✅ $5 free credit</td>
+                                        <td>⭐️⭐️⭐️⭐️⭐️</td>
+                                        <td>Database integration, Webhooks, GitHub sync</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="deployment-dashboard">
+                            <h3>📦 Manufacturing AI Application Structure</h3>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-language">Python</span>
+                                    <div class="code-actions">
+                                        <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+                                </div>
+<pre><code># 🏭 manufacturing_ai_app/
+# ├── app.py              # Main application
+# ├── requirements.txt    # Dependencies
+# ├── Procfile           # Process definition
+# ├── runtime.txt        # Python version
+# ├── .env.example       # Environment template
+# ├── Dockerfile        # Container definition (optional)
+# └── README.md         # Documentation
+
+# 📄 requirements.txt
+flask==2.3.3
+pandas==2.0.3
+numpy==1.24.3
+scikit-learn==1.3.0
+python-dotenv==1.0.0
+gunicorn==20.1.0
+
+# 📄 Procfile
+web: gunicorn app:app --workers=4 --bind=0.0.0.0:$PORT
+
+# 📄 runtime.txt
+python-3.11.4
+
+# 📄 .env.example
+MANUFACTURING_API_KEY=your_api_key_here
+DATABASE_URL=postgresql://user:pass@localhost/dbname
+DEBUG_MODE=False
+LOG_LEVEL=INFO
+PREDICTION_MODEL_PATH=models/predictive_maintenance.pkl</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deploy to Render -->
+            <div class="message fade-in" id="render-deployment">
+                <div class="avatar deployment">🎯</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Render Deployment Specialist</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-render">Render</div>
+                            <div class="content-badge badge-deployment">Step-by-Step</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🎯 Deploy to Render: Step-by-Step Guide</h2>
+                        <p>Deploy your manufacturing AI application to Render in minutes. Perfect for production monitoring dashboards and predictive maintenance APIs.</p>
+                        
+                        <div class="deployment-dashboard">
+                            <div class="deployment-step">
+                                <span class="step-number">1</span>
+                                <span class="step-title">Create Render Account</span>
+                                <div style="margin-top: 12px; color: var(--text-secondary);">
+                                    <p>Visit <a href="https://render.com" style="color: var(--deployment-purple);">render.com</a> and sign up with GitHub, GitLab, or email.</p>
+                                    <p><strong>Manufacturing Tip:</strong> Use your work email for team collaboration.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="deployment-step">
+                                <span class="step-number">2</span>
+                                <span class="step-title">Prepare Your Application</span>
+                                <div style="margin-top: 12px; color: var(--text-secondary);">
+                                    <div class="code-content" style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; margin: 8px 0;">
+                                        # 📄 app.py - Manufacturing AI API<br>
+                                        from flask import Flask, jsonify<br>
+                                        import pandas as pd<br><br>
+                                        
+                                        app = Flask(__name__)<br><br>
+                                        
+                                        @app.route('/health')<br>
+                                        def health_check():<br>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;return jsonify({"status": "healthy", "service": "manufacturing_ai"})<br><br>
+                                        
+                                        @app.route('/predict', methods=['POST'])<br>
+                                        def predict_maintenance():<br>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;# Your manufacturing AI logic here<br>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;return jsonify({"prediction": "maintenance_needed", "confidence": 0.92})<br><br>
+                                        
+                                        if __name__ == '__main__':<br>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;app.run(host='0.0.0.0', port=5000)
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="deployment-step">
+                                <span class="step-number">3</span>
+                                <span class="step-title">Set Up Environment Variables</span>
+                                <div style="margin-top: 12px; color: var(--text-secondary);">
+                                    <div class="env-panel">
+                                        <div class="env-var">
+                                            <span class="env-key">MANUFACTURING_API_KEY</span>
+                                            <span class="env-value env-masked">••••••••••••</span>
+                                        </div>
+                                        <div class="env-var">
+                                            <span class="env-key">DATABASE_URL</span>
+                                            <span class="env-value">postgresql://user:••••@db.render.com/manufacturing</span>
+                                        </div>
+                                        <div class="env-var">
+                                            <span class="env-key">DEBUG_MODE</span>
+                                            <span class="env-value">False</span>
+                                        </div>
+                                        <div class="env-var">
+                                            <span class="env-key">MODEL_VERSION</span>
+                                            <span class="env-value">v2.1-predictive-maintenance</span>
+                                        </div>
+                                    </div>
+                                    <p><strong>Manufacturing Security:</strong> Never commit API keys to version control. Use Render's environment variables.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="deployment-step">
+                                <span class="step-number">4</span>
+                                <span class="step-title">Deploy from GitHub</span>
+                                <div style="margin-top: 12px; color: var(--text-secondary);">
+                                    <p>1. Connect your GitHub repository</p>
+                                    <p>2. Select "Web Service"</p>
+                                    <p>3. Configure:</p>
+                                    <ul style="margin-left: 20px; color: var(--text-tertiary);">
+                                        <li>Name: <code>manufacturing-ai-api</code></li>
+                                        <li>Region: <code>Oregon (US West)</code> for lower latency</li>
+                                        <li>Branch: <code>main</code></li>
+                                        <li>Build Command: <code>pip install -r requirements.txt</code></li>
+                                        <li>Start Command: <code>gunicorn app:app</code></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="deployment-step">
+                                <span class="step-number">5</span>
+                                <span class="step-title">Monitor & Scale</span>
+                                <div style="margin-top: 12px; color: var(--text-secondary);">
+                                    <div class="monitoring-grid">
+                                        <div class="metric-card">
+                                            <div class="metric-label">Response Time</div>
+                                            <div class="metric-value">142ms</div>
+                                            <div class="metric-trend">↓ 12%</div>
+                                        </div>
+                                        <div class="metric-card">
+                                            <div class="metric-label">Requests/Min</div>
+                                            <div class="metric-value">245</div>
+                                            <div class="metric-trend">↑ 8%</div>
+                                        </div>
+                                        <div class="metric-card">
+                                            <div class="metric-label">Error Rate</div>
+                                            <div class="metric-value">0.02%</div>
+                                            <div class="metric-trend">↓ 5%</div>
+                                        </div>
+                                        <div class="metric-card">
+                                            <div class="metric-label">Uptime</div>
+                                            <div class="metric-value">99.98%</div>
+                                            <div class="metric-trend">→ Stable</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-runner">
+                            <h3>🔧 Render Deployment Simulator</h3>
+                            <textarea class="code-input" id="renderDeployCode"># 🏭 Manufacturing AI Deployment Checklist
+import time
+
+class RenderDeploymentSimulator:
+    def __init__(self):
+        self.steps = []
+        self.current_step = 0
+    
+    def add_step(self, description, command=None):
+        self.steps.append({
+            'description': description,
+            'command': command,
+            'status': 'pending',
+            'timestamp': None
+        })
+    
+    def execute_deployment(self):
+        print("🚀 Starting Manufacturing AI Deployment to Render")
+        print("=" * 60)
+        
+        deployment_steps = [
+            ("Connecting to GitHub repository", "git remote add render https://github.com/your-repo"),
+            ("Installing dependencies", "pip install -r requirements.txt"),
+            ("Setting environment variables", "render env:set MANUFACTURING_API_KEY=***"),
+            ("Building application", "render build"),
+            ("Starting web service", "gunicorn app:app --workers=4"),
+            ("Health check", "curl https://manufacturing-ai-api.onrender.com/health"),
+            ("Deployment complete!", None)
+        ]
+        
+        for i, (desc, cmd) in enumerate(deployment_steps, 1):
+            print(f"\nStep {i}: {desc}")
+            if cmd:
+                print(f"   Command: {cmd}")
+            time.sleep(0.5)
+            print(f"   Status: ✅ Complete")
+        
+        print("\n" + "=" * 60)
+        print("🎉 Deployment Successful!")
+        print("\n📊 Application Details:")
+        print("   URL: https://manufacturing-ai-api.onrender.com")
+        print("   Region: Oregon (US West)")
+        print("   Instance: Free Tier (768 MB RAM)")
+        print("   Auto-deploy: Enabled on git push")
+        
+        return True
+
+# Run deployment simulation
+print("Starting Render deployment simulation...")
+simulator = RenderDeploymentSimulator()
+simulator.execute_deployment()</textarea>
+                            <button class="btn btn-render" onclick="runRenderDeployment()" style="background: var(--deployment-gradient);">
+                                <i class="fas fa-rocket"></i> Simulate Render Deployment
+                            </button>
+                            <div class="runner-output" id="renderOutput">Deployment output will appear here...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deploy to Railway -->
+            <div class="message fade-in" id="railway-deployment">
+                <div class="avatar monitoring">🚂</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Railway Deployment Engineer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-railway">Railway</div>
+                            <div class="content-badge badge-deployment">Database Integration</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🚂 Deploy to Railway with Database Integration</h2>
+                        <p>Deploy manufacturing AI applications with PostgreSQL databases, background workers, and real-time monitoring.</p>
+                        
+                        <div class="deployment-dashboard">
+                            <h3>🏭 Manufacturing AI with Database</h3>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-language">Python + PostgreSQL</span>
+                                    <div class="code-actions">
+                                        <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+                                </div>
+<pre><code># 📄 database.py - Manufacturing data models
+import os
+import psycopg2
+from datetime import datetime
+from contextlib import contextmanager
+
+class ManufacturingDatabase:
+    def __init__(self):
+        self.db_url = os.getenv('DATABASE_URL')
+    
+    @contextmanager
+    def get_connection(self):
+        conn = psycopg2.connect(self.db_url)
+        try:
+            yield conn
+        finally:
+            conn.close()
+    
+    def log_production_event(self, line_id, event_type, details):
+        """Log manufacturing events to database"""
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO production_events 
+                    (line_id, event_type, details, timestamp)
+                    VALUES (%s, %s, %s, %s)
+                    RETURNING id
+                """, (line_id, event_type, details, datetime.utcnow()))
+                conn.commit()
+                return cur.fetchone()[0]
+    
+    def get_production_stats(self, hours=24):
+        """Get production statistics for dashboard"""
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT 
+                        COUNT(*) as total_events,
+                        COUNT(DISTINCT line_id) as active_lines,
+                        AVG(CASE WHEN event_type = 'defect' THEN 1 ELSE 0 END) as defect_rate,
+                        MAX(timestamp) as last_update
+                    FROM production_events
+                    WHERE timestamp >= NOW() - INTERVAL '%s hours'
+                """, (hours,))
+                return dict(zip([desc[0] for desc in cur.description], cur.fetchone()))
+
+# 📄 railway.toml - Railway configuration
+[build]
+builder = "nixpacks"
+buildCommand = "pip install -r requirements.txt"
+
+[deploy]
+startCommand = "gunicorn app:app --workers=2"
+healthcheckPath = "/health"
+restartPolicyType = "always"
+
+[[services]]
+name = "manufacturing-ai-api"
+type = "web"
+port = 5000
+
+[[services]]
+name = "manufacturing-db"
+type = "postgresql"
+plan = "hobby"</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="deployment-step">
+                            <h4>🚂 Railway Deployment Steps:</h4>
+                            <ol style="color: var(--text-secondary); padding-left: 20px; margin-top: 12px;">
+                                <li>Install Railway CLI: <code>npm i -g @railway/cli</code></li>
+                                <li>Login: <code>railway login</code></li>
+                                <li>Initialize project: <code>railway init</code></li>
+                                <li>Add PostgreSQL: <code>railway add postgresql</code></li>
+                                <li>Set environment variables: <code>railway variables set DEBUG_MODE=False</code></li>
+                                <li>Deploy: <code>railway up</code></li>
+                                <li>Monitor logs: <code>railway logs</code></li>
+                            </ol>
+                        </div>
+
+                        <div class="code-runner">
+                            <h3>🔧 Railway CLI Simulator</h3>
+                            <textarea class="code-input" id="railwayDeployCode"># 🚂 Railway Deployment for Manufacturing AI
+import subprocess
+import time
+
+def simulate_railway_deployment():
+    print("🚂 Railway Manufacturing AI Deployment")
+    print("=" * 60)
+    
+    commands = [
+        ("railway login", "🔐 Authenticating with Railway..."),
+        ("railway init", "📦 Initializing Railway project..."),
+        ("railway add postgresql", "🗄️ Adding PostgreSQL database..."),
+        ("railway variables set MANUFACTURING_API_KEY=***", "🔧 Setting environment variables..."),
+        ("railway variables set MODEL_VERSION=v2.1", "🏷️ Setting model version..."),
+        ("railway up", "🚀 Deploying application..."),
+        ("railway logs", "📋 Streaming deployment logs..."),
+        ("railway open", "🌐 Opening application in browser...")
+    ]
+    
+    for cmd, description in commands:
+        print(f"\n{description}")
+        print(f"   Command: {cmd}")
+        time.sleep(0.7)
+        
+        # Simulate command output
+        if "login" in cmd:
+            print("   ✅ Authentication successful")
+        elif "init" in cmd:
+            print("   ✅ Project initialized")
+        elif "postgresql" in cmd:
+            print("   ✅ PostgreSQL database provisioned")
+            print("   📊 Connection string: postgresql://user:***@db.railway.app/manufacturing")
+        elif "variables" in cmd:
+            print("   ✅ Environment variables set")
+        elif "up" in cmd:
+            print("   🏗️ Building Docker image...")
+            time.sleep(0.5)
+            print("   📦 Pushing image to registry...")
+            time.sleep(0.5)
+            print("   🚀 Deploying to Railway infrastructure...")
+            time.sleep(0.5)
+            print("   ✅ Deployment complete!")
+        elif "logs" in cmd:
+            print("   📋 [INFO] Starting manufacturing AI application")
+            print("   📋 [INFO] Loading predictive maintenance model v2.1")
+            print("   📋 [INFO] Database connection established")
+            print("   📋 [INFO] API server listening on port 5000")
+        elif "open" in cmd:
+            print("   🌐 Opening: https://manufacturing-ai.up.railway.app")
+    
+    print("\n" + "=" * 60)
+    print("🎉 Railway Deployment Complete!")
+    print("\n🏭 Manufacturing AI Dashboard:")
+    print("   URL: https://manufacturing-ai.up.railway.app")
+    print("   Database: PostgreSQL (managed)")
+    print("   Region: Global CDN")
+    print("   Monitoring: Built-in logs & metrics")
+    
+    return True
+
+# Run simulation
+simulate_railway_deployment()</textarea>
+                            <button class="btn btn-railway" onclick="runRailwayDeployment()" style="background: var(--monitoring-gradient);">
+                                <i class="fas fa-train"></i> Simulate Railway Deployment
+                            </button>
+                            <div class="runner-output" id="railwayOutput">Deployment output will appear here...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Production Monitoring -->
+            <div class="message fade-in" id="monitoring-production">
+                <div class="avatar monitoring">📊</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Site Reliability Engineer</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-deployment">Monitoring</div>
+                            <div class="content-badge badge-industrial">Production</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>📊 Production Monitoring & Environment Variables</h2>
+                        <p>Set up comprehensive monitoring for your manufacturing AI applications with proper environment management.</p>
+                        
+                        <div class="monitoring-grid">
+                            <div class="metric-card">
+                                <div class="metric-label">API Response Time</div>
+                                <div class="metric-value">128ms</div>
+                                <div class="metric-trend" style="color: var(--predictive-green);">↓ 15%</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Error Rate</div>
+                                <div class="metric-value">0.03%</div>
+                                <div class="metric-trend" style="color: var(--predictive-green);">↓ 8%</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Active Users</div>
+                                <div class="metric-value">142</div>
+                                <div class="metric-trend" style="color: var(--robotics-yellow);">↑ 12%</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Uptime (30d)</div>
+                                <div class="metric-value">99.97%</div>
+                                <div class="metric-trend" style="color: var(--predictive-green);">→ Stable</div>
+                            </div>
+                        </div>
+
+                        <div class="env-panel">
+                            <h4>🔐 Manufacturing AI Environment Variables</h4>
+                            <div class="env-var">
+                                <span class="env-key">MANUFACTURING_API_KEY</span>
+                                <span class="env-value env-masked">sk_prod_••••••••••••••••</span>
+                            </div>
+                            <div class="env-var">
+                                <span class="env-key">DATABASE_URL</span>
+                                <span class="env-value">postgresql://prod_user:••••@prod-db.render.com/manufacturing_prod</span>
+                            </div>
+                            <div class="env-var">
+                                <span class="env-key">MODEL_VERSION</span>
+                                <span class="env-value">v3.2-production</span>
+                            </div>
+                            <div class="env-var">
+                                <span class="env-key">LOG_LEVEL</span>
+                                <span class="env-value">INFO</span>
+                            </div>
+                            <div class="env-var">
+                                <span class="env-key">ALERT_WEBHOOK</span>
+                                <span class="env-value">https://hooks.slack.com/services/••••••••••••••••</span>
+                            </div>
+                            <div class="env-var">
+                                <span class="env-key">MAX_WORKERS</span>
+                                <span class="env-value">4</span>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+                                    <button class="code-action" onclick="runMonitoringDemo()"><i class="fas fa-play"></i> Run</button>
+                                </div>
+                            </div>
+<pre><code>import os
+import json
+from datetime import datetime
+import logging
+from typing import Dict, Any
+
+class ManufacturingAIMonitor:
+    """Production monitoring for manufacturing AI applications"""
+    
+    def __init__(self):
+        # Load environment variables
+        self.api_key = os.getenv('MANUFACTURING_API_KEY')
+        self.model_version = os.getenv('MODEL_VERSION', 'v1.0')
+        self.debug_mode = os.getenv('DEBUG_MODE', 'False').lower() == 'true'
+        
+        # Setup logging
+        log_level = os.getenv('LOG_LEVEL', 'INFO')
+        logging.basicConfig(
+            level=getattr(logging, log_level),
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+        self.logger = logging.getLogger('manufacturing_ai')
+        
+        # Initialize metrics
+        self.metrics = {
+            'requests_processed': 0,
+            'errors': 0,
+            'avg_response_time': 0,
+            'predictions_made': 0,
+            'start_time': datetime.now()
+        }
+    
+    def process_manufacturing_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Process manufacturing AI request with monitoring"""
+        start_time = datetime.now()
+        
+        try:
+            # Log request
+            self.logger.info(f"Processing request: {request_data.get('type', 'unknown')}")
+            
+            # Validate API key
+            if not self.validate_api_key():
+                raise ValueError("Invalid API key")
+            
+            # Process based on request type
+            if request_data.get('type') == 'predictive_maintenance':
+                result = self.predict_maintenance(request_data)
+            elif request_data.get('type') == 'quality_inspection':
+                result = self.inspect_quality(request_data)
+            else:
+                result = self.process_general(request_data)
+            
+            # Update metrics
+            self.update_metrics(success=True, duration=(datetime.now() - start_time).total_seconds())
+            
+            return {
+                'success': True,
+                'result': result,
+                'model_version': self.model_version,
+                'processing_time': (datetime.now() - start_time).total_seconds()
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error processing request: {str(e)}")
+            self.update_metrics(success=False)
+            
+            return {
+                'success': False,
+                'error': str(e),
+                'model_version': self.model_version
+            }
+    
+    def validate_api_key(self) -> bool:
+        """Validate manufacturing API key"""
+        # In production, validate against your authentication service
+        return bool(self.api_key and len(self.api_key) > 10)
+    
+    def predict_maintenance(self, data: Dict) -> Dict:
+        """Predict maintenance needs for manufacturing equipment"""
+        # Your AI model logic here
+        return {
+            'maintenance_needed': True,
+            'confidence': 0.92,
+            'recommended_action': 'Schedule maintenance in 48 hours',
+            'critical_components': ['bearing_assembly', 'hydraulic_pump']
+        }
+    
+    def update_metrics(self, success: bool, duration: float = 0):
+        """Update monitoring metrics"""
+        self.metrics['requests_processed'] += 1
+        
+        if not success:
+            self.metrics['errors'] += 1
+        
+        # Update average response time
+        old_avg = self.metrics['avg_response_time']
+        old_count = self.metrics['requests_processed'] - 1
+        self.metrics['avg_response_time'] = (old_avg * old_count + duration) / self.metrics['requests_processed']
+        
+        if success and duration > 0:
+            self.metrics['predictions_made'] += 1
+    
+    def get_health_status(self) -> Dict:
+        """Get application health status"""
+        uptime = (datetime.now() - self.metrics['start_time']).total_seconds()
+        
+        return {
+            'status': 'healthy',
+            'uptime_seconds': uptime,
+            'metrics': self.metrics,
+            'environment': {
+                'model_version': self.model_version,
+                'debug_mode': self.debug_mode,
+                'log_level': self.logger.level
+            }
+        }
+    
+    def generate_alert(self, alert_type: str, message: str):
+        """Generate production alert"""
+        alert = {
+            'type': alert_type,
+            'message': message,
+            'timestamp': datetime.now().isoformat(),
+            'metrics': self.metrics.copy()
+        }
+        
+        # Log alert
+        self.logger.warning(f"Alert: {alert_type} - {message}")
+        
+        # In production, send to Slack/Teams/PagerDuty
+        webhook_url = os.getenv('ALERT_WEBHOOK')
+        if webhook_url and not self.debug_mode:
+            # Send to webhook (simplified)
+            self.logger.info(f"Alert sent to webhook: {alert_type}")
+        
+        return alert
+
+# Example usage
+def main():
+    print("📊 Manufacturing AI Production Monitoring")
+    print("=" * 50)
+    
+    # Set environment variables (simulated)
+    os.environ['MANUFACTURING_API_KEY'] = 'sk_prod_1234567890'
+    os.environ['MODEL_VERSION'] = 'v3.2-production'
+    os.environ['LOG_LEVEL'] = 'INFO'
+    os.environ['DEBUG_MODE'] = 'False'
+    
+    # Initialize monitor
+    monitor = ManufacturingAIMonitor()
+    
+    print("\n🏭 Processing Manufacturing Requests:")
+    
+    # Simulate requests
+    requests = [
+        {'type': 'predictive_maintenance', 'equipment_id': 'CNC_MILL_001'},
+        {'type': 'quality_inspection', 'batch_id': 'BATCH_2023_0456'},
+        {'type': 'unknown_type', 'data': 'test'}
+    ]
+    
+    for i, request in enumerate(requests, 1):
+        print(f"\nRequest {i}: {request['type']}")
+        result = monitor.process_manufacturing_request(request)
+        
+        if result['success']:
+            print(f"  ✅ Success: {result.get('result', {}).get('recommended_action', 'Completed')}")
+            print(f"  ⏱️ Processing time: {result.get('processing_time', 0):.3f}s")
+        else:
+            print(f"  ❌ Error: {result.get('error')}")
+    
+    # Get health status
+    print(f"\n📈 Health Status:")
+    health = monitor.get_health_status()
+    print(f"  Uptime: {health['uptime_seconds']:.0f}s")
+    print(f"  Requests processed: {health['metrics']['requests_processed']}")
+    print(f"  Error rate: {health['metrics']['errors']/health['metrics']['requests_processed']:.1%}")
+    print(f"  Avg response time: {health['metrics']['avg_response_time']:.3f}s")
+    print(f"  Model version: {health['environment']['model_version']}")
+
+if __name__ == "__main__":
+    main()</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lesson Navigation -->
+            <div class="lesson-navigation">
+                <a href="lesson12.html" class="nav-btn nav-prev">
+                    <i class="fas fa-arrow-left"></i>
+                    <div>
+                        <div style="font-size: 12px; color: var(--text-tertiary);">Previous Lesson</div>
+                        <div style="font-weight: 700;">Lesson 12: Advanced Python Methods</div>
+                    </div>
+                </a>
+                
+                <a href="lesson14.html" class="nav-btn nav-next">
+                    <div>
+                        <div style="font-size: 12px; color: var(--text-tertiary);">Next Lesson</div>
+                        <div style="font-weight: 700;">Lesson 14: Manufacturing APIs & FastAPI</div>
+                    </div>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize Pyodide and all functions from previous lesson
+        // Include all the JavaScript functions from previous lesson
+        
+        // New JavaScript functions for Lesson 13
+        
+        function initializeGuestVisualization() {
+            const container = document.getElementById('guestVisualization');
+            const personnel = [
+                { id: "ROB-001", name: "Assembly Robot ARM-1", role: "robot", status: "active" },
+                { id: "ENG-101", name: "Dr. Sarah Chen", role: "engineer", status: "active" },
+                { id: "OP-202", name: "Mike Rodriguez", role: "operator", status: "active" },
+                { id: "ROB-002", name: "Quality Inspector Bot", role: "robot", status: "maintenance" },
+                { id: "ENG-102", name: "Alex Johnson", role: "engineer", status: "active" }
+            ];
+            
+            container.innerHTML = '';
+            
+            personnel.forEach(person => {
+                const card = document.createElement('div');
+                card.className = `guest-card ${person.role}`;
+                
+                let icon = '🤖';
+                if (person.role === 'engineer') icon = '👨‍💻';
+                if (person.role === 'operator') icon = '👷‍♂️';
+                
+                card.innerHTML = `
+                    <div style="font-size: 24px; margin-bottom: 8px;">${icon}</div>
+                    <div style="font-weight: 600; margin-bottom: 4px;">${person.name}</div>
+                    <div style="font-size: 12px; color: var(--text-tertiary); margin-bottom: 4px;">${person.id}</div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: ${person.status === 'active' ? 'var(--predictive-green)' : 'var(--warning-orange)'};"></span>
+                        <span style="font-size: 11px; text-transform: uppercase;">${person.status}</span>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+        
+        async function runGuestSystem() {
+            const code = `class ManufacturingAccessSystem:
+    def __init__(self):
+        self.personnel = [
+            {"access_id": "ROB-001", "name": "Assembly Robot ARM-1", "role": "robot", "zone_access": ["assembly_line", "quality_check"], "active": True, "skills": ["welding", "assembly", "painting"]},
+            {"access_id": "ENG-101", "name": "Dr. Sarah Chen", "role": "engineer", "zone_access": ["control_room", "assembly_line", "maintenance"], "active": True, "skills": ["PLC programming", "machine learning", "robotics"]},
+            {"access_id": "OP-202", "name": "Mike Rodriguez", "role": "operator", "zone_access": ["assembly_line", "packaging"], "active": True, "skills": ["CNC operation", "quality control", "safety protocols"]},
+            {"access_id": "ROB-002", "name": "Quality Inspector Bot", "role": "robot", "zone_access": ["quality_check", "packaging"], "active": False, "skills": ["vision inspection", "defect detection"]},
+            {"access_id": "ENG-102", "name": "Alex Johnson", "role": "engineer", "zone_access": ["control_room", "R&D", "maintenance"], "active": True, "skills": ["IoT systems", "data analysis", "predictive maintenance"]}
+        ]
+    
+    def get_total_personnel(self):
+        """Calculate total active personnel using list comprehension"""
+        active_personnel = [p for p in self.personnel if p["active"]]
+        return len(active_personnel)
+    
+    def get_personnel_list(self):
+        """Get formatted personnel list using list comprehension"""
+        personnel_list = [f"{p['access_id']}: {p['name']} ({p['role']})" 
+                         for p in self.personnel if p["active"]]
+        return personnel_list
+    
+    def get_zone_occupancy(self, zone):
+        """Get personnel in specific zone using list comprehension"""
+        zone_personnel = [p["name"] for p in self.personnel 
+                         if p["active"] and zone in p["zone_access"]]
+        return zone_personnel
+    
+    def get_skills_inventory(self):
+        """Get all unique skills using nested list comprehension"""
+        all_skills = [skill for p in self.personnel for skill in p["skills"]]
+        return list(set(all_skills))
+    
+    def get_role_summary(self):
+        """Get count by role using dictionary comprehension"""
+        roles = [p["role"] for p in self.personnel if p["active"]]
+        role_counts = {role: roles.count(role) for role in set(roles)}
+        return role_counts
+
+# Test the system
+print("🏭 Manufacturing Facility Access Management System")
+print("=" * 60)
+
+system = ManufacturingAccessSystem()
+
+print("\\n👥 Total Active Personnel:")
+total = system.get_total_personnel()
+print(f"  Active: {total}")
+print(f"  Total Registered: {len(system.personnel)}")
+
+print("\\n📋 Personnel List:")
+personnel_list = system.get_personnel_list()
+for person in personnel_list:
+    print(f"  • {person}")
+
+print("\\n📍 Zone Occupancy Check:")
+zones = ["assembly_line", "control_room", "quality_check"]
+for zone in zones:
+    occupants = system.get_zone_occupancy(zone)
+    print(f"  {zone.replace('_', ' ').title()}: {len(occupants)} personnel")
+    if occupants:
+        print(f"    - {', '.join(occupants)}")
+
+print("\\n🛠️ Skills Inventory:")
+skills = system.get_skills_inventory()
+print(f"  Total Unique Skills: {len(skills)}")
+print(f"  Skills: {', '.join(sorted(skills))}")
+
+print("\\n🎯 Role Distribution:")
+role_summary = system.get_role_summary()
+for role, count in role_summary.items():
+    print(f"  {role.title()}: {count}")`;
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+        
+        async function runGuestSystemExercise() {
+            const code = document.querySelector('#manufacturing-guest-system .code-content').textContent;
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+        
+        function showGuestSystemSolution() {
+            const solution = `# 🏭 Complete Manufacturing Access System Solution
+
+class ManufacturingAccessSystem:
+    def __init__(self):
+        self.personnel = [
+            {"access_id": "ROB-001", "name": "Assembly Robot ARM-1", "role": "robot", "zone_access": ["assembly_line", "quality_check"], "active": True, "skills": ["welding", "assembly", "painting"]},
+            {"access_id": "ENG-101", "name": "Dr. Sarah Chen", "role": "engineer", "zone_access": ["control_room", "assembly_line", "maintenance"], "active": True, "skills": ["PLC programming", "machine learning", "robotics"]},
+            {"access_id": "OP-202", "name": "Mike Rodriguez", "role": "operator", "zone_access": ["assembly_line", "packaging"], "active": True, "skills": ["CNC operation", "quality control", "safety protocols"]},
+            {"access_id": "ROB-002", "name": "Quality Inspector Bot", "role": "robot", "zone_access": ["quality_check", "packaging"], "active": False, "skills": ["vision inspection", "defect detection"]},
+            {"access_id": "ENG-102", "name": "Alex Johnson", "role": "engineer", "zone_access": ["control_room", "R&D", "maintenance"], "active": True, "skills": ["IoT systems", "data analysis", "predictive maintenance"]}
+        ]
+    
+    def get_total_personnel(self):
+        """✅ SOLUTION: Calculate total active personnel using list comprehension"""
+        active_personnel = [p for p in self.personnel if p["active"]]
+        return len(active_personnel)
+    
+    def get_personnel_list(self):
+        """✅ SOLUTION: Get formatted personnel list using list comprehension"""
+        personnel_list = [f"{p['access_id']}: {p['name']} ({p['role']})" 
+                         for p in self.personnel if p["active"]]
+        return personnel_list
+    
+    def get_zone_occupancy(self, zone):
+        """✅ SOLUTION: Get personnel in specific zone using list comprehension"""
+        zone_personnel = [p["name"] for p in self.personnel 
+                         if p["active"] and zone in p["zone_access"]]
+        return zone_personnel
+    
+    def get_skills_inventory(self):
+        """✅ SOLUTION: Get all unique skills using nested list comprehension"""
+        all_skills = [skill for p in self.personnel for skill in p["skills"]]
+        return list(set(all_skills))
+    
+    def get_role_summary(self):
+        """✅ SOLUTION: Get count by role using dictionary comprehension"""
+        role_counts = {}
+        for p in self.personnel:
+            if p["active"]:
+                role_counts[p["role"]] = role_counts.get(p["role"], 0) + 1
+        return role_counts
+        
+        # Alternative one-liner using dictionary comprehension:
+        # roles = [p["role"] for p in self.personnel if p["active"]]
+        # return {role: roles.count(role) for role in set(roles)}
+
+# Key Learning Points:
+# 1. List comprehensions filter and transform data in one line
+# 2. Nested list comprehensions flatten nested structures
+# 3. Dictionary comprehensions create dictionaries from iterables
+# 4. Comprehensions are more readable and often faster than loops
+# 5. Always consider readability - sometimes loops are clearer for complex logic`;
+            
+            const output = document.querySelector('#manufacturing-guest-system .runner-output') || 
+                          document.getElementById('pythonOutput');
+            output.innerHTML = '<span style="color: var(--success-green);">✅ Complete Solution:</span>\n\n' + solution;
+        }
+        
+        async function runComprehensionDemo() {
+            const code = `# ⚡ List Comprehension Power Demonstration
+
+print("🏭 Manufacturing Data Processing with Comprehensions")
+print("=" * 60)
+
+# 1. Basic List Comprehension
+print("\\n1. 🔧 Basic List Comprehension:")
+production = [1200, 1180, 1250, 1100, 1300]
+high_production = [units for units in production if units > 1150]
+print(f"   All production: {production}")
+print(f"   High production (>1150): {high_production}")
+
+# 2. List Comprehension with Transformation
+print("\\n2. 🔄 List Comprehension with Transformation:")
+sensor_readings = [45.2, 47.8, 42.1, 49.5]
+fahrenheit_readings = [(temp * 9/5) + 32 for temp in sensor_readings]
+print(f"   Celsius: {sensor_readings}")
+print(f"   Fahrenheit: {[round(f, 1) for f in fahrenheit_readings]}")
+
+# 3. Nested List Comprehension
+print("\\n3. 🏗️ Nested List Comprehension:")
+production_lines = [
+    ['part_a', 'part_b', 'part_c'],
+    ['part_d', 'part_e'],
+    ['part_f', 'part_g', 'part_h']
+]
+all_parts = [part for line in production_lines for part in line]
+print(f"   Production lines: {production_lines}")
+print(f"   All parts: {all_parts}")
+
+# 4. Dictionary Comprehension
+print("\\n4. 📚 Dictionary Comprehension:")
+sensors = ['temp_01', 'press_02', 'vib_03', 'temp_02']
+sensor_status = {sensor: 'active' for sensor in sensors}
+print(f"   Sensors: {sensors}")
+print(f"   Status: {sensor_status}")
+
+# 5. Set Comprehension
+print("\\n5. 🔄 Set Comprehension:")
+defects = ['scratch', 'dent', 'scratch', 'misalignment', 'dent']
+unique_defects = {defect for defect in defects}
+print(f"   All defects: {defects}")
+print(f"   Unique defects: {unique_defects}")
+
+# 6. Generator Expression (Memory Efficient)
+print("\\n6. ⚡ Generator Expression:")
+def generate_large_dataset():
+    for i in range(1000000):
+        yield i * 2
+
+# This doesn't store all values in memory
+doubles = (i * 2 for i in range(10) if i % 2 == 0)
+print(f"   First 5 from generator: {[next(doubles) for _ in range(5)]}")
+
+# 7. Real Manufacturing Example
+print("\\n7. 🏭 Real Manufacturing Example:")
+
+# Process manufacturing orders
+orders = [
+    {"id": "ORD-001", "quantity": 150, "priority": "high"},
+    {"id": "ORD-002", "quantity": 80, "priority": "normal"},
+    {"id": "ORD-003", "quantity": 200, "priority": "high"},
+    {"id": "ORD-004", "quantity": 60, "priority": "low"}
+]
+
+# High priority orders with large quantities
+critical_orders = [
+    order["id"] 
+    for order in orders 
+    if order["priority"] == "high" and order["quantity"] > 100
+]
+
+print(f"   Critical orders: {critical_orders}")
+
+# Order summary using dictionary comprehension
+order_summary = {
+    order["id"]: {
+        "status": "urgent" if order["priority"] == "high" else "normal",
+        "estimated_time": order["quantity"] * 0.5  # 0.5 minutes per unit
+    }
+    for order in orders
+}
+
+print(f"   Order summary: {order_summary}")`;
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+        
+        async function runAdvancedComprehensions() {
+            const code = document.querySelector('#advanced-comprehensions .code-content').textContent;
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+        
+        async function runRenderDeployment() {
+            const code = document.getElementById('renderDeployCode').value;
+            document.getElementById('renderOutput').innerHTML = '<span style="color: var(--text-tertiary);">Running deployment simulation...</span>';
+            
+            // Simulate deployment output
+            setTimeout(() => {
+                document.getElementById('renderOutput').innerHTML = 
+                    `🚀 Starting Manufacturing AI Deployment to Render\n` +
+                    `===========================================================\n\n` +
+                    `Step 1: Connecting to GitHub repository\n` +
+                    `   Command: git remote add render https://github.com/your-repo\n` +
+                    `   Status: ✅ Complete\n\n` +
+                    `Step 2: Installing dependencies\n` +
+                    `   Command: pip install -r requirements.txt\n` +
+                    `   Status: ✅ Complete\n\n` +
+                    `Step 3: Setting environment variables\n` +
+                    `   Command: render env:set MANUFACTURING_API_KEY=***\n` +
+                    `   Status: ✅ Complete\n\n` +
+                    `Step 4: Building application\n` +
+                    `   Command: render build\n` +
+                    `   Status: ✅ Complete\n\n` +
+                    `Step 5: Starting web service\n` +
+                    `   Command: gunicorn app:app --workers=4\n` +
+                    `   Status: ✅ Complete\n\n` +
+                    `Step 6: Health check\n` +
+                    `   Command: curl https://manufacturing-ai-api.onrender.com/health\n` +
+                    `   Status: ✅ Complete\n\n` +
+                    `Step 7: Deployment complete!\n\n` +
+                    `===========================================================\n` +
+                    `🎉 Deployment Successful!\n\n` +
+                    `📊 Application Details:\n` +
+                    `   URL: https://manufacturing-ai-api.onrender.com\n` +
+                    `   Region: Oregon (US West)\n` +
+                    `   Instance: Free Tier (768 MB RAM)\n` +
+                    `   Auto-deploy: Enabled on git push\n\n` +
+                    `🏭 Your Manufacturing AI is now live in production!`;
+            }, 1000);
+        }
+        
+        async function runRailwayDeployment() {
+            const code = document.getElementById('railwayDeployCode').value;
+            document.getElementById('railwayOutput').innerHTML = '<span style="color: var(--text-tertiary);">Running Railway deployment simulation...</span>';
+            
+            setTimeout(() => {
+                document.getElementById('railwayOutput').innerHTML = 
+                    `🚂 Railway Manufacturing AI Deployment\n` +
+                    `===========================================================\n\n` +
+                    `🔐 Authenticating with Railway...\n` +
+                    `   Command: railway login\n` +
+                    `   ✅ Authentication successful\n\n` +
+                    `📦 Initializing Railway project...\n` +
+                    `   Command: railway init\n` +
+                    `   ✅ Project initialized\n\n` +
+                    `🗄️ Adding PostgreSQL database...\n` +
+                    `   Command: railway add postgresql\n` +
+                    `   ✅ PostgreSQL database provisioned\n` +
+                    `   📊 Connection string: postgresql://user:***@db.railway.app/manufacturing\n\n` +
+                    `🔧 Setting environment variables...\n` +
+                    `   Command: railway variables set MANUFACTURING_API_KEY=***\n` +
+                    `   ✅ Environment variables set\n\n` +
+                    `🏷️ Setting model version...\n` +
+                    `   Command: railway variables set MODEL_VERSION=v2.1\n` +
+                    `   ✅ Environment variables set\n\n` +
+                    `🚀 Deploying application...\n` +
+                    `   Command: railway up\n` +
+                    `   🏗️ Building Docker image...\n` +
+                    `   📦 Pushing image to registry...\n` +
+                    `   🚀 Deploying to Railway infrastructure...\n` +
+                    `   ✅ Deployment complete!\n\n` +
+                    `📋 Streaming deployment logs...\n` +
+                    `   Command: railway logs\n` +
+                    `   📋 [INFO] Starting manufacturing AI application\n` +
+                    `   📋 [INFO] Loading predictive maintenance model v2.1\n` +
+                    `   📋 [INFO] Database connection established\n` +
+                    `   📋 [INFO] API server listening on port 5000\n\n` +
+                    `🌐 Opening application in browser...\n` +
+                    `   Command: railway open\n` +
+                    `   🌐 Opening: https://manufacturing-ai.up.railway.app\n\n` +
+                    `===========================================================\n` +
+                    `🎉 Railway Deployment Complete!\n\n` +
+                    `🏭 Manufacturing AI Dashboard:\n` +
+                    `   URL: https://manufacturing-ai.up.railway.app\n` +
+                    `   Database: PostgreSQL (managed)\n` +
+                    `   Region: Global CDN\n` +
+                    `   Monitoring: Built-in logs & metrics\n\n` +
+                    `🚂 Your manufacturing AI is now running on Railway!`;
+            }, 1000);
+        }
+        
+        async function runMonitoringDemo() {
+            const code = document.querySelector('#monitoring-production .code-content').textContent;
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+        
+        async function runDeploymentSimulator() {
+            const code = `# 🚀 Manufacturing AI Deployment Simulator
+
+import time
+import random
+
+class DeploymentSimulator:
+    def __init__(self):
+        self.platforms = ['Render', 'Railway', 'Heroku', 'AWS']
+        self.services = ['Web API', 'Database', 'Background Worker', 'Monitoring']
+        
+    def simulate_deployment(self, platform):
+        print(f"🚀 Deploying Manufacturing AI to {platform}")
+        print("=" * 60)
+        
+        steps = [
+            ("Initializing deployment", 0.5),
+            ("Checking dependencies", 0.8),
+            ("Building Docker image", 1.2),
+            ("Running tests", 0.7),
+            ("Setting environment variables", 0.3),
+            ("Deploying to production", 1.5),
+            ("Running health checks", 0.6),
+            ("Enabling monitoring", 0.4)
+        ]
+        
+        for step, duration in steps:
+            print(f"\\n{step}...")
+            time.sleep(duration * 0.1)  # Simulate time
+            print(f"   ✅ Complete")
+        
+        # Generate mock metrics
+        metrics = {
+            'response_time': random.uniform(50, 200),
+            'uptime': random.uniform(99.5, 99.99),
+            'requests_per_minute': random.randint(100, 500),
+            'error_rate': random.uniform(0.01, 0.1)
+        }
+        
+        print(f"\\n" + "=" * 60)
+        print(f"🎉 Deployment to {platform} Successful!")
+        print(f"\\n📊 Production Metrics:")
+        print(f"   Avg Response Time: {metrics['response_time']:.1f}ms")
+        print(f"   Uptime: {metrics['uptime']:.2f}%")
+        print(f"   Requests/Min: {metrics['requests_per_minute']}")
+        print(f"   Error Rate: {metrics['error_rate']:.2f}%")
+        print(f"\\n🏭 Manufacturing AI is now live in production!")
+        
+        return metrics
+
+# Run simulation
+print("🏭 Manufacturing AI Deployment Simulator")
+print("=" * 50)
+
+simulator = DeploymentSimulator()
+
+print("\\nAvailable Platforms:")
+for i, platform in enumerate(simulator.platforms, 1):
+    print(f"  {i}. {platform}")
+
+print("\\n🔧 Simulating Render deployment...")
+metrics = simulator.simulate_deployment('Render')
+
+print("\\n🔧 Simulating Railway deployment...")
+metrics = simulator.simulate_deployment('Railway')
+
+print("\\n📈 Comparison:")
+print("  Render: Great for web APIs, Free tier available")
+print("  Railway: Excellent for databases, Easy GitHub integration")
+print("  Both: Perfect for Manufacturing AI applications!")`;
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+        
+        function showEnvironmentVariables() {
+            const envVars = [
+                { key: "MANUFACTURING_API_KEY", value: "sk_prod_••••••••••••••••", description: "API key for manufacturing services" },
+                { key: "DATABASE_URL", value: "postgresql://user:••••@db.render.com/manufacturing", description: "Production database connection" },
+                { key: "MODEL_VERSION", value: "v3.2-production", description: "AI model version in production" },
+                { key: "DEBUG_MODE", value: "False", description: "Enable debug logging" },
+                { key: "LOG_LEVEL", value: "INFO", description: "Logging verbosity" },
+                { key: "ALERT_WEBHOOK", value: "https://hooks.slack.com/services/••••••••••••••••", description: "Slack webhook for alerts" },
+                { key: "MAX_WORKERS", value: "4", description: "Maximum worker processes" },
+                { key: "JWT_SECRET", value: "••••••••••••••••••••••••••••••••", description: "JWT signing secret" }
+            ];
+            
+            let html = '<h4>🔐 Environment Variables for Manufacturing AI</h4>';
+            html += '<div class="env-panel">';
+            
+            envVars.forEach(env => {
+                html += `
+                    <div class="env-var" style="margin-bottom: 8px;">
+                        <div>
+                            <div class="env-key">${env.key}</div>
+                            <div style="font-size: 11px; color: var(--text-tertiary);">${env.description}</div>
+                        </div>
+                        <div class="env-value">${env.value}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            html += '<p style="margin-top: 12px; color: var(--text-secondary);">';
+            html += '<strong>🏭 Manufacturing Best Practices:</strong><br>';
+            html += '• Store secrets in platform environment variables, not in code<br>';
+            html += '• Use different values for development and production<br>';
+            html += '• Rotate API keys regularly for security<br>';
+            html += '• Document all environment variables in README.md';
+            html += '</p>';
+            
+            document.getElementById('pythonOutput').innerHTML = html;
+        }
+        
+        function generateDeploymentChecklist() {
+            const checklist = `
+# 🏭 Manufacturing AI Deployment Checklist
+
+## ✅ Pre-Deployment
+- [ ] Test all manufacturing AI models locally
+- [ ] Update requirements.txt with exact versions
+- [ ] Create .env.example with all required variables
+- [ ] Write comprehensive README.md
+- [ ] Test database migrations (if any)
+
+## 🔧 Platform Setup
+- [ ] Create account on Render/Railway
+- [ ] Connect GitHub repository
+- [ ] Set up production database
+- [ ] Configure environment variables
+- [ ] Set up custom domain (if needed)
+
+## 🚀 Deployment
+- [ ] Deploy to staging environment first
+- [ ] Run automated tests
+- [ ] Verify API endpoints are working
+- [ ] Test database connections
+- [ ] Monitor initial deployment logs
+
+## 📊 Post-Deployment
+- [ ] Set up monitoring and alerts
+- [ ] Configure auto-scaling rules
+- [ ] Set up backup strategy
+- [ ] Document deployment process
+- [ ] Update deployment runbook
+
+## 🏭 Manufacturing Specific
+- [ ] Test with manufacturing data samples
+- [ ] Verify prediction accuracy
+- [ ] Set up data retention policies
+- [ ] Configure manufacturing-specific alerts
+- [ ] Schedule regular model retraining
+
+## 🔒 Security
+- [ ] Enable HTTPS/SSL
+- [ ] Set up API rate limiting
+- [ ] Configure CORS policies
+- [ ] Regular security updates
+- [ ] Monitor for suspicious activity
+            `;
+            
+            document.getElementById('pythonOutput').innerHTML = 
+                '<span style="color: var(--success-green);">✅ Deployment Checklist Generated:</span>\n\n' +
+                '<div class="code-content" style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; white-space: pre-wrap;">' +
+                checklist +
+                '</div>';
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Pyodide
+            initializePyodide();
+            
+            // Initialize theme toggle
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    // Theme toggle logic from previous lesson
+                });
+            }
+            
+            // Initialize guest visualization
+            initializeGuestVisualization();
+            
+            // Update lesson progress
+            const progressBar = document.getElementById('lessonProgress');
+            if (progressBar) {
+                progressBar.style.width = '100%';
+            }
+            
+            // Add fade-in animation to all messages
+            const messages = document.querySelectorAll('.message');
+            messages.forEach((message, index) => {
+                message.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+
+        // Keep all existing JavaScript functions from previous lesson
+        // Add them here or include via separate script tag
+    </script>
+</body>
+</html>
+
+    <script>
+        // Initialize Pyodide
+        let pyodide;
+        
+        async function initializePyodide() {
+            const loader = document.getElementById('pyodideLoader');
+            loader.style.display = 'block';
+            
+            try {
+                pyodide = await loadPyodide({
+                    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
+                });
+                
+                // Load required packages
+                await pyodide.loadPackage(['micropip']);
+                await pyodide.runPythonAsync(`
+                    import micropip
+                    await micropip.install(['pandas', 'numpy', 'matplotlib', 'scipy'])
+                `);
+                
+                console.log('Pyodide initialized successfully');
+                loader.style.display = 'none';
+            } catch (error) {
+                console.error('Failed to initialize Pyodide:', error);
+                loader.innerHTML = `
+                    <div style="color: var(--error-red); text-align: center;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 32px; margin-bottom: 16px;"></i>
+                        <p>Failed to load Python runtime. Some features may be limited.</p>
+                        <p style="font-size: 12px;">Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Initialize on page load
+        initializePyodide();
+        
+        // Theme Toggle Functionality
+        let isDarkMode = true;
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+
+        themeToggle.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                themeIcon.className = 'fas fa-moon theme-icon';
+                themeText.textContent = 'Dark Mode';
+            } else {
+                document.body.classList.remove('dark-mode');
+                themeIcon.className = 'fas fa-sun theme-icon';
+                themeText.textContent = 'Light Mode';
+            }
+        });
+
+        // Scroll to Section
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+                
+                // Update active sidebar item
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Find and activate the corresponding sidebar item
+                const sidebarItems = document.querySelectorAll('.sidebar-item');
+                for (const item of sidebarItems) {
+                    if (item.getAttribute('onclick')?.includes(sectionId)) {
+                        item.classList.add('active');
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Run Python Code
+        async function runPythonCode() {
+            const code = document.getElementById('pythonCode').value;
+            const output = document.getElementById('pythonOutput');
+            
+            output.innerHTML = '<span style="color: var(--text-tertiary);">Running Python code...</span>';
+            
+            if (!pyodide) {
+                output.innerHTML = '<span style="color: var(--error-red);">Python runtime not ready yet. Please wait...</span>';
+                return;
+            }
+            
+            try {
+                // Capture print output
+                let capturedOutput = '';
+                pyodide.runPython(`
+                    import sys
+                    import io
+                    sys.stdout = io.StringIO()
+                `);
+                
+                await pyodide.runPythonAsync(code);
+                
+                // Get the captured output
+                capturedOutput = pyodide.runPython('sys.stdout.getvalue()');
+                
+                // Restore stdout
+                pyodide.runPython('sys.stdout = sys.__stdout__');
+                
+                output.innerHTML = capturedOutput || '<span style="color: var(--text-tertiary);">(No output generated)</span>';
+                output.style.color = 'var(--code-text)';
+            } catch (error) {
+                output.innerHTML = `<span style="color: var(--error-red);">Error: ${error.message}</span>`;
+            }
+        }
+
+        // Run specific demos
+        async function runStringMethodsDemo() {
+            const code = `# String Methods Demo
+class ManufacturingDataProcessor:
+    def clean_sensor_data(self, raw_data):
+        cleaned = {}
+        for sensor_id, reading in raw_data.items():
+            clean_id = sensor_id.strip().replace(' ', '_').upper()
+            if isinstance(reading, str):
+                clean_reading = reading.strip().replace('°C', '').replace('C', '')
+                if clean_reading.replace('.', '').isdigit():
+                    cleaned[clean_id] = float(clean_reading)
+                else:
+                    cleaned[clean_id] = clean_reading
+            else:
+                cleaned[clean_id] = reading
+        return cleaned
+
+processor = ManufacturingDataProcessor()
+raw_sensors = {'  Temp Sensor 1 ': '45.5°C', 'Pressure_Sensor_2': '  100.2  '}
+cleaned = processor.clean_sensor_data(raw_sensors)
+print("🧹 Cleaned Sensor Data:")
+for sensor, value in cleaned.items():
+    print(f"  {sensor}: {value}")
+
+# String method examples
+text = "  ROBOT_ARM_001  "
+print(f"\\n🔧 String Method Examples:")
+print(f"  Original: '{text}'")
+print(f"  .strip(): '{text.strip()}'")
+print(f"  .lower(): '{text.lower()}'")
+print(f"  .replace('_', ' '): '{text.replace('_', ' ')}'")
+print(f"  .startswith('ROBOT'): {text.strip().startswith('ROBOT')}")`;
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+
+        async function runListMethodsDemo() {
+            const code = `# List Methods for Production Data
+import random
+from datetime import datetime, timedelta
+
+class ProductionDataManager:
+    def generate_production_data(self, days=7):
+        batches = []
+        for i in range(days):
+            batch = {
+                'day': f'Day {i+1}',
+                'units': random.randint(800, 1200),
+                'defects': random.randint(0, 20),
+                'downtime': random.randint(0, 120)
+            }
+            batches.append(batch)
+        return batches
+
+manager = ProductionDataManager()
+batches = manager.generate_production_data(7)
+
+print("🏭 Production Data Analysis")
+print("=" * 40)
+
+# Extract metrics using list comprehensions
+units = [batch['units'] for batch in batches]
+defects = [batch['defects'] for batch in batches]
+
+print(f"\\n📊 Daily Production:")
+for batch in batches:
+    print(f"  {batch['day']}: {batch['units']} units, {batch['defects']} defects")
+
+print(f"\\n📈 Statistics:")
+print(f"  Total units: {sum(units):,}")
+print(f"  Average daily: {sum(units)/len(units):.0f} units")
+print(f"  Max production: {max(units)} units (Day {units.index(max(units)) + 1})")
+print(f"  Min production: {min(units)} units (Day {units.index(min(units)) + 1})")
+print(f"  Total defects: {sum(defects)}")
+print(f"  Defect rate: {sum(defects)/sum(units):.2%}")
+
+# List method examples
+print(f"\\n🔧 List Method Examples:")
+production_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+print(f"  Original list: {production_days}")
+print(f"  .append('Saturday'): {production_days + ['Saturday']}")
+print(f"  .sort(): {sorted(production_days)}")
+print(f"  .index('Wednesday'): {production_days.index('Wednesday')}")`;
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+
+        async function runDictMethodsDemo() {
+            const code = `# Dictionary Methods for IoT Data
+import json
+
+class IoTSensorManager:
+    def __init__(self):
+        self.sensors = {}
+    
+    def add_sensor(self, sensor_id, sensor_type, location):
+        self.sensors[sensor_id] = {
+            'type': sensor_type,
+            'location': location,
+            'status': 'active',
+            'readings': []
+        }
+    
+    def get_sensor_info(self, sensor_id):
+        return self.sensors.get(sensor_id, None)
+
+manager = IoTSensorManager()
+manager.add_sensor('temp_001', 'temperature', 'cnc_machine_1')
+manager.add_sensor('vib_001', 'vibration', 'conveyor_belt')
+manager.add_sensor('press_001', 'pressure', 'hydraulic_press')
+
+print("📡 IoT Sensor Network")
+print("=" * 40)
+
+print(f"\\n🔧 Dictionary Method Examples:")
+
+# .keys() - Get all sensor IDs
+print(f"  .keys(): {list(manager.sensors.keys())}")
+
+# .values() - Get all sensor data
+sensor_types = [sensor['type'] for sensor in manager.sensors.values()]
+print(f"  .values() types: {sensor_types}")
+
+# .items() - Iterate through sensors
+print(f"\\n  .items() iteration:")
+for sensor_id, data in manager.sensors.items():
+    print(f"    {sensor_id}: {data['type']} at {data['location']}")
+
+# .get() - Safe access
+print(f"\\n  .get() for missing sensor: {manager.sensors.get('nonexistent', 'Sensor not found')}")
+
+# .update() - Add multiple sensors
+new_sensors = {
+    'temp_002': {'type': 'temperature', 'location': 'oven_1', 'status': 'active'},
+    'humid_001': {'type': 'humidity', 'location': 'clean_room', 'status': 'active'}
+}
+manager.sensors.update(new_sensors)
+print(f"\\n  After .update(): {len(manager.sensors)} total sensors")
+
+# .pop() - Remove sensor
+removed = manager.sensors.pop('humid_001', None)
+print(f"  After .pop('humid_001'): {len(manager.sensors)} sensors remaining")`;
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+
+        async function runCorrelationDemo() {
+            const code = `# Correlation Analysis Demo
+import numpy as np
+import pandas as pd
+
+# Generate manufacturing data
+np.random.seed(42)
+n_samples = 50
+
+production = np.random.normal(100, 15, n_samples)
+quality = 95 - 0.3 * np.abs(np.random.normal(0, 5, n_samples)) + 0.1 * production
+energy = 800 + 2 * production + np.random.normal(0, 50, n_samples)
+downtime = 50 - 0.4 * np.random.uniform(70, 100, n_samples) + np.random.normal(0, 10, n_samples)
+
+# Create DataFrame
+data = pd.DataFrame({
+    'production_rate': production,
+    'quality_score': quality,
+    'energy_kwh': energy,
+    'downtime_hours': downtime
+})
+
+print("📊 Manufacturing Correlation Analysis")
+print("=" * 50)
+
+# Calculate correlations
+correlations = data.corr()
+print(f"\\n🔗 Correlation Matrix:")
+print(correlations.round(3))
+
+# Find strong correlations
+strong_pairs = []
+for i in range(len(correlations.columns)):
+    for j in range(i+1, len(correlations.columns)):
+        corr = correlations.iloc[i, j]
+        if abs(corr) > 0.6:
+            strong_pairs.append({
+                'metric1': correlations.columns[i],
+                'metric2': correlations.columns[j],
+                'correlation': corr
+            })
+
+print(f"\\n⚡ Strong Correlations (|r| > 0.6):")
+for pair in strong_pairs:
+    direction = "positive" if pair['correlation'] > 0 else "negative"
+    print(f"  {pair['metric1']} ↔ {pair['metric2']}: {pair['correlation']:.3f} ({direction})")
+
+# Statistical summary
+print(f"\\n📈 Statistical Summary:")
+for column in data.columns:
+    print(f"\\n  {column}:")
+    print(f"    Mean: {data[column].mean():.2f}")
+    print(f"    Std Dev: {data[column].std():.2f}")
+    print(f"    Min: {data[column].min():.2f}")
+    print(f"    Max: {data[column].max():.2f}")
+    print(f"    Range: {data[column].max() - data[column].min():.2f}")`;
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+
+        async function runBuggyCode() {
+            const code = document.getElementById('buggyCode').value;
+            document.getElementById('exerciseOutput').innerHTML = 
+                '<span style="color: var(--warning-orange);">Running buggy code... Check the Python output above for errors!</span>';
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+
+        function showSolution() {
+            const solution = `# 🏭 Fixed Manufacturing User Management System
+
+users = {
+    "john_doe": "John Doe",
+    "jane_smith": "Jane Smith",
+    "bob_engineer": "Bob Engineer"
+}
+
+def display_menu():
+    print("\\n🏭 Manufacturing User Management System")
+    print("1. View all users")
+    print("2. Add new user(s)")
+    print("3. Remove user")
+    print("4. Search user")
+    print("5. Exit")
+
+def add_users():
+    user_input = input("Enter user name(s), comma-separated: ")
+    
+    # ✅ FIX 1: Validate alphabetic characters, spaces, and commas only
+    valid_chars = user_input.replace(' ', '').replace(',', '')
+    if not valid_chars.isalpha():
+        print("Invalid input! Names should contain only letters, spaces, and commas.")
+        return
+    
+    # Split by comma
+    names = user_input.split(',')
+    
+    for name in names:
+        # ✅ FIX 2: Strip only leading/trailing whitespace
+        cleaned_name = name.strip()
+        
+        if not cleaned_name:
+            continue
+        
+        # ✅ FIX 3: Convert to title case for display
+        display_name = cleaned_name.title()
+        
+        # ✅ FIX 4: Generate proper username (lowercase with underscores)
+        username = cleaned_name.lower().replace(' ', '_')
+        
+        # ✅ FIX 5: Add whole user, not individual characters
+        users[username] = display_name
+        print(f"Added user: {display_name} (username: {username})")
+
+def remove_user():
+    name = input("Enter name to remove: ")
+    
+    # ✅ FIX 6: Convert to title case and find by value
+    search_name = name.strip().title()
+    
+    # Find username by display name
+    username_to_remove = None
+    for username, display_name in users.items():
+        if display_name == search_name:
+            username_to_remove = username
+            break
+    
+    if username_to_remove:
+        del users[username_to_remove]
+        print(f"Removed {search_name} (username: {username_to_remove})")
+    else:
+        print(f"User {search_name} not found")
+
+def main():
+    while True:
+        display_menu()
+        choice = input("\\nEnter choice (1-5): ")
+        
+        # ✅ FIX 7: Handle non-numeric input gracefully
+        if choice.isdigit():
+            choice = int(choice)
+        else:
+            print("Invalid choice. Please enter a number (1-5).")
+            continue
+        
+        # ✅ BONUS: Using match case (Python 3.10+)
+        match choice:
+            case 1:
+                print("\\n👥 Current Users:")
+                if users:
+                    for username, name in users.items():
+                        print(f"  {username}: {name}")
+                else:
+                    print("  No users in system")
+            
+            case 2:
+                add_users()
+            
+            case 3:
+                remove_user()
+            
+            case 4:
+                search_term = input("Enter search term: ").lower()
+                print(f"\\n🔍 Search results for '{search_term}':")
+                found = False
+                for username, name in users.items():
+                    if search_term in name.lower() or search_term in username.lower():
+                        print(f"  {username}: {name}")
+                        found = True
+                if not found:
+                    print("  No matching users found")
+            
+            case 5:
+                print("Exiting... Goodbye! 👋")
+                break
+            
+            case _:
+                print("Invalid choice! Please enter 1-5.")
+
+if __name__ == "__main__":
+    main()`;
+            
+            document.getElementById('exerciseOutput').innerHTML = 
+                '<span style="color: var(--success-green);">✅ Fixed solution loaded! Copy this code to fix the bugs.</span>\n\n' +
+                solution;
+        }
+
+        async function runVisualization() {
+            const output = document.getElementById('vizOutput');
+            output.innerHTML = '<span style="color: var(--text-tertiary);">Visualization would be generated here in a full Python environment with matplotlib.</span>\n\n' +
+                             'In a full Python environment, this would create a bar chart comparing current vs target manufacturing metrics.';
+        }
+
+        async function runAIPatternsDemo() {
+            const code = `# Advanced AI Patterns Demo
+import asyncio
+import time
+from collections import defaultdict
+
+class RateLimiter:
+    def __init__(self, max_calls=10, period=60):
+        self.max_calls = max_calls
+        self.period = period
+        self.calls = []
+    
+    def allow_request(self):
+        now = time.time()
+        self.calls = [call for call in self.calls if now - call < self.period]
+        
+        if len(self.calls) < self.max_calls:
+            self.calls.append(now)
+            return True
+        return False
+
+class ManufacturingAISystem:
+    def __init__(self):
+        self.cost_tracker = defaultdict(float)
+        self.rate_limiter = RateLimiter(max_calls=5, period=10)
+    
+    async def process_item(self, item):
+        # Rate limiting
+        if not self.rate_limiter.allow_request():
+            return {"error": "Rate limit exceeded"}
+        
+        # Simulate AI processing
+        await asyncio.sleep(0.1)
+        
+        # Track cost
+        cost = 0.001 * (1 + len(str(item)) / 1000)
+        self.cost_tracker[item.get('type', 'unknown')] += cost
+        
+        return {
+            "item_id": item.get('id'),
+            "result": "processed",
+            "cost": cost,
+            "timestamp": time.time()
+        }
+
+async def demo():
+    print("🧠 AI System Patterns Demo")
+    print("=" * 40)
+    
+    system = ManufacturingAISystem()
+    
+    # Create sample items
+    items = [
+        {"id": f"item_{i}", "type": ["quality", "maintenance", "optimization"][i % 3]}
+        for i in range(10)
+    ]
+    
+    print(f"Processing {len(items)} items with rate limiting...")
+    
+    # Process items
+    tasks = [system.process_item(item) for item in items]
+    results = await asyncio.gather(*tasks)
+    
+    # Analyze results
+    successful = [r for r in results if "error" not in r]
+    failed = [r for r in results if "error" in r]
+    
+    print(f"\\n📊 Results:")
+    print(f"  Successful: {len(successful)}")
+    print(f"  Failed (rate limited): {len(failed)}")
+    print(f"  Total cost: ${sum(system.cost_tracker.values()):.4f}")
+    print(f"  Cost by type: {dict(system.cost_tracker)}")
+
+# Run the demo
+await demo()`;
+            
+            document.getElementById('pythonCode').value = code;
+            await runPythonCode();
+        }
+
+        // Initialize correlation matrix
+        function initializeCorrelationMatrix() {
+            const matrix = document.getElementById('correlationMatrix');
+            const metrics = ['Prod', 'Qual', 'Energy', 'Uptime', 'Safety', 'Cost'];
+            
+            // Generate correlation values
+            const correlations = [];
+            for (let i = 0; i < metrics.length; i++) {
+                for (let j = 0; j < metrics.length; j++) {
+                    if (i === j) {
+                        correlations.push({value: 1.0, color: 'var(--industrial-blue)'});
+                    } else {
+                        // Generate realistic correlation values
+                        const baseCorr = Math.random() * 2 - 1; // -1 to 1
+                        const value = Math.round(baseCorr * 100) / 100;
+                        let color;
+                        
+                        if (value > 0.7) color = 'var(--predictive-green)';
+                        else if (value > 0.3) color = 'var(--robotics-yellow)';
+                        else if (value > -0.3) color = 'var(--text-tertiary)';
+                        else if (value > -0.7) color = 'var(--automation-orange)';
+                        else color = 'var(--quality-red)';
+                        
+                        correlations.push({value, color});
+                    }
+                }
+            }
+            
+            // Create matrix cells
+            matrix.innerHTML = '';
+            
+            // Header row
+            metrics.forEach(metric => {
+                const cell = document.createElement('div');
+                cell.className = 'correlation-cell';
+                cell.style.background = 'var(--bg-secondary)';
+                cell.style.fontWeight = 'bold';
+                cell.textContent = metric;
+                matrix.appendChild(cell);
+            });
+            
+            // Data rows
+            let index = 0;
+            for (let i = 0; i < metrics.length; i++) {
+                // Row header
+                const headerCell = document.createElement('div');
+                headerCell.className = 'correlation-cell';
+                headerCell.style.background = 'var(--bg-secondary)';
+                headerCell.style.fontWeight = 'bold';
+                headerCell.textContent = metrics[i];
+                matrix.appendChild(headerCell);
+                
+                // Data cells
+                for (let j = 0; j < metrics.length; j++) {
+                    const corr = correlations[index];
+                    const cell = document.createElement('div');
+                    cell.className = 'correlation-cell';
+                    cell.style.background = corr.color;
+                    cell.style.color = Math.abs(corr.value) > 0.5 ? 'white' : 'var(--text-primary)';
+                    cell.textContent = corr.value.toFixed(2);
+                    cell.title = `${metrics[i]} vs ${metrics[j]}: ${corr.value.toFixed(3)}`;
+                    
+                    cell.addEventListener('mouseenter', () => {
+                        cell.style.transform = 'scale(1.1)';
+                        cell.style.boxShadow = '0 4px 15px var(--shadow-color)';
+                        cell.style.zIndex = '10';
+                    });
+                    
+                    cell.addEventListener('mouseleave', () => {
+                        cell.style.transform = 'scale(1)';
+                        cell.style.boxShadow = 'none';
+                        cell.style.zIndex = '1';
+                    });
+                    
+                    matrix.appendChild(cell);
+                    index++;
+                }
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update lesson progress
+            const progressBar = document.getElementById('lessonProgress');
+            progressBar.style.width = '100%';
+            
+            // Initialize correlation matrix
+            initializeCorrelationMatrix();
+            
+            // Add fade-in animation to all messages
+            const messages = document.querySelectorAll('.message');
+            messages.forEach((message, index) => {
+                message.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+            // Initialize chart
+            initializeProductionChart();
+        });
+
+        function initializeProductionChart() {
+            const ctx = document.getElementById('productionChart').getContext('2d');
+            
+            // Sample production data
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const planned = [100, 105, 110, 115, 120, 90, 85];
+            const actual = [95, 102, 108, 112, 118, 88, 82];
+            const efficiency = planned.map((p, i) => (actual[i] / p) * 100);
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: days,
+                    datasets: [
+                        {
+                            label: 'Planned Production',
+                            data: planned,
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Actual Production',
+                            data: actual,
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Efficiency %',
+                            data: efficiency,
+                            type: 'line',
+                            backgroundColor: 'rgba(236, 72, 153, 0.2)',
+                            borderColor: 'rgba(236, 72, 153, 1)',
+                            borderWidth: 2,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Production Units'
+                            }
+                        },
+                        y1: {
+                            position: 'right',
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Efficiency %'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '🏭 Weekly Production Performance',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            color: 'var(--text-primary)'
+                        },
+                        legend: {
+                            labels: {
+                                color: 'var(--text-primary)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Tool functions
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-block').querySelector('.code-content');
+            const codeText = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(codeText).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+
+        function runPythonCodeRunner() {
+            document.getElementById('pythonCode').value = `# Welcome to the Python Code Runner!
+# Try these manufacturing examples:
+
+# 1. Clean sensor data
+sensors = {'Temp 01': '45.5°C', ' Pressure_02 ': ' 100.2 '}
+cleaned = {k.strip().replace(' ', '_').upper(): float(v.strip().replace('°C', '')) 
+           for k, v in sensors.items()}
+print("🧹 Cleaned Sensors:", cleaned)
+
+# 2. Production statistics
+production = [1200, 1180, 1250, 1100, 1300]
+print("📊 Production Stats:")
+print(f"  Total: {sum(production):,} units")
+print(f"  Average: {sum(production)/len(production):.0f} units/day")
+print(f"  Best day: {max(production)} units")
+print(f"  Worst day: {min(production)} units")
+
+# 3. Robot command formatting
+commands = ['MOVE TO X:100', 'ROTATE 45 DEG', 'GRIP PART']
+formatted = [cmd.lower().replace(' ', '_').replace(':', '=') for cmd in commands]
+print("🤖 Formatted Commands:", formatted)`;
+            
+            scrollToSection('python-methods-intro');
+        }
+
+        function runDataVisualization() {
+            alert('📊 Data Visualization Tool\n\nIn a full environment, this would open an interactive chart showing:\n• Production trends over time\n• Quality vs Production correlation\n• Energy consumption patterns\n• Downtime analysis\n\nTry the correlation matrix below for interactive exploration!');
+        }
+
+        function runManufacturingSimulation() {
+            document.getElementById('pythonCode').value = `# 🏭 Manufacturing Data Simulation
+import random
+from datetime import datetime, timedelta
+
+def simulate_production_line(days=7):
+    """Simulate a smart factory production line"""
+    data = []
+    base_production = 1000
+    
+    for day in range(days):
+        # Simulate daily variations
+        efficiency = random.uniform(0.85, 0.98)
+        downtime = random.randint(0, 120)  # minutes
+        defects = random.randint(0, int(base_production * 0.03))
+        
+        daily_data = {
+            'day': f'Day {day + 1}',
+            'date': (datetime.now() - timedelta(days=days-day)).strftime('%Y-%m-%d'),
+            'production_target': base_production,
+            'actual_production': int(base_production * efficiency),
+            'downtime_minutes': downtime,
+            'defects': defects,
+            'quality_score': 100 - (defects / base_production * 100),
+            'energy_kwh': random.uniform(800, 1200),
+            'oee': efficiency * (1 - downtime/1440) * (1 - defects/base_production)
+        }
+        data.append(daily_data)
+    
+    return data
+
+# Run simulation
+production_data = simulate_production_line(5)
+
+print("🏭 Smart Factory Simulation Results")
+print("=" * 50)
+
+for day in production_data:
+    print(f"\\n📅 {day['day']} ({day['date']}):")
+    print(f"  Production: {day['actual_production']:,}/{day['production_target']:,} units")
+    print(f"  Quality: {day['quality_score']:.1f}% ({day['defects']} defects)")
+    print(f"  Downtime: {day['downtime_minutes']} minutes")
+    print(f"  Energy: {day['energy_kwh']:.0f} kWh")
+    print(f"  OEE: {day['oee']:.1%}")
+
+# Calculate totals
+total_production = sum(d['actual_production'] for d in production_data)
+total_defects = sum(d['defects'] for d in production_data)
+avg_oee = sum(d['oee'] for d in production_data) / len(production_data)
+
+print(f"\\n📊 5-Day Summary:")
+print(f"  Total Production: {total_production:,} units")
+print(f"  Total Defects: {total_defects:,}")
+print(f"  Overall Defect Rate: {total_defects/total_production:.2%}")
+print(f"  Average OEE: {avg_oee:.1%}")
+print(f"  {'✅ World Class' if avg_oee > 0.85 else '⚠️ Needs Improvement'}")`;
+            
+            runPythonCode();
+        }
+
+        function runCorrelationAnalysis() {
+            initializeCorrelationMatrix();
+            alert('🔗 Correlation Analysis Started!\n\nExplore the correlation matrix above. Each cell shows the relationship between manufacturing metrics:\n\n• Green: Strong positive correlation (＞0.7)\n• Yellow: Moderate positive correlation (0.3-0.7)\n• Gray: Weak or no correlation (-0.3 to 0.3)\n• Orange: Moderate negative correlation (-0.7 to -0.3)\n• Red: Strong negative correlation (＜-0.7)\n\nHover over cells for exact values!');
+        }
+
+        function startInteractiveExercise() {
+            scrollToSection('real-world-exercise');
+            document.getElementById('exerciseOutput').innerHTML = 
+                '<span style="color: var(--robotics-yellow);">🏭 Interactive Exercise Ready!</span>\n\n' +
+                '1. Run the buggy code to see the errors\n' +
+                '2. Fix each bug using Python methods\n' +
+                '3. Check the solution when ready\n' +
+                '4. Try the bonus challenge: Convert to match/case!';
+        }
+    </script>
+</body>
+</html>

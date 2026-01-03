@@ -1,0 +1,3056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 10: Vector Databases & Embeddings in AI/ML | Python String Methods</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Enhanced Quantum Computing Theme Variables */
+        :root {
+            /* Light Theme - Quantum Style */
+            --bg-primary: #0A0E17;
+            --bg-secondary: #0F172A;
+            --bg-tertiary: #1E293B;
+            --bg-quaternary: #334155;
+            --border-color: #475569;
+            --border-light: #64748B;
+            --text-primary: #F1F5F9;
+            --text-secondary: #CBD5E1;
+            --text-tertiary: #94A3B8;
+            --quantum-teal: #06D6A0;
+            --quantum-teal-light: rgba(6, 214, 160, 0.1);
+            --quantum-teal-hover: #05C38F;
+            --quantum-blue: #118AB2;
+            --quantum-purple: #7209B7;
+            --quantum-pink: #F72585;
+            --vector-orange: #FF9E00;
+            --embedding-green: #4CC9F0;
+            --database-indigo: #4361EE;
+            --string-methods-yellow: #FFD166;
+            --exam-red: #EF476F;
+            --code-bg: #0D1117;
+            --code-text: #E2E8F0;
+            --highlight-bg: rgba(6, 214, 160, 0.15);
+            --sidebar-bg: #0F172A;
+            --message-ai-bg: #1E293B;
+            --message-user-bg: #0F172A;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --shadow-heavy: rgba(0, 0, 0, 0.5);
+            --success-green: #06D6A0;
+            --warning-orange: #FF9E00;
+            --error-red: #EF476F;
+            --quantum-gradient: linear-gradient(135deg, #06D6A0, #118AB2);
+            --vector-gradient: linear-gradient(135deg, #FF9E00, #FF6B6B);
+            --embedding-gradient: linear-gradient(135deg, #4CC9F0, #4361EE);
+            --database-gradient: linear-gradient(135deg, #4361EE, #7209B7);
+            --string-gradient: linear-gradient(135deg, #FFD166, #FF9E00);
+            --exam-gradient: linear-gradient(135deg, #EF476F, #7209B7);
+        }
+
+        /* Dark Theme - Quantum Deep */
+        .dark-mode {
+            --bg-primary: #030712;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1F2937;
+            --bg-quaternary: #374151;
+            --border-color: #4B5563;
+            --border-light: #6B7280;
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-tertiary: #9CA3AF;
+            --quantum-teal: #10B981;
+            --quantum-teal-light: rgba(16, 185, 129, 0.15);
+            --quantum-teal-hover: #059669;
+            --quantum-blue: #3B82F6;
+            --quantum-purple: #8B5CF6;
+            --quantum-pink: #EC4899;
+            --vector-orange: #F59E0B;
+            --embedding-green: #06B6D4;
+            --database-indigo: #6366F1;
+            --string-methods-yellow: #FBBF24;
+            --exam-red: #EF4444;
+            --code-bg: #1F2937;
+            --code-text: #E5E7EB;
+            --highlight-bg: rgba(16, 185, 129, 0.15);
+            --sidebar-bg: #111827;
+            --message-ai-bg: #1F2937;
+            --message-user-bg: #111827;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --shadow-heavy: rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Quantum Background Animation */
+        .quantum-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.03;
+            overflow: hidden;
+        }
+
+        .quantum-particle {
+            position: absolute;
+            background: var(--quantum-gradient);
+            border-radius: 50%;
+            animation: quantumFloat 20s infinite linear;
+            filter: blur(0.5px);
+        }
+
+        .quantum-entanglement {
+            position: absolute;
+            width: 2px;
+            background: linear-gradient(90deg, transparent, var(--quantum-teal), transparent);
+            opacity: 0.1;
+            transform-origin: center;
+            animation: quantumSpin 15s infinite linear;
+        }
+
+        .quantum-gate {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: transparent;
+            border: 2px solid var(--quantum-purple);
+            border-radius: 8px;
+            animation: quantumPulse 8s infinite ease-in-out;
+            opacity: 0.05;
+        }
+
+        .binary-stream {
+            position: absolute;
+            color: var(--quantum-teal);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            opacity: 0.1;
+            animation: binaryFall 20s infinite linear;
+        }
+
+        @keyframes quantumFloat {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(100px, 50px) rotate(90deg);
+            }
+            50% {
+                transform: translate(50px, 100px) rotate(180deg);
+            }
+            75% {
+                transform: translate(-50px, 50px) rotate(270deg);
+            }
+        }
+
+        @keyframes quantumSpin {
+            0% {
+                transform: rotate(0deg) scale(1);
+            }
+            50% {
+                transform: rotate(180deg) scale(1.2);
+            }
+            100% {
+                transform: rotate(360deg) scale(1);
+            }
+        }
+
+        @keyframes quantumPulse {
+            0%, 100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 0.05;
+            }
+            50% {
+                transform: scale(1.2) rotate(180deg);
+                opacity: 0.1;
+            }
+        }
+
+        @keyframes binaryFall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.1;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: var(--quantum-gradient);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .lesson-tag {
+            background: var(--quantum-gradient);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-primary);
+            box-shadow: 0 2px 10px var(--shadow-color);
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .theme-icon {
+            font-size: 18px;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            position: sticky;
+            top: 70px;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 28px;
+        }
+
+        .sidebar-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            margin-bottom: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .sidebar-item:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-light);
+            transform: translateX(4px);
+        }
+
+        .sidebar-item.active {
+            background: var(--highlight-bg);
+            color: var(--quantum-teal);
+            font-weight: 600;
+            border-color: var(--quantum-teal-light);
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+
+        .sidebar-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Content Badges */
+        .content-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 2px;
+            border: 1px solid transparent;
+            backdrop-filter: blur(10px);
+        }
+
+        .badge-vector {
+            background: rgba(255, 158, 0, 0.1);
+            color: var(--vector-orange);
+            border-color: rgba(255, 158, 0, 0.3);
+        }
+
+        .badge-embedding {
+            background: rgba(76, 201, 240, 0.1);
+            color: var(--embedding-green);
+            border-color: rgba(76, 201, 240, 0.3);
+        }
+
+        .badge-database {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--database-indigo);
+            border-color: rgba(67, 97, 238, 0.3);
+        }
+
+        .badge-string {
+            background: rgba(255, 209, 102, 0.1);
+            color: var(--string-methods-yellow);
+            border-color: rgba(255, 209, 102, 0.3);
+        }
+
+        .badge-exam {
+            background: rgba(239, 71, 111, 0.1);
+            color: var(--exam-red);
+            border-color: rgba(239, 71, 111, 0.3);
+        }
+
+        .badge-quantum {
+            background: rgba(6, 214, 160, 0.1);
+            color: var(--quantum-teal);
+            border-color: rgba(6, 214, 160, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Message Bubbles */
+        .message {
+            display: flex;
+            gap: 16px;
+            padding: 28px 0;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .message:last-child {
+            border-bottom: none;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+            font-size: 14px;
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+
+        .avatar.quantum {
+            background: var(--quantum-gradient);
+            color: white;
+        }
+
+        .avatar.vector {
+            background: var(--vector-gradient);
+            color: white;
+        }
+
+        .avatar.embedding {
+            background: var(--embedding-gradient);
+            color: white;
+        }
+
+        .avatar.database {
+            background: var(--database-gradient);
+            color: white;
+        }
+
+        .avatar.string {
+            background: var(--string-gradient);
+            color: white;
+        }
+
+        .avatar.exam {
+            background: var(--exam-gradient);
+            color: white;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .message-author {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 15px;
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            padding: 2px 8px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+        }
+
+        .message-tags {
+            display: flex;
+            gap: 6px;
+            margin-left: auto;
+        }
+
+        .message-text {
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--code-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+            position: relative;
+            font-family: 'Cascadia Code', 'JetBrains Mono', 'SF Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow: hidden;
+        }
+
+        .code-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--quantum-gradient);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .code-language {
+            font-weight: 600;
+            color: var(--quantum-teal);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .code-action {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .code-action:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-color: var(--quantum-teal);
+            transform: translateY(-1px);
+        }
+
+        .code-content {
+            color: var(--code-text);
+            overflow-x: auto;
+            white-space: pre-wrap;
+            padding: 4px 0;
+        }
+
+        .code-line {
+            padding: 4px 8px;
+            border-left: 3px solid transparent;
+            margin: 2px 0;
+            border-radius: 2px;
+            transition: background-color 0.2s;
+        }
+
+        .code-line:hover {
+            background: var(--quantum-teal-light);
+        }
+
+        .code-line.highlight {
+            background: var(--highlight-bg);
+            border-left: 3px solid var(--quantum-teal);
+            padding-left: 12px;
+        }
+
+        /* Interactive Console */
+        .interactive-console {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            border: 2px solid var(--border-color);
+        }
+
+        .console-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .console-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .console-title::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--quantum-teal);
+            border-radius: 50%;
+        }
+
+        .console-input-group {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .console-input {
+            padding: 14px 18px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .console-input:focus {
+            outline: none;
+            border-color: var(--quantum-teal);
+            box-shadow: 0 0 0 3px var(--quantum-teal-light);
+        }
+
+        .console-output {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'Cascadia Code', monospace;
+            font-size: 13px;
+            color: var(--code-text);
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-primary {
+            background: var(--quantum-teal);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--quantum-teal-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(6, 214, 160, 0.3);
+        }
+
+        .btn-vector {
+            background: var(--vector-gradient);
+            color: white;
+        }
+
+        .btn-vector:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 158, 0, 0.3);
+        }
+
+        .btn-quantum {
+            background: var(--quantum-gradient);
+            color: white;
+        }
+
+        .btn-quantum:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(6, 214, 160, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--quantum-teal);
+        }
+
+        /* Progress Tracker */
+        .progress-tracker {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 24px 0;
+            position: relative;
+            padding: 0 20px;
+        }
+
+        .progress-tracker::before {
+            content: '';
+            position: absolute;
+            top: 16px;
+            left: 20px;
+            right: 20px;
+            height: 4px;
+            background: var(--border-color);
+            z-index: 1;
+        }
+
+        .progress-step {
+            width: 36px;
+            height: 36px;
+            background: var(--bg-tertiary);
+            border: 3px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--text-tertiary);
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s;
+        }
+
+        .progress-step.completed {
+            background: var(--quantum-teal);
+            border-color: var(--quantum-teal);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .progress-step.active {
+            background: var(--bg-primary);
+            border-color: var(--quantum-teal);
+            color: var(--quantum-teal);
+            box-shadow: 0 0 0 6px rgba(6, 214, 160, 0.1);
+        }
+
+        .step-label {
+            position: absolute;
+            top: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        /* Learning Objectives */
+        .learning-objectives {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            border-left: 6px solid var(--quantum-teal);
+        }
+
+        .objective-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .objective-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--quantum-teal);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        /* Vector Visualization */
+        .vector-visualizer {
+            background: var(--vector-gradient);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            color: white;
+        }
+
+        .vector-node {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 8px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Exam Section */
+        .exam-section {
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            border: 2px solid var(--exam-red);
+        }
+
+        .question-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--database-indigo);
+        }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option:hover {
+            background: var(--bg-quaternary);
+            transform: translateX(4px);
+        }
+
+        .option.selected {
+            background: var(--quantum-teal-light);
+            border: 2px solid var(--quantum-teal);
+        }
+
+        .option-correct {
+            background: rgba(6, 214, 160, 0.2);
+            border: 2px solid var(--quantum-teal);
+        }
+
+        .option-wrong {
+            background: rgba(239, 71, 111, 0.2);
+            border: 2px solid var(--exam-red);
+        }
+
+        .option-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .option.selected .option-indicator {
+            background: var(--quantum-teal);
+            border-color: var(--quantum-teal);
+            color: white;
+        }
+
+        /* Results Panel */
+        .results-panel {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            display: none;
+        }
+
+        .score-display {
+            text-align: center;
+            padding: 32px;
+            background: var(--quantum-gradient);
+            border-radius: 12px;
+            color: white;
+            margin-bottom: 24px;
+        }
+
+        .score-number {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .score-text {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 32px 24px;
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-tertiary);
+            font-size: 14px;
+            background: var(--bg-secondary);
+            border-radius: 16px 16px 0 0;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+            }
+            
+            .header {
+                padding: 12px 16px;
+            }
+            
+            .main-content {
+                padding: 16px;
+            }
+            
+            .message {
+                padding: 20px 0;
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+            
+            .console-input-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* String Methods Practice */
+        .string-practice {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            border: 2px solid var(--string-methods-yellow);
+        }
+
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .method-card {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 16px;
+            border-left: 4px solid var(--string-methods-yellow);
+        }
+
+        .method-name {
+            font-weight: 600;
+            color: var(--string-methods-yellow);
+            margin-bottom: 8px;
+            font-family: 'Cascadia Code', monospace;
+        }
+
+        /* Embedding Visualization */
+        .embedding-viz {
+            background: var(--embedding-gradient);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            color: white;
+        }
+
+        .dimension-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .dimension {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-family: 'Cascadia Code', monospace;
+        }
+    </style>
+</head>
+<body>
+    <!-- Quantum Background -->
+    <div class="quantum-background" id="quantumBackground">
+        <!-- Particles will be generated by JavaScript -->
+    </div>
+
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon theme-icon" id="themeIcon"></i>
+        <span id="themeText">Light Mode</span>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">🔢</div>
+        <div class="header-title">Python AI Developer Bootcamp</div>
+        <div class="lesson-tag">Lesson 10: Vector Databases & Embeddings</div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-atom"></i>
+                    Lesson 10 Topics
+                </div>
+                <div style="height: 4px; background: var(--bg-tertiary); border-radius: 2px; margin: 8px 0;">
+                    <div style="height: 100%; background: var(--quantum-gradient); border-radius: 2px; width: 35%;" id="lessonProgress"></div>
+                </div>
+                <div class="sidebar-item active" onclick="scrollToSection('quantum-intro')">
+                    <i class="fas fa-atom sidebar-icon"></i>
+                    <span>Quantum Computing & Vectors</span>
+                    <div class="content-badge badge-quantum">Core</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('vector-basics')">
+                    <i class="fas fa-vector-square sidebar-icon"></i>
+                    <span>Vector Mathematics</span>
+                    <div class="content-badge badge-vector">Math</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('embeddings')">
+                    <i class="fas fa-project-diagram sidebar-icon"></i>
+                    <span>AI Embeddings</span>
+                    <div class="content-badge badge-embedding">AI</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('vector-databases')">
+                    <i class="fas fa-database sidebar-icon"></i>
+                    <span>Vector Databases</span>
+                    <div class="content-badge badge-database">Data</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('string-methods')">
+                    <i class="fas fa-font sidebar-icon"></i>
+                    <span>Python String Methods</span>
+                    <div class="content-badge badge-string">Python</div>
+                </div>
+                <div class="sidebar-item" onclick="scrollToSection('final-exam')">
+                    <i class="fas fa-graduation-cap sidebar-icon"></i>
+                    <span>Final Exam (30 Questions)</span>
+                    <div class="content-badge badge-exam">Test</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-tools"></i>
+                    Interactive Tools
+                </div>
+                <div class="sidebar-item" onclick="runVectorDemo()">
+                    <i class="fas fa-calculator sidebar-icon"></i>
+                    <span>Vector Calculator</span>
+                </div>
+                <div class="sidebar-item" onclick="runEmbeddingDemo()">
+                    <i class="fas fa-brain sidebar-icon"></i>
+                    <span>Embedding Simulator</span>
+                </div>
+                <div class="sidebar-item" onclick="runStringPractice()">
+                    <i class="fas fa-keyboard sidebar-icon"></i>
+                    <span>String Methods Practice</span>
+                </div>
+                <div class="sidebar-item" onclick="startExam()">
+                    <i class="fas fa-play sidebar-icon"></i>
+                    <span>Start Exam</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-download"></i>
+                    Quick Resources
+                </div>
+                <div class="sidebar-item" onclick="downloadVectorCheatsheet()">
+                    <i class="fas fa-file-alt sidebar-icon"></i>
+                    <span>Vector Math Cheatsheet</span>
+                </div>
+                <div class="sidebar-item" onclick="downloadStringMethods()">
+                    <i class="fas fa-font sidebar-icon"></i>
+                    <span>String Methods Guide</span>
+                </div>
+                <div class="sidebar-item" onclick="downloadEmbeddingExamples()">
+                    <i class="fas fa-brain sidebar-icon"></i>
+                    <span>Embedding Examples</span>
+                </div>
+                <div class="sidebar-item" onclick="showAnswerKey()">
+                    <i class="fas fa-key sidebar-icon"></i>
+                    <span>Exam Answer Key</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-chart-line"></i>
+                    Progress Tracking
+                </div>
+                <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 12px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 12px; color: var(--text-secondary);">Course Progress</span>
+                        <span style="font-size: 12px; color: var(--quantum-teal); font-weight: 600;" id="progressPercent">60%</span>
+                    </div>
+                    <div style="height: 4px; background: var(--bg-quaternary); border-radius: 2px; overflow: hidden;">
+                        <div style="height: 100%; background: var(--quantum-gradient); border-radius: 2px; width: 60%;" id="globalProgress"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                        <span style="font-size: 11px; color: var(--text-tertiary);">Lesson 10/15</span>
+                        <span style="font-size: 11px; color: var(--text-tertiary);">Next: Neural Networks</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Introduction -->
+            <div class="message fade-in" id="quantum-intro">
+                <div class="avatar quantum">🔢</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Quantum AI Instructor</span>
+                        <span class="message-time">Now</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-quantum">Quantum</div>
+                            <div class="content-badge badge-vector">Vectors</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h1>🚀 Lesson 10: Vector Databases & Embeddings in AI/ML</h1>
+                        <p>Welcome to the quantum realm of AI! Today you'll master vector mathematics, understand embeddings, work with vector databases, and practice Python string methods essential for AI text processing.</p>
+                        
+                        <!-- Learning Objectives -->
+                        <div class="learning-objectives">
+                            <h3 style="color: var(--text-primary); margin-bottom: 20px;">🎯 Learning Objectives</h3>
+                            <div class="objective-item">
+                                <div class="objective-icon">1</div>
+                                <div>
+                                    <strong>Understand Vector Mathematics</strong>: Master vectors, dot products, and similarity measures
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">2</div>
+                                <div>
+                                    <strong>Create AI Embeddings</strong>: Transform text/images into numerical vectors
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">3</div>
+                                <div>
+                                    <strong>Work with Vector Databases</strong>: Store and query high-dimensional data
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">4</div>
+                                <div>
+                                    <strong>Master Python String Methods</strong>: Essential tools for text preprocessing in AI
+                                </div>
+                            </div>
+                            <div class="objective-item">
+                                <div class="objective-icon">5</div>
+                                <div>
+                                    <strong>Pass the Final Exam</strong>: 30 questions testing your understanding
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="progress-tracker">
+                            <div class="progress-step completed">
+                                <span>1</span>
+                                <div class="step-label">Vectors</div>
+                            </div>
+                            <div class="progress-step active">
+                                <span>2</span>
+                                <div class="step-label">Embeddings</div>
+                            </div>
+                            <div class="progress-step">
+                                <span>3</span>
+                                <div class="step-label">Databases</div>
+                            </div>
+                            <div class="progress-step">
+                                <span>4</span>
+                                <div class="step-label">Strings</div>
+                            </div>
+                            <div class="progress-step">
+                                <span>5</span>
+                                <div class="step-label">Exam</div>
+                            </div>
+                        </div>
+
+                        <!-- Quantum Vector Demo -->
+                        <div class="interactive-console">
+                            <div class="console-header">
+                                <div class="console-title">Quantum Vector Simulator</div>
+                                <div class="console-status">
+                                    <div class="status-dot"></div>
+                                    <span>Ready to calculate</span>
+                                </div>
+                            </div>
+                            <div class="console-input-group">
+                                <input type="text" class="console-input" id="vectorA" placeholder="Vector A (e.g., 1,2,3)">
+                                <input type="text" class="console-input" id="vectorB" placeholder="Vector B (e.g., 4,5,6)">
+                                <button class="btn btn-quantum" onclick="calculateVectors()">
+                                    <i class="fas fa-calculator"></i> Calculate
+                                </button>
+                            </div>
+                            <div class="console-output" id="vectorOutput">
+                        🔢 Quantum Vector Calculator<br><br>
+                        Enter two vectors to calculate:<br>
+                        • Dot Product<br>
+                        • Cosine Similarity<br>
+                        • Euclidean Distance<br>
+                        • Vector Magnitude<br><br>
+                        Format: comma-separated numbers (e.g., 1,2,3)
+                    </div>
+                        </div>
+
+                        <div class="vector-visualizer">
+                            <h3 style="color: white; margin-bottom: 16px;">📐 Vector Space Visualization</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                                <div class="vector-node">
+                                    <div style="font-weight: bold; margin-bottom: 8px;">🎯 Dot Product</div>
+                                    <div style="font-size: 13px;">A·B = Σ(Aᵢ × Bᵢ) measures alignment</div>
+                                </div>
+                                <div class="vector-node">
+                                    <div style="font-weight: bold; margin-bottom: 8px;">📏 Cosine Similarity</div>
+                                    <div style="font-size: 13px;">cos(θ) = A·B / (|A| × |B|)</div>
+                                </div>
+                                <div class="vector-node">
+                                    <div style="font-weight: bold; margin-bottom: 8px;">🧭 Euclidean Distance</div>
+                                    <div style="font-size: 13px;">√Σ(Aᵢ - Bᵢ)² measures separation</div>
+                                </div>
+                                <div class="vector-node">
+                                    <div style="font-weight: bold; margin-bottom: 8px;">⚡ Magnitude</div>
+                                    <div style="font-size: 13px;">|A| = √Σ(Aᵢ²) vector length</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vector Basics -->
+            <div class="message fade-in" id="vector-basics">
+                <div class="avatar vector">📐</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Vector Mathematician</span>
+                        <span class="message-time">Topic 1</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-vector">Mathematics</div>
+                            <div class="content-badge badge-quantum">Physics</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>📐 Vector Mathematics for AI</h2>
+                        <p>Vectors are the fundamental building blocks of modern AI. They represent data points in high-dimensional spaces where similarity search and clustering happen.</p>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python - Complete Vector Operations</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+<div class="code-content">
+<span class="code-line"># ==========================================</span><br>
+<span class="code-line"># VECTOR MATHEMATICS FOR AI/ML</span><br>
+<span class="code-line"># ==========================================</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">import numpy as np</span><br>
+<span class="code-line">from math import sqrt, acos, pi</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">class VectorOperations:</span><br>
+<span class="code-line">    """Complete vector mathematics for AI applications."""</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    @staticmethod</span><br>
+<span class="code-line">    def dot_product(vec1, vec2):</span><br>
+<span class="code-line">        """Calculate dot product of two vectors."""</span><br>
+<span class="code-line">        return sum(a * b for a, b in zip(vec1, vec2))</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    @staticmethod</span><br>
+<span class="code-line">    def magnitude(vector):</span><br>
+<span class="code-line">        """Calculate magnitude (length) of a vector."""</span><br>
+<span class="code-line">        return sqrt(sum(x ** 2 for x in vector))</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    @staticmethod</span><br>
+<span class="code-line">    def cosine_similarity(vec1, vec2):</span><br>
+<span class="code-line">        """Calculate cosine similarity between vectors."""</span><br>
+<span class="code-line">        dot = VectorOperations.dot_product(vec1, vec2)</span><br>
+<span class="code-line">        mag1 = VectorOperations.magnitude(vec1)</span><br>
+<span class="code-line">        mag2 = VectorOperations.magnitude(vec2)</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        if mag1 == 0 or mag2 == 0:</span><br>
+<span class="code-line">            return 0</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        return dot / (mag1 * mag2)</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    @staticmethod</span><br>
+<span class="code-line">    def euclidean_distance(vec1, vec2):</span><br>
+<span class="code-line">        """Calculate Euclidean distance between vectors."""</span><br>
+<span class="code-line">        return sqrt(sum((a - b) ** 2 for a, b in zip(vec1, vec2)))</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    @staticmethod</span><br>
+<span class="code-line">    def normalize(vector):</span><br>
+<span class="code-line">        """Normalize a vector to unit length."""</span><br>
+<span class="code-line">        mag = VectorOperations.magnitude(vector)</span><br>
+<span class="code-line">        if mag == 0:</span><br>
+<span class="code-line">            return [0] * len(vector)</span><br>
+<span class="code-line">        return [x / mag for x in vector]</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    @staticmethod</span><br>
+<span class="code-line">    def angle_between(vec1, vec2):</span><br>
+<span class="code-line">        """Calculate angle between two vectors in radians."""</span><br>
+<span class="code-line">        cos_sim = VectorOperations.cosine_similarity(vec1, vec2)</span><br>
+<span class="code-line">        # Clamp to [-1, 1] to avoid floating point errors</span><br>
+<span class="code-line">        cos_sim = max(-1, min(1, cos_sim))</span><br>
+<span class="code-line">        return acos(cos_sim)</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># ==========================================</span><br>
+<span class="code-line"># PRACTICAL AI EXAMPLES</span><br>
+<span class="code-line"># ==========================================</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Example 1: Text Embedding Similarity</span><br>
+<span class="code-line">print("=== TEXT EMBEDDING SIMILARITY ===\n")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Word embeddings (simplified 3D vectors)</span><br>
+<span class="code-line">word_embeddings = {</span><br>
+<span class="code-line">    "king": [0.8, 0.2, 0.1],</span><br>
+<span class="code-line">    "queen": [0.7, 0.9, 0.1],</span><br>
+<span class="code-line">    "man": [0.9, 0.1, 0.8],</span><br>
+<span class="code-line">    "woman": [0.8, 0.9, 0.8],</span><br>
+<span class="code-line">    "computer": [0.1, 0.1, 0.9]</span><br>
+<span class="code-line">}</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Calculate similarities</span><br>
+<span class="code-line">vo = VectorOperations()</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">print("Cosine Similarities:")</span><br>
+<span class="code-line">for word1 in ["king", "queen", "man"]:</span><br>
+<span class="code-line">    for word2 in ["queen", "woman", "computer"]:</span><br>
+<span class="code-line">        if word1 != word2:</span><br>
+<span class="code-line">            sim = vo.cosine_similarity(</span><br>
+<span class="code-line">                word_embeddings[word1],</span><br>
+<span class="code-line">                word_embeddings[word2]</span><br>
+<span class="code-line">            )</span><br>
+<span class="code-line">            print(f"{word1} ↔ {word2}: {sim:.3f}")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Example 2: Image Feature Vectors</span><br>
+<span class="code-line">print("\n=== IMAGE FEATURE VECTORS ===\n")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">image_features = {</span><br>
+<span class="code-line">    "cat_image": [0.9, 0.8, 0.1, 0.2, 0.7],</span><br>
+<span class="code-line">    "dog_image": [0.8, 0.7, 0.2, 0.3, 0.9],</span><br>
+<span class="code-line">    "car_image": [0.1, 0.2, 0.9, 0.8, 0.1]</span><br>
+<span class="code-line">}</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">print("Euclidean Distances (lower = more similar):")</span><br>
+<span class="code-line">for img1, features1 in image_features.items():</span><br>
+<span class="code-line">    for img2, features2 in image_features.items():</span><br>
+<span class="code-line">        if img1 != img2:</span><br>
+<span class="code-line">            dist = vo.euclidean_distance(features1, features2)</span><br>
+<span class="code-line">            print(f"{img1} ↔ {img2}: {dist:.3f}")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Example 3: Recommendation System</span><br>
+<span class="code-line">print("\n=== RECOMMENDATION SYSTEM ===\n")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">user_preferences = {</span><br>
+<span class="code-line">    "user1": [5, 4, 1, 2, 5],  # Action, Comedy, Romance, Drama, Sci-Fi</span><br>
+<span class="code-line">    "user2": [1, 5, 4, 3, 2],</span><br>
+<span class="code-line">    "user3": [3, 2, 5, 4, 1]</span><br>
+<span class="code-line">}</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">movie_features = {</span><br>
+<span class="code-line">    "action_movie": [5, 2, 1, 1, 4],</span><br>
+<span class="code-line">    "romantic_comedy": [1, 5, 5, 3, 1],</span><br>
+<span class="code-line">    "sci_fi_thriller": [4, 1, 1, 2, 5]</span><br>
+<span class="code-line">}</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">print("Movie Recommendations:")</span><br>
+<span class="code-line">for user, preferences in user_preferences.items():</span><br>
+<span class="code-line">    print(f"\n{user}:")</span><br>
+<span class="code-line">    for movie, features in movie_features.items():</span><br>
+<span class="code-line">        similarity = vo.cosine_similarity(preferences, features)</span><br>
+<span class="code-line">        print(f"  {movie}: {similarity:.3f}")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Example 4: Vector Normalization</span><br>
+<span class="code-line">print("\n=== VECTOR NORMALIZATION ===\n")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">vectors = [[3, 4], [1, 1, 1], [2, 0, 0]]</span><br>
+<span class="code-line">for vec in vectors:</span><br>
+<span class="code-line">    normalized = vo.normalize(vec)</span><br>
+<span class="code-line">    mag = vo.magnitude(vec)</span><br>
+<span class="code-line">    print(f"Vector {vec}:")</span><br>
+<span class="code-line">    print(f"  Magnitude: {mag:.3f}")</span><br>
+<span class="code-line">    print(f"  Normalized: {[round(x, 3) for x in normalized]}")</span><br>
+<span class="code-line">    print(f"  New magnitude: {vo.magnitude(normalized):.3f}")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Example 5: High-Dimensional AI Vectors</span><br>
+<span class="code-line">print("\n=== HIGH-DIMENSIONAL AI VECTORS ===\n")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Simulate 768-dimensional BERT embeddings</span><br>
+<span class="code-line">import random</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">def generate_embedding(dim=768):</span><br>
+<span class="code-line">    """Generate a random embedding vector."""</span><br>
+<span class="code-line">    return [random.uniform(-1, 1) for _ in range(dim)]</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Generate similar embeddings</span><br>
+<span class="code-line">embedding1 = generate_embedding(768)</span><br>
+<span class="code-line">embedding2 = [x + random.uniform(-0.1, 0.1) for x in embedding1]  # Slightly modified</span><br>
+<span class="code-line">embedding3 = generate_embedding(768)  # Completely different</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">print("High-dimensional embedding similarities:")</span><br>
+<span class="code-line">print(f"Similar embeddings: {vo.cosine_similarity(embedding1, embedding2):.3f}")</span><br>
+<span class="code-line">print(f"Different embeddings: {vo.cosine_similarity(embedding1, embedding3):.3f}")</span><br>
+</div>
+                        </div>
+
+                        <div class="interactive-console">
+                            <div class="console-header">
+                                <div class="console-title">Vector Operations Playground</div>
+                                <div class="console-status">
+                                    <div class="status-dot"></div>
+                                    <span>Ready to experiment</span>
+                                </div>
+                            </div>
+                            <div class="console-input-group">
+                                <select class="console-input" id="vectorOperation">
+                                    <option value="dot">Dot Product</option>
+                                    <option value="cosine">Cosine Similarity</option>
+                                    <option value="euclidean">Euclidean Distance</option>
+                                    <option value="normalize">Normalization</option>
+                                </select>
+                                <button class="btn btn-vector" onclick="runVectorOperationDemo()">
+                                    <i class="fas fa-play"></i> Run Demo
+                                </button>
+                            </div>
+                            <div class="console-output" id="vectorDemoOutput">
+                        📊 Vector Operations Playground<br><br>
+                        Select an operation to see practical examples:<br><br>
+                        • <strong>Dot Product</strong>: Measures vector alignment<br>
+                        • <strong>Cosine Similarity</strong>: Angle between vectors (-1 to 1)<br>
+                        • <strong>Euclidean Distance</strong>: Straight-line distance<br>
+                        • <strong>Normalization</strong>: Convert to unit vector<br><br>
+                        Essential for AI similarity search and clustering!
+                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Embeddings -->
+            <div class="message fade-in" id="embeddings">
+                <div class="avatar embedding">🧠</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Embeddings Expert</span>
+                        <span class="message-time">Topic 2</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-embedding">AI</div>
+                            <div class="content-badge badge-vector">ML</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🧠 AI Embeddings: Turning Data into Vectors</h2>
+                        <p>Embeddings transform words, images, and concepts into numerical vectors that capture semantic meaning and relationships.</p>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python - Creating and Using Embeddings</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+<div class="code-content">
+<span class="code-line"># ==========================================</span><br>
+<span class="code-line"># AI EMBEDDINGS: TEXT, IMAGE & MULTIMODAL</span><br>
+<span class="code-line"># ==========================================</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">import numpy as np</span><br>
+<span class="code-line">from sklearn.feature_extraction.text import TfidfVectorizer</span><br>
+<span class="code-line">from sklearn.decomposition import PCA</span><br>
+<span class="code-line">import matplotlib.pyplot as plt</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">class AIEmbeddings:</span><br>
+<span class="code-line">    """Create and manipulate AI embeddings."""</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    @staticmethod</span><br>
+<span class="code-line">    def create_word2vec_style_embeddings(words, embedding_dim=100):</span><br>
+<span class="code-line">        """Create Word2Vec style embeddings."""</span><br>
+<span class="code-line">        np.random.seed(42)</span><br>
+<span class="code-line">        embeddings = {}</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        for word in words:</span><br>
+<span class="code-line">            # Generate random embedding (in real Word2Vec, these are learned)</span><br>
+<span class="code-line">            embedding = np.random.randn(embedding_dim)</span><br>
+<span class="code-line">            # Normalize</span><br>
+<span class="code-line">            embedding = embedding / np.linalg.norm(embedding)</span><br>
+<span class="code-line">            embeddings[word] = embedding</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        return embeddings</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    @staticmethod</span><br>
+<span class="code-line">    def create_semantic_relationships(embeddings):</span><br>
+<span class="code-line">        """Create semantic relationships between words."""</span><br>
+<span class="code-line">        # king - man + woman = queen analogy</span><br>
+<span class="code-line">        if all(word in embeddings for word in ["king", "man", "woman"]):</span><br>
+<span class="code-line">            queen_vector = (</span><br>
+<span class="code-line">                embeddings["king"] </span><br>
+<span class="code-line">                - embeddings["man"] </span><br>
+<span class="code-line">                + embeddings["woman"]</span><br>
+<span class="code-line">            )</span><br>
+<span class="code-line">            embeddings["queen_predicted"] = queen_vector / np.linalg.norm(queen_vector)</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        return embeddings</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    @staticmethod</span><br>
+<span class="code-line">    def create_tfidf_embeddings(documents):</span><br>
+<span class="code-line">        """Create TF-IDF embeddings for documents."""</span><br>
+<span class="code-line">        vectorizer = TfidfVectorizer(max_features=100)</span><br>
+<span class="code-line">        tfidf_matrix = vectorizer.fit_transform(documents)</span><br>
+<span class="code-line">        return tfidf_matrix.toarray(), vectorizer.get_feature_names_out()</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    @staticmethod</span><br>
+<span class="code-line">    def reduce_dimensions(embeddings, n_components=2):</span><br>
+<span class="code-line">        """Reduce embedding dimensions for visualization."""</span><br>
+<span class="code-line">        pca = PCA(n_components=n_components)</span><br>
+<span class="code-line">        reduced = pca.fit_transform(embeddings)</span><br>
+<span class="code-line">        return reduced, pca.explained_variance_ratio_</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    @staticmethod</span><br>
+<span class="code-line">    def find_similar_words(query_word, embeddings, top_n=5):</span><br>
+<span class="code-line">        """Find most similar words to query word."""</span><br>
+<span class="code-line">        if query_word not in embeddings:</span><br>
+<span class="code-line">            return []</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        query_vec = embeddings[query_word]</span><br>
+<span class="code-line">        similarities = []</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        for word, vec in embeddings.items():</span><br>
+<span class="code-line">            if word != query_word:</span><br>
+<span class="code-line">                sim = np.dot(query_vec, vec) / (</span><br>
+<span class="code-line">                    np.linalg.norm(query_vec) * np.linalg.norm(vec)</span><br>
+<span class="code-line">                )</span><br>
+<span class="code-line">                similarities.append((word, sim))</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        # Sort by similarity</span><br>
+<span class="code-line">        similarities.sort(key=lambda x: x[1], reverse=True)</span><br>
+<span class="code-line">        return similarities[:top_n]</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># ==========================================</span><br>
+<span class="code-line"># PRACTICAL EMBEDDING EXAMPLES</span><br>
+<span class="code-line"># ==========================================</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Example 1: Word Embeddings</span><br>
+<span class="code-line">print("=== WORD EMBEDDINGS ===\n")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">words = ["king", "queen", "man", "woman", "prince", "princess", </span><br>
+<span class="code-line">         "boy", "girl", "actor", "actress", "doctor", "nurse"]</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">ae = AIEmbeddings()</span><br>
+<span class="code-line">word_embeddings = ae.create_word2vec_style_embeddings(words, embedding_dim=50)</span><br>
+<span class="code-line">word_embeddings = ae.create_semantic_relationships(word_embeddings)</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">print("Word similarities to 'king':")</span><br>
+<span class="code-line">similar_words = ae.find_similar_words("king", word_embeddings, top_n=5)</span><br>
+<span class="code-line">for word, similarity in similar_words:</span><br>
+<span class="code-line">    print(f"  {word}: {similarity:.3f}")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">print("\nWord similarities to 'doctor':")</span><br>
+<span class="code-line">similar_words = ae.find_similar_words("doctor", word_embeddings, top_n=5)</span><br>
+<span class="code-line">for word, similarity in similar_words:</span><br>
+<span class="code-line">    print(f"  {word}: {similarity:.3f}")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Example 2: Document Embeddings</span><br>
+<span class="code-line">print("\n=== DOCUMENT EMBEDDINGS ===\n")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">documents = [</span><br>
+<span class="code-line">    "Machine learning is a subset of artificial intelligence",</span><br>
+<span class="code-line">    "Deep learning uses neural networks with multiple layers",</span><br>
+<span class="code-line">    "Natural language processing enables computers to understand text",</span><br>
+<span class="code-line">    "Computer vision allows machines to interpret visual information",</span><br>
+<span class="code-line">    "Reinforcement learning is about agents taking actions in environments"</span><br>
+<span class="code-line">]</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">tfidf_embeddings, feature_names = ae.create_tfidf_embeddings(documents)</span><br>
+<span class="code-line">print(f"TF-IDF Embedding shape: {tfidf_embeddings.shape}")</span><br>
+<span class="code-line">print(f"Vocabulary size: {len(feature_names)}")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Example 3: Image Embeddings (simulated)</span><br>
+<span class="code-line">print("\n=== IMAGE EMBEDDINGS ===\n")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">def simulate_image_embeddings(num_images=10, embedding_dim=512):</span><br>
+<span class="code-line">    """Simulate image embeddings from a CNN."""</span><br>
+<span class="code-line">    np.random.seed(42)</span><br>
+<span class="code-line">    embeddings = []</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    for i in range(num_images):</span><br>
+<span class="code-line">        # Generate random "image features"</span><br>
+<span class="code-line">        embedding = np.random.randn(embedding_dim)</span><br>
+<span class="code-line">        # Add some structure: cats and dogs</span><br>
+<span class="code-line">        if i < num_images // 2:</span><br>
+<span class="code-line">            embedding += 0.5  # Cat-like features</span><br>
+<span class="code-line">        else:</span><br>
+<span class="code-line">            embedding -= 0.5  # Dog-like features</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        embedding = embedding / np.linalg.norm(embedding)</span><br>
+<span class="code-line">        embeddings.append(embedding)</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    return np.array(embeddings)</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">image_embeddings = simulate_image_embeddings()</span><br>
+<span class="code-line">print(f"Image embeddings shape: {image_embeddings.shape}")</span><br>
+<span class="code-line">print(f"First image embedding (first 5 dims): {image_embeddings[0][:5]}")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Example 4: Multimodal Embeddings</span><br>
+<span class="code-line">print("\n=== MULTIMODAL EMBEDDINGS ===\n")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">class MultimodalEmbedding:</span><br>
+<span class="code-line">    """Combine text and image embeddings."""</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    def __init__(self, text_dim=768, image_dim=512, multimodal_dim=1024):</span><br>
+<span class="code-line">        self.text_dim = text_dim</span><br>
+<span class="code-line">        self.image_dim = image_dim</span><br>
+<span class="code-line">        self.multimodal_dim = multimodal_dim</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    def create_multimodal_embedding(self, text_embedding, image_embedding):</span><br>
+<span class="code-line">        """Combine text and image embeddings."""</span><br>
+<span class="code-line">        # In practice, this would be a learned transformation</span><br>
+<span class="code-line">        combined = np.concatenate([text_embedding, image_embedding])</span><br>
+<span class="code-line">        # Ensure correct dimension</span><br>
+<span class="code-line">        if len(combined) > self.multimodal_dim:</span><br>
+<span class="code-line">            combined = combined[:self.multimodal_dim]</span><br>
+<span class="code-line">        elif len(combined) < self.multimodal_dim:</span><br>
+<span class="code-line">            # Pad with zeros</span><br>
+<span class="code-line">            combined = np.pad(combined, (0, self.multimodal_dim - len(combined)))</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        return combined / np.linalg.norm(combined)</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Create multimodal embedding example</span><br>
+<span class="code-line">mm = MultimodalEmbedding()</span><br>
+<span class="code-line">text_embedding = np.random.randn(768)</span><br>
+<span class="code-line">image_embedding = np.random.randn(512)</span><br>
+<span class="code-line">multimodal_embedding = mm.create_multimodal_embedding(text_embedding, image_embedding)</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">print(f"Text embedding dimension: {len(text_embedding)}")</span><br>
+<span class="code-line">print(f"Image embedding dimension: {len(image_embedding)}")</span><br>
+<span class="code-line">print(f"Multimodal embedding dimension: {len(multimodal_embedding)}")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Example 5: Embedding Search</span><br>
+<span class="code-line">print("\n=== EMBEDDING SIMILARITY SEARCH ===\n")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">def search_similar_embeddings(query_embedding, embeddings_dict, top_k=3):</span><br>
+<span class="code-line">    """Search for similar embeddings."""</span><br>
+<span class="code-line">    results = []</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    for name, embedding in embeddings_dict.items():</span><br>
+<span class="code-line">        similarity = np.dot(query_embedding, embedding) / (</span><br>
+<span class="code-line">            np.linalg.norm(query_embedding) * np.linalg.norm(embedding)</span><br>
+<span class="code-line">        )</span><br>
+<span class="code-line">        results.append((name, similarity))</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    results.sort(key=lambda x: x[1], reverse=True)</span><br>
+<span class="code-line">    return results[:top_k]</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Create sample embeddings</span><br>
+<span class="code-line">sample_data = {</span><br>
+<span class="code-line">    "cat_image": np.random.randn(512),</span><br>
+<span class="code-line">    "dog_image": np.random.randn(512) + 0.1,  # Similar to cat</span><br>
+<span class="code-line">    "car_image": np.random.randn(512) - 0.5,  # Different</span><br>
+<span class="code-line">    "house_image": np.random.randn(512) - 0.3  # Different</span><br>
+<span class="code-line">}</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Normalize all embeddings</span><br>
+<span class="code-line">for name in sample_data:</span><br>
+<span class="code-line">    sample_data[name] = sample_data[name] / np.linalg.norm(sample_data[name])</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">print("Similarity search for 'cat_image':")</span><br>
+<span class="code-line">similar = search_similar_embeddings(sample_data["cat_image"], sample_data)</span><br>
+<span class="code-line">for name, similarity in similar:</span><br>
+<span class="code-line">    print(f"  {name}: {similarity:.3f}")</span>
+</div>
+                        </div>
+
+                        <div class="embedding-viz">
+                            <h3 style="color: white; margin-bottom: 16px;">🎯 Embedding Dimensions Visualization</h3>
+                            <div class="dimension-grid">
+                                <div class="dimension">dim_001</div>
+                                <div class="dimension">dim_002</div>
+                                <div class="dimension">dim_003</div>
+                                <div class="dimension">dim_004</div>
+                                <div class="dimension">dim_005</div>
+                                <div class="dimension">dim_006</div>
+                                <div class="dimension">dim_007</div>
+                                <div class="dimension">dim_008</div>
+                            </div>
+                            <p style="margin-top: 16px; opacity: 0.9;">
+                                Each dimension captures different semantic features. In real AI models, embeddings have 768-4096 dimensions!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vector Databases -->
+            <div class="message fade-in" id="vector-databases">
+                <div class="avatar database">🗄️</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Database Architect</span>
+                        <span class="message-time">Topic 3</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-database">Storage</div>
+                            <div class="content-badge badge-embedding">AI</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🗄️ Vector Databases for AI Applications</h2>
+                        <p>Vector databases efficiently store and query high-dimensional embeddings, enabling semantic search, recommendations, and AI memory systems.</p>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python - Vector Database Implementation</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+<div class="code-content">
+<span class="code-line"># ==========================================</span><br>
+<span class="code-line"># VECTOR DATABASE IMPLEMENTATION</span><br>
+<span class="code-line"># ==========================================</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">import numpy as np</span><br>
+<span class="code-line">from typing import List, Tuple, Dict, Any</span><br>
+<span class="code-line">import json</span><br>
+<span class="code-line">from datetime import datetime</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">class VectorDatabase:</span><br>
+<span class="code-line">    """Simple vector database for AI applications."""</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    def __init__(self, dimension: int):</span><br>
+<span class="code-line">        self.dimension = dimension</span><br>
+<span class="code-line">        self.vectors = []  # List of vectors</span><br>
+<span class="code-line">        self.metadata = []  # List of metadata dictionaries</span><br>
+<span class="code-line">        self.id_counter = 0</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">    def add_vector(self, vector: List[float], metadata: Dict[str, Any] = None) -> int:</span><br>
+<span class="code-line">        """Add a vector to the database."""</span><br>
+<span class="code-line">        if len(vector) != self.dimension:</span><br>
+<span class="code-line">            raise ValueError(f"Vector must have dimension {self.dimension}")</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        vector_id = self.id_counter</span><br>
+<span class="code-line">        self.vectors.append(np.array(vector))</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        if metadata is None:</span><br>
+<span class="code-line">            metadata = {}</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        metadata.update({</span><br>
+<span class="code-line">            "id": vector_id,</span><br>
+<span class="code-line">            "added_at": datetime.now().isoformat()</span><br>
+<span class="code-line">        })</span><br>
+<span class="code-line">        self.metadata.append(metadata)</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        self.id_counter += 1</span><br>
+<span class="code-line">        return vector_id</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    def similarity_search(self, query_vector: List[float], top_k: int = 5) -> List[Tuple[int, float, Dict]]:</span><br>
+<span class="code-line">        """Find most similar vectors to query."""</span><br>
+<span class="code-line">        if len(query_vector) != self.dimension:</span><br>
+<span class="code-line">            raise ValueError(f"Query vector must have dimension {self.dimension}")</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        query_np = np.array(query_vector)</span><br>
+<span class="code-line">        similarities = []</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        for i, vector in enumerate(self.vectors):</span><br>
+<span class="code-line">            # Calculate cosine similarity</span><br>
+<span class="code-line">            similarity = np.dot(query_np, vector) / (</span><br>
+<span class="code-line">                np.linalg.norm(query_np) * np.linalg.norm(vector)</span><br>
+<span class="code-line">            )</span><br>
+<span class="code-line">            similarities.append((i, similarity))</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        # Sort by similarity (highest first)</span><br>
+<span class="code-line">        similarities.sort(key=lambda x: x[1], reverse=True)</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        # Return top_k results with metadata</span><br>
+<span class="code-line">        results = []</span><br>
+<span class="code-line">        for i, similarity in similarities[:top_k]:</span><br>
+<span class="code-line">            results.append((i, similarity, self.metadata[i]))</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        return results</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    def euclidean_search(self, query_vector: List[float], top_k: int = 5) -> List[Tuple[int, float, Dict]]:</span><br>
+<span class="code-line">        """Find nearest vectors using Euclidean distance."""</span><br>
+<span class="code-line">        query_np = np.array(query_vector)</span><br>
+<span class="code-line">        distances = []</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        for i, vector in enumerate(self.vectors):</span><br>
+<span class="code-line">            distance = np.linalg.norm(query_np - vector)</span><br>
+<span class="code-line">            distances.append((i, distance))</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        # Sort by distance (lowest first)</span><br>
+<span class="code-line">        distances.sort(key=lambda x: x[1])</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        results = []</span><br>
+<span class="code-line">        for i, distance in distances[:top_k]:</span><br>
+<span class="code-line">            results.append((i, distance, self.metadata[i]))</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        return results</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    def get_by_id(self, vector_id: int) -> Tuple[np.ndarray, Dict]:</span><br>
+<span class="code-line">        """Get vector and metadata by ID."""</span><br>
+<span class="code-line">        for i, metadata in enumerate(self.metadata):</span><br>
+<span class="code-line">            if metadata.get("id") == vector_id:</span><br>
+<span class="code-line">                return self.vectors[i], metadata</span><br>
+<span class="code-line">        raise ValueError(f"Vector with ID {vector_id} not found")</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    def delete_by_id(self, vector_id: int) -> bool:</span><br>
+<span class="code-line">        """Delete vector by ID."""</span><br>
+<span class="code-line">        for i, metadata in enumerate(self.metadata):</span><br>
+<span class="code-line">            if metadata.get("id") == vector_id:</span><br>
+<span class="code-line">                del self.vectors[i]</span><br>
+<span class="code-line">                del self.metadata[i]</span><br>
+<span class="code-line">                return True</span><br>
+<span class="code-line">        return False</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    def search_by_metadata(self, filter_func) -> List[Tuple[int, Dict]]:</span><br>
+<span class="code-line">        """Search vectors by metadata filter."""</span><br>
+<span class="code-line">        results = []</span><br>
+<span class="code-line">        for i, metadata in enumerate(self.metadata):</span><br>
+<span class="code-line">            if filter_func(metadata):</span><br>
+<span class="code-line">                results.append((i, metadata))</span><br>
+<span class="code-line">        return results</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    def save_to_file(self, filename: str):</span><br>
+<span class="code-line">        """Save database to JSON file."""</span><br>
+<span class="code-line">        data = {</span><br>
+<span class="code-line">            "dimension": self.dimension,</span><br>
+<span class="code-line">            "vectors": [v.tolist() for v in self.vectors],</span><br>
+<span class="code-line">            "metadata": self.metadata,</span><br>
+<span class="code-line">            "id_counter": self.id_counter</span><br>
+<span class="code-line">        }</span><br>
+<span class="code-line">        with open(filename, 'w') as f:</span><br>
+<span class="code-line">            json.dump(data, f, indent=2)</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    def load_from_file(self, filename: str):</span><br>
+<span class="code-line">        """Load database from JSON file."""</span><br>
+<span class="code-line">        with open(filename, 'r') as f:</span><br>
+<span class="code-line">            data = json.load(f)</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        self.dimension = data["dimension"]</span><br>
+<span class="code-line">        self.vectors = [np.array(v) for v in data["vectors"]]</span><br>
+<span class="code-line">        self.metadata = data["metadata"]</span><br>
+<span class="code-line">        self.id_counter = data["id_counter"]</span>
+</div>
+                        </div>
+
+                        <div class="interactive-console">
+                            <div class="console-header">
+                                <div class="console-title">Vector Database Demo</div>
+                                <div class="console-status">
+                                    <div class="status-dot"></div>
+                                    <span>Ready to query</span>
+                                </div>
+                            </div>
+                            <div class="console-input-group">
+                                <select class="console-input" id="dbOperation">
+                                    <option value="search">Similarity Search</option>
+                                    <option value="add">Add Vector</option>
+                                    <option value="delete">Delete Vector</option>
+                                    <option value="metadata">Search Metadata</option>
+                                </select>
+                                <button class="btn btn-quantum" onclick="runDatabaseDemo()">
+                                    <i class="fas fa-database"></i> Execute
+                                </button>
+                            </div>
+                            <div class="console-output" id="databaseOutput">
+                        🗄️ Vector Database Demo<br><br>
+                        Operations available:<br>
+                        • <strong>Similarity Search</strong>: Find similar vectors<br>
+                        • <strong>Add Vector</strong>: Add new vector to database<br>
+                        • <strong>Delete Vector</strong>: Remove vector by ID<br>
+                        • <strong>Search Metadata</strong>: Filter by metadata<br><br>
+                        Real vector databases like Pinecone, Weaviate, and Qdrant use similar principles!
+                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- String Methods -->
+            <div class="message fade-in" id="string-methods">
+                <div class="avatar string">🔤</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">String Methods Expert</span>
+                        <span class="message-time">Topic 4</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-string">Python</div>
+                            <div class="content-badge badge-embedding">Text</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>🔤 Python String Methods for AI Text Processing</h2>
+                        <p>Master Python string methods essential for preprocessing text data before creating embeddings for AI models.</p>
+
+                        <div class="string-practice">
+                            <h3 style="color: var(--string-methods-yellow); margin-bottom: 20px;">🎯 Essential String Methods Practice</h3>
+                            
+                            <div class="method-grid">
+                                <div class="method-card">
+                                    <div class="method-name">.lower() / .upper()</div>
+                                    <div style="font-size: 14px; color: var(--text-secondary);">
+                                        Convert case: <code>"HELLO".lower() → "hello"</code>
+                                    </div>
+                                </div>
+                                <div class="method-card">
+                                    <div class="method-name">.strip()</div>
+                                    <div style="font-size: 14px; color: var(--text-secondary);">
+                                        Remove whitespace: <code>"  text  ".strip() → "text"</code>
+                                    </div>
+                                </div>
+                                <div class="method-card">
+                                    <div class="method-name">.split() / .join()</div>
+                                    <div style="font-size: 14px; color: var(--text-secondary);">
+                                        Split and join: <code>"a,b,c".split(",") → ["a","b","c"]</code>
+                                    </div>
+                                </div>
+                                <div class="method-card">
+                                    <div class="method-name">.replace()</div>
+                                    <div style="font-size: 14px; color: var(--text-secondary);">
+                                        Replace text: <code>"hello".replace("h","j") → "jello"</code>
+                                    </div>
+                                </div>
+                                <div class="method-card">
+                                    <div class="method-name">.startswith() / .endswith()</div>
+                                    <div style="font-size: 14px; color: var(--text-secondary);">
+                                        Check patterns: <code>"hello".startswith("he") → True</code>
+                                    </div>
+                                </div>
+                                <div class="method-card">
+                                    <div class="method-name">.find() / .index()</div>
+                                    <div style="font-size: 14px; color: var(--text-secondary);">
+                                        Find substrings: <code>"hello".find("ll") → 2</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="interactive-console" style="margin-top: 24px;">
+                                <div class="console-header">
+                                    <div class="console-title">String Methods Playground</div>
+                                    <div class="console-status">
+                                        <div class="status-dot"></div>
+                                        <span>Ready to practice</span>
+                                    </div>
+                                </div>
+                                <div class="console-input-group">
+                                    <input type="text" class="console-input" id="stringInput" placeholder="Enter text (e.g., Hello World)">
+                                    <input type="text" class="console-input" id="stringMethod" placeholder="Method (e.g., upper, strip)">
+                                    <button class="btn btn-quantum" onclick="runStringMethod()">
+                                        <i class="fas fa-play"></i> Execute
+                                    </button>
+                                </div>
+                                <div class="console-output" id="stringOutput">
+                            🔤 String Methods Playground<br><br>
+                            Try these methods:<br>
+                            • upper, lower, title<br>
+                            • strip, lstrip, rstrip<br>
+                            • split, join<br>
+                            • replace<br>
+                            • find, index<br>
+                            • startswith, endswith<br>
+                            • isalpha, isnumeric<br><br>
+                            Example: "  Hello World  ".strip().upper()
+                        </div>
+                            </div>
+                        </div>
+
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">Python - Complete Text Preprocessing Pipeline</span>
+                                <div class="code-actions">
+                                    <button class="code-action" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+<div class="code-content">
+<span class="code-line"># ==========================================</span><br>
+<span class="code-line"># TEXT PREPROCESSING FOR AI EMBEDDINGS</span><br>
+<span class="code-line"># ==========================================</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">import re</span><br>
+<span class="code-line">import string</span><br>
+<span class="code-line">from typing import List, Optional</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">class TextPreprocessor:</span><br>
+<span class="code-line">    """Complete text preprocessing for AI models."""</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    def __init__(self):</span><br>
+<span class="code-line">        self.stop_words = {"a", "an", "the", "and", "or", "but", "in", "on", "at"}</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">    def clean_text(self, text: str) -> str:</span><br>
+<span class="code-line">        """Basic text cleaning."""</span><br>
+<span class="code-line">        # Convert to lowercase</span><br>
+<span class="code-line">        text = text.lower()</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        # Remove extra whitespace</span><br>
+<span class="code-line">        text = ' '.join(text.split())</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        # Remove punctuation (optional, keep for some tasks)</span><br>
+<span class="code-line">        # text = text.translate(str.maketrans('', '', string.punctuation))</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        return text</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    def tokenize(self, text: str) -> List[str]:</span><br>
+<span class="code-line">        """Split text into tokens (words)."""</span><br>
+<span class="code-line">        return text.split()</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    def remove_stop_words(self, tokens: List[str]) -> List[str]:</span><br>
+<span class="code-line">        """Remove common stop words."""</span><br>
+<span class="code-line">        return [token for token in tokens if token not in self.stop_words]</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    def stem_tokens(self, tokens: List[str]) -> List[str]:</span><br>
+<span class="code-line">        """Simple stemming (Porter stemmer in production)."""</span><br>
+<span class="code-line">        stemmed = []</span><br>
+<span class="code-line">        for token in tokens:</span><br>
+<span class="code-line">            # Simple rule-based stemming</span><br>
+<span class="code-line">            if token.endswith('ing'):</span><br>
+<span class="code-line">                token = token[:-3]</span><br>
+<span class="code-line">            elif token.endswith('ed'):</span><br>
+<span class="code-line">                token = token[:-2]</span><br>
+<span class="code-line">            elif token.endswith('s'):</span><br>
+<span class="code-line">                token = token[:-1]</span><br>
+<span class="code-line">            stemmed.append(token)</span><br>
+<span class="code-line">        return stemmed</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    def create_ngrams(self, tokens: List[str], n: int = 2) -> List[str]:</span><br>
+<span class="code-line">        """Create n-grams from tokens."""</span><br>
+<span class="code-line">        ngrams = []</span><br>
+<span class="code-line">        for i in range(len(tokens) - n + 1):</span><br>
+<span class="code-line">            ngram = ' '.join(tokens[i:i + n])</span><br>
+<span class="code-line">            ngrams.append(ngram)</span><br>
+<span class="code-line">        return ngrams</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    def preprocess_pipeline(self, text: str) -> List[str]:</span><br>
+<span class="code-line">        """Complete preprocessing pipeline."""</span><br>
+<span class="code-line">        # Step 1: Clean text</span><br>
+<span class="code-line">        cleaned = self.clean_text(text)</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        # Step 2: Tokenize</span><br>
+<span class="code-line">        tokens = self.tokenize(cleaned)</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        # Step 3: Remove stop words</span><br>
+<span class="code-line">        filtered = self.remove_stop_words(tokens)</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        # Step 4: Stem tokens</span><br>
+<span class="code-line">        stemmed = self.stem_tokens(filtered)</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        # Step 5: Create bigrams</span><br>
+<span class="code-line">        bigrams = self.create_ngrams(stemmed, n=2)</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        # Combine unigrams and bigrams</span><br>
+<span class="code-line">        final_tokens = stemmed + bigrams</span><br>
+<span class="code-line">        </span><br>
+<span class="code-line">        return final_tokens</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># ==========================================</span><br>
+<span class="code-line"># PRACTICAL EXAMPLES</span><br>
+<span class="code-line"># ==========================================</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Example 1: Basic String Operations</span><br>
+<span class="code-line">print("=== BASIC STRING OPERATIONS ===\n")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">text = "  Hello, World! This is AI Text Processing.  "</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">print("Original:", repr(text))</span><br>
+<span class="code-line">print("Lowercase:", text.lower())</span><br>
+<span class="code-line">print("Stripped:", text.strip())</span><br>
+<span class="code-line">print("Replaced:", text.replace("Hello", "Hi"))</span><br>
+<span class="code-line">print("Starts with 'Hello':", text.strip().startswith("Hello"))</span><br>
+<span class="code-line">print("Find 'World':", text.find("World"))</span><br>
+<span class="code-line">print("Split:", text.strip().split())</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Example 2: Text Preprocessing Pipeline</span><br>
+<span class="code-line">print("\n=== TEXT PREPROCESSING PIPELINE ===\n")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">preprocessor = TextPreprocessor()</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">sample_texts = [</span><br>
+<span class="code-line">    "Machine Learning algorithms are amazing!",</span><br>
+<span class="code-line">    "Natural Language Processing helps computers understand text.",</span><br>
+<span class="code-line">    "Deep Learning models are training on large datasets."</span><br>
+<span class="code-line">]</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">for i, text in enumerate(sample_texts, 1):</span><br>
+<span class="code-line">    processed = preprocessor.preprocess_pipeline(text)</span><br>
+<span class="code-line">    print(f"Text {i}: {text}")</span><br>
+<span class="code-line">    print(f"Processed: {processed}")</span><br>
+<span class="code-line">    print()</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Example 3: String Formatting for AI Reports</span><br>
+<span class="code-line">print("\n=== STRING FORMATTING FOR AI ===\n")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">ai_results = {</span><br>
+<span class="code-line">    "model": "BERT-large",</span><br>
+<span class="code-line">    "accuracy": 0.9234,</span><br>
+<span class="code-line">    "training_time": 125.67,</span><br>
+<span class="code-line">    "parameters": 340000000</span><br>
+<span class="code-line">}</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Create formatted report</span><br>
+<span class="code-line">report = f"""</span><br>
+<span class="code-line">🤖 AI MODEL REPORT</span><br>
+<span class="code-line">=================</span><br>
+<span class="code-line">Model: {ai_results['model'].upper()}</span><br>
+<span class="code-line">Accuracy: {ai_results['accuracy']:.2%}</span><br>
+<span class="code-line">Training Time: {ai_results['training_time']:.1f} seconds</span><br>
+<span class="code-line">Parameters: {ai_results['parameters']:,}</span><br>
+<span class="code-line">Status: {"✅ Production Ready" if ai_results['accuracy'] > 0.9 else "⚠️ Needs Improvement"}</span><br>
+<span class="code-line">"""</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">print(report)</span><br>
+<span class="code-line"></span><br>
+<span class="code-line"># Example 4: Text Similarity with String Methods</span><br>
+<span class="code-line">print("\n=== TEXT SIMILARITY ===\n")</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">def jaccard_similarity(text1: str, text2: str) -> float:</span><br>
+<span class="code-line">    """Calculate Jaccard similarity between texts."""</span><br>
+<span class="code-line">    preprocessor = TextPreprocessor()</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    tokens1 = set(preprocessor.preprocess_pipeline(text1))</span><br>
+<span class="code-line">    tokens2 = set(preprocessor.preprocess_pipeline(text2))</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    intersection = len(tokens1.intersection(tokens2))</span><br>
+<span class="code-line">    union = len(tokens1.union(tokens2))</span><br>
+<span class="code-line">    </span><br>
+<span class="code-line">    return intersection / union if union > 0 else 0</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">text_pairs = [</span><br>
+<span class="code-line">    ("machine learning is fun", "machine learning is interesting"),</span><br>
+<span class="code-line">    ("deep learning models", "natural language processing"),</span><br>
+<span class="code-line">    ("artificial intelligence", "AI and machine learning")</span><br>
+<span class="code-line">]</span><br>
+<span class="code-line"></span><br>
+<span class="code-line">for text1, text2 in text_pairs:</span><br>
+<span class="code-line">    similarity = jaccard_similarity(text1, text2)</span><br>
+<span class="code-line">    print(f"'{text1}' vs '{text2}': {similarity:.3f}")</span>
+</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Final Exam -->
+            <div class="message fade-in" id="final-exam">
+                <div class="avatar exam">📝</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">Exam Proctor</span>
+                        <span class="message-time">Final Assessment</span>
+                        <div class="message-tags">
+                            <div class="content-badge badge-exam">Test</div>
+                            <div class="content-badge badge-quantum">Challenge</div>
+                        </div>
+                    </div>
+                    <div class="message-text">
+                        <h2>📝 Final Exam: Vector Databases & Embeddings</h2>
+                        <p>Test your knowledge with 30 comprehensive questions covering vectors, embeddings, databases, and string methods.</p>
+
+                        <div class="exam-section">
+                            <div class="console-header" style="border-bottom: none;">
+                                <div class="console-title">Exam Instructions</div>
+                                <div class="console-status">
+                                    <div class="status-dot"></div>
+                                    <span>30 Questions • 45 Minutes</span>
+                                </div>
+                            </div>
+                            
+                            <div style="text-align: center; padding: 20px;">
+                                <button class="btn btn-exam" style="background: var(--exam-gradient); padding: 16px 32px; font-size: 16px;" onclick="startExam()">
+                                    <i class="fas fa-play-circle"></i> Start Exam
+                                </button>
+                                <p style="margin-top: 16px; color: var(--text-secondary);">
+                                    Complete all 30 questions to test your understanding.<br>
+                                    Answers will be shown after you submit.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="examQuestions" style="display: none;">
+                            <!-- Questions will be inserted here by JavaScript -->
+                        </div>
+
+                        <div class="results-panel" id="resultsPanel">
+                            <!-- Results will be inserted here by JavaScript -->
+                        </div>
+
+                        <div style="text-align: center; margin-top: 40px;">
+                            <button class="btn btn-primary" onclick="downloadCertificate()">
+                                <i class="fas fa-certificate"></i> Download Lesson 10 Certificate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <div style="max-width: 600px; margin: 0 auto;">
+                    <div style="display: flex; justify-content: center; gap: 24px; margin-bottom: 20px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; margin-bottom: 8px;">🔢</div>
+                            <div style="font-size: 12px; font-weight: 600;">Vector Mathematics</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; margin-bottom: 8px;">🧠</div>
+                            <div style="font-size: 12px; font-weight: 600;">AI Embeddings</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; margin-bottom: 8px;">🗄️</div>
+                            <div style="font-size: 12px; font-weight: 600;">Vector Databases</div>
+                        </div>
+                    </div>
+                    <p style="font-size: 13px; color: var(--text-tertiary); margin-bottom: 16px;">
+                        Lesson 10: Master vector mathematics, AI embeddings, vector databases, and Python string methods for modern AI applications.
+                    </p>
+                    <div style="font-size: 12px; color: var(--text-tertiary);">
+                        © 2024 Oxford Python & AI Learners | Lesson 10: Vector Databases & Embeddings
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        // Quantum Background Animation
+        function createQuantumBackground() {
+            const background = document.getElementById('quantumBackground');
+            
+            // Create quantum particles
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'quantum-particle';
+                particle.style.width = `${Math.random() * 40 + 20}px`;
+                particle.style.height = particle.style.width;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                particle.style.opacity = Math.random() * 0.05 + 0.02;
+                background.appendChild(particle);
+            }
+            
+            // Create quantum entanglement lines
+            for (let i = 0; i < 15; i++) {
+                const line = document.createElement('div');
+                line.className = 'quantum-entanglement';
+                line.style.width = `${Math.random() * 200 + 100}px`;
+                line.style.top = `${Math.random() * 100}%`;
+                line.style.left = `${Math.random() * 100}%`;
+                line.style.transform = `rotate(${Math.random() * 360}deg)`;
+                line.style.animationDelay = `${Math.random() * 3}s`;
+                background.appendChild(line);
+            }
+            
+            // Create quantum gates
+            for (let i = 0; i < 10; i++) {
+                const gate = document.createElement('div');
+                gate.className = 'quantum-gate';
+                gate.style.top = `${Math.random() * 100}%`;
+                gate.style.left = `${Math.random() * 100}%`;
+                gate.style.animationDelay = `${Math.random() * 4}s`;
+                background.appendChild(gate);
+            }
+            
+            // Create binary streams
+            for (let i = 0; i < 30; i++) {
+                const binary = document.createElement('div');
+                binary.className = 'binary-stream';
+                binary.textContent = Math.random() > 0.5 ? '1' : '0';
+                binary.style.left = `${Math.random() * 100}%`;
+                binary.style.animationDelay = `${Math.random() * 10}s`;
+                binary.style.fontSize = `${Math.random() * 10 + 8}px`;
+                background.appendChild(binary);
+            }
+        }
+
+        // Theme Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            createQuantumBackground();
+            
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            const body = document.body;
+            
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            if (savedTheme === 'light') {
+                body.classList.add('dark-mode');
+                themeIcon.className = 'fas fa-sun theme-icon';
+                themeText.textContent = 'Dark Mode';
+            }
+            
+            themeToggle.addEventListener('click', function() {
+                body.classList.toggle('dark-mode');
+                
+                if (body.classList.contains('dark-mode')) {
+                    themeIcon.className = 'fas fa-sun theme-icon';
+                    themeText.textContent = 'Dark Mode';
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    themeIcon.className = 'fas fa-moon theme-icon';
+                    themeText.textContent = 'Light Mode';
+                    localStorage.setItem('theme', 'dark');
+                }
+            });
+            
+            updateProgress();
+        });
+        
+        function updateProgress() {
+            const lessonProgress = document.getElementById('lessonProgress');
+            const globalProgress = document.getElementById('globalProgress');
+            const progressPercent = document.getElementById('progressPercent');
+            
+            lessonProgress.style.width = '35%';
+            globalProgress.style.width = '60%';
+            progressPercent.textContent = '60%';
+        }
+        
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+                
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                document.querySelector(`[onclick*="${sectionId}"]`).classList.add('active');
+            }
+        }
+
+        // Vector Calculator
+        function calculateVectors() {
+            const vectorAInput = document.getElementById('vectorA').value;
+            const vectorBInput = document.getElementById('vectorB').value;
+            const output = document.getElementById('vectorOutput');
+            
+            try {
+                const vectorA = vectorAInput.split(',').map(x => parseFloat(x.trim()));
+                const vectorB = vectorBInput.split(',').map(x => parseFloat(x.trim()));
+                
+                if (vectorA.length !== vectorB.length) {
+                    throw new Error('Vectors must have the same length');
+                }
+                
+                // Calculate dot product
+                const dotProduct = vectorA.reduce((sum, a, i) => sum + a * vectorB[i], 0);
+                
+                // Calculate magnitudes
+                const magnitudeA = Math.sqrt(vectorA.reduce((sum, a) => sum + a * a, 0));
+                const magnitudeB = Math.sqrt(vectorB.reduce((sum, b) => sum + b * b, 0));
+                
+                // Calculate cosine similarity
+                const cosineSimilarity = magnitudeA * magnitudeB === 0 ? 0 : 
+                    dotProduct / (magnitudeA * magnitudeB);
+                
+                // Calculate Euclidean distance
+                const euclideanDistance = Math.sqrt(
+                    vectorA.reduce((sum, a, i) => sum + Math.pow(a - vectorB[i], 2), 0)
+                );
+                
+                // Calculate angle in degrees
+                const angleRad = Math.acos(Math.max(-1, Math.min(1, cosineSimilarity)));
+                const angleDeg = (angleRad * 180 / Math.PI).toFixed(2);
+                
+                output.innerHTML = `
+                    🔢 Vector Calculations<br><br>
+                    <strong>Vector A:</strong> [${vectorA}]<br>
+                    <strong>Vector B:</strong> [${vectorB}]<br><br>
+                    
+                    <strong>📊 Results:</strong><br>
+                    • Dot Product: <strong>${dotProduct.toFixed(4)}</strong><br>
+                    • Magnitude A: ${magnitudeA.toFixed(4)}<br>
+                    • Magnitude B: ${magnitudeB.toFixed(4)}<br>
+                    • Cosine Similarity: <strong>${cosineSimilarity.toFixed(4)}</strong><br>
+                    • Angle Between: ${angleDeg}°<br>
+                    • Euclidean Distance: ${euclideanDistance.toFixed(4)}<br><br>
+                    
+                    <em>Interpretation:</em><br>
+                    ${cosineSimilarity > 0.9 ? '🎯 Very similar vectors' : 
+                      cosineSimilarity > 0.7 ? '✅ Similar vectors' : 
+                      cosineSimilarity > 0.3 ? '⚠️ Somewhat related' : 
+                      '🚫 Unrelated vectors'}
+                `;
+                
+            } catch (error) {
+                output.innerHTML = `❌ Error: ${error.message}<br><br>Please enter vectors like: 1,2,3 or 0.5,-0.2,0.8`;
+            }
+        }
+
+        // Vector Operations Demo
+        function runVectorOperationDemo() {
+            const operation = document.getElementById('vectorOperation').value;
+            const output = document.getElementById('vectorDemoOutput');
+            
+            const demos = {
+                'dot': `
+                    <strong>🎯 Dot Product (A·B)</strong><br><br>
+                    Formula: Σ(Aᵢ × Bᵢ)<br><br>
+                    
+                    Example:<br>
+                    A = [1, 2, 3]<br>
+                    B = [4, 5, 6]<br><br>
+                    
+                    Calculation:<br>
+                    1×4 + 2×5 + 3×6 = 4 + 10 + 18 = 32<br><br>
+                    
+                    <strong>AI Application:</strong><br>
+                    • Measures vector alignment<br>
+                    • Used in attention mechanisms<br>
+                    • Higher values = more similar direction
+                `,
+                'cosine': `
+                    <strong>📏 Cosine Similarity</strong><br><br>
+                    Formula: cos(θ) = A·B / (|A| × |B|)<br>
+                    Range: -1 (opposite) to 1 (same)<br><br>
+                    
+                    Example:<br>
+                    A = [1, 0], B = [0, 1] → 0 (orthogonal)<br>
+                    A = [1, 0], B = [1, 0] → 1 (same)<br>
+                    A = [1, 0], B = [-1, 0] → -1 (opposite)<br><br>
+                    
+                    <strong>AI Application:</strong><br>
+                    • Semantic search<br>
+                    • Recommendation systems<br>
+                    • Document similarity
+                `,
+                'euclidean': `
+                    <strong>🧭 Euclidean Distance</strong><br><br>
+                    Formula: √Σ(Aᵢ - Bᵢ)²<br><br>
+                    
+                    Example:<br>
+                    A = [0, 0], B = [3, 4]<br>
+                    Distance = √((0-3)² + (0-4)²)<br>
+                    = √(9 + 16) = √25 = 5<br><br>
+                    
+                    <strong>AI Application:</strong><br>
+                    • K-means clustering<br>
+                    • Nearest neighbor search<br>
+                    • Image recognition<br>
+                    • Lower distance = more similar
+                `,
+                'normalize': `
+                    <strong>⚡ Vector Normalization</strong><br><br>
+                    Formula: A' = A / |A|<br>
+                    Result: Unit vector (length = 1)<br><br>
+                    
+                    Example:<br>
+                    A = [3, 4]<br>
+                    |A| = √(3² + 4²) = √25 = 5<br>
+                    A' = [3/5, 4/5] = [0.6, 0.8]<br><br>
+                    
+                    <strong>AI Application:</strong><br>
+                    • Standardize embeddings<br>
+                    • Improve similarity comparisons<br>
+                    • Required for cosine similarity
+                `
+            };
+            
+            output.innerHTML = demos[operation] || 'Select an operation from the dropdown.';
+        }
+
+        // Embedding Demo
+        function runEmbeddingDemo() {
+            alert('🧠 Embedding Simulator:\n\n1. Word Embeddings: "king" - "man" + "woman" ≈ "queen"\n2. Image Embeddings: CNN extracts 512-2048 features\n3. Sentence Embeddings: BERT creates 768-dim vectors\n4. Multimodal: CLIP aligns text and images\n\nTry the code examples above!');
+        }
+
+        // String Methods Practice
+        function runStringMethod() {
+            const text = document.getElementById('stringInput').value;
+            const method = document.getElementById('stringMethod').value.toLowerCase();
+            const output = document.getElementById('stringOutput');
+            
+            if (!text || !method) {
+                output.innerHTML = '❌ Please enter both text and a method.';
+                return;
+            }
+            
+            let result;
+            try {
+                switch(method) {
+                    case 'upper':
+                        result = text.toUpperCase();
+                        break;
+                    case 'lower':
+                        result = text.toLowerCase();
+                        break;
+                    case 'title':
+                        result = text.replace(/\b\w/g, char => char.toUpperCase());
+                        break;
+                    case 'strip':
+                        result = text.trim();
+                        break;
+                    case 'lstrip':
+                        result = text.trimStart();
+                        break;
+                    case 'rstrip':
+                        result = text.trimEnd();
+                        break;
+                    case 'split':
+                        result = JSON.stringify(text.split());
+                        break;
+                    case 'join':
+                        result = text.split().join('-');
+                        break;
+                    case 'replace':
+                        result = text.replace(' ', '_');
+                        break;
+                    case 'find':
+                        result = text.indexOf('World');
+                        break;
+                    case 'index':
+                        result = text.indexOf('World');
+                        break;
+                    case 'startswith':
+                        result = text.startsWith('Hello');
+                        break;
+                    case 'endswith':
+                        result = text.endsWith('!');
+                        break;
+                    case 'isalpha':
+                        result = text.replace(/\s/g, '').match(/^[A-Za-z]+$/) ? 'True' : 'False';
+                        break;
+                    case 'isnumeric':
+                        result = text.match(/^\d+$/) ? 'True' : 'False';
+                        break;
+                    default:
+                        result = `Method "${method}" not recognized. Try: upper, lower, strip, split, replace, etc.`;
+                }
+                
+                output.innerHTML = `
+                    🔤 String Method Result<br><br>
+                    <strong>Original Text:</strong> "${text}"<br>
+                    <strong>Method:</strong> .${method}()<br>
+                    <strong>Result:</strong> ${typeof result === 'string' ? `"${result}"` : result}<br><br>
+                    
+                    <strong>Python Code:</strong><br>
+                    <code>text = "${text.replace(/"/g, '\\"')}"</code><br>
+                    <code>result = text.${method}()</code><br>
+                    <code>print(result)  # ${result}</code>
+                `;
+                
+            } catch (error) {
+                output.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+
+        function runStringPractice() {
+            const output = document.getElementById('stringOutput');
+            output.innerHTML = `
+                🎯 String Methods Practice Exercises<br><br>
+                
+                <strong>Exercise 1:</strong><br>
+                Convert to uppercase: "hello world"<br>
+                <code>"hello world".upper()</code><br><br>
+                
+                <strong>Exercise 2:</strong><br>
+                Remove extra spaces: "  AI  Text  "<br>
+                <code>"  AI  Text  ".strip()</code><br><br>
+                
+                <strong>Exercise 3:</strong><br>
+                Split into words: "machine,learning,ai"<br>
+                <code>"machine,learning,ai".split(",")</code><br><br>
+                
+                <strong>Exercise 4:</strong><br>
+                Replace text: "I like Java"<br>
+                <code>"I like Java".replace("Java", "Python")</code><br><br>
+                
+                <strong>Exercise 5:</strong><br>
+                Check if starts with: "Hello World"<br>
+                <code>"Hello World".startswith("Hello")</code><br><br>
+                
+                Try these in the playground above!
+            `;
+        }
+
+        // Database Demo
+        function runDatabaseDemo() {
+            alert('🗄️ Vector Database Operations:\n\n1. Add: Store embeddings with metadata\n2. Search: Find similar vectors (cosine/euclidean)\n3. Query: Filter by metadata (tags, timestamps)\n4. Delete: Remove vectors by ID\n\nReal systems: Pinecone, Weaviate, Qdrant, Milvus');
+        }
+
+        // Exam System
+        const examQuestions = [
+            {
+                id: 1,
+                question: "What is the dot product of vectors [1, 2, 3] and [4, 5, 6]?",
+                options: ["32", "14", "28", "50"],
+                correct: 0,
+                explanation: "1×4 + 2×5 + 3×6 = 4 + 10 + 18 = 32"
+            },
+            {
+                id: 2,
+                question: "What does cosine similarity measure?",
+                options: ["The angle between two vectors", "The magnitude of a vector", "The dot product of vectors", "The Euclidean distance"],
+                correct: 0,
+                explanation: "Cosine similarity measures the cosine of the angle between two vectors, indicating their directional similarity."
+            },
+            {
+                id: 3,
+                question: "Which Python string method converts text to lowercase?",
+                options: [".lower()", ".upper()", ".title()", ".casefold()"],
+                correct: 0,
+                explanation: ".lower() converts all characters to lowercase."
+            },
+            {
+                id: 4,
+                question: "What is the purpose of vector normalization?",
+                options: ["Convert vector to unit length", "Sort vector elements", "Remove negative values", "Calculate magnitude"],
+                correct: 0,
+                explanation: "Normalization converts a vector to unit length (magnitude = 1) for fair similarity comparisons."
+            },
+            {
+                id: 5,
+                question: "Which of these is a popular vector database?",
+                options: ["Pinecone", "MySQL", "SQLite", "PostgreSQL"],
+                correct: 0,
+                explanation: "Pinecone is a specialized vector database for AI embeddings."
+            },
+            {
+                id: 6,
+                question: "What does the string method .strip() do?",
+                options: ["Removes whitespace from both ends", "Splits string into list", "Replaces characters", "Finds substring"],
+                correct: 0,
+                explanation: ".strip() removes leading and trailing whitespace characters."
+            },
+            {
+                id: 7,
+                question: "What is Euclidean distance formula?",
+                options: ["√Σ(Aᵢ - Bᵢ)²", "Σ(Aᵢ × Bᵢ)", "A·B / (|A|×|B|)", "max(|Aᵢ - Bᵢ|)"],
+                correct: 0,
+                explanation: "Euclidean distance is the straight-line distance between points: √Σ(Aᵢ - Bᵢ)²"
+            },
+            {
+                id: 8,
+                question: "Which method splits a string into a list?",
+                options: [".split()", ".join()", ".partition()", ".rsplit()"],
+                correct: 0,
+                explanation: ".split() divides a string into a list based on a separator."
+            },
+            {
+                id: 9,
+                question: "What dimension do BERT embeddings typically have?",
+                options: ["768", "256", "512", "1024"],
+                correct: 0,
+                explanation: "Base BERT models output 768-dimensional embeddings."
+            },
+            {
+                id: 10,
+                question: "What does .startswith() method return?",
+                options: ["Boolean", "Integer", "String", "List"],
+                correct: 0,
+                explanation: ".startswith() returns True or False if the string starts with the specified value."
+            },
+            {
+                id: 11,
+                question: "Which similarity measure ranges from -1 to 1?",
+                options: ["Cosine similarity", "Euclidean distance", "Manhattan distance", "Jaccard index"],
+                correct: 0,
+                explanation: "Cosine similarity ranges from -1 (opposite) to 1 (same direction)."
+            },
+            {
+                id: 12,
+                question: "What does .replace('a', 'b') do?",
+                options: ["Replaces 'a' with 'b'", "Removes 'a'", "Finds 'a'", "Splits at 'a'"],
+                correct: 0,
+                explanation: ".replace('a', 'b') replaces all occurrences of 'a' with 'b'."
+            },
+            {
+                id: 13,
+                question: "What is word embedding?",
+                options: ["Vector representation of words", "Encryption of words", "Compression of text", "Tokenization"],
+                correct: 0,
+                explanation: "Word embeddings are vector representations that capture semantic meaning."
+            },
+            {
+                id: 14,
+                question: "Which method joins list elements into a string?",
+                options: ["'.'.join(list)", "list.join('.')", "string.join(list)", "concat(list)"],
+                correct: 0,
+                explanation: "'.'.join(list) joins list elements with '.' as separator."
+            },
+            {
+                id: 15,
+                question: "What does vector magnitude represent?",
+                options: ["Length of the vector", "Direction of vector", "Number of dimensions", "Dot product"],
+                correct: 0,
+                explanation: "Magnitude (norm) represents the length of a vector."
+            },
+            {
+                id: 16,
+                question: "What is the result of 'HELLO'.lower()?",
+                options: ["'hello'", "'Hello'", "'HELLO'", "'hELLO'"],
+                correct: 0,
+                explanation: ".lower() converts to lowercase: 'hello'"
+            },
+            {
+                id: 17,
+                question: "Which database is optimized for vector similarity search?",
+                options: ["Qdrant", "MongoDB", "Redis", "Cassandra"],
+                correct: 0,
+                explanation: "Qdrant is a vector database optimized for similarity search."
+            },
+            {
+                id: 18,
+                question: "What does .find() method return if substring not found?",
+                options: ["-1", "0", "False", "None"],
+                correct: 0,
+                explanation: ".find() returns -1 if the substring is not found."
+            },
+            {
+                id: 19,
+                question: "What is semantic search?",
+                options: ["Search by meaning, not keywords", "Encrypted search", "Fast text search", "Image search"],
+                correct: 0,
+                explanation: "Semantic search finds content based on meaning using embeddings."
+            },
+            {
+                id: 20,
+                question: "Which method checks if string contains only alphabets?",
+                options: [".isalpha()", ".isdigit()", ".isalnum()", ".isspace()"],
+                correct: 0,
+                explanation: ".isalpha() returns True if all characters are alphabetic."
+            },
+            {
+                id: 21,
+                question: "What is the cosine similarity of identical vectors?",
+                options: ["1", "0", "-1", "Undefined"],
+                correct: 0,
+                explanation: "Identical vectors have angle 0°, cos(0) = 1."
+            },
+            {
+                id: 22,
+                question: "What does .endswith('.py') check?",
+                options: ["If string ends with '.py'", "If string starts with '.py'", "If contains '.py'", "Length of string"],
+                correct: 0,
+                explanation: ".endswith() checks if string ends with the specified suffix."
+            },
+            {
+                id: 23,
+                question: "What are embeddings used for in AI?",
+                options: ["Represent data as vectors", "Encrypt data", "Compress images", "Sort databases"],
+                correct: 0,
+                explanation: "Embeddings convert data to vectors for machine learning."
+            },
+            {
+                id: 24,
+                question: "Which method removes leading whitespace?",
+                options: [".lstrip()", ".rstrip()", ".strip()", ".trim()"],
+                correct: 0,
+                explanation: ".lstrip() removes leading (left) whitespace."
+            },
+            {
+                id: 25,
+                question: "What is nearest neighbor search?",
+                options: ["Finding most similar vectors", "Sorting vectors", "Normalizing vectors", "Training models"],
+                correct: 0,
+                explanation: "Nearest neighbor search finds the closest vectors in embedding space."
+            },
+            {
+                id: 26,
+                question: "What does 'AI'.isalpha() return?",
+                options: ["True", "False", "Error", "None"],
+                correct: 0,
+                explanation: "'AI' contains only alphabetic characters, so returns True."
+            },
+            {
+                id: 27,
+                question: "What is a unit vector?",
+                options: ["Vector with magnitude 1", "First vector in array", "Zero vector", "Normalized matrix"],
+                correct: 0,
+                explanation: "A unit vector has magnitude (length) equal to 1."
+            },
+            {
+                id: 28,
+                question: "Which method capitalizes first letter of each word?",
+                options: [".title()", ".capitalize()", ".upper()", ".casefold()"],
+                correct: 0,
+                explanation: ".title() capitalizes the first character of each word."
+            },
+            {
+                id: 29,
+                question: "What does vector dimension represent?",
+                options: ["Number of features", "Magnitude", "Direction", "Similarity"],
+                correct: 0,
+                explanation: "Dimension represents the number of features/coordinates."
+            },
+            {
+                id: 30,
+                question: "What is the result of '123'.isdigit()?",
+                options: ["True", "False", "Error", "None"],
+                correct: 0,
+                explanation: "'123' contains only digits, so returns True."
+            }
+        ];
+
+        let userAnswers = new Array(examQuestions.length).fill(null);
+        let examStarted = false;
+
+        function startExam() {
+            examStarted = true;
+            document.getElementById('examQuestions').style.display = 'block';
+            document.getElementById('resultsPanel').style.display = 'none';
+            
+            const examContainer = document.getElementById('examQuestions');
+            examContainer.innerHTML = '';
+            
+            examQuestions.forEach((q, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+                questionCard.innerHTML = `
+                    <div class="question-text">${index + 1}. ${q.question}</div>
+                    <div class="options-grid">
+                        ${q.options.map((option, optIndex) => `
+                            <div class="option" onclick="selectAnswer(${index}, ${optIndex})" id="q${index}_opt${optIndex}">
+                                <div class="option-indicator">${String.fromCharCode(65 + optIndex)}</div>
+                                <div>${option}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                examContainer.appendChild(questionCard);
+            });
+            
+            const submitButton = document.createElement('div');
+            submitButton.style.textAlign = 'center';
+            submitButton.style.marginTop = '32px';
+            submitButton.innerHTML = `
+                <button class="btn btn-primary" style="padding: 16px 48px; font-size: 16px;" onclick="submitExam()">
+                    <i class="fas fa-paper-plane"></i> Submit Exam
+                </button>
+                <p style="margin-top: 16px; color: var(--text-secondary);">
+                    ${examQuestions.length} questions • Select all answers before submitting
+                </p>
+            `;
+            examContainer.appendChild(submitButton);
+            
+            scrollToSection('final-exam');
+        }
+
+        function selectAnswer(questionIndex, optionIndex) {
+            if (!examStarted) return;
+            
+            userAnswers[questionIndex] = optionIndex;
+            
+            // Update UI
+            const options = document.querySelectorAll(`#q${questionIndex}_opt${optionIndex}`).parentNode.querySelectorAll('.option');
+            options.forEach((opt, idx) => {
+                opt.classList.remove('selected');
+                if (idx === optionIndex) {
+                    opt.classList.add('selected');
+                }
+            });
+        }
+
+        function submitExam() {
+            if (!examStarted) return;
+            
+            const unanswered = userAnswers.filter(a => a === null).length;
+            if (unanswered > 0) {
+                if (!confirm(`You have ${unanswered} unanswered questions. Submit anyway?`)) {
+                    return;
+                }
+            }
+            
+            // Calculate score
+            let correct = 0;
+            examQuestions.forEach((q, index) => {
+                if (userAnswers[index] === q.correct) {
+                    correct++;
+                }
+            });
+            
+            const score = (correct / examQuestions.length * 100).toFixed(1);
+            
+            // Show results
+            const resultsPanel = document.getElementById('resultsPanel');
+            resultsPanel.style.display = 'block';
+            resultsPanel.innerHTML = '';
+            
+            // Score display
+            const scoreDisplay = document.createElement('div');
+            scoreDisplay.className = 'score-display';
+            scoreDisplay.innerHTML = `
+                <div class="score-number">${score}%</div>
+                <div class="score-text">${correct} out of ${examQuestions.length} correct</div>
+                <div style="margin-top: 16px; font-size: 14px;">
+                    ${score >= 90 ? '🎉 Excellent! Master Level' : 
+                      score >= 80 ? '👍 Great Job! Proficient' : 
+                      score >= 70 ? '✅ Good! Passed' : 
+                      '📚 Needs Review'}
+                </div>
+            `;
+            resultsPanel.appendChild(scoreDisplay);
+            
+            // Detailed results
+            const details = document.createElement('div');
+            details.innerHTML = '<h3 style="color: var(--text-primary); margin-bottom: 16px;">📋 Detailed Results</h3>';
+            
+            examQuestions.forEach((q, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === q.correct;
+                
+                const resultCard = document.createElement('div');
+                resultCard.className = 'question-card';
+                resultCard.style.marginBottom = '12px';
+                resultCard.style.backgroundColor = isCorrect ? 'rgba(6, 214, 160, 0.1)' : 'rgba(239, 71, 111, 0.1)';
+                
+                resultCard.innerHTML = `
+                    <div class="question-text">
+                        <span style="color: ${isCorrect ? 'var(--quantum-teal)' : 'var(--exam-red)'};">
+                            ${isCorrect ? '✅' : '❌'}
+                        </span>
+                        ${index + 1}. ${q.question}
+                    </div>
+                    <div style="margin-top: 8px; font-size: 14px;">
+                        <strong>Your answer:</strong> 
+                        ${userAnswer !== null ? q.options[userAnswer] : 'Not answered'} 
+                        ${!isCorrect && userAnswer !== null ? ` (${String.fromCharCode(65 + userAnswer)})` : ''}
+                    </div>
+                    ${!isCorrect ? `
+                        <div style="margin-top: 4px; font-size: 14px;">
+                            <strong>Correct answer:</strong> ${q.options[q.correct]} (${String.fromCharCode(65 + q.correct)})
+                        </div>
+                    ` : ''}
+                    <div style="margin-top: 8px; font-size: 13px; color: var(--text-secondary);">
+                        <strong>Explanation:</strong> ${q.explanation}
+                    </div>
+                `;
+                details.appendChild(resultCard);
+            });
+            
+            resultsPanel.appendChild(details);
+            
+            // Answer key button
+            const keyButton = document.createElement('div');
+            keyButton.style.textAlign = 'center';
+            keyButton.style.marginTop = '24px';
+            keyButton.innerHTML = `
+                <button class="btn btn-secondary" onclick="showAnswerKey()">
+                    <i class="fas fa-key"></i> Show Complete Answer Key
+                </button>
+            `;
+            resultsPanel.appendChild(keyButton);
+            
+            scrollToSection('final-exam');
+            examStarted = false;
+        }
+
+        // Resource Functions
+        function downloadVectorCheatsheet() {
+            alert('📐 Vector Mathematics Cheatsheet Downloaded!\n\n• Dot Product: A·B = ΣAᵢBᵢ\n• Cosine Similarity: A·B/(|A||B|)\n• Euclidean Distance: √Σ(Aᵢ-Bᵢ)²\n• Magnitude: |A| = √ΣAᵢ²\n• Normalization: A/|A|\n\nEssential for AI/ML!');
+        }
+
+        function downloadStringMethods() {
+            alert('🔤 String Methods Guide Downloaded!\n\nEssential methods for AI text processing:\n• .lower()/.upper() - Case conversion\n• .strip() - Remove whitespace\n• .split()/.join() - Tokenization\n• .replace() - Text substitution\n• .find()/.index() - Search\n• .startswith()/.endswith() - Pattern matching\n• String formatting with f-strings');
+        }
+
+        function downloadEmbeddingExamples() {
+            alert('🧠 Embedding Examples Downloaded!\n\n• Word2Vec: Semantic word vectors\n• BERT: Contextual sentence embeddings\n• CLIP: Multimodal text-image embeddings\n• ResNet: Image feature vectors\n• OpenAI Embeddings: API-based text embeddings');
+        }
+
+        function showAnswerKey() {
+            let answerKey = '🔑 Complete Answer Key:\n\n';
+            examQuestions.forEach((q, index) => {
+                answerKey += `${index + 1}. ${String.fromCharCode(65 + q.correct)} - ${q.options[q.correct]}\n`;
+            });
+            answerKey += '\nStudy these concepts:\n• Vector mathematics\n• Python string methods\n• AI embeddings\n• Vector databases';
+            alert(answerKey);
+        }
+
+        function downloadCertificate() {
+            alert('🎓 Lesson 10 Certificate Downloaded!\n\nVector Databases & Embeddings Mastery\n\nThis certifies completion of:\n• Vector mathematics and operations\n• AI embedding creation and usage\n• Vector database implementation\n• Python string methods for text processing\n• 30-question comprehensive exam');
+        }
+
+        // Initialize quantum background
+        window.onload = createQuantumBackground;
+    </script>
+</body>
+</html>
