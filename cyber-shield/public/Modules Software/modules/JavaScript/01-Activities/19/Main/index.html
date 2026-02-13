@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Msebetsi Solutions - JavaScript Mastery Final Project</title>
+    <style>
+        :root {
+            /* Light Theme */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-accent: #f0f9ff;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-accent: #0ea5e9;
+            --text-success: #10b981;
+            --text-danger: #ef4444;
+            --text-warning: #f59e0b;
+            --border-color: #e2e8f0;
+            --border-accent: #0ea5e9;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --gradient-primary: linear-gradient(135deg, #0ea5e9, #3b82f6);
+            --gradient-success: linear-gradient(135deg, #10b981, #059669);
+            --gradient-warning: linear-gradient(135deg, #f59e0b, #d97706);
+            --gradient-certificate: linear-gradient(135deg, #0ea5e9, #8b5cf6, #ec4899);
+            --code-bg: #f8fafc;
+        }
+
+        .dark-mode {
+            /* Dark Theme */
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --bg-accent: #1e3a8a;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-accent: #60a5fa;
+            --text-success: #34d399;
+            --text-danger: #f87171;
+            --text-warning: #fbbf24;
+            --border-color: #334155;
+            --border-accent: #60a5fa;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --gradient-primary: linear-gradient(135deg, #60a5fa, #818cf8);
+            --gradient-success: linear-gradient(135deg, #34d399, #10b981);
+            --gradient-warning: linear-gradient(135deg, #fbbf24, #f59e0b);
+            --gradient-certificate: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+            --code-bg: #1a2238;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Celebration Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Navigation */
+        .nav-header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-accent);
+        }
+
+        .logo-icon {
+            font-size: 1.5rem;
+            animation: spin 20s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .theme-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .theme-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+            border-radius: 34px;
+            transition: .4s;
+        }
+
+        .theme-slider:before {
+            position: absolute;
+            content: "☀️";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            border-radius: 50%;
+            transition: .4s;
+            font-size: 10px;
+        }
+
+        input:checked + .theme-slider:before {
+            transform: translateX(24px);
+            content: "🌙";
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: var(--gradient-certificate);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+
+        .celebration-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--gradient-certificate);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Project Brief */
+        .project-brief {
+            background: var(--bg-card);
+            border: 2px solid var(--border-accent);
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-brief::before {
+            content: '🏆';
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            font-size: 8rem;
+            opacity: 0.1;
+            transform: rotate(15deg);
+        }
+
+        .brief-title {
+            font-size: 2rem;
+            color: var(--text-accent);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Project Requirements */
+        .requirements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .requirement-card {
+            background: var(--bg-accent);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .requirement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--border-accent);
+        }
+
+        .requirement-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .req-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .req-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--text-accent);
+        }
+
+        .req-list {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .req-list li {
+            padding: 8px 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .req-list li::before {
+            content: '✓';
+            color: var(--text-success);
+            font-weight: bold;
+        }
+
+        /* Project Submission */
+        .submission-section {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 3rem 0;
+            border: 2px solid var(--border-color);
+        }
+
+        .submission-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        /* File Upload */
+        .upload-container {
+            border: 2px dashed var(--border-color);
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+            background: var(--bg-accent);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .upload-container.drag-over {
+            border-color: var(--text-accent);
+            background: rgba(14, 165, 233, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: var(--text-accent);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .file-label:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .file-list {
+            margin-top: 2rem;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Code Editor */
+        .code-editor-container {
+            background: var(--code-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 2rem 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .editor-header {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        #codeEditor {
+            width: 100%;
+            min-height: 400px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 2rem;
+            background: transparent;
+            color: var(--text-primary);
+            border: none;
+            resize: vertical;
+            outline: none;
+        }
+
+        /* Test Results */
+        .test-results {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .test-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .test-score {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--gradient-certificate);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .test-progress {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .progress-item {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .progress-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Certificate Generator */
+        .certificate-section {
+            display: none;
+            margin: 4rem 0;
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .certificate-container {
+            background: white;
+            border: 20px solid #f0f0f0;
+            border-radius: 30px;
+            padding: 4rem;
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            overflow: hidden;
+        }
+
+        .certificate-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M20,20 L80,20 L80,80 L20,80 Z" fill="none" stroke="%230ea5e9" stroke-width="0.5" opacity="0.1"/></svg>');
+            pointer-events: none;
+        }
+
+        .certificate-border {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 2px solid #0ea5e9;
+            border-radius: 20px;
+            pointer-events: none;
+        }
+
+        .certificate-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .certificate-logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .certificate-title {
+            font-size: 2.5rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            font-weight: 800;
+        }
+
+        .certificate-subtitle {
+            color: #64748b;
+            font-size: 1.2rem;
+            letter-spacing: 3px;
+        }
+
+        .certificate-body {
+            text-align: center;
+            margin: 3rem 0;
+        }
+
+        .certificate-name {
+            font-size: 3rem;
+            color: #0ea5e9;
+            margin: 2rem 0;
+            font-weight: 700;
+            background: var(--gradient-certificate);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .certificate-text {
+            font-size: 1.3rem;
+            color: #475569;
+            line-height: 1.8;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        .certificate-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+            padding: 2rem;
+            background: #f8fafc;
+            border-radius: 15px;
+        }
+
+        .detail-item {
+            text-align: center;
+        }
+
+        .detail-label {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-value {
+            color: #1e293b;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .certificate-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .signature {
+            text-align: center;
+        }
+
+        .signature-name {
+            font-weight: 600;
+            color: #1e293b;
+            margin-top: 1rem;
+        }
+
+        .signature-title {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 15px 30px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn-success {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .btn-certificate {
+            background: var(--gradient-certificate);
+            color: white;
+            padding: 20px 40px;
+            font-size: 1.3rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        /* Celebration Animation */
+        .confetti {
+            position: fixed;
+            width: 15px;
+            height: 15px;
+            background: var(--gradient-certificate);
+            top: -10px;
+            z-index: 1000;
+            opacity: 0;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                top: -10px;
+                opacity: 1;
+            }
+            100% {
+                top: 100vh;
+                opacity: 0;
+            }
+        }
+
+        /* Completion Stats */
+        .completion-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--gradient-certificate);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Utility Classes */
+        .hidden { display: none; }
+        .flex { display: flex; align-items: center; gap: 15px; }
+        .text-center { text-align: center; }
+        .mt-1 { margin-top: 1rem; } .mt-2 { margin-top: 2rem; } .mt-3 { margin-top: 3rem; }
+        .mb-1 { margin-bottom: 1rem; } .mb-2 { margin-bottom: 2rem; } .mb-3 { margin-bottom: 3rem; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <header class="nav-header">
+        <div class="logo">
+            <span class="logo-icon">🏆</span>
+            <span>Msebetsi Solutions - Final Project</span>
+        </div>
+        
+        <div class="nav-controls">
+            <label class="theme-toggle">
+                <input type="checkbox" id="themeToggle">
+                <span class="theme-slider"></span>
+            </label>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1 class="hero-title">JavaScript Mastery Final Challenge</h1>
+            <p class="hero-subtitle">
+                Apply everything you've learned to build a complete Smart Home Automation System.
+                Complete this project to earn your official JavaScript Mastery Certificate.
+            </p>
+            <div class="celebration-badge">
+                <i class="fas fa-trophy"></i>
+                GRADUATION PROJECT - CERTIFICATION AWARDED UPON COMPLETION
+            </div>
+        </section>
+
+        <!-- Project Brief -->
+        <section class="project-brief">
+            <h2 class="brief-title">
+                <i class="fas fa-project-diagram"></i>
+                Project: Smart Home Automation System
+            </h2>
+            
+            <div style="background: var(--bg-accent); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
+                <h3 style="color: var(--text-accent); margin-bottom: 1rem;">
+                    <i class="fas fa-info-circle"></i> Project Overview
+                </h3>
+                <p style="color: var(--text-secondary); line-height: 1.8;">
+                    You're tasked with building a comprehensive Smart Home Automation System using JavaScript. 
+                    This system will control various smart devices, manage energy consumption, and provide 
+                    automation scenarios. Your solution will be evaluated on object design, method implementation, 
+                    commenting practices, and overall code quality.
+                </p>
+            </div>
+        </section>
+
+        <!-- Project Requirements -->
+        <section class="requirements-grid">
+            <div class="requirement-card">
+                <div class="req-icon">🏠</div>
+                <h3 class="req-title">Core Objects & Structure</h3>
+                <ul class="req-list">
+                    <li>SmartHome object as main controller</li>
+                    <li>Device objects with properties/methods</li>
+                    <li>Room objects to organize devices</li>
+                    <li>Schedule object for automation</li>
+                    <li>EnergyMonitor for consumption tracking</li>
+                </ul>
+            </div>
+
+            <div class="requirement-card">
+                <div class="req-icon">⚡</div>
+                <h3 class="req-title">Required Methods</h3>
+                <ul class="req-list">
+                    <li>Device control (on/off/toggle)</li>
+                    <li>Energy consumption calculation</li>
+                    <li>Automated scenario triggers</li>
+                    <li>Device status reporting</li>
+                    <li>Schedule management</li>
+                    <li>Error handling and validation</li>
+                </ul>
+            </div>
+
+            <div class="requirement-card">
+                <div class="req-icon">📝</div>
+                <h3 class="req-title">Code Quality Standards</h3>
+                <ul class="req-list">
+                    <li>Proper use of objects and methods</li>
+                    <li>Comprehensive JSDoc comments</li>
+                    <li>Clear variable/function names</li>
+                    <li>Error handling throughout</li>
+                    <li>Modular and organized code</li>
+                    <li>Follows best practices learned</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Project Submission -->
+        <section class="submission-section">
+            <div class="submission-header">
+                <h2 style="color: var(--text-accent);">
+                    <i class="fas fa-code"></i>
+                    Implement Your Solution
+                </h2>
+                <div style="color: var(--text-secondary);">
+                    <i class="fas fa-clock"></i>
+                    Recommended: 60-90 minutes
+                </div>
+            </div>
+
+            <!-- Code Editor -->
+            <div class="code-editor-container">
+                <div class="editor-header">
+                    <span style="font-family: 'JetBrains Mono', monospace; color: var(--text-accent);">
+                        smart-home-system.js
+                    </span>
+                    <div class="flex">
+                        <button class="btn btn-primary" id="saveBtn">
+                            <i class="fas fa-save"></i> Save Draft
+                        </button>
+                        <button class="btn btn-success" id="testBtn">
+                            <i class="fas fa-vial"></i> Run Tests
+                        </button>
+                    </div>
+                </div>
+                <textarea id="codeEditor" placeholder="// Implement your Smart Home Automation System here
+// Use the requirements above as your guide
+// Remember to include proper comments and documentation
+
+// Example starter structure:
+const SmartHome = {
+    name: 'My Smart Home',
+    rooms: [],
+    devices: [],
+    schedules: [],
+    
+    // Add your methods here...
+    
+    initialize: function() {
+        // Setup initial state
+    },
+    
+    addDevice: function(device) {
+        // Add device to system
+    },
+    
+    calculateEnergyUsage: function() {
+        // Calculate total energy consumption
+    }
+    
+    // ... more methods
+};"></textarea>
+            </div>
+
+            <!-- File Upload -->
+            <div class="upload-container" id="uploadContainer">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <h3 style="margin-bottom: 1rem;">Upload Your JavaScript File</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    Or drag and drop your completed smart-home-system.js file here
+                </p>
+                <input type="file" id="fileInput" class="file-input" accept=".js">
+                <label for="fileInput" class="file-label">
+                    <i class="fas fa-folder-open"></i>
+                    Choose File
+                </label>
+                <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                    Maximum file size: 2MB • .js files only
+                </p>
+            </div>
+
+            <div class="file-list" id="fileList"></div>
+
+            <!-- Test Button -->
+            <div class="text-center mt-3">
+                <button class="btn btn-certificate" id="submitProjectBtn">
+                    <i class="fas fa-graduation-cap"></i>
+                    SUBMIT PROJECT FOR CERTIFICATION
+                </button>
+            </div>
+        </section>
+
+        <!-- Test Results -->
+        <section class="test-results hidden" id="testResults">
+            <div class="test-header">
+                <h2 style="color: var(--text-accent);">
+                    <i class="fas fa-chart-bar"></i>
+                    Project Evaluation Results
+                </h2>
+                <div class="test-score" id="finalScore">0%</div>
+            </div>
+
+            <div class="test-progress" id="testProgress">
+                <!-- Progress items will be added here -->
+            </div>
+
+            <div id="detailedResults" class="mt-3"></div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" id="retryBtn">
+                    <i class="fas fa-redo"></i>
+                    Improve & Retry
+                </button>
+                <button class="btn btn-success" id="generateCertBtn">
+                    <i class="fas fa-certificate"></i>
+                    Generate Certificate
+                </button>
+            </div>
+        </section>
+
+        <!-- Completion Stats -->
+        <div class="completion-stats hidden" id="completionStats">
+            <div class="stat-card">
+                <div class="stat-value" id="overallScore">0%</div>
+                <div style="color: var(--text-secondary);">Overall Score</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="codeQuality">0%</div>
+                <div style="color: var(--text-secondary);">Code Quality</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="methodScore">0%</div>
+                <div style="color: var(--text-secondary);">Methods Implementation</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="commentScore">0%</div>
+                <div style="color: var(--text-secondary);">Documentation</div>
+            </div>
+        </div>
+
+        <!-- Certificate Generator -->
+        <section class="certificate-section" id="certificateSection">
+            <div class="certificate-container" id="certificateContainer">
+                <div class="certificate-border"></div>
+                
+                <div class="certificate-header">
+                    <div class="certificate-logo">🏆</div>
+                    <h1 class="certificate-title">Certificate of Completion</h1>
+                    <div class="certificate-subtitle">JAVASCRIPT MASTERY PROGRAM</div>
+                </div>
+
+                <div class="certificate-body">
+                    <p class="certificate-text">
+                        This certifies that
+                    </p>
+                    <div class="certificate-name" id="certificateName">[Your Name]</div>
+                    <p class="certificate-text">
+                        has successfully completed all requirements and demonstrated mastery in JavaScript programming, 
+                        including object-oriented design, method implementation, and professional coding practices.
+                    </p>
+
+                    <div class="certificate-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Program</div>
+                            <div class="detail-value">JavaScript Mastery</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Completion Date</div>
+                            <div class="detail-value" id="completionDate">[Date]</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Final Score</div>
+                            <div class="detail-value" id="certificateScore">[Score]</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Certificate ID</div>
+                            <div class="detail-value" id="certificateId">[ID]</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="certificate-footer">
+                    <div class="signature">
+                        <div style="border-bottom: 2px solid #1e293b; width: 200px; margin: 0 auto;"></div>
+                        <div class="signature-name">Sarah Johnson</div>
+                        <div class="signature-title">Head of Software Engineering</div>
+                    </div>
+                    
+                    <div class="signature">
+                        <div style="font-size: 2rem;">🏢</div>
+                        <div class="signature-name">Msebetsi Solutions</div>
+                        <div class="signature-title">Technology Education Division</div>
+                    </div>
+                    
+                    <div class="signature">
+                        <div style="border-bottom: 2px solid #1e293b; width: 200px; margin: 0 auto;"></div>
+                        <div class="signature-name">Dr. Michael Chen</div>
+                        <div class="signature-title">Academic Director</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-group" style="justify-content: center; margin-top: 3rem;">
+                <button class="btn btn-certificate" id="downloadCertBtn">
+                    <i class="fas fa-download"></i>
+                    Download Certificate (PDF)
+                </button>
+                <button class="btn btn-primary" id="shareCertBtn">
+                    <i class="fas fa-share-alt"></i>
+                    Share Achievement
+                </button>
+                <button class="btn btn-success" onclick="printCertificate()">
+                    <i class="fas fa-print"></i>
+                    Print Certificate
+                </button>
+            </div>
+        </section>
+
+        <!-- Final Celebration -->
+        <div class="text-center mt-4">
+            <button class="btn btn-primary hidden" id="viewCourseBtn">
+                <i class="fas fa-award"></i>
+                View Course Completion Summary
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== THEME TOGGLE ====================
+        const themeToggle = document.getElementById('themeToggle');
+        
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.checked = true;
+        }
+        
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // ==================== CODE EDITOR ====================
+        const codeEditor = document.getElementById('codeEditor');
+        const saveBtn = document.getElementById('saveBtn');
+        const testBtn = document.getElementById('testBtn');
+
+        // Load saved draft
+        const savedDraft = localStorage.getItem('finalProjectDraft');
+        if (savedDraft) {
+            codeEditor.value = savedDraft;
+        }
+
+        saveBtn.addEventListener('click', () => {
+            localStorage.setItem('finalProjectDraft', codeEditor.value);
+            showNotification('Draft saved successfully!', 'success');
+        });
+
+        // ==================== FILE UPLOAD ====================
+        const uploadContainer = document.getElementById('uploadContainer');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+
+        // Drag and drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadContainer.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadContainer.addEventListener(eventName, () => {
+                uploadContainer.classList.add('drag-over');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadContainer.addEventListener(eventName, () => {
+                uploadContainer.classList.remove('drag-over');
+            });
+        });
+
+        uploadContainer.addEventListener('drop', handleDrop, false);
+        fileInput.addEventListener('change', handleFileSelect, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            const file = files[0];
+            
+            if (!file.name.endsWith('.js')) {
+                showNotification('Please upload a JavaScript file (.js)', 'error');
+                return;
+            }
+            
+            if (file.size > 2 * 1024 * 1024) {
+                showNotification('File size exceeds 2MB limit', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                codeEditor.value = e.target.result;
+                localStorage.setItem('finalProjectDraft', e.target.result);
+                showNotification('File loaded successfully!', 'success');
+            };
+            reader.readAsText(file);
+            
+            displayFile(file);
+        }
+
+        function displayFile(file) {
+            fileList.innerHTML = `
+                <div class="file-item">
+                    <div class="flex">
+                        <i class="fas fa-file-code" style="color: var(--text-accent); font-size: 1.5rem;"></i>
+                        <div>
+                            <div style="font-weight: 600;">${file.name}</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                ${formatFileSize(file.size)}
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="useThisFile()">
+                        <i class="fas fa-check"></i> Use This Code
+                    </button>
+                </div>
+            `;
+        }
+
+        window.useThisFile = function() {
+            showNotification('Code loaded into editor!', 'success');
+        };
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // ==================== PROJECT TESTING ====================
+        const submitProjectBtn = document.getElementById('submitProjectBtn');
+        const testResults = document.getElementById('testResults');
+        const testProgress = document.getElementById('testProgress');
+        const detailedResults = document.getElementById('detailedResults');
+        const finalScore = document.getElementById('finalScore');
+        const completionStats = document.getElementById('completionStats');
+
+        submitProjectBtn.addEventListener('click', evaluateProject);
+        testBtn.addEventListener('click', evaluateProject);
+
+        function evaluateProject() {
+            const code = codeEditor.value.trim();
+            
+            if (code.length < 100) {
+                showNotification('Please write more code before submitting!', 'error');
+                return;
+            }
+            
+            // Show test results section
+            testResults.classList.remove('hidden');
+            testResults.scrollIntoView({ behavior: 'smooth' });
+            
+            // Run evaluation
+            const evaluation = runComprehensiveEvaluation(code);
+            
+            // Update UI with results
+            updateTestResults(evaluation);
+            
+            // Show celebration if passing
+            if (evaluation.overallScore >= 70) {
+                createConfetti();
+                showNotification('🎉 Project Passed! You can now generate your certificate!', 'success');
+            }
+        }
+
+        function runComprehensiveEvaluation(code) {
+            const evaluation = {
+                overallScore: 0,
+                categories: {
+                    structure: { score: 0, max: 25, tests: [] },
+                    methods: { score: 0, max: 30, tests: [] },
+                    quality: { score: 0, max: 25, tests: [] },
+                    documentation: { score: 0, max: 20, tests: [] }
+                }
+            };
+            
+            // Test 1: Basic Structure
+            if (code.includes('const') && code.includes('let') && code.includes('function')) {
+                evaluation.categories.structure.score += 5;
+                evaluation.categories.structure.tests.push({ passed: true, message: 'Uses modern variable declarations' });
+            }
+            
+            if (code.includes('{') && code.includes('}')) {
+                evaluation.categories.structure.score += 5;
+                evaluation.categories.structure.tests.push({ passed: true, message: 'Proper code block structure' });
+            }
+            
+            // Test 2: Objects
+            if (code.includes('SmartHome') || code.includes('smartHome')) {
+                evaluation.categories.structure.score += 10;
+                evaluation.categories.structure.tests.push({ passed: true, message: 'Main SmartHome object found' });
+            }
+            
+            if (code.match(/const\s+\w+\s*=\s*{/g)?.length >= 3) {
+                evaluation.categories.structure.score += 5;
+                evaluation.categories.structure.tests.push({ passed: true, message: 'Multiple objects defined' });
+            }
+            
+            // Test 3: Methods
+            const methodCount = (code.match(/:\s*function/g) || []).length + 
+                               (code.match(/\)\s*=>/g) || []).length +
+                               (code.match(/\w+\s*\([^)]*\)\s*\{/g) || []).length;
+            
+            if (methodCount >= 5) {
+                evaluation.categories.methods.score += 15;
+                evaluation.categories.methods.tests.push({ passed: true, message: `Found ${methodCount} methods (Excellent!)` });
+            } else if (methodCount >= 3) {
+                evaluation.categories.methods.score += 10;
+                evaluation.categories.methods.tests.push({ passed: true, message: `Found ${methodCount} methods (Good)` });
+            } else {
+                evaluation.categories.methods.tests.push({ passed: false, message: 'Add more methods (aim for 5+)' });
+            }
+            
+            // Test 4: Specific required methods
+            const requiredMethods = ['initialize', 'addDevice', 'calculateEnergy', 'toggle', 'schedule'];
+            let foundMethods = 0;
+            
+            requiredMethods.forEach(method => {
+                if (code.toLowerCase().includes(method.toLowerCase())) {
+                    foundMethods++;
+                }
+            });
+            
+            evaluation.categories.methods.score += (foundMethods / requiredMethods.length) * 15;
+            evaluation.categories.methods.tests.push({ 
+                passed: foundMethods >= 3, 
+                message: `Found ${foundMethods}/5 required methods` 
+            });
+            
+            // Test 5: Code Quality
+            const lines = code.split('\n').length;
+            if (lines >= 50) {
+                evaluation.categories.quality.score += 5;
+                evaluation.categories.quality.tests.push({ passed: true, message: 'Sufficient code length' });
+            }
+            
+            // Check for error handling
+            if (code.includes('try') || code.includes('catch') || code.includes('if') && code.includes('else')) {
+                evaluation.categories.quality.score += 10;
+                evaluation.categories.quality.tests.push({ passed: true, message: 'Error handling implemented' });
+            }
+            
+            // Check for modern JavaScript features
+            if (code.includes('=>') || code.includes('...') || code.includes('const')) {
+                evaluation.categories.quality.score += 10;
+                evaluation.categories.quality.tests.push({ passed: true, message: 'Uses modern JavaScript features' });
+            }
+            
+            // Test 6: Documentation
+            const singleLineComments = (code.match(/\/\/[^\n]*/g) || []).length;
+            const multiLineComments = (code.match(/\/\*[\s\S]*?\*\//g) || []).length;
+            const jsdocComments = (code.match(/\/\*\*[\s\S]*?\*\//g) || []).length;
+            
+            if (singleLineComments >= 5) {
+                evaluation.categories.documentation.score += 5;
+                evaluation.categories.documentation.tests.push({ passed: true, message: 'Good use of single-line comments' });
+            }
+            
+            if (jsdocComments >= 1) {
+                evaluation.categories.documentation.score += 10;
+                evaluation.categories.documentation.tests.push({ passed: true, message: 'JSDoc comments found' });
+            }
+            
+            if (multiLineComments >= 1) {
+                evaluation.categories.documentation.score += 5;
+                evaluation.categories.documentation.tests.push({ passed: true, message: 'Multi-line comments used' });
+            }
+            
+            // Calculate overall score
+            evaluation.overallScore = Math.round(
+                (evaluation.categories.structure.score + 
+                 evaluation.categories.methods.score + 
+                 evaluation.categories.quality.score + 
+                 evaluation.categories.documentation.score) / 
+                (evaluation.categories.structure.max + 
+                 evaluation.categories.methods.max + 
+                 evaluation.categories.quality.max + 
+                 evaluation.categories.documentation.max) * 100
+            );
+            
+            return evaluation;
+        }
+
+        function updateTestResults(evaluation) {
+            // Update final score
+            finalScore.textContent = `${evaluation.overallScore}%`;
+            
+            // Update progress items
+            testProgress.innerHTML = `
+                <div class="progress-item">
+                    <div class="progress-value" style="color: ${getScoreColor(evaluation.categories.structure.score/evaluation.categories.structure.max*100)}">
+                        ${Math.round(evaluation.categories.structure.score/evaluation.categories.structure.max*100)}%
+                    </div>
+                    <div style="color: var(--text-secondary);">Structure</div>
+                </div>
+                <div class="progress-item">
+                    <div class="progress-value" style="color: ${getScoreColor(evaluation.categories.methods.score/evaluation.categories.methods.max*100)}">
+                        ${Math.round(evaluation.categories.methods.score/evaluation.categories.methods.max*100)}%
+                    </div>
+                    <div style="color: var(--text-secondary);">Methods</div>
+                </div>
+                <div class="progress-item">
+                    <div class="progress-value" style="color: ${getScoreColor(evaluation.categories.quality.score/evaluation.categories.quality.max*100)}">
+                        ${Math.round(evaluation.categories.quality.score/evaluation.categories.quality.max*100)}%
+                    </div>
+                    <div style="color: var(--text-secondary);">Code Quality</div>
+                </div>
+                <div class="progress-item">
+                    <div class="progress-value" style="color: ${getScoreColor(evaluation.categories.documentation.score/evaluation.categories.documentation.max*100)}">
+                        ${Math.round(evaluation.categories.documentation.score/evaluation.categories.documentation.max*100)}%
+                    </div>
+                    <div style="color: var(--text-secondary);">Documentation</div>
+                </div>
+            `;
+            
+            // Update completion stats
+            document.getElementById('overallScore').textContent = `${evaluation.overallScore}%`;
+            document.getElementById('codeQuality').textContent = `${Math.round(evaluation.categories.quality.score/evaluation.categories.quality.max*100)}%`;
+            document.getElementById('methodScore').textContent = `${Math.round(evaluation.categories.methods.score/evaluation.categories.methods.max*100)}%`;
+            document.getElementById('commentScore').textContent = `${Math.round(evaluation.categories.documentation.score/evaluation.categories.documentation.max*100)}%`;
+            
+            // Show detailed results
+            let detailedHTML = '<h3 style="margin-bottom: 1rem; color: var(--text-accent);">Detailed Feedback:</h3>';
+            
+            Object.keys(evaluation.categories).forEach(category => {
+                const cat = evaluation.categories[category];
+                detailedHTML += `
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="color: var(--text-primary); margin-bottom: 1rem;">${category.charAt(0).toUpperCase() + category.slice(1)}</h4>
+                        <div style="display: grid; gap: 0.5rem;">
+                            ${cat.tests.map(test => `
+                                <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: ${test.passed ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'}; border-radius: 8px; border-left: 4px solid ${test.passed ? 'var(--text-success)' : 'var(--text-danger)'};">
+                                    <i class="fas fa-${test.passed ? 'check-circle' : 'times-circle'}" style="color: ${test.passed ? 'var(--text-success)' : 'var(--text-danger)'};"></i>
+                                    <span>${test.message}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            detailedResults.innerHTML = detailedHTML;
+            
+            // Show completion stats if passing
+            if (evaluation.overallScore >= 70) {
+                completionStats.classList.remove('hidden');
+            }
+        }
+
+        function getScoreColor(percentage) {
+            if (percentage >= 80) return '#10b981';
+            if (percentage >= 60) return '#f59e0b';
+            return '#ef4444';
+        }
+
+        // ==================== CERTIFICATE GENERATION ====================
+        const generateCertBtn = document.getElementById('generateCertBtn');
+        const certificateSection = document.getElementById('certificateSection');
+        const downloadCertBtn = document.getElementById('downloadCertBtn');
+        const shareCertBtn = document.getElementById('shareCertBtn');
+        const viewCourseBtn = document.getElementById('viewCourseBtn');
+
+        generateCertBtn.addEventListener('click', generateCertificate);
+
+        function generateCertificate() {
+            const score = parseInt(finalScore.textContent);
+            
+            if (score < 70) {
+                showNotification('Score must be at least 70% to generate certificate', 'error');
+                return;
+            }
+            
+            // Get student name
+            const studentName = prompt('Enter your name for the certificate:', 'John Doe') || 'JavaScript Developer';
+            
+            // Generate certificate data
+            const certificateData = {
+                name: studentName,
+                date: new Date().toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                }),
+                score: `${score}%`,
+                id: 'MS-' + Date.now().toString(36).toUpperCase() + '-JS',
+                grade: score >= 90 ? 'A+' : score >= 80 ? 'A' : score >= 70 ? 'B' : 'C'
+            };
+            
+            // Update certificate
+            document.getElementById('certificateName').textContent = certificateData.name;
+            document.getElementById('completionDate').textContent = certificateData.date;
+            document.getElementById('certificateScore').textContent = certificateData.score;
+            document.getElementById('certificateId').textContent = certificateData.id;
+            
+            // Show certificate
+            certificateSection.style.display = 'block';
+            certificateSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Create massive celebration
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => createConfetti(), i * 50);
+            }
+            
+            // Play celebration sound (if allowed)
+            playCelebrationSound();
+            
+            // Show view course button
+            viewCourseBtn.classList.remove('hidden');
+            
+            // Save certificate data
+            localStorage.setItem('jsCertificate', JSON.stringify(certificateData));
+            
+            showNotification('🎓 Certificate Generated! Congratulations on completing the course!', 'success');
+        }
+
+        function printCertificate() {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>JavaScript Mastery Certificate</title>
+                        <style>
+                            body { 
+                                font-family: Arial, sans-serif; 
+                                margin: 0; 
+                                padding: 2rem;
+                                background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+                            }
+                            .certificate {
+                                border: 20px solid #f0f0f0;
+                                border-radius: 30px;
+                                padding: 4rem;
+                                max-width: 900px;
+                                margin: 0 auto;
+                                position: relative;
+                                background: white;
+                            }
+                            .certificate-title {
+                                font-size: 2.5rem;
+                                text-align: center;
+                                color: #1e293b;
+                                margin-bottom: 1rem;
+                            }
+                            .certificate-name {
+                                font-size: 3rem;
+                                text-align: center;
+                                color: #0ea5e9;
+                                margin: 2rem 0;
+                                font-weight: bold;
+                            }
+                            .certificate-text {
+                                text-align: center;
+                                font-size: 1.2rem;
+                                color: #475569;
+                                margin: 2rem 0;
+                            }
+                            @media print {
+                                body { padding: 0; }
+                                .no-print { display: none; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="certificate">
+                            <h1 class="certificate-title">Certificate of Completion</h1>
+                            <p class="certificate-text">This certifies that</p>
+                            <div class="certificate-name">${document.getElementById('certificateName').textContent}</div>
+                            <p class="certificate-text">has successfully completed the JavaScript Mastery Program</p>
+                            <div style="text-align: center; margin-top: 3rem;">
+                                <div>Score: ${document.getElementById('certificateScore').textContent}</div>
+                                <div>Date: ${document.getElementById('completionDate').textContent}</div>
+                                <div>ID: ${document.getElementById('certificateId').textContent}</div>
+                            </div>
+                            <div style="margin-top: 4rem; text-align: center;">
+                                <div>Msebetsi Solutions - Technology Education Division</div>
+                            </div>
+                        </div>
+                        <div class="no-print" style="text-align: center; margin-top: 2rem;">
+                            <button onclick="window.print()">Print Certificate</button>
+                            <button onclick="window.close()">Close</button>
+                        </div>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        downloadCertBtn.addEventListener('click', () => {
+            showNotification('Certificate PDF download started!', 'success');
+            // In a real app, this would generate and download a PDF
+        });
+
+        shareCertBtn.addEventListener('click', () => {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'JavaScript Mastery Certificate',
+                    text: `I completed the JavaScript Mastery course with a score of ${document.getElementById('certificateScore').textContent}!`,
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(
+                    `JavaScript Mastery Certificate - Score: ${document.getElementById('certificateScore').textContent} - ${document.getElementById('certificateId').textContent}`
+                );
+                showNotification('Certificate details copied to clipboard!', 'success');
+            }
+        });
+
+        viewCourseBtn.addEventListener('click', () => {
+            alert('🎓 Course Completion Summary:\n\n' +
+                  '✓ JavaScript Objects Mastery\n' +
+                  '✓ Methods & Functions\n' +
+                  '✓ Professional Commenting\n' +
+                  '✓ Final Project: Smart Home System\n' +
+                  '✓ Overall Score: ' + finalScore.textContent + '\n\n' +
+                  'You have successfully completed the JavaScript Mastery Program!');
+        });
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                border-radius: 10px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#0ea5e9'};
+                color: white;
+                font-weight: 600;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        function createConfetti() {
+            const colors = ['#0ea5e9', '#3b82f6', '#8b5cf6', '#ec4899', '#10b981'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = Math.random() * 20 + 5 + 'px';
+                confetti.style.height = Math.random() * 20 + 5 + 'px';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                
+                document.body.appendChild(confetti);
+                
+                const animationDuration = Math.random() * 3 + 2;
+                confetti.style.animation = `confetti-fall ${animationDuration}s linear forwards`;
+                
+                setTimeout(() => confetti.remove(), animationDuration * 1000);
+            }
+        }
+
+        function playCelebrationSound() {
+            // Create a simple celebration sound using Web Audio API
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+                oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                // Audio context not supported or permission not granted
+                console.log('Audio celebration skipped');
+            }
+        }
+
+        // Add CSS for notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Load saved certificate if exists
+        const savedCertificate = localStorage.getItem('jsCertificate');
+        if (savedCertificate) {
+            const certData = JSON.parse(savedCertificate);
+            document.getElementById('certificateName').textContent = certData.name;
+            document.getElementById('completionDate').textContent = certData.date;
+            document.getElementById('certificateScore').textContent = certData.score;
+            document.getElementById('certificateId').textContent = certData.id;
+            
+            // Pre-fill the final score if available
+            finalScore.textContent = certData.score;
+            certificateSection.style.display = 'block';
+            viewCourseBtn.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

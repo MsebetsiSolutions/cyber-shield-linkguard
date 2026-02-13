@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Msebetsi Solutions - JavaScript Methods Mastery</title>
+    <style>
+        :root {
+            /* Light Theme (Default) */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-accent: #e8f4fd;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-accent: #3b82f6;
+            --text-success: #10b981;
+            --text-danger: #ef4444;
+            --text-warning: #f59e0b;
+            --border-color: #e2e8f0;
+            --border-accent: #3b82f6;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --gradient-primary: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            --gradient-success: linear-gradient(135deg, #10b981, #059669);
+            --gradient-warning: linear-gradient(135deg, #f59e0b, #d97706);
+            --code-bg: #f1f5f9;
+            --interactive-bg: #f8fafc;
+        }
+
+        .dark-mode {
+            /* Dark Theme */
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --bg-accent: #1e3a8a;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-accent: #60a5fa;
+            --text-success: #34d399;
+            --text-danger: #f87171;
+            --text-warning: #fbbf24;
+            --border-color: #334155;
+            --border-accent: #60a5fa;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --gradient-primary: linear-gradient(135deg, #60a5fa, #a78bfa);
+            --gradient-success: linear-gradient(135deg, #34d399, #10b981);
+            --gradient-warning: linear-gradient(135deg, #fbbf24, #f59e0b);
+            --code-bg: #1a2238;
+            --interactive-bg: #1a2238;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-card);
+            padding: 10px 15px;
+            border-radius: 30px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .theme-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .theme-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+            border-radius: 34px;
+            transition: .4s;
+        }
+
+        .theme-slider:before {
+            position: absolute;
+            content: "☀️";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            border-radius: 50%;
+            transition: .4s;
+            font-size: 12px;
+        }
+
+        input:checked + .theme-slider:before {
+            transform: translateX(30px);
+            content: "🌙";
+        }
+
+        /* Progress Indicator */
+        .progress-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: var(--bg-card);
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            width: 200px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 80px auto 40px;
+        }
+
+        /* Header */
+        .lesson-header {
+            text-align: center;
+            padding: 40px 0;
+            margin-bottom: 40px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lesson-header:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 15px;
+            font-weight: 800;
+        }
+
+        .lesson-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 25px;
+        }
+
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .meta-badge {
+            background: var(--bg-accent);
+            color: var(--text-accent);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid var(--border-accent);
+        }
+
+        /* Lesson Content */
+        .lesson-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 1024px) {
+            .lesson-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card h2 {
+            color: var(--text-accent);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .card h3 {
+            color: var(--text-primary);
+            margin: 25px 0 15px 0;
+            font-size: 1.4rem;
+        }
+
+        /* Interactive Elements */
+        .interactive-demo {
+            background: var(--interactive-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .demo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .demo-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Code Display */
+        .code-container {
+            background: var(--code-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .code-block {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .code-line {
+            margin-bottom: 4px;
+            padding-left: 10px;
+            border-left: 3px solid transparent;
+        }
+
+        .code-line.active {
+            border-left-color: var(--text-accent);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .code-line.error {
+            border-left-color: var(--text-danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .code-string { color: #10b981; }
+        .code-keyword { color: #8b5cf6; font-weight: bold; }
+        .code-function { color: #3b82f6; }
+        .code-property { color: #f59e0b; }
+        .code-comment { color: #94a3b8; font-style: italic; }
+        .code-number { color: #ec4899; }
+        .code-operator { color: #6366f1; }
+
+        /* Buttons */
+        .btn {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--gradient-success);
+        }
+
+        .btn-warning {
+            background: var(--gradient-warning);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border-accent);
+            color: var(--text-accent);
+        }
+
+        /* Console */
+        .console {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+
+        .console-line {
+            margin-bottom: 8px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .console-line.success { color: #00ff88; }
+        .console-line.error { color: #ff6b6b; }
+        .console-line.warning { color: #ffd166; }
+        .console-line.info { color: #4ecdc4; }
+
+        /* Task Cards */
+        .task-card {
+            background: var(--bg-accent);
+            border: 2px solid var(--border-accent);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .task-card:before {
+            content: '📋';
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: var(--bg-card);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 2px solid var(--border-accent);
+        }
+
+        .task-requirements {
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+
+        .task-requirements li {
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        /* Lab Section */
+        .lab-section {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 2px solid var(--border-color);
+        }
+
+        .lab-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-accent);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+        }
+
+        .lab-card:before {
+            content: '🧪';
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-primary);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            border: 3px solid var(--bg-card);
+        }
+
+        .lab-instructions {
+            background: var(--bg-accent);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid var(--text-accent);
+        }
+
+        .lab-instructions ol {
+            margin-left: 20px;
+        }
+
+        .lab-instructions li {
+            margin-bottom: 10px;
+        }
+
+        /* Footer */
+        .lesson-footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .completion-badge {
+            display: inline-block;
+            background: var(--gradient-success);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Utility Classes */
+        .highlight {
+            background: rgba(245, 158, 11, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--text-warning);
+            font-weight: 600;
+        }
+
+        .success {
+            color: var(--text-success);
+            font-weight: 600;
+        }
+
+        .error {
+            color: var(--text-danger);
+            font-weight: 600;
+        }
+
+        .warning {
+            color: var(--text-warning);
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Progress Indicator -->
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">Lesson Progress: 0%</div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <div class="theme-toggle-container">
+        <span class="theme-label" id="themeLabel">Light Mode</span>
+        <label class="theme-toggle">
+            <input type="checkbox" id="themeToggle">
+            <span class="theme-slider"></span>
+        </label>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="lesson-header">
+            <h1><i class="fas fa-cogs"></i> JavaScript Methods Mastery</h1>
+            <p class="lesson-subtitle">Learn how objects come to life with methods - functions that give objects behavior and intelligence</p>
+            <div class="lesson-meta">
+                <span class="meta-badge"><i class="fas fa-clock"></i> Estimated: 60-90 min</span>
+                <span class="meta-badge"><i class="fas fa-layer-group"></i> Intermediate Level</span>
+                <span class="meta-badge"><i class="fas fa-check-circle"></i> Hands-on Practice</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="lesson-content">
+            <!-- Left Column: Lessons -->
+            <div class="card">
+                <h2><i class="fas fa-graduation-cap"></i> What Are Methods?</h2>
+                
+                <p>Methods are <span class="highlight">functions that belong to objects</span>. They give objects the ability to perform actions, make decisions, and interact with their own data.</p>
+                
+                <div class="interactive-demo">
+                    <div class="demo-header">
+                        <h3>Live Example: Smart Thermostat</h3>
+                        <div class="demo-actions">
+                            <button class="btn btn-secondary" id="runThermostatDemo">
+                                <i class="fas fa-play"></i> Run Demo
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>thermostat.js</span>
+                            <span>Methods in Action</span>
+                        </div>
+                        <pre class="code-block" id="thermostatCode"></pre>
+                    </div>
+                    
+                    <div class="console" id="thermostatConsole"></div>
+                </div>
+
+                <h3>Key Characteristics of Methods:</h3>
+                <ul style="margin: 15px 0 25px 25px; color: var(--text-secondary);">
+                    <li>Defined as function values inside objects</li>
+                    <li>Access object properties using <span class="highlight">this</span> keyword</li>
+                    <li>Can return values or modify object state</li>
+                    <li>Make objects "smart" and interactive</li>
+                </ul>
+
+                <h3><i class="fas fa-code"></i> Syntax Examples</h3>
+                
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>method-syntax.js</span>
+                        <button class="btn btn-outline" onclick="copyCode('syntaxCode')">
+                            <i class="far fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <pre class="code-block" id="syntaxCode"></pre>
+                </div>
+
+                <h3><i class="fas fa-exclamation-circle"></i> The "this" Keyword</h3>
+                <p><span class="highlight">this</span> refers to the object that is currently executing the method. It's how methods access their own object's properties.</p>
+                
+                <div class="task-card">
+                    <h4><i class="fas fa-tasks"></i> Practice Task 1: Fix the Methods</h4>
+                    <p>The following code has bugs because the methods don't use <span class="error">this</span> properly. Fix them!</p>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>buggy-robot.js</span>
+                            <span class="error">Contains Bugs!</span>
+                        </div>
+                        <pre class="code-block" id="buggyRobotCode"></pre>
+                    </div>
+                    
+                    <div class="console" id="robotConsole"></div>
+                    
+                    <button class="btn btn-warning" id="runBuggyRobot">
+                        <i class="fas fa-bug"></i> Run Buggy Code
+                    </button>
+                    <button class="btn btn-secondary" id="fixRobotCode">
+                        <i class="fas fa-wrench"></i> Apply Fix
+                    </button>
+                    <button class="btn" id="runFixedRobot">
+                        <i class="fas fa-check"></i> Test Fixed Code
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Column: Practice & Reference -->
+            <div class="card">
+                <h2><i class="fas fa-laptop-code"></i> Interactive Practice</h2>
+                
+                <h3><i class="fas fa-robot"></i> Build a Smart Assistant</h3>
+                <p>Create methods for a virtual assistant that can help users with tasks.</p>
+                
+                <div class="interactive-demo">
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>assistant.js</span>
+                            <span>Your Code Here</span>
+                        </div>
+                        <div class="code-block">
+                            <div class="code-line"><span class="code-keyword">const</span> <span class="code-function">smartAssistant</span> = {</div>
+                            <div class="code-line">&nbsp;&nbsp;<span class="code-property">name</span>: <span class="code-string" contenteditable="true" id="assistantName">"Alexa"</span>,</div>
+                            <div class="code-line">&nbsp;&nbsp;<span class="code-property">tasks</span>: [<span class="code-string" contenteditable="true" id="task1">"reminder"</span>, <span class="code-string" contenteditable="true" id="task2">"weather"</span>],</div>
+                            <div class="code-line">&nbsp;&nbsp;<span class="code-property">isActive</span>: <span class="code-keyword">true</span>,</div>
+                            <div class="code-line">&nbsp;&nbsp;<span class="code-comment">// TODO: Add greet() method here</span></div>
+                            <div class="code-line" contenteditable="true" id="method1">&nbsp;&nbsp;greet: function() { return `Hello! I'm ${this.name}`; },</div>
+                            <div class="code-line">&nbsp;&nbsp;<span class="code-comment">// TODO: Add addTask() method here</span></div>
+                            <div class="code-line" contenteditable="true" id="method2">&nbsp;&nbsp;addTask: function(task) { this.tasks.push(task); },</div>
+                            <div class="code-line">&nbsp;&nbsp;<span class="code-comment">// TODO: Add toggleStatus() method here</span></div>
+                            <div class="code-line" contenteditable="true" id="method3">&nbsp;&nbsp;toggleStatus: function() { this.isActive = !this.isActive; }</div>
+                            <div class="code-line">};</div>
+                        </div>
+                    </div>
+                    
+                    <div class="console" id="assistantConsole"></div>
+                    
+                    <div class="demo-actions">
+                        <button class="btn" id="testAssistant">
+                            <i class="fas fa-vial"></i> Test Assistant
+                        </button>
+                        <button class="btn btn-secondary" id="resetAssistant">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <h3><i class="fas fa-lightbulb"></i> Method Types Reference</h3>
+                
+                <div style="margin: 20px 0;">
+                    <div style="display: flex; align-items: center; margin-bottom: 15px; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 8px;">
+                        <div style="margin-right: 15px; font-size: 1.5rem;">📝</div>
+                        <div>
+                            <strong>Getter Methods</strong><br>
+                            <small>Return information without modifying data</small>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; margin-bottom: 15px; padding: 15px; background: rgba(16, 185, 129, 0.1); border-radius: 8px;">
+                        <div style="margin-right: 15px; font-size: 1.5rem;">⚡</div>
+                        <div>
+                            <strong>Setter Methods</strong><br>
+                            <small>Modify object properties or state</small>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; padding: 15px; background: rgba(245, 158, 11, 0.1); border-radius: 8px;">
+                        <div style="margin-right: 15px; font-size: 1.5rem;">🔧</div>
+                        <div>
+                            <strong>Action Methods</strong><br>
+                            <small>Perform complex operations or calculations</small>
+                        </div>
+                    </div>
+                </div>
+
+                <h3><i class="fas fa-star"></i> Best Practices</h3>
+                <ul style="margin: 15px 0 15px 25px; color: var(--text-secondary);">
+                    <li>Use descriptive method names (verbs)</li>
+                    <li>Keep methods focused on single responsibility</li>
+                    <li>Use <span class="highlight">this</span> to access object properties</li>
+                    <li>Return meaningful values from methods</li>
+                    <li>Document complex method logic</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Lab Section -->
+        <section class="lab-section">
+            <div class="card">
+                <h2><i class="fas fa-flask"></i> Intelligent Methods Lab</h2>
+                <p>Apply everything you've learned to build a complete Banking System with intelligent methods.</p>
+            </div>
+
+            <div class="lab-card">
+                <h3>🏦 Banking System Challenge</h3>
+                <p>Create a <span class="highlight">bankAccount</span> object with methods that handle banking operations intelligently.</p>
+                
+                <div class="lab-instructions">
+                    <h4><i class="fas fa-list-ol"></i> Requirements:</h4>
+                    <ol>
+                        <li>Create object with: <span class="highlight">accountNumber</span>, <span class="highlight">accountHolder</span>, <span class="highlight">balance</span>, <span class="highlight">transactionHistory</span></li>
+                        <li>Implement these methods:
+                            <ul>
+                                <li><code>deposit(amount)</code> - Add to balance, record transaction</li>
+                                <li><code>withdraw(amount)</code> - Check if funds available, prevent overdraft</li>
+                                <li><code>getBalance()</code> - Return formatted balance</li>
+                                <li><code>getStatement()</code> - Show all transactions</li>
+                                <li><code>transfer(targetAccount, amount)</code> - Transfer between accounts</li>
+                            </ul>
+                        </li>
+                        <li>Add validation and error handling</li>
+                        <li>Bonus: Add interest calculation method</li>
+                    </ol>
+                </div>
+
+                <div class="interactive-demo">
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>banking-system.js</span>
+                            <span>Complete the Implementation</span>
+                        </div>
+                        <pre class="code-block" id="bankCode" contenteditable="true">const bankAccount = {
+    accountNumber: 'ACC001',
+    accountHolder: 'John Doe',
+    balance: 1000,
+    transactionHistory: [],
+    
+    // Method 1: Deposit money
+    deposit: function(amount) {
+        // TODO: Implement deposit logic
+        // - Add amount to balance
+        // - Record transaction in transactionHistory
+        // - Return new balance
+    },
+    
+    // Method 2: Withdraw money
+    withdraw: function(amount) {
+        // TODO: Implement withdraw logic
+        // - Check if sufficient balance
+        // - Subtract amount if available
+        // - Record transaction
+        // - Return new balance or error
+    },
+    
+    // Method 3: Get formatted balance
+    getBalance: function() {
+        // TODO: Return balance as formatted string
+        // Example: "Current balance: $1,000.00"
+    },
+    
+    // Method 4: Get account statement
+    getStatement: function() {
+        // TODO: Return all transactions
+        // Format: "Transaction History: ..."
+    },
+    
+    // Method 5: Transfer to another account
+    transfer: function(targetAccount, amount) {
+        // TODO: Implement transfer logic
+        // - Withdraw from this account
+        // - Deposit to target account
+        // - Record both transactions
+    },
+    
+    // Bonus Method: Calculate interest
+    calculateInterest: function(rate, years) {
+        // TODO: Calculate compound interest
+        // Formula: balance * (1 + rate)^years
+    }
+};</pre>
+                    </div>
+                    
+                    <div class="console" id="bankConsole"></div>
+                    
+                    <div class="demo-actions">
+                        <button class="btn" id="testDeposit">
+                            <i class="fas fa-money-bill-wave"></i> Test Deposit
+                        </button>
+                        <button class="btn" id="testWithdraw">
+                            <i class="fas fa-hand-holding-usd"></i> Test Withdraw
+                        </button>
+                        <button class="btn" id="testTransfer">
+                            <i class="fas fa-exchange-alt"></i> Test Transfer
+                        </button>
+                        <button class="btn btn-secondary" id="runBankTests">
+                            <i class="fas fa-vials"></i> Run All Tests
+                        </button>
+                        <button class="btn btn-warning" id="resetBank">
+                            <i class="fas fa-undo"></i> Reset Bank
+                        </button>
+                    </div>
+                </div>
+
+                <div class="task-card">
+                    <h4><i class="fas fa-chart-line"></i> Lab Evaluation</h4>
+                    <p>Your banking system will be evaluated on:</p>
+                    <div class="task-requirements">
+                        <li>✅ Method implementation correctness</li>
+                        <li>✅ Proper use of <span class="highlight">this</span> keyword</li>
+                        <li>✅ Error handling and validation</li>
+                        <li>✅ Transaction recording</li>
+                        <li>✅ Code readability and organization</li>
+                    </div>
+                    
+                    <button class="btn" id="submitLab" style="margin-top: 15px;">
+                        <i class="fas fa-paper-plane"></i> Submit Lab for Evaluation
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="lesson-footer">
+            <p>Msebetsi Solutions - Software Engineering Program</p>
+            <p>JavaScript Methods Mastery | Lesson Complete</p>
+            <div class="completion-badge" id="completionBadge">
+                <i class="fas fa-medal"></i> Complete Lesson to Earn Badge
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // ==================== THEME TOGGLE ====================
+        const themeToggle = document.getElementById('themeToggle');
+        const themeLabel = document.getElementById('themeLabel');
+        
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.checked = true;
+            themeLabel.textContent = 'Dark Mode';
+        }
+        
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+                themeLabel.textContent = 'Dark Mode';
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+                themeLabel.textContent = 'Light Mode';
+            }
+        });
+
+        // ==================== PROGRESS TRACKING ====================
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        let progress = 0;
+
+        function updateProgress(value) {
+            progress = Math.min(100, Math.max(0, value));
+            progressFill.style.width = `${progress}%`;
+            progressText.textContent = `Lesson Progress: ${progress}%`;
+            
+            // Update completion badge
+            if (progress >= 100) {
+                document.getElementById('completionBadge').innerHTML = 
+                    '<i class="fas fa-trophy"></i> Lesson Mastered! Certificate Ready';
+            }
+        }
+
+        // ==================== CODE EXAMPLES ====================
+        const thermostatCode = `const thermostat = {
+    currentTemp: 22,
+    targetTemp: 20,
+    mode: 'cooling',
+    
+    // Method to get current temperature
+    getTemperature: function() {
+        return \`Current temperature: \${this.currentTemp}°C\`;
+    },
+    
+    // Method to set target temperature
+    setTarget: function(temp) {
+        this.targetTemp = temp;
+        return \`Target set to \${temp}°C\`;
+    },
+    
+    // Method to adjust temperature
+    adjustTemp: function() {
+        if (this.mode === 'cooling' && this.currentTemp > this.targetTemp) {
+            this.currentTemp--;
+            return 'Cooling... Temperature decreased.';
+        } else if (this.mode === 'heating' && this.currentTemp < this.targetTemp) {
+            this.currentTemp++;
+            return 'Heating... Temperature increased.';
+        }
+        return 'Temperature is optimal.';
+    },
+    
+    // Method to toggle mode
+    toggleMode: function() {
+        this.mode = this.mode === 'cooling' ? 'heating' : 'cooling';
+        return \`Mode switched to \${this.mode}\`;
+    }
+};`;
+
+        const syntaxCode = `// Method Syntax Examples
+
+// 1. Regular Function Syntax
+const calculator = {
+    add: function(a, b) {
+        return a + b;
+    }
+};
+
+// 2. Shorthand Method Syntax (ES6)
+const calculator = {
+    add(a, b) {
+        return a + b;
+    }
+};
+
+// 3. Arrow Function (careful with 'this')
+const calculator = {
+    value: 10,
+    // This won't work - arrow functions don't have their own 'this'
+    increment: () => {
+        return this.value + 1; // ERROR: 'this' is undefined
+    },
+    // This works - regular function
+    increment: function() {
+        return this.value + 1;
+    }
+};
+
+// 4. Method Calling
+console.log(calculator.add(5, 3)); // 8
+
+// 5. Method with 'this'
+const user = {
+    name: 'Alice',
+    greet: function() {
+        return \`Hello, my name is \${this.name}\`;
+    }
+};`;
+
+        const buggyRobotCode = `const robot = {
+    name: 'Robo',
+    battery: 100,
+    tasks: ['clean', 'cook'],
+    
+    // BUG: Missing 'this'
+    performTask: function(task) {
+        tasks.push(task);  // Should be this.tasks.push(task)
+        return \`Performing: \${task}\`;
+    },
+    
+    // BUG: Missing 'this'
+    charge: function(amount) {
+        battery += amount;  // Should be this.battery += amount
+        if (battery > 100) battery = 100;
+        return \`Battery: \${battery}%\`;
+    },
+    
+    // BUG: Incorrect 'this' usage
+    status: () => {
+        return \`\${this.name} has \${battery}% battery\`;
+        // Arrow functions don't have their own 'this'
+        // Use regular function instead
+    }
+};`;
+
+        // Initialize code displays
+        document.getElementById('thermostatCode').textContent = thermostatCode;
+        document.getElementById('syntaxCode').textContent = syntaxCode;
+        document.getElementById('buggyRobotCode').textContent = buggyRobotCode;
+
+        // ==================== DEMO 1: THERMOSTAT ====================
+        document.getElementById('runThermostatDemo').addEventListener('click', () => {
+            const console = document.getElementById('thermostatConsole');
+            console.innerHTML = '';
+            
+            // Create thermostat object
+            const thermostat = {
+                currentTemp: 22,
+                targetTemp: 20,
+                mode: 'cooling',
+                
+                getTemperature: function() {
+                    return `Current temperature: ${this.currentTemp}°C`;
+                },
+                
+                setTarget: function(temp) {
+                    this.targetTemp = temp;
+                    return `Target set to ${temp}°C`;
+                },
+                
+                adjustTemp: function() {
+                    if (this.mode === 'cooling' && this.currentTemp > this.targetTemp) {
+                        this.currentTemp--;
+                        return 'Cooling... Temperature decreased.';
+                    } else if (this.mode === 'heating' && this.currentTemp < this.targetTemp) {
+                        this.currentTemp++;
+                        return 'Heating... Temperature increased.';
+                    }
+                    return 'Temperature is optimal.';
+                },
+                
+                toggleMode: function() {
+                    this.mode = this.mode === 'cooling' ? 'heating' : 'cooling';
+                    return `Mode switched to ${this.mode}`;
+                }
+            };
+            
+            // Run demo
+            addConsoleMessage(console, thermostat.getTemperature(), 'info');
+            addConsoleMessage(console, thermostat.setTarget(21), 'success');
+            addConsoleMessage(console, thermostat.adjustTemp(), 'warning');
+            addConsoleMessage(console, thermostat.toggleMode(), 'info');
+            addConsoleMessage(console, thermostat.adjustTemp(), 'warning');
+            
+            updateProgress(progress + 10);
+        });
+
+        // ==================== TASK 1: FIX ROBOT ====================
+        document.getElementById('runBuggyRobot').addEventListener('click', () => {
+            const console = document.getElementById('robotConsole');
+            console.innerHTML = '';
+            
+            const robot = {
+                name: 'Robo',
+                battery: 100,
+                tasks: ['clean', 'cook'],
+                
+                performTask: function(task) {
+                    tasks.push(task);  // BUG
+                    return `Performing: ${task}`;
+                },
+                
+                charge: function(amount) {
+                    battery += amount;  // BUG
+                    if (battery > 100) battery = 100;
+                    return `Battery: ${battery}%`;
+                },
+                
+                status: () => {
+                    return `${this.name} has ${battery}% battery`;  // BUG
+                }
+            };
+            
+            try {
+                robot.performTask('deliver');
+            } catch (error) {
+                addConsoleMessage(console, `❌ Error in performTask: ${error.message}`, 'error');
+            }
+            
+            try {
+                robot.charge(20);
+            } catch (error) {
+                addConsoleMessage(console, `❌ Error in charge: ${error.message}`, 'error');
+            }
+            
+            try {
+                console.log(robot.status());
+            } catch (error) {
+                addConsoleMessage(console, `❌ Error in status: Arrow function doesn't have 'this'`, 'error');
+            }
+            
+            updateProgress(progress + 5);
+        });
+
+        document.getElementById('fixRobotCode').addEventListener('click', () => {
+            const fixedRobotCode = `const robot = {
+    name: 'Robo',
+    battery: 100,
+    tasks: ['clean', 'cook'],
+    
+    // FIXED: Added 'this'
+    performTask: function(task) {
+        this.tasks.push(task);
+        return \`Performing: \${task}\`;
+    },
+    
+    // FIXED: Added 'this'
+    charge: function(amount) {
+        this.battery += amount;
+        if (this.battery > 100) this.battery = 100;
+        return \`Battery: \${this.battery}%\`;
+    },
+    
+    // FIXED: Changed to regular function
+    status: function() {
+        return \`\${this.name} has \${this.battery}% battery\`;
+    }
+};`;
+            
+            document.getElementById('buggyRobotCode').textContent = fixedRobotCode;
+            updateProgress(progress + 10);
+        });
+
+        document.getElementById('runFixedRobot').addEventListener('click', () => {
+            const console = document.getElementById('robotConsole');
+            console.innerHTML = '';
+            
+            const robot = {
+                name: 'Robo',
+                battery: 100,
+                tasks: ['clean', 'cook'],
+                
+                performTask: function(task) {
+                    this.tasks.push(task);
+                    return `Performing: ${task}`;
+                },
+                
+                charge: function(amount) {
+                    this.battery += amount;
+                    if (this.battery > 100) this.battery = 100;
+                    return `Battery: ${this.battery}%`;
+                },
+                
+                status: function() {
+                    return `${this.name} has ${this.battery}% battery`;
+                }
+            };
+            
+            addConsoleMessage(console, robot.performTask('deliver'), 'success');
+            addConsoleMessage(console, robot.charge(20), 'success');
+            addConsoleMessage(console, robot.status(), 'info');
+            addConsoleMessage(console, '✅ All methods work correctly!', 'success');
+            
+            updateProgress(progress + 15);
+        });
+
+        // ==================== INTERACTIVE ASSISTANT ====================
+        document.getElementById('testAssistant').addEventListener('click', () => {
+            const console = document.getElementById('assistantConsole');
+            console.innerHTML = '';
+            
+            // Get user input
+            const name = document.getElementById('assistantName').textContent;
+            const task1 = document.getElementById('task1').textContent;
+            const task2 = document.getElementById('task2').textContent;
+            const method1 = document.getElementById('method1').textContent;
+            const method2 = document.getElementById('method2').textContent;
+            const method3 = document.getElementById('method3').textContent;
+            
+            // Create assistant object
+            const smartAssistant = {
+                name: name,
+                tasks: [task1, task2],
+                isActive: true
+            };
+            
+            // Try to evaluate methods
+            try {
+                // Extract method from user input
+                const greetMatch = method1.match(/function\(\)\s*\{([^}]+)\}/);
+                if (greetMatch) {
+                    smartAssistant.greet = new Function('return ' + greetMatch[1].trim());
+                    addConsoleMessage(console, smartAssistant.greet(), 'success');
+                } else {
+                    addConsoleMessage(console, '⚠️ Check greet() method syntax', 'warning');
+                }
+                
+                // Add task method
+                const addTaskMatch = method2.match(/function\([^)]+\)\s*\{([^}]+)\}/);
+                if (addTaskMatch) {
+                    smartAssistant.addTask = new Function('task', addTaskMatch[1]);
+                    smartAssistant.addTask('new task');
+                    addConsoleMessage(console, `Tasks: ${smartAssistant.tasks.join(', ')}`, 'info');
+                }
+                
+                // Toggle status method
+                const toggleMatch = method3.match(/function\(\)\s*\{([^}]+)\}/);
+                if (toggleMatch) {
+                    smartAssistant.toggleStatus = new Function('', toggleMatch[1]);
+                    smartAssistant.toggleStatus();
+                    addConsoleMessage(console, `Status: ${smartAssistant.isActive ? 'Active' : 'Inactive'}`, 'info');
+                }
+                
+            } catch (error) {
+                addConsoleMessage(console, `❌ Error: ${error.message}`, 'error');
+            }
+            
+            updateProgress(progress + 10);
+        });
+
+        document.getElementById('resetAssistant').addEventListener('click', () => {
+            document.getElementById('assistantName').textContent = "Alexa";
+            document.getElementById('task1').textContent = "reminder";
+            document.getElementById('task2').textContent = "weather";
+            document.getElementById('method1').textContent = "greet: function() { return `Hello! I'm ${this.name}`; }";
+            document.getElementById('method2').textContent = "addTask: function(task) { this.tasks.push(task); }";
+            document.getElementById('method3').textContent = "toggleStatus: function() { this.isActive = !this.isActive; }";
+            document.getElementById('assistantConsole').innerHTML = '';
+        });
+
+        // ==================== BANKING SYSTEM LAB ====================
+        let bankAccount = null;
+
+        // Test Deposit
+        document.getElementById('testDeposit').addEventListener('click', () => {
+            const console = document.getElementById('bankConsole');
+            console.innerHTML = '';
+            
+            try {
+                const code = document.getElementById('bankCode').textContent;
+                eval(code);
+                
+                if (!bankAccount.deposit.toString().includes('this.balance')) {
+                    addConsoleMessage(console, '❌ Deposit method not using "this.balance"', 'error');
+                } else {
+                    const result = bankAccount.deposit(500);
+                    addConsoleMessage(console, `✅ Deposit successful: ${result}`, 'success');
+                    addConsoleMessage(console, `New balance: $${bankAccount.balance}`, 'info');
+                }
+            } catch (error) {
+                addConsoleMessage(console, `❌ Deposit error: ${error.message}`, 'error');
+            }
+        });
+
+        // Test Withdraw
+        document.getElementById('testWithdraw').addEventListener('click', () => {
+            const console = document.getElementById('bankConsole');
+            console.innerHTML = '';
+            
+            try {
+                const code = document.getElementById('bankCode').textContent;
+                eval(code);
+                
+                // Test valid withdrawal
+                const result1 = bankAccount.withdraw(200);
+                addConsoleMessage(console, `✅ Withdrawal: ${result1}`, 'success');
+                
+                // Test overdraft
+                const result2 = bankAccount.withdraw(5000);
+                if (result2 && result2.includes('insufficient')) {
+                    addConsoleMessage(console, `✅ Overdraft prevented: ${result2}`, 'success');
+                } else {
+                    addConsoleMessage(console, '⚠️ Should check for sufficient funds', 'warning');
+                }
+            } catch (error) {
+                addConsoleMessage(console, `❌ Withdraw error: ${error.message}`, 'error');
+            }
+        });
+
+        // Test Transfer
+        document.getElementById('testTransfer').addEventListener('click', () => {
+            const console = document.getElementById('bankConsole');
+            console.innerHTML = '';
+            
+            try {
+                const code = document.getElementById('bankCode').textContent;
+                eval(code);
+                
+                // Create target account
+                const targetAccount = {
+                    accountNumber: 'ACC002',
+                    balance: 500,
+                    transactionHistory: [],
+                    deposit: function(amount) {
+                        this.balance += amount;
+                        this.transactionHistory.push(`Deposit: +$${amount}`);
+                        return this.balance;
+                    }
+                };
+                
+                const result = bankAccount.transfer(targetAccount, 300);
+                addConsoleMessage(console, `✅ Transfer result: ${result}`, 'success');
+                addConsoleMessage(console, `Your balance: $${bankAccount.balance}`, 'info');
+                addConsoleMessage(console, `Target balance: $${targetAccount.balance}`, 'info');
+            } catch (error) {
+                addConsoleMessage(console, `❌ Transfer error: ${error.message}`, 'error');
+            }
+        });
+
+        // Run All Tests
+        document.getElementById('runBankTests').addEventListener('click', () => {
+            const console = document.getElementById('bankConsole');
+            console.innerHTML = '';
+            
+            try {
+                const code = document.getElementById('bankCode').textContent;
+                eval(code);
+                
+                let passed = 0;
+                let total = 5;
+                
+                // Test 1: Deposit
+                if (bankAccount.deposit.toString().includes('this.balance')) {
+                    bankAccount.deposit(100);
+                    passed++;
+                    addConsoleMessage(console, '✅ Deposit method: Working', 'success');
+                } else {
+                    addConsoleMessage(console, '❌ Deposit method: Missing "this"', 'error');
+                }
+                
+                // Test 2: Withdraw with validation
+                if (bankAccount.withdraw.toString().includes('if') || 
+                    bankAccount.withdraw.toString().includes('balance')) {
+                    passed++;
+                    addConsoleMessage(console, '✅ Withdraw method: Has validation', 'success');
+                } else {
+                    addConsoleMessage(console, '❌ Withdraw method: Missing validation', 'error');
+                }
+                
+                // Test 3: getBalance returns string
+                const balance = bankAccount.getBalance();
+                if (typeof balance === 'string') {
+                    passed++;
+                    addConsoleMessage(console, '✅ getBalance method: Returns string', 'success');
+                } else {
+                    addConsoleMessage(console, '❌ getBalance method: Should return formatted string', 'error');
+                }
+                
+                // Test 4: Transaction history
+                if (bankAccount.deposit.toString().includes('push') || 
+                    bankAccount.deposit.toString().includes('transactionHistory')) {
+                    passed++;
+                    addConsoleMessage(console, '✅ Transaction recording: Implemented', 'success');
+                } else {
+                    addConsoleMessage(console, '⚠️ Transaction recording: Should record transactions', 'warning');
+                }
+                
+                // Test 5: Transfer method
+                if (code.includes('transfer')) {
+                    passed++;
+                    addConsoleMessage(console, '✅ Transfer method: Implemented', 'success');
+                } else {
+                    addConsoleMessage(console, '❌ Transfer method: Not implemented', 'error');
+                }
+                
+                const score = Math.round((passed / total) * 100);
+                addConsoleMessage(console, `📊 Lab Score: ${score}% (${passed}/${total} tests passed)`, 'info');
+                
+                if (score >= 80) {
+                    addConsoleMessage(console, '🎉 Excellent! Your banking system is well-designed!', 'success');
+                    updateProgress(100);
+                } else if (score >= 60) {
+                    addConsoleMessage(console, '👍 Good work! Review the feedback and improve your methods.', 'warning');
+                    updateProgress(80);
+                } else {
+                    addConsoleMessage(console, '📚 Review the lesson and try again. Focus on using "this" keyword.', 'error');
+                }
+                
+            } catch (error) {
+                addConsoleMessage(console, `❌ Evaluation error: ${error.message}`, 'error');
+            }
+        });
+
+        document.getElementById('resetBank').addEventListener('click', () => {
+            document.getElementById('bankCode').textContent = `const bankAccount = {
+    accountNumber: 'ACC001',
+    accountHolder: 'John Doe',
+    balance: 1000,
+    transactionHistory: [],
+    
+    // Method 1: Deposit money
+    deposit: function(amount) {
+        // TODO: Implement deposit logic
+        // - Add amount to balance
+        // - Record transaction in transactionHistory
+        // - Return new balance
+    },
+    
+    // Method 2: Withdraw money
+    withdraw: function(amount) {
+        // TODO: Implement withdraw logic
+        // - Check if sufficient balance
+        // - Subtract amount if available
+        // - Record transaction
+        // - Return new balance or error
+    },
+    
+    // Method 3: Get formatted balance
+    getBalance: function() {
+        // TODO: Return balance as formatted string
+        // Example: "Current balance: $1,000.00"
+    },
+    
+    // Method 4: Get account statement
+    getStatement: function() {
+        // TODO: Return all transactions
+        // Format: "Transaction History: ..."
+    },
+    
+    // Method 5: Transfer to another account
+    transfer: function(targetAccount, amount) {
+        // TODO: Implement transfer logic
+        // - Withdraw from this account
+        // - Deposit to target account
+        // - Record both transactions
+    },
+    
+    // Bonus Method: Calculate interest
+    calculateInterest: function(rate, years) {
+        // TODO: Calculate compound interest
+        // Formula: balance * (1 + rate)^years
+    }
+};`;
+            document.getElementById('bankConsole').innerHTML = '';
+        });
+
+        // Submit Lab
+        document.getElementById('submitLab').addEventListener('click', () => {
+            const console = document.getElementById('bankConsole');
+            console.innerHTML = '';
+            
+            // Example solution for comparison
+            const exampleSolution = `const bankAccount = {
+    accountNumber: 'ACC001',
+    accountHolder: 'John Doe',
+    balance: 1000,
+    transactionHistory: [],
+    
+    deposit: function(amount) {
+        if (amount <= 0) return "Invalid amount";
+        this.balance += amount;
+        this.transactionHistory.push(\`Deposit: +\${amount}\`);
+        return \`Deposited \${amount}. New balance: \${this.balance}\`;
+    },
+    
+    withdraw: function(amount) {
+        if (amount <= 0) return "Invalid amount";
+        if (amount > this.balance) return "Insufficient funds";
+        this.balance -= amount;
+        this.transactionHistory.push(\`Withdrawal: -\${amount}\`);
+        return \`Withdrew \${amount}. New balance: \${this.balance}\`;
+    },
+    
+    getBalance: function() {
+        return \`Current balance: $\${this.balance.toFixed(2)}\`;
+    },
+    
+    getStatement: function() {
+        if (this.transactionHistory.length === 0) return "No transactions yet";
+        return "Transaction History:\\n" + this.transactionHistory.join('\\n');
+    },
+    
+    transfer: function(targetAccount, amount) {
+        if (amount > this.balance) return "Transfer failed: Insufficient funds";
+        this.withdraw(amount);
+        targetAccount.deposit(amount);
+        return \`Transferred \${amount} to \${targetAccount.accountHolder}\`;
+    },
+    
+    calculateInterest: function(rate, years) {
+        const interest = this.balance * Math.pow(1 + rate/100, years) - this.balance;
+        return \`Interest after \${years} years: $\${interest.toFixed(2)}\`;
+    }
+};`;
+            
+            addConsoleMessage(console, '📤 Submitting lab for evaluation...', 'info');
+            addConsoleMessage(console, '✅ Lab submitted successfully!', 'success');
+            addConsoleMessage(console, '📋 Your methods will be evaluated on:', 'info');
+            addConsoleMessage(console, '• Correct use of "this" keyword', 'success');
+            addConsoleMessage(console, '• Proper method implementation', 'success');
+            addConsoleMessage(console, '• Error handling and validation', 'success');
+            addConsoleMessage(console, '• Transaction recording', 'success');
+            addConsoleMessage(console, '💡 Check your solution against the example above.', 'warning');
+            
+            updateProgress(100);
+        });
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function addConsoleMessage(consoleElement, message, type = 'info') {
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            line.textContent = message;
+            consoleElement.appendChild(line);
+            consoleElement.scrollTop = consoleElement.scrollHeight;
+        }
+
+        function copyCode(elementId) {
+            const code = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        }
+    </script>
+</body>
+</html>

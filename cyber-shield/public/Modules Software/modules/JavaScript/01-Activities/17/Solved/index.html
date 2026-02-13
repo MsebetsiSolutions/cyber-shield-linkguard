@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Msebetsi Solutions - JavaScript Methods Lab</title>
+    <style>
+        :root {
+            /* Light Theme */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-accent: #eff6ff;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-accent: #3b82f6;
+            --text-success: #10b981;
+            --text-danger: #ef4444;
+            --text-warning: #f59e0b;
+            --border-color: #e2e8f0;
+            --border-accent: #3b82f6;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --gradient-primary: linear-gradient(135deg, #3b82f6, #6366f1);
+            --gradient-success: linear-gradient(135deg, #10b981, #059669);
+            --gradient-danger: linear-gradient(135deg, #ef4444, #dc2626);
+            --code-bg: #f8fafc;
+        }
+
+        .dark-mode {
+            /* Dark Theme */
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --bg-accent: #1e3a8a;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-accent: #60a5fa;
+            --text-success: #34d399;
+            --text-danger: #f87171;
+            --text-warning: #fbbf24;
+            --border-color: #334155;
+            --border-accent: #60a5fa;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --gradient-primary: linear-gradient(135deg, #60a5fa, #818cf8);
+            --gradient-success: linear-gradient(135deg, #34d399, #10b981);
+            --gradient-danger: linear-gradient(135deg, #f87171, #ef4444);
+            --code-bg: #1a2238;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Navigation Header */
+        .nav-header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-accent);
+        }
+
+        .logo-icon {
+            font-size: 1.5rem;
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .lesson-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn.prev {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-btn.next {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .lesson-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .lesson-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-color);
+        }
+
+        .lesson-dot.active {
+            background: var(--text-accent);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .theme-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .theme-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+            border-radius: 34px;
+            transition: .4s;
+        }
+
+        .theme-slider:before {
+            position: absolute;
+            content: "☀️";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            border-radius: 50%;
+            transition: .4s;
+            font-size: 10px;
+        }
+
+        input:checked + .theme-slider:before {
+            transform: translateX(24px);
+            content: "🌙";
+        }
+
+        /* Main Container */
+        .main-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: calc(100vh - 70px);
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .lesson-list {
+            list-style: none;
+        }
+
+        .lesson-item {
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .lesson-item:hover {
+            background: var(--bg-accent);
+        }
+
+        .lesson-item.active {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .lesson-icon {
+            font-size: 1rem;
+        }
+
+        .lesson-status {
+            margin-left: auto;
+            font-size: 0.8rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-success);
+        }
+
+        .status-dot.complete {
+            background: var(--text-success);
+        }
+
+        .status-dot.in-progress {
+            background: var(--text-warning);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main Content */
+        .content-area {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .lesson-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .lesson-header {
+            margin-bottom: 2rem;
+        }
+
+        .lesson-badge {
+            display: inline-block;
+            background: var(--gradient-primary);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .lesson-description {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: var(--text-accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* File Upload */
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            background: var(--bg-accent);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area.drag-over {
+            border-color: var(--text-accent);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--text-accent);
+        }
+
+        .upload-text {
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .file-label:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .file-list {
+            margin-top: 2rem;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-icon {
+            color: var(--text-accent);
+            font-size: 1.2rem;
+        }
+
+        .file-name {
+            font-weight: 600;
+        }
+
+        .file-size {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Code Editor */
+        .code-editor-container {
+            background: var(--code-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 2rem 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .editor-header {
+            background: var(--bg-secondary);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .editor-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        #codeEditor {
+            width: 100%;
+            min-height: 300px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 1.5rem;
+            background: transparent;
+            color: var(--text-primary);
+            border: none;
+            resize: vertical;
+            outline: none;
+        }
+
+        /* Test Console */
+        .test-console {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 2rem 0;
+        }
+
+        .console-line {
+            margin-bottom: 8px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .console-success { color: #00ff88; }
+        .console-error { color: #ff6b6b; }
+        .console-warning { color: #ffd166; }
+        .console-info { color: #4ecdc4; }
+        .console-log { color: #ffffff; }
+
+        /* Test Results */
+        .test-results {
+            margin-top: 2rem;
+        }
+
+        .test-case {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--border-color);
+        }
+
+        .test-case.passed {
+            border-left-color: var(--text-success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .test-case.failed {
+            border-left-color: var(--text-danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .test-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .test-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .test-status.passed {
+            background: var(--text-success);
+            color: white;
+        }
+
+        .test-status.failed {
+            background: var(--text-danger);
+            color: white;
+        }
+
+        .test-output {
+            background: var(--code-bg);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-accent);
+        }
+
+        .btn-success {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--gradient-danger);
+            color: white;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        /* Progress */
+        .progress-section {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Completion */
+        .completion-card {
+            text-align: center;
+            padding: 3rem;
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: 12px;
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .completion-card.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .completion-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .completion-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none;
+        }
+
+        .flex {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mt-1 { margin-top: 1rem; }
+        .mt-2 { margin-top: 2rem; }
+        .mb-1 { margin-bottom: 1rem; }
+        .mb-2 { margin-bottom: 2rem; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="nav-header">
+        <div class="logo">
+            <span class="logo-icon">🚀</span>
+            <span>Msebetsi Solutions</span>
+        </div>
+        
+        <div class="nav-controls">
+            <div class="lesson-indicator">
+                <span>Lesson 3 of 5</span>
+                <div class="lesson-dots">
+                    <span class="lesson-dot active"></span>
+                    <span class="lesson-dot active"></span>
+                    <span class="lesson-dot active"></span>
+                    <span class="lesson-dot"></span>
+                    <span class="lesson-dot"></span>
+                </div>
+            </div>
+            
+            <div class="lesson-nav">
+                <a href="#" class="nav-btn prev">
+                    <i class="fas fa-arrow-left"></i>
+                    Previous Lesson
+                </a>
+                <a href="#" class="nav-btn next">
+                    Next Lesson
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <label class="theme-toggle">
+                <input type="checkbox" id="themeToggle">
+                <span class="theme-slider"></span>
+            </label>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Course Modules</h3>
+                <ul class="lesson-list">
+                    <li class="lesson-item" data-lesson="1">
+                        <i class="lesson-icon fas fa-cube"></i>
+                        <span>JavaScript Objects</span>
+                        <div class="lesson-status">
+                            <div class="status-dot complete"></div>
+                        </div>
+                    </li>
+                    <li class="lesson-item" data-lesson="2">
+                        <i class="lesson-icon fas fa-code"></i>
+                        <span>Object Methods</span>
+                        <div class="lesson-status">
+                            <div class="status-dot complete"></div>
+                        </div>
+                    </li>
+                    <li class="lesson-item active" data-lesson="3">
+                        <i class="lesson-icon fas fa-file-upload"></i>
+                        <span>Methods Lab & File Upload</span>
+                        <div class="lesson-status">
+                            <div class="status-dot in-progress"></div>
+                        </div>
+                    </li>
+                    <li class="lesson-item" data-lesson="4">
+                        <i class="lesson-icon fas fa-project-diagram"></i>
+                        <span>Advanced Methods & Prototypes</span>
+                        <div class="lesson-status">
+                            <div class="status-dot"></div>
+                        </div>
+                    </li>
+                    <li class="lesson-item" data-lesson="5">
+                        <i class="lesson-icon fas fa-trophy"></i>
+                        <span>Final Project & Certification</span>
+                        <div class="lesson-status">
+                            <div class="status-dot"></div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Lab Resources</h3>
+                <ul class="lesson-list">
+                    <li class="lesson-item">
+                        <i class="lesson-icon fas fa-download"></i>
+                        <span>Download Starter Files</span>
+                    </li>
+                    <li class="lesson-item">
+                        <i class="lesson-icon fas fa-question-circle"></i>
+                        <span>Lab Instructions PDF</span>
+                    </li>
+                    <li class="lesson-item">
+                        <i class="lesson-icon fas fa-video"></i>
+                        <span>Video Tutorial</span>
+                    </li>
+                    <li class="lesson-item">
+                        <i class="lesson-icon fas fa-code-branch"></i>
+                        <span>Solution Repository</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Your Progress</h3>
+                <div class="card" style="background: var(--bg-accent); border: none;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 2.5rem; font-weight: 700; background: var(--gradient-primary); -webkit-background-clip: text; background-clip: text; color: transparent;">65%</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Course Completion</div>
+                    </div>
+                    <div class="progress-bar mt-1">
+                        <div class="progress-fill" style="width: 65%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
+                        <span>3/5 Lessons</span>
+                        <span>5/10 Exercises</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content-area">
+            <div class="lesson-content">
+                <!-- Lesson Header -->
+                <div class="lesson-header">
+                    <div class="lesson-badge">Hands-on Lab</div>
+                    <h1>JavaScript Methods: Practical Application Lab</h1>
+                    <p class="lesson-description">
+                        In this lab, you'll apply your knowledge of JavaScript methods by creating a complete e-commerce system. 
+                        Upload your JavaScript files to test your implementation against real-world scenarios.
+                    </p>
+                </div>
+
+                <!-- Lab Introduction -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-shopping-cart"></i>
+                            E-Commerce System Challenge
+                        </h2>
+                        <div class="flex">
+                            <i class="fas fa-clock"></i>
+                            <span>Estimated: 45-60 minutes</span>
+                        </div>
+                    </div>
+                    
+                    <h3 class="mt-2">🎯 Learning Objectives</h3>
+                    <ul style="margin: 1rem 0 1rem 2rem; color: var(--text-secondary);">
+                        <li>Implement methods that manipulate object properties</li>
+                        <li>Use the 'this' keyword correctly in method contexts</li>
+                        <li>Create methods that return calculated values</li>
+                        <li>Build methods that interact with other methods</li>
+                        <li>Test methods with various input scenarios</li>
+                    </ul>
+
+                    <h3 class="mt-2">📋 Lab Requirements</h3>
+                    <p style="color: var(--text-secondary);">
+                        Create a JavaScript file that implements an e-commerce system with the following objects and methods:
+                    </p>
+                    
+                    <div class="test-case" style="margin-top: 1rem;">
+                        <div class="test-header">
+                            <div class="test-title">
+                                <i class="fas fa-box"></i>
+                                Product Object
+                            </div>
+                        </div>
+                        <p style="color: var(--text-secondary);">Should have methods: <code>applyDiscount()</code>, <code>updateStock()</code>, <code>getPrice()</code></p>
+                    </div>
+
+                    <div class="test-case" style="margin-top: 1rem;">
+                        <div class="test-header">
+                            <div class="test-title">
+                                <i class="fas fa-shopping-cart"></i>
+                                Cart Object
+                            </div>
+                        </div>
+                        <p style="color: var(--text-secondary);">Should have methods: <code>addItem()</code>, <code>removeItem()</code>, <code>calculateTotal()</code>, <code>checkout()</code></p>
+                    </div>
+
+                    <div class="test-case" style="margin-top: 1rem;">
+                        <div class="test-header">
+                            <div class="test-title">
+                                <i class="fas fa-user"></i>
+                                Customer Object
+                            </div>
+                        </div>
+                        <p style="color: var(--text-secondary);">Should have methods: <code>placeOrder()</code>, <code>viewOrderHistory()</code>, <code>updateProfile()</code></p>
+                    </div>
+                </div>
+
+                <!-- File Upload Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-upload"></i>
+                            Upload Your Solution
+                        </h2>
+                    </div>
+
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h3 style="margin-bottom: 0.5rem;">Drag & Drop Your JavaScript File</h3>
+                        <p class="upload-text">
+                            Upload your completed e-commerce system implementation (.js file)
+                        </p>
+                        <input type="file" id="fileInput" class="file-input" accept=".js">
+                        <label for="fileInput" class="file-label">
+                            <i class="fas fa-folder-open"></i>
+                            Choose File
+                        </label>
+                        <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                            Maximum file size: 1MB • Supported: .js files only
+                        </p>
+                    </div>
+
+                    <div class="file-list" id="fileList"></div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="runTestsBtn">
+                            <i class="fas fa-play"></i>
+                            Run Tests on Uploaded File
+                        </button>
+                        <button class="btn btn-secondary" id="viewStarterBtn">
+                            <i class="fas fa-eye"></i>
+                            View Starter Code
+                        </button>
+                        <button class="btn btn-secondary" id="downloadStarterBtn">
+                            <i class="fas fa-download"></i>
+                            Download Starter Template
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Code Editor -->
+                <div class="card hidden" id="codeEditorCard">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-code"></i>
+                            Code Editor
+                        </h2>
+                        <div class="editor-actions">
+                            <button class="btn btn-secondary" id="formatCodeBtn">
+                                <i class="fas fa-indent"></i>
+                                Format
+                            </button>
+                            <button class="btn btn-primary" id="saveCodeBtn">
+                                <i class="fas fa-save"></i>
+                                Save & Test
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="code-editor-container">
+                        <div class="editor-header">
+                            <span class="editor-title">ecommerce-system.js</span>
+                            <span style="color: var(--text-secondary); font-size: 0.8rem;">Auto-saved locally</span>
+                        </div>
+                        <textarea id="codeEditor" spellcheck="false"></textarea>
+                    </div>
+                </div>
+
+                <!-- Test Results -->
+                <div class="card hidden" id="testResultsCard">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-vial"></i>
+                            Test Results
+                        </h2>
+                        <div class="flex">
+                            <span id="testScore">Score: 0%</span>
+                            <span id="testCount">Tests: 0/12</span>
+                        </div>
+                    </div>
+
+                    <div class="test-console" id="testConsole"></div>
+
+                    <div class="test-results" id="testResults">
+                        <!-- Test cases will be dynamically added here -->
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="retryTestsBtn">
+                            <i class="fas fa-redo"></i>
+                            Re-run Tests
+                        </button>
+                        <button class="btn btn-success" id="submitLabBtn">
+                            <i class="fas fa-paper-plane"></i>
+                            Submit Lab for Review
+                        </button>
+                        <button class="btn btn-secondary" id="viewSolutionBtn">
+                            <i class="fas fa-lightbulb"></i>
+                            View Solution
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress Section -->
+                <div class="progress-section">
+                    <h3 style="margin-bottom: 1rem;">Lab Progress</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="labProgressFill"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span>Upload File</span>
+                        <span>Run Tests</span>
+                        <span>Complete Lab</span>
+                    </div>
+                </div>
+
+                <!-- Completion Card -->
+                <div class="completion-card" id="completionCard">
+                    <div class="completion-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="completion-title">Lab Completed Successfully!</div>
+                    <p>Your e-commerce system implementation passed all tests. Great work!</p>
+                    <div class="btn-group" style="justify-content: center; margin-top: 2rem;">
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-certificate"></i>
+                            Download Certificate
+                        </button>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-arrow-right"></i>
+                            Continue to Next Lesson
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ==================== THEME TOGGLE ====================
+        const themeToggle = document.getElementById('themeToggle');
+        
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.checked = true;
+        }
+        
+        themeToggle.addEventListener('change', () => {
+            if (themeToggle.checked) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // ==================== LESSON NAVIGATION ====================
+        document.querySelectorAll('.lesson-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('.lesson-item') === item) {
+                    document.querySelectorAll('.lesson-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    // In a real app, this would load different lesson content
+                    console.log(`Switching to lesson ${item.dataset.lesson}`);
+                }
+            });
+        });
+
+        // Navigation buttons
+        document.querySelector('.nav-btn.prev').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Navigating to previous lesson...');
+            // In real app: window.location.href = 'previous-lesson.html';
+        });
+
+        document.querySelector('.nav-btn.next').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Navigating to next lesson...');
+            // In real app: window.location.href = 'next-lesson.html';
+        });
+
+        // ==================== FILE UPLOAD ====================
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const codeEditorCard = document.getElementById('codeEditorCard');
+        const codeEditor = document.getElementById('codeEditor');
+        let uploadedFile = null;
+
+        // Drag and drop functionality
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            uploadArea.classList.add('drag-over');
+        }
+
+        function unhighlight() {
+            uploadArea.classList.remove('drag-over');
+        }
+
+        uploadArea.addEventListener('drop', handleDrop, false);
+        fileInput.addEventListener('change', handleFileSelect, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            const file = files[0];
+            
+            // Validate file type
+            if (!file.name.endsWith('.js')) {
+                alert('Please upload a JavaScript file (.js)');
+                return;
+            }
+            
+            // Validate file size (1MB max)
+            if (file.size > 1024 * 1024) {
+                alert('File size exceeds 1MB limit');
+                return;
+            }
+            
+            uploadedFile = file;
+            displayFile(file);
+            readFileContent(file);
+        }
+
+        function displayFile(file) {
+            fileList.innerHTML = `
+                <div class="file-item">
+                    <div class="file-info">
+                        <i class="file-icon fas fa-file-code"></i>
+                        <div>
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-size">${formatFileSize(file.size)}</div>
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn btn-secondary" onclick="editFile()">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger" onclick="removeFile()">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Show code editor
+            codeEditorCard.classList.remove('hidden');
+            updateProgress(33);
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function readFileContent(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                codeEditor.value = e.target.result;
+                // Save to localStorage for auto-save
+                localStorage.setItem('labCode', e.target.result);
+            };
+            reader.readAsText(file);
+        }
+
+        window.editFile = function() {
+            codeEditorCard.classList.remove('hidden');
+            codeEditor.focus();
+        };
+
+        window.removeFile = function() {
+            uploadedFile = null;
+            fileList.innerHTML = '';
+            codeEditorCard.classList.add('hidden');
+            codeEditor.value = '';
+            localStorage.removeItem('labCode');
+            updateProgress(0);
+        };
+
+        // Load saved code from localStorage
+        const savedCode = localStorage.getItem('labCode');
+        if (savedCode) {
+            codeEditor.value = savedCode;
+            codeEditorCard.classList.remove('hidden');
+            
+            // Simulate a file being uploaded
+            uploadedFile = {
+                name: 'saved-code.js',
+                size: savedCode.length
+            };
+            
+            fileList.innerHTML = `
+                <div class="file-item">
+                    <div class="file-info">
+                        <i class="file-icon fas fa-file-code"></i>
+                        <div>
+                            <div class="file-name">saved-code.js (Auto-saved)</div>
+                            <div class="file-size">${formatFileSize(savedCode.length)}</div>
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn btn-secondary" onclick="editFile()">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger" onclick="removeFile()">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            updateProgress(33);
+        }
+
+        // Auto-save code editor content
+        codeEditor.addEventListener('input', () => {
+            localStorage.setItem('labCode', codeEditor.value);
+        });
+
+        // ==================== CODE EDITOR ACTIONS ====================
+        document.getElementById('formatCodeBtn').addEventListener('click', () => {
+            // Simple code formatting
+            const code = codeEditor.value;
+            // Add basic formatting logic here
+            alert('Code formatted! (In a real app, this would use Prettier or similar)');
+        });
+
+        document.getElementById('saveCodeBtn').addEventListener('click', () => {
+            const code = codeEditor.value;
+            localStorage.setItem('labCode', code);
+            
+            // Create a downloadable file
+            const blob = new Blob([code], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ecommerce-system.js';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            addConsoleMessage('💾 Code saved and file downloaded!', 'success');
+        });
+
+        // ==================== TEST RUNNER ====================
+        const testResultsCard = document.getElementById('testResultsCard');
+        const testConsole = document.getElementById('testConsole');
+        const testResults = document.getElementById('testResults');
+        const runTestsBtn = document.getElementById('runTestsBtn');
+        const retryTestsBtn = document.getElementById('retryTestsBtn');
+        const submitLabBtn = document.getElementById('submitLabBtn');
+
+        runTestsBtn.addEventListener('click', runTests);
+        retryTestsBtn.addEventListener('click', runTests);
+        submitLabBtn.addEventListener('click', submitLab);
+
+        function runTests() {
+            if (!codeEditor.value.trim()) {
+                alert('Please write or upload some code first!');
+                return;
+            }
+            
+            testResultsCard.classList.remove('hidden');
+            testConsole.innerHTML = '';
+            testResults.innerHTML = '';
+            
+            // Show test results section
+            testResultsCard.scrollIntoView({ behavior: 'smooth' });
+            
+            addConsoleMessage('🧪 Starting test suite...', 'info');
+            addConsoleMessage('Running 12 test cases for e-commerce system...', 'info');
+            
+            // Parse and test the code
+            const code = codeEditor.value;
+            
+            // Clear any previous test state
+            window.product = null;
+            window.cart = null;
+            window.customer = null;
+            
+            try {
+                // Execute the user's code
+                eval(code);
+                
+                // Run test cases
+                runTestSuite();
+                
+            } catch (error) {
+                addConsoleMessage(`❌ Error executing code: ${error.message}`, 'error');
+                addTestResult('Code Execution', false, `Error: ${error.message}`);
+            }
+            
+            updateProgress(66);
+        }
+
+        function runTestSuite() {
+            let passedTests = 0;
+            const totalTests = 12;
+            
+            // Test 1: Check if product object exists
+            if (window.product || window.Product) {
+                addTestResult('Product Object Exists', true);
+                passedTests++;
+            } else {
+                addTestResult('Product Object Exists', false, 'Could not find product object');
+            }
+            
+            // Test 2: Check if cart object exists
+            if (window.cart || window.Cart) {
+                addTestResult('Cart Object Exists', true);
+                passedTests++;
+            } else {
+                addTestResult('Cart Object Exists', false, 'Could not find cart object');
+            }
+            
+            // Test 3: Check if customer object exists
+            if (window.customer || window.Customer) {
+                addTestResult('Customer Object Exists', true);
+                passedTests++;
+            } else {
+                addTestResult('Customer Object Exists', false, 'Could not find customer object');
+            }
+            
+            // Test 4: Check for product methods
+            const productObj = window.product || new (window.Product || function() {})();
+            if (typeof productObj.applyDiscount === 'function') {
+                addTestResult('Product has applyDiscount() method', true);
+                passedTests++;
+            } else {
+                addTestResult('Product has applyDiscount() method', false);
+            }
+            
+            // Test 5: Check for cart methods
+            const cartObj = window.cart || new (window.Cart || function() {})();
+            if (typeof cartObj.addItem === 'function') {
+                addTestResult('Cart has addItem() method', true);
+                passedTests++;
+            } else {
+                addTestResult('Cart has addItem() method', false);
+            }
+            
+            // Test 6: Check for calculateTotal method
+            if (typeof cartObj.calculateTotal === 'function') {
+                addTestResult('Cart has calculateTotal() method', true);
+                passedTests++;
+            } else {
+                addTestResult('Cart has calculateTotal() method', false);
+            }
+            
+            // Test 7: Test product price calculation
+            try {
+                if (productObj.getPrice && typeof productObj.getPrice === 'function') {
+                    const price = productObj.getPrice();
+                    addTestResult('Product getPrice() method works', true, `Price: ${price}`);
+                    passedTests++;
+                } else {
+                    addTestResult('Product getPrice() method works', false, 'getPrice method not found');
+                }
+            } catch (error) {
+                addTestResult('Product getPrice() method works', false, `Error: ${error.message}`);
+            }
+            
+            // Test 8: Check for checkout method
+            if (typeof cartObj.checkout === 'function') {
+                addTestResult('Cart has checkout() method', true);
+                passedTests++;
+            } else {
+                addTestResult('Cart has checkout() method', false);
+            }
+            
+            // Test 9: Check customer methods
+            const customerObj = window.customer || new (window.Customer || function() {})();
+            if (typeof customerObj.placeOrder === 'function') {
+                addTestResult('Customer has placeOrder() method', true);
+                passedTests++;
+            } else {
+                addTestResult('Customer has placeOrder() method', false);
+            }
+            
+            // Test 10: Check for order history method
+            if (typeof customerObj.viewOrderHistory === 'function') {
+                addTestResult('Customer has viewOrderHistory() method', true);
+                passedTests++;
+            } else {
+                addTestResult('Customer has viewOrderHistory() method', false);
+            }
+            
+            // Test 11: Check for updateProfile method
+            if (typeof customerObj.updateProfile === 'function') {
+                addTestResult('Customer has updateProfile() method', true);
+                passedTests++;
+            } else {
+                addTestResult('Customer has updateProfile() method', false);
+            }
+            
+            // Test 12: Check for 'this' keyword usage
+            const code = codeEditor.value;
+            if (code.includes('this.')) {
+                addTestResult('Using "this" keyword correctly', true, 'Found proper usage of this keyword');
+                passedTests++;
+            } else {
+                addTestResult('Using "this" keyword correctly', false, 'No usage of "this" keyword found');
+            }
+            
+            // Update score
+            const score = Math.round((passedTests / totalTests) * 100);
+            document.getElementById('testScore').textContent = `Score: ${score}%`;
+            document.getElementById('testCount').textContent = `Tests: ${passedTests}/${totalTests}`;
+            
+            addConsoleMessage(`\n📊 Test Results: ${passedTests}/${totalTests} tests passed (${score}%)`, 
+                score >= 80 ? 'success' : score >= 60 ? 'warning' : 'error');
+            
+            if (score >= 80) {
+                addConsoleMessage('🎉 Excellent! Your implementation is working well!', 'success');
+            } else if (score >= 60) {
+                addConsoleMessage('👍 Good work! Review the failed tests and improve your code.', 'warning');
+            } else {
+                addConsoleMessage('📚 Review the lesson materials and try again.', 'error');
+            }
+        }
+
+        function addTestResult(title, passed, message = '') {
+            const testCase = document.createElement('div');
+            testCase.className = `test-case ${passed ? 'passed' : 'failed'}`;
+            
+            testCase.innerHTML = `
+                <div class="test-header">
+                    <div class="test-title">
+                        <i class="fas fa-${passed ? 'check-circle' : 'times-circle'}"></i>
+                        ${title}
+                    </div>
+                    <div class="test-status ${passed ? 'passed' : 'failed'}">
+                        ${passed ? 'PASSED' : 'FAILED'}
+                    </div>
+                </div>
+                ${message ? `<div class="test-output">${message}</div>` : ''}
+            `;
+            
+            testResults.appendChild(testCase);
+        }
+
+        function addConsoleMessage(message, type = 'log') {
+            const line = document.createElement('div');
+            line.className = `console-line console-${type}`;
+            line.textContent = message;
+            testConsole.appendChild(line);
+            testConsole.scrollTop = testConsole.scrollHeight;
+        }
+
+        function submitLab() {
+            const score = parseInt(document.getElementById('testScore').textContent.match(/\d+/)[0]);
+            
+            if (score >= 70) {
+                addConsoleMessage('\n📤 Submitting lab for review...', 'info');
+                addConsoleMessage('✅ Lab submitted successfully!', 'success');
+                addConsoleMessage('📋 Your solution will be reviewed by instructors.', 'info');
+                
+                // Show completion card
+                setTimeout(() => {
+                    document.getElementById('completionCard').classList.add('show');
+                    document.getElementById('completionCard').scrollIntoView({ behavior: 'smooth' });
+                    updateProgress(100);
+                }, 1000);
+            } else {
+                addConsoleMessage('⚠️ Please score at least 70% before submitting.', 'warning');
+            }
+        }
+
+        // ==================== STARTER CODE ====================
+        document.getElementById('viewStarterBtn').addEventListener('click', () => {
+            const starterCode = `// E-Commerce System Starter Template
+// Complete the methods below
+
+const product = {
+    name: "Laptop",
+    price: 999.99,
+    stock: 50,
+    discount: 0,
+    
+    // Apply discount percentage
+    applyDiscount: function(percent) {
+        // TODO: Calculate discounted price
+        // Hint: this.discount = percent;
+        // Return new price
+    },
+    
+    // Update stock quantity
+    updateStock: function(quantity) {
+        // TODO: Update stock, prevent negative values
+        // Return remaining stock
+    },
+    
+    // Get current price (with discount if any)
+    getPrice: function() {
+        // TODO: Calculate price with discount
+        // Return formatted price string
+    }
+};
+
+const cart = {
+    items: [],
+    total: 0,
+    
+    // Add product to cart
+    addItem: function(product, quantity = 1) {
+        // TODO: Add item to items array
+        // Update total
+        // Return cart summary
+    },
+    
+    // Remove item from cart
+    removeItem: function(productId) {
+        // TODO: Remove item by ID
+        // Update total
+        // Return updated cart
+    },
+    
+    // Calculate total price
+    calculateTotal: function() {
+        // TODO: Calculate sum of all items
+        // Apply taxes if needed
+        // Return formatted total
+    },
+    
+    // Process checkout
+    checkout: function() {
+        // TODO: Process payment
+        // Update product stocks
+        // Clear cart
+        // Return order confirmation
+    }
+};
+
+const customer = {
+    name: "John Doe",
+    email: "john@example.com",
+    orders: [],
+    
+    // Place an order
+    placeOrder: function(cart) {
+        // TODO: Create order from cart
+        // Add to orders history
+        // Return order details
+    },
+    
+    // View order history
+    viewOrderHistory: function() {
+        // TODO: Return formatted order history
+        // Include dates, totals, status
+    },
+    
+    // Update customer profile
+    updateProfile: function(newData) {
+        // TODO: Update name, email, etc.
+        // Validate input
+        // Return updated profile
+    }
+};`;
+
+            // Open starter code in editor
+            codeEditor.value = starterCode;
+            codeEditorCard.classList.remove('hidden');
+            localStorage.setItem('labCode', starterCode);
+            
+            // Scroll to editor
+            codeEditorCard.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        document.getElementById('downloadStarterBtn').addEventListener('click', () => {
+            const starterCode = `// E-Commerce System Starter Template
+// Complete the methods below
+
+const product = {
+    name: "Laptop",
+    price: 999.99,
+    stock: 50,
+    discount: 0,
+    
+    applyDiscount: function(percent) {
+        // TODO: Calculate discounted price
+    },
+    
+    updateStock: function(quantity) {
+        // TODO: Update stock
+    },
+    
+    getPrice: function() {
+        // TODO: Get current price
+    }
+};
+
+const cart = {
+    items: [],
+    total: 0,
+    
+    addItem: function(product, quantity = 1) {
+        // TODO: Add item to cart
+    },
+    
+    removeItem: function(productId) {
+        // TODO: Remove item
+    },
+    
+    calculateTotal: function() {
+        // TODO: Calculate total
+    },
+    
+    checkout: function() {
+        // TODO: Process checkout
+    }
+};
+
+const customer = {
+    name: "John Doe",
+    email: "john@example.com",
+    orders: [],
+    
+    placeOrder: function(cart) {
+        // TODO: Place order
+    },
+    
+    viewOrderHistory: function() {
+        // TODO: View history
+    },
+    
+    updateProfile: function(newData) {
+        // TODO: Update profile
+    }
+};`;
+
+            const blob = new Blob([starterCode], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ecommerce-system-starter.js';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        document.getElementById('viewSolutionBtn').addEventListener('click', () => {
+            const solutionCode = `// E-Commerce System Solution
+
+const product = {
+    name: "Laptop",
+    price: 999.99,
+    stock: 50,
+    discount: 0,
+    
+    applyDiscount: function(percent) {
+        this.discount = percent;
+        const discountedPrice = this.price * (1 - percent / 100);
+        return \`\${percent}% discount applied. New price: \$\${discountedPrice.toFixed(2)}\`;
+    },
+    
+    updateStock: function(quantity) {
+        if (this.stock + quantity < 0) {
+            return "Error: Cannot have negative stock";
+        }
+        this.stock += quantity;
+        return \`Stock updated. Remaining: \${this.stock}\`;
+    },
+    
+    getPrice: function() {
+        const finalPrice = this.price * (1 - this.discount / 100);
+        return \`\$\${finalPrice.toFixed(2)}\`;
+    }
+};
+
+const cart = {
+    items: [],
+    total: 0,
+    
+    addItem: function(product, quantity = 1) {
+        const item = {
+            product: product,
+            quantity: quantity,
+            subtotal: product.price * quantity
+        };
+        this.items.push(item);
+        this.total += item.subtotal;
+        return \`Added \${quantity} × \${product.name} to cart\`;
+    },
+    
+    removeItem: function(productName) {
+        const index = this.items.findIndex(item => item.product.name === productName);
+        if (index !== -1) {
+            const removed = this.items.splice(index, 1)[0];
+            this.total -= removed.subtotal;
+            return \`Removed \${removed.product.name} from cart\`;
+        }
+        return "Item not found in cart";
+    },
+    
+    calculateTotal: function() {
+        const tax = this.total * 0.08; // 8% tax
+        const grandTotal = this.total + tax;
+        return {
+            subtotal: this.total.toFixed(2),
+            tax: tax.toFixed(2),
+            total: grandTotal.toFixed(2)
+        };
+    },
+    
+    checkout: function() {
+        if (this.items.length === 0) {
+            return "Cart is empty";
+        }
+        const total = this.calculateTotal();
+        const order = {
+            items: [...this.items],
+            total: total,
+            date: new Date().toISOString()
+        };
+        this.items = [];
+        this.total = 0;
+        return {
+            success: true,
+            message: "Checkout successful!",
+            order: order
+        };
+    }
+};
+
+const customer = {
+    name: "John Doe",
+    email: "john@example.com",
+    orders: [],
+    
+    placeOrder: function(cart) {
+        const result = cart.checkout();
+        if (result.success) {
+            this.orders.push(result.order);
+            return \`Order placed successfully! Total: \$\${result.order.total.total}\`;
+        }
+        return "Checkout failed: " + result;
+    },
+    
+    viewOrderHistory: function() {
+        if (this.orders.length === 0) {
+            return "No orders yet";
+        }
+        return this.orders.map((order, index) => 
+            \`Order \${index + 1}: \$\${order.total.total} on \${new Date(order.date).toLocaleDateString()}\`
+        ).join('\\n');
+    },
+    
+    updateProfile: function(newData) {
+        if (newData.name) {
+            this.name = newData.name;
+        }
+        if (newData.email) {
+            // Simple email validation
+            if (/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(newData.email)) {
+                this.email = newData.email;
+            } else {
+                return "Invalid email format";
+            }
+        }
+        return \`Profile updated: \${this.name}, \${this.email}\`;
+    }
+};`;
+
+            // Show solution in alert with option to copy
+            const shouldCopy = confirm('View solution? Click OK to copy to clipboard, Cancel to just view.');
+            if (shouldCopy) {
+                navigator.clipboard.writeText(solutionCode).then(() => {
+                    alert('Solution copied to clipboard!');
+                });
+            } else {
+                codeEditor.value = solutionCode;
+                codeEditorCard.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        // ==================== PROGRESS TRACKING ====================
+        function updateProgress(percent) {
+            const progressFill = document.getElementById('labProgressFill');
+            progressFill.style.width = `${percent}%`;
+        }
+
+        // Initialize
+        updateProgress(0);
+    </script>
+</body>
+</html>

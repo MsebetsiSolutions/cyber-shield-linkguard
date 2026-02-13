@@ -1,22 +1,27 @@
-(() => {
-  // Run immediately after fragment injection
+// public/js/monitoringAPI.js
+const monitoringAPI = {
+    base: '/api/monitoring',
 
-  // API Key management (optional UI present in some fragments)
-  const saveApiKeysBtn = document.getElementById('saveApiKeys');
-  if (saveApiKeysBtn) {
-    saveApiKeysBtn.addEventListener('click', () => {
-      const keys = {
-        virustotal: document.getElementById('virustotalApiKey')?.value || '',
-        shodan: document.getElementById('shodanApiKey')?.value || '',
-        abuseipdb: document.getElementById('abuseipdbApiKey')?.value || '',
-        splunk: document.getElementById('splunkApiKey')?.value || ''
-      };
-      try {
-        localStorage.setItem('soc_api_keys', JSON.stringify(keys));
-        alert('API keys saved successfully!');
-      } catch {}
-    });
+    async getHosts() {
+        const token = localStorage.getItem('token') || '';
+        const res = await fetch(`${this.base}/hosts`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to load hosts');
+        return await res.json();
+    },
 
+<<<<<<< HEAD
+    async getTraffic() {
+        const token = localStorage.getItem('token') || '';
+        const res = await fetch(`${this.base}/traffic`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to load traffic');
+        return await res.json();
+    }
+};
+=======
     try {
       const saved = localStorage.getItem('soc_api_keys');
       if (saved) {
@@ -1803,4 +1808,6 @@ function showPcapModal(sessionId, packets) {
   document.body.appendChild(modal);
 }
 
+>>>>>>> e6ebe9fdeea5e4eec72e0f4e19caea45b6aed0ae
 
+console.log('monitoringAPI loaded');
